@@ -16,6 +16,7 @@ operations, or commercial details.
 - One-command local demo API run.
 - API contract smoke for `/demo/public`, OpenAPI, and public client examples.
 - Curl, Python, and JavaScript public demo client examples.
+- Generated OpenAPI client SDK example and SDK smoke.
 - Public export gate, public CI, and GitHub Pages demo.
 - Public system design overview for reviewers.
 
@@ -24,7 +25,7 @@ operations, or commercial details.
 - More structured adapter contracts and mapping examples.
 - More public-safe workflow examples that reuse the same event and outbox shape.
 - More public-safe evidence around local run, CI, OpenAPI, and demo health.
-- Generated client SDK examples from the OpenAPI schema.
+- Broader generated client SDK examples from the OpenAPI schema.
 
 ## Later
 

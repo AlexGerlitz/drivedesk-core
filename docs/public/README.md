@@ -12,6 +12,7 @@ credentials.
 - `API_BACKED_DEMO.md` - read-only synthetic API contract for the public demo.
 - `WORKFLOW_DEMO.md` - synthetic business workflow, timeline, events, audit,
   and outbox overview.
+- `CLIENT_SDK.md` - generated OpenAPI client SDK example.
 - `INTEGRATION_ADAPTERS.md` - adapter contract, outbox, retry, and dead-letter overview.
 - `INTEGRATION_OBSERVABILITY.md` - adapter metrics, worker logs, and failure visibility overview.
 - `ARCHITECTURE_DIAGRAMS.md` - public-safe architecture diagrams.
@@ -31,6 +32,10 @@ The public repository export also generates:
   the public demo payload.
 - `scripts/run_public_demo_local.sh` - one-command local API run.
 - `scripts/check_public_demo_api.sh` - local API contract and client-example smoke.
+- `scripts/generate_public_demo_sdk.py` - generated SDK builder from OpenAPI.
+- `scripts/check_public_demo_sdk.sh` - generated SDK drift and runtime smoke.
+- `sdk/generated/public-demo/` - generated Python, JavaScript, and TypeScript
+  client artifacts.
 - `examples/curl/demo-public.sh` - curl client example.
 - `examples/python/demo_public_client.py` - Python client example.
 - `examples/js/demo-public-fetch.js` - JavaScript fetch client example.
@@ -50,12 +55,13 @@ https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 4. Run one client example from `examples/`.
 5. Read the API-backed demo overview.
 6. Read the workflow demo overview.
-7. Read the system design overview.
-8. Read the integration adapters overview.
-9. Read the integration observability overview.
-10. Read the case study.
-11. Check CI and public demo health workflow results.
-12. Run the public smoke checks locally.
+7. Read the generated client SDK overview.
+8. Read the system design overview.
+9. Read the integration adapters overview.
+10. Read the integration observability overview.
+11. Read the case study.
+12. Check CI and public demo health workflow results.
+13. Run the public smoke checks locally.
 
 ## Human Explanation
 

@@ -52,6 +52,12 @@ BASE_URL=http://localhost:8080 python examples/python/demo_public_client.py
 BASE_URL=http://localhost:8080 node examples/js/demo-public-fetch.js
 ```
 
+Generated SDK smoke:
+
+```bash
+bash scripts/check_public_demo_sdk.sh
+```
+
 `check_public_demo_api.sh` starts a temporary local API when no
 `DRIVEDESK_DEMO_BASE_URL` is provided. It checks `/health`, `/ready`,
 `/demo/public`, `/openapi.json`, the generated `docs/openapi.json` when
@@ -64,6 +70,10 @@ synthetic path:
 ```text
 lead -> student -> contract -> audit -> outbox -> integration sync
 ```
+
+The generated SDK is documented in `CLIENT_SDK.md`. It demonstrates that the
+exported OpenAPI schema can produce working Python, JavaScript, and TypeScript
+client artifacts.
 
 ## Safety Boundary
 

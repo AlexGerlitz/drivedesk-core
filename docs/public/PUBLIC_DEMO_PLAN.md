@@ -20,6 +20,7 @@ Recommended first public demo:
 - fake tenant and fake users;
 - read-only workflow state with timeline and domain events;
 - public OpenAPI docs generated from the demo API;
+- generated client SDK example from the OpenAPI contract;
 - public demo screenshot in the repository README;
 - link to the public repository and case study.
 
@@ -53,8 +54,9 @@ An external reviewer should be able to:
 8. Inspect the integration adapter tab.
 9. Inspect `GET /demo/public` in `docs/openapi.json`.
 10. Run `bash scripts/check_public_demo_api.sh`.
-11. Run the curl, Python, or JavaScript demo client example.
-12. Read sanitized evidence that staging checks, metrics, logs, and alerts exist.
+11. Run `bash scripts/check_public_demo_sdk.sh`.
+12. Run the curl, Python, or JavaScript demo client example.
+13. Read sanitized evidence that staging checks, metrics, logs, and alerts exist.
 
 ## Runtime Boundary
 
@@ -83,3 +85,4 @@ Alertmanager, SSH, production backups, or private GitHub Actions secrets.
 13. Add curl, Python, and JavaScript demo clients for `GET /demo/public`.
 14. Add a public-safe synthetic workflow with stages, timeline, domain events,
     audit events, and outbox handoff.
+15. Add generated OpenAPI client SDK artifacts and SDK smoke checks.

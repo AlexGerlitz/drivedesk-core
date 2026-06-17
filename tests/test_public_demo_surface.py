@@ -106,9 +106,16 @@ def test_public_demo_api_scripts_and_examples_exist() -> None:
     expected = {
         "scripts/run_public_demo_local.sh",
         "scripts/check_public_demo_api.sh",
+        "scripts/check_public_demo_sdk.sh",
+        "scripts/generate_public_demo_sdk.py",
         "examples/curl/demo-public.sh",
         "examples/python/demo_public_client.py",
         "examples/js/demo-public-fetch.js",
+        "sdk/generated/public-demo/README.md",
+        "sdk/generated/public-demo/openapi-client-manifest.json",
+        "sdk/generated/public-demo/python/drivedesk_public_demo_client.py",
+        "sdk/generated/public-demo/javascript/drivedesk-public-demo-client.mjs",
+        "sdk/generated/public-demo/typescript/drivedesk-public-demo-client.d.ts",
     }
 
     for relative in expected:
@@ -119,9 +126,35 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
     scripts = {
         "scripts/run_public_demo_local.sh": ["uvicorn", "/demo/public"],
         "scripts/check_public_demo_api.sh": ["/health", "/ready", "/demo/public", "/openapi.json", "student_sync"],
+        "scripts/check_public_demo_sdk.sh": [
+            "generate_public_demo_sdk.py",
+            "sdk/generated/public-demo",
+            "drivedesk_public_demo_client.py",
+            "drivedesk-public-demo-client.mjs",
+        ],
+        "scripts/generate_public_demo_sdk.py": [
+            "/demo/public",
+            "operationId",
+            "drivedesk_public_demo_client.py",
+            "drivedesk-public-demo-client.mjs",
+        ],
         "examples/curl/demo-public.sh": ["/demo/public", "api.synthetic", "student_sync"],
         "examples/python/demo_public_client.py": ["/demo/public", "api.synthetic", "student_sync"],
         "examples/js/demo-public-fetch.js": ["/demo/public", "api.synthetic", "student_sync"],
+        "sdk/generated/public-demo/python/drivedesk_public_demo_client.py": [
+            "/demo/public",
+            "public_demo_demo_public_get",
+            "student_sync",
+        ],
+        "sdk/generated/public-demo/javascript/drivedesk-public-demo-client.mjs": [
+            "/demo/public",
+            "public_demo_demo_public_get",
+            "student_sync",
+        ],
+        "sdk/generated/public-demo/typescript/drivedesk-public-demo-client.d.ts": [
+            "PublicDemoPayload",
+            "student_sync",
+        ],
     }
 
     for relative, required_fragments in scripts.items():

@@ -46,6 +46,7 @@ Implemented foundation:
 - one-command local API demo run.
 - public demo API smoke that validates health, readiness, OpenAPI, and example clients.
 - curl, Python, and JavaScript public demo clients for `GET /demo/public`.
+- generated OpenAPI client SDK artifacts for Python, JavaScript, and TypeScript.
 - synthetic business workflow in the public demo payload:
   lead -> student -> contract -> audit -> outbox -> integration sync.
 
@@ -104,7 +105,7 @@ Recommended next slices:
 
 1. Backup and restore evidence for the staging runtime.
 2. Real authentication and tenant-scoped memberships.
-3. Generated API clients from OpenAPI.
+3. Broader generated API clients from OpenAPI for more endpoints.
 4. Additional mock adapters for webhook and accounting export flows.
 5. More workflow examples backed by the same event, audit, and outbox shape.
 

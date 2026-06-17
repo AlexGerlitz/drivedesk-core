@@ -1,0 +1,35 @@
+{
+  "data_profile": "synthetic_fake_data",
+  "generated_files": [
+    "README.md",
+    "openapi-client-manifest.json",
+    "python/drivedesk_public_demo_client.py",
+    "javascript/drivedesk-public-demo-client.mjs",
+    "typescript/drivedesk-public-demo-client.d.ts"
+  ],
+  "method": "GET",
+  "operation_id": "public_demo_demo_public_get",
+  "path": "/demo/public",
+  "required_fields": [
+    "schemaVersion",
+    "generatedAt",
+    "dataSource",
+    "apiContract",
+    "tenant",
+    "health",
+    "metrics",
+    "workQueue",
+    "members",
+    "auditEvents",
+    "outbox",
+    "adapters",
+    "integrationJobs",
+    "integrationHealth",
+    "integrationReadiness",
+    "workflow",
+    "timeline",
+    "domainEvents"
+  ],
+  "schema_version": 1,
+  "source": "docs/openapi.json"
+}

@@ -46,6 +46,7 @@ flowchart TB
   AdapterHub --> Providers["External Providers"]
 
   API --> Metrics["Metrics Endpoint"]
+  DemoAPI --> SDK["Generated Client SDK"]
   Worker --> Logs["Structured Logs"]
   Metrics --> Observability["Observability Stack"]
   Logs --> Observability
@@ -57,6 +58,7 @@ flowchart TB
 | --- | --- |
 | Public demo | Reviewable static UI with synthetic data. |
 | Demo API | Read-only synthetic payload for API-backed public demo mode. |
+| Generated SDK | Python, JavaScript, and TypeScript client artifacts generated from OpenAPI. |
 | API | HTTP contract, validation, tenant-aware operations, audit writes. |
 | Core modules | Domain rules that should not depend on web framework details. |
 | Database | Durable business state, migrations, audit and outbox storage. |
@@ -158,6 +160,7 @@ The public workflow is documented in `WORKFLOW_DEMO.md`.
 flowchart LR
   Change["Code Change"] --> CI["CI Smoke Checks"]
   CI --> ExportGate["Public Export Gate"]
+  ExportGate --> SDKSmoke["Generated SDK Smoke"]
   CI --> DeployGate["Deployment Gate"]
   DeployGate --> Health["Health Checks"]
   Health --> Evidence["Sanitized Evidence"]
@@ -167,7 +170,8 @@ flowchart LR
 The important idea is that the project does not treat started containers as
 enough evidence. A change is stronger when checks prove API behavior, schema
 generation, demo availability, observability configuration, and public export
-boundaries.
+boundaries. The generated SDK smoke adds another proof point: the exported
+OpenAPI schema can produce working public client code.
 
 ## Public And Private Boundary
 

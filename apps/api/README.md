@@ -3,7 +3,7 @@
 Run locally from the repository root:
 
 ```bash
-PYTHONPATH=apps/api:apps/worker:packages/core uvicorn drivedesk_api.main:app --reload --port 8080
+bash scripts/run_public_demo_local.sh
 ```
 
 Health endpoints:
@@ -15,6 +15,12 @@ Demo endpoints:
 
 - `GET /demo/public` returns a read-only synthetic payload for the public demo
   shell.
+
+Public demo contract smoke:
+
+```bash
+bash scripts/check_public_demo_api.sh
+```
 
 Core endpoints:
 

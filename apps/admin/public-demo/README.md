@@ -14,6 +14,18 @@ provided:
 apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 ```
 
+Start that local API from the repository root:
+
+```bash
+bash scripts/run_public_demo_local.sh
+```
+
+Validate the API contract and example clients:
+
+```bash
+bash scripts/check_public_demo_api.sh
+```
+
 The shell is intentionally small. It gives reviewers a visible product surface
 for the Core concepts that already exist in the backend:
 

@@ -25,6 +25,11 @@ The public repository export also generates:
 - `docs/openapi.json` - FastAPI OpenAPI schema from the exported API.
 - `apps/admin/public-demo/index.html` - static fake-data product demo shell.
 - `GET /demo/public` - read-only synthetic demo payload in the exported API.
+- `scripts/run_public_demo_local.sh` - one-command local API run.
+- `scripts/check_public_demo_api.sh` - local API contract and client-example smoke.
+- `examples/curl/demo-public.sh` - curl client example.
+- `examples/python/demo_public_client.py` - Python client example.
+- `examples/js/demo-public-fetch.js` - JavaScript fetch client example.
 - `PUBLIC_EXPORT_MANIFEST.md` - file list and export boundary summary.
 
 Hosted demo:
@@ -37,13 +42,15 @@ https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 
 1. Open the hosted demo.
 2. Review the generated OpenAPI schema.
-3. Read the API-backed demo overview.
-4. Read the system design overview.
-5. Read the integration adapters overview.
-6. Read the integration observability overview.
-7. Read the case study.
-8. Check CI and public demo health workflow results.
-9. Run the public smoke checks locally.
+3. Run `bash scripts/check_public_demo_api.sh`.
+4. Run one client example from `examples/`.
+5. Read the API-backed demo overview.
+6. Read the system design overview.
+7. Read the integration adapters overview.
+8. Read the integration observability overview.
+9. Read the case study.
+10. Check CI and public demo health workflow results.
+11. Run the public smoke checks locally.
 
 ## Human Explanation
 

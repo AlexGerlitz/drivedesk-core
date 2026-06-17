@@ -28,13 +28,15 @@ It includes:
 
 1. Open the live demo.
 2. Review `docs/openapi.json`.
-3. Read `docs/public/API_BACKED_DEMO.md`.
-4. Read `docs/public/SYSTEM_DESIGN.md`.
-5. Read `docs/public/INTEGRATION_ADAPTERS.md`.
-6. Read `docs/public/INTEGRATION_OBSERVABILITY.md`.
-7. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
-8. Check `.github/workflows/ci.yml`.
-9. Run `bash scripts/ci_smoke_public.sh` locally.
+3. Run `bash scripts/check_public_demo_api.sh`.
+4. Run one client example from `examples/`.
+5. Read `docs/public/API_BACKED_DEMO.md`.
+6. Read `docs/public/SYSTEM_DESIGN.md`.
+7. Read `docs/public/INTEGRATION_ADAPTERS.md`.
+8. Read `docs/public/INTEGRATION_OBSERVABILITY.md`.
+9. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
+10. Check `.github/workflows/ci.yml`.
+11. Run `bash scripts/ci_smoke_public.sh` locally.
 
 ## What To Review First
 
@@ -50,18 +52,33 @@ It includes:
 - `apps/admin/public-demo/index.html` - static fake-data product demo shell.
 - `docs/openapi.json` - generated FastAPI OpenAPI schema.
 - `GET /demo/public` - read-only synthetic demo payload in the exported API.
+- `scripts/run_public_demo_local.sh` - one-command local API run.
+- `scripts/check_public_demo_api.sh` - local API contract and examples smoke.
+- `examples/curl/demo-public.sh` - curl client example.
+- `examples/python/demo_public_client.py` - Python client example.
+- `examples/js/demo-public-fetch.js` - JavaScript fetch client example.
 
 ## Local Run
 
 ```bash
 python -m pip install -r requirements.txt
-PYTHONPATH=apps/api:apps/worker:packages/core uvicorn drivedesk_api.main:app --reload --port 8080
+bash scripts/run_public_demo_local.sh
 ```
 
 Health:
 
 ```bash
-curl http://127.0.0.1:8080/health
+curl http://localhost:8080/health
+curl http://localhost:8080/demo/public
+```
+
+API contract and client examples:
+
+```bash
+bash scripts/check_public_demo_api.sh
+BASE_URL=http://localhost:8080 bash examples/curl/demo-public.sh
+BASE_URL=http://localhost:8080 python examples/python/demo_public_client.py
+BASE_URL=http://localhost:8080 node examples/js/demo-public-fetch.js
 ```
 
 Docker Compose:
@@ -74,6 +91,7 @@ docker compose -f infra/docker/docker-compose.foundation.yml up --build
 
 ```bash
 bash scripts/ci_smoke_public.sh
+bash scripts/check_public_demo_api.sh
 ```
 
 ## Public Demo Shell

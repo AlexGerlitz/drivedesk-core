@@ -84,6 +84,34 @@ def test_public_demo_can_load_api_backed_data_with_static_fallback() -> None:
     assert "return fallbackData" in script
 
 
+def test_public_demo_api_scripts_and_examples_exist() -> None:
+    expected = {
+        "scripts/run_public_demo_local.sh",
+        "scripts/check_public_demo_api.sh",
+        "examples/curl/demo-public.sh",
+        "examples/python/demo_public_client.py",
+        "examples/js/demo-public-fetch.js",
+    }
+
+    for relative in expected:
+        assert (ROOT / relative).is_file(), relative
+
+
+def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
+    scripts = {
+        "scripts/run_public_demo_local.sh": ["uvicorn", "/demo/public"],
+        "scripts/check_public_demo_api.sh": ["/health", "/ready", "/demo/public", "/openapi.json"],
+        "examples/curl/demo-public.sh": ["/demo/public", "api.synthetic"],
+        "examples/python/demo_public_client.py": ["/demo/public", "api.synthetic"],
+        "examples/js/demo-public-fetch.js": ["/demo/public", "api.synthetic"],
+    }
+
+    for relative, required_fragments in scripts.items():
+        text = (ROOT / relative).read_text(encoding="utf-8")
+        for fragment in required_fragments:
+            assert fragment in text, f"{fragment} missing from {relative}"
+
+
 def test_public_demo_has_no_private_runtime_markers() -> None:
     private_patterns = [
         r"auto\s*school\s*54",

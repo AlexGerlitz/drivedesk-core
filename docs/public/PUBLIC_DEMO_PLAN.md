@@ -48,7 +48,9 @@ An external reviewer should be able to:
 6. See fake operational workflows.
 7. Inspect the integration adapter tab.
 8. Inspect `GET /demo/public` in `docs/openapi.json`.
-9. Read sanitized evidence that staging checks, metrics, logs, and alerts exist.
+9. Run `bash scripts/check_public_demo_api.sh`.
+10. Run the curl, Python, or JavaScript demo client example.
+11. Read sanitized evidence that staging checks, metrics, logs, and alerts exist.
 
 ## Runtime Boundary
 
@@ -71,3 +73,7 @@ Alertmanager, SSH, production backups, or private GitHub Actions secrets.
 9. Add `GET /demo/public` as a read-only synthetic API payload.
 10. Let the static demo load API-backed data through `?demoApi=...` while
     keeping GitHub Pages on static fallback.
+11. Add a one-command local API run script for reviewers.
+12. Add a public demo API smoke script that validates the endpoint, OpenAPI, and
+    client examples.
+13. Add curl, Python, and JavaScript demo clients for `GET /demo/public`.

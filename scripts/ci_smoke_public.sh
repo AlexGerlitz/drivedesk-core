@@ -16,9 +16,10 @@ fi
 
 export PYTHONPATH="$ROOT/apps/api:$ROOT/apps/worker:$ROOT/packages/core"
 
-"$PYTHON_BIN" -m compileall -q apps packages tests
+"$PYTHON_BIN" -m compileall -q apps packages tests examples scripts
 "$PYTHON_BIN" -m pytest -q
 bash scripts/check_public_export_secrets.sh
+bash scripts/check_public_demo_api.sh
 
 if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
   docker compose -f infra/docker/docker-compose.foundation.yml config --quiet

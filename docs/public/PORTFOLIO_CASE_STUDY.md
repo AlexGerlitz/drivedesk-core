@@ -43,6 +43,9 @@ Implemented foundation:
 - Docker Compose local and staging runtime.
 - public demo Integration Health panel with synthetic adapter health data.
 - read-only `GET /demo/public` endpoint for API-backed public demo mode.
+- one-command local API demo run.
+- public demo API smoke that validates health, readiness, OpenAPI, and example clients.
+- curl, Python, and JavaScript public demo clients for `GET /demo/public`.
 
 ## Architecture Choice
 
@@ -98,9 +101,9 @@ Recommended next slices:
 
 1. Backup and restore evidence for the staging runtime.
 2. Real authentication and tenant-scoped memberships.
-3. Generated API client examples from OpenAPI.
+3. Generated API clients from OpenAPI.
 4. Additional mock adapters for webhook and accounting export flows.
-5. Read-only demo API client examples.
+5. A deeper public admin shell backed by synthetic workflows.
 
 ## Interview Summary
 

@@ -12,14 +12,17 @@ operations, or commercial details.
 - Fake file import adapter with retry and dead-letter state.
 - Integration observability for adapter metrics, structured logs, and failed-job runbooks.
 - Public demo shell with synthetic data and an API-backed synthetic contract.
+- One-command local demo API run.
+- API contract smoke for `/demo/public`, OpenAPI, and public client examples.
+- Curl, Python, and JavaScript public demo client examples.
 - Public export gate, public CI, and GitHub Pages demo.
 - Public system design overview for reviewers.
 
 ## Next
 
-- Public demo health workflow.
 - More structured adapter contracts and mapping examples.
-- More public-safe evidence around CI, OpenAPI, and demo health.
+- More public-safe evidence around local run, CI, OpenAPI, and demo health.
+- Generated client SDK examples from the OpenAPI schema.
 
 ## Later
 

@@ -28,7 +28,7 @@ events, adapter contracts, sync jobs, and Integration Health.
 Example local API-backed run:
 
 ```bash
-PYTHONPATH=apps/api:apps/worker:packages/core uvicorn drivedesk_api.main:app --reload --port 8080
+bash scripts/run_public_demo_local.sh
 ```
 
 Then open the static demo with:
@@ -36,6 +36,26 @@ Then open the static demo with:
 ```text
 apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 ```
+
+Contract smoke:
+
+```bash
+bash scripts/check_public_demo_api.sh
+```
+
+Client examples:
+
+```bash
+BASE_URL=http://localhost:8080 bash examples/curl/demo-public.sh
+BASE_URL=http://localhost:8080 python examples/python/demo_public_client.py
+BASE_URL=http://localhost:8080 node examples/js/demo-public-fetch.js
+```
+
+`check_public_demo_api.sh` starts a temporary local API when no
+`DRIVEDESK_DEMO_BASE_URL` is provided. It checks `/health`, `/ready`,
+`/demo/public`, `/openapi.json`, the generated `docs/openapi.json` when
+present, and then runs the curl, Python, and JavaScript examples against the
+same API.
 
 ## Safety Boundary
 

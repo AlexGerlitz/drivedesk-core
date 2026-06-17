@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-17T11:06:19Z
+Generated at: 2026-06-17T12:07:44Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -10,6 +10,7 @@ Copied public-safe areas:
 - apps/admin
 - packages/core
 - infra/docker
+- examples
 - tests/test_drivedesk_foundation.py
 - tests/test_drivedesk_core_api.py
 - tests/test_public_demo_surface.py
@@ -25,6 +26,9 @@ Copied public-safe areas:
 - public roadmap
 - public demo integration health surface
 - public demo API-backed loading surface
+- public demo local run script
+- public demo API contract smoke script
+- curl, Python, and JavaScript public demo client examples
 - public engineering surface docs
 - public-only README
 - public-only .nojekyll for GitHub Pages

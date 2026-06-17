@@ -92,3 +92,21 @@ class FileImportCreate(BaseModel):
     source_format: Literal["json", "csv"] = "json"
     records: list[dict[str, Any]] = Field(min_length=1, max_length=50)
     simulate_failure: Literal["retryable", "permanent"] | None = None
+
+
+class PublicDemoRead(BaseModel):
+    schemaVersion: int
+    generatedAt: str
+    dataSource: Literal["api.synthetic"]
+    apiContract: dict[str, str]
+    tenant: dict[str, str]
+    health: dict[str, str]
+    metrics: list[dict[str, Any]]
+    workQueue: list[dict[str, Any]]
+    members: list[dict[str, str]]
+    auditEvents: list[dict[str, str]]
+    outbox: list[dict[str, Any]]
+    adapters: list[dict[str, str]]
+    integrationJobs: list[dict[str, Any]]
+    integrationHealth: list[dict[str, str]]
+    integrationReadiness: list[dict[str, Any]]

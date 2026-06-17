@@ -16,6 +16,7 @@ using the private staging runtime.
 Recommended first public demo:
 
 - a small hosted web shell or static frontend;
+- a read-only synthetic FastAPI demo endpoint;
 - fake tenant and fake users;
 - read-only or resettable workflows;
 - public OpenAPI docs generated from the demo API;
@@ -46,7 +47,8 @@ An external reviewer should be able to:
 5. Open `https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/`.
 6. See fake operational workflows.
 7. Inspect the integration adapter tab.
-8. Read sanitized evidence that staging checks, metrics, logs, and alerts exist.
+8. Inspect `GET /demo/public` in `docs/openapi.json`.
+9. Read sanitized evidence that staging checks, metrics, logs, and alerts exist.
 
 ## Runtime Boundary
 
@@ -66,3 +68,6 @@ Alertmanager, SSH, production backups, or private GitHub Actions secrets.
 6. Add a public health endpoint and public CI badge.
 7. Link the hosted demo from the public README.
 8. Show adapter contracts and sync job states in the public demo shell.
+9. Add `GET /demo/public` as a read-only synthetic API payload.
+10. Let the static demo load API-backed data through `?demoApi=...` while
+    keeping GitHub Pages on static fallback.

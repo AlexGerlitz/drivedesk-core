@@ -4,13 +4,14 @@ import logging
 from time import perf_counter
 
 from fastapi import Depends, FastAPI
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import JSONResponse, PlainTextResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 from starlette.responses import Response
 
 from drivedesk_api.db import AuditEvent, Membership, OutboxEvent, Tenant, User
+from drivedesk_api.demo import build_public_demo_payload
 from drivedesk_api.observability import (
     build_health_payload,
     build_metrics_text,
@@ -26,6 +27,7 @@ from drivedesk_api.schemas import (
     MembershipCreate,
     MembershipRead,
     OutboxEventRead,
+    PublicDemoRead,
     TenantCreate,
     TenantRead,
     UserCreate,
@@ -90,6 +92,16 @@ def build_app(settings: Settings | None = None) -> FastAPI:
     @api.get("/ready")
     async def ready() -> dict[str, object]:
         return build_ready_payload(resolved_settings)
+
+    @api.get("/demo/public", response_model=PublicDemoRead, tags=["demo"])
+    async def public_demo() -> JSONResponse:
+        return JSONResponse(
+            build_public_demo_payload(),
+            headers={
+                "Access-Control-Allow-Origin": "*",
+                "Cache-Control": "public, max-age=60",
+            },
+        )
 
     @api.get("/metrics", include_in_schema=False)
     async def metrics(session: AsyncSession = Depends(get_session)) -> PlainTextResponse:

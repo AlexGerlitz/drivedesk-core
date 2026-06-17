@@ -128,6 +128,34 @@ def test_identity_rbac_audit_and_outbox_flow(api_client: tuple[TestClient, async
     assert asyncio.run(outbox_statuses()) == ["processed", "processed", "processed"]
 
 
+def test_public_demo_endpoint_is_read_only_synthetic_contract(
+    api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, _ = api_client
+
+    response = client.get("/demo/public")
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "*"
+    assert response.headers["cache-control"] == "public, max-age=60"
+    payload = response.json()
+    assert payload["schemaVersion"] == 1
+    assert payload["dataSource"] == "api.synthetic"
+    assert payload["apiContract"]["path"] == "/demo/public"
+    assert payload["apiContract"]["data_profile"] == "synthetic_fake_data"
+    assert payload["tenant"]["slug"] == "demo-academy"
+    assert len(payload["metrics"]) >= 4
+    assert len(payload["workQueue"]) >= 4
+    assert len(payload["integrationJobs"]) >= 3
+    assert len(payload["integrationHealth"]) >= 4
+    assert {job["status"] for job in payload["integrationJobs"]} >= {"processed", "retry", "dead_letter"}
+
+    serialized = json.dumps(payload).lower()
+    assert "land" "vps" not in serialized
+    assert "auto" "school54" not in serialized
+    assert "password" not in serialized
+
+
 def test_file_import_adapter_success_flow(api_client: tuple[TestClient, async_sessionmaker[AsyncSession]]) -> None:
     client, session_factory = api_client
 

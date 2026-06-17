@@ -35,6 +35,7 @@ def test_public_demo_html_links_static_assets() -> None:
     assert "./styles.css" in html
     assert "./demo-data.js" in html
     assert "./app.js" in html
+    assert 'data-demo-api-path="/demo/public"' in html
     assert 'id="metricGrid"' in html
     assert 'id="workQueueRows"' in html
     assert 'id="integrationHealthRows"' in html
@@ -47,6 +48,9 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
     payload = _demo_data()
 
     assert payload["schemaVersion"] == 1
+    assert payload["dataSource"] == "static.fallback"
+    assert payload["apiContract"]["path"] == "/demo/public"
+    assert payload["apiContract"]["data_profile"] == "synthetic_fake_data"
     assert payload["tenant"]["slug"] == "demo-academy"
     assert payload["tenant"]["status"] == "active"
     assert len(payload["metrics"]) >= 4
@@ -64,6 +68,20 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
         "retry",
         "dead_letter",
     }
+
+
+def test_public_demo_can_load_api_backed_data_with_static_fallback() -> None:
+    script = (DEMO_DIR / "app.js").read_text(encoding="utf-8")
+
+    assert "loadApiBackedDemoData" in script
+    assert "demoApi" in script
+    assert "data-demo-api-path" not in script
+    assert "dataset.demoApiPath" in script
+    assert "/demo/public" in script
+    assert "static.fallback" not in script
+    assert "api.synthetic" not in script
+    assert "fetch(url" in script
+    assert "return fallbackData" in script
 
 
 def test_public_demo_has_no_private_runtime_markers() -> None:

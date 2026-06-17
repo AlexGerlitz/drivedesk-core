@@ -42,6 +42,7 @@ Implemented foundation:
 - GitHub Actions CI, deploy, health, and evidence workflows;
 - Docker Compose local and staging runtime.
 - public demo Integration Health panel with synthetic adapter health data.
+- read-only `GET /demo/public` endpoint for API-backed public demo mode.
 
 ## Architecture Choice
 
@@ -84,7 +85,8 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
 ## Current Tradeoffs
 
 - Authentication is still a development foundation based on actor headers.
-- The public demo is planned but not exposed yet.
+- The hosted public demo uses static fallback on GitHub Pages and can be pointed
+  at `GET /demo/public` for API-backed fake data.
 - Alertmanager currently uses an internal receiver; external notification
   routing is a later step.
 - The frontend is intentionally not the center of the current work; the backend
@@ -94,11 +96,11 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
 
 Recommended next slices:
 
-1. API-backed public demo mode with synthetic data.
-2. Backup and restore evidence for the staging runtime.
-3. Real authentication and tenant-scoped memberships.
-4. Generated API client examples from OpenAPI.
-5. Additional mock adapters for webhook and accounting export flows.
+1. Backup and restore evidence for the staging runtime.
+2. Real authentication and tenant-scoped memberships.
+3. Generated API client examples from OpenAPI.
+4. Additional mock adapters for webhook and accounting export flows.
+5. Read-only demo API client examples.
 
 ## Interview Summary
 

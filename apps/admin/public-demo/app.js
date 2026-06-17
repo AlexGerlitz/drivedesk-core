@@ -1,7 +1,8 @@
 (function () {
   "use strict";
 
-  var data = window.DRIVEDESK_DEMO_DATA;
+  var fallbackData = window.DRIVEDESK_DEMO_DATA;
+  var data = fallbackData;
 
   function text(value) {
     return document.createTextNode(String(value));
@@ -19,6 +20,56 @@
     node.dataset.tone = tone || "blue";
     node.appendChild(text(label));
     return node;
+  }
+
+  function demoApiUrl() {
+    var params = new URLSearchParams(window.location.search);
+    var explicitUrl = params.get("demoApi");
+    if (explicitUrl) {
+      return explicitUrl;
+    }
+    if (params.get("api") === "1") {
+      return document.body.dataset.demoApiPath || "/demo/public";
+    }
+    if (window.DRIVEDESK_DEMO_API_URL) {
+      return window.DRIVEDESK_DEMO_API_URL;
+    }
+    return "";
+  }
+
+  function isValidDemoPayload(payload) {
+    return Boolean(
+      payload &&
+        payload.schemaVersion === 1 &&
+        payload.tenant &&
+        Array.isArray(payload.metrics) &&
+        Array.isArray(payload.workQueue) &&
+        Array.isArray(payload.integrationJobs) &&
+        Array.isArray(payload.integrationHealth)
+    );
+  }
+
+  async function loadApiBackedDemoData() {
+    var url = demoApiUrl();
+    if (!url || !window.fetch) {
+      return fallbackData;
+    }
+
+    try {
+      var response = await window.fetch(url, {
+        cache: "no-store",
+        headers: {
+          Accept: "application/json",
+        },
+      });
+      if (!response.ok) {
+        return fallbackData;
+      }
+      var payload = await response.json();
+      return isValidDemoPayload(payload) ? payload : fallbackData;
+    } catch (error) {
+      return fallbackData;
+    }
   }
 
   function fillMetricGrid() {
@@ -297,7 +348,7 @@
     });
   }
 
-  function init() {
+  function render() {
     document.getElementById("tenantName").textContent = data.tenant.name;
     document.getElementById("tenantMeta").textContent = data.tenant.plan + " - " + data.tenant.status;
     document.getElementById("apiStatus").textContent = "API " + data.health.api;
@@ -312,6 +363,11 @@
     fillAudit();
     fillOutbox();
     fillHealth();
+  }
+
+  async function init() {
+    data = await loadApiBackedDemoData();
+    render();
     setupTabs();
   }
 

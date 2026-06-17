@@ -9,6 +9,7 @@ credentials.
 
 - `PORTFOLIO_CASE_STUDY.md` - engineering case study and current system shape.
 - `SYSTEM_DESIGN.md` - public-safe system design overview.
+- `API_BACKED_DEMO.md` - read-only synthetic API contract for the public demo.
 - `INTEGRATION_ADAPTERS.md` - adapter contract, outbox, retry, and dead-letter overview.
 - `INTEGRATION_OBSERVABILITY.md` - adapter metrics, worker logs, and failure visibility overview.
 - `ARCHITECTURE_DIAGRAMS.md` - public-safe architecture diagrams.
@@ -23,6 +24,7 @@ The public repository export also generates:
 
 - `docs/openapi.json` - FastAPI OpenAPI schema from the exported API.
 - `apps/admin/public-demo/index.html` - static fake-data product demo shell.
+- `GET /demo/public` - read-only synthetic demo payload in the exported API.
 - `PUBLIC_EXPORT_MANIFEST.md` - file list and export boundary summary.
 
 Hosted demo:
@@ -35,12 +37,13 @@ https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 
 1. Open the hosted demo.
 2. Review the generated OpenAPI schema.
-3. Read the system design overview.
-4. Read the integration adapters overview.
-5. Read the integration observability overview.
-6. Read the case study.
-7. Check CI and public demo health workflow results.
-8. Run the public smoke checks locally.
+3. Read the API-backed demo overview.
+4. Read the system design overview.
+5. Read the integration adapters overview.
+6. Read the integration observability overview.
+7. Read the case study.
+8. Check CI and public demo health workflow results.
+9. Run the public smoke checks locally.
 
 ## Human Explanation
 

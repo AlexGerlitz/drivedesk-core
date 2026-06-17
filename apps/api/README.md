@@ -11,6 +11,11 @@ Health endpoints:
 - `GET /health`;
 - `GET /ready`.
 
+Demo endpoints:
+
+- `GET /demo/public` returns a read-only synthetic payload for the public demo
+  shell.
+
 Core endpoints:
 
 - `POST /tenants`;
@@ -23,6 +28,7 @@ Core endpoints:
 - `GET /tenants/{tenant_id}/audit-events`;
 - `GET /tenants/{tenant_id}/outbox-events`.
 - `POST /tenants/{tenant_id}/integration-imports/file`.
+- `GET /demo/public`.
 
 Integration endpoints:
 

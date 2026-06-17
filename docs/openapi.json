@@ -361,6 +361,143 @@
         "title": "OutboxEventRead",
         "type": "object"
       },
+      "PublicDemoRead": {
+        "properties": {
+          "adapters": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "title": "Adapters",
+            "type": "array"
+          },
+          "apiContract": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Apicontract",
+            "type": "object"
+          },
+          "auditEvents": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "title": "Auditevents",
+            "type": "array"
+          },
+          "dataSource": {
+            "const": "api.synthetic",
+            "title": "Datasource",
+            "type": "string"
+          },
+          "generatedAt": {
+            "title": "Generatedat",
+            "type": "string"
+          },
+          "health": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Health",
+            "type": "object"
+          },
+          "integrationHealth": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "title": "Integrationhealth",
+            "type": "array"
+          },
+          "integrationJobs": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Integrationjobs",
+            "type": "array"
+          },
+          "integrationReadiness": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Integrationreadiness",
+            "type": "array"
+          },
+          "members": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "title": "Members",
+            "type": "array"
+          },
+          "metrics": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Metrics",
+            "type": "array"
+          },
+          "outbox": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Outbox",
+            "type": "array"
+          },
+          "schemaVersion": {
+            "title": "Schemaversion",
+            "type": "integer"
+          },
+          "tenant": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Tenant",
+            "type": "object"
+          },
+          "workQueue": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Workqueue",
+            "type": "array"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "generatedAt",
+          "dataSource",
+          "apiContract",
+          "tenant",
+          "health",
+          "metrics",
+          "workQueue",
+          "members",
+          "auditEvents",
+          "outbox",
+          "adapters",
+          "integrationJobs",
+          "integrationHealth",
+          "integrationReadiness"
+        ],
+        "title": "PublicDemoRead",
+        "type": "object"
+      },
       "TenantCreate": {
         "properties": {
           "name": {
@@ -535,6 +672,27 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/demo/public": {
+      "get": {
+        "operationId": "public_demo_demo_public_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicDemoRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Public Demo",
+        "tags": [
+          "demo"
+        ]
+      }
+    },
     "/health": {
       "get": {
         "operationId": "health_health_get",

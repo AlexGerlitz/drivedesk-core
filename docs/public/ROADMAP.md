@@ -11,14 +11,13 @@ operations, or commercial details.
 - Tenant, user, membership, RBAC, audit, and outbox primitives.
 - Fake file import adapter with retry and dead-letter state.
 - Integration observability for adapter metrics, structured logs, and failed-job runbooks.
-- Public demo shell with synthetic data.
+- Public demo shell with synthetic data and an API-backed synthetic contract.
 - Public export gate, public CI, and GitHub Pages demo.
 - Public system design overview for reviewers.
 
 ## Next
 
 - Public demo health workflow.
-- Read-only API-backed demo mode.
 - More structured adapter contracts and mapping examples.
 - More public-safe evidence around CI, OpenAPI, and demo health.
 

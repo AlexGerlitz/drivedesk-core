@@ -1,6 +1,13 @@
 window.DRIVEDESK_DEMO_DATA = {
   "schemaVersion": 1,
   "generatedAt": "2026-06-17T08:20:00Z",
+  "dataSource": "static.fallback",
+  "apiContract": {
+    "path": "/demo/public",
+    "mode": "read_only",
+    "data_profile": "synthetic_fake_data",
+    "fallback": "apps/admin/public-demo/demo-data.js"
+  },
   "tenant": {
     "name": "DriveDesk Demo Academy",
     "slug": "demo-academy",
@@ -16,7 +23,7 @@ window.DRIVEDESK_DEMO_DATA = {
   "metrics": [
     {
       "label": "API checks",
-      "value": "34",
+      "value": "43",
       "detail": "private smoke tests",
       "tone": "blue"
     },
@@ -28,7 +35,7 @@ window.DRIVEDESK_DEMO_DATA = {
     },
     {
       "label": "OpenAPI paths",
-      "value": "9",
+      "value": "10",
       "detail": "generated contract",
       "tone": "violet"
     },
@@ -222,8 +229,8 @@ window.DRIVEDESK_DEMO_DATA = {
     },
     {
       "name": "Public demo runtime",
-      "state": "next",
-      "progress": 10
+      "state": "active",
+      "progress": 35
     }
   ]
 };

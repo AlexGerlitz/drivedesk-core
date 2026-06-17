@@ -28,17 +28,19 @@ It includes:
 
 1. Open the live demo.
 2. Review `docs/openapi.json`.
-3. Read `docs/public/SYSTEM_DESIGN.md`.
-4. Read `docs/public/INTEGRATION_ADAPTERS.md`.
-5. Read `docs/public/INTEGRATION_OBSERVABILITY.md`.
-6. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
-7. Check `.github/workflows/ci.yml`.
-8. Run `bash scripts/ci_smoke_public.sh` locally.
+3. Read `docs/public/API_BACKED_DEMO.md`.
+4. Read `docs/public/SYSTEM_DESIGN.md`.
+5. Read `docs/public/INTEGRATION_ADAPTERS.md`.
+6. Read `docs/public/INTEGRATION_OBSERVABILITY.md`.
+7. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
+8. Check `.github/workflows/ci.yml`.
+9. Run `bash scripts/ci_smoke_public.sh` locally.
 
 ## What To Review First
 
 - `docs/public/PORTFOLIO_CASE_STUDY.md` - engineering case study.
 - `docs/public/SYSTEM_DESIGN.md` - system design overview.
+- `docs/public/API_BACKED_DEMO.md` - read-only synthetic demo API contract.
 - `docs/public/INTEGRATION_ADAPTERS.md` - adapter contract and retry model.
 - `docs/public/INTEGRATION_OBSERVABILITY.md` - adapter metrics and worker log signals.
 - `docs/public/ARCHITECTURE_DIAGRAMS.md` - architecture diagrams.
@@ -47,6 +49,7 @@ It includes:
 - `docs/public/ROADMAP.md` - public-safe engineering roadmap.
 - `apps/admin/public-demo/index.html` - static fake-data product demo shell.
 - `docs/openapi.json` - generated FastAPI OpenAPI schema.
+- `GET /demo/public` - read-only synthetic demo payload in the exported API.
 
 ## Local Run
 
@@ -87,6 +90,12 @@ Or open this file directly in a browser:
 apps/admin/public-demo/index.html
 ```
 
+For local API-backed mode, run the FastAPI app and open:
+
+```text
+apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
+```
+
 ## Architecture
 
 - `docs/PROJECT_DIRECTION.md`
@@ -96,6 +105,7 @@ apps/admin/public-demo/index.html
 - `docs/public/README.md`
 - `docs/public/PORTFOLIO_CASE_STUDY.md`
 - `docs/public/SYSTEM_DESIGN.md`
+- `docs/public/API_BACKED_DEMO.md`
 - `docs/public/INTEGRATION_ADAPTERS.md`
 - `docs/public/INTEGRATION_OBSERVABILITY.md`
 - `docs/public/ARCHITECTURE_DIAGRAMS.md`

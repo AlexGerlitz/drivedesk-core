@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-17T10:45:41Z
+Generated at: 2026-06-17T11:06:19Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -19,10 +19,12 @@ Copied public-safe areas:
 - public demo screenshot
 - public demo health workflow
 - public system design overview
+- public API-backed demo overview
 - public integration adapters overview
 - public integration observability overview
 - public roadmap
 - public demo integration health surface
+- public demo API-backed loading surface
 - public engineering surface docs
 - public-only README
 - public-only .nojekyll for GitHub Pages

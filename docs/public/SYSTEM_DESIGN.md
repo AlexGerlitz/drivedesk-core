@@ -30,8 +30,10 @@ is a real operational reason.
 flowchart TB
   Reviewer["External Reviewer"] --> PublicDemo["Public Demo UI"]
   PublicDemo --> StaticData["Synthetic Demo Data"]
+  PublicDemo -. "optional API-backed mode" .-> DemoAPI["GET /demo/public"]
 
   AdminClient["Admin Client"] --> API["FastAPI API"]
+  API --> DemoAPI
   API --> Domain["Core Domain Modules"]
   API --> Database["PostgreSQL"]
   API --> Cache["Redis"]
@@ -54,6 +56,7 @@ flowchart TB
 | Layer | Responsibility |
 | --- | --- |
 | Public demo | Reviewable static UI with synthetic data. |
+| Demo API | Read-only synthetic payload for API-backed public demo mode. |
 | API | HTTP contract, validation, tenant-aware operations, audit writes. |
 | Core modules | Domain rules that should not depend on web framework details. |
 | Database | Durable business state, migrations, audit and outbox storage. |
@@ -154,6 +157,7 @@ Public repository content is meant to show engineering quality:
 - source code for the platform foundation;
 - OpenAPI schema;
 - public demo shell;
+- read-only synthetic demo API contract;
 - public CI;
 - public demo health workflow;
 - ADRs and architecture docs;

@@ -63,7 +63,7 @@ flowchart TB
 | Demo API | Read-only synthetic payload for API-backed public demo mode. |
 | Generated SDK | Python, JavaScript, and TypeScript client artifacts generated from OpenAPI. |
 | API | HTTP contract, validation, auth context, tenant-aware operations, audit writes. |
-| Auth layer | Credential verification, bearer token hashing, revocation, session listing, login guard, audit, current-user lookup, tenant isolation, and RBAC context. |
+| Auth layer | Credential verification, bearer token hashing, revocation, session listing, login guard, aggregate auth metrics, audit, current-user lookup, tenant isolation, and RBAC context. |
 | Tenant scope | Reusable query helpers that keep tenant/user list behavior scoped to memberships. |
 | Tenant repository | Reusable query helpers for tenant-owned models that carry `tenant_id`. |
 | Core modules | Domain rules that should not depend on web framework details. |
@@ -133,6 +133,14 @@ guard without mixing operational security state into user records.
 Auth session listing is redacted. It exposes token ids and lifecycle state, but
 not raw bearer tokens or token hashes. Bearer callers see sessions only for
 tenants where their own membership role can read auth sessions.
+
+Auth metrics follow a stricter aggregate-only boundary. The metrics endpoint can
+show counts by session `status` and attempt `outcome`, but it must not include
+emails, user ids, tenant ids, token ids, token hashes, bearer tokens, or request
+bodies.
+
+If storage-backed aggregate queries fail, the endpoint still returns Prometheus
+text and marks that part with `drivedesk_metrics_storage_available 0`.
 
 ## Tenant Isolation Boundary
 
@@ -236,7 +244,7 @@ flowchart LR
   ExportGate --> SDKSmoke["Generated SDK Smoke"]
   CI --> DeployGate["Deployment Gate"]
   DeployGate --> Health["Health Checks"]
-  Health --> Evidence["Sanitized Evidence"]
+Health --> Evidence["Sanitized Evidence"]
   Evidence --> Docs["Public-Safe Docs"]
 ```
 
@@ -245,6 +253,9 @@ enough evidence. A change is stronger when checks prove API behavior, schema
 generation, demo availability, observability configuration, and public export
 boundaries. The generated SDK smoke adds another proof point: the exported
 OpenAPI schema can produce working public client code.
+
+The public API smoke also calls `/metrics` and verifies that auth metric
+families are present while common sensitive auth fields are absent.
 
 ## Public And Private Boundary
 

@@ -47,5 +47,5 @@ The guard is configured through DriveDesk settings, not through policy files:
 
 - Tenant-scoped query filters for every tenant-owned object.
 - ADR-0020 adds admin-visible auth session listing.
+- ADR-0021 adds aggregate auth observability metrics.
 - External identity provider or refresh-session design.
-- Public-safe auth metrics using synthetic data.

@@ -130,6 +130,7 @@ def test_api_metrics_endpoint(api_client: TestClient) -> None:
     assert 'drivedesk_api_readiness{dependency="all"} 1' in response.text
     assert 'drivedesk_api_readiness{dependency="database_url_configured"} 1' in response.text
     assert 'drivedesk_api_readiness{dependency="redis_url_configured"} 1' in response.text
+    assert "drivedesk_metrics_storage_available 1" in response.text
     assert "drivedesk_api_uptime_seconds " in response.text
     assert "drivedesk_api_started_at_seconds " in response.text
     assert 'drivedesk_api_http_requests_total{method="GET",path="/health",status_code="200"}' in response.text
@@ -138,6 +139,33 @@ def test_api_metrics_endpoint(api_client: TestClient) -> None:
     assert 'drivedesk_integration_jobs{adapter_key="internal.noop",status="pending"} 1' in response.text
     assert 'drivedesk_integration_job_attempts{adapter_key="internal.noop",status="pending"} 0' in response.text
     assert 'drivedesk_integration_job_errors{adapter_key="internal.noop",status="pending"} 0' in response.text
+    assert "# HELP drivedesk_auth_sessions Current auth sessions by lifecycle status." in response.text
+    assert "# TYPE drivedesk_auth_sessions gauge" in response.text
+    assert "# HELP drivedesk_auth_attempts_total Auth attempts grouped by outcome." in response.text
+    assert "# TYPE drivedesk_auth_attempts_total counter" in response.text
+
+
+def test_api_metrics_endpoint_degrades_without_database_schema() -> None:
+    engine = create_async_engine("sqlite+aiosqlite:///:memory:")
+    session_factory = async_sessionmaker(engine, expire_on_commit=False)
+
+    async def override_session() -> AsyncIterator[AsyncSession]:
+        async with session_factory() as session:
+            yield session
+
+    app = build_app()
+    app.dependency_overrides[get_session] = override_session
+
+    with TestClient(app) as client:
+        response = client.get("/metrics")
+
+    asyncio.run(engine.dispose())
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/plain")
+    assert "drivedesk_metrics_storage_available 0" in response.text
+    assert "# HELP drivedesk_auth_sessions Current auth sessions by lifecycle status." in response.text
+    assert "# HELP drivedesk_auth_attempts_total Auth attempts grouped by outcome." in response.text
 
 
 def test_api_request_log_is_structured_json(caplog: pytest.LogCaptureFixture) -> None:

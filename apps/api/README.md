@@ -50,6 +50,17 @@ Auth endpoints:
 The auth layer records failed attempts, activates a login guard after repeated
 failures, and writes auth lifecycle events into the platform audit log.
 
+Auth observability:
+
+- `/metrics` exposes aggregate session counts with `drivedesk_auth_sessions`;
+- `/metrics` exposes aggregate login-attempt outcomes with
+  `drivedesk_auth_attempts_total`;
+- `/metrics` keeps returning Prometheus text with
+  `drivedesk_metrics_storage_available 0` when storage-backed aggregates are
+  temporarily unavailable;
+- auth metrics avoid emails, tenant ids, token ids, token hashes, bearer tokens,
+  and request bodies.
+
 Tenant isolation:
 
 - bearer tokens resolve through active tenant memberships;

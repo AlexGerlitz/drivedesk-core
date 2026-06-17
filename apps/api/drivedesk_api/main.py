@@ -29,7 +29,11 @@ from drivedesk_api.auth import (
     revoke_access_token,
     write_auth_audit,
 )
-from drivedesk_api.auth_sessions import list_auth_sessions
+from drivedesk_api.auth_sessions import (
+    count_auth_attempts_by_outcome,
+    count_auth_sessions_by_status,
+    list_auth_sessions,
+)
 from drivedesk_api.rbac import (
     ActorContext,
     Permission,
@@ -73,6 +77,7 @@ from drivedesk_core import __version__ as core_version
 
 
 request_logger = logging.getLogger("drivedesk.api.requests")
+metrics_logger = logging.getLogger("drivedesk.api.metrics")
 
 
 def build_app(settings: Settings | None = None) -> FastAPI:
@@ -130,14 +135,37 @@ def build_app(settings: Settings | None = None) -> FastAPI:
 
     @api.get("/metrics", include_in_schema=False)
     async def metrics(session: AsyncSession = Depends(get_session)) -> PlainTextResponse:
-        outbox_counts = await count_outbox_by_status(session)
-        integration_rows = await summarize_integration_outbox(session)
+        storage_available = True
+        try:
+            outbox_counts = await count_outbox_by_status(session)
+            integration_rows = await summarize_integration_outbox(session)
+            auth_session_counts = await count_auth_sessions_by_status(session)
+            auth_attempt_counts = await count_auth_attempts_by_outcome(session)
+        except Exception as exc:
+            # Keep Prometheus scrapeable even when storage-backed aggregates degrade.
+            storage_available = False
+            await session.rollback()
+            outbox_counts = {}
+            integration_rows = []
+            auth_session_counts = {}
+            auth_attempt_counts = {}
+            log_json(
+                metrics_logger,
+                "metrics.storage_unavailable",
+                service=resolved_settings.service_name,
+                environment=resolved_settings.environment,
+                core_version=core_version,
+                reason=exc.__class__.__name__,
+            )
         return PlainTextResponse(
             build_metrics_text(
                 resolved_settings,
                 core_version,
                 outbox_counts=outbox_counts,
                 integration_rows=integration_rows,
+                auth_session_counts=auth_session_counts,
+                auth_attempt_counts=auth_attempt_counts,
+                storage_available=storage_available,
             ),
             media_type="text/plain; version=0.0.4; charset=utf-8",
         )

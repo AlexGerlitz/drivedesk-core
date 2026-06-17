@@ -171,6 +171,31 @@ def build_integration_metrics_lines(integration_rows: list[dict[str, object]]) -
     return lines
 
 
+def build_auth_metrics_lines(
+    auth_session_counts: dict[str, int],
+    auth_attempt_counts: dict[str, int],
+) -> list[str]:
+    lines = [
+        "# HELP drivedesk_auth_sessions Current auth sessions by lifecycle status.",
+        "# TYPE drivedesk_auth_sessions gauge",
+    ]
+    for status, count in sorted(auth_session_counts.items()):
+        labels = prometheus_labels({"status": status})
+        lines.append(f"drivedesk_auth_sessions{labels} {count}")
+
+    lines.extend(
+        [
+            "# HELP drivedesk_auth_attempts_total Auth attempts grouped by outcome.",
+            "# TYPE drivedesk_auth_attempts_total counter",
+        ]
+    )
+    for outcome, count in sorted(auth_attempt_counts.items()):
+        labels = prometheus_labels({"outcome": outcome})
+        lines.append(f"drivedesk_auth_attempts_total{labels} {count}")
+
+    return lines
+
+
 def build_readiness_metrics_lines(settings: Settings) -> list[str]:
     dependencies = {
         "database_url_configured": bool(settings.database_url),
@@ -188,11 +213,22 @@ def build_readiness_metrics_lines(settings: Settings) -> list[str]:
     return lines
 
 
+def build_metrics_storage_lines(storage_available: bool) -> list[str]:
+    return [
+        "# HELP drivedesk_metrics_storage_available Storage-backed metrics availability as 1 for available and 0 for degraded.",
+        "# TYPE drivedesk_metrics_storage_available gauge",
+        f"drivedesk_metrics_storage_available {1 if storage_available else 0}",
+    ]
+
+
 def build_metrics_text(
     settings: Settings,
     core_version: str,
     outbox_counts: dict[str, int] | None = None,
     integration_rows: list[dict[str, object]] | None = None,
+    auth_session_counts: dict[str, int] | None = None,
+    auth_attempt_counts: dict[str, int] | None = None,
+    storage_available: bool = True,
 ) -> str:
     labels = prometheus_labels(
         {
@@ -217,9 +253,11 @@ def build_metrics_text(
         f'drivedesk_api_started_at_info{{started_at="{prometheus_label_value(started_at)}"}} 1',
     ]
     lines.extend(build_readiness_metrics_lines(settings))
+    lines.extend(build_metrics_storage_lines(storage_available))
     lines.extend(build_http_metrics_lines())
     lines.extend(build_outbox_metrics_lines(outbox_counts or {}))
     lines.extend(build_integration_metrics_lines(integration_rows or []))
+    lines.extend(build_auth_metrics_lines(auth_session_counts or {}, auth_attempt_counts or {}))
     lines.append("")
     return "\n".join(lines)
 

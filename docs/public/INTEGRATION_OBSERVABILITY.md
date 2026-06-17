@@ -104,3 +104,11 @@ This is what makes integrations production-shaped. A basic adapter only moves
 data. A serious adapter also tells operators whether it is healthy, why it
 failed, how many attempts happened, and what to do next without leaking private
 data into logs, metrics, screenshots, or public documentation.
+
+The same rule is now used by the auth surface. `drivedesk_auth_sessions` and
+`drivedesk_auth_attempts_total` expose aggregate session and login-attempt
+health, but avoid emails, user ids, tenant ids, token ids, token hashes, bearer
+tokens, and request bodies.
+
+Storage-backed metrics degrade with `drivedesk_metrics_storage_available 0`
+instead of turning the whole `/metrics` scrape into a 500 response.

@@ -58,6 +58,25 @@ The auth-attempt row keeps review state:
 - reason;
 - created time.
 
+The metrics endpoint exposes only aggregate auth health:
+
+```text
+drivedesk_auth_sessions{status="active"} 2
+drivedesk_auth_sessions{status="revoked"} 1
+drivedesk_auth_attempts_total{outcome="success"} 3
+```
+
+Those metrics intentionally use only `status` and `outcome` labels. They do not
+include emails, user ids, tenant ids, token ids, token hashes, raw bearer tokens,
+or request bodies.
+
+If storage-backed aggregate queries are temporarily unavailable, `/metrics`
+still returns Prometheus text and marks the degraded part explicitly:
+
+```text
+drivedesk_metrics_storage_available 0
+```
+
 ## Request Flow
 
 ```mermaid
@@ -101,6 +120,7 @@ This layer adds the missing bridge:
 - admin-visible redacted session listing;
 - failed-attempt guard;
 - auth audit events;
+- aggregate auth metrics;
 - tenant-aware permission checks.
 
 The actor headers still exist as a development bootstrap path. They are useful
@@ -129,4 +149,4 @@ Recommended next slices:
 1. Add short-lived refresh flow or external identity provider integration.
 2. Add admin-triggered token revocation for tenant-scoped sessions.
 3. Add stronger device/session metadata.
-4. Add public-safe auth metrics with fake data.
+4. Add alert rules for aggregate auth failures and locked attempts.

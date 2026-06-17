@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from drivedesk_api.db import AccessToken, Membership, User
+from drivedesk_api.db import AccessToken, AuthAttempt, Membership, User
 from drivedesk_api.schemas import AuthSessionRead
 
 
@@ -99,3 +99,17 @@ async def list_auth_sessions(
         )
         for token, user in rows
     ]
+
+
+async def count_auth_sessions_by_status(session: AsyncSession) -> dict[str, int]:
+    result = await session.execute(
+        select(AccessToken.status, func.count()).group_by(AccessToken.status)
+    )
+    return {status: int(count or 0) for status, count in result.all()}
+
+
+async def count_auth_attempts_by_outcome(session: AsyncSession) -> dict[str, int]:
+    result = await session.execute(
+        select(AuthAttempt.outcome, func.count()).group_by(AuthAttempt.outcome)
+    )
+    return {outcome: int(count or 0) for outcome, count in result.all()}

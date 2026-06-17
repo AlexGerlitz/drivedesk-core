@@ -13,6 +13,7 @@ It includes:
 - tenant, user, membership, RBAC, audit, and outbox foundation;
 - credential auth foundation with bearer access tokens, current-user lookup,
   token revocation, redacted session listing, failed-attempt guard, and auth audit events;
+- aggregate auth metrics for session lifecycle and login-attempt outcomes;
 - bearer-token tenant isolation for tenant/user listing and bootstrap endpoints;
 - reusable tenant-scope helper module for Core list queries;
 - reusable tenant-owned repository helper module for models with `tenant_id`;
@@ -67,6 +68,7 @@ It includes:
 - `apps/admin/public-demo/index.html` - static fake-data product demo shell.
 - `docs/openapi.json` - generated FastAPI OpenAPI schema.
 - `GET /demo/public` - read-only synthetic demo payload in the exported API.
+- `GET /metrics` - public-safe aggregate metrics including auth health.
 - `workflow`, `timeline`, and `domainEvents` - synthetic business process data
   in the public demo payload.
 - `sdk/generated/public-demo/` - generated client SDK artifacts.
@@ -169,3 +171,4 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/adr/0018-tenant-scope-query-helpers.md`
 - `docs/adr/0019-tenant-owned-repository-helpers.md`
 - `docs/adr/0020-admin-visible-auth-session-listing.md`
+- `docs/adr/0021-auth-observability-metrics.md`

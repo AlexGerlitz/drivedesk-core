@@ -441,6 +441,15 @@ def test_auth_session_listing_is_tenant_admin_scoped_and_redacted(
     assert viewer_a_token.lower() not in serialized
     assert owner_b_token.lower() not in serialized
 
+    metrics_response = client.get("/metrics")
+    assert metrics_response.status_code == 200
+    assert 'drivedesk_auth_sessions{status="active"} 2' in metrics_response.text
+    assert 'drivedesk_auth_sessions{status="revoked"} 1' in metrics_response.text
+    assert 'drivedesk_auth_attempts_total{outcome="success"} 3' in metrics_response.text
+    assert "session-owner-a@example.com" not in metrics_response.text
+    assert "token_id" not in metrics_response.text
+    assert "token_hash" not in metrics_response.text
+
 
 def test_bearer_token_is_limited_to_member_tenants(
     api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],

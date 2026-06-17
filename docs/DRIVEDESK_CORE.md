@@ -120,6 +120,8 @@ What this gives us:
 - `/auth/me` proves current-user and membership lookup.
 - `/auth/logout` proves token revocation.
 - `/auth/sessions` proves redacted tenant-scoped session review for admins.
+- `/metrics` exposes aggregate auth session and login-attempt counters without
+  leaking emails, token ids, token hashes, or bearer tokens.
 - Auth attempts and platform audit events make failed access, guard activation,
   successful login, and logout reviewable.
 - Tenant endpoints can reject a valid token when that user has no membership in

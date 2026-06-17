@@ -82,6 +82,14 @@ def get_json(path: str) -> tuple[dict, dict[str, str]]:
         return payload, headers
 
 
+def get_text(path: str) -> tuple[str, dict[str, str]]:
+    request = urllib.request.Request(f"{base_url}{path}", headers={"Accept": "text/plain"})
+    with urllib.request.urlopen(request, timeout=5) as response:
+        payload = response.read().decode("utf-8")
+        headers = {key.lower(): value for key, value in response.headers.items()}
+        return payload, headers
+
+
 deadline = time.monotonic() + 20
 last_error: Exception | None = None
 while time.monotonic() < deadline:
@@ -99,6 +107,7 @@ health, _ = get_json("/health")
 ready, _ = get_json("/ready")
 demo, demo_headers = get_json("/demo/public")
 openapi, _ = get_json("/openapi.json")
+metrics, metrics_headers = get_text("/metrics")
 
 assert health["status"] == "ok", health
 assert ready["status"] in {"ready", "degraded"}, ready
@@ -127,6 +136,13 @@ assert {item["state"] for item in demo["integrationHealth"]} >= {
 }
 assert demo_headers.get("access-control-allow-origin") == "*", demo_headers
 assert "public" in demo_headers.get("cache-control", ""), demo_headers
+assert metrics_headers.get("content-type", "").startswith("text/plain"), metrics_headers
+assert "drivedesk_metrics_storage_available " in metrics, metrics
+assert "# HELP drivedesk_auth_sessions Current auth sessions by lifecycle status." in metrics, metrics
+assert "# HELP drivedesk_auth_attempts_total Auth attempts grouped by outcome." in metrics, metrics
+assert "user_email" not in metrics, metrics
+assert "token_id" not in metrics, metrics
+assert "token_hash" not in metrics, metrics
 assert "/auth/login" in openapi["paths"], openapi["paths"].keys()
 assert "/auth/me" in openapi["paths"], openapi["paths"].keys()
 assert "/auth/logout" in openapi["paths"], openapi["paths"].keys()

@@ -137,10 +137,12 @@ assert {item["state"] for item in demo["integrationHealth"]} >= {
 }
 assert {adapter["key"] for adapter in demo["adapters"]} >= {"file.import.fake", "internal.noop"}, demo
 assert any(adapter.get("connectionProfileSupported") for adapter in demo["adapters"]), demo
+assert any(adapter.get("requiredMappingKeys") for adapter in demo["adapters"]), demo
 adapter_catalog = {adapter["key"]: adapter for adapter in adapters}
 assert set(adapter_catalog) == {"file.import.fake", "internal.noop"}, adapters
 assert adapter_catalog["file.import.fake"]["direction"] == "inbound", adapters
 assert adapter_catalog["file.import.fake"]["connection_profile_supported"] is True, adapters
+assert adapter_catalog["file.import.fake"]["required_mapping_keys"] == ["external_id", "display_name"], adapters
 assert adapter_catalog["file.import.fake"]["mapping_example"]["external_id"] == "lead_id", adapters
 assert "records" in adapter_catalog["file.import.fake"]["payload_schema"]["required"], adapters
 assert adapter_catalog["internal.noop"]["connection_profile_supported"] is False, adapters

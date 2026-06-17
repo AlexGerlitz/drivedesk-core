@@ -1248,18 +1248,85 @@ def test_file_import_adapter_success_flow(api_client: tuple[TestClient, async_se
     assert unsupported_response.status_code == 400
     assert unsupported_response.json()["detail"] == "Unknown adapter: provider.unknown"
 
+    missing_mapping_response = client.post(
+        f"/tenants/{tenant_id}/integration-connections",
+        json={
+            "name": "Incomplete file import profile",
+            "adapter_key": "file.import.fake",
+            "mapping": {"external_id": "lead_id"},
+        },
+        headers=owner_headers,
+    )
+    assert missing_mapping_response.status_code == 400
+    assert missing_mapping_response.json()["detail"] == "Missing mapping keys for file.import.fake: display_name"
+
+    invalid_mapping_response = client.post(
+        f"/tenants/{tenant_id}/integration-connections",
+        json={
+            "name": "Invalid file import profile",
+            "adapter_key": "file.import.fake",
+            "mapping": {"external_id": "lead_id", "display_name": ""},
+        },
+        headers=owner_headers,
+    )
+    assert invalid_mapping_response.status_code == 400
+    assert invalid_mapping_response.json()["detail"] == "Invalid mapping values for file.import.fake: display_name"
+
     noop_connection_response = client.post(
         f"/tenants/{tenant_id}/integration-connections",
         json={"name": "Noop profile", "adapter_key": "internal.noop"},
         headers=owner_headers,
     )
-    assert noop_connection_response.status_code == 201
-    noop_connection = noop_connection_response.json()
+    assert noop_connection_response.status_code == 400
+    assert noop_connection_response.json()["detail"] == "Adapter does not support integration connections: internal.noop"
+
+    disabled_connection_response = client.post(
+        f"/tenants/{tenant_id}/integration-connections",
+        json={
+            "name": "Disabled file import profile",
+            "adapter_key": "file.import.fake",
+            "status": "disabled",
+            "mapping": {"external_id": "lead_id", "display_name": "full_name"},
+        },
+        headers=owner_headers,
+    )
+    assert disabled_connection_response.status_code == 201
+    disabled_connection = disabled_connection_response.json()
+
+    inactive_response = client.post(
+        f"/tenants/{tenant_id}/integration-imports/file",
+        json={
+            "integration_connection_id": disabled_connection["id"],
+            "source_name": "disabled-profile",
+            "source_format": "json",
+            "records": [{"external_id": "lead_disabled", "display_name": "Disabled Profile"}],
+        },
+        headers=owner_headers,
+    )
+    assert inactive_response.status_code == 409
+    assert inactive_response.json()["detail"] == "integration connection is not active"
+
+    async def insert_mismatched_connection() -> str:
+        async with session_factory() as session:
+            mismatch = IntegrationConnection(
+                id="manual-noop-connection",
+                tenant_id=tenant_id,
+                name="Manual noop profile",
+                adapter_key="internal.noop",
+                status="active",
+                config_json="{}",
+                mapping_json="{}",
+            )
+            session.add(mismatch)
+            await session.commit()
+            return mismatch.id
+
+    noop_connection_id = asyncio.run(insert_mismatched_connection())
 
     mismatch_response = client.post(
         f"/tenants/{tenant_id}/integration-imports/file",
         json={
-            "integration_connection_id": noop_connection["id"],
+            "integration_connection_id": noop_connection_id,
             "source_name": "wrong-profile",
             "source_format": "json",
             "records": [{"external_id": "lead_wrong", "display_name": "Wrong Profile"}],
@@ -1348,6 +1415,9 @@ def test_file_import_adapter_success_flow(api_client: tuple[TestClient, async_se
     metrics_response = client.get("/metrics")
     assert metrics_response.status_code == 200
     assert 'drivedesk_integration_connections{adapter_key="file.import.fake",status="active"} 1' in (
+        metrics_response.text
+    )
+    assert 'drivedesk_integration_connections{adapter_key="file.import.fake",status="disabled"} 1' in (
         metrics_response.text
     )
     assert 'drivedesk_integration_connections{adapter_key="internal.noop",status="active"} 1' in metrics_response.text

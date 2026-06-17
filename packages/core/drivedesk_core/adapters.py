@@ -32,6 +32,7 @@ class AdapterDescriptor:
     payload_schema: dict[str, object] = field(default_factory=dict)
     config_example: dict[str, object] = field(default_factory=dict)
     mapping_example: dict[str, object] = field(default_factory=dict)
+    required_mapping_keys: list[str] = field(default_factory=list)
     capabilities: list[str] = field(default_factory=list)
     failure_modes: list[str] = field(default_factory=list)
     public_notes: list[str] = field(default_factory=list)
@@ -46,6 +47,13 @@ class AdapterExecutionError(Exception):
         self.message = message
         self.adapter_key = adapter_key
         self.retryable = retryable
+
+
+class AdapterValidationError(Exception):
+    def __init__(self, message: str, *, adapter_key: str) -> None:
+        super().__init__(message)
+        self.message = message
+        self.adapter_key = adapter_key
 
 
 class IntegrationAdapter(Protocol):
@@ -111,6 +119,7 @@ class FakeFileImportAdapter:
         },
         config_example={"mode": "synthetic"},
         mapping_example={"external_id": "lead_id", "display_name": "full_name"},
+        required_mapping_keys=["external_id", "display_name"],
         capabilities=[
             "payload validation",
             "accepted/rejected record counts",
@@ -203,6 +212,38 @@ def list_adapter_descriptors() -> list[dict[str, object]]:
 
 def describe_adapter(adapter_key: str | None) -> dict[str, object]:
     return resolve_adapter(adapter_key).descriptor.to_payload()
+
+
+def validate_adapter_connection_profile(
+    adapter_key: str,
+    *,
+    mapping: dict[str, object],
+) -> AdapterDescriptor:
+    descriptor = resolve_adapter(adapter_key).descriptor
+    if not descriptor.connection_profile_supported:
+        raise AdapterValidationError(
+            f"Adapter does not support integration connections: {adapter_key}",
+            adapter_key=adapter_key,
+        )
+
+    missing_keys = [key for key in descriptor.required_mapping_keys if key not in mapping]
+    if missing_keys:
+        raise AdapterValidationError(
+            f"Missing mapping keys for {adapter_key}: {', '.join(missing_keys)}",
+            adapter_key=adapter_key,
+        )
+
+    invalid_keys = [
+        key
+        for key, value in mapping.items()
+        if not isinstance(key, str) or not isinstance(value, str) or not value.strip()
+    ]
+    if invalid_keys:
+        raise AdapterValidationError(
+            f"Invalid mapping values for {adapter_key}: {', '.join(sorted(str(key) for key in invalid_keys))}",
+            adapter_key=adapter_key,
+        )
+    return descriptor
 
 
 def execute_adapter(adapter_key: str | None, payload: dict[str, object]) -> AdapterResult:

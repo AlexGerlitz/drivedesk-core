@@ -349,6 +349,26 @@ The current catalog exposes:
 | `file.import.fake` | `inbound` | supported | Synthetic file import contract tests and public demos. |
 | `internal.noop` | `internal` | not supported | Default internal outbox acknowledgement path. |
 
+## Sprint 4F Integration Mapping Validation
+
+Sprint 4F validates tenant-owned integration connection mappings against the
+runtime adapter catalog.
+
+Why this matters:
+
+- bad connection mappings are rejected before they become outbox work;
+- `file.import.fake` requires `external_id` and `display_name` mappings;
+- mapping values must be non-empty strings;
+- adapters that do not support tenant-owned profiles, such as `internal.noop`,
+  are rejected by the connection API;
+- file-import job creation re-validates stored mapping before using a
+  connection profile.
+
+Public docs:
+
+- `docs/public/INTEGRATION_MAPPING_VALIDATION.md`;
+- `docs/adr/0033-integration-mapping-validation.md`.
+
 ## Local Commands
 
 Run the API without Docker:

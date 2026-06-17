@@ -15,6 +15,7 @@ def _public_adapter_rows() -> list[dict[str, Any]]:
                 "status": descriptor["status"],
                 "direction": descriptor["direction"],
                 "connectionProfileSupported": descriptor["connection_profile_supported"],
+                "requiredMappingKeys": descriptor["required_mapping_keys"],
                 "contract": descriptor["purpose"],
             }
         )
@@ -25,6 +26,7 @@ def _public_adapter_rows() -> list[dict[str, Any]]:
             "status": "planned",
             "direction": "outbound",
             "connectionProfileSupported": True,
+            "requiredMappingKeys": ["external_ref"],
             "contract": "Future adapter boundary for accounting exports and reconciliation status.",
         }
     )

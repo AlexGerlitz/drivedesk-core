@@ -129,6 +129,8 @@ Integration endpoints:
   connection-profile support flags.
 - `POST /tenants/{tenant_id}/integration-connections` creates a tenant-owned
   adapter profile with safe config and mapping JSON.
+  The API validates adapter support, required mapping keys, and non-empty
+  mapping values before storing the profile.
 - `GET /tenants/{tenant_id}/integration-connections` lists tenant-owned adapter
   profiles.
 - `POST /tenants/{tenant_id}/integration-imports/file` creates a synthetic

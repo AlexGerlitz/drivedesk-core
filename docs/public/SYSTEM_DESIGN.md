@@ -268,6 +268,11 @@ add tenant-owned adapter profiles with safe config and mapping, so an
 integration job can reference a configured connection instead of relying only on
 a hardcoded adapter key.
 
+Mapping validation is documented in `INTEGRATION_MAPPING_VALIDATION.md`.
+Connection creation checks the selected adapter, connection-profile support, and
+required mapping keys before storing tenant configuration. File-import job
+creation re-validates stored mapping before enqueueing work for the worker.
+
 Integration observability is documented in `INTEGRATION_OBSERVABILITY.md`. It
 shows how adapter jobs become metrics, structured worker logs, and
 runbook-backed operational signals.

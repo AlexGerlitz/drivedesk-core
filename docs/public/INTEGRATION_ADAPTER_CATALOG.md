@@ -33,7 +33,8 @@ and replaces them with runtime metadata:
   "status": "active",
   "direction": "inbound",
   "connection_profile_supported": true,
-  "connection_profile_required": false
+  "connection_profile_required": false,
+  "required_mapping_keys": ["external_id", "display_name"]
 }
 ```
 
@@ -54,6 +55,7 @@ Each adapter descriptor includes:
 | `payload_schema` | Public-safe payload shape expected by the adapter. |
 | `config_example` | Safe example config shape. |
 | `mapping_example` | Safe example field mapping. |
+| `required_mapping_keys` | Mapping keys that must be present when a tenant connection profile is created. |
 | `capabilities` | What the adapter proves. |
 | `failure_modes` | Public-safe failure modes used for retry/dead-letter tests. |
 
@@ -97,5 +99,6 @@ The public smoke test validates:
 - `/integration-adapters` returns `file.import.fake` and `internal.noop`;
 - OpenAPI includes `GET /integration-adapters`;
 - the file-import descriptor exposes `connection_profile_supported`;
+- the file-import descriptor exposes `required_mapping_keys`;
 - the file-import descriptor includes mapping and payload examples;
 - the public demo adapter cards include connection-profile metadata.

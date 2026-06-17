@@ -109,6 +109,7 @@ def test_adapter_catalog_describes_runtime_adapters() -> None:
         "external_id": "lead_id",
         "display_name": "full_name",
     }
+    assert descriptors["file.import.fake"]["required_mapping_keys"] == ["external_id", "display_name"]
     assert "records" in descriptors["file.import.fake"]["payload_schema"]["required"]
     assert descriptors["internal.noop"]["connection_profile_supported"] is False
 
@@ -137,6 +138,7 @@ def test_api_integration_adapter_catalog_endpoint() -> None:
     assert payload["file.import.fake"]["direction"] == "inbound"
     assert payload["file.import.fake"]["connection_profile_supported"] is True
     assert payload["file.import.fake"]["mapping_example"]["external_id"] == "lead_id"
+    assert payload["file.import.fake"]["required_mapping_keys"] == ["external_id", "display_name"]
     assert "payload validation" in payload["file.import.fake"]["capabilities"]
     assert payload["internal.noop"]["direction"] == "internal"
 

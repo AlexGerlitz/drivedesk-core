@@ -179,7 +179,14 @@
         )
       );
 
-      row.append(top, key, contract, meta);
+      var mapping = document.createElement("span");
+      mapping.className = "muted";
+      var requiredMappingKeys = adapter.requiredMappingKeys || [];
+      mapping.appendChild(
+        text(requiredMappingKeys.length ? "mapping: " + requiredMappingKeys.join(", ") : "mapping: none")
+      );
+
+      row.append(top, key, contract, meta, mapping);
       rows.appendChild(row);
     });
   }

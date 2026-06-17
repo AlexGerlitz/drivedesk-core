@@ -168,6 +168,7 @@ window.DRIVEDESK_DEMO_DATA = {
       "status": "active",
       "direction": "inbound",
       "connectionProfileSupported": true,
+      "requiredMappingKeys": ["external_id", "display_name"],
       "contract": "Normalizes provider rows, returns accepted and rejected record counts, and stores the result on the outbox event."
     },
     {
@@ -176,6 +177,7 @@ window.DRIVEDESK_DEMO_DATA = {
       "status": "active",
       "direction": "internal",
       "connectionProfileSupported": false,
+      "requiredMappingKeys": [],
       "contract": "Acknowledges internal domain events without calling an external provider."
     },
     {
@@ -184,6 +186,7 @@ window.DRIVEDESK_DEMO_DATA = {
       "status": "planned",
       "direction": "outbound",
       "connectionProfileSupported": true,
+      "requiredMappingKeys": ["external_ref"],
       "contract": "Future adapter boundary for accounting exports and reconciliation status."
     }
   ],

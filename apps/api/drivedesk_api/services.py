@@ -37,7 +37,12 @@ from drivedesk_api.schemas import (
     WorkflowRuleCreate,
 )
 from drivedesk_api.tenant_repository import list_tenant_owned, tenant_owned_select
-from drivedesk_core import AdapterExecutionError, resolve_adapter
+from drivedesk_core import (
+    AdapterExecutionError,
+    AdapterValidationError,
+    resolve_adapter,
+    validate_adapter_connection_profile,
+)
 
 
 def new_id() -> str:
@@ -230,8 +235,8 @@ async def create_integration_connection(
 ) -> IntegrationConnection:
     await ensure_tenant_exists(session, tenant_id)
     try:
-        resolve_adapter(payload.adapter_key)
-    except AdapterExecutionError as exc:
+        validate_adapter_connection_profile(payload.adapter_key, mapping=payload.mapping)
+    except (AdapterExecutionError, AdapterValidationError) as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=exc.message) from exc
 
     connection = IntegrationConnection(
@@ -289,6 +294,10 @@ async def _active_connection_for_file_import(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="integration connection is not active")
     if connection.adapter_key != "file.import.fake":
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="integration connection adapter mismatch")
+    try:
+        validate_adapter_connection_profile(connection.adapter_key, mapping=json.loads(connection.mapping_json))
+    except (AdapterExecutionError, AdapterValidationError) as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=exc.message) from exc
     return connection
 
 

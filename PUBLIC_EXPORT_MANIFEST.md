@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-17T22:21:08Z
+Generated at: 2026-06-17T22:37:54Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -28,6 +28,8 @@ Copied public-safe areas:
 - public runtime adapter catalog endpoint: /integration-adapters
 - public runtime adapter catalog doc
 - public demo adapter connectionProfileSupported metadata
+- public integration mapping validation doc
+- public demo adapter requiredMappingKeys metadata
 - public integration observability overview
 - public roadmap
 - public demo integration health surface

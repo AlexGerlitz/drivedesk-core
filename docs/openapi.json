@@ -96,6 +96,13 @@
             "title": "Purpose",
             "type": "string"
           },
+          "required_mapping_keys": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Required Mapping Keys",
+            "type": "array"
+          },
           "status": {
             "title": "Status",
             "type": "string"

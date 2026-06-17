@@ -12,6 +12,17 @@ Before creating a connection, clients can call `GET /integration-adapters` to
 discover which executable adapters support connection profiles and which mapping
 shape they expect.
 
+Connection creation validates the submitted mapping against the selected adapter
+descriptor. For `file.import.fake`, the required mapping keys are:
+
+```text
+external_id
+display_name
+```
+
+Adapters that do not support tenant-owned connection profiles, such as
+`internal.noop`, are rejected by the connection API.
+
 ## API Shape
 
 ```text
@@ -57,7 +68,8 @@ The API verifies:
 
 - the connection belongs to the same tenant;
 - the connection is `active`;
-- the connection uses the file-import adapter.
+- the connection uses the file-import adapter;
+- the stored mapping still satisfies the runtime adapter descriptor.
 
 The created outbox event includes:
 

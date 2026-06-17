@@ -25,6 +25,7 @@ class AdapterContractRead(BaseModel):
     payload_schema: dict[str, Any] = Field(default_factory=dict)
     config_example: dict[str, Any] = Field(default_factory=dict)
     mapping_example: dict[str, Any] = Field(default_factory=dict)
+    required_mapping_keys: list[str] = Field(default_factory=list)
     capabilities: list[str] = Field(default_factory=list)
     failure_modes: list[str] = Field(default_factory=list)
     public_notes: list[str] = Field(default_factory=list)

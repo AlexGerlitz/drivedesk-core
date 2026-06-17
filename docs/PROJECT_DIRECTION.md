@@ -39,7 +39,7 @@ tests          API and foundation tests
 
 Recommended next slices:
 
-- admin-visible auth session listing;
+- admin-triggered token revocation for tenant-scoped sessions;
 - tenant-owned repository coverage for future business entities;
 - structured logging;
 - OpenTelemetry tracing;

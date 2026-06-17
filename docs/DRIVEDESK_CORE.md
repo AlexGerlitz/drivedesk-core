@@ -104,6 +104,7 @@ Sprint 2 adds the first real Core auth path:
 - `POST /auth/login`;
 - `GET /auth/me`;
 - `POST /auth/logout`;
+- `GET /auth/sessions`;
 - token-backed actor context for existing RBAC checks;
 - tenant-aware permission checks for tenant endpoints.
 - tenant isolation for bearer-token tenant and user listing;
@@ -118,6 +119,7 @@ What this gives us:
 - Access tokens are returned once while only their hashes are stored.
 - `/auth/me` proves current-user and membership lookup.
 - `/auth/logout` proves token revocation.
+- `/auth/sessions` proves redacted tenant-scoped session review for admins.
 - Auth attempts and platform audit events make failed access, guard activation,
   successful login, and logout reviewable.
 - Tenant endpoints can reject a valid token when that user has no membership in
@@ -136,7 +138,8 @@ New field:
 
 New endpoint group:
 
-- auth login, current-user lookup, and logout/token revocation.
+- auth login, current-user lookup, logout/token revocation, and redacted session
+  listing.
 
 Tenant isolation rules:
 

@@ -29,6 +29,7 @@ from drivedesk_api.auth import (
     revoke_access_token,
     write_auth_audit,
 )
+from drivedesk_api.auth_sessions import list_auth_sessions
 from drivedesk_api.rbac import (
     ActorContext,
     Permission,
@@ -36,11 +37,13 @@ from drivedesk_api.rbac import (
     require_permission,
     require_platform_bootstrap_permission,
     require_tenant_permission,
+    tenant_ids_with_permission,
 )
 from drivedesk_api.schemas import (
     AccessTokenRead,
     AuditEventRead,
     AuthMeRead,
+    AuthSessionRead,
     FileImportCreate,
     LoginRequest,
     MembershipCreate,
@@ -260,6 +263,23 @@ def build_app(settings: Settings | None = None) -> FastAPI:
         )
         await session.commit()
         return TokenRevocationRead(revoked=True, token_id=token.id, status="revoked")
+
+    @api.get("/auth/sessions", response_model=list[AuthSessionRead], tags=["auth"])
+    async def list_auth_sessions_endpoint(
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> list[AuthSessionRead]:
+        if actor.source != "bearer":
+            require_permission(actor, Permission.AUTH_SESSION_READ)
+            return await list_auth_sessions(session)
+
+        allowed_tenant_ids = tenant_ids_with_permission(actor, Permission.AUTH_SESSION_READ)
+        if not allowed_tenant_ids:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"permission required: {Permission.AUTH_SESSION_READ.value}",
+            )
+        return await list_auth_sessions(session, allowed_tenant_ids=allowed_tenant_ids)
 
     @api.post("/tenants", response_model=TenantRead, status_code=201)
     async def create_tenant_endpoint(

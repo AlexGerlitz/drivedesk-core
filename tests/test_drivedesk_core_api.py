@@ -319,6 +319,129 @@ def test_login_attempt_guard_records_and_locks_email(
     assert audit_events.count("auth.login.locked") == 1
 
 
+def test_auth_session_listing_is_tenant_admin_scoped_and_redacted(
+    api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, _ = api_client
+    owner_headers = {"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"}
+
+    tenant_a_response = client.post(
+        "/tenants",
+        json={"slug": "auth-sessions-a", "name": "Auth Sessions A"},
+        headers=owner_headers,
+    )
+    assert tenant_a_response.status_code == 201
+    tenant_a_id = tenant_a_response.json()["id"]
+
+    tenant_b_response = client.post(
+        "/tenants",
+        json={"slug": "auth-sessions-b", "name": "Auth Sessions B"},
+        headers=owner_headers,
+    )
+    assert tenant_b_response.status_code == 201
+    tenant_b_id = tenant_b_response.json()["id"]
+
+    owner_a_response = client.post(
+        "/users",
+        json={"email": "session-owner-a@example.com", "display_name": "Session Owner A", "password": "correct-horse-a"},
+        headers=owner_headers,
+    )
+    assert owner_a_response.status_code == 201
+    owner_a_id = owner_a_response.json()["id"]
+
+    viewer_a_response = client.post(
+        "/users",
+        json={"email": "session-viewer-a@example.com", "display_name": "Session Viewer A", "password": "correct-horse-b"},
+        headers=owner_headers,
+    )
+    assert viewer_a_response.status_code == 201
+    viewer_a_id = viewer_a_response.json()["id"]
+
+    owner_b_response = client.post(
+        "/users",
+        json={"email": "session-owner-b@example.com", "display_name": "Session Owner B", "password": "correct-horse-c"},
+        headers=owner_headers,
+    )
+    assert owner_b_response.status_code == 201
+    owner_b_id = owner_b_response.json()["id"]
+
+    assert client.post(
+        f"/tenants/{tenant_a_id}/memberships",
+        json={"user_id": owner_a_id, "role": "owner"},
+        headers=owner_headers,
+    ).status_code == 201
+    assert client.post(
+        f"/tenants/{tenant_a_id}/memberships",
+        json={"user_id": viewer_a_id, "role": "viewer"},
+        headers=owner_headers,
+    ).status_code == 201
+    assert client.post(
+        f"/tenants/{tenant_b_id}/memberships",
+        json={"user_id": owner_b_id, "role": "owner"},
+        headers=owner_headers,
+    ).status_code == 201
+
+    owner_a_login = client.post(
+        "/auth/login",
+        json={"email": "session-owner-a@example.com", "password": "correct-horse-a"},
+    )
+    assert owner_a_login.status_code == 200
+    owner_a_token = owner_a_login.json()["access_token"]
+
+    viewer_a_login = client.post(
+        "/auth/login",
+        json={"email": "session-viewer-a@example.com", "password": "correct-horse-b"},
+    )
+    assert viewer_a_login.status_code == 200
+    viewer_a_token = viewer_a_login.json()["access_token"]
+
+    owner_b_login = client.post(
+        "/auth/login",
+        json={"email": "session-owner-b@example.com", "password": "correct-horse-c"},
+    )
+    assert owner_b_login.status_code == 200
+    owner_b_token = owner_b_login.json()["access_token"]
+
+    viewer_sessions_response = client.get(
+        "/auth/sessions",
+        headers={"Authorization": f"Bearer {viewer_a_token}"},
+    )
+    assert viewer_sessions_response.status_code == 403
+    assert viewer_sessions_response.json()["detail"] == "permission required: auth_session:read"
+
+    logout_viewer_response = client.post(
+        "/auth/logout",
+        headers={"Authorization": f"Bearer {viewer_a_token}"},
+    )
+    assert logout_viewer_response.status_code == 200
+
+    sessions_response = client.get(
+        "/auth/sessions",
+        headers={"Authorization": f"Bearer {owner_a_token}"},
+    )
+    assert sessions_response.status_code == 200
+    sessions = sessions_response.json()
+
+    statuses_by_email: dict[str, set[str]] = {}
+    tenant_ids_by_email: dict[str, set[str]] = {}
+    for session in sessions:
+        statuses_by_email.setdefault(session["user_email"], set()).add(session["status"])
+        tenant_ids_by_email.setdefault(session["user_email"], set()).update(session["tenant_ids"])
+
+    assert "active" in statuses_by_email["session-owner-a@example.com"]
+    assert "revoked" in statuses_by_email["session-viewer-a@example.com"]
+    assert "session-owner-b@example.com" not in statuses_by_email
+    assert tenant_ids_by_email["session-owner-a@example.com"] == {tenant_a_id}
+    assert tenant_ids_by_email["session-viewer-a@example.com"] == {tenant_a_id}
+
+    serialized = json.dumps(sessions).lower()
+    assert "access_token" not in serialized
+    assert "token_hash" not in serialized
+    assert owner_a_token.lower() not in serialized
+    assert viewer_a_token.lower() not in serialized
+    assert owner_b_token.lower() not in serialized
+
+
 def test_bearer_token_is_limited_to_member_tenants(
     api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
 ) -> None:

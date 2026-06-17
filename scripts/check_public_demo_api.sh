@@ -130,6 +130,7 @@ assert "public" in demo_headers.get("cache-control", ""), demo_headers
 assert "/auth/login" in openapi["paths"], openapi["paths"].keys()
 assert "/auth/me" in openapi["paths"], openapi["paths"].keys()
 assert "/auth/logout" in openapi["paths"], openapi["paths"].keys()
+assert "/auth/sessions" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/public" in openapi["paths"], openapi["paths"].keys()
 assert "/health" in openapi["paths"], openapi["paths"].keys()
 

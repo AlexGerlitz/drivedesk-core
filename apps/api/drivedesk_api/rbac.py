@@ -11,6 +11,7 @@ from drivedesk_api.session import get_session
 
 
 class Permission(StrEnum):
+    AUTH_SESSION_READ = "auth_session:read"
     TENANT_READ = "tenant:read"
     TENANT_WRITE = "tenant:write"
     USER_READ = "user:read"
@@ -24,6 +25,7 @@ class Permission(StrEnum):
 ROLE_PERMISSIONS: dict[str, set[Permission]] = {
     "owner": set(Permission),
     "admin": {
+        Permission.AUTH_SESSION_READ,
         Permission.TENANT_READ,
         Permission.USER_READ,
         Permission.USER_WRITE,
@@ -125,6 +127,16 @@ def require_permission(actor: ActorContext, permission: Permission) -> None:
             status_code=status.HTTP_403_FORBIDDEN,
             detail=f"permission required: {permission.value}",
         )
+
+
+def tenant_ids_with_permission(actor: ActorContext, permission: Permission) -> list[str]:
+    if actor.source != "bearer" or not actor.tenant_roles:
+        return []
+    return [
+        tenant_id
+        for tenant_id, role in actor.tenant_roles.items()
+        if permission in ROLE_PERMISSIONS.get(role, set())
+    ]
 
 
 def require_platform_bootstrap_permission(actor: ActorContext, permission: Permission) -> None:

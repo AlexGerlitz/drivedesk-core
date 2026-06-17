@@ -12,7 +12,7 @@ It includes:
 - background worker;
 - tenant, user, membership, RBAC, audit, and outbox foundation;
 - credential auth foundation with bearer access tokens, current-user lookup,
-  token revocation, failed-attempt guard, and auth audit events;
+  token revocation, redacted session listing, failed-attempt guard, and auth audit events;
 - bearer-token tenant isolation for tenant/user listing and bootstrap endpoints;
 - reusable tenant-scope helper module for Core list queries;
 - reusable tenant-owned repository helper module for models with `tenant_id`;
@@ -168,3 +168,4 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/adr/0017-bearer-tenant-isolation.md`
 - `docs/adr/0018-tenant-scope-query-helpers.md`
 - `docs/adr/0019-tenant-owned-repository-helpers.md`
+- `docs/adr/0020-admin-visible-auth-session-listing.md`

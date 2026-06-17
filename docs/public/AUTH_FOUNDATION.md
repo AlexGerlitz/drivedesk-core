@@ -9,6 +9,7 @@ It is intentionally small, but it proves the platform direction:
 - the database stores only a hash of the access token;
 - `GET /auth/me` returns the current user and active memberships;
 - `POST /auth/logout` revokes the current bearer access token;
+- `GET /auth/sessions` returns redacted tenant-scoped session state for admins;
 - failed login attempts are recorded for operational review;
 - repeated failed attempts activate a login guard;
 - auth lifecycle events are written to the audit log;
@@ -21,6 +22,7 @@ It is intentionally small, but it proves the platform direction:
 POST /auth/login
 GET /auth/me
 POST /auth/logout
+GET /auth/sessions
 ```
 
 The login response returns the access token once. Later requests use:
@@ -37,6 +39,16 @@ The token row keeps operational state:
 - last-used time;
 - user id;
 - token hash.
+
+The session listing endpoint returns only redacted state:
+
+- token id;
+- user id and display fields;
+- active or revoked status;
+- created, expiry, last-used, and revoked timestamps;
+- tenant ids visible to the current admin.
+
+It does not return raw access tokens or token hashes.
 
 The auth-attempt row keeps review state:
 
@@ -69,6 +81,8 @@ sequenceDiagram
   Client->>API: POST /auth/logout
   API->>DB: Mark token revoked
   API->>DB: Write auth audit event
+  Client->>API: GET /auth/sessions
+  API->>DB: Read redacted tenant-scoped session state
 ```
 
 ## Why This Matters
@@ -84,6 +98,7 @@ This layer adds the missing bridge:
 - current-user endpoint;
 - token-backed authorization context;
 - token revocation;
+- admin-visible redacted session listing;
 - failed-attempt guard;
 - auth audit events;
 - tenant-aware permission checks.
@@ -111,8 +126,7 @@ revocation are visible system events.
 
 Recommended next slices:
 
-1. Add tenant-scoped query filters to every tenant-owned entity.
-2. Add short-lived refresh flow or external identity provider integration.
-3. Add admin-visible auth session listing.
-4. Add stronger device/session metadata.
-5. Add public-safe auth metrics with fake data.
+1. Add short-lived refresh flow or external identity provider integration.
+2. Add admin-triggered token revocation for tenant-scoped sessions.
+3. Add stronger device/session metadata.
+4. Add public-safe auth metrics with fake data.

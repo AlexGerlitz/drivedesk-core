@@ -63,7 +63,7 @@ flowchart TB
 | Demo API | Read-only synthetic payload for API-backed public demo mode. |
 | Generated SDK | Python, JavaScript, and TypeScript client artifacts generated from OpenAPI. |
 | API | HTTP contract, validation, auth context, tenant-aware operations, audit writes. |
-| Auth layer | Credential verification, bearer token hashing, revocation, login guard, audit, current-user lookup, tenant isolation, and RBAC context. |
+| Auth layer | Credential verification, bearer token hashing, revocation, session listing, login guard, audit, current-user lookup, tenant isolation, and RBAC context. |
 | Tenant scope | Reusable query helpers that keep tenant/user list behavior scoped to memberships. |
 | Tenant repository | Reusable query helpers for tenant-owned models that carry `tenant_id`. |
 | Core modules | Domain rules that should not depend on web framework details. |
@@ -113,6 +113,8 @@ flowchart LR
   Client --> Logout["POST /auth/logout"]
   Logout --> Revoked["Revoked Token"]
   Logout --> AuthAudit
+  Actor --> Sessions["GET /auth/sessions"]
+  Sessions --> Redacted["Redacted Session State"]
 ```
 
 The auth foundation keeps two paths separate:
@@ -127,6 +129,10 @@ requested tenant.
 Auth lifecycle events are stored as platform audit events. Failed login
 attempts are stored separately so repeated failures can activate the login
 guard without mixing operational security state into user records.
+
+Auth session listing is redacted. It exposes token ids and lifecycle state, but
+not raw bearer tokens or token hashes. Bearer callers see sessions only for
+tenants where their own membership role can read auth sessions.
 
 ## Tenant Isolation Boundary
 

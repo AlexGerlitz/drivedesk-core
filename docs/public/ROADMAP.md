@@ -13,6 +13,7 @@ operations, or commercial details.
 - Integration observability for adapter metrics, structured logs, and failed-job runbooks.
 - Credential auth foundation with bearer access tokens and `/auth/me`.
 - Token revocation with `POST /auth/logout`.
+- Admin-visible redacted auth session listing with `GET /auth/sessions`.
 - Auth attempt recording, login guard, and auth audit events.
 - Token-backed RBAC context for existing Core endpoints.
 - Tenant-aware permission checks for tenant endpoint reads and writes.
@@ -31,7 +32,6 @@ operations, or commercial details.
 ## Next
 
 - More structured adapter contracts and mapping examples.
-- Admin-visible auth session listing.
 - Dedicated platform-admin model.
 - Tenant-owned repository coverage for future contracts, payments, lessons, tasks, and documents.
 - More public-safe workflow examples that reuse the same event and outbox shape.

@@ -78,6 +78,19 @@ class AuthMeRead(BaseModel):
     memberships: list[MembershipRead]
 
 
+class AuthSessionRead(BaseModel):
+    token_id: str
+    user_id: str
+    user_email: str
+    user_display_name: str
+    status: str
+    created_at: datetime | None = None
+    expires_at: datetime
+    last_used_at: datetime | None = None
+    revoked_at: datetime | None = None
+    tenant_ids: list[str]
+
+
 class AuditEventRead(BaseModel):
     id: str
     tenant_id: str

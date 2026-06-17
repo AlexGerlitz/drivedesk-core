@@ -56,6 +56,8 @@ flowchart LR
   Client --> Logout["POST /auth/logout"]
   Logout --> Revoked["Revoked Token"]
   Logout --> Audit
+  Actor --> Sessions["GET /auth/sessions"]
+  Sessions --> Redacted["Redacted Session State"]
 ```
 
 ## Tenant Isolation

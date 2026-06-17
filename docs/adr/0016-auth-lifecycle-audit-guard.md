@@ -41,11 +41,11 @@ The guard is configured through DriveDesk settings, not through policy files:
 - Failed auth activity is visible in a dedicated table.
 - Auth lifecycle activity is visible in the existing audit model.
 - Security operations can be tested with ordinary API tests.
-- Future UI can show auth sessions, failed attempts, and revoked sessions.
+- UI can show auth sessions, failed attempts, and revoked sessions.
 
 ## Next Work
 
 - Tenant-scoped query filters for every tenant-owned object.
-- Admin-visible auth session listing.
+- ADR-0020 adds admin-visible auth session listing.
 - External identity provider or refresh-session design.
 - Public-safe auth metrics using synthetic data.

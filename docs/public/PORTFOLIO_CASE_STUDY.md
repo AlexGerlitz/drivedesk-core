@@ -31,6 +31,7 @@ Implemented foundation:
 - tenant, user, membership, RBAC, audit, and outbox primitives;
 - credential auth foundation with bearer access tokens and `/auth/me`;
 - token revocation, auth attempt recording, and auth audit events;
+- redacted tenant-scoped auth session listing for admins;
 - token-backed tenant-aware RBAC checks for Core tenant endpoints;
 - tenant isolation for bearer-token list/read access and global bootstrap endpoints;
 - reusable tenant-scope helper module for Core list queries;
@@ -96,8 +97,9 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
 ## Current Tradeoffs
 
 - Authentication now has a token-backed foundation with logout, failed-attempt
-  tracking, and platform audit events. Development actor headers still exist as
-  a bootstrap path for local setup and early data creation.
+  tracking, redacted session listing, and platform audit events. Development
+  actor headers still exist as a bootstrap path for local setup and early data
+  creation.
 - Platform-level tenant and user creation still uses bootstrap context. A tenant
   owner can operate inside their tenant, but not create global platform records
   through a bearer token.
@@ -118,7 +120,7 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
 Recommended next slices:
 
 1. Backup and restore evidence for the staging runtime.
-2. Admin-visible auth session listing and a dedicated platform-admin model.
+2. Dedicated platform-admin model and admin-triggered token revocation.
 3. Broader generated API clients from OpenAPI for more endpoints.
 4. Additional mock adapters for webhook and accounting export flows.
 5. More workflow examples backed by the same event, audit, and outbox shape.

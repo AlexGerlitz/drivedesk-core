@@ -200,9 +200,19 @@ events. Status transitions write `business_record.status_changed` audit and
 outbox events. Future integrations can react through the same delivery path as
 other Core changes.
 
+Workflow rules are the first automation layer on top of those transitions. A
+tenant-owned rule can match `business_record.status_changed` by record type,
+previous status, and new status. A matching rule writes
+`workflow.rule.triggered` audit events and enqueues the configured workflow
+outbox event, such as `workflow.contract_approved`.
+
 Business record observability is aggregate-only. `/metrics` exposes
 `drivedesk_business_records` grouped by `record_type` and `status`, but it does
 not expose titles, external references, payload data, user ids, or tenant ids.
+Workflow rule observability follows the same rule: `/metrics` exposes
+`drivedesk_workflow_rules` grouped by `status`, `trigger_event_type`, and
+`action_type`, but never rule names, action payloads, record ids, or request
+bodies.
 
 ## Adapter Boundary
 
@@ -332,7 +342,8 @@ boundaries inside the modular monolith:
 2. Keep provider-specific logic inside adapters.
 3. Keep async delivery behind outbox and worker contracts.
 4. Keep tenant and role checks explicit.
-5. Keep observability and release evidence part of every serious change.
+5. Keep workflow side effects auditable and outbox-backed.
+6. Keep observability and release evidence part of every serious change.
 
 Services can be extracted later when the reason is concrete: independent
 scaling, independent release cadence, provider isolation, or operational risk

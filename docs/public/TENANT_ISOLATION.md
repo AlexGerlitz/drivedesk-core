@@ -101,7 +101,8 @@ Current helpers:
 - `list_tenant_owned()`.
 
 Current tenant-owned list endpoints for memberships, audit events, outbox
-events, and business records use the helper after explicit permission checks.
+events, business records, and workflow rules use the helper after explicit
+permission checks.
 The point is to make `tenant_id` filtering the default path for future
 contracts, payments, lessons, documents, and tasks.
 
@@ -111,11 +112,15 @@ The first product-shaped tenant-owned table is:
 
 ```text
 dd_business_records
+dd_workflow_rules
 ```
 
 It supports `contract`, `payment`, `lesson`, `task`, and `document` record
 types through one shared platform path. This proves tenant isolation before
 those record types grow into dedicated domain modules.
+
+Workflow rules use the same tenant-owned boundary for automation rules that
+react to business record status changes.
 
 ## Request Flow
 

@@ -207,6 +207,23 @@ def build_business_record_metrics_lines(business_record_rows: list[dict[str, obj
     return lines
 
 
+def build_workflow_rule_metrics_lines(workflow_rule_rows: list[dict[str, object]]) -> list[str]:
+    lines = [
+        "# HELP drivedesk_workflow_rules Current workflow rules by status, trigger, and action.",
+        "# TYPE drivedesk_workflow_rules gauge",
+    ]
+    for row in workflow_rule_rows:
+        labels = prometheus_labels(
+            {
+                "status": row["status"],
+                "trigger_event_type": row["trigger_event_type"],
+                "action_type": row["action_type"],
+            }
+        )
+        lines.append(f"drivedesk_workflow_rules{labels} {row['rule_count']}")
+    return lines
+
+
 def build_readiness_metrics_lines(settings: Settings) -> list[str]:
     dependencies = {
         "database_url_configured": bool(settings.database_url),
@@ -240,6 +257,7 @@ def build_metrics_text(
     auth_session_counts: dict[str, int] | None = None,
     auth_attempt_counts: dict[str, int] | None = None,
     business_record_rows: list[dict[str, object]] | None = None,
+    workflow_rule_rows: list[dict[str, object]] | None = None,
     storage_available: bool = True,
 ) -> str:
     labels = prometheus_labels(
@@ -271,6 +289,7 @@ def build_metrics_text(
     lines.extend(build_integration_metrics_lines(integration_rows or []))
     lines.extend(build_auth_metrics_lines(auth_session_counts or {}, auth_attempt_counts or {}))
     lines.extend(build_business_record_metrics_lines(business_record_rows or []))
+    lines.extend(build_workflow_rule_metrics_lines(workflow_rule_rows or []))
     lines.append("")
     return "\n".join(lines)
 

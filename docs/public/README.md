@@ -12,6 +12,7 @@ credentials.
 - `API_BACKED_DEMO.md` - read-only synthetic API contract for the public demo.
 - `WORKFLOW_DEMO.md` - synthetic business workflow, timeline, events, audit,
   and outbox overview.
+- `WORKFLOW_RULES.md` - tenant-owned automation rules, audit, outbox, and metrics.
 - `AUTH_FOUNDATION.md` - credential auth, bearer token, and RBAC overview.
 - `AUTH_OBSERVABILITY.md` - aggregate auth metrics, alert names, and runbook shape.
 - `SESSION_REVOCATION.md` - admin-triggered tenant/platform session revocation.

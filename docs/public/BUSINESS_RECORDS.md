@@ -11,6 +11,8 @@ POST /tenants/{tenant_id}/business-records
 GET /tenants/{tenant_id}/business-records
 GET /tenants/{tenant_id}/business-records?record_type=contract
 POST /tenants/{tenant_id}/business-records/{record_id}/transition
+POST /tenants/{tenant_id}/workflow-rules
+GET /tenants/{tenant_id}/workflow-rules
 ```
 
 Supported public-safe record types:
@@ -52,15 +54,26 @@ The Core API tests cover:
 - writing `business_record.status_changed` audit events;
 - enqueuing `business_record.status_changed` outbox events with
   `adapter_key=internal.business_record`;
+- triggering matching workflow rules through `workflow.rule.triggered`;
+- enqueuing configured workflow outbox events such as
+  `workflow.contract_approved`;
 - exposing aggregate metric rows such as:
 
 ```text
 drivedesk_business_records{record_type="contract",status="approved"} 1
 ```
 
-The metric labels are intentionally limited to `record_type` and `status`.
+Matching workflow rule counts are exposed separately:
+
+```text
+drivedesk_workflow_rules{action_type="emit_outbox_event",status="active",trigger_event_type="business_record.status_changed"} 1
+```
+
+The business record metric labels are intentionally limited to `record_type` and
+`status`.
 Titles, external references, payload data, user identifiers, tenant identifiers,
-and request bodies must not appear in metrics.
+rule names, workflow action payloads, and request bodies must not appear in
+metrics.
 
 ## Boundary
 

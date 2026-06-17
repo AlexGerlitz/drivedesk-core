@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 from starlette.responses import Response
 
-from drivedesk_api.db import AuditEvent, BusinessRecord, Membership, OutboxEvent, PlatformAdmin, Tenant, User
+from drivedesk_api.db import AuditEvent, BusinessRecord, Membership, OutboxEvent, PlatformAdmin, Tenant, User, WorkflowRule
 from drivedesk_api.demo import build_public_demo_payload
 from drivedesk_api.observability import (
     build_health_payload,
@@ -68,19 +68,24 @@ from drivedesk_api.schemas import (
     TokenRevocationRead,
     UserCreate,
     UserRead,
+    WorkflowRuleCreate,
+    WorkflowRuleRead,
 )
 from drivedesk_api.services import (
     count_business_records_by_type_status,
     count_outbox_by_status,
+    count_workflow_rules_by_status_trigger_action,
     create_business_record,
     create_file_import_job,
     create_membership,
     create_platform_admin,
     create_tenant,
     create_user,
+    create_workflow_rule,
     ensure_tenant_exists,
     list_business_records,
     list_platform_admins,
+    list_workflow_rules,
     summarize_integration_outbox,
     transition_business_record,
     write_audit,
@@ -158,6 +163,7 @@ def build_app(settings: Settings | None = None) -> FastAPI:
             auth_session_counts = await count_auth_sessions_by_status(session)
             auth_attempt_counts = await count_auth_attempts_by_outcome(session)
             business_record_rows = await count_business_records_by_type_status(session)
+            workflow_rule_rows = await count_workflow_rules_by_status_trigger_action(session)
         except Exception as exc:
             # Keep Prometheus scrapeable even when storage-backed aggregates degrade.
             storage_available = False
@@ -167,6 +173,7 @@ def build_app(settings: Settings | None = None) -> FastAPI:
             auth_session_counts = {}
             auth_attempt_counts = {}
             business_record_rows = []
+            workflow_rule_rows = []
             log_json(
                 metrics_logger,
                 "metrics.storage_unavailable",
@@ -184,6 +191,7 @@ def build_app(settings: Settings | None = None) -> FastAPI:
                 auth_session_counts=auth_session_counts,
                 auth_attempt_counts=auth_attempt_counts,
                 business_record_rows=business_record_rows,
+                workflow_rule_rows=workflow_rule_rows,
                 storage_available=storage_available,
             ),
             media_type="text/plain; version=0.0.4; charset=utf-8",
@@ -536,6 +544,27 @@ def build_app(settings: Settings | None = None) -> FastAPI:
             payload=payload,
             actor=actor,
         )
+
+    @api.post("/tenants/{tenant_id}/workflow-rules", response_model=WorkflowRuleRead, status_code=201)
+    async def create_workflow_rule_endpoint(
+        tenant_id: str,
+        payload: WorkflowRuleCreate,
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> WorkflowRule:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.TENANT_WRITE)
+        return await create_workflow_rule(session, tenant_id=tenant_id, payload=payload, actor=actor)
+
+    @api.get("/tenants/{tenant_id}/workflow-rules", response_model=list[WorkflowRuleRead])
+    async def list_workflow_rules_endpoint(
+        tenant_id: str,
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> list[WorkflowRule]:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.TENANT_READ)
+        return await list_workflow_rules(session, tenant_id=tenant_id)
 
     @api.post("/tenants/{tenant_id}/integration-imports/file", response_model=OutboxEventRead, status_code=202)
     async def create_file_import_endpoint(

@@ -10,7 +10,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from drivedesk_api.auth import hash_credential
-from drivedesk_api.db import AuditEvent, BusinessRecord, Membership, OutboxEvent, PlatformAdmin, Tenant, User
+from drivedesk_api.db import AuditEvent, BusinessRecord, Membership, OutboxEvent, PlatformAdmin, Tenant, User, WorkflowRule
 from drivedesk_api.rbac import ActorContext
 from drivedesk_api.schemas import (
     BusinessRecordCreate,
@@ -21,6 +21,7 @@ from drivedesk_api.schemas import (
     PlatformAdminCreate,
     TenantCreate,
     UserCreate,
+    WorkflowRuleCreate,
 )
 from drivedesk_api.tenant_repository import list_tenant_owned, tenant_owned_select
 
@@ -364,8 +365,143 @@ async def transition_business_record(
             "new_status": record.status,
         },
     )
+    await trigger_workflow_rules_for_business_record_transition(
+        session,
+        tenant_id=tenant_id,
+        record=record,
+        previous_status=previous_status,
+        actor=actor,
+        reason=payload.reason,
+    )
     await commit_or_conflict(session, "business record transition failed")
     return record
+
+
+async def create_workflow_rule(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    payload: WorkflowRuleCreate,
+    actor: ActorContext,
+) -> WorkflowRule:
+    await ensure_tenant_exists(session, tenant_id)
+    rule = WorkflowRule(
+        id=new_id(),
+        tenant_id=tenant_id,
+        name=payload.name,
+        status="active",
+        trigger_event_type=payload.trigger_event_type,
+        record_type=payload.record_type,
+        from_status=payload.from_status,
+        to_status=payload.to_status,
+        action_type=payload.action_type,
+        action_config_json=json.dumps(payload.action_config, ensure_ascii=False, sort_keys=True),
+    )
+    session.add(rule)
+    await write_audit(
+        session,
+        tenant_id=tenant_id,
+        actor=actor,
+        event_type="workflow_rule.created",
+        entity_type="workflow_rule",
+        entity_id=rule.id,
+        summary=f"Workflow rule created: {rule.name}",
+        metadata={
+            "rule_id": rule.id,
+            "trigger_event_type": rule.trigger_event_type,
+            "record_type": rule.record_type,
+            "from_status": rule.from_status,
+            "to_status": rule.to_status,
+            "action_type": rule.action_type,
+        },
+    )
+    await enqueue_outbox(
+        session,
+        tenant_id=tenant_id,
+        event_type="workflow_rule.created",
+        adapter_key="internal.workflow",
+        payload={
+            "rule_id": rule.id,
+            "trigger_event_type": rule.trigger_event_type,
+            "record_type": rule.record_type,
+            "from_status": rule.from_status,
+            "to_status": rule.to_status,
+            "action_type": rule.action_type,
+        },
+    )
+    await commit_or_conflict(session, "workflow rule already exists")
+    return rule
+
+
+async def list_workflow_rules(session: AsyncSession, *, tenant_id: str) -> list[WorkflowRule]:
+    return await list_tenant_owned(
+        session,
+        WorkflowRule,
+        tenant_id,
+        order_by=WorkflowRule.created_at.desc(),
+    )
+
+
+async def trigger_workflow_rules_for_business_record_transition(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    record: BusinessRecord,
+    previous_status: str,
+    actor: ActorContext,
+    reason: str | None = None,
+) -> list[WorkflowRule]:
+    result = await session.execute(
+        select(WorkflowRule)
+        .where(
+            WorkflowRule.tenant_id == tenant_id,
+            WorkflowRule.status == "active",
+            WorkflowRule.trigger_event_type == "business_record.status_changed",
+            or_(WorkflowRule.record_type.is_(None), WorkflowRule.record_type == record.record_type),
+            or_(WorkflowRule.from_status.is_(None), WorkflowRule.from_status == previous_status),
+            or_(WorkflowRule.to_status.is_(None), WorkflowRule.to_status == record.status),
+        )
+        .order_by(WorkflowRule.created_at)
+    )
+    matched_rules = list(result.scalars().all())
+    for rule in matched_rules:
+        config = json.loads(rule.action_config_json or "{}")
+        if not isinstance(config, dict):
+            config = {}
+        event_type = str(config.get("event_type") or "workflow.rule.triggered")
+        adapter_key = str(config.get("adapter_key") or "internal.workflow")
+        configured_payload = config.get("payload", {})
+        if not isinstance(configured_payload, dict):
+            configured_payload = {}
+        action_payload = {
+            "rule_id": rule.id,
+            "rule_name": rule.name,
+            "action_type": rule.action_type,
+            "record_id": record.id,
+            "record_type": record.record_type,
+            "previous_status": previous_status,
+            "new_status": record.status,
+            "reason": reason,
+            "payload": configured_payload,
+        }
+        await write_audit(
+            session,
+            tenant_id=tenant_id,
+            actor=actor,
+            event_type="workflow.rule.triggered",
+            entity_type="workflow_rule",
+            entity_id=rule.id,
+            summary=f"Workflow rule triggered: {rule.name}",
+            metadata=action_payload,
+        )
+        await enqueue_outbox(
+            session,
+            tenant_id=tenant_id,
+            event_type=event_type,
+            adapter_key=adapter_key,
+            payload=action_payload,
+        )
+    return matched_rules
 
 
 async def count_business_records_by_type_status(session: AsyncSession) -> list[dict[str, object]]:
@@ -381,6 +517,26 @@ async def count_business_records_by_type_status(session: AsyncSession) -> list[d
             "record_type": row.record_type,
             "status": row.status,
             "record_count": int(row.record_count or 0),
+        }
+        for row in result.all()
+    ]
+
+
+async def count_workflow_rules_by_status_trigger_action(session: AsyncSession) -> list[dict[str, object]]:
+    result = await session.execute(
+        select(
+            WorkflowRule.status,
+            WorkflowRule.trigger_event_type,
+            WorkflowRule.action_type,
+            func.count().label("rule_count"),
+        ).group_by(WorkflowRule.status, WorkflowRule.trigger_event_type, WorkflowRule.action_type)
+    )
+    return [
+        {
+            "status": row.status,
+            "trigger_event_type": row.trigger_event_type,
+            "action_type": row.action_type,
+            "rule_count": int(row.rule_count or 0),
         }
         for row in result.all()
     ]

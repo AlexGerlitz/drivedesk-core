@@ -23,6 +23,8 @@ It includes:
 - tenant-owned business record foundation for contracts, payments, lessons,
   tasks, and documents;
 - business record lifecycle transition endpoint with audit, outbox, and aggregate metrics;
+- tenant-owned workflow rules for business record status automation;
+- workflow rule audit, configured outbox handoff, and aggregate workflow metrics;
 - fake file import adapter with retry and dead-letter state;
 - synthetic lead-to-student workflow in the public demo payload;
 - generated OpenAPI client SDK example for the public demo API;
@@ -46,19 +48,20 @@ It includes:
 4. Run one client example from `examples/`.
 5. Read `docs/public/API_BACKED_DEMO.md`.
 6. Read `docs/public/WORKFLOW_DEMO.md`.
-7. Read `docs/public/AUTH_FOUNDATION.md`.
-8. Read `docs/public/AUTH_OBSERVABILITY.md`.
-9. Read `docs/public/SESSION_REVOCATION.md`.
-10. Read `docs/public/PLATFORM_ADMIN.md`.
-11. Read `docs/public/TENANT_ISOLATION.md`.
-12. Read `docs/public/BUSINESS_RECORDS.md`.
-13. Read `docs/public/CLIENT_SDK.md`.
-14. Read `docs/public/SYSTEM_DESIGN.md`.
-15. Read `docs/public/INTEGRATION_ADAPTERS.md`.
-16. Read `docs/public/INTEGRATION_OBSERVABILITY.md`.
-17. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
-18. Check `.github/workflows/ci.yml`.
-19. Run `bash scripts/ci_smoke_public.sh` locally.
+7. Read `docs/public/WORKFLOW_RULES.md`.
+8. Read `docs/public/AUTH_FOUNDATION.md`.
+9. Read `docs/public/AUTH_OBSERVABILITY.md`.
+10. Read `docs/public/SESSION_REVOCATION.md`.
+11. Read `docs/public/PLATFORM_ADMIN.md`.
+12. Read `docs/public/TENANT_ISOLATION.md`.
+13. Read `docs/public/BUSINESS_RECORDS.md`.
+14. Read `docs/public/CLIENT_SDK.md`.
+15. Read `docs/public/SYSTEM_DESIGN.md`.
+16. Read `docs/public/INTEGRATION_ADAPTERS.md`.
+17. Read `docs/public/INTEGRATION_OBSERVABILITY.md`.
+18. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
+19. Check `.github/workflows/ci.yml`.
+20. Run `bash scripts/ci_smoke_public.sh` locally.
 
 ## What To Review First
 
@@ -66,6 +69,7 @@ It includes:
 - `docs/public/SYSTEM_DESIGN.md` - system design overview.
 - `docs/public/API_BACKED_DEMO.md` - read-only synthetic demo API contract.
 - `docs/public/WORKFLOW_DEMO.md` - synthetic business workflow contract.
+- `docs/public/WORKFLOW_RULES.md` - tenant-owned workflow rules contract.
 - `docs/public/AUTH_FOUNDATION.md` - auth, bearer token, and RBAC overview.
 - `docs/public/AUTH_OBSERVABILITY.md` - auth metrics, alert names, and runbook shape.
 - `docs/public/SESSION_REVOCATION.md` - admin-triggered tenant/platform session revocation.
@@ -91,6 +95,12 @@ It includes:
 - `POST /tenants/{tenant_id}/business-records/{record_id}/transition` - auditable business status transition.
 - `drivedesk_business_records` - aggregate business record metric by type and status.
 - `internal.business_record` - adapter key used by business record outbox events.
+- `POST /tenants/{tenant_id}/workflow-rules` - tenant-owned workflow rule creation.
+- `GET /tenants/{tenant_id}/workflow-rules` - tenant-owned workflow rule listing.
+- `workflow.rule.triggered` - audit event for matching workflow rules.
+- `workflow.contract_approved` - public-safe example workflow outbox event.
+- `drivedesk_workflow_rules` - aggregate workflow rule metric by status, trigger, and action.
+- `internal.workflow` - adapter key used by workflow rule outbox events.
 - `DriveDeskMetricsStorageUnavailable`, `DriveDeskAuthFailureSpike`, and
   `DriveDeskAuthLockedAttempts` - public-safe auth alert contract.
 - `workflow`, `timeline`, and `domainEvents` - synthetic business process data
@@ -175,6 +185,7 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/public/SYSTEM_DESIGN.md`
 - `docs/public/API_BACKED_DEMO.md`
 - `docs/public/WORKFLOW_DEMO.md`
+- `docs/public/WORKFLOW_RULES.md`
 - `docs/public/AUTH_FOUNDATION.md`
 - `docs/public/AUTH_OBSERVABILITY.md`
 - `docs/public/SESSION_REVOCATION.md`
@@ -205,3 +216,4 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/adr/0024-admin-triggered-session-revocation.md`
 - `docs/adr/0025-tenant-owned-business-record-foundation.md`
 - `docs/adr/0026-business-record-lifecycle-and-metrics.md`
+- `docs/adr/0027-workflow-rule-foundation.md`

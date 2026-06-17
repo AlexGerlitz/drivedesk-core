@@ -43,6 +43,8 @@ Core endpoints:
 - `POST /tenants/{tenant_id}/business-records`.
 - `GET /tenants/{tenant_id}/business-records`.
 - `POST /tenants/{tenant_id}/business-records/{record_id}/transition`.
+- `POST /tenants/{tenant_id}/workflow-rules`.
+- `GET /tenants/{tenant_id}/workflow-rules`.
 - `POST /tenants/{tenant_id}/integration-imports/file`.
 - `GET /demo/public`.
 
@@ -93,6 +95,16 @@ Business record endpoints:
 - created records write `business_record.created` audit and outbox events.
 - status transitions write `business_record.status_changed` audit and outbox events.
 - `/metrics` exposes aggregate counts with `drivedesk_business_records`.
+
+Workflow rule endpoints:
+
+- `POST /tenants/{tenant_id}/workflow-rules` creates a tenant-owned automation rule.
+- `GET /tenants/{tenant_id}/workflow-rules` lists tenant-owned automation rules.
+- the first trigger is `business_record.status_changed`.
+- the first action is `emit_outbox_event`.
+- matching business record transitions write `workflow.rule.triggered` audit events.
+- matching business record transitions enqueue the configured workflow outbox event.
+- `/metrics` exposes aggregate counts with `drivedesk_workflow_rules`.
 
 Bearer requests use:
 

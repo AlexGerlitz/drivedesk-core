@@ -8,6 +8,8 @@ from pydantic import BaseModel, ConfigDict, Field
 Role = Literal["owner", "admin", "manager", "viewer"]
 PlatformRole = Literal["platform_admin"]
 BusinessRecordType = Literal["contract", "payment", "lesson", "task", "document"]
+WorkflowRuleTrigger = Literal["business_record.status_changed"]
+WorkflowRuleActionType = Literal["emit_outbox_event"]
 
 
 class TenantCreate(BaseModel):
@@ -163,6 +165,32 @@ class BusinessRecordRead(BaseModel):
     title: str
     external_ref: str | None = None
     payload_json: str
+    created_at: datetime | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class WorkflowRuleCreate(BaseModel):
+    name: str = Field(min_length=2, max_length=120)
+    trigger_event_type: WorkflowRuleTrigger = "business_record.status_changed"
+    record_type: BusinessRecordType | None = None
+    from_status: str | None = Field(default=None, min_length=2, max_length=32, pattern=r"^[a-z0-9][a-z0-9_-]*$")
+    to_status: str | None = Field(default=None, min_length=2, max_length=32, pattern=r"^[a-z0-9][a-z0-9_-]*$")
+    action_type: WorkflowRuleActionType = "emit_outbox_event"
+    action_config: dict[str, Any] = Field(default_factory=dict)
+
+
+class WorkflowRuleRead(BaseModel):
+    id: str
+    tenant_id: str
+    name: str
+    status: str
+    trigger_event_type: WorkflowRuleTrigger
+    record_type: BusinessRecordType | None = None
+    from_status: str | None = None
+    to_status: str | None = None
+    action_type: WorkflowRuleActionType
+    action_config_json: str
     created_at: datetime | None = None
 
     model_config = ConfigDict(from_attributes=True)

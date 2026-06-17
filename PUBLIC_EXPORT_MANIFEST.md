@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-17T20:41:07Z
+Generated at: 2026-06-17T21:02:42Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -36,6 +36,10 @@ Copied public-safe areas:
 - public business record tenant-owned surface
 - public business record lifecycle and metrics surface
 - public business record outbox adapter key: internal.business_record
+- public workflow rule tenant-owned automation surface
+- public workflow rule audit and outbox surface
+- public workflow rule metric: drivedesk_workflow_rules
+- public workflow rule outbox adapter key: internal.workflow
 - public tenant-owned repository helper surface
 - public auth observability alerting surface
 - public demo local run script

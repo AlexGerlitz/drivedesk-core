@@ -41,6 +41,8 @@ Implemented foundation:
 - reusable tenant-scope helper module for Core list queries;
 - tenant-owned business record foundation for contracts, payments, lessons, tasks, and documents;
 - business record lifecycle transition endpoint with audit, outbox, and aggregate metrics;
+- tenant-owned workflow rules for business record status automation;
+- workflow rule audit, configured outbox handoff, and aggregate workflow metrics;
 - fake file import adapter with retry and dead-letter states;
 - integration adapter metrics grouped by adapter and status;
 - structured adapter worker logs for started, completed, failed, and
@@ -119,6 +121,10 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
   audit/outbox events and aggregate `drivedesk_business_records` metrics, while
   keeping titles, external refs, payloads, tenant ids, and user ids out of
   metrics.
+- Workflow rules can now react to `business_record.status_changed`, write
+  `workflow.rule.triggered` audit events, enqueue configured workflow outbox
+  events such as `workflow.contract_approved`, and expose only aggregate
+  `drivedesk_workflow_rules` metrics.
 - The hosted public demo uses static fallback on GitHub Pages and can be pointed
   at `GET /demo/public` for API-backed fake data, including workflow stages,
   timeline, domain events, audit, and outbox state.
@@ -134,7 +140,7 @@ Recommended next slices:
 1. Backup and restore evidence for the staging runtime.
 2. Broader generated API clients from OpenAPI for more endpoints.
 3. Additional mock adapters for webhook and accounting export flows.
-4. More workflow examples backed by the same event, audit, and outbox shape.
+4. More workflow rule actions backed by the same event, audit, and outbox shape.
 
 ## Interview Summary
 

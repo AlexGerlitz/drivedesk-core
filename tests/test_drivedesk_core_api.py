@@ -19,7 +19,17 @@ for relative in ("apps/api", "apps/worker", "packages/core"):
     if path not in sys.path:
         sys.path.insert(0, path)
 
-from drivedesk_api.db import AccessToken, AuditEvent, AuthAttempt, Base, BusinessRecord, OutboxEvent, PlatformAdmin, User
+from drivedesk_api.db import (
+    AccessToken,
+    AuditEvent,
+    AuthAttempt,
+    Base,
+    BusinessRecord,
+    OutboxEvent,
+    PlatformAdmin,
+    User,
+    WorkflowRule,
+)
 from drivedesk_api.main import build_app
 from drivedesk_api.rbac import ActorContext
 from drivedesk_api.session import get_session
@@ -177,6 +187,35 @@ def test_business_record_foundation_is_tenant_scoped_and_audited(
     assert viewer_b_login.status_code == 200
     viewer_b_headers = {"Authorization": f"Bearer {viewer_b_login.json()['access_token']}"}
 
+    workflow_rule_response = client.post(
+        f"/tenants/{tenant_a_id}/workflow-rules",
+        json={
+            "name": "Contract approval sync",
+            "record_type": "contract",
+            "from_status": "draft",
+            "to_status": "approved",
+            "action_config": {
+                "event_type": "workflow.contract_approved",
+                "adapter_key": "internal.workflow",
+                "payload": {"next_step": "prepare_signature"},
+            },
+        },
+        headers=owner_headers,
+    )
+    assert workflow_rule_response.status_code == 201
+    workflow_rule = workflow_rule_response.json()
+    assert workflow_rule["tenant_id"] == tenant_a_id
+    assert workflow_rule["trigger_event_type"] == "business_record.status_changed"
+    assert workflow_rule["action_type"] == "emit_outbox_event"
+    assert "workflow.contract_approved" in workflow_rule["action_config_json"]
+
+    workflow_rules_response = client.get(
+        f"/tenants/{tenant_a_id}/workflow-rules",
+        headers=manager_headers,
+    )
+    assert workflow_rules_response.status_code == 200
+    assert [rule["name"] for rule in workflow_rules_response.json()] == ["Contract approval sync"]
+
     contract_response = client.post(
         f"/tenants/{tenant_a_id}/business-records",
         json={
@@ -257,10 +296,14 @@ def test_business_record_foundation_is_tenant_scoped_and_audited(
     assert metrics_response.status_code == 200
     assert 'drivedesk_business_records{record_type="contract",status="approved"} 1' in metrics_response.text
     assert 'drivedesk_business_records{record_type="payment",status="pending"} 1' in metrics_response.text
+    assert (
+        'drivedesk_workflow_rules{action_type="emit_outbox_event",'
+        'status="active",trigger_event_type="business_record.status_changed"} 1'
+    ) in metrics_response.text
     assert "contract-001" not in metrics_response.text
     assert "Training contract draft" not in metrics_response.text
 
-    async def inspect_business_records() -> tuple[list[str], list[str], list[str], list[str]]:
+    async def inspect_business_records() -> tuple[list[str], list[str], list[str], list[str], list[str], list[str]]:
         async with session_factory() as session:
             business_records = await list_tenant_owned(
                 session,
@@ -268,41 +311,84 @@ def test_business_record_foundation_is_tenant_scoped_and_audited(
                 tenant_a_id,
                 order_by=BusinessRecord.created_at.desc(),
             )
+            workflow_rules = await list_tenant_owned(
+                session,
+                WorkflowRule,
+                tenant_a_id,
+                order_by=WorkflowRule.created_at.desc(),
+            )
             audit_result = await session.execute(
                 select(AuditEvent.event_type)
-                .where(AuditEvent.tenant_id == tenant_a_id, AuditEvent.event_type.like("business_record.%"))
+                .where(
+                    AuditEvent.tenant_id == tenant_a_id,
+                    AuditEvent.event_type.in_(
+                        [
+                            "business_record.created",
+                            "business_record.status_changed",
+                            "workflow_rule.created",
+                            "workflow.rule.triggered",
+                        ]
+                    ),
+                )
                 .order_by(AuditEvent.created_at)
             )
             outbox_result = await session.execute(
-                select(OutboxEvent.event_type, OutboxEvent.adapter_key)
-                .where(OutboxEvent.tenant_id == tenant_a_id, OutboxEvent.event_type.like("business_record.%"))
+                select(OutboxEvent.event_type, OutboxEvent.adapter_key, OutboxEvent.payload_json)
+                .where(
+                    OutboxEvent.tenant_id == tenant_a_id,
+                    OutboxEvent.event_type.in_(
+                        [
+                            "business_record.created",
+                            "business_record.status_changed",
+                            "workflow_rule.created",
+                            "workflow.contract_approved",
+                        ]
+                    ),
+                )
                 .order_by(OutboxEvent.created_at)
             )
             outbox_rows = list(outbox_result.all())
             return (
                 [record.record_type for record in business_records],
+                [rule.name for rule in workflow_rules],
                 list(audit_result.scalars().all()),
                 [row.event_type for row in outbox_rows],
                 [row.adapter_key for row in outbox_rows],
+                [row.payload_json for row in outbox_rows],
             )
 
-    record_types, audit_events, outbox_events, adapter_keys = asyncio.run(inspect_business_records())
+    record_types, workflow_rule_names, audit_events, outbox_events, adapter_keys, payloads = asyncio.run(
+        inspect_business_records()
+    )
     assert set(record_types) == {"contract", "payment"}
+    assert workflow_rule_names == ["Contract approval sync"]
     assert audit_events == [
+        "workflow_rule.created",
         "business_record.created",
         "business_record.created",
         "business_record.status_changed",
+        "workflow.rule.triggered",
     ]
     assert outbox_events == [
+        "workflow_rule.created",
         "business_record.created",
         "business_record.created",
         "business_record.status_changed",
+        "workflow.contract_approved",
     ]
     assert adapter_keys == [
+        "internal.workflow",
         "internal.business_record",
         "internal.business_record",
         "internal.business_record",
+        "internal.workflow",
     ]
+    workflow_payload = json.loads(payloads[-1])
+    assert workflow_payload["rule_id"] == workflow_rule["id"]
+    assert workflow_payload["record_id"] == contract["id"]
+    assert workflow_payload["previous_status"] == "draft"
+    assert workflow_payload["new_status"] == "approved"
+    assert workflow_payload["payload"] == {"next_step": "prepare_signature"}
 
 
 def test_identity_rbac_audit_and_outbox_flow(api_client: tuple[TestClient, async_sessionmaker[AsyncSession]]) -> None:

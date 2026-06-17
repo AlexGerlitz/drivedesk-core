@@ -14,6 +14,7 @@ The project starts with generic platform capabilities:
 - tenant-owned repository helpers;
 - audit;
 - outbox events;
+- workflow rules;
 - worker processing;
 - Docker Compose local runtime;
 - CI checks.
@@ -39,7 +40,7 @@ tests          API and foundation tests
 
 Recommended next slices:
 
-- detailed business record lifecycle examples;
+- richer workflow rule actions;
 - structured logging;
 - OpenTelemetry tracing;
 - metrics endpoint;

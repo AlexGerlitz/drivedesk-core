@@ -1103,6 +1103,181 @@
         ],
         "title": "ValidationError",
         "type": "object"
+      },
+      "WorkflowRuleCreate": {
+        "properties": {
+          "action_config": {
+            "additionalProperties": true,
+            "title": "Action Config",
+            "type": "object"
+          },
+          "action_type": {
+            "const": "emit_outbox_event",
+            "default": "emit_outbox_event",
+            "title": "Action Type",
+            "type": "string"
+          },
+          "from_status": {
+            "anyOf": [
+              {
+                "maxLength": 32,
+                "minLength": 2,
+                "pattern": "^[a-z0-9][a-z0-9_-]*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From Status"
+          },
+          "name": {
+            "maxLength": 120,
+            "minLength": 2,
+            "title": "Name",
+            "type": "string"
+          },
+          "record_type": {
+            "anyOf": [
+              {
+                "enum": [
+                  "contract",
+                  "payment",
+                  "lesson",
+                  "task",
+                  "document"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Record Type"
+          },
+          "to_status": {
+            "anyOf": [
+              {
+                "maxLength": 32,
+                "minLength": 2,
+                "pattern": "^[a-z0-9][a-z0-9_-]*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "To Status"
+          },
+          "trigger_event_type": {
+            "const": "business_record.status_changed",
+            "default": "business_record.status_changed",
+            "title": "Trigger Event Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "WorkflowRuleCreate",
+        "type": "object"
+      },
+      "WorkflowRuleRead": {
+        "properties": {
+          "action_config_json": {
+            "title": "Action Config Json",
+            "type": "string"
+          },
+          "action_type": {
+            "const": "emit_outbox_event",
+            "title": "Action Type",
+            "type": "string"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "from_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From Status"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "record_type": {
+            "anyOf": [
+              {
+                "enum": [
+                  "contract",
+                  "payment",
+                  "lesson",
+                  "task",
+                  "document"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Record Type"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "to_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "To Status"
+          },
+          "trigger_event_type": {
+            "const": "business_record.status_changed",
+            "title": "Trigger Event Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "name",
+          "status",
+          "trigger_event_type",
+          "action_type",
+          "action_config_json"
+        ],
+        "title": "WorkflowRuleRead",
+        "type": "object"
       }
     }
   },
@@ -2556,6 +2731,168 @@
           }
         },
         "summary": "List Outbox Events Endpoint"
+      }
+    },
+    "/tenants/{tenant_id}/workflow-rules": {
+      "get": {
+        "operationId": "list_workflow_rules_endpoint_tenants__tenant_id__workflow_rules_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tenant_id",
+            "required": true,
+            "schema": {
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "X-Actor-Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Role",
+            "required": false,
+            "schema": {
+              "default": "viewer",
+              "title": "X-Actor-Role",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/WorkflowRuleRead"
+                  },
+                  "title": "Response List Workflow Rules Endpoint Tenants  Tenant Id  Workflow Rules Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Workflow Rules Endpoint"
+      },
+      "post": {
+        "operationId": "create_workflow_rule_endpoint_tenants__tenant_id__workflow_rules_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tenant_id",
+            "required": true,
+            "schema": {
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "X-Actor-Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Role",
+            "required": false,
+            "schema": {
+              "default": "viewer",
+              "title": "X-Actor-Role",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkflowRuleCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowRuleRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Workflow Rule Endpoint"
       }
     },
     "/users": {

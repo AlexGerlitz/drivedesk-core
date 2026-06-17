@@ -215,6 +215,41 @@ What this gives us:
 - The business list path exercises the tenant-owned repository helper on real
   product-shaped data.
 
+## Sprint 4 Workflow Rule Foundation
+
+Sprint 4 adds a small automation layer on top of business record lifecycle
+events.
+
+New table:
+
+- `dd_workflow_rules`.
+
+New endpoint group:
+
+- `POST /tenants/{tenant_id}/workflow-rules`;
+- `GET /tenants/{tenant_id}/workflow-rules`.
+
+First supported trigger:
+
+- `business_record.status_changed`.
+
+First supported action:
+
+- `emit_outbox_event`.
+
+What this gives us:
+
+- DriveDesk can react to a business state change without hardcoding one-off
+  side effects into the endpoint.
+- A matching transition writes `workflow.rule.triggered` audit events.
+- A matching transition enqueues the configured workflow outbox event, such as
+  `workflow.contract_approved`.
+- Workflow side effects travel through the same retryable outbox path as
+  integrations.
+- `/metrics` exposes aggregate rule counts with `drivedesk_workflow_rules`.
+- Workflow metrics expose only `status`, `trigger_event_type`, and
+  `action_type` labels.
+
 ## Local Commands
 
 Run the API without Docker:

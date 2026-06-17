@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-17T08:37:47Z
+Generated at: 2026-06-17T08:49:51Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -18,6 +18,7 @@ Copied public-safe areas:
 - static public demo shell
 - public engineering surface docs
 - public-only README
+- public-only .nojekyll for GitHub Pages
 - public-only .gitignore
 - public-only CI workflow
 - public-only smoke and secret-scan scripts

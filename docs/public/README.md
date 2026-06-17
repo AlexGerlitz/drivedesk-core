@@ -20,6 +20,12 @@ The public repository export also generates:
 - `apps/admin/public-demo/index.html` - static fake-data product demo shell.
 - `PUBLIC_EXPORT_MANIFEST.md` - file list and export boundary summary.
 
+Hosted demo:
+
+```text
+https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
+```
+
 ## Human Explanation
 
 The private repository keeps building the real product. This folder is the

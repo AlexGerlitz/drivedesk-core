@@ -51,7 +51,13 @@ bash scripts/ci_smoke_public.sh
 
 ## Public Demo Shell
 
-Open this file directly in a browser:
+Open the hosted demo:
+
+```text
+https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
+```
+
+Or open this file directly in a browser:
 
 ```text
 apps/admin/public-demo/index.html

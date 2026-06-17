@@ -9,5 +9,11 @@ Current public demo:
 apps/admin/public-demo/index.html
 ```
 
+Hosted public demo:
+
+```text
+https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
+```
+
 The current backend foundation exposes the API and worker first. The admin app
 can later become a Next.js workspace that talks to DriveDesk Core API.

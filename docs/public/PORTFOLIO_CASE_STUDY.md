@@ -145,6 +145,9 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
   instead of hardcoding adapter assumptions.
 - Integration connection creation now validates required mapping keys and
   rejects unsupported connection-profile adapters before outbox work is created.
+- Integration mapping transform now normalizes provider-shaped fields such as
+  `lead_id` and `full_name` before worker execution, with a read-only preview
+  endpoint for operator review.
 - The hosted public demo uses static fallback on GitHub Pages and can be pointed
   at `GET /demo/public` for API-backed fake data, including workflow stages,
   timeline, domain events, audit, and outbox state.

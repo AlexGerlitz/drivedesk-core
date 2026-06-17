@@ -34,7 +34,8 @@ and replaces them with runtime metadata:
   "direction": "inbound",
   "connection_profile_supported": true,
   "connection_profile_required": false,
-  "required_mapping_keys": ["external_id", "display_name"]
+  "required_mapping_keys": ["external_id", "display_name"],
+  "capabilities": ["payload validation", "field mapping transform", "mapping preview"]
 }
 ```
 
@@ -82,6 +83,9 @@ GET /integration-adapters
 POST /tenants/{tenant_id}/integration-connections
         |
         v
+POST /tenants/{tenant_id}/integration-mapping-preview
+        |
+        v
 POST /tenants/{tenant_id}/integration-imports/file
         |
         v
@@ -100,5 +104,6 @@ The public smoke test validates:
 - OpenAPI includes `GET /integration-adapters`;
 - the file-import descriptor exposes `connection_profile_supported`;
 - the file-import descriptor exposes `required_mapping_keys`;
+- the file-import descriptor exposes mapping transform and preview capabilities;
 - the file-import descriptor includes mapping and payload examples;
 - the public demo adapter cards include connection-profile metadata.

@@ -50,6 +50,7 @@ Core endpoints:
 - `GET /integration-adapters`.
 - `POST /tenants/{tenant_id}/integration-connections`.
 - `GET /tenants/{tenant_id}/integration-connections`.
+- `POST /tenants/{tenant_id}/integration-mapping-preview`.
 - `POST /tenants/{tenant_id}/integration-imports/file`.
 - `GET /demo/public`.
 
@@ -133,11 +134,15 @@ Integration endpoints:
   mapping values before storing the profile.
 - `GET /tenants/{tenant_id}/integration-connections` lists tenant-owned adapter
   profiles.
+- `POST /tenants/{tenant_id}/integration-mapping-preview` previews mapping
+  transforms and accepted/rejected rows without creating outbox work.
 - `POST /tenants/{tenant_id}/integration-imports/file` creates a synthetic
   file-import job and stores it as an outbox event with
   `adapter_key=file.import.fake`.
 - file-import jobs can reference `integration_connection_id`; the API verifies
   tenant ownership, active status, and adapter compatibility.
+- file-import worker execution applies connection mapping, for example
+  `lead_id -> external_id` and `full_name -> display_name`.
 - `/metrics` exposes aggregate connection inventory with
   `drivedesk_integration_connections`.
 - `POST /tenants/{tenant_id}/outbox-events/{event_id}/retry` moves reviewed

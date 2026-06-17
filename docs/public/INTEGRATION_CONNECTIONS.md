@@ -29,6 +29,7 @@ Adapters that do not support tenant-owned connection profiles, such as
 GET /integration-adapters
 POST /tenants/{tenant_id}/integration-connections
 GET /tenants/{tenant_id}/integration-connections
+POST /tenants/{tenant_id}/integration-mapping-preview
 ```
 
 Connection creation uses public-safe profile data:
@@ -77,6 +78,14 @@ The created outbox event includes:
 - selected `adapter_key`;
 - safe mapping JSON;
 - file import metadata and records.
+
+The worker applies the stored mapping before executing the file-import adapter.
+For example, a connection can map `lead_id` to `external_id` and `full_name` to
+`display_name`.
+
+Before scheduling a job, clients can call
+`POST /tenants/{tenant_id}/integration-mapping-preview` to see accepted and
+rejected normalized rows without creating outbox work.
 
 ## Audit Event
 

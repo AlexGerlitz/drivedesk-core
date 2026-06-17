@@ -35,7 +35,7 @@ window.DRIVEDESK_DEMO_DATA = {
     },
     {
       "label": "OpenAPI paths",
-      "value": "23",
+      "value": "24",
       "detail": "generated contract",
       "tone": "violet"
     },
@@ -169,7 +169,7 @@ window.DRIVEDESK_DEMO_DATA = {
       "direction": "inbound",
       "connectionProfileSupported": true,
       "requiredMappingKeys": ["external_id", "display_name"],
-      "contract": "Normalizes provider rows, returns accepted and rejected record counts, and stores the result on the outbox event."
+      "contract": "Normalizes provider rows, previews mapped records, returns accepted and rejected counts, and stores the result on the outbox event."
     },
     {
       "key": "internal.noop",

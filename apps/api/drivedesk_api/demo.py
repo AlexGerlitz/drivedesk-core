@@ -71,7 +71,7 @@ def build_public_demo_payload() -> dict[str, Any]:
             },
             {
                 "label": "OpenAPI paths",
-                "value": "23",
+                "value": "24",
                 "detail": "generated contract",
                 "tone": "violet",
             },

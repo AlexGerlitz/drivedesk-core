@@ -61,14 +61,15 @@ It includes:
 15. Read `docs/public/CLIENT_SDK.md`.
 16. Read `docs/public/INTEGRATION_ADAPTER_CATALOG.md`.
 17. Read `docs/public/INTEGRATION_MAPPING_VALIDATION.md`.
-18. Read `docs/public/INTEGRATION_CONNECTIONS.md`.
-19. Read `docs/public/SYSTEM_DESIGN.md`.
-20. Read `docs/public/INTEGRATION_ADAPTERS.md`.
-21. Read `docs/public/INTEGRATION_OBSERVABILITY.md`.
-22. Read `docs/public/OUTBOX_RECOVERY.md`.
-23. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
-24. Check `.github/workflows/ci.yml`.
-25. Run `bash scripts/ci_smoke_public.sh` locally.
+18. Read `docs/public/INTEGRATION_MAPPING_TRANSFORM.md`.
+19. Read `docs/public/INTEGRATION_CONNECTIONS.md`.
+20. Read `docs/public/SYSTEM_DESIGN.md`.
+21. Read `docs/public/INTEGRATION_ADAPTERS.md`.
+22. Read `docs/public/INTEGRATION_OBSERVABILITY.md`.
+23. Read `docs/public/OUTBOX_RECOVERY.md`.
+24. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
+25. Check `.github/workflows/ci.yml`.
+26. Run `bash scripts/ci_smoke_public.sh` locally.
 
 ## What To Review First
 
@@ -87,6 +88,7 @@ It includes:
 - `docs/public/CLIENT_SDK.md` - generated OpenAPI client SDK example.
 - `docs/public/INTEGRATION_ADAPTER_CATALOG.md` - runtime adapter metadata and discovery contract.
 - `docs/public/INTEGRATION_MAPPING_VALIDATION.md` - mapping validation against adapter requirements.
+- `docs/public/INTEGRATION_MAPPING_TRANSFORM.md` - runtime mapping transform and preview.
 - `docs/public/INTEGRATION_CONNECTIONS.md` - tenant-owned adapter profiles and mapping.
 - `docs/public/INTEGRATION_ADAPTERS.md` - adapter contract and retry model.
 - `docs/public/INTEGRATION_OBSERVABILITY.md` - adapter metrics and worker log signals.
@@ -99,6 +101,7 @@ It includes:
 - `docs/openapi.json` - generated FastAPI OpenAPI schema.
 - `GET /demo/public` - read-only synthetic demo payload in the exported API.
 - `GET /integration-adapters` - runtime adapter catalog endpoint.
+- `POST /tenants/{tenant_id}/integration-mapping-preview` - read-only mapping transform preview.
 - `GET /metrics` - public-safe aggregate metrics including auth health.
 - `POST /auth/sessions/{session_id}/revoke` - admin-triggered visible session revocation.
 - `POST /platform/admins` - platform-admin grant endpoint.
@@ -245,3 +248,4 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/adr/0031-tenant-owned-integration-connections.md`
 - `docs/adr/0032-runtime-adapter-catalog.md`
 - `docs/adr/0033-integration-mapping-validation.md`
+- `docs/adr/0034-integration-mapping-transform-preview.md`

@@ -64,6 +64,113 @@ class IntegrationAdapter(Protocol):
         ...
 
 
+def _validate_mapping_values(adapter_key: str, mapping: dict[str, object]) -> None:
+    invalid_keys = [
+        key
+        for key, value in mapping.items()
+        if not isinstance(key, str) or not isinstance(value, str) or not value.strip()
+    ]
+    if invalid_keys:
+        raise AdapterValidationError(
+            f"Invalid mapping values for {adapter_key}: {', '.join(sorted(str(key) for key in invalid_keys))}",
+            adapter_key=adapter_key,
+        )
+
+
+def _mapped_record(
+    record: dict[str, object],
+    *,
+    mapping: dict[str, object],
+    required_mapping_keys: list[str],
+) -> dict[str, object]:
+    if not mapping:
+        return dict(record)
+
+    normalized: dict[str, object] = {}
+    for target_key, source_key in mapping.items():
+        if isinstance(target_key, str) and isinstance(source_key, str) and source_key in record:
+            normalized[target_key] = record[source_key]
+
+    for target_key in required_mapping_keys:
+        if target_key not in normalized and target_key in record:
+            normalized[target_key] = record[target_key]
+    return normalized
+
+
+def normalize_adapter_records(
+    adapter_key: str,
+    *,
+    records: list[object],
+    mapping: dict[str, object] | None = None,
+) -> list[dict[str, object]]:
+    descriptor = resolve_adapter(adapter_key).descriptor
+    mapping_payload = mapping or {}
+    if mapping_payload:
+        validate_adapter_connection_profile(adapter_key, mapping=mapping_payload)
+
+    normalized_records: list[dict[str, object]] = []
+    for record in records:
+        if not isinstance(record, dict):
+            normalized_records.append({})
+            continue
+        normalized_records.append(
+            _mapped_record(
+                record,
+                mapping=mapping_payload,
+                required_mapping_keys=descriptor.required_mapping_keys,
+            )
+        )
+    return normalized_records
+
+
+def build_adapter_mapping_preview(
+    adapter_key: str,
+    *,
+    records: list[object],
+    mapping: dict[str, object] | None = None,
+) -> dict[str, object]:
+    descriptor = resolve_adapter(adapter_key).descriptor
+    if not descriptor.connection_profile_supported:
+        raise AdapterValidationError(
+            f"Adapter does not support integration mapping preview: {adapter_key}",
+            adapter_key=adapter_key,
+        )
+
+    normalized_records = normalize_adapter_records(adapter_key, records=records, mapping=mapping)
+    preview_records: list[dict[str, object]] = []
+    accepted = 0
+    rejected = 0
+    for index, normalized_record in enumerate(normalized_records, start=1):
+        errors = [
+            f"missing mapped value: {key}"
+            for key in descriptor.required_mapping_keys
+            if not str(normalized_record.get(key) or "").strip()
+        ]
+        if errors:
+            rejected += 1
+            status = "rejected"
+        else:
+            accepted += 1
+            status = "accepted"
+        preview_records.append(
+            {
+                "index": index,
+                "status": status,
+                "normalized": normalized_record,
+                "errors": errors,
+            }
+        )
+
+    return {
+        "adapter_key": adapter_key,
+        "required_mapping_keys": descriptor.required_mapping_keys,
+        "records_received": len(records),
+        "records_accepted": accepted,
+        "records_rejected": rejected,
+        "records": preview_records,
+    }
+
+
 class NoopAdapter:
     adapter_key = "internal.noop"
     descriptor = AdapterDescriptor(
@@ -122,6 +229,8 @@ class FakeFileImportAdapter:
         required_mapping_keys=["external_id", "display_name"],
         capabilities=[
             "payload validation",
+            "field mapping transform",
+            "mapping preview",
             "accepted/rejected record counts",
             "retryable failure simulation",
             "permanent failure simulation",
@@ -155,10 +264,27 @@ class FakeFileImportAdapter:
                 adapter_key=self.adapter_key,
                 retryable=False,
             )
+        mapping = payload.get("mapping", {})
+        if mapping is None:
+            mapping = {}
+        if not isinstance(mapping, dict):
+            raise AdapterExecutionError(
+                "Import payload mapping must be a JSON object.",
+                adapter_key=self.adapter_key,
+                retryable=False,
+            )
+        try:
+            normalized_records = normalize_adapter_records(self.adapter_key, records=records, mapping=mapping)
+        except AdapterValidationError as exc:
+            raise AdapterExecutionError(
+                exc.message,
+                adapter_key=self.adapter_key,
+                retryable=False,
+            ) from exc
 
         accepted_external_ids: list[str] = []
         rejected = 0
-        for record in records:
+        for record in normalized_records:
             if not isinstance(record, dict):
                 rejected += 1
                 continue
@@ -233,16 +359,7 @@ def validate_adapter_connection_profile(
             adapter_key=adapter_key,
         )
 
-    invalid_keys = [
-        key
-        for key, value in mapping.items()
-        if not isinstance(key, str) or not isinstance(value, str) or not value.strip()
-    ]
-    if invalid_keys:
-        raise AdapterValidationError(
-            f"Invalid mapping values for {adapter_key}: {', '.join(sorted(str(key) for key in invalid_keys))}",
-            adapter_key=adapter_key,
-        )
+    _validate_mapping_values(adapter_key, mapping)
     return descriptor
 
 

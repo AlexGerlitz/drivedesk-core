@@ -15,6 +15,9 @@ POST /tenants/{tenant_id}/integration-connections
 adapter descriptor -> required_mapping_keys -> mapping JSON
 ```
 
+Runtime mapping transform and preview are documented separately in
+`INTEGRATION_MAPPING_TRANSFORM.md`.
+
 ## What Is Validated
 
 Connection creation checks:

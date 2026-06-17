@@ -90,6 +90,23 @@ def test_fake_file_import_adapter_contract() -> None:
     assert result.records_rejected == 1
     assert result.to_payload()["details"]["accepted_external_ids"] == ["row_1"]
 
+    mapped_result = adapter.execute(
+        {
+            "source_name": "mapped-json",
+            "source_format": "json",
+            "mapping": {"external_id": "lead_id", "display_name": "full_name"},
+            "records": [
+                {"lead_id": "lead_1", "full_name": "Mapped One"},
+                {"lead_id": "lead_2", "full_name": ""},
+            ],
+        }
+    )
+    assert mapped_result.status == "partial_success"
+    assert mapped_result.records_received == 2
+    assert mapped_result.records_accepted == 1
+    assert mapped_result.records_rejected == 1
+    assert mapped_result.to_payload()["details"]["accepted_external_ids"] == ["lead_1"]
+
     try:
         adapter.execute({"simulate_failure": "retryable", "records": []})
     except AdapterExecutionError as exc:
@@ -111,6 +128,8 @@ def test_adapter_catalog_describes_runtime_adapters() -> None:
     }
     assert descriptors["file.import.fake"]["required_mapping_keys"] == ["external_id", "display_name"]
     assert "records" in descriptors["file.import.fake"]["payload_schema"]["required"]
+    assert "field mapping transform" in descriptors["file.import.fake"]["capabilities"]
+    assert "mapping preview" in descriptors["file.import.fake"]["capabilities"]
     assert descriptors["internal.noop"]["connection_profile_supported"] is False
 
 
@@ -139,6 +158,8 @@ def test_api_integration_adapter_catalog_endpoint() -> None:
     assert payload["file.import.fake"]["connection_profile_supported"] is True
     assert payload["file.import.fake"]["mapping_example"]["external_id"] == "lead_id"
     assert payload["file.import.fake"]["required_mapping_keys"] == ["external_id", "display_name"]
+    assert "field mapping transform" in payload["file.import.fake"]["capabilities"]
+    assert "mapping preview" in payload["file.import.fake"]["capabilities"]
     assert "payload validation" in payload["file.import.fake"]["capabilities"]
     assert payload["internal.noop"]["direction"] == "internal"
 

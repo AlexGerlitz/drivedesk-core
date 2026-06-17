@@ -29,6 +29,7 @@ from drivedesk_api.schemas import (
     BusinessRecordType,
     FileImportCreate,
     IntegrationConnectionCreate,
+    IntegrationMappingPreviewCreate,
     MembershipCreate,
     OutboxEventRetryRequest,
     PlatformAdminCreate,
@@ -40,6 +41,7 @@ from drivedesk_api.tenant_repository import list_tenant_owned, tenant_owned_sele
 from drivedesk_core import (
     AdapterExecutionError,
     AdapterValidationError,
+    build_adapter_mapping_preview,
     resolve_adapter,
     validate_adapter_connection_profile,
 )
@@ -276,6 +278,37 @@ async def list_integration_connections(session: AsyncSession, *, tenant_id: str)
         tenant_id,
         order_by=IntegrationConnection.created_at.desc(),
     )
+
+
+async def preview_integration_mapping(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    payload: IntegrationMappingPreviewCreate,
+) -> dict[str, object]:
+    await ensure_tenant_exists(session, tenant_id)
+    adapter_key = payload.adapter_key
+    mapping = payload.mapping
+
+    if payload.integration_connection_id:
+        connection = await session.get(IntegrationConnection, payload.integration_connection_id)
+        if not connection or connection.tenant_id != tenant_id:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="integration connection not found")
+        if connection.adapter_key != payload.adapter_key:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="integration connection adapter mismatch")
+        adapter_key = connection.adapter_key
+        mapping = json.loads(connection.mapping_json)
+        if not isinstance(mapping, dict):
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="integration connection mapping is invalid")
+
+    try:
+        return build_adapter_mapping_preview(
+            adapter_key,
+            records=payload.records,
+            mapping=mapping,
+        )
+    except (AdapterExecutionError, AdapterValidationError) as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=exc.message) from exc
 
 
 async def _active_connection_for_file_import(

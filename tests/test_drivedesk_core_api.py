@@ -1225,6 +1225,56 @@ def test_file_import_adapter_success_flow(api_client: tuple[TestClient, async_se
     assert connection["status"] == "active"
     assert "lead_id" in connection["mapping_json"]
 
+    preview_response = client.post(
+        f"/tenants/{tenant_id}/integration-mapping-preview",
+        json={
+            "adapter_key": "file.import.fake",
+            "integration_connection_id": connection["id"],
+            "records": [
+                {"lead_id": "lead_preview_1", "full_name": "Preview One"},
+                {"lead_id": "lead_preview_2", "full_name": ""},
+            ],
+        },
+        headers={"X-Actor-Id": "manager_1", "X-Actor-Role": "manager"},
+    )
+    assert preview_response.status_code == 200
+    preview = preview_response.json()
+    assert preview["adapter_key"] == "file.import.fake"
+    assert preview["required_mapping_keys"] == ["external_id", "display_name"]
+    assert preview["records_received"] == 2
+    assert preview["records_accepted"] == 1
+    assert preview["records_rejected"] == 1
+    assert preview["records"][0]["status"] == "accepted"
+    assert preview["records"][0]["normalized"] == {
+        "external_id": "lead_preview_1",
+        "display_name": "Preview One",
+    }
+    assert preview["records"][1]["status"] == "rejected"
+    assert preview["records"][1]["errors"] == ["missing mapped value: display_name"]
+
+    direct_preview_response = client.post(
+        f"/tenants/{tenant_id}/integration-mapping-preview",
+        json={
+            "adapter_key": "file.import.fake",
+            "mapping": {"external_id": "lead_id", "display_name": "full_name"},
+            "records": [{"lead_id": "lead_direct_1", "full_name": "Direct Preview"}],
+        },
+        headers=owner_headers,
+    )
+    assert direct_preview_response.status_code == 200
+    assert direct_preview_response.json()["records_accepted"] == 1
+
+    noop_preview_response = client.post(
+        f"/tenants/{tenant_id}/integration-mapping-preview",
+        json={
+            "adapter_key": "internal.noop",
+            "records": [{"event_type": "demo"}],
+        },
+        headers=owner_headers,
+    )
+    assert noop_preview_response.status_code == 400
+    assert noop_preview_response.json()["detail"] == "Adapter does not support integration mapping preview: internal.noop"
+
     connections_response = client.get(
         f"/tenants/{tenant_id}/integration-connections",
         headers={"X-Actor-Id": "manager_1", "X-Actor-Role": "manager"},
@@ -1343,9 +1393,9 @@ def test_file_import_adapter_success_flow(api_client: tuple[TestClient, async_se
             "source_name": "demo-leads-json",
             "source_format": "json",
             "records": [
-                {"external_id": "lead_001", "display_name": "Demo Learner One"},
-                {"external_id": "lead_002", "display_name": "Demo Learner Two"},
-                {"external_id": "", "display_name": "Rejected Demo Row"},
+                {"lead_id": "lead_001", "full_name": "Demo Learner One"},
+                {"lead_id": "lead_002", "full_name": "Demo Learner Two"},
+                {"lead_id": "", "full_name": "Rejected Demo Row"},
             ],
         },
         headers=owner_headers,
@@ -1377,6 +1427,7 @@ def test_file_import_adapter_success_flow(api_client: tuple[TestClient, async_se
     assert result["records_received"] == 3
     assert result["records_accepted"] == 2
     assert result["records_rejected"] == 1
+    assert result["details"]["accepted_external_ids"] == ["lead_001", "lead_002"]
     assert file_payload["integration_connection_id"] == connection["id"]
     assert file_payload["mapping"] == {"external_id": "lead_id", "display_name": "full_name"}
 

@@ -70,6 +70,8 @@ from drivedesk_api.schemas import (
     FileImportCreate,
     IntegrationConnectionCreate,
     IntegrationConnectionRead,
+    IntegrationMappingPreviewCreate,
+    IntegrationMappingPreviewRead,
     LoginRequest,
     MembershipCreate,
     MembershipRead,
@@ -107,6 +109,7 @@ from drivedesk_api.services import (
     list_platform_admins,
     list_workflow_action_runs,
     list_workflow_rules,
+    preview_integration_mapping,
     retry_outbox_event,
     summarize_integration_outbox,
     transition_business_record,
@@ -582,6 +585,21 @@ def build_app(settings: Settings | None = None) -> FastAPI:
         await ensure_tenant_exists(session, tenant_id)
         require_tenant_permission(actor, tenant_id, Permission.TENANT_READ)
         return await list_integration_connections(session, tenant_id=tenant_id)
+
+    @api.post(
+        "/tenants/{tenant_id}/integration-mapping-preview",
+        response_model=IntegrationMappingPreviewRead,
+        tags=["integrations"],
+    )
+    async def preview_integration_mapping_endpoint(
+        tenant_id: str,
+        payload: IntegrationMappingPreviewCreate,
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> dict[str, object]:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.TENANT_READ)
+        return await preview_integration_mapping(session, tenant_id=tenant_id, payload=payload)
 
     @api.post("/tenants/{tenant_id}/business-records", response_model=BusinessRecordRead, status_code=201)
     async def create_business_record_endpoint(

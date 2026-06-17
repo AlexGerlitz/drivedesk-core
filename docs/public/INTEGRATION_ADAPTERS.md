@@ -16,6 +16,7 @@ shape needed for later providers:
 - API-created integration job;
 - outbox event;
 - worker execution;
+- field mapping transform and preview;
 - retry state for temporary failures;
 - dead-letter state for permanent failures;
 - result payload stored on the outbox event;
@@ -50,6 +51,7 @@ The public OpenAPI schema includes:
 GET /integration-adapters
 POST /tenants/{tenant_id}/integration-connections
 GET /tenants/{tenant_id}/integration-connections
+POST /tenants/{tenant_id}/integration-mapping-preview
 POST /tenants/{tenant_id}/integration-imports/file
 POST /tenants/{tenant_id}/outbox-events/{event_id}/retry
 ```
@@ -61,7 +63,9 @@ support flags. See `INTEGRATION_ADAPTER_CATALOG.md`.
 The file-import endpoint accepts synthetic file-import records and creates an outbox event
 with `adapter_key = file.import.fake`.
 File imports can also reference a tenant-owned integration connection profile.
-See `INTEGRATION_CONNECTIONS.md`.
+The worker applies connection mapping before adapter validation, and clients can
+preview accepted/rejected normalized rows before creating outbox work. See
+`INTEGRATION_CONNECTIONS.md` and `INTEGRATION_MAPPING_TRANSFORM.md`.
 
 ## Worker Flow
 

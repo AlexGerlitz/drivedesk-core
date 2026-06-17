@@ -189,6 +189,29 @@ class IntegrationConnectionRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class IntegrationMappingPreviewCreate(BaseModel):
+    adapter_key: str = Field(default="file.import.fake", min_length=2, max_length=128, pattern=r"^[a-z0-9][a-z0-9_.-]*$")
+    integration_connection_id: str | None = Field(default=None, min_length=1, max_length=36)
+    mapping: dict[str, Any] = Field(default_factory=dict)
+    records: list[dict[str, Any]] = Field(min_length=1, max_length=20)
+
+
+class IntegrationMappingPreviewRecordRead(BaseModel):
+    index: int
+    status: Literal["accepted", "rejected"]
+    normalized: dict[str, Any]
+    errors: list[str] = Field(default_factory=list)
+
+
+class IntegrationMappingPreviewRead(BaseModel):
+    adapter_key: str
+    required_mapping_keys: list[str]
+    records_received: int
+    records_accepted: int
+    records_rejected: int
+    records: list[IntegrationMappingPreviewRecordRead]
+
+
 class BusinessRecordCreate(BaseModel):
     record_type: BusinessRecordType
     title: str = Field(min_length=2, max_length=255)

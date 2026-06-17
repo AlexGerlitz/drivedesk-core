@@ -144,6 +144,8 @@ assert adapter_catalog["file.import.fake"]["direction"] == "inbound", adapters
 assert adapter_catalog["file.import.fake"]["connection_profile_supported"] is True, adapters
 assert adapter_catalog["file.import.fake"]["required_mapping_keys"] == ["external_id", "display_name"], adapters
 assert adapter_catalog["file.import.fake"]["mapping_example"]["external_id"] == "lead_id", adapters
+assert "field mapping transform" in adapter_catalog["file.import.fake"]["capabilities"], adapters
+assert "mapping preview" in adapter_catalog["file.import.fake"]["capabilities"], adapters
 assert "records" in adapter_catalog["file.import.fake"]["payload_schema"]["required"], adapters
 assert adapter_catalog["internal.noop"]["connection_profile_supported"] is False, adapters
 assert demo_headers.get("access-control-allow-origin") == "*", demo_headers
@@ -171,6 +173,7 @@ assert "/tenants/{tenant_id}/workflow-rules" in openapi["paths"], openapi["paths
 assert "/tenants/{tenant_id}/workflow-action-runs" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/outbox-events/{event_id}/retry" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/integration-connections" in openapi["paths"], openapi["paths"].keys()
+assert "/tenants/{tenant_id}/integration-mapping-preview" in openapi["paths"], openapi["paths"].keys()
 assert "/integration-adapters" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/public" in openapi["paths"], openapi["paths"].keys()
 assert "/health" in openapi["paths"], openapi["paths"].keys()
@@ -181,6 +184,7 @@ if openapi_file.exists():
     assert "/tenants/{tenant_id}/workflow-action-runs" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/outbox-events/{event_id}/retry" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/integration-connections" in generated["paths"], generated["paths"].keys()
+    assert "/tenants/{tenant_id}/integration-mapping-preview" in generated["paths"], generated["paths"].keys()
     assert "/integration-adapters" in generated["paths"], generated["paths"].keys()
 
 print(

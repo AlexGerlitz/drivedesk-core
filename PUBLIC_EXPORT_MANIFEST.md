@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-17T22:37:54Z
+Generated at: 2026-06-17T22:54:51Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -29,6 +29,7 @@ Copied public-safe areas:
 - public runtime adapter catalog doc
 - public demo adapter connectionProfileSupported metadata
 - public integration mapping validation doc
+- public integration mapping transform doc
 - public demo adapter requiredMappingKeys metadata
 - public integration observability overview
 - public roadmap
@@ -52,6 +53,7 @@ Copied public-safe areas:
 - public outbox recovery endpoint: /tenants/{tenant_id}/outbox-events/{event_id}/retry
 - public outbox recovery audit event: outbox_event.retry_requested
 - public integration connection endpoint: /tenants/{tenant_id}/integration-connections
+- public integration mapping preview endpoint: /tenants/{tenant_id}/integration-mapping-preview
 - public integration connection audit event: integration_connection.created
 - public integration connection metric: drivedesk_integration_connections
 - public tenant-owned repository helper surface

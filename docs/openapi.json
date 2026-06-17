@@ -649,6 +649,130 @@
         "title": "IntegrationConnectionRead",
         "type": "object"
       },
+      "IntegrationMappingPreviewCreate": {
+        "properties": {
+          "adapter_key": {
+            "default": "file.import.fake",
+            "maxLength": 128,
+            "minLength": 2,
+            "pattern": "^[a-z0-9][a-z0-9_.-]*$",
+            "title": "Adapter Key",
+            "type": "string"
+          },
+          "integration_connection_id": {
+            "anyOf": [
+              {
+                "maxLength": 36,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Integration Connection Id"
+          },
+          "mapping": {
+            "additionalProperties": true,
+            "title": "Mapping",
+            "type": "object"
+          },
+          "records": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "maxItems": 20,
+            "minItems": 1,
+            "title": "Records",
+            "type": "array"
+          }
+        },
+        "required": [
+          "records"
+        ],
+        "title": "IntegrationMappingPreviewCreate",
+        "type": "object"
+      },
+      "IntegrationMappingPreviewRead": {
+        "properties": {
+          "adapter_key": {
+            "title": "Adapter Key",
+            "type": "string"
+          },
+          "records": {
+            "items": {
+              "$ref": "#/components/schemas/IntegrationMappingPreviewRecordRead"
+            },
+            "title": "Records",
+            "type": "array"
+          },
+          "records_accepted": {
+            "title": "Records Accepted",
+            "type": "integer"
+          },
+          "records_received": {
+            "title": "Records Received",
+            "type": "integer"
+          },
+          "records_rejected": {
+            "title": "Records Rejected",
+            "type": "integer"
+          },
+          "required_mapping_keys": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Required Mapping Keys",
+            "type": "array"
+          }
+        },
+        "required": [
+          "adapter_key",
+          "required_mapping_keys",
+          "records_received",
+          "records_accepted",
+          "records_rejected",
+          "records"
+        ],
+        "title": "IntegrationMappingPreviewRead",
+        "type": "object"
+      },
+      "IntegrationMappingPreviewRecordRead": {
+        "properties": {
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Errors",
+            "type": "array"
+          },
+          "index": {
+            "title": "Index",
+            "type": "integer"
+          },
+          "normalized": {
+            "additionalProperties": true,
+            "title": "Normalized",
+            "type": "object"
+          },
+          "status": {
+            "enum": [
+              "accepted",
+              "rejected"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "index",
+          "status",
+          "normalized"
+        ],
+        "title": "IntegrationMappingPreviewRecordRead",
+        "type": "object"
+      },
       "LoginRequest": {
         "properties": {
           "email": {
@@ -3021,6 +3145,94 @@
           }
         },
         "summary": "Create File Import Endpoint"
+      }
+    },
+    "/tenants/{tenant_id}/integration-mapping-preview": {
+      "post": {
+        "operationId": "preview_integration_mapping_endpoint_tenants__tenant_id__integration_mapping_preview_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tenant_id",
+            "required": true,
+            "schema": {
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "X-Actor-Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Role",
+            "required": false,
+            "schema": {
+              "default": "viewer",
+              "title": "X-Actor-Role",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntegrationMappingPreviewCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationMappingPreviewRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Preview Integration Mapping Endpoint",
+        "tags": [
+          "integrations"
+        ]
       }
     },
     "/tenants/{tenant_id}/memberships": {

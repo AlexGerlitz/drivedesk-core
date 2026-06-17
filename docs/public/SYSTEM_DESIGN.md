@@ -273,6 +273,13 @@ Connection creation checks the selected adapter, connection-profile support, and
 required mapping keys before storing tenant configuration. File-import job
 creation re-validates stored mapping before enqueueing work for the worker.
 
+Mapping transform is documented in `INTEGRATION_MAPPING_TRANSFORM.md`. It proves
+that stored mappings affect worker execution: provider-shaped fields such as
+`lead_id` and `full_name` are normalized into adapter-owned fields such as
+`external_id` and `display_name`. The read-only preview endpoint
+`POST /tenants/{tenant_id}/integration-mapping-preview` lets clients detect bad
+rows before creating outbox work.
+
 Integration observability is documented in `INTEGRATION_OBSERVABILITY.md`. It
 shows how adapter jobs become metrics, structured worker logs, and
 runbook-backed operational signals.

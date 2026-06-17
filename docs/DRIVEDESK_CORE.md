@@ -369,6 +369,30 @@ Public docs:
 - `docs/public/INTEGRATION_MAPPING_VALIDATION.md`;
 - `docs/adr/0033-integration-mapping-validation.md`.
 
+## Sprint 4G Integration Mapping Transform Preview
+
+Sprint 4G turns stored mapping into runtime behavior.
+
+New API:
+
+- `POST /tenants/{tenant_id}/integration-mapping-preview`.
+
+Why this matters:
+
+- provider-shaped rows such as `lead_id` and `full_name` can be normalized into
+  adapter-owned fields such as `external_id` and `display_name`;
+- the worker executes file-import jobs against normalized records;
+- the preview endpoint lets clients inspect accepted and rejected rows before
+  creating outbox work;
+- preview is read-only and uses existing tenant read permissions;
+- stored connection mappings can be previewed by passing
+  `integration_connection_id`.
+
+Public docs:
+
+- `docs/public/INTEGRATION_MAPPING_TRANSFORM.md`;
+- `docs/adr/0034-integration-mapping-transform-preview.md`.
+
 ## Local Commands
 
 Run the API without Docker:

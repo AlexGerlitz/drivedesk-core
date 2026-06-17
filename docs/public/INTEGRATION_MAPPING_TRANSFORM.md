@@ -114,13 +114,16 @@ The same endpoint can preview a stored tenant-owned connection:
 ```
 
 When a connection id is present, DriveDesk loads the stored mapping from that
-connection and verifies tenant ownership before returning the preview.
+connection, verifies tenant ownership, and checks that the connection has the
+`file_import:preview` scope before returning the preview.
 
 ## Worker Behavior
 
 File-import outbox payloads carry the selected `integration_connection_id` and
 mapping JSON. The worker executes `file.import.fake` against normalized records,
 so provider-shaped rows can be accepted as long as the profile mapping is valid.
+When a stored connection is used, the API requires the `file_import:execute`
+scope before creating outbox work.
 
 ## What This Proves
 

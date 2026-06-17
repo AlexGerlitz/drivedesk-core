@@ -26,6 +26,8 @@ class AdapterContractRead(BaseModel):
     config_example: dict[str, Any] = Field(default_factory=dict)
     mapping_example: dict[str, Any] = Field(default_factory=dict)
     required_mapping_keys: list[str] = Field(default_factory=list)
+    supported_connection_scopes: list[str] = Field(default_factory=list)
+    default_connection_scopes: list[str] = Field(default_factory=list)
     capabilities: list[str] = Field(default_factory=list)
     failure_modes: list[str] = Field(default_factory=list)
     public_notes: list[str] = Field(default_factory=list)
@@ -174,6 +176,7 @@ class IntegrationConnectionCreate(BaseModel):
     status: IntegrationConnectionStatus = "active"
     config: dict[str, Any] = Field(default_factory=dict)
     mapping: dict[str, Any] = Field(default_factory=dict)
+    scopes: list[str] = Field(default_factory=list, max_length=8)
 
 
 class IntegrationConnectionRead(BaseModel):
@@ -184,6 +187,7 @@ class IntegrationConnectionRead(BaseModel):
     status: IntegrationConnectionStatus
     config_json: str
     mapping_json: str
+    scopes_json: str
     created_at: datetime | None = None
 
     model_config = ConfigDict(from_attributes=True)

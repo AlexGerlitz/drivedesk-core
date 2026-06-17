@@ -35,7 +35,14 @@ and replaces them with runtime metadata:
   "connection_profile_supported": true,
   "connection_profile_required": false,
   "required_mapping_keys": ["external_id", "display_name"],
-  "capabilities": ["payload validation", "field mapping transform", "mapping preview"]
+  "supported_connection_scopes": ["file_import:execute", "file_import:preview"],
+  "default_connection_scopes": ["file_import:execute", "file_import:preview"],
+  "capabilities": [
+    "payload validation",
+    "field mapping transform",
+    "mapping preview",
+    "connection scope enforcement"
+  ]
 }
 ```
 
@@ -57,6 +64,8 @@ Each adapter descriptor includes:
 | `config_example` | Safe example config shape. |
 | `mapping_example` | Safe example field mapping. |
 | `required_mapping_keys` | Mapping keys that must be present when a tenant connection profile is created. |
+| `supported_connection_scopes` | Operations a tenant-owned profile may request for this adapter. |
+| `default_connection_scopes` | Scopes stored when a profile does not request explicit scopes. |
 | `capabilities` | What the adapter proves. |
 | `failure_modes` | Public-safe failure modes used for retry/dead-letter tests. |
 
@@ -104,6 +113,8 @@ The public smoke test validates:
 - OpenAPI includes `GET /integration-adapters`;
 - the file-import descriptor exposes `connection_profile_supported`;
 - the file-import descriptor exposes `required_mapping_keys`;
+- the file-import descriptor exposes `supported_connection_scopes`;
+- the file-import descriptor exposes `default_connection_scopes`;
 - the file-import descriptor exposes mapping transform and preview capabilities;
 - the file-import descriptor includes mapping and payload examples;
 - the public demo adapter cards include connection-profile metadata.

@@ -17,6 +17,7 @@ shape needed for later providers:
 - outbox event;
 - worker execution;
 - field mapping transform and preview;
+- connection scope enforcement;
 - retry state for temporary failures;
 - dead-letter state for permanent failures;
 - result payload stored on the outbox event;
@@ -59,6 +60,11 @@ POST /tenants/{tenant_id}/outbox-events/{event_id}/retry
 `GET /integration-adapters` returns the executable runtime adapter catalog with
 public-safe metadata, payload shape, mapping examples, and connection-profile
 support flags. See `INTEGRATION_ADAPTER_CATALOG.md`.
+
+Tenant-owned connection profiles can be scoped. For the public file-import
+adapter, `file_import:preview` allows mapping preview and
+`file_import:execute` allows import execution. See
+`INTEGRATION_CONNECTION_SCOPES.md`.
 
 The file-import endpoint accepts synthetic file-import records and creates an outbox event
 with `adapter_key = file.import.fake`.

@@ -73,6 +73,15 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
     assert len(payload["members"]) >= 3
     assert len(payload["auditEvents"]) >= 3
     assert len(payload["adapters"]) >= 3
+    adapter_by_key = {adapter["key"]: adapter for adapter in payload["adapters"]}
+    assert adapter_by_key["file.import.fake"]["supportedConnectionScopes"] == [
+        "file_import:execute",
+        "file_import:preview",
+    ]
+    assert adapter_by_key["file.import.fake"]["defaultConnectionScopes"] == [
+        "file_import:execute",
+        "file_import:preview",
+    ]
     assert len(payload["integrationJobs"]) >= 3
     assert len(payload["integrationHealth"]) >= 4
     assert len(payload["outbox"]) >= 3

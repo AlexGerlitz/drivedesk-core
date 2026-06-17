@@ -169,6 +169,8 @@ window.DRIVEDESK_DEMO_DATA = {
       "direction": "inbound",
       "connectionProfileSupported": true,
       "requiredMappingKeys": ["external_id", "display_name"],
+      "supportedConnectionScopes": ["file_import:execute", "file_import:preview"],
+      "defaultConnectionScopes": ["file_import:execute", "file_import:preview"],
       "contract": "Normalizes provider rows, previews mapped records, returns accepted and rejected counts, and stores the result on the outbox event."
     },
     {
@@ -178,6 +180,8 @@ window.DRIVEDESK_DEMO_DATA = {
       "direction": "internal",
       "connectionProfileSupported": false,
       "requiredMappingKeys": [],
+      "supportedConnectionScopes": [],
+      "defaultConnectionScopes": [],
       "contract": "Acknowledges internal domain events without calling an external provider."
     },
     {
@@ -187,6 +191,8 @@ window.DRIVEDESK_DEMO_DATA = {
       "direction": "outbound",
       "connectionProfileSupported": true,
       "requiredMappingKeys": ["external_ref"],
+      "supportedConnectionScopes": ["accounting:export"],
+      "defaultConnectionScopes": ["accounting:export"],
       "contract": "Future adapter boundary for accounting exports and reconciliation status."
     }
   ],

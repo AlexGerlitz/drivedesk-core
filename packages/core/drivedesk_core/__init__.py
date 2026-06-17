@@ -17,6 +17,8 @@ from drivedesk_core.adapters import (
     list_adapter_descriptors,
     normalize_adapter_records,
     resolve_adapter,
+    resolve_adapter_connection_scopes,
+    validate_adapter_connection_scope,
     validate_adapter_connection_profile,
 )
 from drivedesk_core.domain import ActorRef, DomainEvent, TenantRef, build_event
@@ -38,6 +40,8 @@ __all__ = [
     "list_adapter_descriptors",
     "normalize_adapter_records",
     "resolve_adapter",
+    "resolve_adapter_connection_scopes",
+    "validate_adapter_connection_scope",
     "validate_adapter_connection_profile",
 ]
 

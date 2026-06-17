@@ -130,17 +130,19 @@ Integration endpoints:
   connection-profile support flags.
 - `POST /tenants/{tenant_id}/integration-connections` creates a tenant-owned
   adapter profile with safe config and mapping JSON.
-  The API validates adapter support, required mapping keys, and non-empty
-  mapping values before storing the profile.
+  The API validates adapter support, required mapping keys, non-empty mapping
+  values, and supported scopes before storing the profile.
 - `GET /tenants/{tenant_id}/integration-connections` lists tenant-owned adapter
   profiles.
 - `POST /tenants/{tenant_id}/integration-mapping-preview` previews mapping
   transforms and accepted/rejected rows without creating outbox work.
+  Stored connection previews require `file_import:preview`.
 - `POST /tenants/{tenant_id}/integration-imports/file` creates a synthetic
   file-import job and stores it as an outbox event with
   `adapter_key=file.import.fake`.
 - file-import jobs can reference `integration_connection_id`; the API verifies
-  tenant ownership, active status, and adapter compatibility.
+  tenant ownership, active status, adapter compatibility, and
+  `file_import:execute`.
 - file-import worker execution applies connection mapping, for example
   `lead_id -> external_id` and `full_name -> display_name`.
 - `/metrics` exposes aggregate connection inventory with

@@ -43,6 +43,8 @@ from drivedesk_core import (
     AdapterValidationError,
     build_adapter_mapping_preview,
     resolve_adapter,
+    resolve_adapter_connection_scopes,
+    validate_adapter_connection_scope,
     validate_adapter_connection_profile,
 )
 
@@ -237,7 +239,8 @@ async def create_integration_connection(
 ) -> IntegrationConnection:
     await ensure_tenant_exists(session, tenant_id)
     try:
-        validate_adapter_connection_profile(payload.adapter_key, mapping=payload.mapping)
+        validate_adapter_connection_profile(payload.adapter_key, mapping=payload.mapping, scopes=payload.scopes)
+        scopes = resolve_adapter_connection_scopes(payload.adapter_key, scopes=payload.scopes)
     except (AdapterExecutionError, AdapterValidationError) as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=exc.message) from exc
 
@@ -249,6 +252,7 @@ async def create_integration_connection(
         status=payload.status,
         config_json=json.dumps(payload.config, ensure_ascii=False, sort_keys=True),
         mapping_json=json.dumps(payload.mapping, ensure_ascii=False, sort_keys=True),
+        scopes_json=json.dumps(scopes, ensure_ascii=False, sort_keys=True),
     )
     session.add(connection)
     await write_audit(
@@ -265,6 +269,7 @@ async def create_integration_connection(
             "status": connection.status,
             "config_keys": sorted(payload.config.keys()),
             "mapping_keys": sorted(payload.mapping.keys()),
+            "scopes": scopes,
         },
     )
     await commit_or_conflict(session, "integration connection already exists")
@@ -297,6 +302,15 @@ async def preview_integration_mapping(
         if connection.adapter_key != payload.adapter_key:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="integration connection adapter mismatch")
         adapter_key = connection.adapter_key
+        scopes = _connection_scopes(connection)
+        try:
+            validate_adapter_connection_scope(
+                adapter_key,
+                scopes=scopes,
+                required_scope="file_import:preview",
+            )
+        except AdapterValidationError as exc:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=exc.message) from exc
         mapping = json.loads(connection.mapping_json)
         if not isinstance(mapping, dict):
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="integration connection mapping is invalid")
@@ -327,11 +341,34 @@ async def _active_connection_for_file_import(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="integration connection is not active")
     if connection.adapter_key != "file.import.fake":
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="integration connection adapter mismatch")
+    scopes = _connection_scopes(connection)
     try:
-        validate_adapter_connection_profile(connection.adapter_key, mapping=json.loads(connection.mapping_json))
+        validate_adapter_connection_scope(
+            connection.adapter_key,
+            scopes=scopes,
+            required_scope="file_import:execute",
+        )
+        validate_adapter_connection_profile(
+            connection.adapter_key,
+            mapping=json.loads(connection.mapping_json),
+            scopes=scopes,
+        )
     except (AdapterExecutionError, AdapterValidationError) as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=exc.message) from exc
     return connection
+
+
+def _connection_scopes(connection: IntegrationConnection) -> list[str]:
+    try:
+        scopes = json.loads(connection.scopes_json or "[]")
+    except json.JSONDecodeError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="integration connection scopes are invalid") from exc
+    if not isinstance(scopes, list) or any(not isinstance(scope, str) for scope in scopes):
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="integration connection scopes are invalid")
+    try:
+        return resolve_adapter_connection_scopes(connection.adapter_key, scopes=scopes)
+    except AdapterValidationError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=exc.message) from exc
 
 
 async def create_file_import_job(
@@ -351,6 +388,7 @@ async def create_file_import_job(
     source_name = payload.source_name.strip()
     adapter_key = connection.adapter_key if connection else "file.import.fake"
     mapping = json.loads(connection.mapping_json) if connection else {}
+    scopes = _connection_scopes(connection) if connection else []
     await write_audit(
         session,
         tenant_id=tenant_id,
@@ -365,6 +403,7 @@ async def create_file_import_job(
             "source_format": payload.source_format,
             "source_name": source_name,
             "mapping_keys": sorted(mapping.keys()),
+            "scopes": scopes,
         },
     )
     event = await enqueue_outbox(
@@ -379,6 +418,7 @@ async def create_file_import_job(
             "source_format": payload.source_format,
             "record_count": record_count,
             "mapping": mapping,
+            "connection_scopes": scopes,
             "records": payload.records,
             "simulate_failure": payload.simulate_failure,
         },

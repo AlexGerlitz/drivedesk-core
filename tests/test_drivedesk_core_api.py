@@ -1224,6 +1224,7 @@ def test_file_import_adapter_success_flow(api_client: tuple[TestClient, async_se
     assert connection["adapter_key"] == "file.import.fake"
     assert connection["status"] == "active"
     assert "lead_id" in connection["mapping_json"]
+    assert json.loads(connection["scopes_json"]) == ["file_import:execute", "file_import:preview"]
 
     preview_response = client.post(
         f"/tenants/{tenant_id}/integration-mapping-preview",
@@ -1275,12 +1276,88 @@ def test_file_import_adapter_success_flow(api_client: tuple[TestClient, async_se
     assert noop_preview_response.status_code == 400
     assert noop_preview_response.json()["detail"] == "Adapter does not support integration mapping preview: internal.noop"
 
+    invalid_scope_response = client.post(
+        f"/tenants/{tenant_id}/integration-connections",
+        json={
+            "name": "Invalid scope file import profile",
+            "adapter_key": "file.import.fake",
+            "mapping": {"external_id": "lead_id", "display_name": "full_name"},
+            "scopes": ["accounting:export"],
+        },
+        headers=owner_headers,
+    )
+    assert invalid_scope_response.status_code == 400
+    assert invalid_scope_response.json()["detail"] == (
+        "Unsupported connection scopes for file.import.fake: accounting:export"
+    )
+
+    preview_only_connection_response = client.post(
+        f"/tenants/{tenant_id}/integration-connections",
+        json={
+            "name": "Preview-only file import profile",
+            "adapter_key": "file.import.fake",
+            "mapping": {"external_id": "lead_id", "display_name": "full_name"},
+            "scopes": ["file_import:preview"],
+        },
+        headers=owner_headers,
+    )
+    assert preview_only_connection_response.status_code == 201
+    preview_only_connection = preview_only_connection_response.json()
+    assert json.loads(preview_only_connection["scopes_json"]) == ["file_import:preview"]
+
+    execute_only_connection_response = client.post(
+        f"/tenants/{tenant_id}/integration-connections",
+        json={
+            "name": "Execute-only file import profile",
+            "adapter_key": "file.import.fake",
+            "mapping": {"external_id": "lead_id", "display_name": "full_name"},
+            "scopes": ["file_import:execute"],
+        },
+        headers=owner_headers,
+    )
+    assert execute_only_connection_response.status_code == 201
+    execute_only_connection = execute_only_connection_response.json()
+    assert json.loads(execute_only_connection["scopes_json"]) == ["file_import:execute"]
+
+    preview_only_import_response = client.post(
+        f"/tenants/{tenant_id}/integration-imports/file",
+        json={
+            "integration_connection_id": preview_only_connection["id"],
+            "source_name": "preview-only-profile",
+            "source_format": "json",
+            "records": [{"lead_id": "lead_preview_only", "full_name": "Preview Only"}],
+        },
+        headers=owner_headers,
+    )
+    assert preview_only_import_response.status_code == 409
+    assert preview_only_import_response.json()["detail"] == (
+        "Integration connection for file.import.fake lacks required scope: file_import:execute"
+    )
+
+    execute_only_preview_response = client.post(
+        f"/tenants/{tenant_id}/integration-mapping-preview",
+        json={
+            "adapter_key": "file.import.fake",
+            "integration_connection_id": execute_only_connection["id"],
+            "records": [{"lead_id": "lead_execute_only", "full_name": "Execute Only"}],
+        },
+        headers=owner_headers,
+    )
+    assert execute_only_preview_response.status_code == 409
+    assert execute_only_preview_response.json()["detail"] == (
+        "Integration connection for file.import.fake lacks required scope: file_import:preview"
+    )
+
     connections_response = client.get(
         f"/tenants/{tenant_id}/integration-connections",
         headers={"X-Actor-Id": "manager_1", "X-Actor-Role": "manager"},
     )
     assert connections_response.status_code == 200
-    assert [item["id"] for item in connections_response.json()] == [connection["id"]]
+    assert {item["id"] for item in connections_response.json()} == {
+        connection["id"],
+        preview_only_connection["id"],
+        execute_only_connection["id"],
+    }
 
     manager_create_response = client.post(
         f"/tenants/{tenant_id}/integration-connections",
@@ -1366,6 +1443,7 @@ def test_file_import_adapter_success_flow(api_client: tuple[TestClient, async_se
                 status="active",
                 config_json="{}",
                 mapping_json="{}",
+                scopes_json="[]",
             )
             session.add(mismatch)
             await session.commit()
@@ -1430,6 +1508,7 @@ def test_file_import_adapter_success_flow(api_client: tuple[TestClient, async_se
     assert result["details"]["accepted_external_ids"] == ["lead_001", "lead_002"]
     assert file_payload["integration_connection_id"] == connection["id"]
     assert file_payload["mapping"] == {"external_id": "lead_id", "display_name": "full_name"}
+    assert file_payload["connection_scopes"] == ["file_import:execute", "file_import:preview"]
 
     async def integration_connection_state() -> tuple[list[IntegrationConnection], list[str]]:
         async with session_factory() as session:
@@ -1458,14 +1537,14 @@ def test_file_import_adapter_success_flow(api_client: tuple[TestClient, async_se
     assert {item.adapter_key for item in connections} == {"file.import.fake", "internal.noop"}
     assert Counter(audit_events) == Counter(
         {
-            "integration_connection.created": 2,
+            "integration_connection.created": 4,
             "integration.file_import.requested": 1,
         }
     )
 
     metrics_response = client.get("/metrics")
     assert metrics_response.status_code == 200
-    assert 'drivedesk_integration_connections{adapter_key="file.import.fake",status="active"} 1' in (
+    assert 'drivedesk_integration_connections{adapter_key="file.import.fake",status="active"} 3' in (
         metrics_response.text
     )
     assert 'drivedesk_integration_connections{adapter_key="file.import.fake",status="disabled"} 1' in (

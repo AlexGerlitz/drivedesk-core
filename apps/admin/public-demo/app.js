@@ -186,7 +186,12 @@
         text(requiredMappingKeys.length ? "mapping: " + requiredMappingKeys.join(", ") : "mapping: none")
       );
 
-      row.append(top, key, contract, meta, mapping);
+      var scopes = document.createElement("span");
+      scopes.className = "muted";
+      var supportedScopes = adapter.supportedConnectionScopes || [];
+      scopes.appendChild(text(supportedScopes.length ? "scopes: " + supportedScopes.join(", ") : "scopes: none"));
+
+      row.append(top, key, contract, meta, mapping, scopes);
       rows.appendChild(row);
     });
   }

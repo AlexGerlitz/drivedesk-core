@@ -127,9 +127,18 @@ def test_adapter_catalog_describes_runtime_adapters() -> None:
         "display_name": "full_name",
     }
     assert descriptors["file.import.fake"]["required_mapping_keys"] == ["external_id", "display_name"]
+    assert descriptors["file.import.fake"]["supported_connection_scopes"] == [
+        "file_import:execute",
+        "file_import:preview",
+    ]
+    assert descriptors["file.import.fake"]["default_connection_scopes"] == [
+        "file_import:execute",
+        "file_import:preview",
+    ]
     assert "records" in descriptors["file.import.fake"]["payload_schema"]["required"]
     assert "field mapping transform" in descriptors["file.import.fake"]["capabilities"]
     assert "mapping preview" in descriptors["file.import.fake"]["capabilities"]
+    assert "connection scope enforcement" in descriptors["file.import.fake"]["capabilities"]
     assert descriptors["internal.noop"]["connection_profile_supported"] is False
 
 
@@ -158,8 +167,17 @@ def test_api_integration_adapter_catalog_endpoint() -> None:
     assert payload["file.import.fake"]["connection_profile_supported"] is True
     assert payload["file.import.fake"]["mapping_example"]["external_id"] == "lead_id"
     assert payload["file.import.fake"]["required_mapping_keys"] == ["external_id", "display_name"]
+    assert payload["file.import.fake"]["supported_connection_scopes"] == [
+        "file_import:execute",
+        "file_import:preview",
+    ]
+    assert payload["file.import.fake"]["default_connection_scopes"] == [
+        "file_import:execute",
+        "file_import:preview",
+    ]
     assert "field mapping transform" in payload["file.import.fake"]["capabilities"]
     assert "mapping preview" in payload["file.import.fake"]["capabilities"]
+    assert "connection scope enforcement" in payload["file.import.fake"]["capabilities"]
     assert "payload validation" in payload["file.import.fake"]["capabilities"]
     assert payload["internal.noop"]["direction"] == "internal"
 

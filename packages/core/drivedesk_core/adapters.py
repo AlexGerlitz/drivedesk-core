@@ -33,6 +33,8 @@ class AdapterDescriptor:
     config_example: dict[str, object] = field(default_factory=dict)
     mapping_example: dict[str, object] = field(default_factory=dict)
     required_mapping_keys: list[str] = field(default_factory=list)
+    supported_connection_scopes: list[str] = field(default_factory=list)
+    default_connection_scopes: list[str] = field(default_factory=list)
     capabilities: list[str] = field(default_factory=list)
     failure_modes: list[str] = field(default_factory=list)
     public_notes: list[str] = field(default_factory=list)
@@ -73,6 +75,45 @@ def _validate_mapping_values(adapter_key: str, mapping: dict[str, object]) -> No
     if invalid_keys:
         raise AdapterValidationError(
             f"Invalid mapping values for {adapter_key}: {', '.join(sorted(str(key) for key in invalid_keys))}",
+            adapter_key=adapter_key,
+        )
+
+
+def resolve_adapter_connection_scopes(
+    adapter_key: str,
+    *,
+    scopes: list[str] | None = None,
+) -> list[str]:
+    descriptor = resolve_adapter(adapter_key).descriptor
+    requested_scopes = list(scopes or descriptor.default_connection_scopes)
+    invalid_values = [
+        scope
+        for scope in requested_scopes
+        if not isinstance(scope, str) or not scope.strip()
+    ]
+    if invalid_values:
+        raise AdapterValidationError(
+            f"Invalid connection scopes for {adapter_key}: {', '.join(sorted(str(scope) for scope in invalid_values))}",
+            adapter_key=adapter_key,
+        )
+
+    normalized_scopes = sorted({scope.strip() for scope in requested_scopes})
+    unsupported_scopes = [
+        scope for scope in normalized_scopes if scope not in descriptor.supported_connection_scopes
+    ]
+    if unsupported_scopes:
+        raise AdapterValidationError(
+            f"Unsupported connection scopes for {adapter_key}: {', '.join(unsupported_scopes)}",
+            adapter_key=adapter_key,
+        )
+    return normalized_scopes
+
+
+def validate_adapter_connection_scope(adapter_key: str, *, scopes: list[str], required_scope: str) -> None:
+    resolved_scopes = resolve_adapter_connection_scopes(adapter_key, scopes=scopes)
+    if required_scope not in resolved_scopes:
+        raise AdapterValidationError(
+            f"Integration connection for {adapter_key} lacks required scope: {required_scope}",
             adapter_key=adapter_key,
         )
 
@@ -227,10 +268,13 @@ class FakeFileImportAdapter:
         config_example={"mode": "synthetic"},
         mapping_example={"external_id": "lead_id", "display_name": "full_name"},
         required_mapping_keys=["external_id", "display_name"],
+        supported_connection_scopes=["file_import:execute", "file_import:preview"],
+        default_connection_scopes=["file_import:execute", "file_import:preview"],
         capabilities=[
             "payload validation",
             "field mapping transform",
             "mapping preview",
+            "connection scope enforcement",
             "accepted/rejected record counts",
             "retryable failure simulation",
             "permanent failure simulation",
@@ -344,6 +388,7 @@ def validate_adapter_connection_profile(
     adapter_key: str,
     *,
     mapping: dict[str, object],
+    scopes: list[str] | None = None,
 ) -> AdapterDescriptor:
     descriptor = resolve_adapter(adapter_key).descriptor
     if not descriptor.connection_profile_supported:
@@ -360,6 +405,7 @@ def validate_adapter_connection_profile(
         )
 
     _validate_mapping_values(adapter_key, mapping)
+    resolve_adapter_connection_scopes(adapter_key, scopes=scopes)
     return descriptor
 
 

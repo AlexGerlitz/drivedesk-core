@@ -148,6 +148,9 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
 - Integration mapping transform now normalizes provider-shaped fields such as
   `lead_id` and `full_name` before worker execution, with a read-only preview
   endpoint for operator review.
+- Integration connection scopes now separate preview and execution permissions,
+  so stored profiles can be limited to `file_import:preview` or
+  `file_import:execute`.
 - The hosted public demo uses static fallback on GitHub Pages and can be pointed
   at `GET /demo/public` for API-backed fake data, including workflow stages,
   timeline, domain events, audit, and outbox state.

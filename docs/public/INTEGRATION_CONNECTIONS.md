@@ -23,6 +23,9 @@ display_name
 Adapters that do not support tenant-owned connection profiles, such as
 `internal.noop`, are rejected by the connection API.
 
+Connection creation also validates requested scopes against the adapter
+descriptor. Scope behavior is documented in `INTEGRATION_CONNECTION_SCOPES.md`.
+
 ## API Shape
 
 ```text
@@ -45,7 +48,8 @@ Connection creation uses public-safe profile data:
   "mapping": {
     "external_id": "lead_id",
     "display_name": "full_name"
-  }
+  },
+  "scopes": ["file_import:preview", "file_import:execute"]
 }
 ```
 
@@ -71,6 +75,7 @@ The API verifies:
 - the connection is `active`;
 - the connection uses the file-import adapter;
 - the stored mapping still satisfies the runtime adapter descriptor.
+- the connection has the `file_import:execute` scope.
 
 The created outbox event includes:
 
@@ -85,7 +90,8 @@ For example, a connection can map `lead_id` to `external_id` and `full_name` to
 
 Before scheduling a job, clients can call
 `POST /tenants/{tenant_id}/integration-mapping-preview` to see accepted and
-rejected normalized rows without creating outbox work.
+rejected normalized rows without creating outbox work. When preview references a
+stored connection, the connection must have the `file_import:preview` scope.
 
 ## Audit Event
 
@@ -96,7 +102,7 @@ integration_connection.created
 ```
 
 The audit event stores the connection id, adapter key, status, config keys, and
-mapping keys. It does not store credentials.
+mapping keys. It also stores scope labels. It does not store credentials.
 
 ## Metrics
 

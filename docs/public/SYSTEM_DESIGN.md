@@ -268,6 +268,13 @@ add tenant-owned adapter profiles with safe config and mapping, so an
 integration job can reference a configured connection instead of relying only on
 a hardcoded adapter key.
 
+Integration connection scopes are documented in
+`INTEGRATION_CONNECTION_SCOPES.md`. Runtime adapter descriptors declare
+supported and default scopes, and endpoint handlers enforce the required scope
+when a stored profile is used. For example, mapping preview requires
+`file_import:preview`, while file-import execution requires
+`file_import:execute`.
+
 Mapping validation is documented in `INTEGRATION_MAPPING_VALIDATION.md`.
 Connection creation checks the selected adapter, connection-profile support, and
 required mapping keys before storing tenant configuration. File-import job

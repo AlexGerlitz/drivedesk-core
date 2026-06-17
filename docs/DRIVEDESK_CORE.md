@@ -393,6 +393,36 @@ Public docs:
 - `docs/public/INTEGRATION_MAPPING_TRANSFORM.md`;
 - `docs/adr/0034-integration-mapping-transform-preview.md`.
 
+## Sprint 4H Integration Connection Scopes
+
+Sprint 4H adds least-privilege scopes for tenant-owned integration profiles.
+
+Migration head:
+
+- `20260618_0012`.
+
+New field:
+
+- `dd_integration_connections.scopes_json`.
+
+Why this matters:
+
+- adapter descriptors declare `supported_connection_scopes` and
+  `default_connection_scopes`;
+- `file.import.fake` supports `file_import:preview` and
+  `file_import:execute`;
+- connection creation rejects unsupported scopes;
+- preview with a stored connection requires `file_import:preview`;
+- file-import job creation with a stored connection requires
+  `file_import:execute`;
+- connection scope labels are public-safe and do not expose tenant ids,
+  provider payloads, credentials, or real connection names.
+
+Public docs:
+
+- `docs/public/INTEGRATION_CONNECTION_SCOPES.md`;
+- `docs/adr/0035-integration-connection-scopes.md`.
+
 ## Local Commands
 
 Run the API without Docker:

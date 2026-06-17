@@ -56,6 +56,13 @@
             "title": "Connection Profile Supported",
             "type": "boolean"
           },
+          "default_connection_scopes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Default Connection Scopes",
+            "type": "array"
+          },
           "direction": {
             "title": "Direction",
             "type": "string"
@@ -106,6 +113,13 @@
           "status": {
             "title": "Status",
             "type": "string"
+          },
+          "supported_connection_scopes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Supported Connection Scopes",
+            "type": "array"
           }
         },
         "required": [
@@ -573,6 +587,14 @@
             "title": "Name",
             "type": "string"
           },
+          "scopes": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 8,
+            "title": "Scopes",
+            "type": "array"
+          },
           "status": {
             "default": "active",
             "enum": [
@@ -624,6 +646,10 @@
             "title": "Name",
             "type": "string"
           },
+          "scopes_json": {
+            "title": "Scopes Json",
+            "type": "string"
+          },
           "status": {
             "enum": [
               "active",
@@ -644,7 +670,8 @@
           "adapter_key",
           "status",
           "config_json",
-          "mapping_json"
+          "mapping_json",
+          "scopes_json"
         ],
         "title": "IntegrationConnectionRead",
         "type": "object"

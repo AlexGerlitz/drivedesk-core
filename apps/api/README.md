@@ -42,6 +42,7 @@ Core endpoints:
 - `GET /tenants/{tenant_id}/outbox-events`.
 - `POST /tenants/{tenant_id}/business-records`.
 - `GET /tenants/{tenant_id}/business-records`.
+- `POST /tenants/{tenant_id}/business-records/{record_id}/transition`.
 - `POST /tenants/{tenant_id}/integration-imports/file`.
 - `GET /demo/public`.
 
@@ -90,6 +91,8 @@ Business record endpoints:
 - `GET /tenants/{tenant_id}/business-records?record_type=contract` filters by
   record type.
 - created records write `business_record.created` audit and outbox events.
+- status transitions write `business_record.status_changed` audit and outbox events.
+- `/metrics` exposes aggregate counts with `drivedesk_business_records`.
 
 Bearer requests use:
 

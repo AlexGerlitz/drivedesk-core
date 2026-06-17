@@ -221,6 +221,23 @@ def test_business_record_foundation_is_tenant_scoped_and_audited(
     assert contract_records_response.status_code == 200
     assert [record["record_type"] for record in contract_records_response.json()] == ["contract"]
 
+    transition_response = client.post(
+        f"/tenants/{tenant_a_id}/business-records/{contract['id']}/transition",
+        json={"status": "approved", "reason": "ready for signature"},
+        headers=manager_headers,
+    )
+    assert transition_response.status_code == 200
+    assert transition_response.json()["id"] == contract["id"]
+    assert transition_response.json()["status"] == "approved"
+
+    missing_transition_response = client.post(
+        f"/tenants/{tenant_b_id}/business-records/{contract['id']}/transition",
+        json={"status": "approved"},
+        headers=viewer_b_headers,
+    )
+    assert missing_transition_response.status_code == 403
+    assert missing_transition_response.json()["detail"] == "permission required: business_record:write"
+
     cross_tenant_read_response = client.get(
         f"/tenants/{tenant_b_id}/business-records",
         headers=manager_headers,
@@ -236,6 +253,13 @@ def test_business_record_foundation_is_tenant_scoped_and_audited(
     assert viewer_write_response.status_code == 403
     assert viewer_write_response.json()["detail"] == "permission required: business_record:write"
 
+    metrics_response = client.get("/metrics")
+    assert metrics_response.status_code == 200
+    assert 'drivedesk_business_records{record_type="contract",status="approved"} 1' in metrics_response.text
+    assert 'drivedesk_business_records{record_type="payment",status="pending"} 1' in metrics_response.text
+    assert "contract-001" not in metrics_response.text
+    assert "Training contract draft" not in metrics_response.text
+
     async def inspect_business_records() -> tuple[list[str], list[str], list[str], list[str]]:
         async with session_factory() as session:
             business_records = await list_tenant_owned(
@@ -246,12 +270,12 @@ def test_business_record_foundation_is_tenant_scoped_and_audited(
             )
             audit_result = await session.execute(
                 select(AuditEvent.event_type)
-                .where(AuditEvent.tenant_id == tenant_a_id, AuditEvent.event_type == "business_record.created")
+                .where(AuditEvent.tenant_id == tenant_a_id, AuditEvent.event_type.like("business_record.%"))
                 .order_by(AuditEvent.created_at)
             )
             outbox_result = await session.execute(
                 select(OutboxEvent.event_type, OutboxEvent.adapter_key)
-                .where(OutboxEvent.tenant_id == tenant_a_id, OutboxEvent.event_type == "business_record.created")
+                .where(OutboxEvent.tenant_id == tenant_a_id, OutboxEvent.event_type.like("business_record.%"))
                 .order_by(OutboxEvent.created_at)
             )
             outbox_rows = list(outbox_result.all())
@@ -264,9 +288,21 @@ def test_business_record_foundation_is_tenant_scoped_and_audited(
 
     record_types, audit_events, outbox_events, adapter_keys = asyncio.run(inspect_business_records())
     assert set(record_types) == {"contract", "payment"}
-    assert audit_events == ["business_record.created", "business_record.created"]
-    assert outbox_events == ["business_record.created", "business_record.created"]
-    assert adapter_keys == ["internal.business_record", "internal.business_record"]
+    assert audit_events == [
+        "business_record.created",
+        "business_record.created",
+        "business_record.status_changed",
+    ]
+    assert outbox_events == [
+        "business_record.created",
+        "business_record.created",
+        "business_record.status_changed",
+    ]
+    assert adapter_keys == [
+        "internal.business_record",
+        "internal.business_record",
+        "internal.business_record",
+    ]
 
 
 def test_identity_rbac_audit_and_outbox_flow(api_client: tuple[TestClient, async_sessionmaker[AsyncSession]]) -> None:

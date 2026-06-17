@@ -53,6 +53,7 @@ from drivedesk_api.schemas import (
     AuthSessionRead,
     BusinessRecordCreate,
     BusinessRecordRead,
+    BusinessRecordTransition,
     BusinessRecordType,
     FileImportCreate,
     LoginRequest,
@@ -69,6 +70,7 @@ from drivedesk_api.schemas import (
     UserRead,
 )
 from drivedesk_api.services import (
+    count_business_records_by_type_status,
     count_outbox_by_status,
     create_business_record,
     create_file_import_job,
@@ -80,6 +82,7 @@ from drivedesk_api.services import (
     list_business_records,
     list_platform_admins,
     summarize_integration_outbox,
+    transition_business_record,
     write_audit,
 )
 from drivedesk_api.session import get_session
@@ -154,6 +157,7 @@ def build_app(settings: Settings | None = None) -> FastAPI:
             integration_rows = await summarize_integration_outbox(session)
             auth_session_counts = await count_auth_sessions_by_status(session)
             auth_attempt_counts = await count_auth_attempts_by_outcome(session)
+            business_record_rows = await count_business_records_by_type_status(session)
         except Exception as exc:
             # Keep Prometheus scrapeable even when storage-backed aggregates degrade.
             storage_available = False
@@ -162,6 +166,7 @@ def build_app(settings: Settings | None = None) -> FastAPI:
             integration_rows = []
             auth_session_counts = {}
             auth_attempt_counts = {}
+            business_record_rows = []
             log_json(
                 metrics_logger,
                 "metrics.storage_unavailable",
@@ -178,6 +183,7 @@ def build_app(settings: Settings | None = None) -> FastAPI:
                 integration_rows=integration_rows,
                 auth_session_counts=auth_session_counts,
                 auth_attempt_counts=auth_attempt_counts,
+                business_record_rows=business_record_rows,
                 storage_available=storage_available,
             ),
             media_type="text/plain; version=0.0.4; charset=utf-8",
@@ -509,6 +515,27 @@ def build_app(settings: Settings | None = None) -> FastAPI:
         await ensure_tenant_exists(session, tenant_id)
         require_tenant_permission(actor, tenant_id, Permission.BUSINESS_RECORD_READ)
         return await list_business_records(session, tenant_id=tenant_id, record_type=record_type)
+
+    @api.post(
+        "/tenants/{tenant_id}/business-records/{record_id}/transition",
+        response_model=BusinessRecordRead,
+    )
+    async def transition_business_record_endpoint(
+        tenant_id: str,
+        record_id: str,
+        payload: BusinessRecordTransition,
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> BusinessRecord:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.BUSINESS_RECORD_WRITE)
+        return await transition_business_record(
+            session,
+            tenant_id=tenant_id,
+            record_id=record_id,
+            payload=payload,
+            actor=actor,
+        )
 
     @api.post("/tenants/{tenant_id}/integration-imports/file", response_model=OutboxEventRead, status_code=202)
     async def create_file_import_endpoint(

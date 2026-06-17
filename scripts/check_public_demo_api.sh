@@ -140,14 +140,18 @@ assert metrics_headers.get("content-type", "").startswith("text/plain"), metrics
 assert "drivedesk_metrics_storage_available " in metrics, metrics
 assert "# HELP drivedesk_auth_sessions Current auth sessions by lifecycle status." in metrics, metrics
 assert "# HELP drivedesk_auth_attempts_total Auth attempts grouped by outcome." in metrics, metrics
+assert "# HELP drivedesk_business_records Current business records by type and status." in metrics, metrics
 assert "user_email" not in metrics, metrics
 assert "token_id" not in metrics, metrics
 assert "token_hash" not in metrics, metrics
+assert "external_ref" not in metrics, metrics
+assert "tenant_id" not in metrics, metrics
 assert "/auth/login" in openapi["paths"], openapi["paths"].keys()
 assert "/auth/me" in openapi["paths"], openapi["paths"].keys()
 assert "/auth/logout" in openapi["paths"], openapi["paths"].keys()
 assert "/auth/sessions" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/business-records" in openapi["paths"], openapi["paths"].keys()
+assert "/tenants/{tenant_id}/business-records/{record_id}/transition" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/public" in openapi["paths"], openapi["paths"].keys()
 assert "/health" in openapi["paths"], openapi["paths"].keys()
 

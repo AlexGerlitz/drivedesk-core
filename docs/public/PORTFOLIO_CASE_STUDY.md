@@ -40,6 +40,7 @@ Implemented foundation:
 - tenant isolation for bearer-token list/read access and global bootstrap endpoints;
 - reusable tenant-scope helper module for Core list queries;
 - tenant-owned business record foundation for contracts, payments, lessons, tasks, and documents;
+- business record lifecycle transition endpoint with audit, outbox, and aggregate metrics;
 - fake file import adapter with retry and dead-letter states;
 - integration adapter metrics grouped by adapter and status;
 - structured adapter worker logs for started, completed, failed, and
@@ -114,6 +115,10 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
 - Tenant-owned repository helpers now wrap current membership, audit, and outbox
   list queries plus the first product-shaped business records, so future
   business entities do not copy raw `tenant_id` filters.
+- Business record status changes now produce `business_record.status_changed`
+  audit/outbox events and aggregate `drivedesk_business_records` metrics, while
+  keeping titles, external refs, payloads, tenant ids, and user ids out of
+  metrics.
 - The hosted public demo uses static fallback on GitHub Pages and can be pointed
   at `GET /demo/public` for API-backed fake data, including workflow stages,
   timeline, domain events, audit, and outbox state.

@@ -22,6 +22,7 @@ It includes:
 - reusable tenant-owned repository helper module for models with `tenant_id`;
 - tenant-owned business record foundation for contracts, payments, lessons,
   tasks, and documents;
+- business record lifecycle transition endpoint with audit, outbox, and aggregate metrics;
 - fake file import adapter with retry and dead-letter state;
 - synthetic lead-to-student workflow in the public demo payload;
 - generated OpenAPI client SDK example for the public demo API;
@@ -87,6 +88,8 @@ It includes:
 - `GET /platform/admins` - platform-admin grant review endpoint.
 - `POST /tenants/{tenant_id}/business-records` - tenant-owned business record creation.
 - `GET /tenants/{tenant_id}/business-records` - tenant-owned business record listing.
+- `POST /tenants/{tenant_id}/business-records/{record_id}/transition` - auditable business status transition.
+- `drivedesk_business_records` - aggregate business record metric by type and status.
 - `internal.business_record` - adapter key used by business record outbox events.
 - `DriveDeskMetricsStorageUnavailable`, `DriveDeskAuthFailureSpike`, and
   `DriveDeskAuthLockedAttempts` - public-safe auth alert contract.
@@ -201,3 +204,4 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/adr/0023-dedicated-platform-admin-model.md`
 - `docs/adr/0024-admin-triggered-session-revocation.md`
 - `docs/adr/0025-tenant-owned-business-record-foundation.md`
+- `docs/adr/0026-business-record-lifecycle-and-metrics.md`

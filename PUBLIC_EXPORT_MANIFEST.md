@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-17T20:28:39Z
+Generated at: 2026-06-17T20:41:07Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -34,6 +34,7 @@ Copied public-safe areas:
 - public platform-admin control-plane surface
 - public session revocation control-plane surface
 - public business record tenant-owned surface
+- public business record lifecycle and metrics surface
 - public business record outbox adapter key: internal.business_record
 - public tenant-owned repository helper surface
 - public auth observability alerting surface

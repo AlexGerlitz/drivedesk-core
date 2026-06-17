@@ -14,6 +14,7 @@ from drivedesk_api.db import AuditEvent, BusinessRecord, Membership, OutboxEvent
 from drivedesk_api.rbac import ActorContext
 from drivedesk_api.schemas import (
     BusinessRecordCreate,
+    BusinessRecordTransition,
     BusinessRecordType,
     FileImportCreate,
     MembershipCreate,
@@ -318,6 +319,71 @@ async def list_business_records(
         tenant_id,
         order_by=BusinessRecord.created_at.desc(),
     )
+
+
+async def transition_business_record(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    record_id: str,
+    payload: BusinessRecordTransition,
+    actor: ActorContext,
+) -> BusinessRecord:
+    await ensure_tenant_exists(session, tenant_id)
+    record = await session.get(BusinessRecord, record_id)
+    if not record or record.tenant_id != tenant_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="business record not found")
+
+    previous_status = record.status
+    record.status = payload.status
+    await write_audit(
+        session,
+        tenant_id=tenant_id,
+        actor=actor,
+        event_type="business_record.status_changed",
+        entity_type=f"business_record.{record.record_type}",
+        entity_id=record.id,
+        summary=f"Business record status changed: {previous_status} -> {record.status}",
+        metadata={
+            "record_id": record.id,
+            "record_type": record.record_type,
+            "previous_status": previous_status,
+            "new_status": record.status,
+            "reason": payload.reason,
+        },
+    )
+    await enqueue_outbox(
+        session,
+        tenant_id=tenant_id,
+        event_type="business_record.status_changed",
+        adapter_key="internal.business_record",
+        payload={
+            "record_id": record.id,
+            "record_type": record.record_type,
+            "previous_status": previous_status,
+            "new_status": record.status,
+        },
+    )
+    await commit_or_conflict(session, "business record transition failed")
+    return record
+
+
+async def count_business_records_by_type_status(session: AsyncSession) -> list[dict[str, object]]:
+    result = await session.execute(
+        select(
+            BusinessRecord.record_type,
+            BusinessRecord.status,
+            func.count().label("record_count"),
+        ).group_by(BusinessRecord.record_type, BusinessRecord.status)
+    )
+    return [
+        {
+            "record_type": row.record_type,
+            "status": row.status,
+            "record_count": int(row.record_count or 0),
+        }
+        for row in result.all()
+    ]
 
 
 async def ensure_tenant_exists(session: AsyncSession, tenant_id: str) -> Tenant:

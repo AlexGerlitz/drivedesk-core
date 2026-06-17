@@ -25,6 +25,7 @@ operations, or commercial details.
 - Reusable tenant-scope helper module for Core list queries.
 - Reusable tenant-owned repository helper module for models with `tenant_id`.
 - Tenant-owned business record foundation for contracts, payments, lessons, tasks, and documents.
+- Business record lifecycle transition endpoint with audit, outbox, and aggregate metrics.
 - Public demo shell with synthetic data and an API-backed synthetic contract.
 - Synthetic workflow payload with stages, timeline, domain events, audit, and outbox.
 - One-command local demo API run.
@@ -37,7 +38,7 @@ operations, or commercial details.
 ## Next
 
 - More structured adapter contracts and mapping examples.
-- More detailed lifecycle examples for contracts, payments, lessons, tasks, and documents.
+- More detailed lifecycle validation examples for contracts, payments, lessons, tasks, and documents.
 - More public-safe workflow examples that reuse the same event and outbox shape.
 - More public-safe evidence around local run, CI, OpenAPI, and demo health.
 - Broader generated client SDK examples from the OpenAPI schema.

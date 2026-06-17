@@ -150,6 +150,11 @@ class BusinessRecordCreate(BaseModel):
     payload: dict[str, Any] = Field(default_factory=dict)
 
 
+class BusinessRecordTransition(BaseModel):
+    status: str = Field(min_length=2, max_length=32, pattern=r"^[a-z0-9][a-z0-9_-]*$")
+    reason: str | None = Field(default=None, min_length=2, max_length=255)
+
+
 class BusinessRecordRead(BaseModel):
     id: str
     tenant_id: str

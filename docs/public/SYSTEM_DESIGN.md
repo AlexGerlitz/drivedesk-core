@@ -196,8 +196,13 @@ create a record inside their tenant, a viewer can read but not write, and a
 member of tenant A cannot read tenant B records.
 
 Created business records write `business_record.created` audit and outbox
-events so future integrations can react through the same delivery path as other
-Core changes.
+events. Status transitions write `business_record.status_changed` audit and
+outbox events. Future integrations can react through the same delivery path as
+other Core changes.
+
+Business record observability is aggregate-only. `/metrics` exposes
+`drivedesk_business_records` grouped by `record_type` and `status`, but it does
+not expose titles, external references, payload data, user ids, or tenant ids.
 
 ## Adapter Boundary
 

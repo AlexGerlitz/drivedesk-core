@@ -143,6 +143,8 @@ def test_api_metrics_endpoint(api_client: TestClient) -> None:
     assert "# TYPE drivedesk_auth_sessions gauge" in response.text
     assert "# HELP drivedesk_auth_attempts_total Auth attempts grouped by outcome." in response.text
     assert "# TYPE drivedesk_auth_attempts_total counter" in response.text
+    assert "# HELP drivedesk_business_records Current business records by type and status." in response.text
+    assert "# TYPE drivedesk_business_records gauge" in response.text
 
 
 def test_api_metrics_endpoint_degrades_without_database_schema() -> None:
@@ -166,6 +168,7 @@ def test_api_metrics_endpoint_degrades_without_database_schema() -> None:
     assert "drivedesk_metrics_storage_available 0" in response.text
     assert "# HELP drivedesk_auth_sessions Current auth sessions by lifecycle status." in response.text
     assert "# HELP drivedesk_auth_attempts_total Auth attempts grouped by outcome." in response.text
+    assert "# HELP drivedesk_business_records Current business records by type and status." in response.text
 
 
 def test_api_request_log_is_structured_json(caplog: pytest.LogCaptureFixture) -> None:

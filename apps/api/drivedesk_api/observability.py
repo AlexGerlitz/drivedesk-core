@@ -196,6 +196,17 @@ def build_auth_metrics_lines(
     return lines
 
 
+def build_business_record_metrics_lines(business_record_rows: list[dict[str, object]]) -> list[str]:
+    lines = [
+        "# HELP drivedesk_business_records Current business records by type and status.",
+        "# TYPE drivedesk_business_records gauge",
+    ]
+    for row in business_record_rows:
+        labels = prometheus_labels({"record_type": row["record_type"], "status": row["status"]})
+        lines.append(f"drivedesk_business_records{labels} {row['record_count']}")
+    return lines
+
+
 def build_readiness_metrics_lines(settings: Settings) -> list[str]:
     dependencies = {
         "database_url_configured": bool(settings.database_url),
@@ -228,6 +239,7 @@ def build_metrics_text(
     integration_rows: list[dict[str, object]] | None = None,
     auth_session_counts: dict[str, int] | None = None,
     auth_attempt_counts: dict[str, int] | None = None,
+    business_record_rows: list[dict[str, object]] | None = None,
     storage_available: bool = True,
 ) -> str:
     labels = prometheus_labels(
@@ -258,6 +270,7 @@ def build_metrics_text(
     lines.extend(build_outbox_metrics_lines(outbox_counts or {}))
     lines.extend(build_integration_metrics_lines(integration_rows or []))
     lines.extend(build_auth_metrics_lines(auth_session_counts or {}, auth_attempt_counts or {}))
+    lines.extend(build_business_record_metrics_lines(business_record_rows or []))
     lines.append("")
     return "\n".join(lines)
 

@@ -191,6 +191,7 @@ New endpoint group:
 - `POST /tenants/{tenant_id}/business-records`;
 - `GET /tenants/{tenant_id}/business-records`;
 - `GET /tenants/{tenant_id}/business-records?record_type=contract`.
+- `POST /tenants/{tenant_id}/business-records/{record_id}/transition`.
 
 Supported record types:
 
@@ -207,6 +208,10 @@ What this gives us:
 - Viewers can read business records but cannot write them.
 - Cross-tenant bearer-token access is rejected.
 - Each created record writes `business_record.created` audit and outbox events.
+- Each status transition writes `business_record.status_changed` audit and
+  outbox events.
+- `/metrics` exposes aggregate business record counts by `record_type` and
+  `status` with `drivedesk_business_records`.
 - The business list path exercises the tenant-owned repository helper on real
   product-shaped data.
 

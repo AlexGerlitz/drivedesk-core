@@ -10,6 +10,7 @@ building detailed product modules.
 POST /tenants/{tenant_id}/business-records
 GET /tenants/{tenant_id}/business-records
 GET /tenants/{tenant_id}/business-records?record_type=contract
+POST /tenants/{tenant_id}/business-records/{record_id}/transition
 ```
 
 Supported public-safe record types:
@@ -31,6 +32,8 @@ shared platform behavior once:
 - explicit read/write permissions;
 - audit events;
 - outbox events;
+- lifecycle transitions;
+- aggregate Prometheus metrics.
 - reusable tenant-owned repository helpers.
 
 ## Verified Behavior
@@ -45,6 +48,19 @@ The Core API tests cover:
 - writing `business_record.created` audit events;
 - enqueuing `business_record.created` outbox events with
   `adapter_key=internal.business_record`.
+- changing a record status through the transition endpoint;
+- writing `business_record.status_changed` audit events;
+- enqueuing `business_record.status_changed` outbox events with
+  `adapter_key=internal.business_record`;
+- exposing aggregate metric rows such as:
+
+```text
+drivedesk_business_records{record_type="contract",status="approved"} 1
+```
+
+The metric labels are intentionally limited to `record_type` and `status`.
+Titles, external references, payload data, user identifiers, tenant identifiers,
+and request bodies must not appear in metrics.
 
 ## Boundary
 

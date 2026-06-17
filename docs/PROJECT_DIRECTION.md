@@ -11,6 +11,7 @@ The project starts with generic platform capabilities:
 - RBAC;
 - tenant isolation;
 - tenant-scope query helpers;
+- tenant-owned repository helpers;
 - audit;
 - outbox events;
 - worker processing;
@@ -39,7 +40,7 @@ tests          API and foundation tests
 Recommended next slices:
 
 - admin-visible auth session listing;
-- stricter tenant-scoped query filters backed by memberships;
+- tenant-owned repository coverage for future business entities;
 - structured logging;
 - OpenTelemetry tracing;
 - metrics endpoint;

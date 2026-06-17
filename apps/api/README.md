@@ -57,6 +57,8 @@ Tenant isolation:
   reject bearer-token requests until a dedicated platform-admin model exists.
 - tenant-scoped list queries are centralized in
   `apps/api/drivedesk_api/tenant_scope.py`.
+- tenant-owned list queries for models with `tenant_id` use
+  `apps/api/drivedesk_api/tenant_repository.py`.
 
 Bearer requests use:
 

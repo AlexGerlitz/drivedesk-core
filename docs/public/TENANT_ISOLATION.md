@@ -62,6 +62,24 @@ The goal is to keep future endpoint groups from copying tenant filters by hand.
 When contracts, payments, lessons, documents, and tasks are added, they should
 use the same tenant-scope pattern.
 
+## Tenant-Owned Repository Helper
+
+Tenant-owned query construction is centralized in:
+
+```text
+apps/api/drivedesk_api/tenant_repository.py
+```
+
+Current helpers:
+
+- `tenant_owned_select()`;
+- `list_tenant_owned()`.
+
+Current tenant-owned list endpoints for memberships, audit events, and outbox
+events use the helper after explicit permission checks. The point is to make
+`tenant_id` filtering the default path for future contracts, payments, lessons,
+documents, and tasks.
+
 ## Request Flow
 
 ```mermaid
@@ -77,7 +95,8 @@ flowchart LR
 
 Recommended next slices:
 
-1. Add tenant-scoped query helpers for every future tenant-owned repository.
+1. Apply tenant-owned repository helpers to future contracts, payments, lessons,
+   documents, and tasks.
 2. Add a dedicated platform-admin model instead of reusing tenant roles.
 3. Add public-safe tenant-isolation metrics with synthetic data.
 4. Add database-level row isolation once the Core data model stabilizes.

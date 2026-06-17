@@ -64,8 +64,9 @@ flowchart LR
 flowchart LR
   Bearer["Bearer Token"] --> Membership["Tenant Memberships"]
   Membership --> Scope["Tenant Scope Helpers"]
-  Scope --> TenantA["Tenant A Allowed"]
-  Scope --> TenantB["Tenant B Rejected Without Membership"]
+  Scope --> Repository["Tenant-Owned Repository Helpers"]
+  Repository --> TenantA["Tenant A Allowed"]
+  Repository --> TenantB["Tenant B Rejected Without Membership"]
   Bearer --> Bootstrap["Global Bootstrap Endpoint"]
   Bootstrap --> Rejected["Rejected For Bearer Token"]
 ```

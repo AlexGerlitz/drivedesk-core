@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-17T18:25:07Z
+Generated at: 2026-06-17T18:40:22Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -31,6 +31,7 @@ Copied public-safe areas:
 - public demo API-backed loading surface
 - public demo synthetic business workflow surface
 - public demo generated OpenAPI SDK
+- public tenant-owned repository helper surface
 - public demo local run script
 - public demo API contract smoke script
 - public demo SDK smoke script

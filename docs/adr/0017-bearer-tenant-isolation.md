@@ -40,6 +40,7 @@ seed flows. They are not product-session authorization.
 
 ## Next Work
 
-- Add tenant-scoped repository helpers for future tenant-owned entities.
+- ADR-0018 and ADR-0019 add tenant-scope and tenant-owned repository helpers.
+- Apply those helpers to future tenant-owned entities as they are introduced.
 - Add a platform-admin model when real platform operations need it.
 - Add database-level row isolation when the Core model is stable enough.

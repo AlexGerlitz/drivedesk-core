@@ -6,7 +6,6 @@ from time import perf_counter
 
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.responses import JSONResponse, PlainTextResponse
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 from starlette.responses import Response
@@ -65,6 +64,7 @@ from drivedesk_api.services import (
 )
 from drivedesk_api.session import get_session
 from drivedesk_api.settings import Settings, get_settings
+from drivedesk_api.tenant_repository import list_tenant_owned
 from drivedesk_api.tenant_scope import list_tenants_for_actor, list_users_for_actor
 from drivedesk_core import __version__ as core_version
 
@@ -324,10 +324,7 @@ def build_app(settings: Settings | None = None) -> FastAPI:
     ) -> list[Membership]:
         await ensure_tenant_exists(session, tenant_id)
         require_tenant_permission(actor, tenant_id, Permission.MEMBERSHIP_READ)
-        result = await session.execute(
-            select(Membership).where(Membership.tenant_id == tenant_id).order_by(Membership.created_at.desc())
-        )
-        return list(result.scalars().all())
+        return await list_tenant_owned(session, Membership, tenant_id, order_by=Membership.created_at.desc())
 
     @api.get("/tenants/{tenant_id}/audit-events", response_model=list[AuditEventRead])
     async def list_audit_events_endpoint(
@@ -337,10 +334,7 @@ def build_app(settings: Settings | None = None) -> FastAPI:
     ) -> list[AuditEvent]:
         await ensure_tenant_exists(session, tenant_id)
         require_tenant_permission(actor, tenant_id, Permission.AUDIT_READ)
-        result = await session.execute(
-            select(AuditEvent).where(AuditEvent.tenant_id == tenant_id).order_by(AuditEvent.created_at.desc())
-        )
-        return list(result.scalars().all())
+        return await list_tenant_owned(session, AuditEvent, tenant_id, order_by=AuditEvent.created_at.desc())
 
     @api.get("/tenants/{tenant_id}/outbox-events", response_model=list[OutboxEventRead])
     async def list_outbox_events_endpoint(
@@ -350,10 +344,7 @@ def build_app(settings: Settings | None = None) -> FastAPI:
     ) -> list[OutboxEvent]:
         await ensure_tenant_exists(session, tenant_id)
         require_tenant_permission(actor, tenant_id, Permission.OUTBOX_READ)
-        result = await session.execute(
-            select(OutboxEvent).where(OutboxEvent.tenant_id == tenant_id).order_by(OutboxEvent.created_at.desc())
-        )
-        return list(result.scalars().all())
+        return await list_tenant_owned(session, OutboxEvent, tenant_id, order_by=OutboxEvent.created_at.desc())
 
     @api.post("/tenants/{tenant_id}/integration-imports/file", response_model=OutboxEventRead, status_code=202)
     async def create_file_import_endpoint(

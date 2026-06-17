@@ -19,10 +19,11 @@ for relative in ("apps/api", "apps/worker", "packages/core"):
     if path not in sys.path:
         sys.path.insert(0, path)
 
-from drivedesk_api.db import AccessToken, AuditEvent, AuthAttempt, Base, OutboxEvent
+from drivedesk_api.db import AccessToken, AuditEvent, AuthAttempt, Base, OutboxEvent, User
 from drivedesk_api.main import build_app
 from drivedesk_api.rbac import ActorContext
 from drivedesk_api.session import get_session
+from drivedesk_api.tenant_repository import list_tenant_owned, tenant_owned_select
 from drivedesk_api.tenant_scope import actor_member_tenant_ids
 from drivedesk_worker.main import process_outbox_once
 
@@ -62,6 +63,55 @@ def test_tenant_scope_helper_reads_bearer_membership_ids() -> None:
 
     assert actor_member_tenant_ids(bearer_actor) == ["tenant_a", "tenant_b"]
     assert actor_member_tenant_ids(header_actor) == []
+
+
+def test_tenant_owned_repository_helper_filters_by_tenant(
+    api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, session_factory = api_client
+    owner_headers = {"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"}
+
+    tenant_a_response = client.post(
+        "/tenants",
+        json={"slug": "repo-helper-a", "name": "Repository Helper A"},
+        headers=owner_headers,
+    )
+    assert tenant_a_response.status_code == 201
+    tenant_a_id = tenant_a_response.json()["id"]
+
+    tenant_b_response = client.post(
+        "/tenants",
+        json={"slug": "repo-helper-b", "name": "Repository Helper B"},
+        headers=owner_headers,
+    )
+    assert tenant_b_response.status_code == 201
+    tenant_b_id = tenant_b_response.json()["id"]
+
+    async def list_events_for_tenant() -> tuple[list[AuditEvent], list[OutboxEvent]]:
+        async with session_factory() as session:
+            audits = await list_tenant_owned(
+                session,
+                AuditEvent,
+                tenant_a_id,
+                order_by=AuditEvent.created_at.desc(),
+            )
+            outbox = await list_tenant_owned(
+                session,
+                OutboxEvent,
+                tenant_a_id,
+                order_by=OutboxEvent.created_at.desc(),
+            )
+            return audits, outbox
+
+    audit_events, outbox_events = asyncio.run(list_events_for_tenant())
+
+    assert {event.tenant_id for event in audit_events} == {tenant_a_id}
+    assert {event.tenant_id for event in outbox_events} == {tenant_a_id}
+    assert tenant_b_id not in {event.tenant_id for event in audit_events}
+    assert tenant_b_id not in {event.tenant_id for event in outbox_events}
+
+    with pytest.raises(ValueError, match="User is not a tenant-owned model"):
+        tenant_owned_select(User, tenant_a_id)
 
 
 def test_identity_rbac_audit_and_outbox_flow(api_client: tuple[TestClient, async_sessionmaker[AsyncSession]]) -> None:

@@ -15,6 +15,7 @@ It includes:
   token revocation, failed-attempt guard, and auth audit events;
 - bearer-token tenant isolation for tenant/user listing and bootstrap endpoints;
 - reusable tenant-scope helper module for Core list queries;
+- reusable tenant-owned repository helper module for models with `tenant_id`;
 - fake file import adapter with retry and dead-letter state;
 - synthetic lead-to-student workflow in the public demo payload;
 - generated OpenAPI client SDK example for the public demo API;
@@ -166,3 +167,4 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/adr/0016-auth-lifecycle-audit-guard.md`
 - `docs/adr/0017-bearer-tenant-isolation.md`
 - `docs/adr/0018-tenant-scope-query-helpers.md`
+- `docs/adr/0019-tenant-owned-repository-helpers.md`

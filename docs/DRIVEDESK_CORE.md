@@ -109,6 +109,7 @@ Sprint 2 adds the first real Core auth path:
 - tenant isolation for bearer-token tenant and user listing;
 - bootstrap-only platform endpoints for global tenant/user creation.
 - reusable tenant-scope helpers for Core list queries.
+- tenant-owned repository helpers for Core list queries with `tenant_id`.
 
 What this gives us:
 
@@ -150,6 +151,12 @@ Tenant-scope module:
 - `actor_member_tenant_ids()`;
 - `list_tenants_for_actor()`;
 - `list_users_for_actor()`.
+
+Tenant-owned repository module:
+
+- `apps/api/drivedesk_api/tenant_repository.py`;
+- `tenant_owned_select()`;
+- `list_tenant_owned()`.
 
 ## Local Commands
 

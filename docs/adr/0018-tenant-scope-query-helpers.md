@@ -34,6 +34,8 @@ queries to the tenant-scope module.
 
 ## Next Work
 
-- Add tenant-scoped repository helpers for contracts, payments, lessons, files,
-  tasks, and documents when those models exist.
+- ADR-0019 adds tenant-owned repository helpers for models that carry
+  `tenant_id`.
+- Apply those helpers to contracts, payments, lessons, files, tasks, and
+  documents when those models exist.
 - Add database-level row isolation when the Core schema stabilizes.

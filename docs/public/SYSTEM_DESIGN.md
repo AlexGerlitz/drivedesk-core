@@ -65,6 +65,7 @@ flowchart TB
 | API | HTTP contract, validation, auth context, tenant-aware operations, audit writes. |
 | Auth layer | Credential verification, bearer token hashing, revocation, login guard, audit, current-user lookup, tenant isolation, and RBAC context. |
 | Tenant scope | Reusable query helpers that keep tenant/user list behavior scoped to memberships. |
+| Tenant repository | Reusable query helpers for tenant-owned models that carry `tenant_id`. |
 | Core modules | Domain rules that should not depend on web framework details. |
 | Database | Durable business state, migrations, audit and outbox storage. |
 | Worker | Async processing, retryable jobs, future adapter execution. |
@@ -151,6 +152,10 @@ platform-admin model exists.
 Tenant list filtering is centralized in a tenant-scope module. Current handlers
 still perform explicit permission checks, then delegate scoped list queries to
 that module.
+
+Tenant-owned resources such as memberships, audit events, and outbox events use
+a repository helper for `tenant_id` query construction. Future contracts,
+payments, lessons, documents, and tasks should use the same default path.
 
 ## Adapter Boundary
 

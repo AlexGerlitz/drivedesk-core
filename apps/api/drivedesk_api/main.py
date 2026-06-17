@@ -22,6 +22,7 @@ from drivedesk_api.observability import (
 from drivedesk_api.rbac import ActorContext, Permission, actor_context, require_permission
 from drivedesk_api.schemas import (
     AuditEventRead,
+    FileImportCreate,
     MembershipCreate,
     MembershipRead,
     OutboxEventRead,
@@ -32,6 +33,7 @@ from drivedesk_api.schemas import (
 )
 from drivedesk_api.services import (
     count_outbox_by_status,
+    create_file_import_job,
     create_membership,
     create_tenant,
     create_user,
@@ -189,6 +191,16 @@ def build_app(settings: Settings | None = None) -> FastAPI:
             select(OutboxEvent).where(OutboxEvent.tenant_id == tenant_id).order_by(OutboxEvent.created_at.desc())
         )
         return list(result.scalars().all())
+
+    @api.post("/tenants/{tenant_id}/integration-imports/file", response_model=OutboxEventRead, status_code=202)
+    async def create_file_import_endpoint(
+        tenant_id: str,
+        payload: FileImportCreate,
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> OutboxEvent:
+        require_permission(actor, Permission.TENANT_WRITE)
+        return await create_file_import_job(session, tenant_id=tenant_id, payload=payload, actor=actor)
 
     return api
 

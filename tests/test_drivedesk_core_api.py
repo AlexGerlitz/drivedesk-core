@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import sys
 from collections.abc import AsyncIterator, Iterator
 from pathlib import Path
@@ -124,3 +125,120 @@ def test_identity_rbac_audit_and_outbox_flow(api_client: tuple[TestClient, async
             return list(result.scalars().all())
 
     assert asyncio.run(outbox_statuses()) == ["processed", "processed", "processed"]
+
+
+def test_file_import_adapter_success_flow(api_client: tuple[TestClient, async_sessionmaker[AsyncSession]]) -> None:
+    client, session_factory = api_client
+
+    tenant_response = client.post(
+        "/tenants",
+        json={"slug": "adapter-success", "name": "Adapter Success"},
+        headers={"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"},
+    )
+    assert tenant_response.status_code == 201
+    tenant_id = tenant_response.json()["id"]
+
+    import_response = client.post(
+        f"/tenants/{tenant_id}/integration-imports/file",
+        json={
+            "source_name": "demo-leads-json",
+            "source_format": "json",
+            "records": [
+                {"external_id": "lead_001", "display_name": "Demo Learner One"},
+                {"external_id": "lead_002", "display_name": "Demo Learner Two"},
+                {"external_id": "", "display_name": "Rejected Demo Row"},
+            ],
+        },
+        headers={"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"},
+    )
+    assert import_response.status_code == 202
+    import_event = import_response.json()
+    assert import_event["event_type"] == "integration.file_import.requested"
+    assert import_event["adapter_key"] == "file.import.fake"
+    assert import_event["status"] == "pending"
+
+    processed = asyncio.run(process_outbox_once(session_factory=session_factory))
+    assert processed == 2
+
+    outbox_response = client.get(
+        f"/tenants/{tenant_id}/outbox-events",
+        headers={"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"},
+    )
+    assert outbox_response.status_code == 200
+    file_event = next(
+        event for event in outbox_response.json() if event["event_type"] == "integration.file_import.requested"
+    )
+    result = json.loads(file_event["result_json"])
+    assert file_event["status"] == "processed"
+    assert file_event["attempts"] == 1
+    assert result["adapter_key"] == "file.import.fake"
+    assert result["status"] == "partial_success"
+    assert result["records_received"] == 3
+    assert result["records_accepted"] == 2
+    assert result["records_rejected"] == 1
+
+
+def test_file_import_adapter_retry_and_dead_letter(
+    api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, session_factory = api_client
+
+    tenant_response = client.post(
+        "/tenants",
+        json={"slug": "adapter-failure", "name": "Adapter Failure"},
+        headers={"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"},
+    )
+    assert tenant_response.status_code == 201
+    tenant_id = tenant_response.json()["id"]
+
+    retry_response = client.post(
+        f"/tenants/{tenant_id}/integration-imports/file",
+        json={
+            "source_name": "retryable-file",
+            "source_format": "json",
+            "simulate_failure": "retryable",
+            "records": [{"external_id": "lead_retry", "display_name": "Retry Demo"}],
+        },
+        headers={"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"},
+    )
+    assert retry_response.status_code == 202
+
+    permanent_response = client.post(
+        f"/tenants/{tenant_id}/integration-imports/file",
+        json={
+            "source_name": "permanent-file",
+            "source_format": "json",
+            "simulate_failure": "permanent",
+            "records": [{"external_id": "lead_dead", "display_name": "Dead Letter Demo"}],
+        },
+        headers={"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"},
+    )
+    assert permanent_response.status_code == 202
+
+    processed = asyncio.run(process_outbox_once(session_factory=session_factory))
+    assert processed == 3
+
+    async def outbox_events() -> list[OutboxEvent]:
+        async with session_factory() as session:
+            result = await session.execute(select(OutboxEvent).order_by(OutboxEvent.created_at))
+            return list(result.scalars().all())
+
+    events = asyncio.run(outbox_events())
+    statuses_by_source = {}
+    for event in events:
+        payload = json.loads(event.payload_json)
+        if "source_name" in payload:
+            statuses_by_source[payload["source_name"]] = event
+
+    retry_event = statuses_by_source["retryable-file"]
+    assert retry_event.status == "retry"
+    assert retry_event.attempts == 1
+    assert retry_event.next_retry_at is not None
+    assert retry_event.last_error == "Fake provider is temporarily unavailable."
+
+    dead_event = statuses_by_source["permanent-file"]
+    assert dead_event.status == "dead_letter"
+    assert dead_event.attempts == 1
+    assert dead_event.dead_lettered_at is not None
+    assert dead_event.next_retry_at is None
+    assert dead_event.last_error == "Fake provider rejected the import contract."

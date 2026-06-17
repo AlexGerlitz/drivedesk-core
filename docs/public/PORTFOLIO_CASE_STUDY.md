@@ -29,6 +29,7 @@ Implemented foundation:
 - Redis wiring;
 - background worker;
 - tenant, user, membership, RBAC, audit, and outbox primitives;
+- fake file import adapter with retry and dead-letter states;
 - structured JSON API and worker logs;
 - Prometheus metrics;
 - Grafana dashboard;
@@ -93,7 +94,7 @@ Recommended next slices:
 2. Backup and restore evidence for the staging runtime.
 3. Real authentication and tenant-scoped memberships.
 4. Generated API client examples from OpenAPI.
-5. First mock integration adapter with retries and dead-letter handling.
+5. Additional mock adapters for webhook and accounting export flows.
 
 ## Interview Summary
 

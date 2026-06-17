@@ -20,6 +20,7 @@
         <nav class="nav-tabs" aria-label="Demo sections">
           <button class="nav-tab is-active" type="button" data-view="overview">Overview</button>
           <button class="nav-tab" type="button" data-view="work">Work</button>
+          <button class="nav-tab" type="button" data-view="integrations">Integrations</button>
           <button class="nav-tab" type="button" data-view="system">System</button>
         </nav>
       </aside>
@@ -97,6 +98,30 @@
           </div>
         </section>
 
+        <section class="view" id="view-integrations" aria-labelledby="integrationsTitle">
+          <div class="section-heading">
+            <h2 id="integrationsTitle">Integration Adapters</h2>
+            <span class="muted">Outbox-driven delivery</span>
+          </div>
+          <div class="dashboard-grid">
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Adapter Contracts</h3>
+                <span class="muted">Provider boundary</span>
+              </div>
+              <div class="adapter-list" id="adapterRows"></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Sync Jobs</h3>
+                <span class="muted">Retry state</span>
+              </div>
+              <div class="event-list" id="syncJobRows"></div>
+            </section>
+          </div>
+        </section>
+
         <section class="view" id="view-system" aria-labelledby="systemTitle">
           <div class="section-heading">
             <h2 id="systemTitle">System State</h2>
@@ -127,4 +152,3 @@
     <script src="./app.js"></script>
   </body>
 </html>
-

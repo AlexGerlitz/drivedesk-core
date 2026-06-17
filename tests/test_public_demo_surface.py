@@ -37,6 +37,8 @@ def test_public_demo_html_links_static_assets() -> None:
     assert "./app.js" in html
     assert 'id="metricGrid"' in html
     assert 'id="workQueueRows"' in html
+    assert 'id="adapterRows"' in html
+    assert 'id="syncJobRows"' in html
     assert 'id="outboxRows"' in html
 
 
@@ -50,8 +52,11 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
     assert len(payload["workQueue"]) >= 4
     assert len(payload["members"]) >= 3
     assert len(payload["auditEvents"]) >= 3
+    assert len(payload["adapters"]) >= 3
+    assert len(payload["integrationJobs"]) >= 3
     assert len(payload["outbox"]) >= 3
     assert {event["status"] for event in payload["outbox"]} >= {"processed", "pending"}
+    assert {job["status"] for job in payload["integrationJobs"]} >= {"processed", "retry", "dead_letter"}
 
 
 def test_public_demo_has_no_private_runtime_markers() -> None:

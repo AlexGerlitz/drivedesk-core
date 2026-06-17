@@ -110,6 +110,10 @@ Adapter rules:
 - failed delivery becomes visible operational state;
 - sensitive provider details stay out of public docs and public demo data.
 
+The first implemented adapter is documented in `INTEGRATION_ADAPTERS.md`. It
+uses synthetic file-import data to prove the API -> outbox -> worker -> adapter
+flow, including retry and dead-letter states.
+
 ## CI/CD And Evidence Flow
 
 ```mermaid

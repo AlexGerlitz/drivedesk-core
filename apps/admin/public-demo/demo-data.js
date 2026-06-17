@@ -34,8 +34,8 @@ window.DRIVEDESK_DEMO_DATA = {
     },
     {
       "label": "Pending events",
-      "value": "3",
-      "detail": "outbox queue",
+      "value": "1",
+      "detail": "retry queue",
       "tone": "amber"
     }
   ],
@@ -121,16 +121,64 @@ window.DRIVEDESK_DEMO_DATA = {
       "attempts": 1
     },
     {
-      "event": "demo.evidence.ready",
+      "event": "integration.file_import.requested",
+      "status": "processed",
+      "attempts": 1
+    },
+    {
+      "event": "integration.provider.sync",
       "status": "pending",
       "attempts": 0
+    }
+  ],
+  "adapters": [
+    {
+      "key": "file.import.fake",
+      "name": "Fake File Import",
+      "status": "active",
+      "contract": "Normalizes provider rows, returns accepted and rejected record counts, and stores the result on the outbox event."
+    },
+    {
+      "key": "internal.noop",
+      "name": "Internal Noop",
+      "status": "active",
+      "contract": "Acknowledges internal domain events without calling an external provider."
+    },
+    {
+      "key": "accounting.export.mock",
+      "name": "Accounting Export",
+      "status": "planned",
+      "contract": "Future adapter boundary for accounting exports and reconciliation status."
+    }
+  ],
+  "integrationJobs": [
+    {
+      "event": "integration.file_import.requested",
+      "adapter": "file.import.fake",
+      "status": "processed",
+      "attempts": 1,
+      "summary": "2 accepted, 1 rejected"
+    },
+    {
+      "event": "integration.file_import.requested",
+      "adapter": "file.import.fake",
+      "status": "retry",
+      "attempts": 1,
+      "summary": "temporary provider failure, next retry scheduled"
+    },
+    {
+      "event": "integration.file_import.requested",
+      "adapter": "file.import.fake",
+      "status": "dead_letter",
+      "attempts": 1,
+      "summary": "permanent contract failure, operator review required"
     }
   ],
   "integrationReadiness": [
     {
       "name": "File import adapter",
-      "state": "planned",
-      "progress": 35
+      "state": "active",
+      "progress": 75
     },
     {
       "name": "Payment sandbox adapter",
@@ -149,4 +197,3 @@ window.DRIVEDESK_DEMO_DATA = {
     }
   ]
 };
-

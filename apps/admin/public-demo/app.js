@@ -94,6 +94,55 @@
     });
   }
 
+  function fillAdapterContracts() {
+    var rows = document.getElementById("adapterRows");
+    clear(rows);
+    data.adapters.forEach(function (adapter) {
+      var row = document.createElement("article");
+      row.className = "adapter-row";
+
+      var top = document.createElement("div");
+      top.className = "adapter-top";
+      var name = document.createElement("strong");
+      name.appendChild(text(adapter.name));
+      top.append(name, chip(adapter.status, statusTone(adapter.status)));
+
+      var key = document.createElement("code");
+      key.appendChild(text(adapter.key));
+
+      var contract = document.createElement("p");
+      contract.className = "muted";
+      contract.appendChild(text(adapter.contract));
+
+      row.append(top, key, contract);
+      rows.appendChild(row);
+    });
+  }
+
+  function fillSyncJobs() {
+    var rows = document.getElementById("syncJobRows");
+    clear(rows);
+    data.integrationJobs.forEach(function (job) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var name = document.createElement("strong");
+      name.appendChild(text(job.event));
+      top.append(name, chip(job.status, statusTone(job.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(job.adapter + " - attempts " + job.attempts + " - " + job.summary)
+      );
+
+      row.append(top, detail);
+      rows.appendChild(row);
+    });
+  }
+
   function fillMembers() {
     var rows = document.getElementById("memberRows");
     clear(rows);
@@ -177,13 +226,15 @@
   }
 
   function statusTone(status) {
-    if (["done", "ready", "online", "validated", "processed", "green", "active"].indexOf(status) >= 0) {
+    if (
+      ["done", "ready", "online", "validated", "processed", "green", "active", "success"].indexOf(status) >= 0
+    ) {
       return "green";
     }
-    if (["blocked", "waiting", "pending"].indexOf(status) >= 0) {
+    if (["blocked", "waiting", "pending", "retry", "partial_success"].indexOf(status) >= 0) {
       return "amber";
     }
-    if (["high"].indexOf(status) >= 0) {
+    if (["high", "dead_letter"].indexOf(status) >= 0) {
       return "red";
     }
     return "blue";
@@ -224,6 +275,8 @@
     fillMetricGrid();
     fillWorkQueue();
     fillIntegrations();
+    fillAdapterContracts();
+    fillSyncJobs();
     fillMembers();
     fillAudit();
     fillOutbox();
@@ -233,4 +286,3 @@
 
   init();
 })();
-

@@ -1,17 +1,17 @@
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 from fastapi import HTTPException, status
-from sqlalchemy import func, select
+from sqlalchemy import and_, func, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from drivedesk_api.db import AuditEvent, Membership, OutboxEvent, Tenant, User
 from drivedesk_api.rbac import ActorContext
-from drivedesk_api.schemas import MembershipCreate, TenantCreate, UserCreate
+from drivedesk_api.schemas import FileImportCreate, MembershipCreate, TenantCreate, UserCreate
 
 
 def new_id() -> str:
@@ -49,11 +49,13 @@ async def enqueue_outbox(
     tenant_id: str,
     event_type: str,
     payload: dict[str, object],
+    adapter_key: str | None = "internal.noop",
 ) -> OutboxEvent:
     event = OutboxEvent(
         id=new_id(),
         tenant_id=tenant_id,
         event_type=event_type,
+        adapter_key=adapter_key,
         payload_json=json.dumps(payload, ensure_ascii=False, sort_keys=True),
         status="pending",
         attempts=0,
@@ -145,6 +147,48 @@ async def create_membership(
     return membership
 
 
+async def create_file_import_job(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    payload: FileImportCreate,
+    actor: ActorContext,
+) -> OutboxEvent:
+    await ensure_tenant_exists(session, tenant_id)
+    record_count = len(payload.records)
+    source_name = payload.source_name.strip()
+    await write_audit(
+        session,
+        tenant_id=tenant_id,
+        actor=actor,
+        event_type="integration.file_import.requested",
+        entity_type="integration_job",
+        summary=f"File import requested from {source_name}",
+        metadata={
+            "adapter_key": "file.import.fake",
+            "record_count": record_count,
+            "source_format": payload.source_format,
+            "source_name": source_name,
+        },
+    )
+    event = await enqueue_outbox(
+        session,
+        tenant_id=tenant_id,
+        event_type="integration.file_import.requested",
+        adapter_key="file.import.fake",
+        payload={
+            "adapter_key": "file.import.fake",
+            "source_name": source_name,
+            "source_format": payload.source_format,
+            "record_count": record_count,
+            "records": payload.records,
+            "simulate_failure": payload.simulate_failure,
+        },
+    )
+    await commit_or_conflict(session, "file import job already exists")
+    return event
+
+
 async def ensure_tenant_exists(session: AsyncSession, tenant_id: str) -> Tenant:
     tenant = await session.get(Tenant, tenant_id)
     if not tenant:
@@ -167,11 +211,27 @@ async def commit_or_conflict(session: AsyncSession, message: str) -> None:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=message) from exc
 
 
-async def list_pending_outbox(session: AsyncSession, limit: int = 25) -> list[OutboxEvent]:
+async def list_processable_outbox(session: AsyncSession, limit: int = 25) -> list[OutboxEvent]:
+    now = datetime.now(UTC)
     result = await session.execute(
-        select(OutboxEvent).where(OutboxEvent.status == "pending").order_by(OutboxEvent.created_at).limit(limit)
+        select(OutboxEvent)
+        .where(
+            or_(
+                OutboxEvent.status == "pending",
+                and_(
+                    OutboxEvent.status == "retry",
+                    or_(OutboxEvent.next_retry_at.is_(None), OutboxEvent.next_retry_at <= now),
+                ),
+            )
+        )
+        .order_by(OutboxEvent.created_at)
+        .limit(limit)
     )
     return list(result.scalars().all())
+
+
+async def list_pending_outbox(session: AsyncSession, limit: int = 25) -> list[OutboxEvent]:
+    return await list_processable_outbox(session, limit=limit)
 
 
 async def count_outbox_by_status(session: AsyncSession) -> dict[str, int]:
@@ -179,8 +239,45 @@ async def count_outbox_by_status(session: AsyncSession) -> dict[str, int]:
     return {status: count for status, count in result.all()}
 
 
-async def mark_outbox_processed(session: AsyncSession, event: OutboxEvent) -> None:
+async def mark_outbox_processed(
+    session: AsyncSession,
+    event: OutboxEvent,
+    *,
+    result: dict[str, object] | None = None,
+) -> None:
     event.status = "processed"
     event.attempts += 1
+    event.last_error = None
+    event.next_retry_at = None
+    event.result_json = json.dumps(result or {}, ensure_ascii=False, sort_keys=True)
     event.processed_at = datetime.now(UTC)
+    await session.commit()
+
+
+def retry_delay_for_attempt(attempt: int) -> timedelta:
+    return timedelta(seconds=min(60 * (2 ** max(attempt - 1, 0)), 3600))
+
+
+async def mark_outbox_failed(
+    session: AsyncSession,
+    event: OutboxEvent,
+    *,
+    error_message: str,
+    retryable: bool,
+    max_attempts: int = 3,
+) -> None:
+    event.attempts += 1
+    event.last_error = error_message
+    event.processed_at = None
+    event.result_json = None
+
+    if retryable and event.attempts < max_attempts:
+        event.status = "retry"
+        event.next_retry_at = datetime.now(UTC) + retry_delay_for_attempt(event.attempts)
+        event.dead_lettered_at = None
+    else:
+        event.status = "dead_letter"
+        event.next_retry_at = None
+        event.dead_lettered_at = datetime.now(UTC)
+
     await session.commit()

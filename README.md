@@ -11,6 +11,7 @@ It includes:
 - PostgreSQL migrations with Alembic;
 - background worker;
 - tenant, user, membership, RBAC, audit, and outbox foundation;
+- fake file import adapter with retry and dead-letter state;
 - Docker Compose local runtime;
 - pytest coverage for the Core API;
 - architecture docs and ADRs.
@@ -28,14 +29,16 @@ It includes:
 1. Open the live demo.
 2. Review `docs/openapi.json`.
 3. Read `docs/public/SYSTEM_DESIGN.md`.
-4. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
-5. Check `.github/workflows/ci.yml`.
-6. Run `bash scripts/ci_smoke_public.sh` locally.
+4. Read `docs/public/INTEGRATION_ADAPTERS.md`.
+5. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
+6. Check `.github/workflows/ci.yml`.
+7. Run `bash scripts/ci_smoke_public.sh` locally.
 
 ## What To Review First
 
 - `docs/public/PORTFOLIO_CASE_STUDY.md` - engineering case study.
 - `docs/public/SYSTEM_DESIGN.md` - system design overview.
+- `docs/public/INTEGRATION_ADAPTERS.md` - adapter contract and retry model.
 - `docs/public/ARCHITECTURE_DIAGRAMS.md` - architecture diagrams.
 - `docs/public/SANITIZED_EVIDENCE.md` - sanitized staging evidence.
 - `docs/public/PUBLIC_DEMO_PLAN.md` - future public demo plan.
@@ -91,6 +94,7 @@ apps/admin/public-demo/index.html
 - `docs/public/README.md`
 - `docs/public/PORTFOLIO_CASE_STUDY.md`
 - `docs/public/SYSTEM_DESIGN.md`
+- `docs/public/INTEGRATION_ADAPTERS.md`
 - `docs/public/ARCHITECTURE_DIAGRAMS.md`
 - `docs/public/PUBLIC_DEMO_PLAN.md`
 - `docs/public/SANITIZED_EVIDENCE.md`
@@ -99,3 +103,4 @@ apps/admin/public-demo/index.html
 - `docs/adr/0001-modular-monolith-first.md`
 - `docs/adr/0006-drivedesk-core-foundation.md`
 - `docs/adr/0007-identity-rbac-audit-outbox-foundation.md`
+- `docs/adr/0014-integration-adapter-foundation.md`

@@ -31,6 +31,8 @@ Use synthetic data only:
 - sample memberships;
 - sample audit events;
 - sample outbox events;
+- sample adapter contracts;
+- sample sync jobs with retry and dead-letter states;
 - sample driving-school domain objects later.
 
 ## Review Flow
@@ -43,7 +45,8 @@ An external reviewer should be able to:
 4. Run the public repo locally.
 5. Open `https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/`.
 6. See fake operational workflows.
-7. Read sanitized evidence that staging checks, metrics, logs, and alerts exist.
+7. Inspect the integration adapter tab.
+8. Read sanitized evidence that staging checks, metrics, logs, and alerts exist.
 
 ## Runtime Boundary
 
@@ -53,7 +56,7 @@ the engineering surface for deploy, observability, and alerting practice.
 The public demo does not need direct access to Prometheus, Grafana, Loki,
 Alertmanager, SSH, production backups, or private GitHub Actions secrets.
 
-## First Implementation Slice
+## Implemented Public Slice
 
 1. Generate OpenAPI schema from the FastAPI app during public export.
 2. Add public demo seed data.
@@ -62,3 +65,4 @@ Alertmanager, SSH, production backups, or private GitHub Actions secrets.
 5. Publish the static shell through GitHub Pages.
 6. Add a public health endpoint and public CI badge.
 7. Link the hosted demo from the public README.
+8. Show adapter contracts and sync job states in the public demo shell.

@@ -17,7 +17,7 @@ flowchart LR
   API --> Outbox["Outbox Events"]
   Worker["Background Worker"] --> Outbox
   Worker --> DB
-  Outbox --> Adapters["Future Integration Adapters"]
+  Outbox --> Adapters["Integration Adapters"]
   Adapters --> Providers["External Systems"]
 ```
 
@@ -52,6 +52,18 @@ flowchart LR
   Loki --> Grafana
   Prometheus --> AlertRules["Alert Rules"]
   AlertRules --> Alertmanager["Alertmanager"]
+```
+
+## Adapter Execution
+
+```mermaid
+flowchart LR
+  API["POST integration import"] --> Outbox["Outbox Event"]
+  Outbox --> Worker["Worker"]
+  Worker --> Adapter["file.import.fake"]
+  Adapter --> Processed["processed + result_json"]
+  Adapter --> Retry["retry + next_retry_at"]
+  Adapter --> DeadLetter["dead_letter + last_error"]
 ```
 
 ## CI/CD and Evidence

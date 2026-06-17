@@ -91,6 +91,56 @@
         "title": "AuditEventRead",
         "type": "object"
       },
+      "FileImportCreate": {
+        "properties": {
+          "records": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "maxItems": 50,
+            "minItems": 1,
+            "title": "Records",
+            "type": "array"
+          },
+          "simulate_failure": {
+            "anyOf": [
+              {
+                "enum": [
+                  "retryable",
+                  "permanent"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Simulate Failure"
+          },
+          "source_format": {
+            "default": "json",
+            "enum": [
+              "json",
+              "csv"
+            ],
+            "title": "Source Format",
+            "type": "string"
+          },
+          "source_name": {
+            "maxLength": 120,
+            "minLength": 2,
+            "title": "Source Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source_name",
+          "records"
+        ],
+        "title": "FileImportCreate",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -183,6 +233,17 @@
       },
       "OutboxEventRead": {
         "properties": {
+          "adapter_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Adapter Key"
+          },
           "attempts": {
             "title": "Attempts",
             "type": "integer"
@@ -198,6 +259,18 @@
               }
             ],
             "title": "Created At"
+          },
+          "dead_lettered_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dead Lettered At"
           },
           "event_type": {
             "title": "Event Type",
@@ -218,6 +291,18 @@
             ],
             "title": "Last Error"
           },
+          "next_retry_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Retry At"
+          },
           "payload_json": {
             "title": "Payload Json",
             "type": "string"
@@ -233,6 +318,17 @@
               }
             ],
             "title": "Processed At"
+          },
+          "result_json": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Result Json"
           },
           "status": {
             "title": "Status",
@@ -702,6 +798,75 @@
           }
         },
         "summary": "List Audit Events Endpoint"
+      }
+    },
+    "/tenants/{tenant_id}/integration-imports/file": {
+      "post": {
+        "operationId": "create_file_import_endpoint_tenants__tenant_id__integration_imports_file_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tenant_id",
+            "required": true,
+            "schema": {
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "X-Actor-Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Role",
+            "required": false,
+            "schema": {
+              "default": "viewer",
+              "title": "X-Actor-Role",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FileImportCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutboxEventRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create File Import Endpoint"
       }
     },
     "/tenants/{tenant_id}/memberships": {

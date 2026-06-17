@@ -22,6 +22,7 @@ from drivedesk_api.db import Base
 from drivedesk_api.main import build_app
 from drivedesk_api.session import get_session
 from drivedesk_core import ActorRef, TenantRef, build_event
+from drivedesk_core.adapters import AdapterExecutionError, FakeFileImportAdapter
 from drivedesk_worker.main import build_heartbeat, heartbeat_to_json
 
 
@@ -66,6 +67,36 @@ def test_core_event_envelope() -> None:
     assert event.actor == actor
     assert event.payload["source"] == "test"
     assert event.correlation_id == "test-correlation"
+
+
+def test_fake_file_import_adapter_contract() -> None:
+    adapter = FakeFileImportAdapter()
+
+    result = adapter.execute(
+        {
+            "source_name": "demo-json",
+            "source_format": "json",
+            "records": [
+                {"external_id": "row_1", "display_name": "Demo One"},
+                {"external_id": "", "display_name": "Rejected"},
+            ],
+        }
+    )
+
+    assert result.adapter_key == "file.import.fake"
+    assert result.status == "partial_success"
+    assert result.records_received == 2
+    assert result.records_accepted == 1
+    assert result.records_rejected == 1
+    assert result.to_payload()["details"]["accepted_external_ids"] == ["row_1"]
+
+    try:
+        adapter.execute({"simulate_failure": "retryable", "records": []})
+    except AdapterExecutionError as exc:
+        assert exc.retryable is True
+        assert exc.adapter_key == "file.import.fake"
+    else:
+        raise AssertionError("expected retryable adapter failure")
 
 
 def test_api_health_and_ready_endpoints() -> None:

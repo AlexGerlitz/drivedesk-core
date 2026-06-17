@@ -5,10 +5,10 @@ import json
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 
-from drivedesk_api.services import list_pending_outbox, mark_outbox_processed
+from drivedesk_api.services import list_processable_outbox, mark_outbox_failed, mark_outbox_processed
 from drivedesk_api.session import SessionLocal
 from drivedesk_api.settings import get_settings
-from drivedesk_core import __version__ as core_version
+from drivedesk_core import AdapterExecutionError, __version__ as core_version, execute_adapter
 
 
 @dataclass(frozen=True)
@@ -46,10 +46,26 @@ async def run_once() -> dict[str, object]:
 
 async def process_outbox_once(limit: int = 25, session_factory=SessionLocal) -> int:
     async with session_factory() as session:
-        events = await list_pending_outbox(session, limit=limit)
+        events = await list_processable_outbox(session, limit=limit)
         processed = 0
         for event in events:
-            await mark_outbox_processed(session, event)
+            try:
+                payload = json.loads(event.payload_json)
+                if not isinstance(payload, dict):
+                    raise AdapterExecutionError(
+                        "Outbox payload must be a JSON object.",
+                        adapter_key=event.adapter_key or "internal.noop",
+                        retryable=False,
+                    )
+                result = execute_adapter(event.adapter_key, payload)
+                await mark_outbox_processed(session, event, result=result.to_payload())
+            except AdapterExecutionError as exc:
+                await mark_outbox_failed(
+                    session,
+                    event,
+                    error_message=exc.message,
+                    retryable=exc.retryable,
+                )
             processed += 1
         return processed
 

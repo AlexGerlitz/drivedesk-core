@@ -6,9 +6,11 @@ Run locally from the repository root:
 PYTHONPATH=apps/api:apps/worker:packages/core python -m drivedesk_worker.main
 ```
 
-Sprint 0 worker behavior emits a heartbeat. Sprint 1 adds an outbox skeleton:
-each worker loop reads pending `dd_outbox_events` rows and marks them
-processed.
+Sprint 0 worker behavior emits a heartbeat. Sprint 1 added an outbox skeleton.
+Sprint 3 adds adapter execution:
 
-External delivery is not implemented yet. Future jobs can attach integration
-retries, dead-letter handling, notifications, and analytics tasks here.
+- pending internal events pass through `internal.noop`;
+- fake file import events pass through `file.import.fake`;
+- retryable adapter errors become `retry` with `next_retry_at`;
+- permanent errors become `dead_letter`;
+- successful adapter results are stored in `result_json`.

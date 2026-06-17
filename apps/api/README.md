@@ -22,6 +22,13 @@ Core endpoints:
 - `GET /tenants/{tenant_id}/memberships`;
 - `GET /tenants/{tenant_id}/audit-events`;
 - `GET /tenants/{tenant_id}/outbox-events`.
+- `POST /tenants/{tenant_id}/integration-imports/file`.
+
+Integration endpoints:
+
+- `POST /tenants/{tenant_id}/integration-imports/file` creates a synthetic
+  file-import job and stores it as an outbox event with
+  `adapter_key=file.import.fake`.
 
 Temporary development RBAC context uses request headers:
 

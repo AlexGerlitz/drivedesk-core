@@ -14,6 +14,7 @@ for the Core concepts that already exist in the backend:
 - users and roles;
 - audit events;
 - outbox events;
+- integration adapters;
+- retry and dead-letter sync jobs;
 - API readiness;
 - fake operational workflow state.
-

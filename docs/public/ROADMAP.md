@@ -9,6 +9,7 @@ operations, or commercial details.
 - Core modular monolith foundation.
 - FastAPI health, readiness, and metrics endpoints.
 - Tenant, user, membership, RBAC, audit, and outbox primitives.
+- Fake file import adapter with retry and dead-letter state.
 - Public demo shell with synthetic data.
 - Public export gate, public CI, and GitHub Pages demo.
 - Public system design overview for reviewers.
@@ -16,7 +17,6 @@ operations, or commercial details.
 ## Next
 
 - Public demo health workflow.
-- File import adapter with fake provider data.
 - Read-only API-backed demo mode.
 - Structured adapter contracts and mapping examples.
 - More public-safe evidence around CI, OpenAPI, and demo health.

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -72,11 +72,22 @@ class OutboxEventRead(BaseModel):
     id: str
     tenant_id: str
     event_type: str
+    adapter_key: str | None = None
     payload_json: str
+    result_json: str | None = None
     status: str
     attempts: int
     last_error: str | None = None
+    next_retry_at: datetime | None = None
     created_at: datetime | None = None
     processed_at: datetime | None = None
+    dead_lettered_at: datetime | None = None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class FileImportCreate(BaseModel):
+    source_name: str = Field(min_length=2, max_length=120)
+    source_format: Literal["json", "csv"] = "json"
+    records: list[dict[str, Any]] = Field(min_length=1, max_length=50)
+    simulate_failure: Literal["retryable", "permanent"] | None = None

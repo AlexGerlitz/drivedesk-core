@@ -235,6 +235,17 @@ def build_workflow_action_run_metrics_lines(workflow_action_run_rows: list[dict[
     return lines
 
 
+def build_integration_connection_metrics_lines(integration_connection_rows: list[dict[str, object]]) -> list[str]:
+    lines = [
+        "# HELP drivedesk_integration_connections Integration connections by adapter and status.",
+        "# TYPE drivedesk_integration_connections gauge",
+    ]
+    for row in integration_connection_rows:
+        labels = prometheus_labels({"adapter_key": row["adapter_key"], "status": row["status"]})
+        lines.append(f"drivedesk_integration_connections{labels} {row['connection_count']}")
+    return lines
+
+
 def build_readiness_metrics_lines(settings: Settings) -> list[str]:
     dependencies = {
         "database_url_configured": bool(settings.database_url),
@@ -270,6 +281,7 @@ def build_metrics_text(
     business_record_rows: list[dict[str, object]] | None = None,
     workflow_rule_rows: list[dict[str, object]] | None = None,
     workflow_action_run_rows: list[dict[str, object]] | None = None,
+    integration_connection_rows: list[dict[str, object]] | None = None,
     storage_available: bool = True,
 ) -> str:
     labels = prometheus_labels(
@@ -303,6 +315,7 @@ def build_metrics_text(
     lines.extend(build_business_record_metrics_lines(business_record_rows or []))
     lines.extend(build_workflow_rule_metrics_lines(workflow_rule_rows or []))
     lines.extend(build_workflow_action_run_metrics_lines(workflow_action_run_rows or []))
+    lines.extend(build_integration_connection_metrics_lines(integration_connection_rows or []))
     lines.append("")
     return "\n".join(lines)
 

@@ -149,6 +149,8 @@ def test_api_metrics_endpoint(api_client: TestClient) -> None:
     assert "# TYPE drivedesk_workflow_rules gauge" in response.text
     assert "# HELP drivedesk_workflow_action_runs Workflow action runs by action type and status." in response.text
     assert "# TYPE drivedesk_workflow_action_runs gauge" in response.text
+    assert "# HELP drivedesk_integration_connections Integration connections by adapter and status." in response.text
+    assert "# TYPE drivedesk_integration_connections gauge" in response.text
 
 
 def test_api_metrics_endpoint_degrades_without_database_schema() -> None:
@@ -175,6 +177,7 @@ def test_api_metrics_endpoint_degrades_without_database_schema() -> None:
     assert "# HELP drivedesk_business_records Current business records by type and status." in response.text
     assert "# HELP drivedesk_workflow_rules Current workflow rules by status, trigger, and action." in response.text
     assert "# HELP drivedesk_workflow_action_runs Workflow action runs by action type and status." in response.text
+    assert "# HELP drivedesk_integration_connections Integration connections by adapter and status." in response.text
 
 
 def test_api_request_log_is_structured_json(caplog: pytest.LogCaptureFixture) -> None:

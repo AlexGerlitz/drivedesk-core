@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-17T21:46:55Z
+Generated at: 2026-06-17T22:04:35Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -46,6 +46,9 @@ Copied public-safe areas:
 - public workflow action run metric: drivedesk_workflow_action_runs
 - public outbox recovery endpoint: /tenants/{tenant_id}/outbox-events/{event_id}/retry
 - public outbox recovery audit event: outbox_event.retry_requested
+- public integration connection endpoint: /tenants/{tenant_id}/integration-connections
+- public integration connection audit event: integration_connection.created
+- public integration connection metric: drivedesk_integration_connections
 - public tenant-owned repository helper surface
 - public auth observability alerting surface
 - public demo local run script

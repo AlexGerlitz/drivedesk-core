@@ -13,6 +13,7 @@ from starlette.responses import Response
 from drivedesk_api.db import (
     AuditEvent,
     BusinessRecord,
+    IntegrationConnection,
     Membership,
     OutboxEvent,
     PlatformAdmin,
@@ -66,6 +67,8 @@ from drivedesk_api.schemas import (
     BusinessRecordTransition,
     BusinessRecordType,
     FileImportCreate,
+    IntegrationConnectionCreate,
+    IntegrationConnectionRead,
     LoginRequest,
     MembershipCreate,
     MembershipRead,
@@ -85,11 +88,13 @@ from drivedesk_api.schemas import (
 )
 from drivedesk_api.services import (
     count_business_records_by_type_status,
+    count_integration_connections_by_adapter_status,
     count_outbox_by_status,
     count_workflow_action_runs_by_action_status,
     count_workflow_rules_by_status_trigger_action,
     create_business_record,
     create_file_import_job,
+    create_integration_connection,
     create_membership,
     create_platform_admin,
     create_tenant,
@@ -97,6 +102,7 @@ from drivedesk_api.services import (
     create_workflow_rule,
     ensure_tenant_exists,
     list_business_records,
+    list_integration_connections,
     list_platform_admins,
     list_workflow_action_runs,
     list_workflow_rules,
@@ -180,6 +186,7 @@ def build_app(settings: Settings | None = None) -> FastAPI:
             business_record_rows = await count_business_records_by_type_status(session)
             workflow_rule_rows = await count_workflow_rules_by_status_trigger_action(session)
             workflow_action_run_rows = await count_workflow_action_runs_by_action_status(session)
+            integration_connection_rows = await count_integration_connections_by_adapter_status(session)
         except Exception as exc:
             # Keep Prometheus scrapeable even when storage-backed aggregates degrade.
             storage_available = False
@@ -191,6 +198,7 @@ def build_app(settings: Settings | None = None) -> FastAPI:
             business_record_rows = []
             workflow_rule_rows = []
             workflow_action_run_rows = []
+            integration_connection_rows = []
             log_json(
                 metrics_logger,
                 "metrics.storage_unavailable",
@@ -210,6 +218,7 @@ def build_app(settings: Settings | None = None) -> FastAPI:
                 business_record_rows=business_record_rows,
                 workflow_rule_rows=workflow_rule_rows,
                 workflow_action_run_rows=workflow_action_run_rows,
+                integration_connection_rows=integration_connection_rows,
                 storage_available=storage_available,
             ),
             media_type="text/plain; version=0.0.4; charset=utf-8",
@@ -537,6 +546,36 @@ def build_app(settings: Settings | None = None) -> FastAPI:
             payload=payload,
             actor=actor,
         )
+
+    @api.post(
+        "/tenants/{tenant_id}/integration-connections",
+        response_model=IntegrationConnectionRead,
+        status_code=201,
+    )
+    async def create_integration_connection_endpoint(
+        tenant_id: str,
+        payload: IntegrationConnectionCreate,
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> IntegrationConnection:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.TENANT_WRITE)
+        return await create_integration_connection(
+            session,
+            tenant_id=tenant_id,
+            payload=payload,
+            actor=actor,
+        )
+
+    @api.get("/tenants/{tenant_id}/integration-connections", response_model=list[IntegrationConnectionRead])
+    async def list_integration_connections_endpoint(
+        tenant_id: str,
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> list[IntegrationConnection]:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.TENANT_READ)
+        return await list_integration_connections(session, tenant_id=tenant_id)
 
     @api.post("/tenants/{tenant_id}/business-records", response_model=BusinessRecordRead, status_code=201)
     async def create_business_record_endpoint(

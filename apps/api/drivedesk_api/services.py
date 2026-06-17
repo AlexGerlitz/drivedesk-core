@@ -13,6 +13,7 @@ from drivedesk_api.auth import hash_credential
 from drivedesk_api.db import (
     AuditEvent,
     BusinessRecord,
+    IntegrationConnection,
     Membership,
     OutboxEvent,
     PlatformAdmin,
@@ -27,6 +28,7 @@ from drivedesk_api.schemas import (
     BusinessRecordTransition,
     BusinessRecordType,
     FileImportCreate,
+    IntegrationConnectionCreate,
     MembershipCreate,
     OutboxEventRetryRequest,
     PlatformAdminCreate,
@@ -35,6 +37,7 @@ from drivedesk_api.schemas import (
     WorkflowRuleCreate,
 )
 from drivedesk_api.tenant_repository import list_tenant_owned, tenant_owned_select
+from drivedesk_core import AdapterExecutionError, resolve_adapter
 
 
 def new_id() -> str:
@@ -218,6 +221,77 @@ async def list_platform_admins(session: AsyncSession) -> list[PlatformAdmin]:
     return list(result.scalars().all())
 
 
+async def create_integration_connection(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    payload: IntegrationConnectionCreate,
+    actor: ActorContext,
+) -> IntegrationConnection:
+    await ensure_tenant_exists(session, tenant_id)
+    try:
+        resolve_adapter(payload.adapter_key)
+    except AdapterExecutionError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=exc.message) from exc
+
+    connection = IntegrationConnection(
+        id=new_id(),
+        tenant_id=tenant_id,
+        name=payload.name,
+        adapter_key=payload.adapter_key,
+        status=payload.status,
+        config_json=json.dumps(payload.config, ensure_ascii=False, sort_keys=True),
+        mapping_json=json.dumps(payload.mapping, ensure_ascii=False, sort_keys=True),
+    )
+    session.add(connection)
+    await write_audit(
+        session,
+        tenant_id=tenant_id,
+        actor=actor,
+        event_type="integration_connection.created",
+        entity_type="integration_connection",
+        entity_id=connection.id,
+        summary=f"Integration connection created: {connection.adapter_key}",
+        metadata={
+            "integration_connection_id": connection.id,
+            "adapter_key": connection.adapter_key,
+            "status": connection.status,
+            "config_keys": sorted(payload.config.keys()),
+            "mapping_keys": sorted(payload.mapping.keys()),
+        },
+    )
+    await commit_or_conflict(session, "integration connection already exists")
+    return connection
+
+
+async def list_integration_connections(session: AsyncSession, *, tenant_id: str) -> list[IntegrationConnection]:
+    return await list_tenant_owned(
+        session,
+        IntegrationConnection,
+        tenant_id,
+        order_by=IntegrationConnection.created_at.desc(),
+    )
+
+
+async def _active_connection_for_file_import(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    connection_id: str | None,
+) -> IntegrationConnection | None:
+    if not connection_id:
+        return None
+
+    connection = await session.get(IntegrationConnection, connection_id)
+    if not connection or connection.tenant_id != tenant_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="integration connection not found")
+    if connection.status != "active":
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="integration connection is not active")
+    if connection.adapter_key != "file.import.fake":
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="integration connection adapter mismatch")
+    return connection
+
+
 async def create_file_import_job(
     session: AsyncSession,
     *,
@@ -226,8 +300,15 @@ async def create_file_import_job(
     actor: ActorContext,
 ) -> OutboxEvent:
     await ensure_tenant_exists(session, tenant_id)
+    connection = await _active_connection_for_file_import(
+        session,
+        tenant_id=tenant_id,
+        connection_id=payload.integration_connection_id,
+    )
     record_count = len(payload.records)
     source_name = payload.source_name.strip()
+    adapter_key = connection.adapter_key if connection else "file.import.fake"
+    mapping = json.loads(connection.mapping_json) if connection else {}
     await write_audit(
         session,
         tenant_id=tenant_id,
@@ -236,22 +317,26 @@ async def create_file_import_job(
         entity_type="integration_job",
         summary=f"File import requested from {source_name}",
         metadata={
-            "adapter_key": "file.import.fake",
+            "adapter_key": adapter_key,
+            "integration_connection_id": connection.id if connection else None,
             "record_count": record_count,
             "source_format": payload.source_format,
             "source_name": source_name,
+            "mapping_keys": sorted(mapping.keys()),
         },
     )
     event = await enqueue_outbox(
         session,
         tenant_id=tenant_id,
         event_type="integration.file_import.requested",
-        adapter_key="file.import.fake",
+        adapter_key=adapter_key,
         payload={
-            "adapter_key": "file.import.fake",
+            "adapter_key": adapter_key,
+            "integration_connection_id": connection.id if connection else None,
             "source_name": source_name,
             "source_format": payload.source_format,
             "record_count": record_count,
+            "mapping": mapping,
             "records": payload.records,
             "simulate_failure": payload.simulate_failure,
         },
@@ -811,6 +896,24 @@ async def count_workflow_action_runs_by_action_status(session: AsyncSession) -> 
             "action_type": row.action_type,
             "status": row.status,
             "run_count": int(row.run_count or 0),
+        }
+        for row in result.all()
+    ]
+
+
+async def count_integration_connections_by_adapter_status(session: AsyncSession) -> list[dict[str, object]]:
+    result = await session.execute(
+        select(
+            IntegrationConnection.adapter_key,
+            IntegrationConnection.status,
+            func.count().label("connection_count"),
+        ).group_by(IntegrationConnection.adapter_key, IntegrationConnection.status)
+    )
+    return [
+        {
+            "adapter_key": row.adapter_key,
+            "status": row.status,
+            "connection_count": int(row.connection_count or 0),
         }
         for row in result.all()
     ]

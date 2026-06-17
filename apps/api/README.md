@@ -47,6 +47,8 @@ Core endpoints:
 - `POST /tenants/{tenant_id}/workflow-rules`.
 - `GET /tenants/{tenant_id}/workflow-rules`.
 - `GET /tenants/{tenant_id}/workflow-action-runs`.
+- `POST /tenants/{tenant_id}/integration-connections`.
+- `GET /tenants/{tenant_id}/integration-connections`.
 - `POST /tenants/{tenant_id}/integration-imports/file`.
 - `GET /demo/public`.
 
@@ -121,9 +123,17 @@ Authorization: Bearer <access-token>
 
 Integration endpoints:
 
+- `POST /tenants/{tenant_id}/integration-connections` creates a tenant-owned
+  adapter profile with safe config and mapping JSON.
+- `GET /tenants/{tenant_id}/integration-connections` lists tenant-owned adapter
+  profiles.
 - `POST /tenants/{tenant_id}/integration-imports/file` creates a synthetic
   file-import job and stores it as an outbox event with
   `adapter_key=file.import.fake`.
+- file-import jobs can reference `integration_connection_id`; the API verifies
+  tenant ownership, active status, and adapter compatibility.
+- `/metrics` exposes aggregate connection inventory with
+  `drivedesk_integration_connections`.
 - `POST /tenants/{tenant_id}/outbox-events/{event_id}/retry` moves reviewed
   `retry` or `dead_letter` events back to `pending` and writes
   `outbox_event.retry_requested` audit events.

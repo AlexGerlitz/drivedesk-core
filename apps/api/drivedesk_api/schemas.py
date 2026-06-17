@@ -10,6 +10,7 @@ PlatformRole = Literal["platform_admin"]
 BusinessRecordType = Literal["contract", "payment", "lesson", "task", "document"]
 WorkflowRuleTrigger = Literal["business_record.status_changed"]
 WorkflowRuleActionType = Literal["emit_outbox_event", "create_task_record", "request_adapter_sync"]
+IntegrationConnectionStatus = Literal["active", "disabled"]
 
 
 class TenantCreate(BaseModel):
@@ -149,6 +150,27 @@ class OutboxEventRetryRequest(BaseModel):
     reset_attempts: bool = False
 
 
+class IntegrationConnectionCreate(BaseModel):
+    name: str = Field(min_length=2, max_length=120)
+    adapter_key: str = Field(min_length=2, max_length=128, pattern=r"^[a-z0-9][a-z0-9_.-]*$")
+    status: IntegrationConnectionStatus = "active"
+    config: dict[str, Any] = Field(default_factory=dict)
+    mapping: dict[str, Any] = Field(default_factory=dict)
+
+
+class IntegrationConnectionRead(BaseModel):
+    id: str
+    tenant_id: str
+    name: str
+    adapter_key: str
+    status: IntegrationConnectionStatus
+    config_json: str
+    mapping_json: str
+    created_at: datetime | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class BusinessRecordCreate(BaseModel):
     record_type: BusinessRecordType
     title: str = Field(min_length=2, max_length=255)
@@ -221,6 +243,7 @@ class WorkflowActionRunRead(BaseModel):
 
 
 class FileImportCreate(BaseModel):
+    integration_connection_id: str | None = Field(default=None, min_length=1, max_length=36)
     source_name: str = Field(min_length=2, max_length=120)
     source_format: Literal["json", "csv"] = "json"
     records: list[dict[str, Any]] = Field(min_length=1, max_length=50)

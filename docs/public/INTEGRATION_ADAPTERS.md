@@ -47,12 +47,16 @@ through the outbox recovery endpoint. See `OUTBOX_RECOVERY.md`.
 The public OpenAPI schema includes:
 
 ```text
+POST /tenants/{tenant_id}/integration-connections
+GET /tenants/{tenant_id}/integration-connections
 POST /tenants/{tenant_id}/integration-imports/file
 POST /tenants/{tenant_id}/outbox-events/{event_id}/retry
 ```
 
 This endpoint accepts synthetic file-import records and creates an outbox event
 with `adapter_key = file.import.fake`.
+File imports can also reference a tenant-owned integration connection profile.
+See `INTEGRATION_CONNECTIONS.md`.
 
 ## Worker Flow
 

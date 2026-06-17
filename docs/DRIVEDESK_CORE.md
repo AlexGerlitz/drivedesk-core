@@ -297,6 +297,32 @@ What this gives us:
   `reset_attempts=true`;
 - operators no longer need direct database access to retry failed jobs.
 
+## Sprint 4D Integration Connection Profiles
+
+Sprint 4D adds tenant-owned adapter profiles.
+
+New table:
+
+- `dd_integration_connections`.
+
+New endpoints:
+
+- `POST /tenants/{tenant_id}/integration-connections`;
+- `GET /tenants/{tenant_id}/integration-connections`.
+
+What this gives us:
+
+- tenants can define adapter connections with safe config and mapping JSON;
+- adapter keys are validated against the runtime adapter registry;
+- connection creation writes `integration_connection.created` audit events;
+- file-import jobs can reference `integration_connection_id`;
+- the API verifies tenant ownership, active status, and file-import adapter
+  compatibility before creating the job;
+- outbox payloads include the selected connection id and mapping;
+- `/metrics` exposes aggregate connection inventory with
+  `drivedesk_integration_connections`;
+- connection metrics expose only `adapter_key` and `status` labels.
+
 ## Local Commands
 
 Run the API without Docker:

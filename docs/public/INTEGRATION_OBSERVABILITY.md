@@ -23,6 +23,7 @@ drivedesk_integration_jobs{adapter_key="file.import.fake",status="processed"} 1
 drivedesk_integration_job_attempts{adapter_key="file.import.fake",status="processed"} 1
 drivedesk_integration_job_errors{adapter_key="file.import.fake",status="retry"} 1
 drivedesk_integration_adapter_duration_milliseconds{adapter_key="file.import.fake",status="processed"} 12.4
+drivedesk_integration_connections{adapter_key="file.import.fake",status="active"} 1
 ```
 
 Metric meaning:
@@ -33,10 +34,11 @@ Metric meaning:
 | `drivedesk_integration_job_attempts` | Total worker attempts for those jobs. |
 | `drivedesk_integration_job_errors` | Jobs with a recorded adapter error. |
 | `drivedesk_integration_adapter_duration_milliseconds` | Average adapter duration for jobs with duration evidence. |
+| `drivedesk_integration_connections` | Number of tenant-owned connection profiles grouped by adapter and status. |
 
 The labels use `adapter_key` and `status` only. They do not include names,
-phone numbers, tenant-specific provider payloads, file contents, credentials,
-or concrete user identifiers.
+connection ids, phone numbers, tenant-specific provider payloads, file contents,
+credentials, mapping values, config values, or concrete user identifiers.
 
 ## Structured Logs
 

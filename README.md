@@ -58,13 +58,14 @@ It includes:
 13. Read `docs/public/TENANT_ISOLATION.md`.
 14. Read `docs/public/BUSINESS_RECORDS.md`.
 15. Read `docs/public/CLIENT_SDK.md`.
-16. Read `docs/public/SYSTEM_DESIGN.md`.
-17. Read `docs/public/INTEGRATION_ADAPTERS.md`.
-18. Read `docs/public/INTEGRATION_OBSERVABILITY.md`.
-19. Read `docs/public/OUTBOX_RECOVERY.md`.
-20. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
-21. Check `.github/workflows/ci.yml`.
-22. Run `bash scripts/ci_smoke_public.sh` locally.
+16. Read `docs/public/INTEGRATION_CONNECTIONS.md`.
+17. Read `docs/public/SYSTEM_DESIGN.md`.
+18. Read `docs/public/INTEGRATION_ADAPTERS.md`.
+19. Read `docs/public/INTEGRATION_OBSERVABILITY.md`.
+20. Read `docs/public/OUTBOX_RECOVERY.md`.
+21. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
+22. Check `.github/workflows/ci.yml`.
+23. Run `bash scripts/ci_smoke_public.sh` locally.
 
 ## What To Review First
 
@@ -81,6 +82,7 @@ It includes:
 - `docs/public/TENANT_ISOLATION.md` - tenant isolation and bootstrap boundary overview.
 - `docs/public/BUSINESS_RECORDS.md` - tenant-owned business record foundation.
 - `docs/public/CLIENT_SDK.md` - generated OpenAPI client SDK example.
+- `docs/public/INTEGRATION_CONNECTIONS.md` - tenant-owned adapter profiles and mapping.
 - `docs/public/INTEGRATION_ADAPTERS.md` - adapter contract and retry model.
 - `docs/public/INTEGRATION_OBSERVABILITY.md` - adapter metrics and worker log signals.
 - `docs/public/OUTBOX_RECOVERY.md` - audited operator retry path for failed outbox jobs.
@@ -203,6 +205,7 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/public/TENANT_ISOLATION.md`
 - `docs/public/BUSINESS_RECORDS.md`
 - `docs/public/CLIENT_SDK.md`
+- `docs/public/INTEGRATION_CONNECTIONS.md`
 - `docs/public/INTEGRATION_ADAPTERS.md`
 - `docs/public/INTEGRATION_OBSERVABILITY.md`
 - `docs/public/OUTBOX_RECOVERY.md`
@@ -231,3 +234,4 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/adr/0028-workflow-actions-task-and-adapter-sync.md`
 - `docs/adr/0029-workflow-action-run-observability.md`
 - `docs/adr/0030-outbox-retry-recovery.md`
+- `docs/adr/0031-tenant-owned-integration-connections.md`

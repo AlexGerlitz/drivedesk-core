@@ -45,6 +45,7 @@ Implemented foundation:
 - workflow rule audit, configured outbox handoff, and aggregate workflow metrics;
 - workflow actions for task record creation and adapter sync requests;
 - fake file import adapter with retry and dead-letter states;
+- tenant-owned integration connection profiles with safe config and mapping;
 - integration adapter metrics grouped by adapter and status;
 - structured adapter worker logs for started, completed, failed, and
   dead-lettered jobs;
@@ -134,6 +135,9 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
   `drivedesk_workflow_action_runs` metrics.
 - Outbox recovery now lets reviewed `retry` and `dead_letter` jobs move back to
   `pending` through an audited `outbox_event.retry_requested` operator action.
+- Integration connections now let tenant-owned adapter profiles drive file import
+  jobs through `integration_connection_id`, with aggregate
+  `drivedesk_integration_connections` metrics.
 - The hosted public demo uses static fallback on GitHub Pages and can be pointed
   at `GET /demo/public` for API-backed fake data, including workflow stages,
   timeline, domain events, audit, and outbox state.

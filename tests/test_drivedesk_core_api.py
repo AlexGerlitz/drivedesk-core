@@ -26,6 +26,7 @@ from drivedesk_api.db import (
     AuthAttempt,
     Base,
     BusinessRecord,
+    IntegrationConnection,
     OutboxEvent,
     PlatformAdmin,
     User,
@@ -1197,18 +1198,81 @@ def test_public_demo_endpoint_is_read_only_synthetic_contract(
 
 def test_file_import_adapter_success_flow(api_client: tuple[TestClient, async_sessionmaker[AsyncSession]]) -> None:
     client, session_factory = api_client
+    owner_headers = {"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"}
 
     tenant_response = client.post(
         "/tenants",
         json={"slug": "adapter-success", "name": "Adapter Success"},
-        headers={"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"},
+        headers=owner_headers,
     )
     assert tenant_response.status_code == 201
     tenant_id = tenant_response.json()["id"]
 
+    connection_response = client.post(
+        f"/tenants/{tenant_id}/integration-connections",
+        json={
+            "name": "Demo file import profile",
+            "adapter_key": "file.import.fake",
+            "config": {"mode": "synthetic"},
+            "mapping": {"external_id": "lead_id", "display_name": "full_name"},
+        },
+        headers=owner_headers,
+    )
+    assert connection_response.status_code == 201
+    connection = connection_response.json()
+    assert connection["tenant_id"] == tenant_id
+    assert connection["adapter_key"] == "file.import.fake"
+    assert connection["status"] == "active"
+    assert "lead_id" in connection["mapping_json"]
+
+    connections_response = client.get(
+        f"/tenants/{tenant_id}/integration-connections",
+        headers={"X-Actor-Id": "manager_1", "X-Actor-Role": "manager"},
+    )
+    assert connections_response.status_code == 200
+    assert [item["id"] for item in connections_response.json()] == [connection["id"]]
+
+    manager_create_response = client.post(
+        f"/tenants/{tenant_id}/integration-connections",
+        json={"name": "Manager cannot create", "adapter_key": "file.import.fake"},
+        headers={"X-Actor-Id": "manager_1", "X-Actor-Role": "manager"},
+    )
+    assert manager_create_response.status_code == 403
+    assert manager_create_response.json()["detail"] == "permission required: tenant:write"
+
+    unsupported_response = client.post(
+        f"/tenants/{tenant_id}/integration-connections",
+        json={"name": "Unknown adapter", "adapter_key": "provider.unknown"},
+        headers=owner_headers,
+    )
+    assert unsupported_response.status_code == 400
+    assert unsupported_response.json()["detail"] == "Unknown adapter: provider.unknown"
+
+    noop_connection_response = client.post(
+        f"/tenants/{tenant_id}/integration-connections",
+        json={"name": "Noop profile", "adapter_key": "internal.noop"},
+        headers=owner_headers,
+    )
+    assert noop_connection_response.status_code == 201
+    noop_connection = noop_connection_response.json()
+
+    mismatch_response = client.post(
+        f"/tenants/{tenant_id}/integration-imports/file",
+        json={
+            "integration_connection_id": noop_connection["id"],
+            "source_name": "wrong-profile",
+            "source_format": "json",
+            "records": [{"external_id": "lead_wrong", "display_name": "Wrong Profile"}],
+        },
+        headers=owner_headers,
+    )
+    assert mismatch_response.status_code == 409
+    assert mismatch_response.json()["detail"] == "integration connection adapter mismatch"
+
     import_response = client.post(
         f"/tenants/{tenant_id}/integration-imports/file",
         json={
+            "integration_connection_id": connection["id"],
             "source_name": "demo-leads-json",
             "source_format": "json",
             "records": [
@@ -1217,7 +1281,7 @@ def test_file_import_adapter_success_flow(api_client: tuple[TestClient, async_se
                 {"external_id": "", "display_name": "Rejected Demo Row"},
             ],
         },
-        headers={"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"},
+        headers=owner_headers,
     )
     assert import_response.status_code == 202
     import_event = import_response.json()
@@ -1230,13 +1294,14 @@ def test_file_import_adapter_success_flow(api_client: tuple[TestClient, async_se
 
     outbox_response = client.get(
         f"/tenants/{tenant_id}/outbox-events",
-        headers={"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"},
+        headers=owner_headers,
     )
     assert outbox_response.status_code == 200
     file_event = next(
         event for event in outbox_response.json() if event["event_type"] == "integration.file_import.requested"
     )
     result = json.loads(file_event["result_json"])
+    file_payload = json.loads(file_event["payload_json"])
     assert file_event["status"] == "processed"
     assert file_event["attempts"] == 1
     assert file_event["last_duration_ms"] is not None
@@ -1245,9 +1310,47 @@ def test_file_import_adapter_success_flow(api_client: tuple[TestClient, async_se
     assert result["records_received"] == 3
     assert result["records_accepted"] == 2
     assert result["records_rejected"] == 1
+    assert file_payload["integration_connection_id"] == connection["id"]
+    assert file_payload["mapping"] == {"external_id": "lead_id", "display_name": "full_name"}
+
+    async def integration_connection_state() -> tuple[list[IntegrationConnection], list[str]]:
+        async with session_factory() as session:
+            connections = await list_tenant_owned(
+                session,
+                IntegrationConnection,
+                tenant_id,
+                order_by=IntegrationConnection.created_at.desc(),
+            )
+            audit_result = await session.execute(
+                select(AuditEvent.event_type)
+                .where(
+                    AuditEvent.tenant_id == tenant_id,
+                    AuditEvent.event_type.in_(
+                        [
+                            "integration_connection.created",
+                            "integration.file_import.requested",
+                        ]
+                    ),
+                )
+                .order_by(AuditEvent.created_at)
+            )
+            return connections, list(audit_result.scalars().all())
+
+    connections, audit_events = asyncio.run(integration_connection_state())
+    assert {item.adapter_key for item in connections} == {"file.import.fake", "internal.noop"}
+    assert Counter(audit_events) == Counter(
+        {
+            "integration_connection.created": 2,
+            "integration.file_import.requested": 1,
+        }
+    )
 
     metrics_response = client.get("/metrics")
     assert metrics_response.status_code == 200
+    assert 'drivedesk_integration_connections{adapter_key="file.import.fake",status="active"} 1' in (
+        metrics_response.text
+    )
+    assert 'drivedesk_integration_connections{adapter_key="internal.noop",status="active"} 1' in metrics_response.text
     assert 'drivedesk_integration_jobs{adapter_key="file.import.fake",status="processed"} 1' in metrics_response.text
     assert (
         'drivedesk_integration_job_attempts{adapter_key="file.import.fake",status="processed"} 1'
@@ -1260,6 +1363,8 @@ def test_file_import_adapter_success_flow(api_client: tuple[TestClient, async_se
     assert 'drivedesk_integration_adapter_duration_milliseconds{adapter_key="file.import.fake",status="processed"}' in (
         metrics_response.text
     )
+    assert "Demo file import profile" not in metrics_response.text
+    assert connection["id"] not in metrics_response.text
 
 
 def test_file_import_adapter_retry_and_dead_letter(

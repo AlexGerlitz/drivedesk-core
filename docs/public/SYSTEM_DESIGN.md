@@ -257,6 +257,11 @@ The first implemented adapter is documented in `INTEGRATION_ADAPTERS.md`. It
 uses synthetic file-import data to prove the API -> outbox -> worker -> adapter
 flow, including retry and dead-letter states.
 
+Integration connections are documented in `INTEGRATION_CONNECTIONS.md`. They
+add tenant-owned adapter profiles with safe config and mapping, so an
+integration job can reference a configured connection instead of relying only on
+a hardcoded adapter key.
+
 Integration observability is documented in `INTEGRATION_OBSERVABILITY.md`. It
 shows how adapter jobs become metrics, structured worker logs, and
 runbook-backed operational signals.

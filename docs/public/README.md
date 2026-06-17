@@ -25,6 +25,7 @@ credentials.
 - `INTEGRATION_MAPPING_VALIDATION.md` - mapping validation against adapter requirements.
 - `INTEGRATION_MAPPING_TRANSFORM.md` - runtime field mapping transform and preview.
 - `INTEGRATION_CONNECTION_SCOPES.md` - least-privilege connection scopes.
+- `INTEGRATION_OPERATION_CONTRACTS.md` - operation-level adapter contracts.
 - `INTEGRATION_CONNECTIONS.md` - tenant-owned adapter profiles and mapping.
 - `INTEGRATION_ADAPTERS.md` - adapter contract, outbox, retry, and dead-letter overview.
 - `INTEGRATION_OBSERVABILITY.md` - adapter metrics, worker logs, and failure visibility overview.
@@ -82,13 +83,14 @@ https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 17. Read the integration mapping validation overview.
 18. Read the integration mapping transform overview.
 19. Read the integration connection scopes overview.
-20. Read the integration connections overview.
-21. Read the integration adapters overview.
-22. Read the integration observability overview.
-23. Read the outbox recovery overview.
-24. Read the case study.
-25. Check CI and public demo health workflow results.
-26. Run the public smoke checks locally.
+20. Read the integration operation contracts overview.
+21. Read the integration connections overview.
+22. Read the integration adapters overview.
+23. Read the integration observability overview.
+24. Read the outbox recovery overview.
+25. Read the case study.
+26. Check CI and public demo health workflow results.
+27. Run the public smoke checks locally.
 
 ## Human Explanation
 

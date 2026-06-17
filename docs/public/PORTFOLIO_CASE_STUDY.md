@@ -151,6 +151,8 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
 - Integration connection scopes now separate preview and execution permissions,
   so stored profiles can be limited to `file_import:preview` or
   `file_import:execute`.
+- Runtime adapter operation contracts now describe operation keys, endpoints,
+  events, required scopes, idempotency keys, and retry/dead-letter behavior.
 - The hosted public demo uses static fallback on GitHub Pages and can be pointed
   at `GET /demo/public` for API-backed fake data, including workflow stages,
   timeline, domain events, audit, and outbox state.

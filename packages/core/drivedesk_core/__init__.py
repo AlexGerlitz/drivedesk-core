@@ -7,6 +7,7 @@ Telegram, worker runtime, and external integrations.
 from drivedesk_core.adapters import (
     AdapterDescriptor,
     AdapterExecutionError,
+    AdapterOperationContract,
     AdapterResult,
     AdapterValidationError,
     FakeFileImportAdapter,
@@ -27,6 +28,7 @@ __all__ = [
     "ActorRef",
     "AdapterDescriptor",
     "AdapterExecutionError",
+    "AdapterOperationContract",
     "AdapterResult",
     "AdapterValidationError",
     "DomainEvent",

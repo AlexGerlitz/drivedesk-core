@@ -423,6 +423,31 @@ Public docs:
 - `docs/public/INTEGRATION_CONNECTION_SCOPES.md`;
 - `docs/adr/0035-integration-connection-scopes.md`.
 
+## Sprint 4I Structured Adapter Operation Contracts
+
+Sprint 4I adds machine-readable operation contracts to runtime adapter
+descriptors.
+
+New descriptor field:
+
+- `operation_contracts`.
+
+Why this matters:
+
+- adapter operations are discoverable through `GET /integration-adapters`;
+- `file.import.fake` declares separate preview and execute operations;
+- each operation exposes endpoint, event type, required scope, idempotency keys,
+  retry behavior, dead-letter behavior, and operator-review behavior;
+- public demo cards can show operation boundaries without exposing private
+  provider configuration;
+- future 1C, bank, KKT, webhook, and file adapters can reuse the same contract
+  shape.
+
+Public docs:
+
+- `docs/public/INTEGRATION_OPERATION_CONTRACTS.md`;
+- `docs/adr/0036-structured-adapter-operation-contracts.md`.
+
 ## Local Commands
 
 Run the API without Docker:

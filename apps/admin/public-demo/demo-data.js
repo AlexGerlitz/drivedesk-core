@@ -171,6 +171,32 @@ window.DRIVEDESK_DEMO_DATA = {
       "requiredMappingKeys": ["external_id", "display_name"],
       "supportedConnectionScopes": ["file_import:execute", "file_import:preview"],
       "defaultConnectionScopes": ["file_import:execute", "file_import:preview"],
+      "operationContracts": [
+        {
+          "key": "file_import_preview",
+          "title": "Preview mapped import rows",
+          "trigger": "api.request",
+          "eventType": "integration.mapping_preview.requested",
+          "endpoint": "POST /tenants/{tenant_id}/integration-mapping-preview",
+          "requiredConnectionScope": "file_import:preview",
+          "idempotencyKeys": ["tenant_id", "integration_connection_id", "records_hash"],
+          "retryable": false,
+          "deadLetter": false,
+          "operatorReview": false
+        },
+        {
+          "key": "file_import_execute",
+          "title": "Execute file import job",
+          "trigger": "api.outbox.enqueue",
+          "eventType": "integration.file_import.requested",
+          "endpoint": "POST /tenants/{tenant_id}/integration-imports/file",
+          "requiredConnectionScope": "file_import:execute",
+          "idempotencyKeys": ["tenant_id", "source_name", "source_format", "records_hash"],
+          "retryable": true,
+          "deadLetter": true,
+          "operatorReview": true
+        }
+      ],
       "contract": "Normalizes provider rows, previews mapped records, returns accepted and rejected counts, and stores the result on the outbox event."
     },
     {
@@ -182,6 +208,20 @@ window.DRIVEDESK_DEMO_DATA = {
       "requiredMappingKeys": [],
       "supportedConnectionScopes": [],
       "defaultConnectionScopes": [],
+      "operationContracts": [
+        {
+          "key": "internal_event_ack",
+          "title": "Acknowledge internal outbox event",
+          "trigger": "worker.outbox.pending",
+          "eventType": "internal.*",
+          "endpoint": "worker:drivedesk_worker.main.process_pending_outbox",
+          "requiredConnectionScope": null,
+          "idempotencyKeys": ["outbox_event.id"],
+          "retryable": false,
+          "deadLetter": false,
+          "operatorReview": false
+        }
+      ],
       "contract": "Acknowledges internal domain events without calling an external provider."
     },
     {
@@ -193,6 +233,20 @@ window.DRIVEDESK_DEMO_DATA = {
       "requiredMappingKeys": ["external_ref"],
       "supportedConnectionScopes": ["accounting:export"],
       "defaultConnectionScopes": ["accounting:export"],
+      "operationContracts": [
+        {
+          "key": "accounting_export_execute",
+          "title": "Export accounting document",
+          "trigger": "worker.outbox.pending",
+          "eventType": "accounting.export.requested",
+          "endpoint": "planned adapter worker",
+          "requiredConnectionScope": "accounting:export",
+          "idempotencyKeys": ["tenant_id", "document_id", "external_ref"],
+          "retryable": true,
+          "deadLetter": true,
+          "operatorReview": true
+        }
+      ],
       "contract": "Future adapter boundary for accounting exports and reconciliation status."
     }
   ],

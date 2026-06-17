@@ -191,7 +191,18 @@
       var supportedScopes = adapter.supportedConnectionScopes || [];
       scopes.appendChild(text(supportedScopes.length ? "scopes: " + supportedScopes.join(", ") : "scopes: none"));
 
-      row.append(top, key, contract, meta, mapping, scopes);
+      var operations = document.createElement("span");
+      operations.className = "muted";
+      var operationContracts = adapter.operationContracts || [];
+      operations.appendChild(
+        text(
+          operationContracts.length
+            ? "operations: " + operationContracts.map(function (operation) { return operation.key; }).join(", ")
+            : "operations: none"
+        )
+      );
+
+      row.append(top, key, contract, meta, mapping, scopes, operations);
       rows.appendChild(row);
     });
   }

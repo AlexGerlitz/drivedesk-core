@@ -63,14 +63,15 @@ It includes:
 17. Read `docs/public/INTEGRATION_MAPPING_VALIDATION.md`.
 18. Read `docs/public/INTEGRATION_MAPPING_TRANSFORM.md`.
 19. Read `docs/public/INTEGRATION_CONNECTION_SCOPES.md`.
-20. Read `docs/public/INTEGRATION_CONNECTIONS.md`.
-21. Read `docs/public/SYSTEM_DESIGN.md`.
-22. Read `docs/public/INTEGRATION_ADAPTERS.md`.
-23. Read `docs/public/INTEGRATION_OBSERVABILITY.md`.
-24. Read `docs/public/OUTBOX_RECOVERY.md`.
-25. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
-26. Check `.github/workflows/ci.yml`.
-27. Run `bash scripts/ci_smoke_public.sh` locally.
+20. Read `docs/public/INTEGRATION_OPERATION_CONTRACTS.md`.
+21. Read `docs/public/INTEGRATION_CONNECTIONS.md`.
+22. Read `docs/public/SYSTEM_DESIGN.md`.
+23. Read `docs/public/INTEGRATION_ADAPTERS.md`.
+24. Read `docs/public/INTEGRATION_OBSERVABILITY.md`.
+25. Read `docs/public/OUTBOX_RECOVERY.md`.
+26. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
+27. Check `.github/workflows/ci.yml`.
+28. Run `bash scripts/ci_smoke_public.sh` locally.
 
 ## What To Review First
 
@@ -91,6 +92,7 @@ It includes:
 - `docs/public/INTEGRATION_MAPPING_VALIDATION.md` - mapping validation against adapter requirements.
 - `docs/public/INTEGRATION_MAPPING_TRANSFORM.md` - runtime mapping transform and preview.
 - `docs/public/INTEGRATION_CONNECTION_SCOPES.md` - least-privilege connection scopes.
+- `docs/public/INTEGRATION_OPERATION_CONTRACTS.md` - operation-level adapter contracts.
 - `docs/public/INTEGRATION_CONNECTIONS.md` - tenant-owned adapter profiles and mapping.
 - `docs/public/INTEGRATION_ADAPTERS.md` - adapter contract and retry model.
 - `docs/public/INTEGRATION_OBSERVABILITY.md` - adapter metrics and worker log signals.
@@ -219,6 +221,9 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/public/CLIENT_SDK.md`
 - `docs/public/INTEGRATION_ADAPTER_CATALOG.md`
 - `docs/public/INTEGRATION_MAPPING_VALIDATION.md`
+- `docs/public/INTEGRATION_MAPPING_TRANSFORM.md`
+- `docs/public/INTEGRATION_CONNECTION_SCOPES.md`
+- `docs/public/INTEGRATION_OPERATION_CONTRACTS.md`
 - `docs/public/INTEGRATION_CONNECTIONS.md`
 - `docs/public/INTEGRATION_ADAPTERS.md`
 - `docs/public/INTEGRATION_OBSERVABILITY.md`
@@ -253,3 +258,4 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/adr/0033-integration-mapping-validation.md`
 - `docs/adr/0034-integration-mapping-transform-preview.md`
 - `docs/adr/0035-integration-connection-scopes.md`
+- `docs/adr/0036-structured-adapter-operation-contracts.md`

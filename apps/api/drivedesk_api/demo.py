@@ -5,6 +5,28 @@ from typing import Any
 from drivedesk_core import list_adapter_descriptors
 
 
+def _public_operation_contracts(descriptor: dict[str, Any]) -> list[dict[str, Any]]:
+    contracts: list[dict[str, Any]] = []
+    for contract in descriptor.get("operation_contracts", []):
+        if not isinstance(contract, dict):
+            continue
+        contracts.append(
+            {
+                "key": contract.get("key", ""),
+                "title": contract.get("title", ""),
+                "trigger": contract.get("trigger", ""),
+                "eventType": contract.get("event_type", ""),
+                "endpoint": contract.get("endpoint", ""),
+                "requiredConnectionScope": contract.get("required_connection_scope"),
+                "idempotencyKeys": contract.get("idempotency_keys", []),
+                "retryable": contract.get("retryable", False),
+                "deadLetter": contract.get("dead_letter", False),
+                "operatorReview": contract.get("operator_review", False),
+            }
+        )
+    return contracts
+
+
 def _public_adapter_rows() -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for descriptor in list_adapter_descriptors():
@@ -18,6 +40,7 @@ def _public_adapter_rows() -> list[dict[str, Any]]:
                 "requiredMappingKeys": descriptor["required_mapping_keys"],
                 "supportedConnectionScopes": descriptor["supported_connection_scopes"],
                 "defaultConnectionScopes": descriptor["default_connection_scopes"],
+                "operationContracts": _public_operation_contracts(descriptor),
                 "contract": descriptor["purpose"],
             }
         )
@@ -31,6 +54,20 @@ def _public_adapter_rows() -> list[dict[str, Any]]:
             "requiredMappingKeys": ["external_ref"],
             "supportedConnectionScopes": ["accounting:export"],
             "defaultConnectionScopes": ["accounting:export"],
+            "operationContracts": [
+                {
+                    "key": "accounting_export_execute",
+                    "title": "Export accounting document",
+                    "trigger": "worker.outbox.pending",
+                    "eventType": "accounting.export.requested",
+                    "endpoint": "planned adapter worker",
+                    "requiredConnectionScope": "accounting:export",
+                    "idempotencyKeys": ["tenant_id", "document_id", "external_ref"],
+                    "retryable": True,
+                    "deadLetter": True,
+                    "operatorReview": True,
+                }
+            ],
             "contract": "Future adapter boundary for accounting exports and reconciliation status.",
         }
     )

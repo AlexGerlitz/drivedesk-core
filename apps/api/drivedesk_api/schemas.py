@@ -28,6 +28,7 @@ class AdapterContractRead(BaseModel):
     required_mapping_keys: list[str] = Field(default_factory=list)
     supported_connection_scopes: list[str] = Field(default_factory=list)
     default_connection_scopes: list[str] = Field(default_factory=list)
+    operation_contracts: list[dict[str, Any]] = Field(default_factory=list)
     capabilities: list[str] = Field(default_factory=list)
     failure_modes: list[str] = Field(default_factory=list)
     public_notes: list[str] = Field(default_factory=list)

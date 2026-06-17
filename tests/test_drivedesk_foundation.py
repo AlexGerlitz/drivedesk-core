@@ -135,6 +135,13 @@ def test_adapter_catalog_describes_runtime_adapters() -> None:
         "file_import:execute",
         "file_import:preview",
     ]
+    operation_contracts = {item["key"]: item for item in descriptors["file.import.fake"]["operation_contracts"]}
+    assert set(operation_contracts) == {"file_import_execute", "file_import_preview"}
+    assert operation_contracts["file_import_preview"]["required_connection_scope"] == "file_import:preview"
+    assert operation_contracts["file_import_execute"]["required_connection_scope"] == "file_import:execute"
+    assert operation_contracts["file_import_execute"]["event_type"] == "integration.file_import.requested"
+    assert operation_contracts["file_import_execute"]["retryable"] is True
+    assert operation_contracts["file_import_execute"]["dead_letter"] is True
     assert "records" in descriptors["file.import.fake"]["payload_schema"]["required"]
     assert "field mapping transform" in descriptors["file.import.fake"]["capabilities"]
     assert "mapping preview" in descriptors["file.import.fake"]["capabilities"]
@@ -174,6 +181,16 @@ def test_api_integration_adapter_catalog_endpoint() -> None:
     assert payload["file.import.fake"]["default_connection_scopes"] == [
         "file_import:execute",
         "file_import:preview",
+    ]
+    api_operation_contracts = {item["key"]: item for item in payload["file.import.fake"]["operation_contracts"]}
+    assert api_operation_contracts["file_import_preview"]["endpoint"] == (
+        "POST /tenants/{tenant_id}/integration-mapping-preview"
+    )
+    assert api_operation_contracts["file_import_execute"]["idempotency_keys"] == [
+        "tenant_id",
+        "source_name",
+        "source_format",
+        "records_hash",
     ]
     assert "field mapping transform" in payload["file.import.fake"]["capabilities"]
     assert "mapping preview" in payload["file.import.fake"]["capabilities"]

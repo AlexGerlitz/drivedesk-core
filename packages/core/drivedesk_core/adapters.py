@@ -20,6 +20,20 @@ class AdapterResult:
 
 
 @dataclass(frozen=True)
+class AdapterOperationContract:
+    key: str
+    title: str
+    trigger: str
+    event_type: str
+    endpoint: str
+    required_connection_scope: str | None
+    idempotency_keys: list[str] = field(default_factory=list)
+    retryable: bool = True
+    dead_letter: bool = True
+    operator_review: bool = True
+
+
+@dataclass(frozen=True)
 class AdapterDescriptor:
     key: str
     name: str
@@ -35,6 +49,7 @@ class AdapterDescriptor:
     required_mapping_keys: list[str] = field(default_factory=list)
     supported_connection_scopes: list[str] = field(default_factory=list)
     default_connection_scopes: list[str] = field(default_factory=list)
+    operation_contracts: list[AdapterOperationContract] = field(default_factory=list)
     capabilities: list[str] = field(default_factory=list)
     failure_modes: list[str] = field(default_factory=list)
     public_notes: list[str] = field(default_factory=list)
@@ -230,6 +245,20 @@ class NoopAdapter:
                 "event_type": "optional internal event type",
             },
         },
+        operation_contracts=[
+            AdapterOperationContract(
+                key="internal_event_ack",
+                title="Acknowledge internal outbox event",
+                trigger="worker.outbox.pending",
+                event_type="internal.*",
+                endpoint="worker:drivedesk_worker.main.process_pending_outbox",
+                required_connection_scope=None,
+                idempotency_keys=["outbox_event.id"],
+                retryable=False,
+                dead_letter=False,
+                operator_review=False,
+            )
+        ],
         capabilities=["internal acknowledgement", "outbox smoke path"],
         failure_modes=[],
         public_notes=["Used as the default adapter for internal outbox events."],
@@ -270,6 +299,32 @@ class FakeFileImportAdapter:
         required_mapping_keys=["external_id", "display_name"],
         supported_connection_scopes=["file_import:execute", "file_import:preview"],
         default_connection_scopes=["file_import:execute", "file_import:preview"],
+        operation_contracts=[
+            AdapterOperationContract(
+                key="file_import_preview",
+                title="Preview mapped import rows",
+                trigger="api.request",
+                event_type="integration.mapping_preview.requested",
+                endpoint="POST /tenants/{tenant_id}/integration-mapping-preview",
+                required_connection_scope="file_import:preview",
+                idempotency_keys=["tenant_id", "integration_connection_id", "records_hash"],
+                retryable=False,
+                dead_letter=False,
+                operator_review=False,
+            ),
+            AdapterOperationContract(
+                key="file_import_execute",
+                title="Execute file import job",
+                trigger="api.outbox.enqueue",
+                event_type="integration.file_import.requested",
+                endpoint="POST /tenants/{tenant_id}/integration-imports/file",
+                required_connection_scope="file_import:execute",
+                idempotency_keys=["tenant_id", "source_name", "source_format", "records_hash"],
+                retryable=True,
+                dead_letter=True,
+                operator_review=True,
+            ),
+        ],
         capabilities=[
             "payload validation",
             "field mapping transform",

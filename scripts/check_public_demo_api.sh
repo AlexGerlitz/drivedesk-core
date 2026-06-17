@@ -139,6 +139,7 @@ assert {adapter["key"] for adapter in demo["adapters"]} >= {"file.import.fake", 
 assert any(adapter.get("connectionProfileSupported") for adapter in demo["adapters"]), demo
 assert any(adapter.get("requiredMappingKeys") for adapter in demo["adapters"]), demo
 assert any(adapter.get("supportedConnectionScopes") for adapter in demo["adapters"]), demo
+assert any(adapter.get("operationContracts") for adapter in demo["adapters"]), demo
 adapter_catalog = {adapter["key"]: adapter for adapter in adapters}
 assert set(adapter_catalog) == {"file.import.fake", "internal.noop"}, adapters
 assert adapter_catalog["file.import.fake"]["direction"] == "inbound", adapters
@@ -151,6 +152,19 @@ assert adapter_catalog["file.import.fake"]["supported_connection_scopes"] == [
 assert adapter_catalog["file.import.fake"]["default_connection_scopes"] == [
     "file_import:execute",
     "file_import:preview",
+], adapters
+operation_contracts = {
+    operation["key"]: operation
+    for operation in adapter_catalog["file.import.fake"]["operation_contracts"]
+}
+assert operation_contracts["file_import_preview"]["required_connection_scope"] == "file_import:preview", adapters
+assert operation_contracts["file_import_execute"]["required_connection_scope"] == "file_import:execute", adapters
+assert operation_contracts["file_import_execute"]["event_type"] == "integration.file_import.requested", adapters
+assert operation_contracts["file_import_execute"]["idempotency_keys"] == [
+    "tenant_id",
+    "source_name",
+    "source_format",
+    "records_hash",
 ], adapters
 assert adapter_catalog["file.import.fake"]["mapping_example"]["external_id"] == "lead_id", adapters
 assert "field mapping transform" in adapter_catalog["file.import.fake"]["capabilities"], adapters

@@ -37,6 +37,13 @@ and replaces them with runtime metadata:
   "required_mapping_keys": ["external_id", "display_name"],
   "supported_connection_scopes": ["file_import:execute", "file_import:preview"],
   "default_connection_scopes": ["file_import:execute", "file_import:preview"],
+  "operation_contracts": [
+    {
+      "key": "file_import_execute",
+      "event_type": "integration.file_import.requested",
+      "required_connection_scope": "file_import:execute"
+    }
+  ],
   "capabilities": [
     "payload validation",
     "field mapping transform",
@@ -66,6 +73,7 @@ Each adapter descriptor includes:
 | `required_mapping_keys` | Mapping keys that must be present when a tenant connection profile is created. |
 | `supported_connection_scopes` | Operations a tenant-owned profile may request for this adapter. |
 | `default_connection_scopes` | Scopes stored when a profile does not request explicit scopes. |
+| `operation_contracts` | Machine-readable operations, endpoints, events, required scopes, idempotency keys, and recovery behavior. |
 | `capabilities` | What the adapter proves. |
 | `failure_modes` | Public-safe failure modes used for retry/dead-letter tests. |
 
@@ -115,6 +123,8 @@ The public smoke test validates:
 - the file-import descriptor exposes `required_mapping_keys`;
 - the file-import descriptor exposes `supported_connection_scopes`;
 - the file-import descriptor exposes `default_connection_scopes`;
+- the file-import descriptor exposes `operation_contracts`;
+- the file-import execute operation declares `integration.file_import.requested`;
 - the file-import descriptor exposes mapping transform and preview capabilities;
 - the file-import descriptor includes mapping and payload examples;
 - the public demo adapter cards include connection-profile metadata.

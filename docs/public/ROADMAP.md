@@ -13,6 +13,7 @@ operations, or commercial details.
 - Runtime adapter catalog with `GET /integration-adapters`.
 - Tenant-owned integration connection profiles with safe config and mapping.
 - Integration connection scopes for preview and execution boundaries.
+- Structured adapter operation contracts in the runtime catalog.
 - Mapping validation against runtime adapter requirements.
 - Runtime mapping transform and read-only mapping preview.
 - Integration observability for adapter metrics, structured logs, and failed-job runbooks.
@@ -47,7 +48,6 @@ operations, or commercial details.
 
 ## Next
 
-- More structured adapter contracts.
 - More detailed lifecycle validation examples for contracts, payments, lessons, tasks, and documents.
 - More public-safe workflow examples that reuse the same rule, action-run, task,
   event, and outbox shape.

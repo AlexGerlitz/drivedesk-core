@@ -87,6 +87,14 @@
             "title": "Name",
             "type": "string"
           },
+          "operation_contracts": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Operation Contracts",
+            "type": "array"
+          },
           "payload_schema": {
             "additionalProperties": true,
             "title": "Payload Schema",

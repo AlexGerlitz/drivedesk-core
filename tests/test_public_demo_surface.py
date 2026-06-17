@@ -82,6 +82,19 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
         "file_import:execute",
         "file_import:preview",
     ]
+    file_import_operations = {
+        operation["key"]: operation
+        for operation in adapter_by_key["file.import.fake"]["operationContracts"]
+    }
+    assert file_import_operations["file_import_preview"]["requiredConnectionScope"] == "file_import:preview"
+    assert file_import_operations["file_import_execute"]["requiredConnectionScope"] == "file_import:execute"
+    assert file_import_operations["file_import_execute"]["eventType"] == "integration.file_import.requested"
+    assert file_import_operations["file_import_execute"]["idempotencyKeys"] == [
+        "tenant_id",
+        "source_name",
+        "source_format",
+        "records_hash",
+    ]
     assert len(payload["integrationJobs"]) >= 3
     assert len(payload["integrationHealth"]) >= 4
     assert len(payload["outbox"]) >= 3
@@ -98,6 +111,8 @@ def test_public_demo_can_load_api_backed_data_with_static_fallback() -> None:
     script = (DEMO_DIR / "app.js").read_text(encoding="utf-8")
 
     assert "loadApiBackedDemoData" in script
+    assert "operationContracts" in script
+    assert "operations: " in script
     assert "fillWorkflow" in script
     assert "fillWorkflowTimeline" in script
     assert "fillDomainEvents" in script

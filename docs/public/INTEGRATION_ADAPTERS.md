@@ -18,6 +18,7 @@ shape needed for later providers:
 - worker execution;
 - field mapping transform and preview;
 - connection scope enforcement;
+- operation-level contracts for preview and execution;
 - retry state for temporary failures;
 - dead-letter state for permanent failures;
 - result payload stored on the outbox event;
@@ -59,7 +60,9 @@ POST /tenants/{tenant_id}/outbox-events/{event_id}/retry
 
 `GET /integration-adapters` returns the executable runtime adapter catalog with
 public-safe metadata, payload shape, mapping examples, and connection-profile
-support flags. See `INTEGRATION_ADAPTER_CATALOG.md`.
+support flags. It also exposes operation contracts with endpoint, event, scope,
+idempotency, retry, dead-letter, and operator-review metadata. See
+`INTEGRATION_ADAPTER_CATALOG.md` and `INTEGRATION_OPERATION_CONTRACTS.md`.
 
 Tenant-owned connection profiles can be scoped. For the public file-import
 adapter, `file_import:preview` allows mapping preview and

@@ -4,13 +4,13 @@ import logging
 from datetime import timedelta
 from time import perf_counter
 
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import Depends, FastAPI, HTTPException, Query, status
 from fastapi.responses import JSONResponse, PlainTextResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 from starlette.responses import Response
 
-from drivedesk_api.db import AuditEvent, Membership, OutboxEvent, PlatformAdmin, Tenant, User
+from drivedesk_api.db import AuditEvent, BusinessRecord, Membership, OutboxEvent, PlatformAdmin, Tenant, User
 from drivedesk_api.demo import build_public_demo_payload
 from drivedesk_api.observability import (
     build_health_payload,
@@ -51,6 +51,9 @@ from drivedesk_api.schemas import (
     AuditEventRead,
     AuthMeRead,
     AuthSessionRead,
+    BusinessRecordCreate,
+    BusinessRecordRead,
+    BusinessRecordType,
     FileImportCreate,
     LoginRequest,
     MembershipCreate,
@@ -67,12 +70,14 @@ from drivedesk_api.schemas import (
 )
 from drivedesk_api.services import (
     count_outbox_by_status,
+    create_business_record,
     create_file_import_job,
     create_membership,
     create_platform_admin,
     create_tenant,
     create_user,
     ensure_tenant_exists,
+    list_business_records,
     list_platform_admins,
     summarize_integration_outbox,
     write_audit,
@@ -482,6 +487,28 @@ def build_app(settings: Settings | None = None) -> FastAPI:
         await ensure_tenant_exists(session, tenant_id)
         require_tenant_permission(actor, tenant_id, Permission.OUTBOX_READ)
         return await list_tenant_owned(session, OutboxEvent, tenant_id, order_by=OutboxEvent.created_at.desc())
+
+    @api.post("/tenants/{tenant_id}/business-records", response_model=BusinessRecordRead, status_code=201)
+    async def create_business_record_endpoint(
+        tenant_id: str,
+        payload: BusinessRecordCreate,
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> BusinessRecord:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.BUSINESS_RECORD_WRITE)
+        return await create_business_record(session, tenant_id=tenant_id, payload=payload, actor=actor)
+
+    @api.get("/tenants/{tenant_id}/business-records", response_model=list[BusinessRecordRead])
+    async def list_business_records_endpoint(
+        tenant_id: str,
+        record_type: BusinessRecordType | None = Query(default=None),
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> list[BusinessRecord]:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.BUSINESS_RECORD_READ)
+        return await list_business_records(session, tenant_id=tenant_id, record_type=record_type)
 
     @api.post("/tenants/{tenant_id}/integration-imports/file", response_model=OutboxEventRead, status_code=202)
     async def create_file_import_endpoint(

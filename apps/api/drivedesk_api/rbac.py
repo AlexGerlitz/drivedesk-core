@@ -15,6 +15,8 @@ class Permission(StrEnum):
     PLATFORM_ADMIN_WRITE = "platform_admin:write"
     AUTH_SESSION_READ = "auth_session:read"
     AUTH_SESSION_WRITE = "auth_session:write"
+    BUSINESS_RECORD_READ = "business_record:read"
+    BUSINESS_RECORD_WRITE = "business_record:write"
     TENANT_READ = "tenant:read"
     TENANT_WRITE = "tenant:write"
     USER_READ = "user:read"
@@ -31,6 +33,8 @@ ROLE_PERMISSIONS: dict[str, set[Permission]] = {
     "admin": {
         Permission.AUTH_SESSION_READ,
         Permission.AUTH_SESSION_WRITE,
+        Permission.BUSINESS_RECORD_READ,
+        Permission.BUSINESS_RECORD_WRITE,
         Permission.TENANT_READ,
         Permission.USER_READ,
         Permission.USER_WRITE,
@@ -40,12 +44,15 @@ ROLE_PERMISSIONS: dict[str, set[Permission]] = {
         Permission.OUTBOX_READ,
     },
     "manager": {
+        Permission.BUSINESS_RECORD_READ,
+        Permission.BUSINESS_RECORD_WRITE,
         Permission.TENANT_READ,
         Permission.USER_READ,
         Permission.MEMBERSHIP_READ,
         Permission.AUDIT_READ,
     },
     "viewer": {
+        Permission.BUSINESS_RECORD_READ,
         Permission.TENANT_READ,
         Permission.USER_READ,
         Permission.MEMBERSHIP_READ,

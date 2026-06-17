@@ -25,8 +25,8 @@ The first helpers are:
 - `tenant_owned_select()`;
 - `list_tenant_owned()`.
 
-Current tenant-owned list endpoints for memberships, audit events, and outbox
-events use this helper after explicit permission checks.
+Current tenant-owned list endpoints for memberships, audit events, outbox
+events, and business records use this helper after explicit permission checks.
 
 ## Consequences
 
@@ -38,7 +38,8 @@ events use this helper after explicit permission checks.
 
 ## Next Work
 
-- Use this helper for new contract, payment, lesson, task, and document models.
+- Use this helper for dedicated contract, payment, lesson, task, and document
+  models when they split out of the shared business record foundation.
 - Add model-specific repository classes only when the query logic becomes more
   complex than simple tenant filtering.
 - Add database-level row isolation after the Core schema stabilizes.

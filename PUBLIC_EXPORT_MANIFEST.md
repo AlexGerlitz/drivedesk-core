@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-17T20:10:53Z
+Generated at: 2026-06-17T20:28:39Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -33,6 +33,8 @@ Copied public-safe areas:
 - public demo generated OpenAPI SDK
 - public platform-admin control-plane surface
 - public session revocation control-plane surface
+- public business record tenant-owned surface
+- public business record outbox adapter key: internal.business_record
 - public tenant-owned repository helper surface
 - public auth observability alerting surface
 - public demo local run script

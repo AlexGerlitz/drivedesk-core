@@ -7,6 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 Role = Literal["owner", "admin", "manager", "viewer"]
 PlatformRole = Literal["platform_admin"]
+BusinessRecordType = Literal["contract", "payment", "lesson", "task", "document"]
 
 
 class TenantCreate(BaseModel):
@@ -137,6 +138,27 @@ class OutboxEventRead(BaseModel):
     created_at: datetime | None = None
     processed_at: datetime | None = None
     dead_lettered_at: datetime | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class BusinessRecordCreate(BaseModel):
+    record_type: BusinessRecordType
+    title: str = Field(min_length=2, max_length=255)
+    status: str = Field(default="draft", min_length=2, max_length=32, pattern=r"^[a-z0-9][a-z0-9_-]*$")
+    external_ref: str | None = Field(default=None, min_length=1, max_length=128)
+    payload: dict[str, Any] = Field(default_factory=dict)
+
+
+class BusinessRecordRead(BaseModel):
+    id: str
+    tenant_id: str
+    record_type: BusinessRecordType
+    status: str
+    title: str
+    external_ref: str | None = None
+    payload_json: str
+    created_at: datetime | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

@@ -10,9 +10,18 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from drivedesk_api.auth import hash_credential
-from drivedesk_api.db import AuditEvent, Membership, OutboxEvent, PlatformAdmin, Tenant, User
+from drivedesk_api.db import AuditEvent, BusinessRecord, Membership, OutboxEvent, PlatformAdmin, Tenant, User
 from drivedesk_api.rbac import ActorContext
-from drivedesk_api.schemas import FileImportCreate, MembershipCreate, PlatformAdminCreate, TenantCreate, UserCreate
+from drivedesk_api.schemas import (
+    BusinessRecordCreate,
+    BusinessRecordType,
+    FileImportCreate,
+    MembershipCreate,
+    PlatformAdminCreate,
+    TenantCreate,
+    UserCreate,
+)
+from drivedesk_api.tenant_repository import list_tenant_owned, tenant_owned_select
 
 
 def new_id() -> str:
@@ -236,6 +245,79 @@ async def create_file_import_job(
     )
     await commit_or_conflict(session, "file import job already exists")
     return event
+
+
+async def create_business_record(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    payload: BusinessRecordCreate,
+    actor: ActorContext,
+) -> BusinessRecord:
+    await ensure_tenant_exists(session, tenant_id)
+    record_payload = payload.payload
+    record = BusinessRecord(
+        id=new_id(),
+        tenant_id=tenant_id,
+        record_type=payload.record_type,
+        status=payload.status,
+        title=payload.title,
+        external_ref=payload.external_ref,
+        payload_json=json.dumps(record_payload, ensure_ascii=False, sort_keys=True),
+    )
+    session.add(record)
+    await write_audit(
+        session,
+        tenant_id=tenant_id,
+        actor=actor,
+        event_type="business_record.created",
+        entity_type=f"business_record.{record.record_type}",
+        entity_id=record.id,
+        summary=f"Business record created: {record.record_type}",
+        metadata={
+            "record_id": record.id,
+            "record_type": record.record_type,
+            "status": record.status,
+            "external_ref": record.external_ref,
+        },
+    )
+    await enqueue_outbox(
+        session,
+        tenant_id=tenant_id,
+        event_type="business_record.created",
+        adapter_key="internal.business_record",
+        payload={
+            "record_id": record.id,
+            "record_type": record.record_type,
+            "status": record.status,
+            "external_ref": record.external_ref,
+        },
+    )
+    await commit_or_conflict(session, "business record already exists")
+    return record
+
+
+async def list_business_records(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    record_type: BusinessRecordType | None = None,
+) -> list[BusinessRecord]:
+    query = tenant_owned_select(
+        BusinessRecord,
+        tenant_id,
+        order_by=BusinessRecord.created_at.desc(),
+    )
+    if record_type is not None:
+        query = query.where(BusinessRecord.record_type == record_type)
+        result = await session.execute(query)
+        return list(result.scalars().all())
+    return await list_tenant_owned(
+        session,
+        BusinessRecord,
+        tenant_id,
+        order_by=BusinessRecord.created_at.desc(),
+    )
 
 
 async def ensure_tenant_exists(session: AsyncSession, tenant_id: str) -> Tenant:

@@ -17,6 +17,7 @@ credentials.
 - `SESSION_REVOCATION.md` - admin-triggered tenant/platform session revocation.
 - `PLATFORM_ADMIN.md` - dedicated platform-admin model and SaaS control-plane boundary.
 - `TENANT_ISOLATION.md` - tenant-scoped bearer access and cross-tenant boundaries.
+- `BUSINESS_RECORDS.md` - tenant-owned business record foundation.
 - `CLIENT_SDK.md` - generated OpenAPI client SDK example.
 - `INTEGRATION_ADAPTERS.md` - adapter contract, outbox, retry, and dead-letter overview.
 - `INTEGRATION_OBSERVABILITY.md` - adapter metrics, worker logs, and failure visibility overview.
@@ -65,13 +66,14 @@ https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 9. Read the session revocation overview.
 10. Read the platform-admin overview.
 11. Read the tenant isolation overview.
-12. Read the generated client SDK overview.
-13. Read the system design overview.
-14. Read the integration adapters overview.
-15. Read the integration observability overview.
-16. Read the case study.
-17. Check CI and public demo health workflow results.
-18. Run the public smoke checks locally.
+12. Read the business records overview.
+13. Read the generated client SDK overview.
+14. Read the system design overview.
+15. Read the integration adapters overview.
+16. Read the integration observability overview.
+17. Read the case study.
+18. Check CI and public demo health workflow results.
+19. Run the public smoke checks locally.
 
 ## Human Explanation
 

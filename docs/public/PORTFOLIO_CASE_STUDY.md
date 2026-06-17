@@ -39,6 +39,7 @@ Implemented foundation:
 - token-backed tenant-aware RBAC checks for Core tenant endpoints;
 - tenant isolation for bearer-token list/read access and global bootstrap endpoints;
 - reusable tenant-scope helper module for Core list queries;
+- tenant-owned business record foundation for contracts, payments, lessons, tasks, and documents;
 - fake file import adapter with retry and dead-letter states;
 - integration adapter metrics grouped by adapter and status;
 - structured adapter worker logs for started, completed, failed, and
@@ -111,7 +112,8 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
 - Tenant filtering is centralized for current tenant/user list queries so
   future tenant-owned models can reuse the same pattern.
 - Tenant-owned repository helpers now wrap current membership, audit, and outbox
-  list queries so future business entities do not copy raw `tenant_id` filters.
+  list queries plus the first product-shaped business records, so future
+  business entities do not copy raw `tenant_id` filters.
 - The hosted public demo uses static fallback on GitHub Pages and can be pointed
   at `GET /demo/public` for API-backed fake data, including workflow stages,
   timeline, domain events, audit, and outbox state.

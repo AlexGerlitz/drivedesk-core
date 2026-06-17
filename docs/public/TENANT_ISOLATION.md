@@ -17,6 +17,7 @@ one tenant without becoming a platform-wide administrator.
   - `POST /users`.
 - Tenant-owner bearer tokens are rejected for those platform operations.
 - Platform-admin bearer tokens can list and create global tenant/user records.
+- Tenant-owned business records require membership in the requested tenant.
 
 Bootstrap headers still exist for local setup and the first controlled
 platform-admin grant. They are not treated as tenant-owner capabilities.
@@ -47,6 +48,9 @@ tenant A owner reads tenant B memberships -> rejected
 tenant A owner creates global tenant/user with bearer token -> rejected
 tenant A owner grants platform admin -> rejected
 platform admin creates global tenant/user with bearer token -> allowed
+tenant A manager creates tenant A business record -> allowed
+tenant A manager reads tenant B business records -> rejected
+tenant B viewer writes tenant B business record -> rejected
 ```
 
 ## Platform Admin Boundary
@@ -96,10 +100,22 @@ Current helpers:
 - `tenant_owned_select()`;
 - `list_tenant_owned()`.
 
-Current tenant-owned list endpoints for memberships, audit events, and outbox
-events use the helper after explicit permission checks. The point is to make
-`tenant_id` filtering the default path for future contracts, payments, lessons,
-documents, and tasks.
+Current tenant-owned list endpoints for memberships, audit events, outbox
+events, and business records use the helper after explicit permission checks.
+The point is to make `tenant_id` filtering the default path for future
+contracts, payments, lessons, documents, and tasks.
+
+## Business Record Boundary
+
+The first product-shaped tenant-owned table is:
+
+```text
+dd_business_records
+```
+
+It supports `contract`, `payment`, `lesson`, `task`, and `document` record
+types through one shared platform path. This proves tenant isolation before
+those record types grow into dedicated domain modules.
 
 ## Request Flow
 
@@ -119,7 +135,7 @@ flowchart LR
 
 Recommended next slices:
 
-1. Apply tenant-owned repository helpers to future contracts, payments, lessons,
-   documents, and tasks.
-2. Add public-safe tenant-isolation metrics with synthetic data.
-3. Add database-level row isolation once the Core data model stabilizes.
+1. Add public-safe tenant-isolation metrics with synthetic data.
+2. Add database-level row isolation once the Core data model stabilizes.
+3. Split high-value business record types into dedicated domain modules when
+   their lifecycle requires it.

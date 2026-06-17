@@ -20,6 +20,8 @@ It includes:
 - bearer-token tenant isolation for tenant/user listing and bootstrap endpoints;
 - reusable tenant-scope helper module for Core list queries;
 - reusable tenant-owned repository helper module for models with `tenant_id`;
+- tenant-owned business record foundation for contracts, payments, lessons,
+  tasks, and documents;
 - fake file import adapter with retry and dead-letter state;
 - synthetic lead-to-student workflow in the public demo payload;
 - generated OpenAPI client SDK example for the public demo API;
@@ -48,13 +50,14 @@ It includes:
 9. Read `docs/public/SESSION_REVOCATION.md`.
 10. Read `docs/public/PLATFORM_ADMIN.md`.
 11. Read `docs/public/TENANT_ISOLATION.md`.
-12. Read `docs/public/CLIENT_SDK.md`.
-13. Read `docs/public/SYSTEM_DESIGN.md`.
-14. Read `docs/public/INTEGRATION_ADAPTERS.md`.
-15. Read `docs/public/INTEGRATION_OBSERVABILITY.md`.
-16. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
-17. Check `.github/workflows/ci.yml`.
-18. Run `bash scripts/ci_smoke_public.sh` locally.
+12. Read `docs/public/BUSINESS_RECORDS.md`.
+13. Read `docs/public/CLIENT_SDK.md`.
+14. Read `docs/public/SYSTEM_DESIGN.md`.
+15. Read `docs/public/INTEGRATION_ADAPTERS.md`.
+16. Read `docs/public/INTEGRATION_OBSERVABILITY.md`.
+17. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
+18. Check `.github/workflows/ci.yml`.
+19. Run `bash scripts/ci_smoke_public.sh` locally.
 
 ## What To Review First
 
@@ -67,6 +70,7 @@ It includes:
 - `docs/public/SESSION_REVOCATION.md` - admin-triggered tenant/platform session revocation.
 - `docs/public/PLATFORM_ADMIN.md` - dedicated platform-admin model and SaaS control-plane boundary.
 - `docs/public/TENANT_ISOLATION.md` - tenant isolation and bootstrap boundary overview.
+- `docs/public/BUSINESS_RECORDS.md` - tenant-owned business record foundation.
 - `docs/public/CLIENT_SDK.md` - generated OpenAPI client SDK example.
 - `docs/public/INTEGRATION_ADAPTERS.md` - adapter contract and retry model.
 - `docs/public/INTEGRATION_OBSERVABILITY.md` - adapter metrics and worker log signals.
@@ -81,6 +85,9 @@ It includes:
 - `POST /auth/sessions/{session_id}/revoke` - admin-triggered visible session revocation.
 - `POST /platform/admins` - platform-admin grant endpoint.
 - `GET /platform/admins` - platform-admin grant review endpoint.
+- `POST /tenants/{tenant_id}/business-records` - tenant-owned business record creation.
+- `GET /tenants/{tenant_id}/business-records` - tenant-owned business record listing.
+- `internal.business_record` - adapter key used by business record outbox events.
 - `DriveDeskMetricsStorageUnavailable`, `DriveDeskAuthFailureSpike`, and
   `DriveDeskAuthLockedAttempts` - public-safe auth alert contract.
 - `workflow`, `timeline`, and `domainEvents` - synthetic business process data
@@ -170,6 +177,7 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/public/SESSION_REVOCATION.md`
 - `docs/public/PLATFORM_ADMIN.md`
 - `docs/public/TENANT_ISOLATION.md`
+- `docs/public/BUSINESS_RECORDS.md`
 - `docs/public/CLIENT_SDK.md`
 - `docs/public/INTEGRATION_ADAPTERS.md`
 - `docs/public/INTEGRATION_OBSERVABILITY.md`
@@ -192,3 +200,4 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/adr/0022-auth-security-alerts.md`
 - `docs/adr/0023-dedicated-platform-admin-model.md`
 - `docs/adr/0024-admin-triggered-session-revocation.md`
+- `docs/adr/0025-tenant-owned-business-record-foundation.md`

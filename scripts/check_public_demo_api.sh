@@ -147,6 +147,7 @@ assert "/auth/login" in openapi["paths"], openapi["paths"].keys()
 assert "/auth/me" in openapi["paths"], openapi["paths"].keys()
 assert "/auth/logout" in openapi["paths"], openapi["paths"].keys()
 assert "/auth/sessions" in openapi["paths"], openapi["paths"].keys()
+assert "/tenants/{tenant_id}/business-records" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/public" in openapi["paths"], openapi["paths"].keys()
 assert "/health" in openapi["paths"], openapi["paths"].keys()
 

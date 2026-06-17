@@ -16,6 +16,7 @@ workflows, but the backend foundation is intentionally generic:
 - credential auth and bearer access tokens;
 - audit events;
 - outbox events;
+- tenant-owned business records;
 - background workers;
 - integration adapters;
 - observability;
@@ -66,6 +67,7 @@ flowchart TB
 | Auth layer | Credential verification, bearer token hashing, revocation, session listing, login guard, aggregate auth metrics, audit, current-user lookup, tenant isolation, and RBAC context. |
 | Tenant scope | Reusable query helpers that keep tenant/user list behavior scoped to memberships. |
 | Tenant repository | Reusable query helpers for tenant-owned models that carry `tenant_id`. |
+| Business records | Generic tenant-owned records for contract, payment, lesson, task, and document foundations. |
 | Core modules | Domain rules that should not depend on web framework details. |
 | Database | Durable business state, migrations, audit and outbox storage. |
 | Worker | Async processing, retryable jobs, future adapter execution. |
@@ -169,6 +171,9 @@ flowchart LR
   TenantEndpoint --> TenantCheck["Requested Tenant Membership"]
   TenantCheck --> Allow["Allow"]
   TenantCheck --> Deny["Deny Cross-Tenant Access"]
+  TenantEndpoint --> BusinessRecord["Business Records"]
+  BusinessRecord --> BusinessAudit["Audit Event"]
+  BusinessRecord --> BusinessOutbox["Outbox Event"]
   Actor --> PlatformGrant["Platform Admin Grant"]
   PlatformGrant --> Bootstrap["POST /tenants or POST /users"]
   Bootstrap --> AllowBootstrap["Allow Platform Operation"]
@@ -184,9 +189,15 @@ Tenant list filtering is centralized in a tenant-scope module. Current handlers
 still perform explicit permission checks, then delegate scoped list queries to
 that module.
 
-Tenant-owned resources such as memberships, audit events, and outbox events use
-a repository helper for `tenant_id` query construction. Future contracts,
-payments, lessons, documents, and tasks should use the same default path.
+Tenant-owned resources such as memberships, audit events, outbox events, and
+business records use a repository helper for `tenant_id` query construction.
+Business records are the first product-shaped use of that path. A manager can
+create a record inside their tenant, a viewer can read but not write, and a
+member of tenant A cannot read tenant B records.
+
+Created business records write `business_record.created` audit and outbox
+events so future integrations can react through the same delivery path as other
+Core changes.
 
 ## Adapter Boundary
 

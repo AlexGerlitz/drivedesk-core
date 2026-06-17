@@ -143,6 +143,7 @@ New table:
 - `dd_access_tokens`.
 - `dd_auth_attempts`.
 - `dd_platform_admins`.
+- `dd_business_records`.
 
 New field:
 
@@ -153,6 +154,7 @@ New endpoint group:
 - auth login, current-user lookup, logout/token revocation, and redacted session
   listing/revocation.
 - platform-admin grant creation and listing.
+- tenant-owned business record create/list/filter.
 
 Tenant isolation rules:
 
@@ -174,6 +176,39 @@ Tenant-owned repository module:
 - `apps/api/drivedesk_api/tenant_repository.py`;
 - `tenant_owned_select()`;
 - `list_tenant_owned()`.
+
+## Sprint 3 Business Record Foundation
+
+Sprint 3 adds the first product-shaped tenant-owned records without committing
+too early to detailed domain schemas.
+
+New table:
+
+- `dd_business_records`.
+
+New endpoint group:
+
+- `POST /tenants/{tenant_id}/business-records`;
+- `GET /tenants/{tenant_id}/business-records`;
+- `GET /tenants/{tenant_id}/business-records?record_type=contract`.
+
+Supported record types:
+
+- `contract`;
+- `payment`;
+- `lesson`;
+- `task`;
+- `document`.
+
+What this gives us:
+
+- Future domain packs can start from one proven tenant-owned path.
+- Managers can create business records inside their tenant.
+- Viewers can read business records but cannot write them.
+- Cross-tenant bearer-token access is rejected.
+- Each created record writes `business_record.created` audit and outbox events.
+- The business list path exercises the tenant-owned repository helper on real
+  product-shaped data.
 
 ## Local Commands
 

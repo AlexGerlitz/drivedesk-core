@@ -39,7 +39,7 @@ tests          API and foundation tests
 
 Recommended next slices:
 
-- tenant-owned repository coverage for future business entities;
+- detailed business record lifecycle examples;
 - structured logging;
 - OpenTelemetry tracing;
 - metrics endpoint;

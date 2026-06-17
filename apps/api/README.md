@@ -40,6 +40,8 @@ Core endpoints:
 - `GET /tenants/{tenant_id}/memberships`;
 - `GET /tenants/{tenant_id}/audit-events`;
 - `GET /tenants/{tenant_id}/outbox-events`.
+- `POST /tenants/{tenant_id}/business-records`.
+- `GET /tenants/{tenant_id}/business-records`.
 - `POST /tenants/{tenant_id}/integration-imports/file`.
 - `GET /demo/public`.
 
@@ -79,6 +81,15 @@ Tenant isolation:
   `apps/api/drivedesk_api/tenant_scope.py`.
 - tenant-owned list queries for models with `tenant_id` use
   `apps/api/drivedesk_api/tenant_repository.py`.
+
+Business record endpoints:
+
+- `POST /tenants/{tenant_id}/business-records` creates a tenant-owned
+  `contract`, `payment`, `lesson`, `task`, or `document` record.
+- `GET /tenants/{tenant_id}/business-records` lists tenant-owned business records.
+- `GET /tenants/{tenant_id}/business-records?record_type=contract` filters by
+  record type.
+- created records write `business_record.created` audit and outbox events.
 
 Bearer requests use:
 

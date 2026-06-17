@@ -19,7 +19,7 @@ for relative in ("apps/api", "apps/worker", "packages/core"):
     if path not in sys.path:
         sys.path.insert(0, path)
 
-from drivedesk_api.db import AccessToken, AuditEvent, AuthAttempt, Base, OutboxEvent, PlatformAdmin, User
+from drivedesk_api.db import AccessToken, AuditEvent, AuthAttempt, Base, BusinessRecord, OutboxEvent, PlatformAdmin, User
 from drivedesk_api.main import build_app
 from drivedesk_api.rbac import ActorContext
 from drivedesk_api.session import get_session
@@ -112,6 +112,161 @@ def test_tenant_owned_repository_helper_filters_by_tenant(
 
     with pytest.raises(ValueError, match="User is not a tenant-owned model"):
         tenant_owned_select(User, tenant_a_id)
+
+
+def test_business_record_foundation_is_tenant_scoped_and_audited(
+    api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, session_factory = api_client
+    owner_headers = {"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"}
+
+    tenant_a_response = client.post(
+        "/tenants",
+        json={"slug": "business-a", "name": "Business A"},
+        headers=owner_headers,
+    )
+    assert tenant_a_response.status_code == 201
+    tenant_a_id = tenant_a_response.json()["id"]
+
+    tenant_b_response = client.post(
+        "/tenants",
+        json={"slug": "business-b", "name": "Business B"},
+        headers=owner_headers,
+    )
+    assert tenant_b_response.status_code == 201
+    tenant_b_id = tenant_b_response.json()["id"]
+
+    manager_a_response = client.post(
+        "/users",
+        json={"email": "business-manager-a@example.com", "display_name": "Business Manager A", "password": "correct-horse-a"},
+        headers=owner_headers,
+    )
+    assert manager_a_response.status_code == 201
+    manager_a_id = manager_a_response.json()["id"]
+
+    viewer_b_response = client.post(
+        "/users",
+        json={"email": "business-viewer-b@example.com", "display_name": "Business Viewer B", "password": "correct-horse-b"},
+        headers=owner_headers,
+    )
+    assert viewer_b_response.status_code == 201
+    viewer_b_id = viewer_b_response.json()["id"]
+
+    assert client.post(
+        f"/tenants/{tenant_a_id}/memberships",
+        json={"user_id": manager_a_id, "role": "manager"},
+        headers=owner_headers,
+    ).status_code == 201
+    assert client.post(
+        f"/tenants/{tenant_b_id}/memberships",
+        json={"user_id": viewer_b_id, "role": "viewer"},
+        headers=owner_headers,
+    ).status_code == 201
+
+    manager_login = client.post(
+        "/auth/login",
+        json={"email": "business-manager-a@example.com", "password": "correct-horse-a"},
+    )
+    assert manager_login.status_code == 200
+    manager_headers = {"Authorization": f"Bearer {manager_login.json()['access_token']}"}
+
+    viewer_b_login = client.post(
+        "/auth/login",
+        json={"email": "business-viewer-b@example.com", "password": "correct-horse-b"},
+    )
+    assert viewer_b_login.status_code == 200
+    viewer_b_headers = {"Authorization": f"Bearer {viewer_b_login.json()['access_token']}"}
+
+    contract_response = client.post(
+        f"/tenants/{tenant_a_id}/business-records",
+        json={
+            "record_type": "contract",
+            "title": "Training contract draft",
+            "status": "draft",
+            "external_ref": "contract-001",
+            "payload": {"amount_bucket": "1000-2000", "workflow": "lead_to_student"},
+        },
+        headers=manager_headers,
+    )
+    assert contract_response.status_code == 201
+    contract = contract_response.json()
+    assert contract["tenant_id"] == tenant_a_id
+    assert contract["record_type"] == "contract"
+    assert contract["external_ref"] == "contract-001"
+    assert "amount_bucket" in contract["payload_json"]
+
+    payment_response = client.post(
+        f"/tenants/{tenant_a_id}/business-records",
+        json={
+            "record_type": "payment",
+            "title": "Payment intent",
+            "status": "pending",
+            "payload": {"provider": "demo", "amount_bucket": "1000-2000"},
+        },
+        headers=manager_headers,
+    )
+    assert payment_response.status_code == 201
+
+    records_response = client.get(
+        f"/tenants/{tenant_a_id}/business-records",
+        headers=manager_headers,
+    )
+    assert records_response.status_code == 200
+    assert {record["record_type"] for record in records_response.json()} == {"contract", "payment"}
+
+    contract_records_response = client.get(
+        f"/tenants/{tenant_a_id}/business-records?record_type=contract",
+        headers=manager_headers,
+    )
+    assert contract_records_response.status_code == 200
+    assert [record["record_type"] for record in contract_records_response.json()] == ["contract"]
+
+    cross_tenant_read_response = client.get(
+        f"/tenants/{tenant_b_id}/business-records",
+        headers=manager_headers,
+    )
+    assert cross_tenant_read_response.status_code == 403
+    assert cross_tenant_read_response.json()["detail"] == "tenant membership required"
+
+    viewer_write_response = client.post(
+        f"/tenants/{tenant_b_id}/business-records",
+        json={"record_type": "task", "title": "Viewer cannot write"},
+        headers=viewer_b_headers,
+    )
+    assert viewer_write_response.status_code == 403
+    assert viewer_write_response.json()["detail"] == "permission required: business_record:write"
+
+    async def inspect_business_records() -> tuple[list[str], list[str], list[str], list[str]]:
+        async with session_factory() as session:
+            business_records = await list_tenant_owned(
+                session,
+                BusinessRecord,
+                tenant_a_id,
+                order_by=BusinessRecord.created_at.desc(),
+            )
+            audit_result = await session.execute(
+                select(AuditEvent.event_type)
+                .where(AuditEvent.tenant_id == tenant_a_id, AuditEvent.event_type == "business_record.created")
+                .order_by(AuditEvent.created_at)
+            )
+            outbox_result = await session.execute(
+                select(OutboxEvent.event_type, OutboxEvent.adapter_key)
+                .where(OutboxEvent.tenant_id == tenant_a_id, OutboxEvent.event_type == "business_record.created")
+                .order_by(OutboxEvent.created_at)
+            )
+            outbox_rows = list(outbox_result.all())
+            return (
+                [record.record_type for record in business_records],
+                list(audit_result.scalars().all()),
+                [row.event_type for row in outbox_rows],
+                [row.adapter_key for row in outbox_rows],
+            )
+
+    record_types, audit_events, outbox_events, adapter_keys = asyncio.run(inspect_business_records())
+    assert set(record_types) == {"contract", "payment"}
+    assert audit_events == ["business_record.created", "business_record.created"]
+    assert outbox_events == ["business_record.created", "business_record.created"]
+    assert adapter_keys == ["internal.business_record", "internal.business_record"]
 
 
 def test_identity_rbac_audit_and_outbox_flow(api_client: tuple[TestClient, async_sessionmaker[AsyncSession]]) -> None:

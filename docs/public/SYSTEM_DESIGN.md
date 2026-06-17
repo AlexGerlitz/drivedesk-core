@@ -64,6 +64,7 @@ flowchart TB
 | Generated SDK | Python, JavaScript, and TypeScript client artifacts generated from OpenAPI. |
 | API | HTTP contract, validation, auth context, tenant-aware operations, audit writes. |
 | Auth layer | Credential verification, bearer token hashing, revocation, login guard, audit, current-user lookup, tenant isolation, and RBAC context. |
+| Tenant scope | Reusable query helpers that keep tenant/user list behavior scoped to memberships. |
 | Core modules | Domain rules that should not depend on web framework details. |
 | Database | Durable business state, migrations, audit and outbox storage. |
 | Worker | Async processing, retryable jobs, future adapter execution. |
@@ -146,6 +147,10 @@ flowchart LR
 Tenant roles are not platform roles. A bearer token can operate only through
 memberships. Platform bootstrap endpoints remain separate until a dedicated
 platform-admin model exists.
+
+Tenant list filtering is centralized in a tenant-scope module. Current handlers
+still perform explicit permission checks, then delegate scoped list queries to
+that module.
 
 ## Adapter Boundary
 

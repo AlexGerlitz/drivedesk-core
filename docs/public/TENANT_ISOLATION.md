@@ -44,6 +44,24 @@ tenant A owner reads tenant B memberships -> rejected
 tenant A owner creates global tenant/user with bearer token -> rejected
 ```
 
+## Reusable Scope Module
+
+Tenant filtering is centralized in:
+
+```text
+apps/api/drivedesk_api/tenant_scope.py
+```
+
+Current helpers:
+
+- `actor_member_tenant_ids()`;
+- `list_tenants_for_actor()`;
+- `list_users_for_actor()`.
+
+The goal is to keep future endpoint groups from copying tenant filters by hand.
+When contracts, payments, lessons, documents, and tasks are added, they should
+use the same tenant-scope pattern.
+
 ## Request Flow
 
 ```mermaid

@@ -14,6 +14,7 @@ It includes:
 - credential auth foundation with bearer access tokens, current-user lookup,
   token revocation, failed-attempt guard, and auth audit events;
 - bearer-token tenant isolation for tenant/user listing and bootstrap endpoints;
+- reusable tenant-scope helper module for Core list queries;
 - fake file import adapter with retry and dead-letter state;
 - synthetic lead-to-student workflow in the public demo payload;
 - generated OpenAPI client SDK example for the public demo API;
@@ -164,3 +165,4 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/adr/0015-core-auth-token-foundation.md`
 - `docs/adr/0016-auth-lifecycle-audit-guard.md`
 - `docs/adr/0017-bearer-tenant-isolation.md`
+- `docs/adr/0018-tenant-scope-query-helpers.md`

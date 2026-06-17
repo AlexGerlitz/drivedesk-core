@@ -17,6 +17,7 @@ operations, or commercial details.
 - Token-backed RBAC context for existing Core endpoints.
 - Tenant-aware permission checks for tenant endpoint reads and writes.
 - Bearer-token tenant isolation for tenant/user listing and global bootstrap endpoints.
+- Reusable tenant-scope helper module for Core list queries.
 - Public demo shell with synthetic data and an API-backed synthetic contract.
 - Synthetic workflow payload with stages, timeline, domain events, audit, and outbox.
 - One-command local demo API run.
@@ -31,7 +32,7 @@ operations, or commercial details.
 - More structured adapter contracts and mapping examples.
 - Admin-visible auth session listing.
 - Dedicated platform-admin model.
-- Reusable tenant-scoped repository helpers for future tenant-owned entities.
+- Tenant-scoped repository helpers for future tenant-owned entities.
 - More public-safe workflow examples that reuse the same event and outbox shape.
 - More public-safe evidence around local run, CI, OpenAPI, and demo health.
 - Broader generated client SDK examples from the OpenAPI schema.

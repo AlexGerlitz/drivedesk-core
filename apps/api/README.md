@@ -55,6 +55,8 @@ Tenant isolation:
 - tenant endpoints reject requests for tenants outside the current user's memberships;
 - `POST /tenants` and `POST /users` are bootstrap-only platform endpoints and
   reject bearer-token requests until a dedicated platform-admin model exists.
+- tenant-scoped list queries are centralized in
+  `apps/api/drivedesk_api/tenant_scope.py`.
 
 Bearer requests use:
 

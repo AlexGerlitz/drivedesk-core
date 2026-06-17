@@ -63,8 +63,9 @@ flowchart LR
 ```mermaid
 flowchart LR
   Bearer["Bearer Token"] --> Membership["Tenant Memberships"]
-  Membership --> TenantA["Tenant A Allowed"]
-  Membership --> TenantB["Tenant B Rejected Without Membership"]
+  Membership --> Scope["Tenant Scope Helpers"]
+  Scope --> TenantA["Tenant A Allowed"]
+  Scope --> TenantB["Tenant B Rejected Without Membership"]
   Bearer --> Bootstrap["Global Bootstrap Endpoint"]
   Bootstrap --> Rejected["Rejected For Bearer Token"]
 ```

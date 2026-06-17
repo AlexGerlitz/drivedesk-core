@@ -10,6 +10,7 @@ The project starts with generic platform capabilities:
 - memberships;
 - RBAC;
 - tenant isolation;
+- tenant-scope query helpers;
 - audit;
 - outbox events;
 - worker processing;

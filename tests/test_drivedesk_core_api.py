@@ -21,7 +21,9 @@ for relative in ("apps/api", "apps/worker", "packages/core"):
 
 from drivedesk_api.db import AccessToken, AuditEvent, AuthAttempt, Base, OutboxEvent
 from drivedesk_api.main import build_app
+from drivedesk_api.rbac import ActorContext
 from drivedesk_api.session import get_session
+from drivedesk_api.tenant_scope import actor_member_tenant_ids
 from drivedesk_worker.main import process_outbox_once
 
 
@@ -47,6 +49,19 @@ def api_client() -> Iterator[tuple[TestClient, async_sessionmaker[AsyncSession]]
         yield client, session_factory
 
     asyncio.run(engine.dispose())
+
+
+def test_tenant_scope_helper_reads_bearer_membership_ids() -> None:
+    bearer_actor = ActorContext(
+        actor_id="user_1",
+        role="owner",
+        source="bearer",
+        tenant_roles={"tenant_a": "owner", "tenant_b": "viewer"},
+    )
+    header_actor = ActorContext(actor_id="owner_1", role="owner")
+
+    assert actor_member_tenant_ids(bearer_actor) == ["tenant_a", "tenant_b"]
+    assert actor_member_tenant_ids(header_actor) == []
 
 
 def test_identity_rbac_audit_and_outbox_flow(api_client: tuple[TestClient, async_sessionmaker[AsyncSession]]) -> None:

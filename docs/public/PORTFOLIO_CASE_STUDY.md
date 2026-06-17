@@ -33,6 +33,7 @@ Implemented foundation:
 - token revocation, auth attempt recording, and auth audit events;
 - token-backed tenant-aware RBAC checks for Core tenant endpoints;
 - tenant isolation for bearer-token list/read access and global bootstrap endpoints;
+- reusable tenant-scope helper module for Core list queries;
 - fake file import adapter with retry and dead-letter states;
 - integration adapter metrics grouped by adapter and status;
 - structured adapter worker logs for started, completed, failed, and
@@ -100,6 +101,8 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
 - Platform-level tenant and user creation still uses bootstrap context. A tenant
   owner can operate inside their tenant, but not create global platform records
   through a bearer token.
+- Tenant filtering is centralized for current tenant/user list queries so
+  future tenant-owned models can reuse the same pattern.
 - The hosted public demo uses static fallback on GitHub Pages and can be pointed
   at `GET /demo/public` for API-backed fake data, including workflow stages,
   timeline, domain events, audit, and outbox state.

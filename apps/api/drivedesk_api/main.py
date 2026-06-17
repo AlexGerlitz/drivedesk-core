@@ -65,6 +65,7 @@ from drivedesk_api.services import (
 )
 from drivedesk_api.session import get_session
 from drivedesk_api.settings import Settings, get_settings
+from drivedesk_api.tenant_scope import list_tenants_for_actor, list_users_for_actor
 from drivedesk_core import __version__ as core_version
 
 
@@ -275,16 +276,7 @@ def build_app(settings: Settings | None = None) -> FastAPI:
         actor: ActorContext = Depends(actor_context),
     ) -> list[Tenant]:
         require_permission(actor, Permission.TENANT_READ)
-        if actor.source == "bearer":
-            tenant_ids = list((actor.tenant_roles or {}).keys())
-            if not tenant_ids:
-                return []
-            result = await session.execute(
-                select(Tenant).where(Tenant.id.in_(tenant_ids)).order_by(Tenant.created_at.desc())
-            )
-            return list(result.scalars().all())
-        result = await session.execute(select(Tenant).order_by(Tenant.created_at.desc()))
-        return list(result.scalars().all())
+        return await list_tenants_for_actor(session, actor)
 
     @api.get("/tenants/{tenant_id}", response_model=TenantRead)
     async def get_tenant_endpoint(
@@ -311,20 +303,7 @@ def build_app(settings: Settings | None = None) -> FastAPI:
         actor: ActorContext = Depends(actor_context),
     ) -> list[User]:
         require_permission(actor, Permission.USER_READ)
-        if actor.source == "bearer":
-            tenant_ids = list((actor.tenant_roles or {}).keys())
-            if not tenant_ids:
-                return []
-            result = await session.execute(
-                select(User)
-                .join(Membership, Membership.user_id == User.id)
-                .where(Membership.tenant_id.in_(tenant_ids), Membership.status == "active")
-                .distinct()
-                .order_by(User.created_at.desc())
-            )
-            return list(result.scalars().all())
-        result = await session.execute(select(User).order_by(User.created_at.desc()))
-        return list(result.scalars().all())
+        return await list_users_for_actor(session, actor)
 
     @api.post("/tenants/{tenant_id}/memberships", response_model=MembershipRead, status_code=201)
     async def create_membership_endpoint(

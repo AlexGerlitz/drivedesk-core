@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-17T12:07:44Z
+Generated at: 2026-06-17T15:31:51Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -21,11 +21,13 @@ Copied public-safe areas:
 - public demo health workflow
 - public system design overview
 - public API-backed demo overview
+- public workflow demo overview
 - public integration adapters overview
 - public integration observability overview
 - public roadmap
 - public demo integration health surface
 - public demo API-backed loading surface
+- public demo synthetic business workflow surface
 - public demo local run script
 - public demo API contract smoke script
 - curl, Python, and JavaScript public demo client examples

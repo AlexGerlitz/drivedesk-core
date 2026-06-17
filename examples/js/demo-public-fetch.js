@@ -28,10 +28,23 @@ async function main() {
     throw new Error(`unexpected tenant slug: ${payload.tenant?.slug}`);
   }
 
+  if (payload.workflow?.id !== "wf-demo-lead-to-student") {
+    throw new Error(`unexpected workflow id: ${payload.workflow?.id}`);
+  }
+
+  if (payload.workflow?.currentStage !== "student_sync") {
+    throw new Error(`unexpected workflow stage: ${payload.workflow?.currentStage}`);
+  }
+
+  if (!Array.isArray(payload.workflow?.stages) || payload.workflow.stages.length < 5) {
+    throw new Error("workflow stages are missing");
+  }
+
   console.log(
     "js demo client ok:",
     payload.tenant.slug,
     payload.dataSource,
+    `workflow=${payload.workflow.currentStage}`,
     `workQueue=${payload.workQueue.length}`,
   );
 }

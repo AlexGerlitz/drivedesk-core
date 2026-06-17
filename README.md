@@ -12,6 +12,7 @@ It includes:
 - background worker;
 - tenant, user, membership, RBAC, audit, and outbox foundation;
 - fake file import adapter with retry and dead-letter state;
+- synthetic lead-to-student workflow in the public demo payload;
 - Docker Compose local runtime;
 - pytest coverage for the Core API;
 - architecture docs and ADRs.
@@ -31,18 +32,20 @@ It includes:
 3. Run `bash scripts/check_public_demo_api.sh`.
 4. Run one client example from `examples/`.
 5. Read `docs/public/API_BACKED_DEMO.md`.
-6. Read `docs/public/SYSTEM_DESIGN.md`.
-7. Read `docs/public/INTEGRATION_ADAPTERS.md`.
-8. Read `docs/public/INTEGRATION_OBSERVABILITY.md`.
-9. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
-10. Check `.github/workflows/ci.yml`.
-11. Run `bash scripts/ci_smoke_public.sh` locally.
+6. Read `docs/public/WORKFLOW_DEMO.md`.
+7. Read `docs/public/SYSTEM_DESIGN.md`.
+8. Read `docs/public/INTEGRATION_ADAPTERS.md`.
+9. Read `docs/public/INTEGRATION_OBSERVABILITY.md`.
+10. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
+11. Check `.github/workflows/ci.yml`.
+12. Run `bash scripts/ci_smoke_public.sh` locally.
 
 ## What To Review First
 
 - `docs/public/PORTFOLIO_CASE_STUDY.md` - engineering case study.
 - `docs/public/SYSTEM_DESIGN.md` - system design overview.
 - `docs/public/API_BACKED_DEMO.md` - read-only synthetic demo API contract.
+- `docs/public/WORKFLOW_DEMO.md` - synthetic business workflow contract.
 - `docs/public/INTEGRATION_ADAPTERS.md` - adapter contract and retry model.
 - `docs/public/INTEGRATION_OBSERVABILITY.md` - adapter metrics and worker log signals.
 - `docs/public/ARCHITECTURE_DIAGRAMS.md` - architecture diagrams.
@@ -52,6 +55,8 @@ It includes:
 - `apps/admin/public-demo/index.html` - static fake-data product demo shell.
 - `docs/openapi.json` - generated FastAPI OpenAPI schema.
 - `GET /demo/public` - read-only synthetic demo payload in the exported API.
+- `workflow`, `timeline`, and `domainEvents` - synthetic business process data
+  in the public demo payload.
 - `scripts/run_public_demo_local.sh` - one-command local API run.
 - `scripts/check_public_demo_api.sh` - local API contract and examples smoke.
 - `examples/curl/demo-public.sh` - curl client example.
@@ -124,6 +129,7 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/public/PORTFOLIO_CASE_STUDY.md`
 - `docs/public/SYSTEM_DESIGN.md`
 - `docs/public/API_BACKED_DEMO.md`
+- `docs/public/WORKFLOW_DEMO.md`
 - `docs/public/INTEGRATION_ADAPTERS.md`
 - `docs/public/INTEGRATION_OBSERVABILITY.md`
 - `docs/public/ARCHITECTURE_DIAGRAMS.md`

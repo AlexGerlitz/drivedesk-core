@@ -395,6 +395,16 @@
             "title": "Datasource",
             "type": "string"
           },
+          "domainEvents": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "title": "Domainevents",
+            "type": "array"
+          },
           "generatedAt": {
             "title": "Generatedat",
             "type": "string"
@@ -469,6 +479,16 @@
             "title": "Tenant",
             "type": "object"
           },
+          "timeline": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "title": "Timeline",
+            "type": "array"
+          },
           "workQueue": {
             "items": {
               "additionalProperties": true,
@@ -476,6 +496,11 @@
             },
             "title": "Workqueue",
             "type": "array"
+          },
+          "workflow": {
+            "additionalProperties": true,
+            "title": "Workflow",
+            "type": "object"
           }
         },
         "required": [
@@ -493,7 +518,10 @@
           "adapters",
           "integrationJobs",
           "integrationHealth",
-          "integrationReadiness"
+          "integrationReadiness",
+          "workflow",
+          "timeline",
+          "domainEvents"
         ],
         "title": "PublicDemoRead",
         "type": "object"

@@ -19,6 +19,7 @@
 
         <nav class="nav-tabs" aria-label="Demo sections">
           <button class="nav-tab is-active" type="button" data-view="overview">Overview</button>
+          <button class="nav-tab" type="button" data-view="workflow">Workflow</button>
           <button class="nav-tab" type="button" data-view="work">Work</button>
           <button class="nav-tab" type="button" data-view="integrations">Integrations</button>
           <button class="nav-tab" type="button" data-view="system">System</button>
@@ -70,6 +71,31 @@
                 <span class="muted">Adapters</span>
               </div>
               <div class="progress-list" id="integrationRows"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="view-workflow" aria-labelledby="workflowTitle">
+          <div class="section-heading">
+            <h2 id="workflowTitle">Business Workflow</h2>
+            <span class="muted" id="workflowMeta"></span>
+          </div>
+          <div class="workflow-stage-grid" id="workflowStageRows"></div>
+          <div class="dashboard-grid">
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Workflow Timeline</h3>
+                <span class="muted">Domain actions</span>
+              </div>
+              <ol class="timeline" id="workflowTimelineRows"></ol>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Domain Events</h3>
+                <span class="muted">Event stream</span>
+              </div>
+              <div class="event-list" id="domainEventRows"></div>
             </section>
           </div>
         </section>

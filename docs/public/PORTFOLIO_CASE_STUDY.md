@@ -46,6 +46,8 @@ Implemented foundation:
 - one-command local API demo run.
 - public demo API smoke that validates health, readiness, OpenAPI, and example clients.
 - curl, Python, and JavaScript public demo clients for `GET /demo/public`.
+- synthetic business workflow in the public demo payload:
+  lead -> student -> contract -> audit -> outbox -> integration sync.
 
 ## Architecture Choice
 
@@ -89,7 +91,8 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
 
 - Authentication is still a development foundation based on actor headers.
 - The hosted public demo uses static fallback on GitHub Pages and can be pointed
-  at `GET /demo/public` for API-backed fake data.
+  at `GET /demo/public` for API-backed fake data, including workflow stages,
+  timeline, domain events, audit, and outbox state.
 - Alertmanager currently uses an internal receiver; external notification
   routing is a later step.
 - The frontend is intentionally not the center of the current work; the backend
@@ -103,11 +106,13 @@ Recommended next slices:
 2. Real authentication and tenant-scoped memberships.
 3. Generated API clients from OpenAPI.
 4. Additional mock adapters for webhook and accounting export flows.
-5. A deeper public admin shell backed by synthetic workflows.
+5. More workflow examples backed by the same event, audit, and outbox shape.
 
 ## Interview Summary
 
 DriveDesk is not a toy CRUD app. It is a practical modular-monolith platform
 with CI/CD, metrics, logs, alerts, SLOs, runbooks, and evidence workflows. The
 project is intentionally built in layers so each DevOps component answers a real
-operational question.
+operational question. The public workflow demo also shows how business actions
+become timeline entries, domain events, audit records, and retryable integration
+handoff.

@@ -15,8 +15,9 @@ GET /demo/public
 ```
 
 The endpoint returns the same product-shaped fake data used by the public demo
-shell: tenant, health, metrics, work queue, members, audit events, outbox
-events, adapter contracts, sync jobs, and Integration Health.
+shell: tenant, health, metrics, work queue, workflow stages, timeline entries,
+domain events, members, audit events, outbox events, adapter contracts, sync
+jobs, and Integration Health.
 
 ## Runtime Modes
 
@@ -57,6 +58,13 @@ BASE_URL=http://localhost:8080 node examples/js/demo-public-fetch.js
 present, and then runs the curl, Python, and JavaScript examples against the
 same API.
 
+The workflow payload is documented in `WORKFLOW_DEMO.md`. It demonstrates the
+synthetic path:
+
+```text
+lead -> student -> contract -> audit -> outbox -> integration sync
+```
+
 ## Safety Boundary
 
 The endpoint is read-only and fake-data only:
@@ -71,4 +79,5 @@ The endpoint is read-only and fake-data only:
 
 This is the first public frontend/backend contract. The static demo remains
 stable for reviewers, while the same UI can be pointed at the FastAPI endpoint
-to prove that the backend owns the demo payload shape.
+to prove that the backend owns the demo payload shape, including workflow,
+timeline, domain event, audit, and outbox data.

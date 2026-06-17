@@ -44,6 +44,10 @@
         payload.tenant &&
         Array.isArray(payload.metrics) &&
         Array.isArray(payload.workQueue) &&
+        payload.workflow &&
+        Array.isArray(payload.workflow.stages) &&
+        Array.isArray(payload.timeline) &&
+        Array.isArray(payload.domainEvents) &&
         Array.isArray(payload.integrationJobs) &&
         Array.isArray(payload.integrationHealth)
     );
@@ -248,6 +252,77 @@
     });
   }
 
+  function fillWorkflow() {
+    var meta = document.getElementById("workflowMeta");
+    meta.textContent = data.workflow.owner + " - " + data.workflow.currentStage;
+
+    var rows = document.getElementById("workflowStageRows");
+    clear(rows);
+    data.workflow.stages.forEach(function (stage) {
+      var row = document.createElement("article");
+      row.className = "workflow-stage-card";
+      row.dataset.state = stage.state;
+
+      var top = document.createElement("div");
+      top.className = "workflow-stage-top";
+
+      var label = document.createElement("strong");
+      label.appendChild(text(stage.label));
+      top.append(label, chip(stage.state, statusTone(stage.state)));
+
+      var owner = document.createElement("span");
+      owner.className = "muted";
+      owner.appendChild(text(stage.owner));
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(stage.evidence));
+
+      row.append(top, owner, evidence);
+      rows.appendChild(row);
+    });
+  }
+
+  function fillWorkflowTimeline() {
+    var rows = document.getElementById("workflowTimelineRows");
+    clear(rows);
+    data.timeline.forEach(function (event) {
+      var row = document.createElement("li");
+      var time = document.createElement("time");
+      time.appendChild(text(event.time + " " + event.actor));
+      var title = document.createElement("strong");
+      title.appendChild(text(event.title));
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(event.detail));
+      var code = document.createElement("code");
+      code.appendChild(text(event.event));
+      row.append(time, title, detail, code);
+      rows.appendChild(row);
+    });
+  }
+
+  function fillDomainEvents() {
+    var rows = document.getElementById("domainEventRows");
+    clear(rows);
+    data.domainEvents.forEach(function (event) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var name = document.createElement("strong");
+      name.appendChild(text(event.event));
+      top.append(name, chip(event.status, statusTone(event.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(event.producer + " -> " + event.consumer));
+
+      row.append(top, detail);
+      rows.appendChild(row);
+    });
+  }
+
   function fillAudit() {
     var rows = document.getElementById("auditRows");
     clear(rows);
@@ -312,7 +387,7 @@
     ) {
       return "green";
     }
-    if (["blocked", "waiting", "pending", "retry", "partial_success"].indexOf(status) >= 0) {
+    if (["blocked", "waiting", "pending", "retry", "partial_success", "current"].indexOf(status) >= 0) {
       return "amber";
     }
     if (["high", "dead_letter"].indexOf(status) >= 0) {
@@ -355,6 +430,9 @@
     document.getElementById("workerStatus").textContent = "Worker " + data.health.worker;
     fillMetricGrid();
     fillWorkQueue();
+    fillWorkflow();
+    fillWorkflowTimeline();
+    fillDomainEvents();
     fillIntegrations();
     fillAdapterContracts();
     fillSyncJobs();

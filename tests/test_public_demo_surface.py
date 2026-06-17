@@ -38,6 +38,10 @@ def test_public_demo_html_links_static_assets() -> None:
     assert 'data-demo-api-path="/demo/public"' in html
     assert 'id="metricGrid"' in html
     assert 'id="workQueueRows"' in html
+    assert 'data-view="workflow"' in html
+    assert 'id="workflowStageRows"' in html
+    assert 'id="workflowTimelineRows"' in html
+    assert 'id="domainEventRows"' in html
     assert 'id="integrationHealthRows"' in html
     assert 'id="adapterRows"' in html
     assert 'id="syncJobRows"' in html
@@ -53,6 +57,17 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
     assert payload["apiContract"]["data_profile"] == "synthetic_fake_data"
     assert payload["tenant"]["slug"] == "demo-academy"
     assert payload["tenant"]["status"] == "active"
+    assert payload["workflow"]["id"] == "wf-demo-lead-to-student"
+    assert payload["workflow"]["currentStage"] == "student_sync"
+    assert len(payload["workflow"]["stages"]) >= 5
+    assert len(payload["timeline"]) >= 5
+    assert len(payload["domainEvents"]) >= 4
+    assert {event["event"] for event in payload["domainEvents"]} >= {
+        "lead.created",
+        "student.created",
+        "contract.generated",
+        "student.sync.requested",
+    }
     assert len(payload["metrics"]) >= 4
     assert len(payload["workQueue"]) >= 4
     assert len(payload["members"]) >= 3
@@ -74,6 +89,9 @@ def test_public_demo_can_load_api_backed_data_with_static_fallback() -> None:
     script = (DEMO_DIR / "app.js").read_text(encoding="utf-8")
 
     assert "loadApiBackedDemoData" in script
+    assert "fillWorkflow" in script
+    assert "fillWorkflowTimeline" in script
+    assert "fillDomainEvents" in script
     assert "demoApi" in script
     assert "data-demo-api-path" not in script
     assert "dataset.demoApiPath" in script
@@ -100,10 +118,10 @@ def test_public_demo_api_scripts_and_examples_exist() -> None:
 def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
     scripts = {
         "scripts/run_public_demo_local.sh": ["uvicorn", "/demo/public"],
-        "scripts/check_public_demo_api.sh": ["/health", "/ready", "/demo/public", "/openapi.json"],
-        "examples/curl/demo-public.sh": ["/demo/public", "api.synthetic"],
-        "examples/python/demo_public_client.py": ["/demo/public", "api.synthetic"],
-        "examples/js/demo-public-fetch.js": ["/demo/public", "api.synthetic"],
+        "scripts/check_public_demo_api.sh": ["/health", "/ready", "/demo/public", "/openapi.json", "student_sync"],
+        "examples/curl/demo-public.sh": ["/demo/public", "api.synthetic", "student_sync"],
+        "examples/python/demo_public_client.py": ["/demo/public", "api.synthetic", "student_sync"],
+        "examples/js/demo-public-fetch.js": ["/demo/public", "api.synthetic", "student_sync"],
     }
 
     for relative, required_fragments in scripts.items():

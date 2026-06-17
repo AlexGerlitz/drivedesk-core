@@ -17,11 +17,15 @@ def main() -> None:
     assert payload["dataSource"] == "api.synthetic"
     assert payload["apiContract"]["path"] == "/demo/public"
     assert payload["tenant"]["slug"] == "demo-academy"
+    assert payload["workflow"]["id"] == "wf-demo-lead-to-student"
+    assert payload["workflow"]["currentStage"] == "student_sync"
+    assert len(payload["workflow"]["stages"]) >= 5
 
     print(
         "python demo client ok:",
         payload["tenant"]["slug"],
         payload["dataSource"],
+        f"workflow={payload['workflow']['currentStage']}",
         f"metrics={len(payload['metrics'])}",
     )
 

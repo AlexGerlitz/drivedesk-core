@@ -107,6 +107,18 @@ assert demo["dataSource"] == "api.synthetic", demo
 assert demo["apiContract"]["path"] == "/demo/public", demo
 assert demo["apiContract"]["data_profile"] == "synthetic_fake_data", demo
 assert demo["tenant"]["slug"] == "demo-academy", demo
+assert demo["workflow"]["id"] == "wf-demo-lead-to-student", demo
+assert demo["workflow"]["currentStage"] == "student_sync", demo
+assert len(demo["workflow"]["stages"]) >= 5, demo
+assert {stage["state"] for stage in demo["workflow"]["stages"]} >= {"done", "current"}, demo
+assert len(demo["timeline"]) >= 5, demo
+assert len(demo["domainEvents"]) >= 4, demo
+assert {event["event"] for event in demo["domainEvents"]} >= {
+    "lead.created",
+    "student.created",
+    "contract.generated",
+    "student.sync.requested",
+}
 assert len(demo["integrationHealth"]) >= 4, demo
 assert {item["state"] for item in demo["integrationHealth"]} >= {
     "processed",
@@ -126,6 +138,7 @@ print(
     "public demo API contract ok:",
     demo["tenant"]["slug"],
     demo["dataSource"],
+    demo["workflow"]["currentStage"],
     len(demo["integrationHealth"]),
 )
 PY

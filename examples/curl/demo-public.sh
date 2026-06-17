@@ -37,12 +37,22 @@ assert payload["schemaVersion"] == 1
 assert payload["dataSource"] == "api.synthetic"
 assert payload["apiContract"]["path"] == "/demo/public"
 assert payload["tenant"]["slug"] == "demo-academy"
+assert payload["workflow"]["id"] == "wf-demo-lead-to-student"
+assert payload["workflow"]["currentStage"] == "student_sync"
+assert len(payload["workflow"]["stages"]) >= 5
+assert {event["event"] for event in payload["domainEvents"]} >= {
+    "lead.created",
+    "student.created",
+    "contract.generated",
+    "student.sync.requested",
+}
 assert len(payload["integrationHealth"]) >= 4
 
 print(
     "curl demo client ok:",
     payload["tenant"]["slug"],
     payload["dataSource"],
+    f"workflow={payload['workflow']['currentStage']}",
     f"integrationHealth={len(payload['integrationHealth'])}",
 )
 PY

@@ -144,6 +144,17 @@ def test_public_demo_endpoint_is_read_only_synthetic_contract(
     assert payload["apiContract"]["path"] == "/demo/public"
     assert payload["apiContract"]["data_profile"] == "synthetic_fake_data"
     assert payload["tenant"]["slug"] == "demo-academy"
+    assert payload["workflow"]["id"] == "wf-demo-lead-to-student"
+    assert payload["workflow"]["currentStage"] == "student_sync"
+    assert len(payload["workflow"]["stages"]) >= 5
+    assert len(payload["timeline"]) >= 5
+    assert len(payload["domainEvents"]) >= 4
+    assert {event["event"] for event in payload["domainEvents"]} >= {
+        "lead.created",
+        "student.created",
+        "contract.generated",
+        "student.sync.requested",
+    }
     assert len(payload["metrics"]) >= 4
     assert len(payload["workQueue"]) >= 4
     assert len(payload["integrationJobs"]) >= 3

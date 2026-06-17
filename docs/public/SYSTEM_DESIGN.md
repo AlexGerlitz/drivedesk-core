@@ -121,6 +121,37 @@ Integration observability is documented in `INTEGRATION_OBSERVABILITY.md`. It
 shows how adapter jobs become metrics, structured worker logs, and
 runbook-backed operational signals.
 
+## Workflow Boundary
+
+The public demo also exposes a synthetic business workflow:
+
+```text
+lead -> student -> contract -> audit -> outbox -> integration sync
+```
+
+```mermaid
+flowchart LR
+  Lead["Lead Captured"] --> Student["Student Record"]
+  Student --> Contract["Contract Prepared"]
+  Contract --> Audit["Audit Event"]
+  Audit --> OutboxEvent["Outbox Event"]
+  OutboxEvent --> Integration["Integration Sync"]
+```
+
+This workflow is part of the `GET /demo/public` payload. The UI receives
+`workflow`, `timeline`, and `domainEvents` fields from the same contract as the
+static fallback data.
+
+The separation is intentional:
+
+- workflow stages explain current business state;
+- timeline entries explain what a user or reviewer sees;
+- domain events explain how platform components communicate;
+- audit events explain reviewability;
+- outbox events explain async integration handoff.
+
+The public workflow is documented in `WORKFLOW_DEMO.md`.
+
 ## CI/CD And Evidence Flow
 
 ```mermaid

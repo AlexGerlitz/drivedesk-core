@@ -18,7 +18,7 @@ Recommended first public demo:
 - a small hosted web shell or static frontend;
 - a read-only synthetic FastAPI demo endpoint;
 - fake tenant and fake users;
-- read-only or resettable workflows;
+- read-only workflow state with timeline and domain events;
 - public OpenAPI docs generated from the demo API;
 - public demo screenshot in the repository README;
 - link to the public repository and case study.
@@ -34,6 +34,9 @@ Use synthetic data only:
 - sample outbox events;
 - sample adapter contracts;
 - sample sync jobs with retry and dead-letter states;
+- sample workflow stages;
+- sample timeline events;
+- sample domain events;
 - sample driving-school domain objects later.
 
 ## Review Flow
@@ -46,11 +49,12 @@ An external reviewer should be able to:
 4. Run the public repo locally.
 5. Open `https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/`.
 6. See fake operational workflows.
-7. Inspect the integration adapter tab.
-8. Inspect `GET /demo/public` in `docs/openapi.json`.
-9. Run `bash scripts/check_public_demo_api.sh`.
-10. Run the curl, Python, or JavaScript demo client example.
-11. Read sanitized evidence that staging checks, metrics, logs, and alerts exist.
+7. Inspect the workflow tab for the synthetic lead-to-student flow.
+8. Inspect the integration adapter tab.
+9. Inspect `GET /demo/public` in `docs/openapi.json`.
+10. Run `bash scripts/check_public_demo_api.sh`.
+11. Run the curl, Python, or JavaScript demo client example.
+12. Read sanitized evidence that staging checks, metrics, logs, and alerts exist.
 
 ## Runtime Boundary
 
@@ -77,3 +81,5 @@ Alertmanager, SSH, production backups, or private GitHub Actions secrets.
 12. Add a public demo API smoke script that validates the endpoint, OpenAPI, and
     client examples.
 13. Add curl, Python, and JavaScript demo clients for `GET /demo/public`.
+14. Add a public-safe synthetic workflow with stages, timeline, domain events,
+    audit events, and outbox handoff.

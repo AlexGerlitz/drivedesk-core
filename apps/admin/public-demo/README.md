@@ -36,6 +36,7 @@ for the Core concepts that already exist in the backend:
 - integration adapters;
 - retry and dead-letter sync jobs;
 - integration health metrics;
+- synthetic workflow stages, timeline, and domain events;
 - API-backed synthetic demo contract;
 - API readiness;
 - fake operational workflow state.

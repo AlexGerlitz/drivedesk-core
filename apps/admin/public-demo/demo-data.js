@@ -23,7 +23,7 @@ window.DRIVEDESK_DEMO_DATA = {
   "metrics": [
     {
       "label": "API checks",
-      "value": "43",
+      "value": "47",
       "detail": "private smoke tests",
       "tone": "blue"
     },
@@ -38,6 +38,12 @@ window.DRIVEDESK_DEMO_DATA = {
       "value": "10",
       "detail": "generated contract",
       "tone": "violet"
+    },
+    {
+      "label": "Workflow stages",
+      "value": "5",
+      "detail": "lead to sync",
+      "tone": "green"
     },
     {
       "label": "Pending events",
@@ -114,6 +120,18 @@ window.DRIVEDESK_DEMO_DATA = {
       "actor": "worker",
       "event": "outbox.processed",
       "summary": "Public evidence event processed"
+    },
+    {
+      "time": "09:21",
+      "actor": "workflow",
+      "event": "contract.generated",
+      "summary": "Demo learner contract prepared"
+    },
+    {
+      "time": "09:22",
+      "actor": "outbox",
+      "event": "student.sync.requested",
+      "summary": "Student sync event queued"
     }
   ],
   "outbox": [
@@ -134,6 +152,11 @@ window.DRIVEDESK_DEMO_DATA = {
     },
     {
       "event": "integration.provider.sync",
+      "status": "pending",
+      "attempts": 0
+    },
+    {
+      "event": "student.sync.requested",
       "status": "pending",
       "attempts": 0
     }
@@ -231,6 +254,113 @@ window.DRIVEDESK_DEMO_DATA = {
       "name": "Public demo runtime",
       "state": "active",
       "progress": 35
+    }
+  ],
+  "workflow": {
+    "id": "wf-demo-lead-to-student",
+    "title": "Lead to enrolled student",
+    "owner": "Front desk",
+    "currentStage": "student_sync",
+    "summary": "Synthetic intake flow that turns a lead into a student record, contract, audit trail, and integration event.",
+    "stages": [
+      {
+        "key": "lead_created",
+        "label": "Lead captured",
+        "state": "done",
+        "owner": "Website adapter",
+        "evidence": "lead.created"
+      },
+      {
+        "key": "student_created",
+        "label": "Student record",
+        "state": "done",
+        "owner": "Front desk",
+        "evidence": "student.created"
+      },
+      {
+        "key": "contract_ready",
+        "label": "Contract prepared",
+        "state": "done",
+        "owner": "Operations",
+        "evidence": "contract.generated"
+      },
+      {
+        "key": "audit_recorded",
+        "label": "Audit recorded",
+        "state": "done",
+        "owner": "Core API",
+        "evidence": "audit.recorded"
+      },
+      {
+        "key": "student_sync",
+        "label": "External sync queued",
+        "state": "current",
+        "owner": "Outbox worker",
+        "evidence": "student.sync.requested"
+      }
+    ]
+  },
+  "timeline": [
+    {
+      "time": "09:16",
+      "actor": "website.adapter",
+      "title": "Lead captured",
+      "detail": "Synthetic website form normalized into a DriveDesk lead.",
+      "event": "lead.created"
+    },
+    {
+      "time": "09:18",
+      "actor": "front_desk",
+      "title": "Lead converted",
+      "detail": "Front desk accepted the lead and opened a student record.",
+      "event": "student.created"
+    },
+    {
+      "time": "09:21",
+      "actor": "contract.service",
+      "title": "Contract generated",
+      "detail": "Contract draft attached to the synthetic student workflow.",
+      "event": "contract.generated"
+    },
+    {
+      "time": "09:22",
+      "actor": "audit",
+      "title": "Audit trail written",
+      "detail": "Workflow state change recorded for review.",
+      "event": "audit.recorded"
+    },
+    {
+      "time": "09:22",
+      "actor": "outbox",
+      "title": "Sync queued",
+      "detail": "Integration event queued for a future external system adapter.",
+      "event": "student.sync.requested"
+    }
+  ],
+  "domainEvents": [
+    {
+      "event": "lead.created",
+      "producer": "website.adapter",
+      "consumer": "workflow.engine",
+      "status": "processed"
+    },
+    {
+      "event": "student.created",
+      "producer": "workflow.engine",
+      "consumer": "audit.log",
+      "status": "processed"
+    },
+    {
+      "event": "contract.generated",
+      "producer": "contract.service",
+      "consumer": "document.archive",
+      "status": "processed"
+    },
+    {
+      "event": "student.sync.requested",
+      "producer": "outbox",
+      "consumer": "integration.hub",
+      "status": "pending"
     }
   ]
 };

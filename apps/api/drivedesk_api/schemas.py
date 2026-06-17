@@ -144,6 +144,11 @@ class OutboxEventRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class OutboxEventRetryRequest(BaseModel):
+    reason: str | None = Field(default=None, min_length=2, max_length=255)
+    reset_attempts: bool = False
+
+
 class BusinessRecordCreate(BaseModel):
     record_type: BusinessRecordType
     title: str = Field(min_length=2, max_length=255)

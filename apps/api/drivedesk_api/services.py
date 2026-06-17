@@ -28,6 +28,7 @@ from drivedesk_api.schemas import (
     BusinessRecordType,
     FileImportCreate,
     MembershipCreate,
+    OutboxEventRetryRequest,
     PlatformAdminCreate,
     TenantCreate,
     UserCreate,
@@ -863,6 +864,68 @@ async def list_pending_outbox(session: AsyncSession, limit: int = 25) -> list[Ou
 async def count_outbox_by_status(session: AsyncSession) -> dict[str, int]:
     result = await session.execute(select(OutboxEvent.status, func.count()).group_by(OutboxEvent.status))
     return {status: count for status, count in result.all()}
+
+
+async def retry_outbox_event(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    event_id: str,
+    payload: OutboxEventRetryRequest,
+    actor: ActorContext,
+) -> OutboxEvent:
+    await ensure_tenant_exists(session, tenant_id)
+    event = await session.get(OutboxEvent, event_id)
+    if not event or event.tenant_id != tenant_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="outbox event not found")
+
+    if event.status not in {"retry", "dead_letter"}:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="outbox event is not in retry or dead_letter status",
+        )
+
+    previous_status = event.status
+    previous_attempts = event.attempts
+    previous_error = event.last_error
+    previous_next_retry_at = event.next_retry_at.isoformat() if event.next_retry_at else None
+    previous_dead_lettered_at = event.dead_lettered_at.isoformat() if event.dead_lettered_at else None
+
+    event.status = "pending"
+    if payload.reset_attempts:
+        event.attempts = 0
+    event.last_error = None
+    event.last_duration_ms = None
+    event.next_retry_at = None
+    event.processed_at = None
+    event.dead_lettered_at = None
+    event.result_json = None
+
+    await write_audit(
+        session,
+        tenant_id=tenant_id,
+        actor=actor,
+        event_type="outbox_event.retry_requested",
+        entity_type="outbox_event",
+        entity_id=event.id,
+        summary="Outbox event requeued for retry",
+        metadata={
+            "outbox_event_id": event.id,
+            "event_type": event.event_type,
+            "adapter_key": event.adapter_key,
+            "previous_status": previous_status,
+            "new_status": event.status,
+            "previous_attempts": previous_attempts,
+            "new_attempts": event.attempts,
+            "previous_error": previous_error,
+            "previous_next_retry_at": previous_next_retry_at,
+            "previous_dead_lettered_at": previous_dead_lettered_at,
+            "reset_attempts": payload.reset_attempts,
+            "reason": payload.reason,
+        },
+    )
+    await commit_or_conflict(session, "outbox event retry request failed")
+    return event
 
 
 async def summarize_integration_outbox(session: AsyncSession) -> list[dict[str, object]]:

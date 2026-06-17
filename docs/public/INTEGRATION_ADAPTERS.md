@@ -39,6 +39,8 @@ Adapter execution returns a normalized result:
 
 Temporary failures become retryable worker state. Permanent failures become
 dead-letter state and need operator review.
+Reviewed `retry` and `dead_letter` events can be moved back to `pending`
+through the outbox recovery endpoint. See `OUTBOX_RECOVERY.md`.
 
 ## API Slice
 
@@ -46,6 +48,7 @@ The public OpenAPI schema includes:
 
 ```text
 POST /tenants/{tenant_id}/integration-imports/file
+POST /tenants/{tenant_id}/outbox-events/{event_id}/retry
 ```
 
 This endpoint accepts synthetic file-import records and creates an outbox event

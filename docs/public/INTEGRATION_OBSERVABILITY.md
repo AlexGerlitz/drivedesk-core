@@ -90,12 +90,17 @@ sequenceDiagram
 
 Temporary failures move to `retry` with a future retry time. Permanent failures
 move to `dead_letter` and require operator review.
+After review, operators can call
+`POST /tenants/{tenant_id}/outbox-events/{event_id}/retry` to move a failed
+event back to `pending`. That recovery action writes
+`outbox_event.retry_requested` to the audit log.
 
 The public-safe operational contract is:
 
 - retry and dead-letter counts are visible through metrics;
 - structured logs explain the safe failure context;
 - runbooks describe first checks and recovery;
+- operator retry requests are audited;
 - the public demo shows Integration Health with fake data.
 
 ## Human Explanation

@@ -23,6 +23,7 @@ credentials.
 - `CLIENT_SDK.md` - generated OpenAPI client SDK example.
 - `INTEGRATION_ADAPTERS.md` - adapter contract, outbox, retry, and dead-letter overview.
 - `INTEGRATION_OBSERVABILITY.md` - adapter metrics, worker logs, and failure visibility overview.
+- `OUTBOX_RECOVERY.md` - operator retry path for failed outbox events.
 - `ARCHITECTURE_DIAGRAMS.md` - public-safe architecture diagrams.
 - `PUBLIC_DEMO_PLAN.md` - future live demo plan.
 - `ROADMAP.md` - public-safe engineering roadmap.
@@ -74,9 +75,10 @@ https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 15. Read the system design overview.
 16. Read the integration adapters overview.
 17. Read the integration observability overview.
-18. Read the case study.
-19. Check CI and public demo health workflow results.
-20. Run the public smoke checks locally.
+18. Read the outbox recovery overview.
+19. Read the case study.
+20. Check CI and public demo health workflow results.
+21. Run the public smoke checks locally.
 
 ## Human Explanation
 

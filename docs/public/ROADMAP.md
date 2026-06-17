@@ -11,6 +11,7 @@ operations, or commercial details.
 - Tenant, user, membership, RBAC, audit, and outbox primitives.
 - Fake file import adapter with retry and dead-letter state.
 - Integration observability for adapter metrics, structured logs, and failed-job runbooks.
+- Outbox recovery endpoint for audited operator retry of failed integration jobs.
 - Credential auth foundation with bearer access tokens and `/auth/me`.
 - Token revocation with `POST /auth/logout`.
 - Admin-visible redacted auth session listing with `GET /auth/sessions`.
@@ -47,6 +48,7 @@ operations, or commercial details.
   event, and outbox shape.
 - More public-safe evidence around local run, CI, OpenAPI, and demo health.
 - Broader generated client SDK examples from the OpenAPI schema.
+- More adapter recovery examples with payload mapping and operator review notes.
 
 ## Later
 

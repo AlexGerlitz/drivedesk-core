@@ -70,6 +70,7 @@ from drivedesk_api.schemas import (
     MembershipCreate,
     MembershipRead,
     OutboxEventRead,
+    OutboxEventRetryRequest,
     PlatformAdminCreate,
     PlatformAdminRead,
     PublicDemoRead,
@@ -99,6 +100,7 @@ from drivedesk_api.services import (
     list_platform_admins,
     list_workflow_action_runs,
     list_workflow_rules,
+    retry_outbox_event,
     summarize_integration_outbox,
     transition_business_record,
     write_audit,
@@ -517,6 +519,24 @@ def build_app(settings: Settings | None = None) -> FastAPI:
         await ensure_tenant_exists(session, tenant_id)
         require_tenant_permission(actor, tenant_id, Permission.OUTBOX_READ)
         return await list_tenant_owned(session, OutboxEvent, tenant_id, order_by=OutboxEvent.created_at.desc())
+
+    @api.post("/tenants/{tenant_id}/outbox-events/{event_id}/retry", response_model=OutboxEventRead)
+    async def retry_outbox_event_endpoint(
+        tenant_id: str,
+        event_id: str,
+        payload: OutboxEventRetryRequest,
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> OutboxEvent:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.OUTBOX_READ)
+        return await retry_outbox_event(
+            session,
+            tenant_id=tenant_id,
+            event_id=event_id,
+            payload=payload,
+            actor=actor,
+        )
 
     @api.post("/tenants/{tenant_id}/business-records", response_model=BusinessRecordRead, status_code=201)
     async def create_business_record_endpoint(

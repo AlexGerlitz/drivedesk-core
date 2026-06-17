@@ -61,9 +61,10 @@ It includes:
 16. Read `docs/public/SYSTEM_DESIGN.md`.
 17. Read `docs/public/INTEGRATION_ADAPTERS.md`.
 18. Read `docs/public/INTEGRATION_OBSERVABILITY.md`.
-19. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
-20. Check `.github/workflows/ci.yml`.
-21. Run `bash scripts/ci_smoke_public.sh` locally.
+19. Read `docs/public/OUTBOX_RECOVERY.md`.
+20. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
+21. Check `.github/workflows/ci.yml`.
+22. Run `bash scripts/ci_smoke_public.sh` locally.
 
 ## What To Review First
 
@@ -82,6 +83,7 @@ It includes:
 - `docs/public/CLIENT_SDK.md` - generated OpenAPI client SDK example.
 - `docs/public/INTEGRATION_ADAPTERS.md` - adapter contract and retry model.
 - `docs/public/INTEGRATION_OBSERVABILITY.md` - adapter metrics and worker log signals.
+- `docs/public/OUTBOX_RECOVERY.md` - audited operator retry path for failed outbox jobs.
 - `docs/public/ARCHITECTURE_DIAGRAMS.md` - architecture diagrams.
 - `docs/public/SANITIZED_EVIDENCE.md` - sanitized staging evidence.
 - `docs/public/PUBLIC_DEMO_PLAN.md` - future public demo plan.
@@ -203,6 +205,7 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/public/CLIENT_SDK.md`
 - `docs/public/INTEGRATION_ADAPTERS.md`
 - `docs/public/INTEGRATION_OBSERVABILITY.md`
+- `docs/public/OUTBOX_RECOVERY.md`
 - `docs/public/ARCHITECTURE_DIAGRAMS.md`
 - `docs/public/PUBLIC_DEMO_PLAN.md`
 - `docs/public/SANITIZED_EVIDENCE.md`
@@ -227,3 +230,4 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/adr/0027-workflow-rule-foundation.md`
 - `docs/adr/0028-workflow-actions-task-and-adapter-sync.md`
 - `docs/adr/0029-workflow-action-run-observability.md`
+- `docs/adr/0030-outbox-retry-recovery.md`

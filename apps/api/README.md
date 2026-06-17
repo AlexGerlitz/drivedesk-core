@@ -40,6 +40,7 @@ Core endpoints:
 - `GET /tenants/{tenant_id}/memberships`;
 - `GET /tenants/{tenant_id}/audit-events`;
 - `GET /tenants/{tenant_id}/outbox-events`.
+- `POST /tenants/{tenant_id}/outbox-events/{event_id}/retry`.
 - `POST /tenants/{tenant_id}/business-records`.
 - `GET /tenants/{tenant_id}/business-records`.
 - `POST /tenants/{tenant_id}/business-records/{record_id}/transition`.
@@ -123,6 +124,9 @@ Integration endpoints:
 - `POST /tenants/{tenant_id}/integration-imports/file` creates a synthetic
   file-import job and stores it as an outbox event with
   `adapter_key=file.import.fake`.
+- `POST /tenants/{tenant_id}/outbox-events/{event_id}/retry` moves reviewed
+  `retry` or `dead_letter` events back to `pending` and writes
+  `outbox_event.retry_requested` audit events.
 
 Development bootstrap RBAC context can still use request headers:
 

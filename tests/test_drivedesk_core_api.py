@@ -1266,11 +1266,12 @@ def test_file_import_adapter_retry_and_dead_letter(
     api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
 ) -> None:
     client, session_factory = api_client
+    owner_headers = {"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"}
 
     tenant_response = client.post(
         "/tenants",
         json={"slug": "adapter-failure", "name": "Adapter Failure"},
-        headers={"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"},
+        headers=owner_headers,
     )
     assert tenant_response.status_code == 201
     tenant_id = tenant_response.json()["id"]
@@ -1283,7 +1284,7 @@ def test_file_import_adapter_retry_and_dead_letter(
             "simulate_failure": "retryable",
             "records": [{"external_id": "lead_retry", "display_name": "Retry Demo"}],
         },
-        headers={"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"},
+        headers=owner_headers,
     )
     assert retry_response.status_code == 202
 
@@ -1295,7 +1296,7 @@ def test_file_import_adapter_retry_and_dead_letter(
             "simulate_failure": "permanent",
             "records": [{"external_id": "lead_dead", "display_name": "Dead Letter Demo"}],
         },
-        headers={"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"},
+        headers=owner_headers,
     )
     assert permanent_response.status_code == 202
 
@@ -1337,6 +1338,81 @@ def test_file_import_adapter_retry_and_dead_letter(
     assert (
         'drivedesk_integration_job_errors{adapter_key="file.import.fake",status="dead_letter"} 1'
         in metrics_response.text
+    )
+
+    processed_event = next(event for event in events if event.status == "processed")
+    processed_retry_response = client.post(
+        f"/tenants/{tenant_id}/outbox-events/{processed_event.id}/retry",
+        json={"reason": "already processed"},
+        headers=owner_headers,
+    )
+    assert processed_retry_response.status_code == 409
+    assert processed_retry_response.json()["detail"] == "outbox event is not in retry or dead_letter status"
+
+    manager_retry_response = client.post(
+        f"/tenants/{tenant_id}/outbox-events/{retry_event.id}/retry",
+        json={"reason": "provider recovered"},
+        headers={"X-Actor-Id": "manager_1", "X-Actor-Role": "manager"},
+    )
+    assert manager_retry_response.status_code == 403
+    assert manager_retry_response.json()["detail"] == "permission required: outbox:read"
+
+    retry_requeue_response = client.post(
+        f"/tenants/{tenant_id}/outbox-events/{retry_event.id}/retry",
+        json={"reason": "provider recovered"},
+        headers=owner_headers,
+    )
+    assert retry_requeue_response.status_code == 200
+    retry_requeue = retry_requeue_response.json()
+    assert retry_requeue["status"] == "pending"
+    assert retry_requeue["attempts"] == 1
+    assert retry_requeue["last_error"] is None
+    assert retry_requeue["last_duration_ms"] is None
+    assert retry_requeue["next_retry_at"] is None
+    assert retry_requeue["dead_lettered_at"] is None
+
+    dead_requeue_response = client.post(
+        f"/tenants/{tenant_id}/outbox-events/{dead_event.id}/retry",
+        json={"reason": "operator fixed provider mapping", "reset_attempts": True},
+        headers=owner_headers,
+    )
+    assert dead_requeue_response.status_code == 200
+    dead_requeue = dead_requeue_response.json()
+    assert dead_requeue["status"] == "pending"
+    assert dead_requeue["attempts"] == 0
+    assert dead_requeue["last_error"] is None
+    assert dead_requeue["dead_lettered_at"] is None
+
+    async def recovery_state() -> tuple[list[OutboxEvent], list[str]]:
+        async with session_factory() as session:
+            outbox_result = await session.execute(select(OutboxEvent).order_by(OutboxEvent.created_at))
+            audit_result = await session.execute(
+                select(AuditEvent.event_type)
+                .where(
+                    AuditEvent.tenant_id == tenant_id,
+                    AuditEvent.event_type == "outbox_event.retry_requested",
+                )
+                .order_by(AuditEvent.created_at)
+            )
+            return list(outbox_result.scalars().all()), list(audit_result.scalars().all())
+
+    recovered_events, recovery_audit_events = asyncio.run(recovery_state())
+    recovered_by_id = {event.id: event for event in recovered_events}
+    assert recovered_by_id[retry_event.id].status == "pending"
+    assert recovered_by_id[retry_event.id].attempts == 1
+    assert recovered_by_id[retry_event.id].last_error is None
+    assert recovered_by_id[dead_event.id].status == "pending"
+    assert recovered_by_id[dead_event.id].attempts == 0
+    assert recovered_by_id[dead_event.id].dead_lettered_at is None
+    assert Counter(recovery_audit_events) == Counter({"outbox_event.retry_requested": 2})
+
+    recovery_metrics_response = client.get("/metrics")
+    assert recovery_metrics_response.status_code == 200
+    assert 'drivedesk_integration_jobs{adapter_key="file.import.fake",status="pending"} 2' in (
+        recovery_metrics_response.text
+    )
+    assert 'drivedesk_integration_job_errors{adapter_key="file.import.fake",status="pending"} 0' in (
+        recovery_metrics_response.text
     )
 
 

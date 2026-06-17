@@ -132,6 +132,8 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
 - Workflow action runs now record which automation action was created and which
   task/outbox result it produced, exposing only aggregate
   `drivedesk_workflow_action_runs` metrics.
+- Outbox recovery now lets reviewed `retry` and `dead_letter` jobs move back to
+  `pending` through an audited `outbox_event.retry_requested` operator action.
 - The hosted public demo uses static fallback on GitHub Pages and can be pointed
   at `GET /demo/public` for API-backed fake data, including workflow stages,
   timeline, domain events, audit, and outbox state.

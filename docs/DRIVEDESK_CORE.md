@@ -278,6 +278,25 @@ What this gives us:
   `drivedesk_workflow_action_runs`;
 - action-run metrics expose only `status` and `action_type` labels.
 
+## Sprint 4C Outbox Recovery
+
+Sprint 4C adds operator recovery for failed outbox and integration jobs.
+
+New endpoint:
+
+- `POST /tenants/{tenant_id}/outbox-events/{event_id}/retry`.
+
+What this gives us:
+
+- reviewed `retry` and `dead_letter` events can move back to `pending`;
+- `processed` and already `pending` events are rejected;
+- recovery writes `outbox_event.retry_requested` audit events;
+- old error, retry time, dead-letter time, result, and duration are cleared
+  before the worker sees the event again;
+- attempts are preserved unless the request explicitly sets
+  `reset_attempts=true`;
+- operators no longer need direct database access to retry failed jobs.
+
 ## Local Commands
 
 Run the API without Docker:

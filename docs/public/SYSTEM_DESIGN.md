@@ -260,6 +260,10 @@ flow, including retry and dead-letter states.
 Integration observability is documented in `INTEGRATION_OBSERVABILITY.md`. It
 shows how adapter jobs become metrics, structured worker logs, and
 runbook-backed operational signals.
+Outbox recovery is documented in `OUTBOX_RECOVERY.md`: reviewed `retry` and
+`dead_letter` events can be moved back to `pending` through
+`POST /tenants/{tenant_id}/outbox-events/{event_id}/retry`, while
+`outbox_event.retry_requested` preserves the operator action in audit.
 
 ## Workflow Boundary
 

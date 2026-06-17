@@ -11,7 +11,8 @@ It includes:
 - PostgreSQL migrations with Alembic;
 - background worker;
 - tenant, user, membership, RBAC, audit, and outbox foundation;
-- credential auth foundation with bearer access tokens and current-user lookup;
+- credential auth foundation with bearer access tokens, current-user lookup,
+  token revocation, failed-attempt guard, and auth audit events;
 - fake file import adapter with retry and dead-letter state;
 - synthetic lead-to-student workflow in the public demo payload;
 - generated OpenAPI client SDK example for the public demo API;
@@ -157,3 +158,4 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/adr/0007-identity-rbac-audit-outbox-foundation.md`
 - `docs/adr/0014-integration-adapter-foundation.md`
 - `docs/adr/0015-core-auth-token-foundation.md`
+- `docs/adr/0016-auth-lifecycle-audit-guard.md`

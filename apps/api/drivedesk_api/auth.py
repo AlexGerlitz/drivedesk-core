@@ -3,15 +3,16 @@ from __future__ import annotations
 import base64
 import hashlib
 import hmac
+import json
 import secrets
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from drivedesk_api.db import AccessToken, Membership, User
+from drivedesk_api.db import AccessToken, AuditEvent, AuthAttempt, Membership, User
 
 _CREDENTIAL_ALGORITHM = "pbkdf2_sha256"
 _CREDENTIAL_ITERATIONS = 210_000
@@ -42,6 +43,10 @@ def _as_utc(value: datetime) -> datetime:
     if value.tzinfo is None:
         return value.replace(tzinfo=UTC)
     return value.astimezone(UTC)
+
+
+def normalize_email(email: str) -> str:
+    return email.strip().lower()
 
 
 def hash_credential(secret: str) -> str:
@@ -102,7 +107,7 @@ def parse_bearer_token(authorization: str | None) -> str | None:
 
 
 async def authenticate_user(session: AsyncSession, *, email: str, secret: str) -> User | None:
-    result = await session.execute(select(User).where(User.email == email.lower(), User.status == "active"))
+    result = await session.execute(select(User).where(User.email == normalize_email(email), User.status == "active"))
     user = result.scalar_one_or_none()
     if not user or not verify_credential(secret, user.credential_hash):
         return None
@@ -127,6 +132,20 @@ async def issue_access_token(
     session.add(token)
     await session.commit()
     return token_value, token
+
+
+async def revoke_access_token(
+    session: AsyncSession,
+    *,
+    token_id: str,
+    user_id: str,
+) -> AccessToken | None:
+    token = await session.get(AccessToken, token_id)
+    if not token or token.user_id != user_id:
+        return None
+    token.status = "revoked"
+    token.revoked_at = datetime.now(UTC)
+    return token
 
 
 async def resolve_access_token(session: AsyncSession, *, token_value: str) -> AuthenticatedUser | None:
@@ -159,3 +178,93 @@ async def list_active_memberships(session: AsyncSession, *, user_id: str) -> lis
         .order_by(Membership.created_at.desc())
     )
     return list(result.scalars().all())
+
+
+async def count_recent_failed_attempts(
+    session: AsyncSession,
+    *,
+    email: str,
+    window_seconds: int,
+) -> int:
+    since = datetime.now(UTC) - timedelta(seconds=window_seconds)
+    result = await session.execute(
+        select(func.count())
+        .select_from(AuthAttempt)
+        .where(
+            AuthAttempt.email == normalize_email(email),
+            AuthAttempt.outcome == "failure",
+            AuthAttempt.created_at >= since,
+        )
+    )
+    return int(result.scalar_one())
+
+
+async def is_login_guard_active(
+    session: AsyncSession,
+    *,
+    email: str,
+    failed_login_limit: int,
+    window_seconds: int,
+) -> bool:
+    if failed_login_limit <= 0:
+        return False
+    failed_attempts = await count_recent_failed_attempts(
+        session,
+        email=email,
+        window_seconds=window_seconds,
+    )
+    return failed_attempts >= failed_login_limit
+
+
+async def record_auth_attempt(
+    session: AsyncSession,
+    *,
+    email: str,
+    outcome: str,
+    reason: str | None = None,
+    user_id: str | None = None,
+) -> AuthAttempt:
+    attempt = AuthAttempt(
+        id=_new_id(),
+        email=normalize_email(email),
+        user_id=user_id,
+        outcome=outcome,
+        reason=reason,
+        created_at=datetime.now(UTC),
+    )
+    session.add(attempt)
+    return attempt
+
+
+async def write_auth_audit(
+    session: AsyncSession,
+    *,
+    event_type: str,
+    email: str,
+    summary: str,
+    user_id: str | None = None,
+    token_id: str | None = None,
+    reason: str | None = None,
+) -> AuditEvent:
+    event = AuditEvent(
+        id=_new_id(),
+        tenant_id="platform",
+        actor_id=user_id or normalize_email(email),
+        event_type=event_type,
+        entity_type="auth_session",
+        entity_id=token_id or user_id,
+        summary=summary,
+        metadata_json=json.dumps(
+            {
+                "email": normalize_email(email),
+                "reason": reason,
+                "token_id": token_id,
+                "user_id": user_id,
+            },
+            ensure_ascii=False,
+            sort_keys=True,
+        ),
+        created_at=datetime.now(UTC),
+    )
+    session.add(event)
+    return event

@@ -26,6 +26,7 @@ Core endpoints:
 
 - `POST /auth/login`;
 - `GET /auth/me`;
+- `POST /auth/logout`;
 - `POST /tenants`;
 - `GET /tenants`;
 - `GET /tenants/{tenant_id}`;
@@ -42,6 +43,10 @@ Auth endpoints:
 
 - `POST /auth/login` verifies user credentials and returns a bearer access token.
 - `GET /auth/me` returns the current user and active memberships.
+- `POST /auth/logout` revokes the current bearer access token.
+
+The auth layer records failed attempts, activates a login guard after repeated
+failures, and writes auth lifecycle events into the platform audit log.
 
 Bearer requests use:
 

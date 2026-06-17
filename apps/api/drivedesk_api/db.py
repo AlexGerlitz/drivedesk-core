@@ -46,6 +46,17 @@ class AccessToken(Base):
     revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
+class AuthAttempt(Base):
+    __tablename__ = "dd_auth_attempts"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    email: Mapped[str] = mapped_column(String(255), index=True)
+    user_id: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
+    outcome: Mapped[str] = mapped_column(String(32), index=True)
+    reason: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), index=True)
+
+
 class Membership(Base):
     __tablename__ = "dd_memberships"
     __table_args__ = (UniqueConstraint("tenant_id", "user_id", name="uq_dd_memberships_tenant_user"),)

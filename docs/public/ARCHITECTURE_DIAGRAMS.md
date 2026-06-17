@@ -46,11 +46,16 @@ flowchart LR
   Client["API Client"] --> Login["POST /auth/login"]
   Login --> UserHash["Credential Hash"]
   Login --> TokenHash["Access Token Hash"]
+  Login --> Attempt["Auth Attempt"]
+  Login --> Audit["Auth Audit"]
   Client --> Bearer["Bearer Token Request"]
   Bearer --> Actor["Actor Context"]
   Actor --> Membership["Tenant Membership"]
   Membership --> RBAC["Permission Check"]
   RBAC --> Endpoint["Core Endpoint"]
+  Client --> Logout["POST /auth/logout"]
+  Logout --> Revoked["Revoked Token"]
+  Logout --> Audit
 ```
 
 ## Observability Flow

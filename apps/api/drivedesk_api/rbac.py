@@ -62,6 +62,7 @@ class ActorContext:
     role: str
     source: str = "header"
     email: str | None = None
+    token_id: str | None = None
     tenant_roles: dict[str, str] | None = None
 
     def can(self, permission: Permission) -> bool:
@@ -99,6 +100,7 @@ async def actor_context(
             role=_highest_role(list(tenant_roles.values())),
             source="bearer",
             email=authenticated.user.email,
+            token_id=authenticated.access_token.id,
             tenant_roles=tenant_roles,
         )
 

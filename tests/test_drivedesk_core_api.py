@@ -19,7 +19,7 @@ for relative in ("apps/api", "apps/worker", "packages/core"):
     if path not in sys.path:
         sys.path.insert(0, path)
 
-from drivedesk_api.db import Base, OutboxEvent
+from drivedesk_api.db import AccessToken, AuditEvent, AuthAttempt, Base, OutboxEvent
 from drivedesk_api.main import build_app
 from drivedesk_api.session import get_session
 from drivedesk_worker.main import process_outbox_once
@@ -157,6 +157,15 @@ def test_identity_rbac_audit_and_outbox_flow(api_client: tuple[TestClient, async
     assert write_forbidden_response.status_code == 403
     assert write_forbidden_response.json()["detail"] == "permission required: tenant:write"
 
+    logout_response = client.post("/auth/logout", headers=auth_headers)
+    assert logout_response.status_code == 200
+    assert logout_response.json()["revoked"] is True
+    assert logout_response.json()["status"] == "revoked"
+
+    revoked_me_response = client.get("/auth/me", headers=auth_headers)
+    assert revoked_me_response.status_code == 401
+    assert revoked_me_response.json()["detail"] == "invalid or expired access token"
+
     outbox_response = client.get(
         f"/tenants/{tenant_id}/outbox-events",
         headers={"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"},
@@ -173,6 +182,76 @@ def test_identity_rbac_audit_and_outbox_flow(api_client: tuple[TestClient, async
             return list(result.scalars().all())
 
     assert asyncio.run(outbox_statuses()) == ["processed", "processed", "processed", "processed"]
+
+    async def auth_state() -> tuple[list[str], list[str], list[str]]:
+        async with session_factory() as session:
+            attempt_result = await session.execute(select(AuthAttempt.outcome).order_by(AuthAttempt.created_at))
+            token_result = await session.execute(select(AccessToken.status).order_by(AccessToken.created_at))
+            audit_result = await session.execute(
+                select(AuditEvent.event_type)
+                .where(AuditEvent.tenant_id == "platform", AuditEvent.event_type.like("auth.%"))
+                .order_by(AuditEvent.created_at)
+            )
+            return (
+                list(attempt_result.scalars().all()),
+                list(token_result.scalars().all()),
+                list(audit_result.scalars().all()),
+            )
+
+    attempt_outcomes, token_statuses, auth_event_types = asyncio.run(auth_state())
+    assert attempt_outcomes == ["failure", "success"]
+    assert token_statuses == ["revoked"]
+    assert {
+        "auth.login.failed",
+        "auth.login.succeeded",
+        "auth.token.revoked",
+    }.issubset(set(auth_event_types))
+
+
+def test_login_attempt_guard_records_and_locks_email(
+    api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, session_factory = api_client
+
+    for _ in range(5):
+        response = client.post(
+            "/auth/login",
+            json={"email": "missing@example.com", "password": "wrong-secret"},
+        )
+        assert response.status_code == 401
+        assert response.json()["detail"] == "invalid credentials"
+
+    locked_response = client.post(
+        "/auth/login",
+        json={"email": "missing@example.com", "password": "wrong-secret"},
+    )
+    assert locked_response.status_code == 429
+    assert locked_response.json()["detail"] == "too many failed login attempts"
+
+    async def auth_attempts() -> tuple[list[str], list[str | None], list[str]]:
+        async with session_factory() as session:
+            attempt_result = await session.execute(
+                select(AuthAttempt.outcome, AuthAttempt.reason)
+                .where(AuthAttempt.email == "missing@example.com")
+                .order_by(AuthAttempt.created_at)
+            )
+            audit_result = await session.execute(
+                select(AuditEvent.event_type)
+                .where(AuditEvent.tenant_id == "platform", AuditEvent.event_type.like("auth.login.%"))
+                .order_by(AuditEvent.created_at)
+            )
+            attempts = list(attempt_result.all())
+            return (
+                [row.outcome for row in attempts],
+                [row.reason for row in attempts],
+                list(audit_result.scalars().all()),
+            )
+
+    outcomes, reasons, audit_events = asyncio.run(auth_attempts())
+    assert outcomes == ["failure", "failure", "failure", "failure", "failure", "locked"]
+    assert reasons[-1] == "too_many_failed_attempts"
+    assert audit_events.count("auth.login.failed") == 5
+    assert audit_events.count("auth.login.locked") == 1
 
 
 def test_public_demo_endpoint_is_read_only_synthetic_contract(

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from datetime import timedelta
 from time import perf_counter
 
 from fastapi import Depends, FastAPI, HTTPException, status
@@ -20,7 +21,15 @@ from drivedesk_api.observability import (
     record_http_request,
     route_template_for_scope,
 )
-from drivedesk_api.auth import authenticate_user, issue_access_token, list_active_memberships
+from drivedesk_api.auth import (
+    authenticate_user,
+    is_login_guard_active,
+    issue_access_token,
+    list_active_memberships,
+    record_auth_attempt,
+    revoke_access_token,
+    write_auth_audit,
+)
 from drivedesk_api.rbac import ActorContext, Permission, actor_context, require_permission, require_tenant_permission
 from drivedesk_api.schemas import (
     AccessTokenRead,
@@ -34,6 +43,7 @@ from drivedesk_api.schemas import (
     PublicDemoRead,
     TenantCreate,
     TenantRead,
+    TokenRevocationRead,
     UserCreate,
     UserRead,
 )
@@ -126,13 +136,74 @@ def build_app(settings: Settings | None = None) -> FastAPI:
         payload: LoginRequest,
         session: AsyncSession = Depends(get_session),
     ) -> AccessTokenRead:
+        if await is_login_guard_active(
+            session,
+            email=payload.email,
+            failed_login_limit=resolved_settings.auth_failed_login_limit,
+            window_seconds=resolved_settings.auth_failed_login_window_seconds,
+        ):
+            await record_auth_attempt(
+                session,
+                email=payload.email,
+                outcome="locked",
+                reason="too_many_failed_attempts",
+            )
+            await write_auth_audit(
+                session,
+                event_type="auth.login.locked",
+                email=payload.email,
+                summary="Login blocked by failed-attempt guard.",
+                reason="too_many_failed_attempts",
+            )
+            await session.commit()
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="too many failed login attempts",
+            )
+
         user = await authenticate_user(session, email=payload.email, secret=payload.password)
         if not user:
+            await record_auth_attempt(
+                session,
+                email=payload.email,
+                outcome="failure",
+                reason="invalid_credentials",
+            )
+            await write_auth_audit(
+                session,
+                event_type="auth.login.failed",
+                email=payload.email,
+                summary="Login failed.",
+                reason="invalid_credentials",
+            )
+            await session.commit()
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="invalid credentials",
             )
-        access_token, token_row = await issue_access_token(session, user=user)
+
+        access_token, token_row = await issue_access_token(
+            session,
+            user=user,
+            ttl=timedelta(seconds=resolved_settings.auth_token_ttl_seconds),
+        )
+        await record_auth_attempt(
+            session,
+            email=user.email,
+            outcome="success",
+            reason="credentials_verified",
+            user_id=user.id,
+        )
+        await write_auth_audit(
+            session,
+            event_type="auth.login.succeeded",
+            email=user.email,
+            summary="Login succeeded.",
+            user_id=user.id,
+            token_id=token_row.id,
+            reason="credentials_verified",
+        )
+        await session.commit()
         return AccessTokenRead(access_token=access_token, expires_at=token_row.expires_at, user=user)
 
     @api.get("/auth/me", response_model=AuthMeRead, tags=["auth"])
@@ -153,6 +224,34 @@ def build_app(settings: Settings | None = None) -> FastAPI:
             )
         memberships = await list_active_memberships(session, user_id=user.id)
         return AuthMeRead(user=user, memberships=memberships)
+
+    @api.post("/auth/logout", response_model=TokenRevocationRead, tags=["auth"])
+    async def logout_endpoint(
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> TokenRevocationRead:
+        if actor.source != "bearer" or not actor.token_id:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="bearer token required",
+            )
+        token = await revoke_access_token(session, token_id=actor.token_id, user_id=actor.actor_id)
+        if not token:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="invalid access token subject",
+            )
+        await write_auth_audit(
+            session,
+            event_type="auth.token.revoked",
+            email=actor.email or actor.actor_id,
+            summary="Access token revoked.",
+            user_id=actor.actor_id,
+            token_id=token.id,
+            reason="user_logout",
+        )
+        await session.commit()
+        return TokenRevocationRead(revoked=True, token_id=token.id, status="revoked")
 
     @api.post("/tenants", response_model=TenantRead, status_code=201)
     async def create_tenant_endpoint(

@@ -63,7 +63,7 @@ flowchart TB
 | Demo API | Read-only synthetic payload for API-backed public demo mode. |
 | Generated SDK | Python, JavaScript, and TypeScript client artifacts generated from OpenAPI. |
 | API | HTTP contract, validation, auth context, tenant-aware operations, audit writes. |
-| Auth layer | Credential verification, bearer token hashing, current-user lookup, and RBAC context. |
+| Auth layer | Credential verification, bearer token hashing, revocation, login guard, audit, current-user lookup, and RBAC context. |
 | Core modules | Domain rules that should not depend on web framework details. |
 | Database | Durable business state, migrations, audit and outbox storage. |
 | Worker | Async processing, retryable jobs, future adapter execution. |
@@ -101,11 +101,16 @@ flowchart LR
   Client["Client"] --> Login["POST /auth/login"]
   Login --> UserHash["Credential Hash"]
   Login --> TokenHash["Access Token Hash"]
+  Login --> Attempt["Auth Attempt"]
+  Login --> AuthAudit["Auth Audit Event"]
   Client --> Bearer["Authorization: Bearer token"]
   Bearer --> Actor["Actor Context"]
   Actor --> Membership["Tenant Membership Role"]
   Membership --> Permission["Permission Check"]
   Permission --> Endpoint["Core Endpoint"]
+  Client --> Logout["POST /auth/logout"]
+  Logout --> Revoked["Revoked Token"]
+  Logout --> AuthAudit
 ```
 
 The auth foundation keeps two paths separate:
@@ -116,6 +121,10 @@ The auth foundation keeps two paths separate:
 Bearer requests are resolved into the same actor context used by RBAC. For
 tenant endpoints, the permission check uses the membership role for the
 requested tenant.
+
+Auth lifecycle events are stored as platform audit events. Failed login
+attempts are stored separately so repeated failures can activate the login
+guard without mixing operational security state into user records.
 
 ## Adapter Boundary
 

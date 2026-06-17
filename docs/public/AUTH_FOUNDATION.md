@@ -8,6 +8,10 @@ It is intentionally small, but it proves the platform direction:
 - `POST /auth/login` issues a bearer access token;
 - the database stores only a hash of the access token;
 - `GET /auth/me` returns the current user and active memberships;
+- `POST /auth/logout` revokes the current bearer access token;
+- failed login attempts are recorded for operational review;
+- repeated failed attempts activate a login guard;
+- auth lifecycle events are written to the audit log;
 - bearer requests enter the same RBAC checks as the existing Core endpoints;
 - tenant endpoints check the membership role for the requested tenant.
 
@@ -16,6 +20,7 @@ It is intentionally small, but it proves the platform direction:
 ```text
 POST /auth/login
 GET /auth/me
+POST /auth/logout
 ```
 
 The login response returns the access token once. Later requests use:
@@ -32,6 +37,14 @@ The token row keeps operational state:
 - last-used time;
 - user id;
 - token hash.
+
+The auth-attempt row keeps review state:
+
+- email;
+- user id when known;
+- success, failure, or locked outcome;
+- reason;
+- created time.
 
 ## Request Flow
 
@@ -53,6 +66,9 @@ sequenceDiagram
   Auth->>DB: Load user memberships
   API->>RBAC: Check tenant role and permission
   RBAC-->>API: Allow or reject
+  Client->>API: POST /auth/logout
+  API->>DB: Mark token revoked
+  API->>DB: Write auth audit event
 ```
 
 ## Why This Matters
@@ -67,18 +83,36 @@ This layer adds the missing bridge:
 - access token lifecycle;
 - current-user endpoint;
 - token-backed authorization context;
+- token revocation;
+- failed-attempt guard;
+- auth audit events;
 - tenant-aware permission checks.
 
 The actor headers still exist as a development bootstrap path. They are useful
 for local setup and tests that create the first tenant and user records. Product
 traffic should move toward bearer token auth.
 
+## Operational Events
+
+The auth layer writes platform audit events:
+
+```text
+auth.login.failed
+auth.login.locked
+auth.login.succeeded
+auth.token.revoked
+```
+
+This matters because auth is an operational surface. A reviewer can now see not
+only that access works, but that failed access, guard activation, and token
+revocation are visible system events.
+
 ## Next Hardening
 
 Recommended next slices:
 
-1. Add token revocation endpoint.
-2. Add tenant-scoped query filters to every tenant-owned entity.
-3. Add short-lived refresh flow or external identity provider integration.
-4. Add auth audit events for login, failed login, and token revocation.
-5. Add rate limiting for login attempts.
+1. Add tenant-scoped query filters to every tenant-owned entity.
+2. Add short-lived refresh flow or external identity provider integration.
+3. Add admin-visible auth session listing.
+4. Add stronger device/session metadata.
+5. Add public-safe auth metrics with fake data.

@@ -12,6 +12,8 @@ operations, or commercial details.
 - Fake file import adapter with retry and dead-letter state.
 - Integration observability for adapter metrics, structured logs, and failed-job runbooks.
 - Credential auth foundation with bearer access tokens and `/auth/me`.
+- Token revocation with `POST /auth/logout`.
+- Auth attempt recording, login guard, and auth audit events.
 - Token-backed RBAC context for existing Core endpoints.
 - Tenant-aware permission checks for tenant endpoint reads and writes.
 - Public demo shell with synthetic data and an API-backed synthetic contract.
@@ -26,8 +28,8 @@ operations, or commercial details.
 ## Next
 
 - More structured adapter contracts and mapping examples.
-- Token revocation and auth audit events.
 - Deeper tenant-scoped query filters across tenant-owned entities.
+- Admin-visible auth session listing.
 - More public-safe workflow examples that reuse the same event and outbox shape.
 - More public-safe evidence around local run, CI, OpenAPI, and demo health.
 - Broader generated client SDK examples from the OpenAPI schema.

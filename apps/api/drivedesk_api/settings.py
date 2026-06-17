@@ -8,6 +8,9 @@ class Settings(BaseSettings):
     environment: str = "local"
     database_url: str = "postgresql+asyncpg://drivedesk:drivedesk@localhost:5432/drivedesk"
     redis_url: str = "redis://localhost:6379/0"
+    auth_failed_login_limit: int = 5
+    auth_failed_login_window_seconds: int = 900
+    auth_token_ttl_seconds: int = 43200
 
     model_config = SettingsConfigDict(
         env_prefix="DRIVEDESK_",

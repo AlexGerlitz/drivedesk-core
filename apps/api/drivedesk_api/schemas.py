@@ -67,6 +67,12 @@ class AccessTokenRead(BaseModel):
     user: UserRead
 
 
+class TokenRevocationRead(BaseModel):
+    revoked: bool
+    token_id: str
+    status: Literal["revoked"]
+
+
 class AuthMeRead(BaseModel):
     user: UserRead
     memberships: list[MembershipRead]

@@ -103,6 +103,7 @@ Sprint 2 adds the first real Core auth path:
 - `dd_access_tokens` table for bearer token state;
 - `POST /auth/login`;
 - `GET /auth/me`;
+- `POST /auth/logout`;
 - token-backed actor context for existing RBAC checks;
 - tenant-aware permission checks for tenant endpoints.
 
@@ -112,12 +113,16 @@ What this gives us:
   headers.
 - Access tokens are returned once while only their hashes are stored.
 - `/auth/me` proves current-user and membership lookup.
+- `/auth/logout` proves token revocation.
+- Auth attempts and platform audit events make failed access, guard activation,
+  successful login, and logout reviewable.
 - Tenant endpoints can reject a valid token when that user has no membership in
   the requested tenant.
 
 New table:
 
 - `dd_access_tokens`.
+- `dd_auth_attempts`.
 
 New field:
 
@@ -125,7 +130,7 @@ New field:
 
 New endpoint group:
 
-- auth login and current-user lookup.
+- auth login, current-user lookup, and logout/token revocation.
 
 ## Local Commands
 

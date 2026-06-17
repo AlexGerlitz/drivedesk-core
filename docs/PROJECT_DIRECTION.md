@@ -36,7 +36,7 @@ tests          API and foundation tests
 
 Recommended next slices:
 
-- auth token lifecycle hardening;
+- admin-visible auth session listing;
 - stricter tenant-scoped query filters backed by memberships;
 - structured logging;
 - OpenTelemetry tracing;

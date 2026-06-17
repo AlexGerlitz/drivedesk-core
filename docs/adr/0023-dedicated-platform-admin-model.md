@@ -39,5 +39,7 @@ outbox streams.
   development headers.
 - The first platform-admin grant still needs controlled bootstrap context.
 - Future admin UI can manage platform operators through real API endpoints.
-- Future hardening can add approval flow, admin-triggered token revocation, and
-  platform-admin metrics without changing the tenant membership model.
+- ADR-0024 uses platform-admin grants for global session revocation without
+  changing the tenant membership model.
+- Future hardening can add approval flow and platform-admin metrics without
+  changing the tenant membership model.

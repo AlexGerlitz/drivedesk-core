@@ -105,6 +105,7 @@ Sprint 2 adds the first real Core auth path:
 - `GET /auth/me`;
 - `POST /auth/logout`;
 - `GET /auth/sessions`;
+- `POST /auth/sessions/{session_id}/revoke`;
 - `POST /platform/admins`;
 - `GET /platform/admins`;
 - token-backed actor context for existing RBAC checks;
@@ -123,12 +124,13 @@ What this gives us:
 - `/auth/me` proves current-user and membership lookup.
 - `/auth/logout` proves token revocation.
 - `/auth/sessions` proves redacted tenant-scoped session review for admins.
+- `/auth/sessions/{session_id}/revoke` proves admin-triggered visible session revocation.
 - `/metrics` exposes aggregate auth session and login-attempt counters without
   leaking emails, token ids, token hashes, or bearer tokens.
 - Prometheus staging rules turn auth metric degradation, failed-login spikes,
   and locked attempts into runbook-backed alerts.
 - Auth attempts and platform audit events make failed access, guard activation,
-  successful login, and logout reviewable.
+  successful login, logout, and admin session revocation reviewable.
 - Tenant endpoints can reject a valid token when that user has no membership in
   the requested tenant.
 - A tenant owner cannot use a bearer token to create global tenants or global
@@ -149,7 +151,7 @@ New field:
 New endpoint group:
 
 - auth login, current-user lookup, logout/token revocation, and redacted session
-  listing.
+  listing/revocation.
 - platform-admin grant creation and listing.
 
 Tenant isolation rules:

@@ -32,6 +32,7 @@ Implemented foundation:
 - credential auth foundation with bearer access tokens and `/auth/me`;
 - token revocation, auth attempt recording, and auth audit events;
 - redacted tenant-scoped auth session listing for admins;
+- admin-triggered auth session revocation for tenant and platform operators;
 - dedicated platform-admin grant model and API endpoints;
 - aggregate auth metrics for sessions and login-attempt outcomes;
 - auth security alert rules and runbook mapping for aggregate auth signals;
@@ -100,9 +101,10 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
 ## Current Tradeoffs
 
 - Authentication now has a token-backed foundation with logout, failed-attempt
-  tracking, redacted session listing, aggregate metrics, auth alert rules, and
-  platform audit events. Development actor headers still exist as a bootstrap
-  path for local setup and early data creation.
+  tracking, redacted session listing, admin-triggered session revocation,
+  aggregate metrics, auth alert rules, and platform audit events. Development
+  actor headers still exist as a bootstrap path for local setup and early data
+  creation.
 - Platform-level tenant and user creation now has a dedicated platform-admin
   bearer-token path. A tenant owner can operate inside their tenant, but not
   create global platform records through a bearer token.
@@ -123,10 +125,9 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
 Recommended next slices:
 
 1. Backup and restore evidence for the staging runtime.
-2. Admin-triggered token revocation for tenant and platform sessions.
-3. Broader generated API clients from OpenAPI for more endpoints.
-4. Additional mock adapters for webhook and accounting export flows.
-5. More workflow examples backed by the same event, audit, and outbox shape.
+2. Broader generated API clients from OpenAPI for more endpoints.
+3. Additional mock adapters for webhook and accounting export flows.
+4. More workflow examples backed by the same event, audit, and outbox shape.
 
 ## Interview Summary
 

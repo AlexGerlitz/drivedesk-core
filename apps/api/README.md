@@ -28,6 +28,7 @@ Core endpoints:
 - `GET /auth/me`;
 - `POST /auth/logout`;
 - `GET /auth/sessions`;
+- `POST /auth/sessions/{session_id}/revoke`;
 - `POST /platform/admins`;
 - `GET /platform/admins`;
 - `POST /tenants`;
@@ -48,6 +49,7 @@ Auth endpoints:
 - `GET /auth/me` returns the current user and active memberships.
 - `POST /auth/logout` revokes the current bearer access token.
 - `GET /auth/sessions` returns redacted tenant-scoped session state for admins.
+- `POST /auth/sessions/{session_id}/revoke` lets admins close visible sessions.
 - `POST /platform/admins` grants a dedicated platform-admin role to a user.
 - `GET /platform/admins` lists platform-admin grants for platform operators.
 

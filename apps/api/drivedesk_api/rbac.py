@@ -14,6 +14,7 @@ class Permission(StrEnum):
     PLATFORM_ADMIN_READ = "platform_admin:read"
     PLATFORM_ADMIN_WRITE = "platform_admin:write"
     AUTH_SESSION_READ = "auth_session:read"
+    AUTH_SESSION_WRITE = "auth_session:write"
     TENANT_READ = "tenant:read"
     TENANT_WRITE = "tenant:write"
     USER_READ = "user:read"
@@ -29,6 +30,7 @@ ROLE_PERMISSIONS: dict[str, set[Permission]] = {
     "owner": set(Permission),
     "admin": {
         Permission.AUTH_SESSION_READ,
+        Permission.AUTH_SESSION_WRITE,
         Permission.TENANT_READ,
         Permission.USER_READ,
         Permission.USER_WRITE,

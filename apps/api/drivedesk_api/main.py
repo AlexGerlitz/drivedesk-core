@@ -28,11 +28,13 @@ from drivedesk_api.auth import (
     list_active_platform_admins,
     record_auth_attempt,
     revoke_access_token,
+    revoke_access_token_by_id,
     write_auth_audit,
 )
 from drivedesk_api.auth_sessions import (
     count_auth_attempts_by_outcome,
     count_auth_sessions_by_status,
+    get_auth_session,
     list_auth_sessions,
 )
 from drivedesk_api.rbac import (
@@ -73,6 +75,7 @@ from drivedesk_api.services import (
     ensure_tenant_exists,
     list_platform_admins,
     summarize_integration_outbox,
+    write_audit,
 )
 from drivedesk_api.session import get_session
 from drivedesk_api.settings import Settings, get_settings
@@ -322,6 +325,61 @@ def build_app(settings: Settings | None = None) -> FastAPI:
                 detail=f"permission required: {Permission.AUTH_SESSION_READ.value}",
             )
         return await list_auth_sessions(session, allowed_tenant_ids=allowed_tenant_ids)
+
+    @api.post("/auth/sessions/{session_id}/revoke", response_model=TokenRevocationRead, tags=["auth"])
+    async def revoke_auth_session_endpoint(
+        session_id: str,
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> TokenRevocationRead:
+        if actor.source != "bearer":
+            require_permission(actor, Permission.AUTH_SESSION_WRITE)
+            auth_session = await get_auth_session(session, token_id=session_id)
+        elif actor.is_platform_admin():
+            require_permission(actor, Permission.AUTH_SESSION_WRITE)
+            auth_session = await get_auth_session(session, token_id=session_id)
+        else:
+            allowed_tenant_ids = tenant_ids_with_permission(actor, Permission.AUTH_SESSION_WRITE)
+            if not allowed_tenant_ids:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail=f"permission required: {Permission.AUTH_SESSION_WRITE.value}",
+                )
+            auth_session = await get_auth_session(
+                session,
+                token_id=session_id,
+                allowed_tenant_ids=allowed_tenant_ids,
+            )
+
+        if auth_session is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="auth session not found",
+            )
+
+        token = await revoke_access_token_by_id(session, token_id=auth_session.token_id)
+        if not token:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="auth session not found",
+            )
+
+        await write_audit(
+            session,
+            tenant_id="platform",
+            actor=actor,
+            event_type="auth.token.admin_revoked",
+            entity_type="auth_session",
+            entity_id=token.id,
+            summary="Auth session revoked by admin.",
+            metadata={
+                "target_user_id": auth_session.user_id,
+                "target_user_email": auth_session.user_email,
+                "visible_tenant_ids": auth_session.tenant_ids,
+            },
+        )
+        await session.commit()
+        return TokenRevocationRead(revoked=True, token_id=token.id, status="revoked")
 
     @api.post("/platform/admins", response_model=PlatformAdminRead, status_code=201, tags=["platform"])
     async def create_platform_admin_endpoint(

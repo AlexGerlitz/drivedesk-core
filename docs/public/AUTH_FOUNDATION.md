@@ -10,6 +10,7 @@ It is intentionally small, but it proves the platform direction:
 - `GET /auth/me` returns the current user, active memberships, and platform roles;
 - `POST /auth/logout` revokes the current bearer access token;
 - `GET /auth/sessions` returns redacted tenant-scoped session state for admins;
+- `POST /auth/sessions/{session_id}/revoke` lets admins close visible sessions;
 - `POST /platform/admins` grants a dedicated platform-admin role to a user;
 - failed login attempts are recorded for operational review;
 - repeated failed attempts activate a login guard;
@@ -24,6 +25,7 @@ POST /auth/login
 GET /auth/me
 POST /auth/logout
 GET /auth/sessions
+POST /auth/sessions/{session_id}/revoke
 POST /platform/admins
 GET /platform/admins
 ```
@@ -52,6 +54,10 @@ The session listing endpoint returns only redacted state:
 - tenant ids visible to the current admin.
 
 It does not return raw access tokens or token hashes.
+
+Admin-triggered session revocation uses the redacted session id. It never needs
+the raw bearer token or token hash. Tenant owners/admins can revoke visible
+tenant sessions; platform admins can revoke any session.
 
 The platform-admin endpoint stores global operator grants separately from
 tenant memberships. A tenant owner does not become a platform admin by having
@@ -120,6 +126,9 @@ sequenceDiagram
   API->>DB: Write auth audit event
   Client->>API: GET /auth/sessions
   API->>DB: Read redacted tenant-scoped session state
+  Client->>API: POST /auth/sessions/{session_id}/revoke
+  API->>DB: Mark visible session revoked
+  API->>DB: Write admin revocation audit event
 ```
 
 ## Why This Matters
@@ -136,6 +145,7 @@ This layer adds the missing bridge:
 - token-backed authorization context;
 - token revocation;
 - admin-visible redacted session listing;
+- admin-triggered session revocation;
 - dedicated platform-admin grants;
 - failed-attempt guard;
 - auth audit events;
@@ -155,6 +165,7 @@ auth.login.failed
 auth.login.locked
 auth.login.succeeded
 auth.token.revoked
+auth.token.admin_revoked
 platform_admin.granted
 ```
 
@@ -167,7 +178,6 @@ revocation are visible system events.
 Recommended next slices:
 
 1. Add short-lived refresh flow or external identity provider integration.
-2. Add admin-triggered token revocation for tenant-scoped sessions.
-3. Add approval workflow for platform-admin grants.
-4. Add stronger device/session metadata.
-5. Add broader auth/device risk scoring after the session metadata exists.
+2. Add approval workflow for platform-admin grants.
+3. Add stronger device/session metadata.
+4. Add broader auth/device risk scoring after the session metadata exists.

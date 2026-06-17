@@ -40,11 +40,10 @@ all sessions for local setup and verification.
 - Session state becomes reviewable through the API.
 - Revoked tokens stay visible for operational review.
 - Tenant admins get tenant-scoped visibility instead of global visibility.
-- Future admin actions such as force-revoking another session can build on this
-  endpoint and permission model.
+- ADR-0024 builds admin-triggered session revocation on this endpoint and
+  permission model.
 
 ## Next Work
 
-- Add admin-triggered token revocation for tenant-scoped sessions.
 - Add stronger device/session metadata when clients provide it.
 - Add public-safe auth/session metrics with synthetic data.

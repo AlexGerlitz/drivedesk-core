@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="${ROOT:-$(pwd)}"
+ROOT="${PUBLIC_EXPORT_ROOT:-$(pwd)}"
 cd "$ROOT"
 
 risk=0

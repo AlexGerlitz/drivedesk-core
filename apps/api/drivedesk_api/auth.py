@@ -149,6 +149,16 @@ async def revoke_access_token(
     return token
 
 
+async def revoke_access_token_by_id(session: AsyncSession, *, token_id: str) -> AccessToken | None:
+    token = await session.get(AccessToken, token_id)
+    if not token:
+        return None
+    token.status = "revoked"
+    if token.revoked_at is None:
+        token.revoked_at = datetime.now(UTC)
+    return token
+
+
 async def resolve_access_token(session: AsyncSession, *, token_value: str) -> AuthenticatedUser | None:
     token_hash = hash_access_token(token_value)
     result = await session.execute(

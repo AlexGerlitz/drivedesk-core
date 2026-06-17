@@ -11,7 +11,8 @@ tenant owner != platform admin
 
 A tenant owner can operate inside their own tenant. A platform admin can perform
 global platform operations such as creating tenants, creating users, and reading
-the platform-admin grant list.
+the platform-admin grant list. A platform admin can also revoke any auth
+session through the control-plane session revocation endpoint.
 
 ## API Shape
 
@@ -22,6 +23,7 @@ POST /tenants
 POST /users
 GET /tenants
 GET /users
+POST /auth/sessions/{session_id}/revoke
 ```
 
 `POST /platform/admins` creates a platform-admin grant for an existing user.
@@ -50,6 +52,7 @@ GET /auth/me returns platform_roles=["platform_admin"]
 platform admin creates a global tenant with bearer token -> allowed
 platform admin creates a global user with bearer token -> allowed
 platform admin reads /platform/admins -> allowed
+platform admin revokes any tenant session -> allowed
 ```
 
 This is the important SaaS boundary. A strong role inside one tenant does not
@@ -112,7 +115,6 @@ needs.
 
 Recommended next slices:
 
-1. Add admin-triggered token revocation for platform and tenant sessions.
-2. Add approval workflow for platform-admin grants.
-3. Add platform-admin metrics and public-safe audit examples.
-4. Add database-level constraints after the Core model stabilizes.
+1. Add approval workflow for platform-admin grants.
+2. Add platform-admin metrics and public-safe audit examples.
+3. Add database-level constraints after the Core model stabilizes.

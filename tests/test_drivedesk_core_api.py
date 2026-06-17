@@ -322,7 +322,7 @@ def test_login_attempt_guard_records_and_locks_email(
 def test_auth_session_listing_is_tenant_admin_scoped_and_redacted(
     api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
 ) -> None:
-    client, _ = api_client
+    client, session_factory = api_client
     owner_headers = {"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"}
 
     tenant_a_response = client.post(
@@ -409,11 +409,50 @@ def test_auth_session_listing_is_tenant_admin_scoped_and_redacted(
     assert viewer_sessions_response.status_code == 403
     assert viewer_sessions_response.json()["detail"] == "permission required: auth_session:read"
 
-    logout_viewer_response = client.post(
-        "/auth/logout",
+    pre_revoke_sessions_response = client.get(
+        "/auth/sessions",
+        headers={"Authorization": f"Bearer {owner_a_token}"},
+    )
+    assert pre_revoke_sessions_response.status_code == 200
+    pre_revoke_sessions = pre_revoke_sessions_response.json()
+    viewer_a_session = next(
+        session for session in pre_revoke_sessions if session["user_email"] == "session-viewer-a@example.com"
+    )
+
+    viewer_revoke_response = client.post(
+        f"/auth/sessions/{viewer_a_session['token_id']}/revoke",
         headers={"Authorization": f"Bearer {viewer_a_token}"},
     )
-    assert logout_viewer_response.status_code == 200
+    assert viewer_revoke_response.status_code == 403
+    assert viewer_revoke_response.json()["detail"] == "permission required: auth_session:write"
+
+    async def token_id_for_user(user_id: str) -> str:
+        async with session_factory() as session:
+            result = await session.execute(select(AccessToken.id).where(AccessToken.user_id == user_id))
+            return result.scalar_one()
+
+    owner_b_token_id = asyncio.run(token_id_for_user(owner_b_id))
+    cross_tenant_revoke_response = client.post(
+        f"/auth/sessions/{owner_b_token_id}/revoke",
+        headers={"Authorization": f"Bearer {owner_a_token}"},
+    )
+    assert cross_tenant_revoke_response.status_code == 404
+    assert cross_tenant_revoke_response.json()["detail"] == "auth session not found"
+
+    revoke_viewer_response = client.post(
+        f"/auth/sessions/{viewer_a_session['token_id']}/revoke",
+        headers={"Authorization": f"Bearer {owner_a_token}"},
+    )
+    assert revoke_viewer_response.status_code == 200
+    assert revoke_viewer_response.json()["revoked"] is True
+    assert revoke_viewer_response.json()["token_id"] == viewer_a_session["token_id"]
+    assert revoke_viewer_response.json()["status"] == "revoked"
+
+    revoked_viewer_me_response = client.get(
+        "/auth/me",
+        headers={"Authorization": f"Bearer {viewer_a_token}"},
+    )
+    assert revoked_viewer_me_response.status_code == 401
 
     sessions_response = client.get(
         "/auth/sessions",
@@ -449,6 +488,17 @@ def test_auth_session_listing_is_tenant_admin_scoped_and_redacted(
     assert "session-owner-a@example.com" not in metrics_response.text
     assert "token_id" not in metrics_response.text
     assert "token_hash" not in metrics_response.text
+
+    async def admin_revoke_audit() -> list[str]:
+        async with session_factory() as session:
+            result = await session.execute(
+                select(AuditEvent.event_type)
+                .where(AuditEvent.tenant_id == "platform", AuditEvent.event_type == "auth.token.admin_revoked")
+                .order_by(AuditEvent.created_at)
+            )
+            return list(result.scalars().all())
+
+    assert asyncio.run(admin_revoke_audit()) == ["auth.token.admin_revoked"]
 
 
 def test_bearer_token_is_limited_to_member_tenants(
@@ -618,6 +668,22 @@ def test_platform_admin_grant_enables_bearer_platform_operations(
     assert me_response.status_code == 200
     assert me_response.json()["platform_roles"] == ["platform_admin"]
 
+    platform_sessions_response = client.get("/auth/sessions", headers=platform_headers)
+    assert platform_sessions_response.status_code == 200
+    tenant_owner_session = next(
+        session for session in platform_sessions_response.json() if session["user_email"] == "tenant-owner@example.com"
+    )
+
+    platform_revoke_response = client.post(
+        f"/auth/sessions/{tenant_owner_session['token_id']}/revoke",
+        headers=platform_headers,
+    )
+    assert platform_revoke_response.status_code == 200
+    assert platform_revoke_response.json()["token_id"] == tenant_owner_session["token_id"]
+
+    revoked_tenant_owner_me_response = client.get("/auth/me", headers=tenant_owner_headers)
+    assert revoked_tenant_owner_me_response.status_code == 401
+
     bearer_grants_response = client.get("/platform/admins", headers=platform_headers)
     assert bearer_grants_response.status_code == 200
     assert [grant["user_id"] for grant in bearer_grants_response.json()] == [platform_user_id]
@@ -677,6 +743,7 @@ def test_platform_admin_grant_enables_bearer_platform_operations(
     platform_roles, platform_audit_events, platform_outbox_events = asyncio.run(platform_admin_state())
     assert platform_roles == ["platform_admin"]
     assert "platform_admin.granted" in platform_audit_events
+    assert "auth.token.admin_revoked" in platform_audit_events
     assert "platform_admin.granted" in platform_outbox_events
 
 

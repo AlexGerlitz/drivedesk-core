@@ -108,6 +108,7 @@ flowchart LR
   Client --> Bearer["Authorization: Bearer token"]
   Bearer --> Actor["Actor Context"]
   Actor --> Membership["Tenant Membership Role"]
+  Actor --> PlatformGrant["Platform Admin Grant"]
   Membership --> Permission["Permission Check"]
   Permission --> Endpoint["Core Endpoint"]
   Client --> Logout["POST /auth/logout"]
@@ -115,6 +116,9 @@ flowchart LR
   Logout --> AuthAudit
   Actor --> Sessions["GET /auth/sessions"]
   Sessions --> Redacted["Redacted Session State"]
+  Actor --> AdminRevoke["POST /auth/sessions/{session_id}/revoke"]
+  AdminRevoke --> Revoked
+  AdminRevoke --> AuthAudit
 ```
 
 The auth foundation keeps two paths separate:
@@ -133,6 +137,11 @@ guard without mixing operational security state into user records.
 Auth session listing is redacted. It exposes token ids and lifecycle state, but
 not raw bearer tokens or token hashes. Bearer callers see sessions only for
 tenants where their own membership role can read auth sessions.
+
+Admin-triggered session revocation uses the same redacted session ids. Tenant
+owners/admins can revoke only visible tenant sessions, while platform admins can
+revoke any auth session. Cross-tenant revoke attempts return `404` so session
+existence is not disclosed.
 
 Auth metrics follow a stricter aggregate-only boundary. The metrics endpoint can
 show counts by session `status` and attempt `outcome`, but it must not include

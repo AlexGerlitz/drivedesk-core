@@ -14,6 +14,7 @@ operations, or commercial details.
 - Credential auth foundation with bearer access tokens and `/auth/me`.
 - Token revocation with `POST /auth/logout`.
 - Admin-visible redacted auth session listing with `GET /auth/sessions`.
+- Admin-triggered visible session revocation with `POST /auth/sessions/{session_id}/revoke`.
 - Dedicated platform-admin grants with `POST /platform/admins` and `GET /platform/admins`.
 - Auth attempt recording, login guard, and auth audit events.
 - Aggregate auth metrics for session lifecycle and login-attempt outcomes.
@@ -35,7 +36,6 @@ operations, or commercial details.
 ## Next
 
 - More structured adapter contracts and mapping examples.
-- Admin-triggered token revocation for tenant and platform sessions.
 - Tenant-owned repository coverage for future contracts, payments, lessons, tasks, and documents.
 - More public-safe workflow examples that reuse the same event and outbox shape.
 - More public-safe evidence around local run, CI, OpenAPI, and demo health.

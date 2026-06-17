@@ -101,6 +101,42 @@ async def list_auth_sessions(
     ]
 
 
+async def get_auth_session(
+    session: AsyncSession,
+    *,
+    token_id: str,
+    allowed_tenant_ids: Iterable[str] | None = None,
+) -> AuthSessionRead | None:
+    query = select(AccessToken, User).join(User, User.id == AccessToken.user_id).where(AccessToken.id == token_id)
+    result = await session.execute(query)
+    row = result.one_or_none()
+    if row is None:
+        return None
+
+    token, user = row
+    tenant_ids_by_user = await _tenant_ids_by_user(
+        session,
+        [user.id],
+        allowed_tenant_ids=allowed_tenant_ids,
+    )
+    tenant_ids = tenant_ids_by_user.get(user.id, [])
+    if allowed_tenant_ids is not None and not tenant_ids:
+        return None
+
+    return AuthSessionRead(
+        token_id=token.id,
+        user_id=user.id,
+        user_email=user.email,
+        user_display_name=user.display_name,
+        status=token.status,
+        created_at=token.created_at,
+        expires_at=token.expires_at,
+        last_used_at=token.last_used_at,
+        revoked_at=token.revoked_at,
+        tenant_ids=tenant_ids,
+    )
+
+
 async def count_auth_sessions_by_status(session: AsyncSession) -> dict[str, int]:
     result = await session.execute(
         select(AccessToken.status, func.count()).group_by(AccessToken.status)

@@ -143,6 +143,36 @@
     });
   }
 
+  function fillIntegrationHealth() {
+    var rows = document.getElementById("integrationHealthRows");
+    clear(rows);
+    data.integrationHealth.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "integration-health-card";
+
+      var top = document.createElement("div");
+      top.className = "integration-health-top";
+
+      var label = document.createElement("span");
+      label.className = "muted";
+      label.appendChild(text(item.label));
+      top.append(label, chip(item.state, statusTone(item.state)));
+
+      var value = document.createElement("strong");
+      value.appendChild(text(item.value));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      var metric = document.createElement("code");
+      metric.appendChild(text(item.metric));
+
+      row.append(top, value, detail, metric);
+      rows.appendChild(row);
+    });
+  }
+
   function fillMembers() {
     var rows = document.getElementById("memberRows");
     clear(rows);
@@ -227,7 +257,7 @@
 
   function statusTone(status) {
     if (
-      ["done", "ready", "online", "validated", "processed", "green", "active", "success"].indexOf(status) >= 0
+      ["done", "ready", "online", "validated", "processed", "green", "active", "success", "observed"].indexOf(status) >= 0
     ) {
       return "green";
     }
@@ -277,6 +307,7 @@
     fillIntegrations();
     fillAdapterContracts();
     fillSyncJobs();
+    fillIntegrationHealth();
     fillMembers();
     fillAudit();
     fillOutbox();

@@ -280,6 +280,17 @@
             "title": "Id",
             "type": "string"
           },
+          "last_duration_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Duration Ms"
+          },
           "last_error": {
             "anyOf": [
               {

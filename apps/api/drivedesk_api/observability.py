@@ -126,6 +126,51 @@ def build_outbox_metrics_lines(outbox_counts: dict[str, int]) -> list[str]:
     return lines
 
 
+def build_integration_metrics_lines(integration_rows: list[dict[str, object]]) -> list[str]:
+    lines = [
+        "# HELP drivedesk_integration_jobs Current integration outbox events by adapter and status.",
+        "# TYPE drivedesk_integration_jobs gauge",
+    ]
+    for row in integration_rows:
+        labels = prometheus_labels({"adapter_key": row["adapter_key"], "status": row["status"]})
+        lines.append(f"drivedesk_integration_jobs{labels} {row['job_count']}")
+
+    lines.extend(
+        [
+            "# HELP drivedesk_integration_job_attempts Current total adapter attempts by adapter and status.",
+            "# TYPE drivedesk_integration_job_attempts gauge",
+        ]
+    )
+    for row in integration_rows:
+        labels = prometheus_labels({"adapter_key": row["adapter_key"], "status": row["status"]})
+        lines.append(f"drivedesk_integration_job_attempts{labels} {row['attempt_count']}")
+
+    lines.extend(
+        [
+            "# HELP drivedesk_integration_job_errors Current integration events with recorded adapter errors.",
+            "# TYPE drivedesk_integration_job_errors gauge",
+        ]
+    )
+    for row in integration_rows:
+        labels = prometheus_labels({"adapter_key": row["adapter_key"], "status": row["status"]})
+        lines.append(f"drivedesk_integration_job_errors{labels} {row['error_count']}")
+
+    lines.extend(
+        [
+            "# HELP drivedesk_integration_adapter_duration_milliseconds Average last adapter execution duration.",
+            "# TYPE drivedesk_integration_adapter_duration_milliseconds gauge",
+        ]
+    )
+    for row in integration_rows:
+        avg_duration_ms = row.get("avg_duration_ms")
+        if avg_duration_ms is None:
+            continue
+        labels = prometheus_labels({"adapter_key": row["adapter_key"], "status": row["status"]})
+        lines.append(f"drivedesk_integration_adapter_duration_milliseconds{labels} {avg_duration_ms:.3f}")
+
+    return lines
+
+
 def build_readiness_metrics_lines(settings: Settings) -> list[str]:
     dependencies = {
         "database_url_configured": bool(settings.database_url),
@@ -143,7 +188,12 @@ def build_readiness_metrics_lines(settings: Settings) -> list[str]:
     return lines
 
 
-def build_metrics_text(settings: Settings, core_version: str, outbox_counts: dict[str, int] | None = None) -> str:
+def build_metrics_text(
+    settings: Settings,
+    core_version: str,
+    outbox_counts: dict[str, int] | None = None,
+    integration_rows: list[dict[str, object]] | None = None,
+) -> str:
     labels = prometheus_labels(
         {
             "service": settings.service_name,
@@ -169,6 +219,7 @@ def build_metrics_text(settings: Settings, core_version: str, outbox_counts: dic
     lines.extend(build_readiness_metrics_lines(settings))
     lines.extend(build_http_metrics_lines())
     lines.extend(build_outbox_metrics_lines(outbox_counts or {}))
+    lines.extend(build_integration_metrics_lines(integration_rows or []))
     lines.append("")
     return "\n".join(lines)
 

@@ -114,6 +114,10 @@ The first implemented adapter is documented in `INTEGRATION_ADAPTERS.md`. It
 uses synthetic file-import data to prove the API -> outbox -> worker -> adapter
 flow, including retry and dead-letter states.
 
+Integration observability is documented in `INTEGRATION_OBSERVABILITY.md`. It
+shows how adapter jobs become metrics, structured worker logs, and
+runbook-backed operational signals.
+
 ## CI/CD And Evidence Flow
 
 ```mermaid

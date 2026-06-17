@@ -78,6 +78,7 @@ class OutboxEventRead(BaseModel):
     status: str
     attempts: int
     last_error: str | None = None
+    last_duration_ms: float | None = None
     next_retry_at: datetime | None = None
     created_at: datetime | None = None
     processed_at: datetime | None = None

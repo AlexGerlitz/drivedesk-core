@@ -10,6 +10,7 @@ credentials.
 - `PORTFOLIO_CASE_STUDY.md` - engineering case study and current system shape.
 - `SYSTEM_DESIGN.md` - public-safe system design overview.
 - `INTEGRATION_ADAPTERS.md` - adapter contract, outbox, retry, and dead-letter overview.
+- `INTEGRATION_OBSERVABILITY.md` - adapter metrics, worker logs, and failure visibility overview.
 - `ARCHITECTURE_DIAGRAMS.md` - public-safe architecture diagrams.
 - `PUBLIC_DEMO_PLAN.md` - future live demo plan.
 - `ROADMAP.md` - public-safe engineering roadmap.
@@ -36,9 +37,10 @@ https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 2. Review the generated OpenAPI schema.
 3. Read the system design overview.
 4. Read the integration adapters overview.
-5. Read the case study.
-6. Check CI and public demo health workflow results.
-7. Run the public smoke checks locally.
+5. Read the integration observability overview.
+6. Read the case study.
+7. Check CI and public demo health workflow results.
+8. Run the public smoke checks locally.
 
 ## Human Explanation
 

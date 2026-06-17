@@ -83,3 +83,7 @@ such as accounting exports, bank imports, website forms, telephony, or messaging
 providers can follow the same pattern: API creates a job, outbox stores it,
 worker executes the adapter, and failures become visible operational state
 instead of disappearing in logs.
+
+The next layer is observability. `INTEGRATION_OBSERVABILITY.md` documents how
+adapter jobs become Prometheus metrics, structured worker logs, and runbook
+signals for retry and dead-letter handling.

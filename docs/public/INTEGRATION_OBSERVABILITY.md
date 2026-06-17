@@ -1,0 +1,106 @@
+# DriveDesk Integration Observability
+
+This document describes the public-safe observability contract for DriveDesk
+integration adapters. It uses synthetic providers and fake data only.
+
+## Goal
+
+DriveDesk integrations should not be invisible background magic. Every adapter
+job should produce enough safe operational signal to answer five questions:
+
+1. Which adapter ran?
+2. Did it succeed, retry, or go to dead letter?
+3. How many attempts happened?
+4. How long did the adapter take?
+5. Which safe log event explains the result?
+
+## Metrics
+
+The API metrics endpoint exposes integration state from the outbox:
+
+```text
+drivedesk_integration_jobs{adapter_key="file.import.fake",status="processed"} 1
+drivedesk_integration_job_attempts{adapter_key="file.import.fake",status="processed"} 1
+drivedesk_integration_job_errors{adapter_key="file.import.fake",status="retry"} 1
+drivedesk_integration_adapter_duration_milliseconds{adapter_key="file.import.fake",status="processed"} 12.4
+```
+
+Metric meaning:
+
+| Metric | Meaning |
+| --- | --- |
+| `drivedesk_integration_jobs` | Number of integration outbox jobs grouped by adapter and status. |
+| `drivedesk_integration_job_attempts` | Total worker attempts for those jobs. |
+| `drivedesk_integration_job_errors` | Jobs with a recorded adapter error. |
+| `drivedesk_integration_adapter_duration_milliseconds` | Average adapter duration for jobs with duration evidence. |
+
+The labels use `adapter_key` and `status` only. They do not include names,
+phone numbers, tenant-specific provider payloads, file contents, credentials,
+or concrete user identifiers.
+
+## Structured Logs
+
+The worker emits JSON events for adapter execution:
+
+```json
+{
+  "event_type": "adapter.completed",
+  "service": "drivedesk-worker",
+  "adapter_key": "file.import.fake",
+  "outbox_event_type": "integration.file_import.requested",
+  "status": "partial_success",
+  "duration_ms": 12.4,
+  "records_received": 3,
+  "records_accepted": 2,
+  "records_rejected": 1
+}
+```
+
+Current adapter log event types:
+
+- `adapter.started`
+- `adapter.completed`
+- `adapter.failed`
+- `adapter.dead_lettered`
+
+The log contract intentionally records normalized counts and operational
+context, not raw provider payloads.
+
+## Operational Flow
+
+```mermaid
+sequenceDiagram
+  participant API as API
+  participant Outbox as Outbox
+  participant Worker as Worker
+  participant Adapter as Adapter
+  participant Metrics as Metrics
+  participant Logs as Structured Logs
+
+  API->>Outbox: enqueue integration job
+  Worker->>Logs: adapter.started
+  Worker->>Adapter: execute adapter
+  Adapter-->>Worker: result or failure
+  Worker->>Outbox: processed, retry, or dead_letter
+  Worker->>Logs: adapter.completed / failed / dead_lettered
+  Metrics->>Outbox: summarize jobs by adapter and status
+```
+
+## Failure Handling
+
+Temporary failures move to `retry` with a future retry time. Permanent failures
+move to `dead_letter` and require operator review.
+
+The public-safe operational contract is:
+
+- retry and dead-letter counts are visible through metrics;
+- structured logs explain the safe failure context;
+- runbooks describe first checks and recovery;
+- the public demo shows Integration Health with fake data.
+
+## Human Explanation
+
+This is what makes integrations production-shaped. A basic adapter only moves
+data. A serious adapter also tells operators whether it is healthy, why it
+failed, how many attempts happened, and what to do next without leaking private
+data into logs, metrics, screenshots, or public documentation.

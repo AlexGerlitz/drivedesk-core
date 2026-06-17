@@ -16,5 +16,6 @@ for the Core concepts that already exist in the backend:
 - outbox events;
 - integration adapters;
 - retry and dead-letter sync jobs;
+- integration health metrics;
 - API readiness;
 - fake operational workflow state.

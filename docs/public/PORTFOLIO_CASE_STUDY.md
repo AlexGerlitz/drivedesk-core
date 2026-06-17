@@ -30,6 +30,9 @@ Implemented foundation:
 - background worker;
 - tenant, user, membership, RBAC, audit, and outbox primitives;
 - fake file import adapter with retry and dead-letter states;
+- integration adapter metrics grouped by adapter and status;
+- structured adapter worker logs for started, completed, failed, and
+  dead-lettered jobs;
 - structured JSON API and worker logs;
 - Prometheus metrics;
 - Grafana dashboard;
@@ -38,6 +41,7 @@ Implemented foundation:
 - SLO and runbook documentation;
 - GitHub Actions CI, deploy, health, and evidence workflows;
 - Docker Compose local and staging runtime.
+- public demo Integration Health panel with synthetic adapter health data.
 
 ## Architecture Choice
 

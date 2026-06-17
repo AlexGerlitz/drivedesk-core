@@ -10,6 +10,7 @@ operations, or commercial details.
 - FastAPI health, readiness, and metrics endpoints.
 - Tenant, user, membership, RBAC, audit, and outbox primitives.
 - Fake file import adapter with retry and dead-letter state.
+- Integration observability for adapter metrics, structured logs, and failed-job runbooks.
 - Public demo shell with synthetic data.
 - Public export gate, public CI, and GitHub Pages demo.
 - Public system design overview for reviewers.
@@ -18,7 +19,7 @@ operations, or commercial details.
 
 - Public demo health workflow.
 - Read-only API-backed demo mode.
-- Structured adapter contracts and mapping examples.
+- More structured adapter contracts and mapping examples.
 - More public-safe evidence around CI, OpenAPI, and demo health.
 
 ## Later

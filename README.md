@@ -30,15 +30,17 @@ It includes:
 2. Review `docs/openapi.json`.
 3. Read `docs/public/SYSTEM_DESIGN.md`.
 4. Read `docs/public/INTEGRATION_ADAPTERS.md`.
-5. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
-6. Check `.github/workflows/ci.yml`.
-7. Run `bash scripts/ci_smoke_public.sh` locally.
+5. Read `docs/public/INTEGRATION_OBSERVABILITY.md`.
+6. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
+7. Check `.github/workflows/ci.yml`.
+8. Run `bash scripts/ci_smoke_public.sh` locally.
 
 ## What To Review First
 
 - `docs/public/PORTFOLIO_CASE_STUDY.md` - engineering case study.
 - `docs/public/SYSTEM_DESIGN.md` - system design overview.
 - `docs/public/INTEGRATION_ADAPTERS.md` - adapter contract and retry model.
+- `docs/public/INTEGRATION_OBSERVABILITY.md` - adapter metrics and worker log signals.
 - `docs/public/ARCHITECTURE_DIAGRAMS.md` - architecture diagrams.
 - `docs/public/SANITIZED_EVIDENCE.md` - sanitized staging evidence.
 - `docs/public/PUBLIC_DEMO_PLAN.md` - future public demo plan.
@@ -95,6 +97,7 @@ apps/admin/public-demo/index.html
 - `docs/public/PORTFOLIO_CASE_STUDY.md`
 - `docs/public/SYSTEM_DESIGN.md`
 - `docs/public/INTEGRATION_ADAPTERS.md`
+- `docs/public/INTEGRATION_OBSERVABILITY.md`
 - `docs/public/ARCHITECTURE_DIAGRAMS.md`
 - `docs/public/PUBLIC_DEMO_PLAN.md`
 - `docs/public/SANITIZED_EVIDENCE.md`

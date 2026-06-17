@@ -38,6 +38,7 @@ from drivedesk_api.services import (
     create_tenant,
     create_user,
     ensure_tenant_exists,
+    summarize_integration_outbox,
 )
 from drivedesk_api.session import get_session
 from drivedesk_api.settings import Settings, get_settings
@@ -93,8 +94,14 @@ def build_app(settings: Settings | None = None) -> FastAPI:
     @api.get("/metrics", include_in_schema=False)
     async def metrics(session: AsyncSession = Depends(get_session)) -> PlainTextResponse:
         outbox_counts = await count_outbox_by_status(session)
+        integration_rows = await summarize_integration_outbox(session)
         return PlainTextResponse(
-            build_metrics_text(resolved_settings, core_version, outbox_counts=outbox_counts),
+            build_metrics_text(
+                resolved_settings,
+                core_version,
+                outbox_counts=outbox_counts,
+                integration_rows=integration_rows,
+            ),
             media_type="text/plain; version=0.0.4; charset=utf-8",
         )
 

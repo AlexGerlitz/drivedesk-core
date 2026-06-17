@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 import sys
 from collections.abc import AsyncIterator, Iterator
 from pathlib import Path
@@ -171,11 +172,27 @@ def test_file_import_adapter_success_flow(api_client: tuple[TestClient, async_se
     result = json.loads(file_event["result_json"])
     assert file_event["status"] == "processed"
     assert file_event["attempts"] == 1
+    assert file_event["last_duration_ms"] is not None
     assert result["adapter_key"] == "file.import.fake"
     assert result["status"] == "partial_success"
     assert result["records_received"] == 3
     assert result["records_accepted"] == 2
     assert result["records_rejected"] == 1
+
+    metrics_response = client.get("/metrics")
+    assert metrics_response.status_code == 200
+    assert 'drivedesk_integration_jobs{adapter_key="file.import.fake",status="processed"} 1' in metrics_response.text
+    assert (
+        'drivedesk_integration_job_attempts{adapter_key="file.import.fake",status="processed"} 1'
+        in metrics_response.text
+    )
+    assert (
+        'drivedesk_integration_job_errors{adapter_key="file.import.fake",status="processed"} 0'
+        in metrics_response.text
+    )
+    assert 'drivedesk_integration_adapter_duration_milliseconds{adapter_key="file.import.fake",status="processed"}' in (
+        metrics_response.text
+    )
 
 
 def test_file_import_adapter_retry_and_dead_letter(
@@ -233,12 +250,74 @@ def test_file_import_adapter_retry_and_dead_letter(
     retry_event = statuses_by_source["retryable-file"]
     assert retry_event.status == "retry"
     assert retry_event.attempts == 1
+    assert retry_event.last_duration_ms is not None
     assert retry_event.next_retry_at is not None
     assert retry_event.last_error == "Fake provider is temporarily unavailable."
 
     dead_event = statuses_by_source["permanent-file"]
     assert dead_event.status == "dead_letter"
     assert dead_event.attempts == 1
+    assert dead_event.last_duration_ms is not None
     assert dead_event.dead_lettered_at is not None
     assert dead_event.next_retry_at is None
     assert dead_event.last_error == "Fake provider rejected the import contract."
+
+    metrics_response = client.get("/metrics")
+    assert metrics_response.status_code == 200
+    assert 'drivedesk_integration_jobs{adapter_key="file.import.fake",status="retry"} 1' in metrics_response.text
+    assert 'drivedesk_integration_jobs{adapter_key="file.import.fake",status="dead_letter"} 1' in metrics_response.text
+    assert 'drivedesk_integration_job_errors{adapter_key="file.import.fake",status="retry"} 1' in metrics_response.text
+    assert (
+        'drivedesk_integration_job_errors{adapter_key="file.import.fake",status="dead_letter"} 1'
+        in metrics_response.text
+    )
+
+
+def test_worker_adapter_logs_are_structured_json(
+    api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    client, session_factory = api_client
+    caplog.set_level(logging.INFO, logger="drivedesk.worker.adapters")
+
+    tenant_response = client.post(
+        "/tenants",
+        json={"slug": "adapter-logs", "name": "Adapter Logs"},
+        headers={"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"},
+    )
+    assert tenant_response.status_code == 201
+    tenant_id = tenant_response.json()["id"]
+
+    response = client.post(
+        f"/tenants/{tenant_id}/integration-imports/file",
+        json={
+            "source_name": "log-file",
+            "source_format": "json",
+            "records": [{"external_id": "lead_log", "display_name": "Log Demo"}],
+        },
+        headers={"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"},
+    )
+    assert response.status_code == 202
+
+    processed = asyncio.run(process_outbox_once(session_factory=session_factory))
+    assert processed == 2
+
+    events = [
+        json.loads(record.message)
+        for record in caplog.records
+        if record.name == "drivedesk.worker.adapters" and record.message.startswith("{")
+    ]
+    event_types = {event["event_type"] for event in events}
+    assert "adapter.started" in event_types
+    assert "adapter.completed" in event_types
+    completed = next(
+        event
+        for event in events
+        if event["event_type"] == "adapter.completed" and event["adapter_key"] == "file.import.fake"
+    )
+    assert completed["service"] == "drivedesk-worker"
+    assert completed["tenant_id"] == tenant_id
+    assert completed["duration_ms"] >= 0
+    assert completed["records_accepted"] == 1
+    assert "headers" not in completed
+    assert "body" not in completed

@@ -174,6 +174,36 @@ window.DRIVEDESK_DEMO_DATA = {
       "summary": "permanent contract failure, operator review required"
     }
   ],
+  "integrationHealth": [
+    {
+      "label": "Processed jobs",
+      "value": "1",
+      "state": "processed",
+      "detail": "file.import.fake",
+      "metric": "drivedesk_integration_jobs"
+    },
+    {
+      "label": "Retry queue",
+      "value": "1",
+      "state": "retry",
+      "detail": "temporary provider failure",
+      "metric": "drivedesk_integration_job_errors"
+    },
+    {
+      "label": "Dead letters",
+      "value": "1",
+      "state": "dead_letter",
+      "detail": "operator review required",
+      "metric": "drivedesk_integration_jobs"
+    },
+    {
+      "label": "Avg duration",
+      "value": "12 ms",
+      "state": "observed",
+      "detail": "last adapter sample",
+      "metric": "drivedesk_integration_adapter_duration_milliseconds"
+    }
+  ],
   "integrationReadiness": [
     {
       "name": "File import adapter",

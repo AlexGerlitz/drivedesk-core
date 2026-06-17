@@ -135,6 +135,9 @@ def test_api_metrics_endpoint(api_client: TestClient) -> None:
     assert 'drivedesk_api_http_requests_total{method="GET",path="/health",status_code="200"}' in response.text
     assert 'drivedesk_api_http_request_duration_seconds_bucket{le="0.005",method="GET",path="/health",' in response.text
     assert 'drivedesk_outbox_events{status="pending"} 1' in response.text
+    assert 'drivedesk_integration_jobs{adapter_key="internal.noop",status="pending"} 1' in response.text
+    assert 'drivedesk_integration_job_attempts{adapter_key="internal.noop",status="pending"} 0' in response.text
+    assert 'drivedesk_integration_job_errors{adapter_key="internal.noop",status="pending"} 0' in response.text
 
 
 def test_api_request_log_is_structured_json(caplog: pytest.LogCaptureFixture) -> None:

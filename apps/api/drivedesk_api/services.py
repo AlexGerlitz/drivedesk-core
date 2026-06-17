@@ -5,7 +5,7 @@ from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 from fastapi import HTTPException, status
-from sqlalchemy import and_, func, or_, select
+from sqlalchemy import and_, case, func, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -239,16 +239,48 @@ async def count_outbox_by_status(session: AsyncSession) -> dict[str, int]:
     return {status: count for status, count in result.all()}
 
 
+async def summarize_integration_outbox(session: AsyncSession) -> list[dict[str, object]]:
+    adapter_key = func.coalesce(OutboxEvent.adapter_key, "internal.noop")
+    result = await session.execute(
+        select(
+            adapter_key.label("adapter_key"),
+            OutboxEvent.status,
+            func.count().label("job_count"),
+            func.coalesce(func.sum(OutboxEvent.attempts), 0).label("attempt_count"),
+            func.coalesce(
+                func.sum(case((OutboxEvent.last_error.is_not(None), 1), else_=0)),
+                0,
+            ).label("error_count"),
+            func.avg(OutboxEvent.last_duration_ms).label("avg_duration_ms"),
+        ).group_by(adapter_key, OutboxEvent.status)
+    )
+    rows = []
+    for row in result.all():
+        rows.append(
+            {
+                "adapter_key": row.adapter_key,
+                "status": row.status,
+                "job_count": int(row.job_count or 0),
+                "attempt_count": int(row.attempt_count or 0),
+                "error_count": int(row.error_count or 0),
+                "avg_duration_ms": float(row.avg_duration_ms) if row.avg_duration_ms is not None else None,
+            }
+        )
+    return rows
+
+
 async def mark_outbox_processed(
     session: AsyncSession,
     event: OutboxEvent,
     *,
     result: dict[str, object] | None = None,
+    duration_ms: float | None = None,
 ) -> None:
     event.status = "processed"
     event.attempts += 1
     event.last_error = None
     event.next_retry_at = None
+    event.last_duration_ms = duration_ms
     event.result_json = json.dumps(result or {}, ensure_ascii=False, sort_keys=True)
     event.processed_at = datetime.now(UTC)
     await session.commit()
@@ -265,9 +297,11 @@ async def mark_outbox_failed(
     error_message: str,
     retryable: bool,
     max_attempts: int = 3,
+    duration_ms: float | None = None,
 ) -> None:
     event.attempts += 1
     event.last_error = error_message
+    event.last_duration_ms = duration_ms
     event.processed_at = None
     event.result_json = None
 

@@ -2,6 +2,34 @@ from __future__ import annotations
 
 from typing import Any
 
+from drivedesk_core import list_adapter_descriptors
+
+
+def _public_adapter_rows() -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for descriptor in list_adapter_descriptors():
+        rows.append(
+            {
+                "key": descriptor["key"],
+                "name": descriptor["name"],
+                "status": descriptor["status"],
+                "direction": descriptor["direction"],
+                "connectionProfileSupported": descriptor["connection_profile_supported"],
+                "contract": descriptor["purpose"],
+            }
+        )
+    rows.append(
+        {
+            "key": "accounting.export.mock",
+            "name": "Accounting Export",
+            "status": "planned",
+            "direction": "outbound",
+            "connectionProfileSupported": True,
+            "contract": "Future adapter boundary for accounting exports and reconciliation status.",
+        }
+    )
+    return rows
+
 
 def build_public_demo_payload() -> dict[str, Any]:
     return {
@@ -41,7 +69,7 @@ def build_public_demo_payload() -> dict[str, Any]:
             },
             {
                 "label": "OpenAPI paths",
-                "value": "10",
+                "value": "23",
                 "detail": "generated contract",
                 "tone": "violet",
             },
@@ -167,29 +195,7 @@ def build_public_demo_payload() -> dict[str, Any]:
                 "attempts": 0,
             },
         ],
-        "adapters": [
-            {
-                "key": "file.import.fake",
-                "name": "Fake File Import",
-                "status": "active",
-                "contract": (
-                    "Normalizes provider rows, returns accepted and rejected record counts, "
-                    "and stores the result on the outbox event."
-                ),
-            },
-            {
-                "key": "internal.noop",
-                "name": "Internal Noop",
-                "status": "active",
-                "contract": "Acknowledges internal domain events without calling an external provider.",
-            },
-            {
-                "key": "accounting.export.mock",
-                "name": "Accounting Export",
-                "status": "planned",
-                "contract": "Future adapter boundary for accounting exports and reconciliation status.",
-            },
-        ],
+        "adapters": _public_adapter_rows(),
         "integrationJobs": [
             {
                 "event": "integration.file_import.requested",

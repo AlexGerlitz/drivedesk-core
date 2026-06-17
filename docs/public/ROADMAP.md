@@ -10,6 +10,7 @@ operations, or commercial details.
 - FastAPI health, readiness, and metrics endpoints.
 - Tenant, user, membership, RBAC, audit, and outbox primitives.
 - Fake file import adapter with retry and dead-letter state.
+- Runtime adapter catalog with `GET /integration-adapters`.
 - Tenant-owned integration connection profiles with safe config and mapping.
 - Integration observability for adapter metrics, structured logs, and failed-job runbooks.
 - Outbox recovery endpoint for audited operator retry of failed integration jobs.
@@ -43,7 +44,7 @@ operations, or commercial details.
 
 ## Next
 
-- More structured adapter contracts, connection scopes, and mapping examples.
+- More structured adapter contracts, connection scopes, and mapping validation examples.
 - More detailed lifecycle validation examples for contracts, payments, lessons, tasks, and documents.
 - More public-safe workflow examples that reuse the same rule, action-run, task,
   event, and outbox shape.

@@ -106,6 +106,7 @@ else:
 health, _ = get_json("/health")
 ready, _ = get_json("/ready")
 demo, demo_headers = get_json("/demo/public")
+adapters, _ = get_json("/integration-adapters")
 openapi, _ = get_json("/openapi.json")
 metrics, metrics_headers = get_text("/metrics")
 
@@ -134,6 +135,15 @@ assert {item["state"] for item in demo["integrationHealth"]} >= {
     "retry",
     "dead_letter",
 }
+assert {adapter["key"] for adapter in demo["adapters"]} >= {"file.import.fake", "internal.noop"}, demo
+assert any(adapter.get("connectionProfileSupported") for adapter in demo["adapters"]), demo
+adapter_catalog = {adapter["key"]: adapter for adapter in adapters}
+assert set(adapter_catalog) == {"file.import.fake", "internal.noop"}, adapters
+assert adapter_catalog["file.import.fake"]["direction"] == "inbound", adapters
+assert adapter_catalog["file.import.fake"]["connection_profile_supported"] is True, adapters
+assert adapter_catalog["file.import.fake"]["mapping_example"]["external_id"] == "lead_id", adapters
+assert "records" in adapter_catalog["file.import.fake"]["payload_schema"]["required"], adapters
+assert adapter_catalog["internal.noop"]["connection_profile_supported"] is False, adapters
 assert demo_headers.get("access-control-allow-origin") == "*", demo_headers
 assert "public" in demo_headers.get("cache-control", ""), demo_headers
 assert metrics_headers.get("content-type", "").startswith("text/plain"), metrics_headers
@@ -159,6 +169,7 @@ assert "/tenants/{tenant_id}/workflow-rules" in openapi["paths"], openapi["paths
 assert "/tenants/{tenant_id}/workflow-action-runs" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/outbox-events/{event_id}/retry" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/integration-connections" in openapi["paths"], openapi["paths"].keys()
+assert "/integration-adapters" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/public" in openapi["paths"], openapi["paths"].keys()
 assert "/health" in openapi["paths"], openapi["paths"].keys()
 
@@ -168,6 +179,7 @@ if openapi_file.exists():
     assert "/tenants/{tenant_id}/workflow-action-runs" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/outbox-events/{event_id}/retry" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/integration-connections" in generated["paths"], generated["paths"].keys()
+    assert "/integration-adapters" in generated["paths"], generated["paths"].keys()
 
 print(
     "public demo API contract ok:",

@@ -323,6 +323,32 @@ What this gives us:
   `drivedesk_integration_connections`;
 - connection metrics expose only `adapter_key` and `status` labels.
 
+## Sprint 4E Runtime Adapter Catalog
+
+Sprint 4E adds a runtime catalog for executable integration adapters.
+
+New API:
+
+- `GET /integration-adapters`.
+
+Why this matters:
+
+- admin UI and generated clients can discover adapter metadata instead of
+  hardcoding adapter keys;
+- connection-profile screens can show which adapters support tenant-owned
+  profiles;
+- public smoke tests can verify that runtime adapter contracts, OpenAPI, docs,
+  and demo data stay aligned;
+- planned adapters stay out of the runtime catalog until the worker can execute
+  them.
+
+The current catalog exposes:
+
+| Adapter | Direction | Connection Profile | Purpose |
+| --- | --- | --- | --- |
+| `file.import.fake` | `inbound` | supported | Synthetic file import contract tests and public demos. |
+| `internal.noop` | `internal` | not supported | Default internal outbox acknowledgement path. |
+
 ## Local Commands
 
 Run the API without Docker:

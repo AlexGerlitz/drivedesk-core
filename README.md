@@ -27,6 +27,7 @@ It includes:
 - workflow rule audit, configured outbox handoff, and aggregate workflow metrics;
 - workflow actions for task record creation and adapter sync requests;
 - fake file import adapter with retry and dead-letter state;
+- runtime adapter catalog for executable adapter metadata;
 - synthetic lead-to-student workflow in the public demo payload;
 - generated OpenAPI client SDK example for the public demo API;
 - Docker Compose local runtime;
@@ -58,14 +59,15 @@ It includes:
 13. Read `docs/public/TENANT_ISOLATION.md`.
 14. Read `docs/public/BUSINESS_RECORDS.md`.
 15. Read `docs/public/CLIENT_SDK.md`.
-16. Read `docs/public/INTEGRATION_CONNECTIONS.md`.
-17. Read `docs/public/SYSTEM_DESIGN.md`.
-18. Read `docs/public/INTEGRATION_ADAPTERS.md`.
-19. Read `docs/public/INTEGRATION_OBSERVABILITY.md`.
-20. Read `docs/public/OUTBOX_RECOVERY.md`.
-21. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
-22. Check `.github/workflows/ci.yml`.
-23. Run `bash scripts/ci_smoke_public.sh` locally.
+16. Read `docs/public/INTEGRATION_ADAPTER_CATALOG.md`.
+17. Read `docs/public/INTEGRATION_CONNECTIONS.md`.
+18. Read `docs/public/SYSTEM_DESIGN.md`.
+19. Read `docs/public/INTEGRATION_ADAPTERS.md`.
+20. Read `docs/public/INTEGRATION_OBSERVABILITY.md`.
+21. Read `docs/public/OUTBOX_RECOVERY.md`.
+22. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
+23. Check `.github/workflows/ci.yml`.
+24. Run `bash scripts/ci_smoke_public.sh` locally.
 
 ## What To Review First
 
@@ -82,6 +84,7 @@ It includes:
 - `docs/public/TENANT_ISOLATION.md` - tenant isolation and bootstrap boundary overview.
 - `docs/public/BUSINESS_RECORDS.md` - tenant-owned business record foundation.
 - `docs/public/CLIENT_SDK.md` - generated OpenAPI client SDK example.
+- `docs/public/INTEGRATION_ADAPTER_CATALOG.md` - runtime adapter metadata and discovery contract.
 - `docs/public/INTEGRATION_CONNECTIONS.md` - tenant-owned adapter profiles and mapping.
 - `docs/public/INTEGRATION_ADAPTERS.md` - adapter contract and retry model.
 - `docs/public/INTEGRATION_OBSERVABILITY.md` - adapter metrics and worker log signals.
@@ -93,6 +96,7 @@ It includes:
 - `apps/admin/public-demo/index.html` - static fake-data product demo shell.
 - `docs/openapi.json` - generated FastAPI OpenAPI schema.
 - `GET /demo/public` - read-only synthetic demo payload in the exported API.
+- `GET /integration-adapters` - runtime adapter catalog endpoint.
 - `GET /metrics` - public-safe aggregate metrics including auth health.
 - `POST /auth/sessions/{session_id}/revoke` - admin-triggered visible session revocation.
 - `POST /platform/admins` - platform-admin grant endpoint.
@@ -205,6 +209,7 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/public/TENANT_ISOLATION.md`
 - `docs/public/BUSINESS_RECORDS.md`
 - `docs/public/CLIENT_SDK.md`
+- `docs/public/INTEGRATION_ADAPTER_CATALOG.md`
 - `docs/public/INTEGRATION_CONNECTIONS.md`
 - `docs/public/INTEGRATION_ADAPTERS.md`
 - `docs/public/INTEGRATION_OBSERVABILITY.md`
@@ -235,3 +240,4 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/adr/0029-workflow-action-run-observability.md`
 - `docs/adr/0030-outbox-retry-recovery.md`
 - `docs/adr/0031-tenant-owned-integration-connections.md`
+- `docs/adr/0032-runtime-adapter-catalog.md`

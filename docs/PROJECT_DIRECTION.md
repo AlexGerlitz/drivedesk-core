@@ -45,3 +45,4 @@ Recommended next slices:
 - OpenTelemetry tracing;
 - metrics endpoint;
 - integration adapter examples with mock providers.
+- runtime adapter catalog metadata.

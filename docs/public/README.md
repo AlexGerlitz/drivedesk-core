@@ -21,6 +21,7 @@ credentials.
 - `TENANT_ISOLATION.md` - tenant-scoped bearer access and cross-tenant boundaries.
 - `BUSINESS_RECORDS.md` - tenant-owned business record foundation.
 - `CLIENT_SDK.md` - generated OpenAPI client SDK example.
+- `INTEGRATION_ADAPTER_CATALOG.md` - runtime adapter metadata and discovery contract.
 - `INTEGRATION_CONNECTIONS.md` - tenant-owned adapter profiles and mapping.
 - `INTEGRATION_ADAPTERS.md` - adapter contract, outbox, retry, and dead-letter overview.
 - `INTEGRATION_OBSERVABILITY.md` - adapter metrics, worker logs, and failure visibility overview.
@@ -74,13 +75,14 @@ https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 13. Read the business records overview.
 14. Read the generated client SDK overview.
 15. Read the system design overview.
-16. Read the integration connections overview.
-17. Read the integration adapters overview.
-18. Read the integration observability overview.
-19. Read the outbox recovery overview.
-20. Read the case study.
-21. Check CI and public demo health workflow results.
-22. Run the public smoke checks locally.
+16. Read the integration adapter catalog overview.
+17. Read the integration connections overview.
+18. Read the integration adapters overview.
+19. Read the integration observability overview.
+20. Read the outbox recovery overview.
+21. Read the case study.
+22. Check CI and public demo health workflow results.
+23. Run the public smoke checks locally.
 
 ## Human Explanation
 

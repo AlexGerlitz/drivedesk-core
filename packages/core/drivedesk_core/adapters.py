@@ -19,6 +19,27 @@ class AdapterResult:
         return asdict(self)
 
 
+@dataclass(frozen=True)
+class AdapterDescriptor:
+    key: str
+    name: str
+    status: str
+    category: str
+    direction: str
+    purpose: str
+    connection_profile_supported: bool
+    connection_profile_required: bool
+    payload_schema: dict[str, object] = field(default_factory=dict)
+    config_example: dict[str, object] = field(default_factory=dict)
+    mapping_example: dict[str, object] = field(default_factory=dict)
+    capabilities: list[str] = field(default_factory=list)
+    failure_modes: list[str] = field(default_factory=list)
+    public_notes: list[str] = field(default_factory=list)
+
+    def to_payload(self) -> dict[str, object]:
+        return asdict(self)
+
+
 class AdapterExecutionError(Exception):
     def __init__(self, message: str, *, adapter_key: str, retryable: bool) -> None:
         super().__init__(message)
@@ -29,6 +50,7 @@ class AdapterExecutionError(Exception):
 
 class IntegrationAdapter(Protocol):
     adapter_key: str
+    descriptor: AdapterDescriptor
 
     def execute(self, payload: dict[str, object]) -> AdapterResult:
         ...
@@ -36,6 +58,26 @@ class IntegrationAdapter(Protocol):
 
 class NoopAdapter:
     adapter_key = "internal.noop"
+    descriptor = AdapterDescriptor(
+        key=adapter_key,
+        name="Internal Noop",
+        status="active",
+        category="internal",
+        direction="internal",
+        purpose="Acknowledge internal domain events without calling an external provider.",
+        connection_profile_supported=False,
+        connection_profile_required=False,
+        payload_schema={
+            "type": "object",
+            "required": [],
+            "properties": {
+                "event_type": "optional internal event type",
+            },
+        },
+        capabilities=["internal acknowledgement", "outbox smoke path"],
+        failure_modes=[],
+        public_notes=["Used as the default adapter for internal outbox events."],
+    )
 
     def execute(self, payload: dict[str, object]) -> AdapterResult:
         return AdapterResult(
@@ -48,6 +90,39 @@ class NoopAdapter:
 
 class FakeFileImportAdapter:
     adapter_key = "file.import.fake"
+    descriptor = AdapterDescriptor(
+        key=adapter_key,
+        name="Fake File Import",
+        status="active",
+        category="file_import",
+        direction="inbound",
+        purpose="Normalize synthetic imported rows and report accepted or rejected records.",
+        connection_profile_supported=True,
+        connection_profile_required=False,
+        payload_schema={
+            "type": "object",
+            "required": ["source_name", "source_format", "records"],
+            "properties": {
+                "source_name": "short source label",
+                "source_format": "json or csv",
+                "records": "list of objects with external_id and display_name",
+                "simulate_failure": "optional retryable or permanent test mode",
+            },
+        },
+        config_example={"mode": "synthetic"},
+        mapping_example={"external_id": "lead_id", "display_name": "full_name"},
+        capabilities=[
+            "payload validation",
+            "accepted/rejected record counts",
+            "retryable failure simulation",
+            "permanent failure simulation",
+        ],
+        failure_modes=["retryable", "permanent"],
+        public_notes=[
+            "Safe fake adapter for public demos and contract tests.",
+            "Real provider values are handled outside the public adapter catalog.",
+        ],
+    )
 
     def execute(self, payload: dict[str, object]) -> AdapterResult:
         simulated_failure = payload.get("simulate_failure")
@@ -120,6 +195,14 @@ def resolve_adapter(adapter_key: str | None) -> IntegrationAdapter:
             retryable=False,
         )
     return adapter
+
+
+def list_adapter_descriptors() -> list[dict[str, object]]:
+    return [ADAPTERS[key].descriptor.to_payload() for key in sorted(ADAPTERS)]
+
+
+def describe_adapter(adapter_key: str | None) -> dict[str, object]:
+    return resolve_adapter(adapter_key).descriptor.to_payload()
 
 
 def execute_adapter(adapter_key: str | None, payload: dict[str, object]) -> AdapterResult:

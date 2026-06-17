@@ -30,6 +30,90 @@
         "title": "AccessTokenRead",
         "type": "object"
       },
+      "AdapterContractRead": {
+        "properties": {
+          "capabilities": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Capabilities",
+            "type": "array"
+          },
+          "category": {
+            "title": "Category",
+            "type": "string"
+          },
+          "config_example": {
+            "additionalProperties": true,
+            "title": "Config Example",
+            "type": "object"
+          },
+          "connection_profile_required": {
+            "title": "Connection Profile Required",
+            "type": "boolean"
+          },
+          "connection_profile_supported": {
+            "title": "Connection Profile Supported",
+            "type": "boolean"
+          },
+          "direction": {
+            "title": "Direction",
+            "type": "string"
+          },
+          "failure_modes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Failure Modes",
+            "type": "array"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "mapping_example": {
+            "additionalProperties": true,
+            "title": "Mapping Example",
+            "type": "object"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "payload_schema": {
+            "additionalProperties": true,
+            "title": "Payload Schema",
+            "type": "object"
+          },
+          "public_notes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Public Notes",
+            "type": "array"
+          },
+          "purpose": {
+            "title": "Purpose",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "name",
+          "status",
+          "category",
+          "direction",
+          "purpose",
+          "connection_profile_supported",
+          "connection_profile_required"
+        ],
+        "title": "AdapterContractRead",
+        "type": "object"
+      },
       "AuditEventRead": {
         "properties": {
           "actor_id": {
@@ -878,9 +962,7 @@
         "properties": {
           "adapters": {
             "items": {
-              "additionalProperties": {
-                "type": "string"
-              },
+              "additionalProperties": true,
               "type": "object"
             },
             "title": "Adapters",
@@ -1913,6 +1995,31 @@
           }
         },
         "summary": "Health"
+      }
+    },
+    "/integration-adapters": {
+      "get": {
+        "operationId": "list_integration_adapters_endpoint_integration_adapters_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AdapterContractRead"
+                  },
+                  "title": "Response List Integration Adapters Endpoint Integration Adapters Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Integration Adapters Endpoint",
+        "tags": [
+          "integrations"
+        ]
       }
     },
     "/platform/admins": {

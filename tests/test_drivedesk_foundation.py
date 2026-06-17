@@ -22,7 +22,7 @@ from drivedesk_api.db import Base
 from drivedesk_api.main import build_app
 from drivedesk_api.session import get_session
 from drivedesk_core import ActorRef, TenantRef, build_event
-from drivedesk_core.adapters import AdapterExecutionError, FakeFileImportAdapter
+from drivedesk_core.adapters import AdapterExecutionError, FakeFileImportAdapter, list_adapter_descriptors
 from drivedesk_worker.main import build_heartbeat, heartbeat_to_json
 
 
@@ -99,6 +99,20 @@ def test_fake_file_import_adapter_contract() -> None:
         raise AssertionError("expected retryable adapter failure")
 
 
+def test_adapter_catalog_describes_runtime_adapters() -> None:
+    descriptors = {item["key"]: item for item in list_adapter_descriptors()}
+
+    assert set(descriptors) == {"file.import.fake", "internal.noop"}
+    assert descriptors["file.import.fake"]["connection_profile_supported"] is True
+    assert descriptors["file.import.fake"]["connection_profile_required"] is False
+    assert descriptors["file.import.fake"]["mapping_example"] == {
+        "external_id": "lead_id",
+        "display_name": "full_name",
+    }
+    assert "records" in descriptors["file.import.fake"]["payload_schema"]["required"]
+    assert descriptors["internal.noop"]["connection_profile_supported"] is False
+
+
 def test_api_health_and_ready_endpoints() -> None:
     client = TestClient(build_app())
 
@@ -109,6 +123,22 @@ def test_api_health_and_ready_endpoints() -> None:
     ready = client.get("/ready")
     assert ready.status_code == 200
     assert ready.json()["status"] == "ready"
+
+
+def test_api_integration_adapter_catalog_endpoint() -> None:
+    client = TestClient(build_app())
+
+    response = client.get("/integration-adapters")
+
+    assert response.status_code == 200
+    payload = {item["key"]: item for item in response.json()}
+    assert set(payload) == {"file.import.fake", "internal.noop"}
+    assert payload["file.import.fake"]["status"] == "active"
+    assert payload["file.import.fake"]["direction"] == "inbound"
+    assert payload["file.import.fake"]["connection_profile_supported"] is True
+    assert payload["file.import.fake"]["mapping_example"]["external_id"] == "lead_id"
+    assert "payload validation" in payload["file.import.fake"]["capabilities"]
+    assert payload["internal.noop"]["direction"] == "internal"
 
 
 def test_api_metrics_endpoint(api_client: TestClient) -> None:

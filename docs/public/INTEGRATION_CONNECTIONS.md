@@ -8,9 +8,14 @@ They answer:
 which configured external connection should this integration job use?
 ```
 
+Before creating a connection, clients can call `GET /integration-adapters` to
+discover which executable adapters support connection profiles and which mapping
+shape they expect.
+
 ## API Shape
 
 ```text
+GET /integration-adapters
 POST /tenants/{tenant_id}/integration-connections
 GET /tenants/{tenant_id}/integration-connections
 ```

@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-17T22:04:35Z
+Generated at: 2026-06-17T22:21:08Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -25,6 +25,9 @@ Copied public-safe areas:
 - public workflow demo overview
 - public generated SDK overview
 - public integration adapters overview
+- public runtime adapter catalog endpoint: /integration-adapters
+- public runtime adapter catalog doc
+- public demo adapter connectionProfileSupported metadata
 - public integration observability overview
 - public roadmap
 - public demo integration health surface

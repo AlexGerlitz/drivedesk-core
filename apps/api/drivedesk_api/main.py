@@ -59,6 +59,7 @@ from drivedesk_api.rbac import (
 )
 from drivedesk_api.schemas import (
     AccessTokenRead,
+    AdapterContractRead,
     AuditEventRead,
     AuthMeRead,
     AuthSessionRead,
@@ -116,6 +117,7 @@ from drivedesk_api.settings import Settings, get_settings
 from drivedesk_api.tenant_repository import list_tenant_owned
 from drivedesk_api.tenant_scope import list_tenants_for_actor, list_users_for_actor
 from drivedesk_core import __version__ as core_version
+from drivedesk_core import list_adapter_descriptors
 
 
 request_logger = logging.getLogger("drivedesk.api.requests")
@@ -174,6 +176,10 @@ def build_app(settings: Settings | None = None) -> FastAPI:
                 "Cache-Control": "public, max-age=60",
             },
         )
+
+    @api.get("/integration-adapters", response_model=list[AdapterContractRead], tags=["integrations"])
+    async def list_integration_adapters_endpoint() -> list[dict[str, object]]:
+        return list_adapter_descriptors()
 
     @api.get("/metrics", include_in_schema=False)
     async def metrics(session: AsyncSession = Depends(get_session)) -> PlainTextResponse:

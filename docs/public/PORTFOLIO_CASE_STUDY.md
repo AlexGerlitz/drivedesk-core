@@ -45,6 +45,7 @@ Implemented foundation:
 - workflow rule audit, configured outbox handoff, and aggregate workflow metrics;
 - workflow actions for task record creation and adapter sync requests;
 - fake file import adapter with retry and dead-letter states;
+- runtime adapter catalog for executable adapter metadata;
 - tenant-owned integration connection profiles with safe config and mapping;
 - integration adapter metrics grouped by adapter and status;
 - structured adapter worker logs for started, completed, failed, and
@@ -138,6 +139,9 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
 - Integration connections now let tenant-owned adapter profiles drive file import
   jobs through `integration_connection_id`, with aggregate
   `drivedesk_integration_connections` metrics.
+- The runtime adapter catalog now exposes `GET /integration-adapters`, allowing
+  UI, generated clients, and smoke tests to discover executable adapter metadata
+  instead of hardcoding adapter assumptions.
 - The hosted public demo uses static fallback on GitHub Pages and can be pointed
   at `GET /demo/public` for API-backed fake data, including workflow stages,
   timeline, domain events, audit, and outbox state.

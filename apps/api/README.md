@@ -47,6 +47,7 @@ Core endpoints:
 - `POST /tenants/{tenant_id}/workflow-rules`.
 - `GET /tenants/{tenant_id}/workflow-rules`.
 - `GET /tenants/{tenant_id}/workflow-action-runs`.
+- `GET /integration-adapters`.
 - `POST /tenants/{tenant_id}/integration-connections`.
 - `GET /tenants/{tenant_id}/integration-connections`.
 - `POST /tenants/{tenant_id}/integration-imports/file`.
@@ -123,6 +124,9 @@ Authorization: Bearer <access-token>
 
 Integration endpoints:
 
+- `GET /integration-adapters` lists executable runtime adapters with
+  public-safe contract metadata, payload shape, mapping examples, and
+  connection-profile support flags.
 - `POST /tenants/{tenant_id}/integration-connections` creates a tenant-owned
   adapter profile with safe config and mapping JSON.
 - `GET /tenants/{tenant_id}/integration-connections` lists tenant-owned adapter

@@ -169,7 +169,17 @@
       contract.className = "muted";
       contract.appendChild(text(adapter.contract));
 
-      row.append(top, key, contract);
+      var meta = document.createElement("span");
+      meta.className = "muted";
+      meta.appendChild(
+        text(
+          (adapter.direction || "adapter") +
+            " · " +
+            (adapter.connectionProfileSupported ? "connection profile supported" : "no connection profile")
+        )
+      );
+
+      row.append(top, key, contract, meta);
       rows.appendChild(row);
     });
   }

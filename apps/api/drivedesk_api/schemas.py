@@ -13,6 +13,23 @@ WorkflowRuleActionType = Literal["emit_outbox_event", "create_task_record", "req
 IntegrationConnectionStatus = Literal["active", "disabled"]
 
 
+class AdapterContractRead(BaseModel):
+    key: str
+    name: str
+    status: str
+    category: str
+    direction: str
+    purpose: str
+    connection_profile_supported: bool
+    connection_profile_required: bool
+    payload_schema: dict[str, Any] = Field(default_factory=dict)
+    config_example: dict[str, Any] = Field(default_factory=dict)
+    mapping_example: dict[str, Any] = Field(default_factory=dict)
+    capabilities: list[str] = Field(default_factory=list)
+    failure_modes: list[str] = Field(default_factory=list)
+    public_notes: list[str] = Field(default_factory=list)
+
+
 class TenantCreate(BaseModel):
     slug: str = Field(min_length=2, max_length=80, pattern=r"^[a-z0-9][a-z0-9-]*[a-z0-9]$")
     name: str = Field(min_length=2, max_length=255)
@@ -262,7 +279,7 @@ class PublicDemoRead(BaseModel):
     members: list[dict[str, str]]
     auditEvents: list[dict[str, str]]
     outbox: list[dict[str, Any]]
-    adapters: list[dict[str, str]]
+    adapters: list[dict[str, Any]]
     integrationJobs: list[dict[str, Any]]
     integrationHealth: list[dict[str, str]]
     integrationReadiness: list[dict[str, Any]]

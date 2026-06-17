@@ -35,7 +35,7 @@ window.DRIVEDESK_DEMO_DATA = {
     },
     {
       "label": "OpenAPI paths",
-      "value": "10",
+      "value": "23",
       "detail": "generated contract",
       "tone": "violet"
     },
@@ -166,18 +166,24 @@ window.DRIVEDESK_DEMO_DATA = {
       "key": "file.import.fake",
       "name": "Fake File Import",
       "status": "active",
+      "direction": "inbound",
+      "connectionProfileSupported": true,
       "contract": "Normalizes provider rows, returns accepted and rejected record counts, and stores the result on the outbox event."
     },
     {
       "key": "internal.noop",
       "name": "Internal Noop",
       "status": "active",
+      "direction": "internal",
+      "connectionProfileSupported": false,
       "contract": "Acknowledges internal domain events without calling an external provider."
     },
     {
       "key": "accounting.export.mock",
       "name": "Accounting Export",
       "status": "planned",
+      "direction": "outbound",
+      "connectionProfileSupported": true,
       "contract": "Future adapter boundary for accounting exports and reconciliation status."
     }
   ],

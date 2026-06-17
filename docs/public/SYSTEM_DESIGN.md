@@ -257,6 +257,12 @@ The first implemented adapter is documented in `INTEGRATION_ADAPTERS.md`. It
 uses synthetic file-import data to prove the API -> outbox -> worker -> adapter
 flow, including retry and dead-letter states.
 
+The runtime adapter catalog is documented in
+`INTEGRATION_ADAPTER_CATALOG.md`. It exposes `GET /integration-adapters` so
+clients can discover executable adapter metadata, connection-profile support,
+payload shape, and mapping examples from the runtime instead of hardcoding them
+in the UI.
+
 Integration connections are documented in `INTEGRATION_CONNECTIONS.md`. They
 add tenant-owned adapter profiles with safe config and mapping, so an
 integration job can reference a configured connection instead of relying only on

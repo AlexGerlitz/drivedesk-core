@@ -15,12 +15,29 @@ It includes:
 - pytest coverage for the Core API;
 - architecture docs and ADRs.
 
+[![Public Demo Health](https://github.com/AlexGerlitz/drivedesk-core/actions/workflows/public-demo-health.yml/badge.svg)](https://github.com/AlexGerlitz/drivedesk-core/actions/workflows/public-demo-health.yml)
+
+## Live Demo
+
+[Open the public DriveDesk Core demo](https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/)
+
+![DriveDesk Core demo overview](docs/public/assets/drivedesk-core-demo-overview.png)
+
+## Reviewer Path
+
+1. Open the live demo.
+2. Review `docs/openapi.json`.
+3. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
+4. Check `.github/workflows/ci.yml`.
+5. Run `bash scripts/ci_smoke_public.sh` locally.
+
 ## What To Review First
 
 - `docs/public/PORTFOLIO_CASE_STUDY.md` - engineering case study.
 - `docs/public/ARCHITECTURE_DIAGRAMS.md` - architecture diagrams.
 - `docs/public/SANITIZED_EVIDENCE.md` - sanitized staging evidence.
 - `docs/public/PUBLIC_DEMO_PLAN.md` - future public demo plan.
+- `docs/public/ROADMAP.md` - public-safe engineering roadmap.
 - `apps/admin/public-demo/index.html` - static fake-data product demo shell.
 - `docs/openapi.json` - generated FastAPI OpenAPI schema.
 
@@ -74,6 +91,7 @@ apps/admin/public-demo/index.html
 - `docs/public/ARCHITECTURE_DIAGRAMS.md`
 - `docs/public/PUBLIC_DEMO_PLAN.md`
 - `docs/public/SANITIZED_EVIDENCE.md`
+- `docs/public/ROADMAP.md`
 - `docs/openapi.json`
 - `docs/adr/0001-modular-monolith-first.md`
 - `docs/adr/0006-drivedesk-core-foundation.md`

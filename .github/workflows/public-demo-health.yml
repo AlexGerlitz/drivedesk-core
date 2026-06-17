@@ -1,0 +1,29 @@
+name: Public Demo Health
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 */6 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  pages-demo:
+    name: Pages demo health
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Check public demo
+        run: |
+          set -euo pipefail
+          url="https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/"
+          base="${url%/}"
+          html="$(curl -fsSL --retry 3 --retry-delay 5 "$url")"
+          printf '%s' "$html" | grep -F "DriveDesk Core Demo"
+          printf '%s' "$html" | grep -F "./demo-data.js"
+          printf '%s' "$html" | grep -F "./styles.css"
+          printf '%s' "$html" | grep -F "./app.js"
+          curl -fsSL --retry 3 --retry-delay 5 "$base/demo-data.js" | grep -F "DRIVEDESK_DEMO_DATA"
+          curl -fsSL --retry 3 --retry-delay 5 "$base/styles.css" | grep -F "metric-grid"
+          curl -fsSL --retry 3 --retry-delay 5 "$base/app.js" | grep -F "setupTabs"

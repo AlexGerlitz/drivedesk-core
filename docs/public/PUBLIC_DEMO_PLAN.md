@@ -8,6 +8,7 @@ using the private staging runtime.
 - show the product direction;
 - show API and workflow behavior with fake data;
 - show engineering quality through CI, docs, tests, and architecture;
+- keep a public demo health workflow for the hosted surface;
 - keep operational tooling separate from the reviewer-facing demo.
 
 ## Demo Surface
@@ -18,6 +19,7 @@ Recommended first public demo:
 - fake tenant and fake users;
 - read-only or resettable workflows;
 - public OpenAPI docs generated from the demo API;
+- public demo screenshot in the repository README;
 - link to the public repository and case study.
 
 ## Demo Data

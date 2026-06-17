@@ -10,9 +10,11 @@ credentials.
 - `PORTFOLIO_CASE_STUDY.md` - engineering case study and current system shape.
 - `ARCHITECTURE_DIAGRAMS.md` - public-safe architecture diagrams.
 - `PUBLIC_DEMO_PLAN.md` - future live demo plan.
+- `ROADMAP.md` - public-safe engineering roadmap.
 - `SANITIZED_EVIDENCE.md` - human-readable staging evidence summary.
 - `evidence/de-staging-evidence.sanitized.json` - machine-readable sanitized
   evidence snapshot.
+- `assets/drivedesk-core-demo-overview.png` - public demo screenshot.
 
 The public repository export also generates:
 
@@ -25,6 +27,14 @@ Hosted demo:
 ```text
 https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 ```
+
+## Reviewer Path
+
+1. Open the hosted demo.
+2. Review the generated OpenAPI schema.
+3. Read the case study.
+4. Check CI and public demo health workflow results.
+5. Run the public smoke checks locally.
 
 ## Human Explanation
 

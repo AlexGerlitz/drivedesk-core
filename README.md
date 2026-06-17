@@ -13,6 +13,7 @@ It includes:
 - tenant, user, membership, RBAC, audit, and outbox foundation;
 - credential auth foundation with bearer access tokens, current-user lookup,
   token revocation, redacted session listing, failed-attempt guard, and auth audit events;
+- dedicated platform-admin grants for platform-scoped bearer-token operations;
 - aggregate auth metrics for session lifecycle and login-attempt outcomes;
 - auth security alert names and public-safe runbook shape;
 - bearer-token tenant isolation for tenant/user listing and bootstrap endpoints;
@@ -43,14 +44,15 @@ It includes:
 6. Read `docs/public/WORKFLOW_DEMO.md`.
 7. Read `docs/public/AUTH_FOUNDATION.md`.
 8. Read `docs/public/AUTH_OBSERVABILITY.md`.
-9. Read `docs/public/TENANT_ISOLATION.md`.
-10. Read `docs/public/CLIENT_SDK.md`.
-11. Read `docs/public/SYSTEM_DESIGN.md`.
-12. Read `docs/public/INTEGRATION_ADAPTERS.md`.
-13. Read `docs/public/INTEGRATION_OBSERVABILITY.md`.
-14. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
-15. Check `.github/workflows/ci.yml`.
-16. Run `bash scripts/ci_smoke_public.sh` locally.
+9. Read `docs/public/PLATFORM_ADMIN.md`.
+10. Read `docs/public/TENANT_ISOLATION.md`.
+11. Read `docs/public/CLIENT_SDK.md`.
+12. Read `docs/public/SYSTEM_DESIGN.md`.
+13. Read `docs/public/INTEGRATION_ADAPTERS.md`.
+14. Read `docs/public/INTEGRATION_OBSERVABILITY.md`.
+15. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
+16. Check `.github/workflows/ci.yml`.
+17. Run `bash scripts/ci_smoke_public.sh` locally.
 
 ## What To Review First
 
@@ -60,6 +62,7 @@ It includes:
 - `docs/public/WORKFLOW_DEMO.md` - synthetic business workflow contract.
 - `docs/public/AUTH_FOUNDATION.md` - auth, bearer token, and RBAC overview.
 - `docs/public/AUTH_OBSERVABILITY.md` - auth metrics, alert names, and runbook shape.
+- `docs/public/PLATFORM_ADMIN.md` - dedicated platform-admin model and SaaS control-plane boundary.
 - `docs/public/TENANT_ISOLATION.md` - tenant isolation and bootstrap boundary overview.
 - `docs/public/CLIENT_SDK.md` - generated OpenAPI client SDK example.
 - `docs/public/INTEGRATION_ADAPTERS.md` - adapter contract and retry model.
@@ -72,6 +75,8 @@ It includes:
 - `docs/openapi.json` - generated FastAPI OpenAPI schema.
 - `GET /demo/public` - read-only synthetic demo payload in the exported API.
 - `GET /metrics` - public-safe aggregate metrics including auth health.
+- `POST /platform/admins` - platform-admin grant endpoint.
+- `GET /platform/admins` - platform-admin grant review endpoint.
 - `DriveDeskMetricsStorageUnavailable`, `DriveDeskAuthFailureSpike`, and
   `DriveDeskAuthLockedAttempts` - public-safe auth alert contract.
 - `workflow`, `timeline`, and `domainEvents` - synthetic business process data
@@ -158,6 +163,7 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/public/WORKFLOW_DEMO.md`
 - `docs/public/AUTH_FOUNDATION.md`
 - `docs/public/AUTH_OBSERVABILITY.md`
+- `docs/public/PLATFORM_ADMIN.md`
 - `docs/public/TENANT_ISOLATION.md`
 - `docs/public/CLIENT_SDK.md`
 - `docs/public/INTEGRATION_ADAPTERS.md`
@@ -179,3 +185,4 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/adr/0020-admin-visible-auth-session-listing.md`
 - `docs/adr/0021-auth-observability-metrics.md`
 - `docs/adr/0022-auth-security-alerts.md`
+- `docs/adr/0023-dedicated-platform-admin-model.md`

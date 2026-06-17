@@ -14,6 +14,7 @@ credentials.
   and outbox overview.
 - `AUTH_FOUNDATION.md` - credential auth, bearer token, and RBAC overview.
 - `AUTH_OBSERVABILITY.md` - aggregate auth metrics, alert names, and runbook shape.
+- `PLATFORM_ADMIN.md` - dedicated platform-admin model and SaaS control-plane boundary.
 - `TENANT_ISOLATION.md` - tenant-scoped bearer access and cross-tenant boundaries.
 - `CLIENT_SDK.md` - generated OpenAPI client SDK example.
 - `INTEGRATION_ADAPTERS.md` - adapter contract, outbox, retry, and dead-letter overview.
@@ -60,14 +61,15 @@ https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 6. Read the workflow demo overview.
 7. Read the auth foundation overview.
 8. Read the auth observability overview.
-9. Read the tenant isolation overview.
-10. Read the generated client SDK overview.
-11. Read the system design overview.
-12. Read the integration adapters overview.
-13. Read the integration observability overview.
-14. Read the case study.
-15. Check CI and public demo health workflow results.
-16. Run the public smoke checks locally.
+9. Read the platform-admin overview.
+10. Read the tenant isolation overview.
+11. Read the generated client SDK overview.
+12. Read the system design overview.
+13. Read the integration adapters overview.
+14. Read the integration observability overview.
+15. Read the case study.
+16. Check CI and public demo health workflow results.
+17. Run the public smoke checks locally.
 
 ## Human Explanation
 

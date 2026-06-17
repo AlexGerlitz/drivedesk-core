@@ -10,9 +10,9 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from drivedesk_api.auth import hash_credential
-from drivedesk_api.db import AuditEvent, Membership, OutboxEvent, Tenant, User
+from drivedesk_api.db import AuditEvent, Membership, OutboxEvent, PlatformAdmin, Tenant, User
 from drivedesk_api.rbac import ActorContext
-from drivedesk_api.schemas import FileImportCreate, MembershipCreate, TenantCreate, UserCreate
+from drivedesk_api.schemas import FileImportCreate, MembershipCreate, PlatformAdminCreate, TenantCreate, UserCreate
 
 
 def new_id() -> str:
@@ -152,6 +152,48 @@ async def create_membership(
     )
     await commit_or_conflict(session, "membership already exists")
     return membership
+
+
+async def create_platform_admin(
+    session: AsyncSession,
+    payload: PlatformAdminCreate,
+    actor: ActorContext,
+) -> PlatformAdmin:
+    await ensure_user_exists(session, payload.user_id)
+    platform_admin = PlatformAdmin(
+        id=new_id(),
+        user_id=payload.user_id,
+        role=payload.role,
+        status="active",
+    )
+    session.add(platform_admin)
+    await write_audit(
+        session,
+        tenant_id="platform",
+        actor=actor,
+        event_type="platform_admin.granted",
+        entity_type="platform_admin",
+        entity_id=platform_admin.id,
+        summary=f"Platform admin granted: {platform_admin.role}",
+        metadata={"user_id": platform_admin.user_id, "role": platform_admin.role},
+    )
+    await enqueue_outbox(
+        session,
+        tenant_id="platform",
+        event_type="platform_admin.granted",
+        payload={
+            "platform_admin_id": platform_admin.id,
+            "user_id": platform_admin.user_id,
+            "role": platform_admin.role,
+        },
+    )
+    await commit_or_conflict(session, "platform admin already exists")
+    return platform_admin
+
+
+async def list_platform_admins(session: AsyncSession) -> list[PlatformAdmin]:
+    result = await session.execute(select(PlatformAdmin).order_by(PlatformAdmin.created_at.desc()))
+    return list(result.scalars().all())
 
 
 async def create_file_import_job(

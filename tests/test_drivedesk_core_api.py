@@ -19,7 +19,7 @@ for relative in ("apps/api", "apps/worker", "packages/core"):
     if path not in sys.path:
         sys.path.insert(0, path)
 
-from drivedesk_api.db import AccessToken, AuditEvent, AuthAttempt, Base, OutboxEvent, User
+from drivedesk_api.db import AccessToken, AuditEvent, AuthAttempt, Base, OutboxEvent, PlatformAdmin, User
 from drivedesk_api.main import build_app
 from drivedesk_api.rbac import ActorContext
 from drivedesk_api.session import get_session
@@ -541,6 +541,143 @@ def test_bearer_token_is_limited_to_member_tenants(
     )
     assert create_user_response.status_code == 403
     assert create_user_response.json()["detail"] == "platform bootstrap context required"
+
+
+def test_platform_admin_grant_enables_bearer_platform_operations(
+    api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, session_factory = api_client
+    owner_headers = {"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"}
+
+    tenant_response = client.post(
+        "/tenants",
+        json={"slug": "platform-admin-seed", "name": "Platform Admin Seed"},
+        headers=owner_headers,
+    )
+    assert tenant_response.status_code == 201
+    tenant_id = tenant_response.json()["id"]
+
+    tenant_owner_response = client.post(
+        "/users",
+        json={"email": "tenant-owner@example.com", "display_name": "Tenant Owner", "password": "correct-horse-a"},
+        headers=owner_headers,
+    )
+    assert tenant_owner_response.status_code == 201
+    tenant_owner_id = tenant_owner_response.json()["id"]
+
+    platform_user_response = client.post(
+        "/users",
+        json={
+            "email": "platform-admin@example.com",
+            "display_name": "Platform Admin",
+            "password": "correct-horse-b",
+        },
+        headers=owner_headers,
+    )
+    assert platform_user_response.status_code == 201
+    platform_user_id = platform_user_response.json()["id"]
+
+    assert client.post(
+        f"/tenants/{tenant_id}/memberships",
+        json={"user_id": tenant_owner_id, "role": "owner"},
+        headers=owner_headers,
+    ).status_code == 201
+
+    tenant_owner_login = client.post(
+        "/auth/login",
+        json={"email": "tenant-owner@example.com", "password": "correct-horse-a"},
+    )
+    assert tenant_owner_login.status_code == 200
+    tenant_owner_headers = {"Authorization": f"Bearer {tenant_owner_login.json()['access_token']}"}
+
+    forbidden_grant_response = client.post(
+        "/platform/admins",
+        json={"user_id": platform_user_id},
+        headers=tenant_owner_headers,
+    )
+    assert forbidden_grant_response.status_code == 403
+    assert forbidden_grant_response.json()["detail"] == "platform bootstrap context required"
+
+    grant_response = client.post(
+        "/platform/admins",
+        json={"user_id": platform_user_id},
+        headers=owner_headers,
+    )
+    assert grant_response.status_code == 201
+    assert grant_response.json()["role"] == "platform_admin"
+    assert grant_response.json()["status"] == "active"
+
+    platform_login = client.post(
+        "/auth/login",
+        json={"email": "platform-admin@example.com", "password": "correct-horse-b"},
+    )
+    assert platform_login.status_code == 200
+    platform_headers = {"Authorization": f"Bearer {platform_login.json()['access_token']}"}
+
+    me_response = client.get("/auth/me", headers=platform_headers)
+    assert me_response.status_code == 200
+    assert me_response.json()["platform_roles"] == ["platform_admin"]
+
+    bearer_grants_response = client.get("/platform/admins", headers=platform_headers)
+    assert bearer_grants_response.status_code == 200
+    assert [grant["user_id"] for grant in bearer_grants_response.json()] == [platform_user_id]
+
+    created_tenant_response = client.post(
+        "/tenants",
+        json={"slug": "platform-created", "name": "Platform Created"},
+        headers=platform_headers,
+    )
+    assert created_tenant_response.status_code == 201
+
+    created_user_response = client.post(
+        "/users",
+        json={
+            "email": "platform-created@example.com",
+            "display_name": "Platform Created User",
+            "password": "correct-horse-c",
+        },
+        headers=platform_headers,
+    )
+    assert created_user_response.status_code == 201
+
+    platform_tenants_response = client.get("/tenants", headers=platform_headers)
+    assert platform_tenants_response.status_code == 200
+    assert {tenant["slug"] for tenant in platform_tenants_response.json()} >= {
+        "platform-admin-seed",
+        "platform-created",
+    }
+
+    platform_users_response = client.get("/users", headers=platform_headers)
+    assert platform_users_response.status_code == 200
+    assert {user["email"] for user in platform_users_response.json()} >= {
+        "tenant-owner@example.com",
+        "platform-admin@example.com",
+        "platform-created@example.com",
+    }
+
+    async def platform_admin_state() -> tuple[list[str], list[str], list[str]]:
+        async with session_factory() as session:
+            admin_result = await session.execute(select(PlatformAdmin.role).order_by(PlatformAdmin.created_at))
+            audit_result = await session.execute(
+                select(AuditEvent.event_type)
+                .where(AuditEvent.tenant_id == "platform")
+                .order_by(AuditEvent.created_at)
+            )
+            outbox_result = await session.execute(
+                select(OutboxEvent.event_type)
+                .where(OutboxEvent.tenant_id == "platform")
+                .order_by(OutboxEvent.created_at)
+            )
+            return (
+                list(admin_result.scalars().all()),
+                list(audit_result.scalars().all()),
+                list(outbox_result.scalars().all()),
+            )
+
+    platform_roles, platform_audit_events, platform_outbox_events = asyncio.run(platform_admin_state())
+    assert platform_roles == ["platform_admin"]
+    assert "platform_admin.granted" in platform_audit_events
+    assert "platform_admin.granted" in platform_outbox_events
 
 
 def test_public_demo_endpoint_is_read_only_synthetic_contract(

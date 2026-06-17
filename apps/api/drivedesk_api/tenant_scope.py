@@ -14,7 +14,7 @@ def actor_member_tenant_ids(actor: ActorContext) -> list[str]:
 
 
 async def list_tenants_for_actor(session: AsyncSession, actor: ActorContext) -> list[Tenant]:
-    if actor.source != "bearer":
+    if actor.source != "bearer" or actor.is_platform_admin():
         result = await session.execute(select(Tenant).order_by(Tenant.created_at.desc()))
         return list(result.scalars().all())
 
@@ -27,7 +27,7 @@ async def list_tenants_for_actor(session: AsyncSession, actor: ActorContext) -> 
 
 
 async def list_users_for_actor(session: AsyncSession, actor: ActorContext) -> list[User]:
-    if actor.source != "bearer":
+    if actor.source != "bearer" or actor.is_platform_admin():
         result = await session.execute(select(User).order_by(User.created_at.desc()))
         return list(result.scalars().all())
 

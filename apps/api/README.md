@@ -28,6 +28,8 @@ Core endpoints:
 - `GET /auth/me`;
 - `POST /auth/logout`;
 - `GET /auth/sessions`;
+- `POST /platform/admins`;
+- `GET /platform/admins`;
 - `POST /tenants`;
 - `GET /tenants`;
 - `GET /tenants/{tenant_id}`;
@@ -46,6 +48,8 @@ Auth endpoints:
 - `GET /auth/me` returns the current user and active memberships.
 - `POST /auth/logout` revokes the current bearer access token.
 - `GET /auth/sessions` returns redacted tenant-scoped session state for admins.
+- `POST /platform/admins` grants a dedicated platform-admin role to a user.
+- `GET /platform/admins` lists platform-admin grants for platform operators.
 
 The auth layer records failed attempts, activates a login guard after repeated
 failures, and writes auth lifecycle events into the platform audit log.
@@ -66,8 +70,9 @@ Tenant isolation:
 - bearer tokens resolve through active tenant memberships;
 - `GET /tenants` and `GET /users` are filtered to the current user's tenants;
 - tenant endpoints reject requests for tenants outside the current user's memberships;
-- `POST /tenants` and `POST /users` are bootstrap-only platform endpoints and
-  reject bearer-token requests until a dedicated platform-admin model exists.
+- `POST /tenants` and `POST /users` require bootstrap or platform-admin context.
+- tenant-owner bearer tokens are rejected for platform-admin and global
+  tenant/user creation endpoints.
 - tenant-scoped list queries are centralized in
   `apps/api/drivedesk_api/tenant_scope.py`.
 - tenant-owned list queries for models with `tenant_id` use

@@ -160,13 +160,16 @@ flowchart LR
   TenantEndpoint --> TenantCheck["Requested Tenant Membership"]
   TenantCheck --> Allow["Allow"]
   TenantCheck --> Deny["Deny Cross-Tenant Access"]
-  Actor --> Bootstrap["POST /tenants or POST /users"]
-  Bootstrap --> DenyBootstrap["Reject Bearer Token"]
+  Actor --> PlatformGrant["Platform Admin Grant"]
+  PlatformGrant --> Bootstrap["POST /tenants or POST /users"]
+  Bootstrap --> AllowBootstrap["Allow Platform Operation"]
+  Bootstrap --> DenyBootstrap["Reject Tenant-Only Token"]
 ```
 
-Tenant roles are not platform roles. A bearer token can operate only through
-memberships. Platform bootstrap endpoints remain separate until a dedicated
-platform-admin model exists.
+Tenant roles are not platform roles. A bearer token can operate through tenant
+memberships for tenant-scoped work, or through a dedicated platform-admin grant
+for platform-scoped work. A tenant owner cannot create global platform records
+unless that user also has a platform-admin grant.
 
 Tenant list filtering is centralized in a tenant-scope module. Current handlers
 still perform explicit permission checks, then delegate scoped list queries to

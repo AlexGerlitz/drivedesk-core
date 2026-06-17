@@ -6,6 +6,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 Role = Literal["owner", "admin", "manager", "viewer"]
+PlatformRole = Literal["platform_admin"]
 
 
 class TenantCreate(BaseModel):
@@ -55,6 +56,21 @@ class MembershipRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class PlatformAdminCreate(BaseModel):
+    user_id: str = Field(min_length=1, max_length=36)
+    role: PlatformRole = "platform_admin"
+
+
+class PlatformAdminRead(BaseModel):
+    id: str
+    user_id: str
+    role: PlatformRole
+    status: str
+    created_at: datetime | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class LoginRequest(BaseModel):
     email: str = Field(min_length=3, max_length=255, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
     password: str = Field(min_length=8, max_length=128)
@@ -76,6 +92,7 @@ class TokenRevocationRead(BaseModel):
 class AuthMeRead(BaseModel):
     user: UserRead
     memberships: list[MembershipRead]
+    platform_roles: list[PlatformRole] = Field(default_factory=list)
 
 
 class AuthSessionRead(BaseModel):

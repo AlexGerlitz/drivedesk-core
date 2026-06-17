@@ -7,9 +7,10 @@ It is intentionally small, but it proves the platform direction:
 - the API stores only a derived credential hash;
 - `POST /auth/login` issues a bearer access token;
 - the database stores only a hash of the access token;
-- `GET /auth/me` returns the current user and active memberships;
+- `GET /auth/me` returns the current user, active memberships, and platform roles;
 - `POST /auth/logout` revokes the current bearer access token;
 - `GET /auth/sessions` returns redacted tenant-scoped session state for admins;
+- `POST /platform/admins` grants a dedicated platform-admin role to a user;
 - failed login attempts are recorded for operational review;
 - repeated failed attempts activate a login guard;
 - auth lifecycle events are written to the audit log;
@@ -23,6 +24,8 @@ POST /auth/login
 GET /auth/me
 POST /auth/logout
 GET /auth/sessions
+POST /platform/admins
+GET /platform/admins
 ```
 
 The login response returns the access token once. Later requests use:
@@ -49,6 +52,10 @@ The session listing endpoint returns only redacted state:
 - tenant ids visible to the current admin.
 
 It does not return raw access tokens or token hashes.
+
+The platform-admin endpoint stores global operator grants separately from
+tenant memberships. A tenant owner does not become a platform admin by having
+the `owner` role inside one tenant.
 
 The auth-attempt row keeps review state:
 
@@ -129,6 +136,7 @@ This layer adds the missing bridge:
 - token-backed authorization context;
 - token revocation;
 - admin-visible redacted session listing;
+- dedicated platform-admin grants;
 - failed-attempt guard;
 - auth audit events;
 - aggregate auth metrics;
@@ -147,6 +155,7 @@ auth.login.failed
 auth.login.locked
 auth.login.succeeded
 auth.token.revoked
+platform_admin.granted
 ```
 
 This matters because auth is an operational surface. A reviewer can now see not
@@ -159,5 +168,6 @@ Recommended next slices:
 
 1. Add short-lived refresh flow or external identity provider integration.
 2. Add admin-triggered token revocation for tenant-scoped sessions.
-3. Add stronger device/session metadata.
-4. Add broader auth/device risk scoring after the session metadata exists.
+3. Add approval workflow for platform-admin grants.
+4. Add stronger device/session metadata.
+5. Add broader auth/device risk scoring after the session metadata exists.

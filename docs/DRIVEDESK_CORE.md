@@ -105,10 +105,13 @@ Sprint 2 adds the first real Core auth path:
 - `GET /auth/me`;
 - `POST /auth/logout`;
 - `GET /auth/sessions`;
+- `POST /platform/admins`;
+- `GET /platform/admins`;
 - token-backed actor context for existing RBAC checks;
 - tenant-aware permission checks for tenant endpoints.
 - tenant isolation for bearer-token tenant and user listing;
-- bootstrap-only platform endpoints for global tenant/user creation.
+- platform-scoped endpoints for global tenant/user creation.
+- dedicated platform-admin grants for bearer-token platform operations.
 - reusable tenant-scope helpers for Core list queries.
 - tenant-owned repository helpers for Core list queries with `tenant_id`.
 
@@ -130,11 +133,14 @@ What this gives us:
   the requested tenant.
 - A tenant owner cannot use a bearer token to create global tenants or global
   users.
+- A platform-admin grant lets a bearer-token user create global tenants/users
+  without making tenant `owner` a global role.
 
 New table:
 
 - `dd_access_tokens`.
 - `dd_auth_attempts`.
+- `dd_platform_admins`.
 
 New field:
 
@@ -144,13 +150,15 @@ New endpoint group:
 
 - auth login, current-user lookup, logout/token revocation, and redacted session
   listing.
+- platform-admin grant creation and listing.
 
 Tenant isolation rules:
 
 - `GET /tenants` is filtered to the bearer user's memberships;
 - `GET /users` is filtered to shared-tenant users;
 - tenant endpoints require membership in the requested tenant;
-- `POST /tenants` and `POST /users` require bootstrap context.
+- `POST /platform/admins`, `POST /tenants`, and `POST /users` require
+  bootstrap or platform-admin context.
 
 Tenant-scope module:
 

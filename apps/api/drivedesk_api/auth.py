@@ -12,7 +12,7 @@ from uuid import uuid4
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from drivedesk_api.db import AccessToken, AuditEvent, AuthAttempt, Membership, User
+from drivedesk_api.db import AccessToken, AuditEvent, AuthAttempt, Membership, PlatformAdmin, User
 
 _CREDENTIAL_ALGORITHM = "pbkdf2_sha256"
 _CREDENTIAL_ITERATIONS = 210_000
@@ -24,6 +24,7 @@ class AuthenticatedUser:
     user: User
     access_token: AccessToken
     memberships: list[Membership]
+    platform_admins: list[PlatformAdmin]
 
 
 def _new_id() -> str:
@@ -166,9 +167,15 @@ async def resolve_access_token(session: AsyncSession, *, token_value: str) -> Au
         return None
 
     memberships = await list_active_memberships(session, user_id=user.id)
+    platform_admins = await list_active_platform_admins(session, user_id=user.id)
     access_token.last_used_at = now
     await session.commit()
-    return AuthenticatedUser(user=user, access_token=access_token, memberships=memberships)
+    return AuthenticatedUser(
+        user=user,
+        access_token=access_token,
+        memberships=memberships,
+        platform_admins=platform_admins,
+    )
 
 
 async def list_active_memberships(session: AsyncSession, *, user_id: str) -> list[Membership]:
@@ -176,6 +183,15 @@ async def list_active_memberships(session: AsyncSession, *, user_id: str) -> lis
         select(Membership)
         .where(Membership.user_id == user_id, Membership.status == "active")
         .order_by(Membership.created_at.desc())
+    )
+    return list(result.scalars().all())
+
+
+async def list_active_platform_admins(session: AsyncSession, *, user_id: str) -> list[PlatformAdmin]:
+    result = await session.execute(
+        select(PlatformAdmin)
+        .where(PlatformAdmin.user_id == user_id, PlatformAdmin.status == "active")
+        .order_by(PlatformAdmin.created_at.desc())
     )
     return list(result.scalars().all())
 

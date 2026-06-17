@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 from starlette.responses import Response
 
-from drivedesk_api.db import AuditEvent, Membership, OutboxEvent, Tenant, User
+from drivedesk_api.db import AuditEvent, Membership, OutboxEvent, PlatformAdmin, Tenant, User
 from drivedesk_api.demo import build_public_demo_payload
 from drivedesk_api.observability import (
     build_health_payload,
@@ -25,6 +25,7 @@ from drivedesk_api.auth import (
     is_login_guard_active,
     issue_access_token,
     list_active_memberships,
+    list_active_platform_admins,
     record_auth_attempt,
     revoke_access_token,
     write_auth_audit,
@@ -53,6 +54,8 @@ from drivedesk_api.schemas import (
     MembershipCreate,
     MembershipRead,
     OutboxEventRead,
+    PlatformAdminCreate,
+    PlatformAdminRead,
     PublicDemoRead,
     TenantCreate,
     TenantRead,
@@ -64,9 +67,11 @@ from drivedesk_api.services import (
     count_outbox_by_status,
     create_file_import_job,
     create_membership,
+    create_platform_admin,
     create_tenant,
     create_user,
     ensure_tenant_exists,
+    list_platform_admins,
     summarize_integration_outbox,
 )
 from drivedesk_api.session import get_session
@@ -262,7 +267,12 @@ def build_app(settings: Settings | None = None) -> FastAPI:
                 detail="invalid access token subject",
             )
         memberships = await list_active_memberships(session, user_id=user.id)
-        return AuthMeRead(user=user, memberships=memberships)
+        platform_admins = await list_active_platform_admins(session, user_id=user.id)
+        return AuthMeRead(
+            user=user,
+            memberships=memberships,
+            platform_roles=[admin.role for admin in platform_admins],
+        )
 
     @api.post("/auth/logout", response_model=TokenRevocationRead, tags=["auth"])
     async def logout_endpoint(
@@ -301,6 +311,10 @@ def build_app(settings: Settings | None = None) -> FastAPI:
             require_permission(actor, Permission.AUTH_SESSION_READ)
             return await list_auth_sessions(session)
 
+        if actor.is_platform_admin():
+            require_permission(actor, Permission.AUTH_SESSION_READ)
+            return await list_auth_sessions(session)
+
         allowed_tenant_ids = tenant_ids_with_permission(actor, Permission.AUTH_SESSION_READ)
         if not allowed_tenant_ids:
             raise HTTPException(
@@ -308,6 +322,23 @@ def build_app(settings: Settings | None = None) -> FastAPI:
                 detail=f"permission required: {Permission.AUTH_SESSION_READ.value}",
             )
         return await list_auth_sessions(session, allowed_tenant_ids=allowed_tenant_ids)
+
+    @api.post("/platform/admins", response_model=PlatformAdminRead, status_code=201, tags=["platform"])
+    async def create_platform_admin_endpoint(
+        payload: PlatformAdminCreate,
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> PlatformAdmin:
+        require_platform_bootstrap_permission(actor, Permission.PLATFORM_ADMIN_WRITE)
+        return await create_platform_admin(session, payload, actor)
+
+    @api.get("/platform/admins", response_model=list[PlatformAdminRead], tags=["platform"])
+    async def list_platform_admins_endpoint(
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> list[PlatformAdmin]:
+        require_platform_bootstrap_permission(actor, Permission.PLATFORM_ADMIN_READ)
+        return await list_platform_admins(session)
 
     @api.post("/tenants", response_model=TenantRead, status_code=201)
     async def create_tenant_endpoint(

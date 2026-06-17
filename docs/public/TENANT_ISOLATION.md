@@ -11,12 +11,15 @@ one tenant without becoming a platform-wide administrator.
 - Tenant endpoints require membership in the requested tenant.
 - A valid bearer token is rejected when it targets a tenant outside the user's
   memberships.
-- Global bootstrap endpoints stay outside bearer-token access:
+- Global platform endpoints require a dedicated platform-admin grant:
+  - `POST /platform/admins`;
   - `POST /tenants`;
   - `POST /users`.
+- Tenant-owner bearer tokens are rejected for those platform operations.
+- Platform-admin bearer tokens can list and create global tenant/user records.
 
-Those bootstrap endpoints still exist for local setup and controlled seed flows.
-They are not treated as tenant-owner capabilities.
+Bootstrap headers still exist for local setup and the first controlled
+platform-admin grant. They are not treated as tenant-owner capabilities.
 
 ## Why This Matters
 
@@ -42,7 +45,25 @@ tenant A owner lists users -> only tenant A users
 tenant A owner reads tenant B -> rejected
 tenant A owner reads tenant B memberships -> rejected
 tenant A owner creates global tenant/user with bearer token -> rejected
+tenant A owner grants platform admin -> rejected
+platform admin creates global tenant/user with bearer token -> allowed
 ```
+
+## Platform Admin Boundary
+
+Platform administration is stored separately from tenant membership:
+
+```text
+dd_platform_admins
+```
+
+That table grants `platform_admin` to a user without changing any tenant role.
+Bearer auth resolves both tenant memberships and platform-admin grants, then
+keeps the checks separate:
+
+- tenant roles drive tenant-scoped access;
+- platform-admin grants drive platform-scoped access;
+- tenant owners cannot create global platform records by accident.
 
 ## Reusable Scope Module
 
@@ -86,9 +107,12 @@ documents, and tasks.
 flowchart LR
   Token["Bearer Token"] --> Actor["Actor Context"]
   Actor --> Memberships["Active Memberships"]
+  Actor --> PlatformGrant["Platform Admin Grant"]
   Memberships --> TenantCheck["Requested Tenant Check"]
   TenantCheck --> Allow["Allow Tenant Operation"]
   TenantCheck --> Reject["Reject Cross-Tenant Operation"]
+  PlatformGrant --> PlatformOp["Platform Operation"]
+  PlatformOp --> AllowPlatform["Allow"]
 ```
 
 ## Next Hardening
@@ -97,6 +121,5 @@ Recommended next slices:
 
 1. Apply tenant-owned repository helpers to future contracts, payments, lessons,
    documents, and tasks.
-2. Add a dedicated platform-admin model instead of reusing tenant roles.
-3. Add public-safe tenant-isolation metrics with synthetic data.
-4. Add database-level row isolation once the Core data model stabilizes.
+2. Add public-safe tenant-isolation metrics with synthetic data.
+3. Add database-level row isolation once the Core data model stabilizes.

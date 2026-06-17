@@ -57,6 +57,18 @@ class AuthAttempt(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), index=True)
 
 
+class PlatformAdmin(Base):
+    __tablename__ = "dd_platform_admins"
+    __table_args__ = (UniqueConstraint("user_id", "role", name="uq_dd_platform_admins_user_role"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    user_id: Mapped[str] = mapped_column(String(36), index=True)
+    role: Mapped[str] = mapped_column(String(32), default="platform_admin", index=True)
+    status: Mapped[str] = mapped_column(String(32), default="active", index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
 class Membership(Base):
     __tablename__ = "dd_memberships"
     __table_args__ = (UniqueConstraint("tenant_id", "user_id", name="uq_dd_memberships_tenant_user"),)

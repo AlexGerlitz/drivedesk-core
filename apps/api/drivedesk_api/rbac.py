@@ -11,6 +11,8 @@ from drivedesk_api.session import get_session
 
 
 class Permission(StrEnum):
+    PLATFORM_ADMIN_READ = "platform_admin:read"
+    PLATFORM_ADMIN_WRITE = "platform_admin:write"
     AUTH_SESSION_READ = "auth_session:read"
     TENANT_READ = "tenant:read"
     TENANT_WRITE = "tenant:write"
@@ -23,6 +25,7 @@ class Permission(StrEnum):
 
 
 ROLE_PERMISSIONS: dict[str, set[Permission]] = {
+    "platform_admin": set(Permission),
     "owner": set(Permission),
     "admin": {
         Permission.AUTH_SESSION_READ,
@@ -55,6 +58,7 @@ ROLE_PRIORITY = {
     "manager": 2,
     "admin": 3,
     "owner": 4,
+    "platform_admin": 5,
 }
 
 
@@ -66,9 +70,13 @@ class ActorContext:
     email: str | None = None
     token_id: str | None = None
     tenant_roles: dict[str, str] | None = None
+    platform_roles: list[str] | None = None
 
     def can(self, permission: Permission) -> bool:
         return permission in ROLE_PERMISSIONS.get(self.role, set())
+
+    def is_platform_admin(self) -> bool:
+        return bool(self.platform_roles)
 
     def role_for_tenant(self, tenant_id: str) -> str | None:
         if not self.tenant_roles:
@@ -97,13 +105,15 @@ async def actor_context(
                 detail="invalid or expired access token",
             )
         tenant_roles = {membership.tenant_id: membership.role for membership in authenticated.memberships}
+        platform_roles = [admin.role for admin in authenticated.platform_admins]
         return ActorContext(
             actor_id=authenticated.user.id,
-            role=_highest_role(list(tenant_roles.values())),
+            role="platform_admin" if platform_roles else _highest_role(list(tenant_roles.values())),
             source="bearer",
             email=authenticated.user.email,
             token_id=authenticated.access_token.id,
             tenant_roles=tenant_roles,
+            platform_roles=platform_roles,
         )
 
     if authorization:
@@ -140,6 +150,10 @@ def tenant_ids_with_permission(actor: ActorContext, permission: Permission) -> l
 
 
 def require_platform_bootstrap_permission(actor: ActorContext, permission: Permission) -> None:
+    if actor.source == "bearer" and actor.is_platform_admin():
+        require_permission(actor, permission)
+        return
+
     if actor.source == "bearer":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -149,7 +163,7 @@ def require_platform_bootstrap_permission(actor: ActorContext, permission: Permi
 
 
 def require_tenant_permission(actor: ActorContext, tenant_id: str, permission: Permission) -> None:
-    if actor.source != "bearer":
+    if actor.source != "bearer" or actor.is_platform_admin():
         require_permission(actor, permission)
         return
 

@@ -36,11 +36,12 @@ seed flows. They are not product-session authorization.
 - A valid token for tenant A cannot read tenant B data without membership in
   tenant B.
 - Future product onboarding needs a dedicated tenant-scoped invitation flow or
-  a dedicated platform-admin model.
+  a dedicated platform-admin model. ADR-0023 adds that model without weakening
+  this tenant boundary.
 
 ## Next Work
 
 - ADR-0018 and ADR-0019 add tenant-scope and tenant-owned repository helpers.
 - Apply those helpers to future tenant-owned entities as they are introduced.
-- Add a platform-admin model when real platform operations need it.
+- Use ADR-0023 platform-admin grants for real platform operations.
 - Add database-level row isolation when the Core model is stable enough.

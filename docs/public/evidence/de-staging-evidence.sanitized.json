@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "source": "DriveDesk private staging evidence, sanitized for public review",
+  "snapshot_commit": "2cab20a",
+  "collected_at_utc": "2026-06-17T07:42:42Z",
+  "runtime": {
+    "environment": "staging",
+    "data_profile": "synthetic_fake_data",
+    "public_route": false
+  },
+  "checks": {
+    "ci_success": true,
+    "deploy_success": true,
+    "health_success": true,
+    "evidence_success": true,
+    "api_private_listener": true,
+    "prometheus_private_listener": true,
+    "grafana_private_listener": true,
+    "loki_private_listener": true,
+    "alloy_private_listener": true,
+    "alertmanager_private_listener": true,
+    "api_health_ok": true,
+    "api_ready_ok": true,
+    "api_metrics_ok": true,
+    "readiness_metrics_ok": true,
+    "http_metrics_ok": true,
+    "outbox_metrics_ok": true,
+    "prometheus_required_targets_up": true,
+    "prometheus_alert_rules_ok": true,
+    "prometheus_alerts_api_ok": true,
+    "loki_ready_ok": true,
+    "loki_query_ok": true,
+    "alertmanager_ready_ok": true,
+    "alertmanager_status_ok": true,
+    "grafana_dashboard_ok": true
+  },
+  "observability": {
+    "prometheus_targets_up": [
+      "api",
+      "loki",
+      "alloy",
+      "alertmanager"
+    ],
+    "alert_rules_loaded": 9,
+    "active_alerts_at_collection": 0,
+    "loki_recent_api_logs_found": true,
+    "alertmanager_version": "0.27.0"
+  },
+  "redaction": {
+    "hostnames_included": false,
+    "addresses_included": false,
+    "credentials_included": false,
+    "raw_logs_included": false,
+    "request_bodies_included": false,
+    "production_data_included": false
+  }
+}

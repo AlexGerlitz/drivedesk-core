@@ -1,0 +1,45 @@
+# DevOps Roadmap
+
+DriveDesk should become the project where infrastructure work is practiced on a
+real backend instead of abstract examples.
+
+## Foundation Layer
+
+Implemented baseline:
+
+- Python import/compile smoke checks;
+- pytest;
+- custom secret scan script;
+- Docker Compose validation when Docker is available;
+- legacy image build in CI;
+- DriveDesk foundation image build in CI;
+- DriveDesk Core API, RBAC, audit, and outbox tests;
+- manual and scheduled security audit workflow already present in the repo.
+
+What this gives us:
+
+- broken imports are caught early;
+- tests run on every push;
+- obvious committed secrets are caught before merge;
+- Docker image problems show up before deployment;
+- the new foundation is checked alongside the old runtime.
+- tenant, user, audit, and outbox behavior is covered before deployment work
+  starts.
+
+## Next Layers
+
+Recommended next DevOps tasks:
+
+1. Add a staging compose environment with fake data.
+2. Add a small deployment target on the DE control-plane node without PII.
+3. Add structured JSON logs for the DriveDesk Core API.
+4. Add Prometheus metrics for API health and worker heartbeat.
+5. Add a basic Grafana dashboard.
+6. Add Helm chart skeleton after the compose contract is stable.
+7. Add Terraform/OpenTofu only after the target infrastructure shape is clear.
+
+## Human Summary
+
+The point is not to collect tools. The point is to make every tool answer a
+real operational question: can it build, can it run, can it be restored, can it
+be observed, and can it be changed without chaos.

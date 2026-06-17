@@ -24,6 +24,8 @@ bash scripts/check_public_demo_api.sh
 
 Core endpoints:
 
+- `POST /auth/login`;
+- `GET /auth/me`;
 - `POST /tenants`;
 - `GET /tenants`;
 - `GET /tenants/{tenant_id}`;
@@ -36,20 +38,31 @@ Core endpoints:
 - `POST /tenants/{tenant_id}/integration-imports/file`.
 - `GET /demo/public`.
 
+Auth endpoints:
+
+- `POST /auth/login` verifies user credentials and returns a bearer access token.
+- `GET /auth/me` returns the current user and active memberships.
+
+Bearer requests use:
+
+```text
+Authorization: Bearer <access-token>
+```
+
 Integration endpoints:
 
 - `POST /tenants/{tenant_id}/integration-imports/file` creates a synthetic
   file-import job and stores it as an outbox event with
   `adapter_key=file.import.fake`.
 
-Temporary development RBAC context uses request headers:
+Development bootstrap RBAC context can still use request headers:
 
 - `X-Actor-Id`;
 - `X-Actor-Role`: `owner`, `admin`, `manager`, or `viewer`.
 
 Requests without an explicit role use `viewer` permissions. This is a
-development foundation for permissions and audit behavior, not the final
-authentication system.
+development bootstrap path for permissions and audit behavior. Product-style
+API requests should use bearer tokens.
 
 Run migrations against a local database:
 

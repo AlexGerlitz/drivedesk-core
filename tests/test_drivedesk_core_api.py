@@ -77,10 +77,11 @@ def test_identity_rbac_audit_and_outbox_flow(api_client: tuple[TestClient, async
 
     user_response = client.post(
         "/users",
-        json={"email": "manager@example.com", "display_name": "Manager User"},
+        json={"email": "manager@example.com", "display_name": "Manager User", "password": "correct-horse-1"},
         headers={"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"},
     )
     assert user_response.status_code == 201
+    assert "password" not in user_response.json()
     user_id = user_response.json()["id"]
 
     membership_response = client.post(
@@ -91,24 +92,70 @@ def test_identity_rbac_audit_and_outbox_flow(api_client: tuple[TestClient, async
     assert membership_response.status_code == 201
     assert membership_response.json()["role"] == "manager"
 
-    tenants_response = client.get("/tenants", headers={"X-Actor-Id": "viewer_1", "X-Actor-Role": "viewer"})
+    bad_login_response = client.post(
+        "/auth/login",
+        json={"email": "manager@example.com", "password": "wrong-secret"},
+    )
+    assert bad_login_response.status_code == 401
+    assert bad_login_response.json()["detail"] == "invalid credentials"
+
+    login_response = client.post(
+        "/auth/login",
+        json={"email": "manager@example.com", "password": "correct-horse-1"},
+    )
+    assert login_response.status_code == 200
+    login_payload = login_response.json()
+    assert login_payload["token_type"] == "bearer"
+    assert login_payload["access_token"]
+    assert login_payload["user"]["email"] == "manager@example.com"
+    assert "password" not in login_payload["user"]
+    auth_headers = {"Authorization": f"Bearer {login_payload['access_token']}"}
+
+    me_response = client.get("/auth/me", headers=auth_headers)
+    assert me_response.status_code == 200
+    assert me_response.json()["user"]["id"] == user_id
+    assert me_response.json()["memberships"][0]["tenant_id"] == tenant_id
+
+    tenants_response = client.get("/tenants", headers=auth_headers)
     assert tenants_response.status_code == 200
     assert tenants_response.json()[0]["slug"] == "drive-test"
 
     memberships_response = client.get(
         f"/tenants/{tenant_id}/memberships",
-        headers={"X-Actor-Id": "viewer_1", "X-Actor-Role": "viewer"},
+        headers=auth_headers,
     )
     assert memberships_response.status_code == 200
     assert memberships_response.json()[0]["user_id"] == user_id
 
     audit_response = client.get(
         f"/tenants/{tenant_id}/audit-events",
-        headers={"X-Actor-Id": "viewer_1", "X-Actor-Role": "viewer"},
+        headers=auth_headers,
     )
     assert audit_response.status_code == 200
     event_types = {event["event_type"] for event in audit_response.json()}
     assert {"tenant.created", "membership.created"}.issubset(event_types)
+
+    second_tenant_response = client.post(
+        "/tenants",
+        json={"slug": "other-tenant", "name": "Other Tenant"},
+        headers={"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"},
+    )
+    assert second_tenant_response.status_code == 201
+    forbidden_tenant_response = client.get(f"/tenants/{second_tenant_response.json()['id']}", headers=auth_headers)
+    assert forbidden_tenant_response.status_code == 403
+    assert forbidden_tenant_response.json()["detail"] == "tenant membership required"
+
+    write_forbidden_response = client.post(
+        f"/tenants/{tenant_id}/integration-imports/file",
+        json={
+            "source_name": "manager-write",
+            "source_format": "json",
+            "records": [{"external_id": "lead_write", "display_name": "Write Demo"}],
+        },
+        headers=auth_headers,
+    )
+    assert write_forbidden_response.status_code == 403
+    assert write_forbidden_response.json()["detail"] == "permission required: tenant:write"
 
     outbox_response = client.get(
         f"/tenants/{tenant_id}/outbox-events",
@@ -118,14 +165,14 @@ def test_identity_rbac_audit_and_outbox_flow(api_client: tuple[TestClient, async
     assert {event["status"] for event in outbox_response.json()} == {"pending"}
 
     processed = asyncio.run(process_outbox_once(session_factory=session_factory))
-    assert processed == 3
+    assert processed == 4
 
     async def outbox_statuses() -> list[str]:
         async with session_factory() as session:
             result = await session.execute(select(OutboxEvent.status).order_by(OutboxEvent.created_at))
             return list(result.scalars().all())
 
-    assert asyncio.run(outbox_statuses()) == ["processed", "processed", "processed"]
+    assert asyncio.run(outbox_statuses()) == ["processed", "processed", "processed", "processed"]
 
 
 def test_public_demo_endpoint_is_read_only_synthetic_contract(

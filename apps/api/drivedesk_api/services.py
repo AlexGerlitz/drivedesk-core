@@ -9,6 +9,7 @@ from sqlalchemy import and_, case, func, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from drivedesk_api.auth import hash_credential
 from drivedesk_api.db import AuditEvent, Membership, OutboxEvent, Tenant, User
 from drivedesk_api.rbac import ActorContext
 from drivedesk_api.schemas import FileImportCreate, MembershipCreate, TenantCreate, UserCreate
@@ -88,7 +89,13 @@ async def create_tenant(session: AsyncSession, payload: TenantCreate, actor: Act
 
 
 async def create_user(session: AsyncSession, payload: UserCreate, actor: ActorContext) -> User:
-    user = User(id=new_id(), email=str(payload.email).lower(), display_name=payload.display_name, status="active")
+    user = User(
+        id=new_id(),
+        email=str(payload.email).lower(),
+        display_name=payload.display_name,
+        credential_hash=hash_credential(payload.password) if payload.password else None,
+        status="active",
+    )
     session.add(user)
     await write_audit(
         session,

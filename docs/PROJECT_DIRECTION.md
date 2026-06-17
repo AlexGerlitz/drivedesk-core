@@ -36,8 +36,8 @@ tests          API and foundation tests
 
 Recommended next slices:
 
-- real authentication;
-- tenant-scoped authorization checks backed by memberships;
+- auth token lifecycle hardening;
+- stricter tenant-scoped query filters backed by memberships;
 - structured logging;
 - OpenTelemetry tracing;
 - metrics endpoint;

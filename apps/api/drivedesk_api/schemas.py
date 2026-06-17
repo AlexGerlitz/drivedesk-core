@@ -26,6 +26,7 @@ class TenantRead(BaseModel):
 class UserCreate(BaseModel):
     email: str = Field(min_length=3, max_length=255, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
     display_name: str = Field(min_length=2, max_length=255)
+    password: str | None = Field(default=None, min_length=8, max_length=128)
 
 
 class UserRead(BaseModel):
@@ -52,6 +53,23 @@ class MembershipRead(BaseModel):
     created_at: datetime | None = None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class LoginRequest(BaseModel):
+    email: str = Field(min_length=3, max_length=255, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+    password: str = Field(min_length=8, max_length=128)
+
+
+class AccessTokenRead(BaseModel):
+    access_token: str
+    token_type: Literal["bearer"] = "bearer"
+    expires_at: datetime
+    user: UserRead
+
+
+class AuthMeRead(BaseModel):
+    user: UserRead
+    memberships: list[MembershipRead]
 
 
 class AuditEventRead(BaseModel):

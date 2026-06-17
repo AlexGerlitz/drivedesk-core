@@ -29,6 +29,8 @@ Implemented foundation:
 - Redis wiring;
 - background worker;
 - tenant, user, membership, RBAC, audit, and outbox primitives;
+- credential auth foundation with bearer access tokens and `/auth/me`;
+- token-backed tenant-aware RBAC checks for Core tenant endpoints;
 - fake file import adapter with retry and dead-letter states;
 - integration adapter metrics grouped by adapter and status;
 - structured adapter worker logs for started, completed, failed, and
@@ -90,7 +92,8 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
 
 ## Current Tradeoffs
 
-- Authentication is still a development foundation based on actor headers.
+- Authentication now has a first token-backed foundation. Development actor
+  headers still exist as a bootstrap path for local setup and early data creation.
 - The hosted public demo uses static fallback on GitHub Pages and can be pointed
   at `GET /demo/public` for API-backed fake data, including workflow stages,
   timeline, domain events, audit, and outbox state.
@@ -104,7 +107,7 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
 Recommended next slices:
 
 1. Backup and restore evidence for the staging runtime.
-2. Real authentication and tenant-scoped memberships.
+2. Token revocation, auth audit events, and stricter tenant query filtering.
 3. Broader generated API clients from OpenAPI for more endpoints.
 4. Additional mock adapters for webhook and accounting export flows.
 5. More workflow examples backed by the same event, audit, and outbox shape.

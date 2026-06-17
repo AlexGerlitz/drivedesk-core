@@ -13,6 +13,7 @@ workflows, but the backend foundation is intentionally generic:
 
 - tenants and memberships;
 - users and roles;
+- credential auth and bearer access tokens;
 - audit events;
 - outbox events;
 - background workers;
@@ -33,6 +34,8 @@ flowchart TB
   PublicDemo -. "optional API-backed mode" .-> DemoAPI["GET /demo/public"]
 
   AdminClient["Admin Client"] --> API["FastAPI API"]
+  API --> Auth["Auth Layer"]
+  Auth --> TokenStore["Access Token Store"]
   API --> DemoAPI
   API --> Domain["Core Domain Modules"]
   API --> Database["PostgreSQL"]
@@ -59,7 +62,8 @@ flowchart TB
 | Public demo | Reviewable static UI with synthetic data. |
 | Demo API | Read-only synthetic payload for API-backed public demo mode. |
 | Generated SDK | Python, JavaScript, and TypeScript client artifacts generated from OpenAPI. |
-| API | HTTP contract, validation, tenant-aware operations, audit writes. |
+| API | HTTP contract, validation, auth context, tenant-aware operations, audit writes. |
+| Auth layer | Credential verification, bearer token hashing, current-user lookup, and RBAC context. |
 | Core modules | Domain rules that should not depend on web framework details. |
 | Database | Durable business state, migrations, audit and outbox storage. |
 | Worker | Async processing, retryable jobs, future adapter execution. |
@@ -79,7 +83,7 @@ sequenceDiagram
   participant Adapter as Adapter
 
   Client->>API: Create or update business object
-  API->>API: Validate request and authorization context
+  API->>API: Validate request and auth context
   API->>DB: Persist state change
   API->>DB: Write audit event
   API->>Outbox: Record integration event
@@ -89,6 +93,29 @@ sequenceDiagram
   Adapter-->>Worker: Return success or failure
   Worker->>Outbox: Mark delivered or retryable
 ```
+
+## Auth Boundary
+
+```mermaid
+flowchart LR
+  Client["Client"] --> Login["POST /auth/login"]
+  Login --> UserHash["Credential Hash"]
+  Login --> TokenHash["Access Token Hash"]
+  Client --> Bearer["Authorization: Bearer token"]
+  Bearer --> Actor["Actor Context"]
+  Actor --> Membership["Tenant Membership Role"]
+  Membership --> Permission["Permission Check"]
+  Permission --> Endpoint["Core Endpoint"]
+```
+
+The auth foundation keeps two paths separate:
+
+- development actor headers for bootstrap and local setup;
+- bearer-token auth for product-style API requests.
+
+Bearer requests are resolved into the same actor context used by RBAC. For
+tenant endpoints, the permission check uses the membership role for the
+requested tenant.
 
 ## Adapter Boundary
 

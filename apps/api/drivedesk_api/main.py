@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from time import perf_counter
 
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.responses import JSONResponse, PlainTextResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -20,10 +20,14 @@ from drivedesk_api.observability import (
     record_http_request,
     route_template_for_scope,
 )
-from drivedesk_api.rbac import ActorContext, Permission, actor_context, require_permission
+from drivedesk_api.auth import authenticate_user, issue_access_token, list_active_memberships
+from drivedesk_api.rbac import ActorContext, Permission, actor_context, require_permission, require_tenant_permission
 from drivedesk_api.schemas import (
+    AccessTokenRead,
     AuditEventRead,
+    AuthMeRead,
     FileImportCreate,
+    LoginRequest,
     MembershipCreate,
     MembershipRead,
     OutboxEventRead,
@@ -117,6 +121,39 @@ def build_app(settings: Settings | None = None) -> FastAPI:
             media_type="text/plain; version=0.0.4; charset=utf-8",
         )
 
+    @api.post("/auth/login", response_model=AccessTokenRead, tags=["auth"])
+    async def login_endpoint(
+        payload: LoginRequest,
+        session: AsyncSession = Depends(get_session),
+    ) -> AccessTokenRead:
+        user = await authenticate_user(session, email=payload.email, secret=payload.password)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="invalid credentials",
+            )
+        access_token, token_row = await issue_access_token(session, user=user)
+        return AccessTokenRead(access_token=access_token, expires_at=token_row.expires_at, user=user)
+
+    @api.get("/auth/me", response_model=AuthMeRead, tags=["auth"])
+    async def me_endpoint(
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> AuthMeRead:
+        if actor.source != "bearer":
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="bearer token required",
+            )
+        user = await session.get(User, actor.actor_id)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="invalid access token subject",
+            )
+        memberships = await list_active_memberships(session, user_id=user.id)
+        return AuthMeRead(user=user, memberships=memberships)
+
     @api.post("/tenants", response_model=TenantRead, status_code=201)
     async def create_tenant_endpoint(
         payload: TenantCreate,
@@ -132,6 +169,14 @@ def build_app(settings: Settings | None = None) -> FastAPI:
         actor: ActorContext = Depends(actor_context),
     ) -> list[Tenant]:
         require_permission(actor, Permission.TENANT_READ)
+        if actor.source == "bearer":
+            tenant_ids = list((actor.tenant_roles or {}).keys())
+            if not tenant_ids:
+                return []
+            result = await session.execute(
+                select(Tenant).where(Tenant.id.in_(tenant_ids)).order_by(Tenant.created_at.desc())
+            )
+            return list(result.scalars().all())
         result = await session.execute(select(Tenant).order_by(Tenant.created_at.desc()))
         return list(result.scalars().all())
 
@@ -141,8 +186,9 @@ def build_app(settings: Settings | None = None) -> FastAPI:
         session: AsyncSession = Depends(get_session),
         actor: ActorContext = Depends(actor_context),
     ) -> Tenant:
-        require_permission(actor, Permission.TENANT_READ)
-        return await ensure_tenant_exists(session, tenant_id)
+        tenant = await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.TENANT_READ)
+        return tenant
 
     @api.post("/users", response_model=UserRead, status_code=201)
     async def create_user_endpoint(
@@ -159,6 +205,18 @@ def build_app(settings: Settings | None = None) -> FastAPI:
         actor: ActorContext = Depends(actor_context),
     ) -> list[User]:
         require_permission(actor, Permission.USER_READ)
+        if actor.source == "bearer":
+            tenant_ids = list((actor.tenant_roles or {}).keys())
+            if not tenant_ids:
+                return []
+            result = await session.execute(
+                select(User)
+                .join(Membership, Membership.user_id == User.id)
+                .where(Membership.tenant_id.in_(tenant_ids), Membership.status == "active")
+                .distinct()
+                .order_by(User.created_at.desc())
+            )
+            return list(result.scalars().all())
         result = await session.execute(select(User).order_by(User.created_at.desc()))
         return list(result.scalars().all())
 
@@ -169,7 +227,8 @@ def build_app(settings: Settings | None = None) -> FastAPI:
         session: AsyncSession = Depends(get_session),
         actor: ActorContext = Depends(actor_context),
     ) -> Membership:
-        require_permission(actor, Permission.MEMBERSHIP_WRITE)
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.MEMBERSHIP_WRITE)
         return await create_membership(session, tenant_id=tenant_id, payload=payload, actor=actor)
 
     @api.get("/tenants/{tenant_id}/memberships", response_model=list[MembershipRead])
@@ -178,8 +237,8 @@ def build_app(settings: Settings | None = None) -> FastAPI:
         session: AsyncSession = Depends(get_session),
         actor: ActorContext = Depends(actor_context),
     ) -> list[Membership]:
-        require_permission(actor, Permission.MEMBERSHIP_READ)
         await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.MEMBERSHIP_READ)
         result = await session.execute(
             select(Membership).where(Membership.tenant_id == tenant_id).order_by(Membership.created_at.desc())
         )
@@ -191,8 +250,8 @@ def build_app(settings: Settings | None = None) -> FastAPI:
         session: AsyncSession = Depends(get_session),
         actor: ActorContext = Depends(actor_context),
     ) -> list[AuditEvent]:
-        require_permission(actor, Permission.AUDIT_READ)
         await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.AUDIT_READ)
         result = await session.execute(
             select(AuditEvent).where(AuditEvent.tenant_id == tenant_id).order_by(AuditEvent.created_at.desc())
         )
@@ -204,8 +263,8 @@ def build_app(settings: Settings | None = None) -> FastAPI:
         session: AsyncSession = Depends(get_session),
         actor: ActorContext = Depends(actor_context),
     ) -> list[OutboxEvent]:
-        require_permission(actor, Permission.OUTBOX_READ)
         await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.OUTBOX_READ)
         result = await session.execute(
             select(OutboxEvent).where(OutboxEvent.tenant_id == tenant_id).order_by(OutboxEvent.created_at.desc())
         )
@@ -218,7 +277,8 @@ def build_app(settings: Settings | None = None) -> FastAPI:
         session: AsyncSession = Depends(get_session),
         actor: ActorContext = Depends(actor_context),
     ) -> OutboxEvent:
-        require_permission(actor, Permission.TENANT_WRITE)
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.TENANT_WRITE)
         return await create_file_import_job(session, tenant_id=tenant_id, payload=payload, actor=actor)
 
     return api

@@ -85,14 +85,47 @@ What this gives us:
 - The worker has a real job loop target, even though external delivery is not
   implemented yet.
 
-Sprint 1 uses temporary header-based actor context:
+Sprint 1 started with temporary header-based actor context:
 
 - `X-Actor-Id`;
 - `X-Actor-Role`.
 
-This proves RBAC behavior without pretending authentication is finished. A real
-auth layer should replace this later. Requests without an explicit role use
-`viewer` permissions.
+This proved RBAC behavior before the auth layer existed. The headers still
+exist as a development bootstrap path for creating the first tenant, user, and
+membership records. Requests without an explicit role use `viewer` permissions.
+
+## Sprint 2 Auth Foundation
+
+Sprint 2 adds the first real Core auth path:
+
+- optional user credential secret on `POST /users`;
+- derived credential hash stored on `dd_users`;
+- `dd_access_tokens` table for bearer token state;
+- `POST /auth/login`;
+- `GET /auth/me`;
+- token-backed actor context for existing RBAC checks;
+- tenant-aware permission checks for tenant endpoints.
+
+What this gives us:
+
+- DriveDesk can authenticate a real API user instead of relying only on dev
+  headers.
+- Access tokens are returned once while only their hashes are stored.
+- `/auth/me` proves current-user and membership lookup.
+- Tenant endpoints can reject a valid token when that user has no membership in
+  the requested tenant.
+
+New table:
+
+- `dd_access_tokens`.
+
+New field:
+
+- `dd_users.credential_hash`.
+
+New endpoint group:
+
+- auth login and current-user lookup.
 
 ## Local Commands
 

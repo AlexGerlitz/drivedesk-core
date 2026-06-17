@@ -12,6 +12,7 @@ credentials.
 - `API_BACKED_DEMO.md` - read-only synthetic API contract for the public demo.
 - `WORKFLOW_DEMO.md` - synthetic business workflow, timeline, events, audit,
   and outbox overview.
+- `AUTH_FOUNDATION.md` - credential auth, bearer token, and RBAC overview.
 - `CLIENT_SDK.md` - generated OpenAPI client SDK example.
 - `INTEGRATION_ADAPTERS.md` - adapter contract, outbox, retry, and dead-letter overview.
 - `INTEGRATION_OBSERVABILITY.md` - adapter metrics, worker logs, and failure visibility overview.
@@ -55,13 +56,14 @@ https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 4. Run one client example from `examples/`.
 5. Read the API-backed demo overview.
 6. Read the workflow demo overview.
-7. Read the generated client SDK overview.
-8. Read the system design overview.
-9. Read the integration adapters overview.
-10. Read the integration observability overview.
-11. Read the case study.
-12. Check CI and public demo health workflow results.
-13. Run the public smoke checks locally.
+7. Read the auth foundation overview.
+8. Read the generated client SDK overview.
+9. Read the system design overview.
+10. Read the integration adapters overview.
+11. Read the integration observability overview.
+12. Read the case study.
+13. Check CI and public demo health workflow results.
+14. Run the public smoke checks locally.
 
 ## Human Explanation
 

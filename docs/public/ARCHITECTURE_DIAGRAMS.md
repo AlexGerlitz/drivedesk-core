@@ -39,6 +39,20 @@ flowchart TB
   Observability --> Alertmanager["Alertmanager"]
 ```
 
+## Auth And RBAC
+
+```mermaid
+flowchart LR
+  Client["API Client"] --> Login["POST /auth/login"]
+  Login --> UserHash["Credential Hash"]
+  Login --> TokenHash["Access Token Hash"]
+  Client --> Bearer["Bearer Token Request"]
+  Bearer --> Actor["Actor Context"]
+  Actor --> Membership["Tenant Membership"]
+  Membership --> RBAC["Permission Check"]
+  RBAC --> Endpoint["Core Endpoint"]
+```
+
 ## Observability Flow
 
 ```mermaid

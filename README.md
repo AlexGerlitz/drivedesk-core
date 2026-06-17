@@ -21,6 +21,7 @@ It includes:
 - `docs/public/ARCHITECTURE_DIAGRAMS.md` - architecture diagrams.
 - `docs/public/SANITIZED_EVIDENCE.md` - sanitized staging evidence.
 - `docs/public/PUBLIC_DEMO_PLAN.md` - future public demo plan.
+- `apps/admin/public-demo/index.html` - static fake-data product demo shell.
 - `docs/openapi.json` - generated FastAPI OpenAPI schema.
 
 ## Local Run
@@ -46,6 +47,14 @@ docker compose -f infra/docker/docker-compose.foundation.yml up --build
 
 ```bash
 bash scripts/ci_smoke_public.sh
+```
+
+## Public Demo Shell
+
+Open this file directly in a browser:
+
+```text
+apps/admin/public-demo/index.html
 ```
 
 ## Architecture

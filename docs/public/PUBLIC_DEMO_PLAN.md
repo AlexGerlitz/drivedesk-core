@@ -39,7 +39,7 @@ An external reviewer should be able to:
 2. Inspect architecture diagrams.
 3. Inspect `docs/openapi.json` for the API contract.
 4. Run the public repo locally.
-5. Open the future public demo.
+5. Open `apps/admin/public-demo/index.html`.
 6. See fake operational workflows.
 7. Read sanitized evidence that staging checks, metrics, logs, and alerts exist.
 
@@ -56,6 +56,7 @@ Alertmanager, SSH, production backups, or private GitHub Actions secrets.
 1. Generate OpenAPI schema from the FastAPI app during public export.
 2. Add public demo seed data.
 3. Build a read-only admin shell.
-4. Deploy the demo as a separate fake-data runtime.
-5. Add a public health endpoint and public CI badge.
-6. Link the demo from the public README.
+4. Add tests and public export checks for the shell.
+5. Deploy the demo as a separate fake-data runtime.
+6. Add a public health endpoint and public CI badge.
+7. Link the hosted demo from the public README.

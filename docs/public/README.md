@@ -17,6 +17,7 @@ credentials.
 The public repository export also generates:
 
 - `docs/openapi.json` - FastAPI OpenAPI schema from the exported API.
+- `apps/admin/public-demo/index.html` - static fake-data product demo shell.
 - `PUBLIC_EXPORT_MANIFEST.md` - file list and export boundary summary.
 
 ## Human Explanation
@@ -27,5 +28,5 @@ built that way, what checks exist, and how the architecture can evolve.
 
 The export release gate makes this repeatable. Instead of manually copying
 files, the private source builds a fresh public package, validates the schema,
-runs public smoke checks, and leaves the result ready for a separate public
-repository.
+runs public smoke checks, validates the demo shell, and leaves the result ready
+for a separate public repository.

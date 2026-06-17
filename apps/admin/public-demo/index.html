@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DriveDesk Core Demo</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="DriveDesk demo navigation">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">DD</span>
+          <div>
+            <strong>DriveDesk</strong>
+            <span>Core Demo</span>
+          </div>
+        </div>
+
+        <nav class="nav-tabs" aria-label="Demo sections">
+          <button class="nav-tab is-active" type="button" data-view="overview">Overview</button>
+          <button class="nav-tab" type="button" data-view="work">Work</button>
+          <button class="nav-tab" type="button" data-view="system">System</button>
+        </nav>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Business operations platform</p>
+            <h1 id="tenantName">DriveDesk Demo Academy</h1>
+          </div>
+          <div class="status-strip" aria-label="Runtime status">
+            <span id="apiStatus" class="status-pill">API ready</span>
+            <span id="workerStatus" class="status-pill">Worker processing</span>
+          </div>
+        </header>
+
+        <section class="view is-visible" id="view-overview" aria-labelledby="overviewTitle">
+          <div class="section-heading">
+            <h2 id="overviewTitle">Operations Overview</h2>
+            <span id="tenantMeta" class="muted"></span>
+          </div>
+          <div class="metric-grid" id="metricGrid"></div>
+          <div class="dashboard-grid">
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Work Queue</h3>
+                <span class="muted">Live fake data</span>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Task</th>
+                      <th>Owner</th>
+                      <th>Status</th>
+                      <th>Priority</th>
+                    </tr>
+                  </thead>
+                  <tbody id="workQueueRows"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Integration Readiness</h3>
+                <span class="muted">Adapters</span>
+              </div>
+              <div class="progress-list" id="integrationRows"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="view-work" aria-labelledby="workTitle">
+          <div class="section-heading">
+            <h2 id="workTitle">People And Access</h2>
+            <span class="muted">RBAC preview</span>
+          </div>
+          <div class="dashboard-grid">
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Members</h3>
+                <span class="muted">Synthetic users</span>
+              </div>
+              <div class="member-list" id="memberRows"></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Audit Timeline</h3>
+                <span class="muted">Latest events</span>
+              </div>
+              <ol class="timeline" id="auditRows"></ol>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="view-system" aria-labelledby="systemTitle">
+          <div class="section-heading">
+            <h2 id="systemTitle">System State</h2>
+            <span class="muted">Core contracts</span>
+          </div>
+          <div class="dashboard-grid">
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Outbox Events</h3>
+                <span class="muted">Async foundation</span>
+              </div>
+              <div class="event-list" id="outboxRows"></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Runtime Health</h3>
+                <span class="muted">Synthetic snapshot</span>
+              </div>
+              <div class="health-grid" id="healthRows"></div>
+            </section>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="./demo-data.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
+

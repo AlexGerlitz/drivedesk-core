@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-17T08:09:10Z
+Generated at: 2026-06-17T08:37:47Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -12,10 +12,13 @@ Copied public-safe areas:
 - infra/docker
 - tests/test_drivedesk_foundation.py
 - tests/test_drivedesk_core_api.py
+- tests/test_public_demo_surface.py
 - selected docs and ADRs
 - generated docs/openapi.json
+- static public demo shell
 - public engineering surface docs
 - public-only README
+- public-only .gitignore
 - public-only CI workflow
 - public-only smoke and secret-scan scripts
 

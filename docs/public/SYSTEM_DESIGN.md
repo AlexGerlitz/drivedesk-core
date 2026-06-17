@@ -142,6 +142,11 @@ bodies.
 If storage-backed aggregate queries fail, the endpoint still returns Prometheus
 text and marks that part with `drivedesk_metrics_storage_available 0`.
 
+The staging alerting contract turns those metrics into three operator-facing
+signals: storage-backed metrics unavailable, auth failure spike, and locked
+login attempts. The public docs expose the alert names and runbook shape without
+exporting private runtime details.
+
 ## Tenant Isolation Boundary
 
 ```mermaid
@@ -244,7 +249,7 @@ flowchart LR
   ExportGate --> SDKSmoke["Generated SDK Smoke"]
   CI --> DeployGate["Deployment Gate"]
   DeployGate --> Health["Health Checks"]
-Health --> Evidence["Sanitized Evidence"]
+  Health --> Evidence["Sanitized Evidence"]
   Evidence --> Docs["Public-Safe Docs"]
 ```
 

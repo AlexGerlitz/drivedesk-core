@@ -77,6 +77,17 @@ still returns Prometheus text and marks the degraded part explicitly:
 drivedesk_metrics_storage_available 0
 ```
 
+The private staging alerting layer watches these aggregate signals with
+Prometheus rules:
+
+- `DriveDeskMetricsStorageUnavailable`;
+- `DriveDeskAuthFailureSpike`;
+- `DriveDeskAuthLockedAttempts`.
+
+The public contract is the important part: alerts are based on counts and
+outcomes, not on emails, token ids, token hashes, bearer tokens, or request
+bodies.
+
 ## Request Flow
 
 ```mermaid
@@ -149,4 +160,4 @@ Recommended next slices:
 1. Add short-lived refresh flow or external identity provider integration.
 2. Add admin-triggered token revocation for tenant-scoped sessions.
 3. Add stronger device/session metadata.
-4. Add alert rules for aggregate auth failures and locked attempts.
+4. Add broader auth/device risk scoring after the session metadata exists.

@@ -122,6 +122,8 @@ What this gives us:
 - `/auth/sessions` proves redacted tenant-scoped session review for admins.
 - `/metrics` exposes aggregate auth session and login-attempt counters without
   leaking emails, token ids, token hashes, or bearer tokens.
+- Prometheus staging rules turn auth metric degradation, failed-login spikes,
+  and locked attempts into runbook-backed alerts.
 - Auth attempts and platform audit events make failed access, guard activation,
   successful login, and logout reviewable.
 - Tenant endpoints can reject a valid token when that user has no membership in

@@ -112,3 +112,6 @@ tokens, and request bodies.
 
 Storage-backed metrics degrade with `drivedesk_metrics_storage_available 0`
 instead of turning the whole `/metrics` scrape into a 500 response.
+
+`AUTH_OBSERVABILITY.md` documents the matching auth alert names and runbook
+shape for these aggregate signals.

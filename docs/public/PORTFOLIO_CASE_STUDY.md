@@ -33,6 +33,7 @@ Implemented foundation:
 - token revocation, auth attempt recording, and auth audit events;
 - redacted tenant-scoped auth session listing for admins;
 - aggregate auth metrics for sessions and login-attempt outcomes;
+- auth security alert rules and runbook mapping for aggregate auth signals;
 - token-backed tenant-aware RBAC checks for Core tenant endpoints;
 - tenant isolation for bearer-token list/read access and global bootstrap endpoints;
 - reusable tenant-scope helper module for Core list queries;
@@ -98,9 +99,9 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
 ## Current Tradeoffs
 
 - Authentication now has a token-backed foundation with logout, failed-attempt
-  tracking, redacted session listing, aggregate metrics, and platform audit
-  events. Development actor headers still exist as a bootstrap path for local
-  setup and early data creation.
+  tracking, redacted session listing, aggregate metrics, auth alert rules, and
+  platform audit events. Development actor headers still exist as a bootstrap
+  path for local setup and early data creation.
 - Platform-level tenant and user creation still uses bootstrap context. A tenant
   owner can operate inside their tenant, but not create global platform records
   through a bearer token.
@@ -122,9 +123,9 @@ Recommended next slices:
 
 1. Backup and restore evidence for the staging runtime.
 2. Dedicated platform-admin model and admin-triggered token revocation.
-3. Alert rules for aggregate auth failures and locked login attempts.
-4. Broader generated API clients from OpenAPI for more endpoints.
-5. Additional mock adapters for webhook and accounting export flows.
+3. Broader generated API clients from OpenAPI for more endpoints.
+4. Additional mock adapters for webhook and accounting export flows.
+5. More workflow examples backed by the same event, audit, and outbox shape.
 
 ## Interview Summary
 

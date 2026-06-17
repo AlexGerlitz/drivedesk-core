@@ -60,6 +60,6 @@ drivedesk_metrics_storage_available 0
   seeing private runtime data.
 - The public demo and staging scrape path can keep returning Prometheus text
   even if storage-backed metrics are temporarily unavailable.
-- Future alerts can be built from aggregate auth behavior instead of raw logs.
+- ADR-0022 adds alert rules and a runbook on top of these aggregate signals.
 - If auth attempt retention is introduced later, the metric name and type should
   be reviewed so it still matches the retention behavior.

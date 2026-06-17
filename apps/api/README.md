@@ -48,6 +48,14 @@ Auth endpoints:
 The auth layer records failed attempts, activates a login guard after repeated
 failures, and writes auth lifecycle events into the platform audit log.
 
+Tenant isolation:
+
+- bearer tokens resolve through active tenant memberships;
+- `GET /tenants` and `GET /users` are filtered to the current user's tenants;
+- tenant endpoints reject requests for tenants outside the current user's memberships;
+- `POST /tenants` and `POST /users` are bootstrap-only platform endpoints and
+  reject bearer-token requests until a dedicated platform-admin model exists.
+
 Bearer requests use:
 
 ```text

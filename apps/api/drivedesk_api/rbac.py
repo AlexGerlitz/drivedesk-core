@@ -127,6 +127,15 @@ def require_permission(actor: ActorContext, permission: Permission) -> None:
         )
 
 
+def require_platform_bootstrap_permission(actor: ActorContext, permission: Permission) -> None:
+    if actor.source == "bearer":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="platform bootstrap context required",
+        )
+    require_permission(actor, permission)
+
+
 def require_tenant_permission(actor: ActorContext, tenant_id: str, permission: Permission) -> None:
     if actor.source != "bearer":
         require_permission(actor, permission)

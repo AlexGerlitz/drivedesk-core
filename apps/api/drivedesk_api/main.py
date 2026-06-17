@@ -30,7 +30,14 @@ from drivedesk_api.auth import (
     revoke_access_token,
     write_auth_audit,
 )
-from drivedesk_api.rbac import ActorContext, Permission, actor_context, require_permission, require_tenant_permission
+from drivedesk_api.rbac import (
+    ActorContext,
+    Permission,
+    actor_context,
+    require_permission,
+    require_platform_bootstrap_permission,
+    require_tenant_permission,
+)
 from drivedesk_api.schemas import (
     AccessTokenRead,
     AuditEventRead,
@@ -259,7 +266,7 @@ def build_app(settings: Settings | None = None) -> FastAPI:
         session: AsyncSession = Depends(get_session),
         actor: ActorContext = Depends(actor_context),
     ) -> Tenant:
-        require_permission(actor, Permission.TENANT_WRITE)
+        require_platform_bootstrap_permission(actor, Permission.TENANT_WRITE)
         return await create_tenant(session, payload, actor)
 
     @api.get("/tenants", response_model=list[TenantRead])
@@ -295,7 +302,7 @@ def build_app(settings: Settings | None = None) -> FastAPI:
         session: AsyncSession = Depends(get_session),
         actor: ActorContext = Depends(actor_context),
     ) -> User:
-        require_permission(actor, Permission.USER_WRITE)
+        require_platform_bootstrap_permission(actor, Permission.USER_WRITE)
         return await create_user(session, payload, actor)
 
     @api.get("/users", response_model=list[UserRead])

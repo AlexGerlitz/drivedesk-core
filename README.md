@@ -13,6 +13,7 @@ It includes:
 - tenant, user, membership, RBAC, audit, and outbox foundation;
 - credential auth foundation with bearer access tokens, current-user lookup,
   token revocation, failed-attempt guard, and auth audit events;
+- bearer-token tenant isolation for tenant/user listing and bootstrap endpoints;
 - fake file import adapter with retry and dead-letter state;
 - synthetic lead-to-student workflow in the public demo payload;
 - generated OpenAPI client SDK example for the public demo API;
@@ -37,13 +38,14 @@ It includes:
 5. Read `docs/public/API_BACKED_DEMO.md`.
 6. Read `docs/public/WORKFLOW_DEMO.md`.
 7. Read `docs/public/AUTH_FOUNDATION.md`.
-8. Read `docs/public/CLIENT_SDK.md`.
-9. Read `docs/public/SYSTEM_DESIGN.md`.
-10. Read `docs/public/INTEGRATION_ADAPTERS.md`.
-11. Read `docs/public/INTEGRATION_OBSERVABILITY.md`.
-12. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
-13. Check `.github/workflows/ci.yml`.
-14. Run `bash scripts/ci_smoke_public.sh` locally.
+8. Read `docs/public/TENANT_ISOLATION.md`.
+9. Read `docs/public/CLIENT_SDK.md`.
+10. Read `docs/public/SYSTEM_DESIGN.md`.
+11. Read `docs/public/INTEGRATION_ADAPTERS.md`.
+12. Read `docs/public/INTEGRATION_OBSERVABILITY.md`.
+13. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
+14. Check `.github/workflows/ci.yml`.
+15. Run `bash scripts/ci_smoke_public.sh` locally.
 
 ## What To Review First
 
@@ -52,6 +54,7 @@ It includes:
 - `docs/public/API_BACKED_DEMO.md` - read-only synthetic demo API contract.
 - `docs/public/WORKFLOW_DEMO.md` - synthetic business workflow contract.
 - `docs/public/AUTH_FOUNDATION.md` - auth, bearer token, and RBAC overview.
+- `docs/public/TENANT_ISOLATION.md` - tenant isolation and bootstrap boundary overview.
 - `docs/public/CLIENT_SDK.md` - generated OpenAPI client SDK example.
 - `docs/public/INTEGRATION_ADAPTERS.md` - adapter contract and retry model.
 - `docs/public/INTEGRATION_OBSERVABILITY.md` - adapter metrics and worker log signals.
@@ -145,6 +148,7 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/public/API_BACKED_DEMO.md`
 - `docs/public/WORKFLOW_DEMO.md`
 - `docs/public/AUTH_FOUNDATION.md`
+- `docs/public/TENANT_ISOLATION.md`
 - `docs/public/CLIENT_SDK.md`
 - `docs/public/INTEGRATION_ADAPTERS.md`
 - `docs/public/INTEGRATION_OBSERVABILITY.md`
@@ -159,3 +163,4 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/adr/0014-integration-adapter-foundation.md`
 - `docs/adr/0015-core-auth-token-foundation.md`
 - `docs/adr/0016-auth-lifecycle-audit-guard.md`
+- `docs/adr/0017-bearer-tenant-isolation.md`

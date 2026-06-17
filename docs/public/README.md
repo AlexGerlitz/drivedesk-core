@@ -13,6 +13,7 @@ credentials.
 - `WORKFLOW_DEMO.md` - synthetic business workflow, timeline, events, audit,
   and outbox overview.
 - `AUTH_FOUNDATION.md` - credential auth, bearer token, and RBAC overview.
+- `TENANT_ISOLATION.md` - tenant-scoped bearer access and cross-tenant boundaries.
 - `CLIENT_SDK.md` - generated OpenAPI client SDK example.
 - `INTEGRATION_ADAPTERS.md` - adapter contract, outbox, retry, and dead-letter overview.
 - `INTEGRATION_OBSERVABILITY.md` - adapter metrics, worker logs, and failure visibility overview.
@@ -57,13 +58,14 @@ https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 5. Read the API-backed demo overview.
 6. Read the workflow demo overview.
 7. Read the auth foundation overview.
-8. Read the generated client SDK overview.
-9. Read the system design overview.
-10. Read the integration adapters overview.
-11. Read the integration observability overview.
-12. Read the case study.
-13. Check CI and public demo health workflow results.
-14. Run the public smoke checks locally.
+8. Read the tenant isolation overview.
+9. Read the generated client SDK overview.
+10. Read the system design overview.
+11. Read the integration adapters overview.
+12. Read the integration observability overview.
+13. Read the case study.
+14. Check CI and public demo health workflow results.
+15. Run the public smoke checks locally.
 
 ## Human Explanation
 

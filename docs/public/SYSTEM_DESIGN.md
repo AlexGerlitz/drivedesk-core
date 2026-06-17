@@ -63,7 +63,7 @@ flowchart TB
 | Demo API | Read-only synthetic payload for API-backed public demo mode. |
 | Generated SDK | Python, JavaScript, and TypeScript client artifacts generated from OpenAPI. |
 | API | HTTP contract, validation, auth context, tenant-aware operations, audit writes. |
-| Auth layer | Credential verification, bearer token hashing, revocation, login guard, audit, current-user lookup, and RBAC context. |
+| Auth layer | Credential verification, bearer token hashing, revocation, login guard, audit, current-user lookup, tenant isolation, and RBAC context. |
 | Core modules | Domain rules that should not depend on web framework details. |
 | Database | Durable business state, migrations, audit and outbox storage. |
 | Worker | Async processing, retryable jobs, future adapter execution. |
@@ -125,6 +125,27 @@ requested tenant.
 Auth lifecycle events are stored as platform audit events. Failed login
 attempts are stored separately so repeated failures can activate the login
 guard without mixing operational security state into user records.
+
+## Tenant Isolation Boundary
+
+```mermaid
+flowchart LR
+  Actor["Bearer Actor"] --> Roles["Tenant Membership Roles"]
+  Roles --> TenantList["GET /tenants"]
+  Roles --> UserList["GET /users"]
+  Roles --> TenantEndpoint["Tenant Endpoint"]
+  TenantList --> OwnTenants["Only Member Tenants"]
+  UserList --> SharedUsers["Only Shared-Tenant Users"]
+  TenantEndpoint --> TenantCheck["Requested Tenant Membership"]
+  TenantCheck --> Allow["Allow"]
+  TenantCheck --> Deny["Deny Cross-Tenant Access"]
+  Actor --> Bootstrap["POST /tenants or POST /users"]
+  Bootstrap --> DenyBootstrap["Reject Bearer Token"]
+```
+
+Tenant roles are not platform roles. A bearer token can operate only through
+memberships. Platform bootstrap endpoints remain separate until a dedicated
+platform-admin model exists.
 
 ## Adapter Boundary
 

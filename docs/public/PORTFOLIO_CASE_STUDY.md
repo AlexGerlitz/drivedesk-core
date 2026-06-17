@@ -32,6 +32,7 @@ Implemented foundation:
 - credential auth foundation with bearer access tokens and `/auth/me`;
 - token revocation, auth attempt recording, and auth audit events;
 - token-backed tenant-aware RBAC checks for Core tenant endpoints;
+- tenant isolation for bearer-token list/read access and global bootstrap endpoints;
 - fake file import adapter with retry and dead-letter states;
 - integration adapter metrics grouped by adapter and status;
 - structured adapter worker logs for started, completed, failed, and
@@ -96,6 +97,9 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
 - Authentication now has a token-backed foundation with logout, failed-attempt
   tracking, and platform audit events. Development actor headers still exist as
   a bootstrap path for local setup and early data creation.
+- Platform-level tenant and user creation still uses bootstrap context. A tenant
+  owner can operate inside their tenant, but not create global platform records
+  through a bearer token.
 - The hosted public demo uses static fallback on GitHub Pages and can be pointed
   at `GET /demo/public` for API-backed fake data, including workflow stages,
   timeline, domain events, audit, and outbox state.
@@ -109,7 +113,7 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
 Recommended next slices:
 
 1. Backup and restore evidence for the staging runtime.
-2. Stricter tenant query filtering and admin-visible auth session listing.
+2. Admin-visible auth session listing and a dedicated platform-admin model.
 3. Broader generated API clients from OpenAPI for more endpoints.
 4. Additional mock adapters for webhook and accounting export flows.
 5. More workflow examples backed by the same event, audit, and outbox shape.

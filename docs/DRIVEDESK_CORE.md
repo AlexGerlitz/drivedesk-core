@@ -106,6 +106,8 @@ Sprint 2 adds the first real Core auth path:
 - `POST /auth/logout`;
 - token-backed actor context for existing RBAC checks;
 - tenant-aware permission checks for tenant endpoints.
+- tenant isolation for bearer-token tenant and user listing;
+- bootstrap-only platform endpoints for global tenant/user creation.
 
 What this gives us:
 
@@ -118,6 +120,8 @@ What this gives us:
   successful login, and logout reviewable.
 - Tenant endpoints can reject a valid token when that user has no membership in
   the requested tenant.
+- A tenant owner cannot use a bearer token to create global tenants or global
+  users.
 
 New table:
 
@@ -131,6 +135,13 @@ New field:
 New endpoint group:
 
 - auth login, current-user lookup, and logout/token revocation.
+
+Tenant isolation rules:
+
+- `GET /tenants` is filtered to the bearer user's memberships;
+- `GET /users` is filtered to shared-tenant users;
+- tenant endpoints require membership in the requested tenant;
+- `POST /tenants` and `POST /users` require bootstrap context.
 
 ## Local Commands
 

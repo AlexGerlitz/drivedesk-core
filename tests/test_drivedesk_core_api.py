@@ -254,6 +254,98 @@ def test_login_attempt_guard_records_and_locks_email(
     assert audit_events.count("auth.login.locked") == 1
 
 
+def test_bearer_token_is_limited_to_member_tenants(
+    api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, _ = api_client
+    owner_headers = {"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"}
+
+    tenant_a_response = client.post(
+        "/tenants",
+        json={"slug": "tenant-a", "name": "Tenant A"},
+        headers=owner_headers,
+    )
+    assert tenant_a_response.status_code == 201
+    tenant_a_id = tenant_a_response.json()["id"]
+
+    tenant_b_response = client.post(
+        "/tenants",
+        json={"slug": "tenant-b", "name": "Tenant B"},
+        headers=owner_headers,
+    )
+    assert tenant_b_response.status_code == 201
+    tenant_b_id = tenant_b_response.json()["id"]
+
+    user_a_response = client.post(
+        "/users",
+        json={"email": "owner-a@example.com", "display_name": "Owner A", "password": "correct-horse-a"},
+        headers=owner_headers,
+    )
+    assert user_a_response.status_code == 201
+    user_a_id = user_a_response.json()["id"]
+
+    user_b_response = client.post(
+        "/users",
+        json={"email": "viewer-b@example.com", "display_name": "Viewer B", "password": "correct-horse-b"},
+        headers=owner_headers,
+    )
+    assert user_b_response.status_code == 201
+    user_b_id = user_b_response.json()["id"]
+
+    membership_a_response = client.post(
+        f"/tenants/{tenant_a_id}/memberships",
+        json={"user_id": user_a_id, "role": "owner"},
+        headers=owner_headers,
+    )
+    assert membership_a_response.status_code == 201
+
+    membership_b_response = client.post(
+        f"/tenants/{tenant_b_id}/memberships",
+        json={"user_id": user_b_id, "role": "viewer"},
+        headers=owner_headers,
+    )
+    assert membership_b_response.status_code == 201
+
+    login_response = client.post(
+        "/auth/login",
+        json={"email": "owner-a@example.com", "password": "correct-horse-a"},
+    )
+    assert login_response.status_code == 200
+    auth_headers = {"Authorization": f"Bearer {login_response.json()['access_token']}"}
+
+    tenants_response = client.get("/tenants", headers=auth_headers)
+    assert tenants_response.status_code == 200
+    assert [tenant["id"] for tenant in tenants_response.json()] == [tenant_a_id]
+
+    users_response = client.get("/users", headers=auth_headers)
+    assert users_response.status_code == 200
+    assert {user["id"] for user in users_response.json()} == {user_a_id}
+
+    tenant_b_read_response = client.get(f"/tenants/{tenant_b_id}", headers=auth_headers)
+    assert tenant_b_read_response.status_code == 403
+    assert tenant_b_read_response.json()["detail"] == "tenant membership required"
+
+    tenant_b_memberships_response = client.get(f"/tenants/{tenant_b_id}/memberships", headers=auth_headers)
+    assert tenant_b_memberships_response.status_code == 403
+    assert tenant_b_memberships_response.json()["detail"] == "tenant membership required"
+
+    create_tenant_response = client.post(
+        "/tenants",
+        json={"slug": "bearer-created", "name": "Bearer Created"},
+        headers=auth_headers,
+    )
+    assert create_tenant_response.status_code == 403
+    assert create_tenant_response.json()["detail"] == "platform bootstrap context required"
+
+    create_user_response = client.post(
+        "/users",
+        json={"email": "global@example.com", "display_name": "Global User", "password": "correct-horse-c"},
+        headers=auth_headers,
+    )
+    assert create_user_response.status_code == 403
+    assert create_user_response.json()["detail"] == "platform bootstrap context required"
+
+
 def test_public_demo_endpoint_is_read_only_synthetic_contract(
     api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
 ) -> None:

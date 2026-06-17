@@ -58,6 +58,17 @@ flowchart LR
   Logout --> Audit
 ```
 
+## Tenant Isolation
+
+```mermaid
+flowchart LR
+  Bearer["Bearer Token"] --> Membership["Tenant Memberships"]
+  Membership --> TenantA["Tenant A Allowed"]
+  Membership --> TenantB["Tenant B Rejected Without Membership"]
+  Bearer --> Bootstrap["Global Bootstrap Endpoint"]
+  Bootstrap --> Rejected["Rejected For Bearer Token"]
+```
+
 ## Observability Flow
 
 ```mermaid

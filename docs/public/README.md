@@ -13,6 +13,7 @@ credentials.
 - `WORKFLOW_DEMO.md` - synthetic business workflow, timeline, events, audit,
   and outbox overview.
 - `WORKFLOW_RULES.md` - tenant-owned automation rules, audit, outbox, and metrics.
+- `WORKFLOW_ACTION_RUNS.md` - workflow execution history, links, and metrics.
 - `AUTH_FOUNDATION.md` - credential auth, bearer token, and RBAC overview.
 - `AUTH_OBSERVABILITY.md` - aggregate auth metrics, alert names, and runbook shape.
 - `SESSION_REVOCATION.md` - admin-triggered tenant/platform session revocation.
@@ -62,19 +63,20 @@ https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 4. Run one client example from `examples/`.
 5. Read the API-backed demo overview.
 6. Read the workflow demo overview.
-7. Read the auth foundation overview.
-8. Read the auth observability overview.
-9. Read the session revocation overview.
-10. Read the platform-admin overview.
-11. Read the tenant isolation overview.
-12. Read the business records overview.
-13. Read the generated client SDK overview.
-14. Read the system design overview.
-15. Read the integration adapters overview.
-16. Read the integration observability overview.
-17. Read the case study.
-18. Check CI and public demo health workflow results.
-19. Run the public smoke checks locally.
+7. Read the workflow action run overview.
+8. Read the auth foundation overview.
+9. Read the auth observability overview.
+10. Read the session revocation overview.
+11. Read the platform-admin overview.
+12. Read the tenant isolation overview.
+13. Read the business records overview.
+14. Read the generated client SDK overview.
+15. Read the system design overview.
+16. Read the integration adapters overview.
+17. Read the integration observability overview.
+18. Read the case study.
+19. Check CI and public demo health workflow results.
+20. Run the public smoke checks locally.
 
 ## Human Explanation
 

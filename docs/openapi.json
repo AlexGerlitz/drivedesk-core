@@ -1104,6 +1104,115 @@
         "title": "ValidationError",
         "type": "object"
       },
+      "WorkflowActionRunRead": {
+        "properties": {
+          "action_type": {
+            "title": "Action Type",
+            "type": "string"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "new_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "New Status"
+          },
+          "outbox_event_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outbox Event Id"
+          },
+          "previous_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previous Status"
+          },
+          "result_json": {
+            "title": "Result Json",
+            "type": "string"
+          },
+          "source_record_id": {
+            "title": "Source Record Id",
+            "type": "string"
+          },
+          "source_record_type": {
+            "title": "Source Record Type",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "task_record_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Task Record Id"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "trigger_event_type": {
+            "title": "Trigger Event Type",
+            "type": "string"
+          },
+          "workflow_rule_id": {
+            "title": "Workflow Rule Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "workflow_rule_id",
+          "trigger_event_type",
+          "action_type",
+          "status",
+          "source_record_id",
+          "source_record_type",
+          "result_json"
+        ],
+        "title": "WorkflowActionRunRead",
+        "type": "object"
+      },
       "WorkflowRuleCreate": {
         "properties": {
           "action_config": {
@@ -2739,6 +2848,85 @@
           }
         },
         "summary": "List Outbox Events Endpoint"
+      }
+    },
+    "/tenants/{tenant_id}/workflow-action-runs": {
+      "get": {
+        "operationId": "list_workflow_action_runs_endpoint_tenants__tenant_id__workflow_action_runs_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tenant_id",
+            "required": true,
+            "schema": {
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "X-Actor-Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Role",
+            "required": false,
+            "schema": {
+              "default": "viewer",
+              "title": "X-Actor-Role",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/WorkflowActionRunRead"
+                  },
+                  "title": "Response List Workflow Action Runs Endpoint Tenants  Tenant Id  Workflow Action Runs Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Workflow Action Runs Endpoint"
       }
     },
     "/tenants/{tenant_id}/workflow-rules": {

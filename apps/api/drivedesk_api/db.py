@@ -145,3 +145,23 @@ class WorkflowRule(Base):
     action_config_json: Mapped[str] = mapped_column(Text, default="{}")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), index=True)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class WorkflowActionRun(Base):
+    __tablename__ = "dd_workflow_action_runs"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(36), index=True)
+    workflow_rule_id: Mapped[str] = mapped_column(String(36), index=True)
+    trigger_event_type: Mapped[str] = mapped_column(String(128), index=True)
+    action_type: Mapped[str] = mapped_column(String(64), index=True)
+    status: Mapped[str] = mapped_column(String(32), default="created", index=True)
+    source_record_id: Mapped[str] = mapped_column(String(36), index=True)
+    source_record_type: Mapped[str] = mapped_column(String(32), index=True)
+    previous_status: Mapped[str | None] = mapped_column(String(32), nullable=True, index=True)
+    new_status: Mapped[str | None] = mapped_column(String(32), nullable=True, index=True)
+    outbox_event_id: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
+    task_record_id: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
+    result_json: Mapped[str] = mapped_column(Text, default="{}")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), index=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

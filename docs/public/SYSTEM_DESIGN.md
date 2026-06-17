@@ -213,6 +213,11 @@ Workflow actions now include three paths:
 - `request_adapter_sync` for retryable integration work such as
   `workflow.contract_sync.requested`.
 
+Each matched workflow action also writes a tenant-owned execution row in
+`dd_workflow_action_runs`. That row links the rule and source business record to
+the generated outbox event or task record, and can be reviewed through
+`GET /tenants/{tenant_id}/workflow-action-runs`.
+
 Business record observability is aggregate-only. `/metrics` exposes
 `drivedesk_business_records` grouped by `record_type` and `status`, but it does
 not expose titles, external references, payload data, user ids, or tenant ids.
@@ -220,6 +225,8 @@ Workflow rule observability follows the same rule: `/metrics` exposes
 `drivedesk_workflow_rules` grouped by `status`, `trigger_event_type`, and
 `action_type`, but never rule names, action payloads, record ids, or request
 bodies.
+Workflow action run observability exposes `drivedesk_workflow_action_runs`
+grouped only by `status` and `action_type`.
 
 ## Adapter Boundary
 

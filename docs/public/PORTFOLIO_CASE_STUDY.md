@@ -129,6 +129,9 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
 - Workflow actions can now create tenant-owned task records and request adapter
   sync work such as `workflow.contract_sync.requested`, while keeping execution
   behind audit and outbox boundaries.
+- Workflow action runs now record which automation action was created and which
+  task/outbox result it produced, exposing only aggregate
+  `drivedesk_workflow_action_runs` metrics.
 - The hosted public demo uses static fallback on GitHub Pages and can be pointed
   at `GET /demo/public` for API-backed fake data, including workflow stages,
   timeline, domain events, audit, and outbox state.

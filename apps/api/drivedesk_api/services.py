@@ -10,7 +10,17 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from drivedesk_api.auth import hash_credential
-from drivedesk_api.db import AuditEvent, BusinessRecord, Membership, OutboxEvent, PlatformAdmin, Tenant, User, WorkflowRule
+from drivedesk_api.db import (
+    AuditEvent,
+    BusinessRecord,
+    Membership,
+    OutboxEvent,
+    PlatformAdmin,
+    Tenant,
+    User,
+    WorkflowActionRun,
+    WorkflowRule,
+)
 from drivedesk_api.rbac import ActorContext
 from drivedesk_api.schemas import (
     BusinessRecordCreate,
@@ -442,6 +452,80 @@ async def list_workflow_rules(session: AsyncSession, *, tenant_id: str) -> list[
     )
 
 
+async def record_workflow_action_run(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    workflow_rule_id: str,
+    trigger_event_type: str,
+    action_type: str,
+    source_record_id: str,
+    source_record_type: str,
+    previous_status: str | None,
+    new_status: str | None,
+    actor: ActorContext,
+    outbox_event_id: str | None = None,
+    task_record_id: str | None = None,
+    result: dict[str, object] | None = None,
+) -> WorkflowActionRun:
+    result_payload = {
+        "workflow_rule_id": workflow_rule_id,
+        "action_type": action_type,
+        "source_record_id": source_record_id,
+        "created_outbox_event_id": outbox_event_id,
+        "created_task_record_id": task_record_id,
+        **(result or {}),
+    }
+    run = WorkflowActionRun(
+        id=new_id(),
+        tenant_id=tenant_id,
+        workflow_rule_id=workflow_rule_id,
+        trigger_event_type=trigger_event_type,
+        action_type=action_type,
+        status="created",
+        source_record_id=source_record_id,
+        source_record_type=source_record_type,
+        previous_status=previous_status,
+        new_status=new_status,
+        outbox_event_id=outbox_event_id,
+        task_record_id=task_record_id,
+        result_json=json.dumps(result_payload, ensure_ascii=False, sort_keys=True),
+    )
+    session.add(run)
+    await write_audit(
+        session,
+        tenant_id=tenant_id,
+        actor=actor,
+        event_type="workflow.action_run.created",
+        entity_type="workflow_action_run",
+        entity_id=run.id,
+        summary=f"Workflow action run created: {action_type}",
+        metadata={
+            "workflow_action_run_id": run.id,
+            "workflow_rule_id": workflow_rule_id,
+            "trigger_event_type": trigger_event_type,
+            "action_type": action_type,
+            "status": run.status,
+            "source_record_id": source_record_id,
+            "source_record_type": source_record_type,
+            "previous_status": previous_status,
+            "new_status": new_status,
+            "outbox_event_id": outbox_event_id,
+            "task_record_id": task_record_id,
+        },
+    )
+    return run
+
+
+async def list_workflow_action_runs(session: AsyncSession, *, tenant_id: str) -> list[WorkflowActionRun]:
+    return await list_tenant_owned(
+        session,
+        WorkflowActionRun,
+        tenant_id,
+        order_by=WorkflowActionRun.created_at.desc(),
+    )
+
+
 def _workflow_config_dict(rule: WorkflowRule) -> dict[str, object]:
     config = json.loads(rule.action_config_json or "{}")
     if not isinstance(config, dict):
@@ -574,7 +658,7 @@ async def trigger_workflow_rules_for_business_record_transition(
                     "source_record_id": record.id,
                 },
             )
-            await enqueue_outbox(
+            business_record_outbox = await enqueue_outbox(
                 session,
                 tenant_id=tenant_id,
                 event_type="business_record.created",
@@ -587,7 +671,7 @@ async def trigger_workflow_rules_for_business_record_transition(
                     "source_record_id": record.id,
                 },
             )
-            await enqueue_outbox(
+            workflow_outbox = await enqueue_outbox(
                 session,
                 tenant_id=tenant_id,
                 event_type="workflow.task_record.created",
@@ -597,6 +681,21 @@ async def trigger_workflow_rules_for_business_record_transition(
                     "task_record_id": task_record.id,
                     "task_status": task_record.status,
                 },
+            )
+            await record_workflow_action_run(
+                session,
+                tenant_id=tenant_id,
+                workflow_rule_id=rule.id,
+                trigger_event_type=rule.trigger_event_type,
+                action_type=rule.action_type,
+                source_record_id=record.id,
+                source_record_type=record.record_type,
+                previous_status=previous_status,
+                new_status=record.status,
+                actor=actor,
+                outbox_event_id=workflow_outbox.id,
+                task_record_id=task_record.id,
+                result={"business_record_outbox_event_id": business_record_outbox.id},
             )
             continue
 
@@ -613,23 +712,49 @@ async def trigger_workflow_rules_for_business_record_transition(
                 "internal.workflow",
                 max_length=128,
             )
-            await enqueue_outbox(
+            adapter_outbox = await enqueue_outbox(
                 session,
                 tenant_id=tenant_id,
                 event_type=event_type,
                 adapter_key=adapter_key,
                 payload=action_payload,
             )
+            await record_workflow_action_run(
+                session,
+                tenant_id=tenant_id,
+                workflow_rule_id=rule.id,
+                trigger_event_type=rule.trigger_event_type,
+                action_type=rule.action_type,
+                source_record_id=record.id,
+                source_record_type=record.record_type,
+                previous_status=previous_status,
+                new_status=record.status,
+                actor=actor,
+                outbox_event_id=adapter_outbox.id,
+            )
             continue
 
         event_type = _workflow_config_text(config, "event_type", "workflow.rule.triggered", max_length=128)
         adapter_key = _workflow_config_text(config, "adapter_key", "internal.workflow", max_length=128)
-        await enqueue_outbox(
+        workflow_outbox = await enqueue_outbox(
             session,
             tenant_id=tenant_id,
             event_type=event_type,
             adapter_key=adapter_key,
             payload=action_payload,
+        )
+        await record_workflow_action_run(
+            session,
+            tenant_id=tenant_id,
+            workflow_rule_id=rule.id,
+            trigger_event_type=rule.trigger_event_type,
+            action_type=rule.action_type,
+            source_record_id=record.id,
+            source_record_type=record.record_type,
+            previous_status=previous_status,
+            new_status=record.status,
+            actor=actor,
+            outbox_event_id=workflow_outbox.id,
         )
     return matched_rules
 
@@ -667,6 +792,24 @@ async def count_workflow_rules_by_status_trigger_action(session: AsyncSession) -
             "trigger_event_type": row.trigger_event_type,
             "action_type": row.action_type,
             "rule_count": int(row.rule_count or 0),
+        }
+        for row in result.all()
+    ]
+
+
+async def count_workflow_action_runs_by_action_status(session: AsyncSession) -> list[dict[str, object]]:
+    result = await session.execute(
+        select(
+            WorkflowActionRun.action_type,
+            WorkflowActionRun.status,
+            func.count().label("run_count"),
+        ).group_by(WorkflowActionRun.action_type, WorkflowActionRun.status)
+    )
+    return [
+        {
+            "action_type": row.action_type,
+            "status": row.status,
+            "run_count": int(row.run_count or 0),
         }
         for row in result.all()
     ]

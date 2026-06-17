@@ -45,6 +45,7 @@ Core endpoints:
 - `POST /tenants/{tenant_id}/business-records/{record_id}/transition`.
 - `POST /tenants/{tenant_id}/workflow-rules`.
 - `GET /tenants/{tenant_id}/workflow-rules`.
+- `GET /tenants/{tenant_id}/workflow-action-runs`.
 - `POST /tenants/{tenant_id}/integration-imports/file`.
 - `GET /demo/public`.
 
@@ -104,9 +105,12 @@ Workflow rule endpoints:
 - supported actions are `emit_outbox_event`, `create_task_record`, and
   `request_adapter_sync`.
 - matching business record transitions write `workflow.rule.triggered` audit events.
+- matching workflow actions write `workflow.action_run.created` audit events.
 - matching business record transitions can enqueue the configured workflow
   outbox event, create a tenant-owned task record, or request adapter sync work.
 - `/metrics` exposes aggregate counts with `drivedesk_workflow_rules`.
+- `/metrics` exposes aggregate action-run counts with
+  `drivedesk_workflow_action_runs`.
 
 Bearer requests use:
 

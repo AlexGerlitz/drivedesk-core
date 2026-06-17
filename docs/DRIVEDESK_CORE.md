@@ -256,6 +256,28 @@ What this gives us:
 - Workflow metrics expose only `status`, `trigger_event_type`, and
   `action_type` labels.
 
+## Sprint 4B Workflow Action Run History
+
+Sprint 4B adds execution history for matched workflow actions.
+
+New table:
+
+- `dd_workflow_action_runs`.
+
+New endpoint:
+
+- `GET /tenants/{tenant_id}/workflow-action-runs`.
+
+What this gives us:
+
+- each matched workflow action records `workflow.action_run.created` in audit;
+- each action run links the source business record and workflow rule;
+- task-creating actions store `task_record_id`;
+- outbox-producing actions store `outbox_event_id`;
+- `/metrics` exposes aggregate action-run counts with
+  `drivedesk_workflow_action_runs`;
+- action-run metrics expose only `status` and `action_type` labels.
+
 ## Local Commands
 
 Run the API without Docker:

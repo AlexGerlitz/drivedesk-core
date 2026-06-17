@@ -196,6 +196,25 @@ class WorkflowRuleRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class WorkflowActionRunRead(BaseModel):
+    id: str
+    tenant_id: str
+    workflow_rule_id: str
+    trigger_event_type: str
+    action_type: str
+    status: str
+    source_record_id: str
+    source_record_type: str
+    previous_status: str | None = None
+    new_status: str | None = None
+    outbox_event_id: str | None = None
+    task_record_id: str | None = None
+    result_json: str
+    created_at: datetime | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class FileImportCreate(BaseModel):
     source_name: str = Field(min_length=2, max_length=120)
     source_format: Literal["json", "csv"] = "json"

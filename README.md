@@ -50,19 +50,20 @@ It includes:
 5. Read `docs/public/API_BACKED_DEMO.md`.
 6. Read `docs/public/WORKFLOW_DEMO.md`.
 7. Read `docs/public/WORKFLOW_RULES.md`.
-8. Read `docs/public/AUTH_FOUNDATION.md`.
-9. Read `docs/public/AUTH_OBSERVABILITY.md`.
-10. Read `docs/public/SESSION_REVOCATION.md`.
-11. Read `docs/public/PLATFORM_ADMIN.md`.
-12. Read `docs/public/TENANT_ISOLATION.md`.
-13. Read `docs/public/BUSINESS_RECORDS.md`.
-14. Read `docs/public/CLIENT_SDK.md`.
-15. Read `docs/public/SYSTEM_DESIGN.md`.
-16. Read `docs/public/INTEGRATION_ADAPTERS.md`.
-17. Read `docs/public/INTEGRATION_OBSERVABILITY.md`.
-18. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
-19. Check `.github/workflows/ci.yml`.
-20. Run `bash scripts/ci_smoke_public.sh` locally.
+8. Read `docs/public/WORKFLOW_ACTION_RUNS.md`.
+9. Read `docs/public/AUTH_FOUNDATION.md`.
+10. Read `docs/public/AUTH_OBSERVABILITY.md`.
+11. Read `docs/public/SESSION_REVOCATION.md`.
+12. Read `docs/public/PLATFORM_ADMIN.md`.
+13. Read `docs/public/TENANT_ISOLATION.md`.
+14. Read `docs/public/BUSINESS_RECORDS.md`.
+15. Read `docs/public/CLIENT_SDK.md`.
+16. Read `docs/public/SYSTEM_DESIGN.md`.
+17. Read `docs/public/INTEGRATION_ADAPTERS.md`.
+18. Read `docs/public/INTEGRATION_OBSERVABILITY.md`.
+19. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
+20. Check `.github/workflows/ci.yml`.
+21. Run `bash scripts/ci_smoke_public.sh` locally.
 
 ## What To Review First
 
@@ -71,6 +72,7 @@ It includes:
 - `docs/public/API_BACKED_DEMO.md` - read-only synthetic demo API contract.
 - `docs/public/WORKFLOW_DEMO.md` - synthetic business workflow contract.
 - `docs/public/WORKFLOW_RULES.md` - tenant-owned workflow rules contract.
+- `docs/public/WORKFLOW_ACTION_RUNS.md` - workflow action execution history.
 - `docs/public/AUTH_FOUNDATION.md` - auth, bearer token, and RBAC overview.
 - `docs/public/AUTH_OBSERVABILITY.md` - auth metrics, alert names, and runbook shape.
 - `docs/public/SESSION_REVOCATION.md` - admin-triggered tenant/platform session revocation.
@@ -191,6 +193,7 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/public/API_BACKED_DEMO.md`
 - `docs/public/WORKFLOW_DEMO.md`
 - `docs/public/WORKFLOW_RULES.md`
+- `docs/public/WORKFLOW_ACTION_RUNS.md`
 - `docs/public/AUTH_FOUNDATION.md`
 - `docs/public/AUTH_OBSERVABILITY.md`
 - `docs/public/SESSION_REVOCATION.md`
@@ -223,3 +226,4 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/adr/0026-business-record-lifecycle-and-metrics.md`
 - `docs/adr/0027-workflow-rule-foundation.md`
 - `docs/adr/0028-workflow-actions-task-and-adapter-sync.md`
+- `docs/adr/0029-workflow-action-run-observability.md`

@@ -29,6 +29,7 @@ operations, or commercial details.
 - Tenant-owned workflow rule foundation for `business_record.status_changed` automation.
 - Workflow rule audit, configured outbox handoff, and aggregate workflow metrics.
 - Workflow actions for task-record creation and adapter-sync requests.
+- Workflow action run history with task/outbox links and aggregate action-run metrics.
 - Public demo shell with synthetic data and an API-backed synthetic contract.
 - Synthetic workflow payload with stages, timeline, domain events, audit, and outbox.
 - One-command local demo API run.
@@ -42,7 +43,8 @@ operations, or commercial details.
 
 - More structured adapter contracts and mapping examples.
 - More detailed lifecycle validation examples for contracts, payments, lessons, tasks, and documents.
-- More public-safe workflow examples that reuse the same rule, task, event, and outbox shape.
+- More public-safe workflow examples that reuse the same rule, action-run, task,
+  event, and outbox shape.
 - More public-safe evidence around local run, CI, OpenAPI, and demo health.
 - Broader generated client SDK examples from the OpenAPI schema.
 

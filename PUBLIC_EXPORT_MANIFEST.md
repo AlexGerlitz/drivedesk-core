@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-17T21:15:23Z
+Generated at: 2026-06-17T21:31:51Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -42,6 +42,8 @@ Copied public-safe areas:
 - public workflow rule outbox adapter key: internal.workflow
 - public workflow task action surface
 - public workflow adapter sync action surface
+- public workflow action run history surface
+- public workflow action run metric: drivedesk_workflow_action_runs
 - public tenant-owned repository helper surface
 - public auth observability alerting surface
 - public demo local run script

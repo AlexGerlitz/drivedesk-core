@@ -9,6 +9,7 @@ adding a full workflow engine.
 ```text
 POST /tenants/{tenant_id}/workflow-rules
 GET /tenants/{tenant_id}/workflow-rules
+GET /tenants/{tenant_id}/workflow-action-runs
 ```
 
 The first supported trigger is:
@@ -49,6 +50,7 @@ When a matching contract moves from `draft` to `approved`, DriveDesk writes:
 
 - `business_record.status_changed` audit and outbox events;
 - `workflow.rule.triggered` audit event;
+- `workflow.action_run.created` audit event;
 - configured outbox event, for example `workflow.contract_approved`.
 
 ## Task Action Example
@@ -106,6 +108,20 @@ adapter:
 This keeps adapter work behind the same outbox retry/dead-letter path used by
 the integration layer.
 
+## Action Run History
+
+Each matched workflow action creates a tenant-owned action run. The action run
+links the workflow rule and source business record to the generated outbox event
+or task record.
+
+This gives operators a compact execution history:
+
+```text
+GET /tenants/{tenant_id}/workflow-action-runs
+```
+
+See `WORKFLOW_ACTION_RUNS.md` for the detailed public contract.
+
 ## Why This Exists
 
 This proves that DriveDesk can be a system of action:
@@ -116,6 +132,7 @@ This proves that DriveDesk can be a system of action:
 - integrations receive work through the outbox instead of direct side effects;
 - workflow rules can create human work through task records;
 - workflow rules can request adapter work without directly calling providers;
+- workflow action runs show what each matched action produced;
 - later workflow actions can add approvals, notifications, and richer sync jobs.
 
 ## Metrics
@@ -124,10 +141,12 @@ This proves that DriveDesk can be a system of action:
 
 ```text
 drivedesk_workflow_rules{action_type="emit_outbox_event",status="active",trigger_event_type="business_record.status_changed"} 1
+drivedesk_workflow_action_runs{action_type="emit_outbox_event",status="created"} 1
 ```
 
-The metric labels are intentionally limited to `status`, `trigger_event_type`,
-and `action_type`.
+The rule metric labels are intentionally limited to `status`,
+`trigger_event_type`, and `action_type`. The action-run metric labels are limited
+to `status` and `action_type`.
 
 Rule names, action payloads, tenant ids, user ids, record ids, titles, external
 references, and request bodies must not appear in metrics.
@@ -139,6 +158,7 @@ stable platform contract for:
 
 ```text
 domain event -> rule match -> audit -> outbox handoff
+domain event -> rule match -> action run -> task/outbox link
 ```
 
 Future sprints can add rule enable/disable, richer conditions, notification

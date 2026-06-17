@@ -59,6 +59,7 @@ The Core API tests cover:
   `workflow.contract_approved`;
 - creating task records through workflow action `create_task_record`;
 - requesting adapter sync work through workflow action `request_adapter_sync`;
+- recording workflow action runs through `workflow.action_run.created`;
 - exposing aggregate metric rows such as:
 
 ```text
@@ -70,6 +71,7 @@ Matching workflow rule counts are exposed separately:
 
 ```text
 drivedesk_workflow_rules{action_type="emit_outbox_event",status="active",trigger_event_type="business_record.status_changed"} 1
+drivedesk_workflow_action_runs{action_type="emit_outbox_event",status="created"} 1
 ```
 
 The business record metric labels are intentionally limited to `record_type` and

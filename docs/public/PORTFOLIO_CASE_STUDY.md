@@ -53,6 +53,10 @@ still changing. Boundaries are still explicit:
 
 Services can be extracted later if there is a real operational reason.
 
+The public system design overview in `docs/public/SYSTEM_DESIGN.md` explains
+the runtime layers, request flow, adapter boundary, and public/private export
+boundary.
+
 ## DevOps Story
 
 The staging runtime is private and fake-data only. It is treated like a real
@@ -85,10 +89,10 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
 
 Recommended next slices:
 
-1. Public demo with fake data and a read-only workflow.
+1. API-backed public demo mode with synthetic data.
 2. Backup and restore evidence for the staging runtime.
 3. Real authentication and tenant-scoped memberships.
-4. OpenAPI publishing and generated API client examples.
+4. Generated API client examples from OpenAPI.
 5. First mock integration adapter with retries and dead-letter handling.
 
 ## Interview Summary

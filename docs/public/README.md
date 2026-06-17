@@ -8,6 +8,7 @@ credentials.
 ## Documents
 
 - `PORTFOLIO_CASE_STUDY.md` - engineering case study and current system shape.
+- `SYSTEM_DESIGN.md` - public-safe system design overview.
 - `ARCHITECTURE_DIAGRAMS.md` - public-safe architecture diagrams.
 - `PUBLIC_DEMO_PLAN.md` - future live demo plan.
 - `ROADMAP.md` - public-safe engineering roadmap.
@@ -32,9 +33,10 @@ https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 
 1. Open the hosted demo.
 2. Review the generated OpenAPI schema.
-3. Read the case study.
-4. Check CI and public demo health workflow results.
-5. Run the public smoke checks locally.
+3. Read the system design overview.
+4. Read the case study.
+5. Check CI and public demo health workflow results.
+6. Run the public smoke checks locally.
 
 ## Human Explanation
 

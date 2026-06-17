@@ -27,13 +27,15 @@ It includes:
 
 1. Open the live demo.
 2. Review `docs/openapi.json`.
-3. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
-4. Check `.github/workflows/ci.yml`.
-5. Run `bash scripts/ci_smoke_public.sh` locally.
+3. Read `docs/public/SYSTEM_DESIGN.md`.
+4. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
+5. Check `.github/workflows/ci.yml`.
+6. Run `bash scripts/ci_smoke_public.sh` locally.
 
 ## What To Review First
 
 - `docs/public/PORTFOLIO_CASE_STUDY.md` - engineering case study.
+- `docs/public/SYSTEM_DESIGN.md` - system design overview.
 - `docs/public/ARCHITECTURE_DIAGRAMS.md` - architecture diagrams.
 - `docs/public/SANITIZED_EVIDENCE.md` - sanitized staging evidence.
 - `docs/public/PUBLIC_DEMO_PLAN.md` - future public demo plan.
@@ -88,6 +90,7 @@ apps/admin/public-demo/index.html
 - `docs/DEVOPS_ROADMAP.md`
 - `docs/public/README.md`
 - `docs/public/PORTFOLIO_CASE_STUDY.md`
+- `docs/public/SYSTEM_DESIGN.md`
 - `docs/public/ARCHITECTURE_DIAGRAMS.md`
 - `docs/public/PUBLIC_DEMO_PLAN.md`
 - `docs/public/SANITIZED_EVIDENCE.md`

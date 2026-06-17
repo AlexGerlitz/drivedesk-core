@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-17T09:23:23Z
+Generated at: 2026-06-17T09:49:34Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -18,6 +18,7 @@ Copied public-safe areas:
 - static public demo shell
 - public demo screenshot
 - public demo health workflow
+- public system design overview
 - public roadmap
 - public engineering surface docs
 - public-only README

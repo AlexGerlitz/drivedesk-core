@@ -11,6 +11,7 @@ operations, or commercial details.
 - Tenant, user, membership, RBAC, audit, and outbox primitives.
 - Public demo shell with synthetic data.
 - Public export gate, public CI, and GitHub Pages demo.
+- Public system design overview for reviewers.
 
 ## Next
 
@@ -33,4 +34,3 @@ operations, or commercial details.
 The private repository remains the real product source. The public repository is
 the clean engineering surface: enough code, docs, demo, and CI to review the
 architecture and execution quality without exposing private operations.
-

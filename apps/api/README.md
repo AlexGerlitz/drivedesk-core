@@ -101,9 +101,11 @@ Workflow rule endpoints:
 - `POST /tenants/{tenant_id}/workflow-rules` creates a tenant-owned automation rule.
 - `GET /tenants/{tenant_id}/workflow-rules` lists tenant-owned automation rules.
 - the first trigger is `business_record.status_changed`.
-- the first action is `emit_outbox_event`.
+- supported actions are `emit_outbox_event`, `create_task_record`, and
+  `request_adapter_sync`.
 - matching business record transitions write `workflow.rule.triggered` audit events.
-- matching business record transitions enqueue the configured workflow outbox event.
+- matching business record transitions can enqueue the configured workflow
+  outbox event, create a tenant-owned task record, or request adapter sync work.
 - `/metrics` exposes aggregate counts with `drivedesk_workflow_rules`.
 
 Bearer requests use:

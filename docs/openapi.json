@@ -1112,8 +1112,12 @@
             "type": "object"
           },
           "action_type": {
-            "const": "emit_outbox_event",
             "default": "emit_outbox_event",
+            "enum": [
+              "emit_outbox_event",
+              "create_task_record",
+              "request_adapter_sync"
+            ],
             "title": "Action Type",
             "type": "string"
           },
@@ -1189,7 +1193,11 @@
             "type": "string"
           },
           "action_type": {
-            "const": "emit_outbox_event",
+            "enum": [
+              "emit_outbox_event",
+              "create_task_record",
+              "request_adapter_sync"
+            ],
             "title": "Action Type",
             "type": "string"
           },

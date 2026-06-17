@@ -233,9 +233,11 @@ First supported trigger:
 
 - `business_record.status_changed`.
 
-First supported action:
+First supported actions:
 
 - `emit_outbox_event`.
+- `create_task_record`.
+- `request_adapter_sync`.
 
 What this gives us:
 
@@ -244,6 +246,10 @@ What this gives us:
 - A matching transition writes `workflow.rule.triggered` audit events.
 - A matching transition enqueues the configured workflow outbox event, such as
   `workflow.contract_approved`.
+- A matching transition can create a tenant-owned task record, such as
+  `Prepare signature package`.
+- A matching transition can request adapter work, such as
+  `workflow.contract_sync.requested` for `accounting.fake`.
 - Workflow side effects travel through the same retryable outbox path as
   integrations.
 - `/metrics` exposes aggregate rule counts with `drivedesk_workflow_rules`.

@@ -23,11 +23,13 @@ The first supported trigger is:
 business_record.status_changed
 ```
 
-The first supported action is:
+The first supported action was:
 
 ```text
 emit_outbox_event
 ```
+
+Additional action types are documented in later ADRs.
 
 When a business record status transition matches an active workflow rule, the
 API writes:

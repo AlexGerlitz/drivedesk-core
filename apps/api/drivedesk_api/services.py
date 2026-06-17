@@ -442,6 +442,40 @@ async def list_workflow_rules(session: AsyncSession, *, tenant_id: str) -> list[
     )
 
 
+def _workflow_config_dict(rule: WorkflowRule) -> dict[str, object]:
+    config = json.loads(rule.action_config_json or "{}")
+    if not isinstance(config, dict):
+        return {}
+    return config
+
+
+def _workflow_config_text(
+    config: dict[str, object],
+    key: str,
+    default: str,
+    *,
+    max_length: int,
+    status_value: bool = False,
+) -> str:
+    raw_value = config.get(key, default)
+    value = str(raw_value if raw_value is not None else default).strip() or default
+    value = value[:max_length]
+    if status_value and (
+        not value
+        or not value[0].isalnum()
+        or any(not (character.isalnum() or character in "_-") for character in value)
+    ):
+        return default
+    return value
+
+
+def _workflow_config_payload(config: dict[str, object]) -> dict[str, object]:
+    configured_payload = config.get("payload", {})
+    if not isinstance(configured_payload, dict):
+        return {}
+    return configured_payload
+
+
 async def trigger_workflow_rules_for_business_record_transition(
     session: AsyncSession,
     *,
@@ -465,14 +499,8 @@ async def trigger_workflow_rules_for_business_record_transition(
     )
     matched_rules = list(result.scalars().all())
     for rule in matched_rules:
-        config = json.loads(rule.action_config_json or "{}")
-        if not isinstance(config, dict):
-            config = {}
-        event_type = str(config.get("event_type") or "workflow.rule.triggered")
-        adapter_key = str(config.get("adapter_key") or "internal.workflow")
-        configured_payload = config.get("payload", {})
-        if not isinstance(configured_payload, dict):
-            configured_payload = {}
+        config = _workflow_config_dict(rule)
+        configured_payload = _workflow_config_payload(config)
         action_payload = {
             "rule_id": rule.id,
             "rule_name": rule.name,
@@ -494,6 +522,108 @@ async def trigger_workflow_rules_for_business_record_transition(
             summary=f"Workflow rule triggered: {rule.name}",
             metadata=action_payload,
         )
+        if rule.action_type == "create_task_record":
+            task_status = _workflow_config_text(
+                config,
+                "status",
+                "open",
+                max_length=32,
+                status_value=True,
+            )
+            task_title = _workflow_config_text(
+                config,
+                "title",
+                f"Task from workflow: {rule.name}",
+                max_length=255,
+            )
+            external_ref = config.get("external_ref")
+            task_external_ref = str(external_ref).strip()[:128] if external_ref else None
+            task_payload = {
+                "source": {
+                    "rule_id": rule.id,
+                    "source_record_id": record.id,
+                    "source_record_type": record.record_type,
+                    "previous_status": previous_status,
+                    "new_status": record.status,
+                },
+                "task": configured_payload,
+            }
+            task_record = BusinessRecord(
+                id=new_id(),
+                tenant_id=tenant_id,
+                record_type="task",
+                status=task_status,
+                title=task_title,
+                external_ref=task_external_ref,
+                payload_json=json.dumps(task_payload, ensure_ascii=False, sort_keys=True),
+            )
+            session.add(task_record)
+            await write_audit(
+                session,
+                tenant_id=tenant_id,
+                actor=actor,
+                event_type="business_record.created",
+                entity_type="business_record.task",
+                entity_id=task_record.id,
+                summary="Workflow task record created",
+                metadata={
+                    "record_id": task_record.id,
+                    "record_type": task_record.record_type,
+                    "status": task_record.status,
+                    "source_rule_id": rule.id,
+                    "source_record_id": record.id,
+                },
+            )
+            await enqueue_outbox(
+                session,
+                tenant_id=tenant_id,
+                event_type="business_record.created",
+                adapter_key="internal.business_record",
+                payload={
+                    "record_id": task_record.id,
+                    "record_type": task_record.record_type,
+                    "status": task_record.status,
+                    "source_rule_id": rule.id,
+                    "source_record_id": record.id,
+                },
+            )
+            await enqueue_outbox(
+                session,
+                tenant_id=tenant_id,
+                event_type="workflow.task_record.created",
+                adapter_key="internal.workflow",
+                payload={
+                    **action_payload,
+                    "task_record_id": task_record.id,
+                    "task_status": task_record.status,
+                },
+            )
+            continue
+
+        if rule.action_type == "request_adapter_sync":
+            event_type = _workflow_config_text(
+                config,
+                "event_type",
+                "workflow.adapter_sync.requested",
+                max_length=128,
+            )
+            adapter_key = _workflow_config_text(
+                config,
+                "adapter_key",
+                "internal.workflow",
+                max_length=128,
+            )
+            await enqueue_outbox(
+                session,
+                tenant_id=tenant_id,
+                event_type=event_type,
+                adapter_key=adapter_key,
+                payload=action_payload,
+            )
+            continue
+
+        event_type = _workflow_config_text(config, "event_type", "workflow.rule.triggered", max_length=128)
+        adapter_key = _workflow_config_text(config, "adapter_key", "internal.workflow", max_length=128)
         await enqueue_outbox(
             session,
             tenant_id=tenant_id,

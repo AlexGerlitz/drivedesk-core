@@ -25,6 +25,7 @@ It includes:
 - business record lifecycle transition endpoint with audit, outbox, and aggregate metrics;
 - tenant-owned workflow rules for business record status automation;
 - workflow rule audit, configured outbox handoff, and aggregate workflow metrics;
+- workflow actions for task record creation and adapter sync requests;
 - fake file import adapter with retry and dead-letter state;
 - synthetic lead-to-student workflow in the public demo payload;
 - generated OpenAPI client SDK example for the public demo API;
@@ -99,6 +100,10 @@ It includes:
 - `GET /tenants/{tenant_id}/workflow-rules` - tenant-owned workflow rule listing.
 - `workflow.rule.triggered` - audit event for matching workflow rules.
 - `workflow.contract_approved` - public-safe example workflow outbox event.
+- `create_task_record` - workflow action that creates tenant-owned task records.
+- `request_adapter_sync` - workflow action that requests retryable adapter work.
+- `workflow.task_record.created` - workflow outbox event for task creation.
+- `workflow.contract_sync.requested` - public-safe example adapter sync request.
 - `drivedesk_workflow_rules` - aggregate workflow rule metric by status, trigger, and action.
 - `internal.workflow` - adapter key used by workflow rule outbox events.
 - `DriveDeskMetricsStorageUnavailable`, `DriveDeskAuthFailureSpike`, and
@@ -217,3 +222,4 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/adr/0025-tenant-owned-business-record-foundation.md`
 - `docs/adr/0026-business-record-lifecycle-and-metrics.md`
 - `docs/adr/0027-workflow-rule-foundation.md`
+- `docs/adr/0028-workflow-actions-task-and-adapter-sync.md`

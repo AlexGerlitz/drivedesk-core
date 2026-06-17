@@ -4,6 +4,7 @@ import asyncio
 import json
 import logging
 import sys
+from collections import Counter
 from collections.abc import AsyncIterator, Iterator
 from pathlib import Path
 
@@ -209,12 +210,58 @@ def test_business_record_foundation_is_tenant_scoped_and_audited(
     assert workflow_rule["action_type"] == "emit_outbox_event"
     assert "workflow.contract_approved" in workflow_rule["action_config_json"]
 
+    task_rule_response = client.post(
+        f"/tenants/{tenant_a_id}/workflow-rules",
+        json={
+            "name": "Create signature task",
+            "record_type": "contract",
+            "from_status": "draft",
+            "to_status": "approved",
+            "action_type": "create_task_record",
+            "action_config": {
+                "title": "Prepare signature package",
+                "status": "open",
+                "payload": {"assignee_role": "manager", "checklist": "signature"},
+            },
+        },
+        headers=owner_headers,
+    )
+    assert task_rule_response.status_code == 201
+    task_rule = task_rule_response.json()
+    assert task_rule["action_type"] == "create_task_record"
+    assert "Prepare signature package" in task_rule["action_config_json"]
+
+    adapter_sync_rule_response = client.post(
+        f"/tenants/{tenant_a_id}/workflow-rules",
+        json={
+            "name": "Request accounting sync",
+            "record_type": "contract",
+            "from_status": "draft",
+            "to_status": "approved",
+            "action_type": "request_adapter_sync",
+            "action_config": {
+                "event_type": "workflow.contract_sync.requested",
+                "adapter_key": "accounting.fake",
+                "payload": {"target": "accounting"},
+            },
+        },
+        headers=owner_headers,
+    )
+    assert adapter_sync_rule_response.status_code == 201
+    adapter_sync_rule = adapter_sync_rule_response.json()
+    assert adapter_sync_rule["action_type"] == "request_adapter_sync"
+    assert "accounting.fake" in adapter_sync_rule["action_config_json"]
+
     workflow_rules_response = client.get(
         f"/tenants/{tenant_a_id}/workflow-rules",
         headers=manager_headers,
     )
     assert workflow_rules_response.status_code == 200
-    assert [rule["name"] for rule in workflow_rules_response.json()] == ["Contract approval sync"]
+    assert {rule["name"] for rule in workflow_rules_response.json()} == {
+        "Contract approval sync",
+        "Create signature task",
+        "Request accounting sync",
+    }
 
     contract_response = client.post(
         f"/tenants/{tenant_a_id}/business-records",
@@ -296,14 +343,23 @@ def test_business_record_foundation_is_tenant_scoped_and_audited(
     assert metrics_response.status_code == 200
     assert 'drivedesk_business_records{record_type="contract",status="approved"} 1' in metrics_response.text
     assert 'drivedesk_business_records{record_type="payment",status="pending"} 1' in metrics_response.text
+    assert 'drivedesk_business_records{record_type="task",status="open"} 1' in metrics_response.text
     assert (
         'drivedesk_workflow_rules{action_type="emit_outbox_event",'
+        'status="active",trigger_event_type="business_record.status_changed"} 1'
+    ) in metrics_response.text
+    assert (
+        'drivedesk_workflow_rules{action_type="create_task_record",'
+        'status="active",trigger_event_type="business_record.status_changed"} 1'
+    ) in metrics_response.text
+    assert (
+        'drivedesk_workflow_rules{action_type="request_adapter_sync",'
         'status="active",trigger_event_type="business_record.status_changed"} 1'
     ) in metrics_response.text
     assert "contract-001" not in metrics_response.text
     assert "Training contract draft" not in metrics_response.text
 
-    async def inspect_business_records() -> tuple[list[str], list[str], list[str], list[str], list[str], list[str]]:
+    async def inspect_business_records() -> tuple[list[BusinessRecord], list[WorkflowRule], list[str], list[tuple[str, str, str]]]:
         async with session_factory() as session:
             business_records = await list_tenant_owned(
                 session,
@@ -342,6 +398,8 @@ def test_business_record_foundation_is_tenant_scoped_and_audited(
                             "business_record.status_changed",
                             "workflow_rule.created",
                             "workflow.contract_approved",
+                            "workflow.contract_sync.requested",
+                            "workflow.task_record.created",
                         ]
                     ),
                 )
@@ -349,46 +407,65 @@ def test_business_record_foundation_is_tenant_scoped_and_audited(
             )
             outbox_rows = list(outbox_result.all())
             return (
-                [record.record_type for record in business_records],
-                [rule.name for rule in workflow_rules],
+                business_records,
+                workflow_rules,
                 list(audit_result.scalars().all()),
-                [row.event_type for row in outbox_rows],
-                [row.adapter_key for row in outbox_rows],
-                [row.payload_json for row in outbox_rows],
+                [(row.event_type, row.adapter_key, row.payload_json) for row in outbox_rows],
             )
 
-    record_types, workflow_rule_names, audit_events, outbox_events, adapter_keys, payloads = asyncio.run(
-        inspect_business_records()
+    records, workflow_rules, audit_events, outbox_rows = asyncio.run(inspect_business_records())
+    assert {record.record_type for record in records} == {"contract", "payment", "task"}
+    task_records = [record for record in records if record.record_type == "task"]
+    assert len(task_records) == 1
+    task_record = task_records[0]
+    assert task_record.status == "open"
+    assert task_record.title == "Prepare signature package"
+    assert {rule.name for rule in workflow_rules} == {
+        "Contract approval sync",
+        "Create signature task",
+        "Request accounting sync",
+    }
+    assert Counter(audit_events) == Counter(
+        {
+            "workflow_rule.created": 3,
+            "business_record.created": 3,
+            "business_record.status_changed": 1,
+            "workflow.rule.triggered": 3,
+        }
     )
-    assert set(record_types) == {"contract", "payment"}
-    assert workflow_rule_names == ["Contract approval sync"]
-    assert audit_events == [
-        "workflow_rule.created",
-        "business_record.created",
-        "business_record.created",
-        "business_record.status_changed",
-        "workflow.rule.triggered",
-    ]
-    assert outbox_events == [
-        "workflow_rule.created",
-        "business_record.created",
-        "business_record.created",
-        "business_record.status_changed",
-        "workflow.contract_approved",
-    ]
-    assert adapter_keys == [
-        "internal.workflow",
-        "internal.business_record",
-        "internal.business_record",
-        "internal.business_record",
-        "internal.workflow",
-    ]
-    workflow_payload = json.loads(payloads[-1])
+    outbox_events = [row[0] for row in outbox_rows]
+    adapter_keys = [row[1] for row in outbox_rows]
+    payloads = [row[2] for row in outbox_rows]
+    assert Counter(outbox_events) == Counter(
+        {
+            "workflow_rule.created": 3,
+            "business_record.created": 3,
+            "business_record.status_changed": 1,
+            "workflow.contract_approved": 1,
+            "workflow.contract_sync.requested": 1,
+            "workflow.task_record.created": 1,
+        }
+    )
+    assert Counter(adapter_keys) == Counter(
+        {
+            "internal.workflow": 5,
+            "internal.business_record": 4,
+            "accounting.fake": 1,
+        }
+    )
+    workflow_payload = json.loads(next(payload for event, _, payload in outbox_rows if event == "workflow.contract_approved"))
     assert workflow_payload["rule_id"] == workflow_rule["id"]
     assert workflow_payload["record_id"] == contract["id"]
     assert workflow_payload["previous_status"] == "draft"
     assert workflow_payload["new_status"] == "approved"
     assert workflow_payload["payload"] == {"next_step": "prepare_signature"}
+    task_payload = json.loads(next(payload for event, _, payload in outbox_rows if event == "workflow.task_record.created"))
+    assert task_payload["rule_id"] == task_rule["id"]
+    assert task_payload["task_record_id"] == task_record.id
+    assert task_payload["task_status"] == "open"
+    adapter_payload = json.loads(next(payload for event, _, payload in outbox_rows if event == "workflow.contract_sync.requested"))
+    assert adapter_payload["rule_id"] == adapter_sync_rule["id"]
+    assert adapter_payload["payload"] == {"target": "accounting"}
 
 
 def test_identity_rbac_audit_and_outbox_flow(api_client: tuple[TestClient, async_sessionmaker[AsyncSession]]) -> None:

@@ -206,6 +206,13 @@ previous status, and new status. A matching rule writes
 `workflow.rule.triggered` audit events and enqueues the configured workflow
 outbox event, such as `workflow.contract_approved`.
 
+Workflow actions now include three paths:
+
+- `emit_outbox_event` for generic workflow handoff;
+- `create_task_record` for creating tenant-owned human work;
+- `request_adapter_sync` for retryable integration work such as
+  `workflow.contract_sync.requested`.
+
 Business record observability is aggregate-only. `/metrics` exposes
 `drivedesk_business_records` grouped by `record_type` and `status`, but it does
 not expose titles, external references, payload data, user ids, or tenant ids.

@@ -9,7 +9,7 @@ Role = Literal["owner", "admin", "manager", "viewer"]
 PlatformRole = Literal["platform_admin"]
 BusinessRecordType = Literal["contract", "payment", "lesson", "task", "document"]
 WorkflowRuleTrigger = Literal["business_record.status_changed"]
-WorkflowRuleActionType = Literal["emit_outbox_event"]
+WorkflowRuleActionType = Literal["emit_outbox_event", "create_task_record", "request_adapter_sync"]
 
 
 class TenantCreate(BaseModel):

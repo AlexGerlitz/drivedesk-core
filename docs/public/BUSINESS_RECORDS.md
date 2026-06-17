@@ -57,10 +57,13 @@ The Core API tests cover:
 - triggering matching workflow rules through `workflow.rule.triggered`;
 - enqueuing configured workflow outbox events such as
   `workflow.contract_approved`;
+- creating task records through workflow action `create_task_record`;
+- requesting adapter sync work through workflow action `request_adapter_sync`;
 - exposing aggregate metric rows such as:
 
 ```text
 drivedesk_business_records{record_type="contract",status="approved"} 1
+drivedesk_business_records{record_type="task",status="open"} 1
 ```
 
 Matching workflow rule counts are exposed separately:

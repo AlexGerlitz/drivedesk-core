@@ -7,7 +7,7 @@ implementation surface, evidence, and verifier commands.
 
 | Capability | Implementation surface | Evidence | Verifier |
 | --- | --- | --- | --- |
-| Public review entrypoint | GitHub Pages root `index.html`, compact system review path, quickstart, and static demo shell | `docs/public/SYSTEM_REVIEW_PATH.md`, `docs/public/REVIEWER_QUICKSTART.md`, `docs/public/ENGINEERING_REVIEW_GUIDE.md`, `docs/public/ENGINEERING_PROOF.md` | `bash scripts/check_public_pages_entrypoint.sh && bash scripts/check_public_system_review_path.sh && bash scripts/check_public_reviewer_quickstart.sh` |
+| Public engineering entrypoint | GitHub Pages root `index.html`, compact system review path, quickstart, and static demo shell | `docs/public/SYSTEM_REVIEW_PATH.md`, `docs/public/REVIEWER_QUICKSTART.md`, `docs/public/ENGINEERING_REVIEW_GUIDE.md`, `docs/public/ENGINEERING_PROOF.md` | `bash scripts/check_public_pages_entrypoint.sh && bash scripts/check_public_system_review_path.sh && bash scripts/check_public_reviewer_quickstart.sh` |
 | Project status | Current public-safe state, limits, next work, and validation commands | `docs/public/PROJECT_STATUS.md`, `docs/public/ROADMAP.md` | `bash scripts/check_public_project_status.sh` |
 | Read-only API contract | FastAPI `GET /demo/public` and generated `docs/openapi.json` | `docs/public/API_BACKED_DEMO.md`, `examples/curl/demo-public.sh` | `bash scripts/check_public_demo_api.sh` |
 | Generated client SDK | Python, JavaScript, and TypeScript demo clients plus typed adapter operation plans | `docs/public/CLIENT_SDK.md`, `sdk/generated/public-demo/`, `examples/python/demo_adapter_operation_plan.py`, `examples/js/demo-adapter-operation-plan.mjs` | `bash scripts/check_public_demo_sdk.sh` |
@@ -29,7 +29,7 @@ implementation surface, evidence, and verifier commands.
 
 1. Open `docs/public/SYSTEM_REVIEW_PATH.md`.
 2. Open `docs/public/REVIEWER_QUICKSTART.md`.
-3. Open the GitHub Pages root review hub.
+3. Open the GitHub Pages engineering reference.
 4. Open the live demo and switch to the Workflow, Operations, Incidents, and Proof tabs.
 5. Read `docs/public/PROJECT_STATUS.md`.
 6. Inspect `docs/openapi.json` and `GET /demo/public`.

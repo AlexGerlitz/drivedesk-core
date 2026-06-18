@@ -36,7 +36,7 @@ The script emits JSON like this:
 {
   "schema_version": 1,
   "drill": "public_synthetic_backup_restore",
-  "data_profile": "synthetic_fake_data",
+  "data_profile": "synthetic_demo_data",
   "backup_format": "sqlite_backup",
   "checks": {
     "source_integrity_ok": true,

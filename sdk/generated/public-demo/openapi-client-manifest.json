@@ -12,7 +12,7 @@
     "adapter-accounting-export-retry",
     "adapter-dead-letter-review"
   ],
-  "data_profile": "synthetic_fake_data",
+  "data_profile": "synthetic_demo_data",
   "generated_files": [
     "README.md",
     "openapi-client-manifest.json",

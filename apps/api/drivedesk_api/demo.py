@@ -55,7 +55,7 @@ def build_public_demo_payload() -> dict[str, Any]:
         "apiContract": {
             "path": "/demo/public",
             "mode": "read_only",
-            "data_profile": "synthetic_fake_data",
+            "data_profile": "synthetic_demo_data",
             "fallback": "apps/admin/public-demo/demo-data.js",
         },
         "tenant": {
@@ -847,10 +847,10 @@ def build_public_demo_payload() -> dict[str, Any]:
                     "summary": "Compact route through public root, demo, API, SDK, operations evidence, release safety, GitOps, OpenTofu, and evidence index",
                 },
                 {
-                    "title": "Reviewer quickstart",
+                    "title": "Verification quickstart",
                     "kind": "doc",
                     "path": "docs/public/REVIEWER_QUICKSTART.md",
-                    "summary": "Timeboxed 5-minute, 15-minute, and 45-minute external review path",
+                    "summary": "Timeboxed 5-minute, 15-minute, and 45-minute external verification path",
                 },
                 {
                     "title": "Milestone contract",

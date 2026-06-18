@@ -153,7 +153,7 @@ passed = passed and checks["production_data_touched"] is False
 payload = {
     "schema_version": 1,
     "check": "public_helm_chart_render",
-    "data_profile": "synthetic_fake_data",
+    "data_profile": "synthetic_demo_data",
     "deployment_model": "kubernetes_helm_chart",
     "chart": {
         "name": "drivedesk-core",

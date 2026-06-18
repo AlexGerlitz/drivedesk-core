@@ -56,14 +56,14 @@ require(quickstart_path.is_file(), "missing docs/public/REVIEWER_QUICKSTART.md")
 text = read(quickstart_path)
 
 for token in [
-    "Reviewer Quickstart",
+    "Verification Quickstart",
     "docs/public/SYSTEM_REVIEW_PATH.md",
     "5-Minute Pass",
     "15-Minute Verification",
     "45-Minute Deep Check",
     "Pass criteria",
     "Boundary",
-    "GitHub Pages root review hub",
+    "GitHub Pages engineering reference",
     "Public demo Workflow, Operations, Incidents, and Proof tabs",
     "end-to-end scenario",
     "approval -> notification -> adapter -> incident -> recovery -> proof",
@@ -96,7 +96,7 @@ for token in [
     "docs/public/GITOPS_DELIVERY.md",
     "docs/public/OPENTOFU_PLAN_EVIDENCE.md",
     "docs/public/INFRA_STATE_DRIFT_EVIDENCE.md",
-    "review hub -> demo -> API -> SDK -> workflow -> adapter -> observability -> incident -> release gate -> evidence",
+    "engineering reference -> demo -> API -> SDK -> workflow -> adapter -> observability -> incident -> release gate -> evidence",
     "docs/public/ENGINEERING_REVIEW_GUIDE.md",
     "docs/public/EVIDENCE_INDEX.md",
 ]:

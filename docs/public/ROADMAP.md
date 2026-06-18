@@ -6,7 +6,7 @@ operations, or commercial details.
 
 Current status snapshot: `docs/public/PROJECT_STATUS.md`.
 Compact system review path: `docs/public/SYSTEM_REVIEW_PATH.md`.
-Fast external review path: `docs/public/REVIEWER_QUICKSTART.md`.
+Fast external verification path: `docs/public/REVIEWER_QUICKSTART.md`.
 
 ## Now
 

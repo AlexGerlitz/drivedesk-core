@@ -125,7 +125,7 @@ def _seed_source_database(path: Path) -> dict[str, int]:
                     status="approved",
                     title="Synthetic training contract",
                     external_ref="DEMO-CONTRACT",
-                    payload_json=json.dumps({"data_profile": "synthetic_fake_data"}, sort_keys=True),
+                    payload_json=json.dumps({"data_profile": "synthetic_demo_data"}, sort_keys=True),
                 ),
                 BusinessRecord(
                     id="record-task",
@@ -153,7 +153,7 @@ def _seed_source_database(path: Path) -> dict[str, int]:
                     name="Synthetic File Import",
                     adapter_key="file.import.fake",
                     status="active",
-                    config_json=json.dumps({"data_profile": "synthetic_fake_data"}, sort_keys=True),
+                    config_json=json.dumps({"data_profile": "synthetic_demo_data"}, sort_keys=True),
                     mapping_json=json.dumps(
                         {"lead_id": "external_id", "full_name": "display_name"},
                         sort_keys=True,
@@ -207,7 +207,7 @@ def _seed_source_database(path: Path) -> dict[str, int]:
                     summary="Synthetic backup restore drill completed",
                     metadata_json=json.dumps(
                         {
-                            "data_profile": "synthetic_fake_data",
+                            "data_profile": "synthetic_demo_data",
                             "production_data_touched": False,
                         },
                         sort_keys=True,
@@ -281,7 +281,7 @@ with tempfile.TemporaryDirectory(prefix="drivedesk-public-restore-") as temp_dir
     payload = {
         "schema_version": 1,
         "drill": "public_synthetic_backup_restore",
-        "data_profile": "synthetic_fake_data",
+        "data_profile": "synthetic_demo_data",
         "source_database": "temporary_sqlite",
         "backup_format": "sqlite_backup",
         "restore_target": "temporary_sqlite",

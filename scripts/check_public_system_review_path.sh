@@ -66,7 +66,7 @@ for token in [
     "Verification Commands",
     "What This Proves",
     "Boundary",
-    "GitHub Pages root review hub",
+    "GitHub Pages engineering reference",
     "apps/admin/public-demo/",
     "Workflow, Operations, Incidents, and Proof",
     "docs/public/PROJECT_STATUS.md",

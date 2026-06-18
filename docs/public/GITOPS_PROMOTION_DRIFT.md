@@ -47,7 +47,7 @@ The script emits JSON like this:
 {
   "schema_version": 1,
   "check": "public_gitops_promotion_drift",
-  "data_profile": "synthetic_fake_data",
+  "data_profile": "synthetic_demo_data",
   "delivery_model": "argocd_gitops_image_promotion",
   "checks": {
     "candidate_image_recorded": true,

@@ -12,10 +12,10 @@ variable "environment" {
 variable "data_profile" {
   type        = string
   description = "Data profile expected by the public-safe plan contract."
-  default     = "synthetic_fake_data"
+  default     = "synthetic_demo_data"
 
   validation {
-    condition     = var.data_profile == "synthetic_fake_data"
-    error_message = "The public plan contract only supports synthetic_fake_data."
+    condition     = var.data_profile == "synthetic_demo_data"
+    error_message = "The public plan contract only supports synthetic_demo_data."
   }
 }

@@ -48,7 +48,7 @@ The script emits JSON like this:
 {
   "schema_version": 1,
   "check": "public_infra_state_drift",
-  "data_profile": "synthetic_fake_data",
+  "data_profile": "synthetic_demo_data",
   "drift_model": "opentofu_desired_vs_observed_state",
   "drift": {
     "detected": true,

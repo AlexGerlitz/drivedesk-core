@@ -47,7 +47,7 @@ The script emits JSON like this:
 {
   "schema_version": 1,
   "check": "public_runtime_rollout_evidence",
-  "data_profile": "synthetic_fake_data",
+  "data_profile": "synthetic_demo_data",
   "rollout_model": "github_actions_to_private_loopback_staging",
   "checks": {
     "staging_deploy_success": true,

@@ -46,7 +46,7 @@ The script emits JSON like this:
 {
   "schema_version": 1,
   "drill": "public_synthetic_slo_canary_gate",
-  "data_profile": "synthetic_fake_data",
+  "data_profile": "synthetic_demo_data",
   "gate_model": "slo_canary_promotion_gate",
   "checks": {
     "stable_baseline_within_slo": true,

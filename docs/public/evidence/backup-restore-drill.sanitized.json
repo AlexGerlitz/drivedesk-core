@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "drill": "public_synthetic_backup_restore",
-  "data_profile": "synthetic_fake_data",
+  "data_profile": "synthetic_demo_data",
   "source_database": "temporary_sqlite",
   "backup_format": "sqlite_backup",
   "restore_target": "temporary_sqlite",

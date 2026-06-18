@@ -1,4 +1,4 @@
-# DriveDesk Public Engineering Surface
+# DriveDesk Public Engineering Reference
 
 This folder contains the public-safe engineering surface for DriveDesk. It is
 written so the project can be inspected without access to private
@@ -10,9 +10,9 @@ infrastructure, production history, customer data, or operational credentials.
 - `SYSTEM_REVIEW_PATH.md` - compact engineering route through the public root,
   demo, API, SDK, operations evidence, release safety, GitOps, OpenTofu, and
   evidence index.
-- `REVIEWER_QUICKSTART.md` - shortest external review path with 5-minute,
+- `REVIEWER_QUICKSTART.md` - shortest external verification path with 5-minute,
   15-minute, and 45-minute verification tracks.
-- `ENGINEERING_REVIEW_GUIDE.md` - short review path for demo, CI, API, recovery, GitOps, and IaC evidence.
+- `ENGINEERING_REVIEW_GUIDE.md` - short verification path for demo, CI, API, recovery, GitOps, and IaC evidence.
 - `PROJECT_STATUS.md` - current public-safe engineering status, limits, and next work.
 - `TECHNICAL_CAPABILITY_MAP.md` - capability-to-evidence map with verifier commands.
 - `EVIDENCE_INDEX.md` - human-readable public evidence index contract.
@@ -158,7 +158,7 @@ The public repository export also generates:
 - `scripts/check_public_private_infra_scheduled_alerting.sh` - public-safe scheduled validation alerting.
 - `scripts/check_public_platform_maturity_70.sh` - public-safe 70 percent milestone validation.
 - `scripts/check_public_system_review_path.sh` - public-safe compact system review path validation.
-- `scripts/check_public_reviewer_quickstart.sh` - public-safe reviewer quickstart validation.
+- `scripts/check_public_reviewer_quickstart.sh` - public-safe verification quickstart validation.
 - `scripts/check_public_project_status.sh` - public-safe project status validation.
 - `scripts/check_public_technical_capability_map.sh` - public-safe capability map validation.
 - `scripts/check_public_observability_proof.sh` - public-safe observability proof validation.

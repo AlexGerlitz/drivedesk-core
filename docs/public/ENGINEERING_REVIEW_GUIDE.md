@@ -1,6 +1,6 @@
 # Engineering Review Guide
 
-This guide is the short review path for DriveDesk Core. It points to the
+This guide is the short verification path for DriveDesk Core. It points to the
 running demo, executable checks, API contract, and public-safe evidence that
 prove the current engineering surface.
 
@@ -9,7 +9,7 @@ prove the current engineering surface.
 | Step | What to inspect | Proof |
 | --- | --- | --- |
 | 1 | System review path | `docs/public/SYSTEM_REVIEW_PATH.md` |
-| 2 | Reviewer quickstart | `docs/public/REVIEWER_QUICKSTART.md` |
+| 2 | Verification quickstart | `docs/public/REVIEWER_QUICKSTART.md` |
 | 3 | Live demo Workflow, Operations, Incidents, and Proof tabs | `endToEndScenario`, `alertRouting`, `incidentResponse`, and `engineeringProof` payloads |
 | 4 | Root CI badge | `bash scripts/ci_smoke_public.sh` |
 | 5 | Project status | `docs/public/PROJECT_STATUS.md` |
@@ -50,7 +50,7 @@ bash scripts/check_public_opentofu_plan.sh
 | Area | Evidence |
 | --- | --- |
 | System review path | `docs/public/SYSTEM_REVIEW_PATH.md` |
-| Reviewer quickstart | `docs/public/REVIEWER_QUICKSTART.md` |
+| Verification quickstart | `docs/public/REVIEWER_QUICKSTART.md` |
 | System design | `docs/public/SYSTEM_DESIGN.md` |
 | Project status | `docs/public/PROJECT_STATUS.md` |
 | Public proof contract | `docs/public/ENGINEERING_PROOF.md` |

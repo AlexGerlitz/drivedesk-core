@@ -5,7 +5,7 @@
   "collected_at_utc": "2026-06-17T07:42:42Z",
   "runtime": {
     "environment": "staging",
-    "data_profile": "synthetic_fake_data",
+    "data_profile": "synthetic_demo_data",
     "public_route": false
   },
   "checks": {

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "state_model": "public_opentofu_desired_state",
-  "data_profile": "synthetic_fake_data",
+  "data_profile": "synthetic_demo_data",
   "source": {
     "iac_stack": "infra/opentofu/public",
     "plan_summary": "infra/opentofu/public/plan-summary.sanitized.json",

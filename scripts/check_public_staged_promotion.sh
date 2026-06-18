@@ -50,7 +50,7 @@ with tempfile.TemporaryDirectory(prefix="drivedesk-public-staged-promotion-") as
 
     build_manifest = {
         "release_id": RELEASE_ID,
-        "data_profile": "synthetic_fake_data",
+        "data_profile": "synthetic_demo_data",
         "source_revision": "public-synthetic-revision",
         "artifact_type": "container_image",
         "sbom_attached": True,
@@ -121,7 +121,7 @@ with tempfile.TemporaryDirectory(prefix="drivedesk-public-staged-promotion-") as
         "stages": stages,
         "approval_hash_recorded": len(approval_hash) == 64,
         "build_hash_recorded": len(build_hash) == 64,
-        "data_profile": "synthetic_fake_data",
+        "data_profile": "synthetic_demo_data",
         "production_data_touched": False,
     }
     history_hash = _write_json(root / "history" / "promotion-history.json", history)
@@ -155,7 +155,7 @@ with tempfile.TemporaryDirectory(prefix="drivedesk-public-staged-promotion-") as
     payload = {
         "schema_version": 1,
         "drill": "public_synthetic_staged_promotion",
-        "data_profile": "synthetic_fake_data",
+        "data_profile": "synthetic_demo_data",
         "promotion_model": "build_staging_canary_production",
         "release_id": RELEASE_ID,
         "stages": stages,

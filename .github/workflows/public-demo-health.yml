@@ -76,7 +76,7 @@ jobs:
           curl -fsSL --retry 3 --retry-delay 5 "$base/app.js" | grep -F "fillAdapterContracts"
           curl -fsSL --retry 3 --retry-delay 5 "$base/app.js" | grep -F "fillIntegrationHealth"
           curl -fsSL --retry 3 --retry-delay 5 "$root/sdk/generated/public-demo/openapi-client-manifest.json" | grep -F "public_demo_demo_public_get"
-          curl -fsSL --retry 3 --retry-delay 5 "$root/sdk/generated/public-demo/openapi-client-manifest.json" | grep -F "synthetic_fake_data"
+          curl -fsSL --retry 3 --retry-delay 5 "$root/sdk/generated/public-demo/openapi-client-manifest.json" | grep -F "synthetic_demo_data"
           curl -fsSL --retry 3 --retry-delay 5 "$root/sdk/generated/public-demo/python/drivedesk_public_demo_client.py" | grep -F "DriveDeskPublicDemoClient"
           curl -fsSL --retry 3 --retry-delay 5 "$root/sdk/generated/public-demo/python/drivedesk_public_demo_client.py" | grep -F "build_adapter_operation_plan"
           curl -fsSL --retry 3 --retry-delay 5 "$root/sdk/generated/public-demo/javascript/drivedesk-public-demo-client.mjs" | grep -F "DriveDeskPublicDemoClient"

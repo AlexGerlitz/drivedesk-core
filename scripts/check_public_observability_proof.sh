@@ -75,7 +75,7 @@ for payload_name, payload in [("contract", contract), ("evidence", evidence)]:
         payload.get("observability_model") == "metrics_logs_alerts_dashboards",
         f"{payload_name} observability model mismatch",
     )
-    require(payload.get("data_profile") == "synthetic_fake_data", f"{payload_name} data profile mismatch")
+    require(payload.get("data_profile") == "synthetic_demo_data", f"{payload_name} data profile mismatch")
 
 signals = contract.get("signals", {}) if isinstance(contract.get("signals"), dict) else {}
 metrics = signals.get("metrics", []) if isinstance(signals.get("metrics"), list) else []

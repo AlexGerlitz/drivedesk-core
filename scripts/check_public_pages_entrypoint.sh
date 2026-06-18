@@ -54,10 +54,10 @@ if is_public_export:
     for token in [
         "<!doctype html>",
         "DriveDesk Core",
-        "Public Engineering Surface",
+        "Public Engineering Reference",
         "Start Here",
         "System Snapshot",
-        "Review Flow",
+        "Verification Flow",
         "Architecture Trace",
         "Evidence Matrix",
         "apps/admin/public-demo/",

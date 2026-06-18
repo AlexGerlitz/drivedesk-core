@@ -46,7 +46,7 @@ The script emits JSON like this:
 {
   "schema_version": 1,
   "check": "public_opentofu_plan",
-  "data_profile": "synthetic_fake_data",
+  "data_profile": "synthetic_demo_data",
   "iac_model": "opentofu_plan_only_infrastructure_contract",
   "checks": {
     "opentofu_files_present": true,

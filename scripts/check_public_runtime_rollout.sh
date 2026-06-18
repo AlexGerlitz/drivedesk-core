@@ -85,7 +85,7 @@ checks = {
     "rollout_contract_present": (
         contract.get("schema_version") == 1
         and contract.get("rollout_model") == "github_actions_to_private_loopback_staging"
-        and contract.get("data_profile") == "synthetic_fake_data"
+        and contract.get("data_profile") == "synthetic_demo_data"
     ),
     "build_stage_recorded": "build" in contract_stage_names and "build" in evidence.get("stages", []),
     "deploy_stage_recorded": "deploy" in contract_stage_names and "deploy" in evidence.get("stages", []),
@@ -151,7 +151,7 @@ checks = {
 payload = {
     "schema_version": 1,
     "check": "public_runtime_rollout_evidence",
-    "data_profile": "synthetic_fake_data",
+    "data_profile": "synthetic_demo_data",
     "rollout_model": "github_actions_to_private_loopback_staging",
     "source": {
         "rollout_contract": "infra/runtime-rollout/private-staging-rollout.sanitized.json",

@@ -243,7 +243,7 @@ Recommended next slices:
 
 ## Interview Summary
 
-DriveDesk is not a toy CRUD app. It is a practical modular-monolith platform
+DriveDesk is a practical modular-monolith platform
 with CI/CD, metrics, logs, alerts, SLOs, runbooks, and evidence workflows. The
 project is intentionally built in layers so each DevOps component answers a real
 operational question. The public workflow demo also shows how business actions

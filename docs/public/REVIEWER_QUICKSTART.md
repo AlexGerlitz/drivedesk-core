@@ -1,6 +1,6 @@
-# Reviewer Quickstart
+# Verification Quickstart
 
-This is the shortest external review path for DriveDesk Core. Use it when you
+This is the shortest external verification path for DriveDesk Core. Use it when you
 want to verify the project shape before reading the full documentation set.
 
 For the compact system map, start with `docs/public/SYSTEM_REVIEW_PATH.md`.
@@ -10,13 +10,13 @@ For the compact system map, start with `docs/public/SYSTEM_REVIEW_PATH.md`.
 | Step | Inspect | What it proves |
 | --- | --- | --- |
 | 1 | `docs/public/SYSTEM_REVIEW_PATH.md` | The compact system path ties the public root, demo, API, SDK, operations evidence, release safety, GitOps, OpenTofu, and evidence index together. |
-| 2 | GitHub Pages root review hub | The public entrypoint is published and wired to demo, CI, OpenAPI, docs, and evidence. |
+| 2 | GitHub Pages engineering reference | The public entrypoint is published and wired to demo, CI, OpenAPI, docs, and evidence. |
 | 3 | Public demo Workflow, Operations, Incidents, and Proof tabs | The demo is not a static screenshot; it exposes an end-to-end workflow-to-proof path, operational contracts, incidents, and proof payloads. |
 | 4 | `docs/public/PROJECT_STATUS.md` | Current capability state, limits, and next work are explicit. |
 | 5 | `docs/public/TECHNICAL_CAPABILITY_MAP.md` | Each visible capability maps to implementation surface, evidence, and verifier commands. |
 | 6 | `docs/public/ENGINEERING_PROOF.md` | The proof tab, API payload, OpenAPI schema, SDK artifacts, and CI gates share one contract. |
 
-Pass criteria: the reviewer can identify the current architecture, public demo,
+Pass criteria: a technical reader can identify the current architecture, public demo,
 API contract, SDK surface, observability evidence, incident response evidence,
 end-to-end scenario, and release safety gates without private access.
 
@@ -73,7 +73,7 @@ Then inspect the operational evidence:
 Pass criteria: the repository proves a coherent engineering chain:
 
 ```text
-review hub -> demo -> API -> SDK -> workflow -> adapter -> observability -> incident -> release gate -> evidence
+engineering reference -> demo -> API -> SDK -> workflow -> adapter -> observability -> incident -> release gate -> evidence
 ```
 
 The fastest demo-specific chain is:
@@ -84,7 +84,7 @@ approval -> notification -> adapter -> incident -> recovery -> proof
 
 ## Boundary
 
-The public review path uses synthetic data and sanitized evidence. It does not
+The public verification path uses synthetic data and sanitized evidence. It does not
 include production data, credentials, private runtime addresses, raw logs,
 payment provider details, or private deployment state.
 

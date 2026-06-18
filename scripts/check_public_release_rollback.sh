@@ -82,7 +82,7 @@ with tempfile.TemporaryDirectory(prefix="drivedesk-public-rollback-") as temp_di
         {
             "release_id": "stable-2026-06-18",
             "commit": "public-stable",
-            "data_profile": "synthetic_fake_data",
+            "data_profile": "synthetic_demo_data",
             "schema_version": 1,
             "checks": {
                 "api_health_ok": True,
@@ -97,7 +97,7 @@ with tempfile.TemporaryDirectory(prefix="drivedesk-public-rollback-") as temp_di
         {
             "release_id": "candidate-2026-06-18",
             "commit": "public-candidate",
-            "data_profile": "synthetic_fake_data",
+            "data_profile": "synthetic_demo_data",
             "schema_version": 1,
             "checks": {
                 "api_health_ok": True,
@@ -132,7 +132,7 @@ with tempfile.TemporaryDirectory(prefix="drivedesk-public-rollback-") as temp_di
             "from_release": candidate_promoted_id,
             "to_release": stable_release.name,
             "reason": "synthetic readiness check failed",
-            "data_profile": "synthetic_fake_data",
+            "data_profile": "synthetic_demo_data",
             "production_data_touched": False,
         },
     )
@@ -155,7 +155,7 @@ with tempfile.TemporaryDirectory(prefix="drivedesk-public-rollback-") as temp_di
     payload = {
         "schema_version": 1,
         "drill": "public_synthetic_release_rollback",
-        "data_profile": "synthetic_fake_data",
+        "data_profile": "synthetic_demo_data",
         "deployment_model": "symlinked_release_directory",
         "checks": checks,
         "release_flow": {

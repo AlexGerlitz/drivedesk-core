@@ -68,7 +68,7 @@ require(index_json_path.is_file(), "missing public evidence index JSON")
 payload = json.loads(read(index_json_path))
 require(payload.get("schema_version") == 1, "unexpected evidence index schema version")
 require(payload.get("index_id") == "drivedesk-core-public-evidence-index", "unexpected evidence index id")
-require(payload.get("data_profile") == "synthetic_fake_data", "unexpected evidence index data profile")
+require(payload.get("data_profile") == "synthetic_demo_data", "unexpected evidence index data profile")
 require(payload.get("status") == "validated", "unexpected evidence index status")
 require(payload.get("public_root_url") == "https://alexgerlitz.github.io/drivedesk-core/", "unexpected public root URL")
 

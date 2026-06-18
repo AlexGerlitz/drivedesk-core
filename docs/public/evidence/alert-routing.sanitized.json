@@ -2,7 +2,7 @@
   "schema_version": 1,
   "check": "public_alert_routing_evidence",
   "routing_model": "alertmanager_style_route_tree",
-  "data_profile": "synthetic_fake_data",
+  "data_profile": "synthetic_demo_data",
   "source": {
     "observability_proof": "docs/public/evidence/observability-proof.sanitized.json",
     "scheduled_alerting": "docs/public/evidence/private-infra-scheduled-alerting.sanitized.json"

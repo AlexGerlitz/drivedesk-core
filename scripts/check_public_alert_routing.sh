@@ -79,7 +79,7 @@ for payload_name, payload in [("contract", contract), ("evidence", evidence)]:
         payload.get("routing_model") == "alertmanager_style_route_tree",
         f"{payload_name} routing model mismatch",
     )
-    require(payload.get("data_profile") == "synthetic_fake_data", f"{payload_name} data profile mismatch")
+    require(payload.get("data_profile") == "synthetic_demo_data", f"{payload_name} data profile mismatch")
 
 routes = contract.get("routes", []) if isinstance(contract.get("routes"), list) else []
 receivers = contract.get("receivers", []) if isinstance(contract.get("receivers"), list) else []

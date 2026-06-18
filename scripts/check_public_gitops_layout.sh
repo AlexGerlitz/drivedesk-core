@@ -106,7 +106,7 @@ passed = passed and checks["production_data_touched"] is False
 payload = {
     "schema_version": 1,
     "check": "public_gitops_layout",
-    "data_profile": "synthetic_fake_data",
+    "data_profile": "synthetic_demo_data",
     "delivery_model": "argocd_gitops",
     "gitops": {
         "path": "infra/gitops",

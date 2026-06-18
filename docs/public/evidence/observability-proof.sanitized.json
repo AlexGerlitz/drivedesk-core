@@ -2,7 +2,7 @@
   "schema_version": 1,
   "check": "public_observability_proof",
   "observability_model": "metrics_logs_alerts_dashboards",
-  "data_profile": "synthetic_fake_data",
+  "data_profile": "synthetic_demo_data",
   "summary": {
     "purpose": "prove the public-safe observability loop without exposing private runtime telemetry",
     "metrics_backend": "prometheus-compatible",

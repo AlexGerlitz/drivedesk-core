@@ -45,7 +45,7 @@ The script emits JSON like this:
 {
   "schema_version": 1,
   "drill": "public_synthetic_release_rollback",
-  "data_profile": "synthetic_fake_data",
+  "data_profile": "synthetic_demo_data",
   "deployment_model": "symlinked_release_directory",
   "checks": {
     "initial_stable_release_active": true,

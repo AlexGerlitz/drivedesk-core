@@ -48,7 +48,7 @@ The script emits JSON like this:
 {
   "schema_version": 1,
   "drill": "public_synthetic_staged_promotion",
-  "data_profile": "synthetic_fake_data",
+  "data_profile": "synthetic_demo_data",
   "promotion_model": "build_staging_canary_production",
   "checks": {
     "build_gate_passed": true,

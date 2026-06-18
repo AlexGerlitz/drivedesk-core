@@ -74,7 +74,7 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
     assert payload["schemaVersion"] == 1
     assert payload["dataSource"] == "static.fallback"
     assert payload["apiContract"]["path"] == "/demo/public"
-    assert payload["apiContract"]["data_profile"] == "synthetic_fake_data"
+    assert payload["apiContract"]["data_profile"] == "synthetic_demo_data"
     assert payload["tenant"]["slug"] == "demo-academy"
     assert payload["tenant"]["status"] == "active"
     assert payload["workflow"]["id"] == "wf-demo-lead-to-student"

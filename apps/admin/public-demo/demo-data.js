@@ -5,7 +5,7 @@ window.DRIVEDESK_DEMO_DATA = {
   "apiContract": {
     "path": "/demo/public",
     "mode": "read_only",
-    "data_profile": "synthetic_fake_data",
+    "data_profile": "synthetic_demo_data",
     "fallback": "apps/admin/public-demo/demo-data.js"
   },
   "tenant": {
@@ -971,10 +971,10 @@ window.DRIVEDESK_DEMO_DATA = {
         "summary": "Compact route through public root, demo, API, SDK, operations evidence, release safety, GitOps, OpenTofu, and evidence index"
       },
       {
-        "title": "Reviewer quickstart",
+        "title": "Verification quickstart",
         "kind": "doc",
         "path": "docs/public/REVIEWER_QUICKSTART.md",
-        "summary": "Timeboxed 5-minute, 15-minute, and 45-minute external review path"
+        "summary": "Timeboxed 5-minute, 15-minute, and 45-minute external verification path"
       },
       {
         "title": "Milestone contract",

@@ -874,7 +874,7 @@ def render_manifest(operation_id: str, required_fields: list[str]) -> str:
         "path": PUBLIC_DEMO_PATH,
         "method": PUBLIC_DEMO_METHOD.upper(),
         "operation_id": operation_id,
-        "data_profile": "synthetic_fake_data",
+        "data_profile": "synthetic_demo_data",
         "generated_files": [
             "README.md",
             "openapi-client-manifest.json",

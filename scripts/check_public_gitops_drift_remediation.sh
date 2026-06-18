@@ -132,7 +132,7 @@ passed = passed and checks["production_data_touched"] is False
 payload = {
     "schema_version": 1,
     "check": "public_gitops_drift_remediation",
-    "data_profile": "synthetic_fake_data",
+    "data_profile": "synthetic_demo_data",
     "remediation_model": "gitops_plan_only_reconcile_or_rollback",
     "remediation": {
         "audit_event": audit_event,

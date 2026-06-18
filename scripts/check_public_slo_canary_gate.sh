@@ -74,14 +74,14 @@ with tempfile.TemporaryDirectory(prefix="drivedesk-public-slo-canary-") as temp_
     root = Path(temp_dir)
     stable_metrics = {
         "release_id": "stable-2026-06-18",
-        "data_profile": "synthetic_fake_data",
+        "data_profile": "synthetic_demo_data",
         "requests": 10000,
         "errors": 10,
         "p95_latency_ms": 180,
     }
     candidate_metrics = {
         "release_id": "candidate-2026-06-18",
-        "data_profile": "synthetic_fake_data",
+        "data_profile": "synthetic_demo_data",
         "requests": 1000,
         "errors": 18,
         "p95_latency_ms": 620,
@@ -101,7 +101,7 @@ with tempfile.TemporaryDirectory(prefix="drivedesk-public-slo-canary-") as temp_
         "reason": "synthetic SLO canary violation",
         "violations": candidate["violations"],
         "promote": False,
-        "data_profile": "synthetic_fake_data",
+        "data_profile": "synthetic_demo_data",
         "production_data_touched": False,
     }
     event_hash = _write_json(root / "audit" / "slo-canary-gate.json", event)
@@ -132,7 +132,7 @@ with tempfile.TemporaryDirectory(prefix="drivedesk-public-slo-canary-") as temp_
     payload = {
         "schema_version": 1,
         "drill": "public_synthetic_slo_canary_gate",
-        "data_profile": "synthetic_fake_data",
+        "data_profile": "synthetic_demo_data",
         "gate_model": "slo_canary_promotion_gate",
         "slo": SLO,
         "stable": stable,

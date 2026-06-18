@@ -46,7 +46,7 @@ The script emits JSON like this:
 {
   "schema_version": 1,
   "check": "public_gitops_image_automation",
-  "data_profile": "synthetic_fake_data",
+  "data_profile": "synthetic_demo_data",
   "automation_model": "ci_image_build_to_gitops_update_proposal",
   "checks": {
     "image_digest_recorded": true,

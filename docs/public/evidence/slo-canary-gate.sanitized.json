@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "drill": "public_synthetic_slo_canary_gate",
-  "data_profile": "synthetic_fake_data",
+  "data_profile": "synthetic_demo_data",
   "gate_model": "slo_canary_promotion_gate",
   "slo": {
     "availability_target_percent": 99.5,

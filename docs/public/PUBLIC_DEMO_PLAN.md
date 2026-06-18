@@ -48,7 +48,7 @@ Use synthetic data only:
 - sample recovery actions and resolution evidence;
 - sample driving-school domain objects later.
 
-## Review Flow
+## Verification Flow
 
 The public path should make it possible to:
 
@@ -70,7 +70,7 @@ The public path should make it possible to:
 
 ## Runtime Boundary
 
-The public demo is a product-review surface. The private staging runtime remains
+The public demo is a product-verification surface. The private staging runtime remains
 the engineering surface for deploy, observability, and alerting practice.
 
 The public demo does not need direct access to Prometheus, Grafana, Loki,

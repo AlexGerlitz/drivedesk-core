@@ -56,7 +56,7 @@ text = read(map_path)
 for token in [
     "Technical Capability Map",
     "Capability Matrix",
-    "Public review entrypoint",
+    "Public engineering entrypoint",
     "SYSTEM_REVIEW_PATH.md",
     "bash scripts/check_public_system_review_path.sh",
     "REVIEWER_QUICKSTART.md",

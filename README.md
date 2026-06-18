@@ -41,7 +41,7 @@ It includes:
 
 ## Live Demo
 
-[Open the public DriveDesk Core review hub](https://alexgerlitz.github.io/drivedesk-core/)
+[Open the public DriveDesk Core engineering reference](https://alexgerlitz.github.io/drivedesk-core/)
 
 [Open the public DriveDesk Core demo](https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/)
 
@@ -52,7 +52,7 @@ It includes:
 | Need | Open | What it proves |
 | --- | --- | --- |
 | Fast system route | `docs/public/SYSTEM_REVIEW_PATH.md` | How the public root, demo, API, SDK, operations evidence, release safety, GitOps, OpenTofu, and evidence index fit together. |
-| Live product surface | [public review hub](https://alexgerlitz.github.io/drivedesk-core/) and [public demo](https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/) | Browser-visible workflow, operations, incidents, and proof tabs on synthetic demo data. |
+| Live product surface | [public engineering reference](https://alexgerlitz.github.io/drivedesk-core/) and [public demo](https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/) | Browser-visible workflow, operations, incidents, and proof tabs on synthetic demo data. |
 | Current project state | `docs/public/PROJECT_STATUS.md` | What is implemented, what is intentionally public-safe, and what remains private. |
 | Verification commands | `bash scripts/ci_smoke_public.sh` | Public smoke path covering docs, demo contract, OpenAPI, SDK examples, and release evidence. |
 
@@ -76,14 +76,14 @@ evidence, release safety, GitOps, OpenTofu, and evidence index.
 Then continue with `docs/public/REVIEWER_QUICKSTART.md`.
 
 It gives a 5-minute pass, 15-minute verification path, and 45-minute deep
-check for the public review surface.
+check for the public verification surface.
 
 Use `docs/public/ENGINEERING_REVIEW_GUIDE.md` when you need the expanded
-review path.
+verification path.
 
 It maps the live demo, public CI, proof contract, OpenAPI, generated SDK,
 recovery drills, release gates, GitOps, OpenTofu, and public/private boundary
-into one short review path.
+into one short verification path.
 
 Use `docs/public/PROJECT_STATUS.md` when you need the current engineering
 state, public-safe limits, and next work in one page.
@@ -121,8 +121,8 @@ incident queue, mitigation, recovery, and resolution evidence path.
 
 - `docs/public/ENGINEERING_CASE_STUDY.md` - engineering case study.
 - `docs/public/SYSTEM_REVIEW_PATH.md` - compact engineering route through the public root, demo, API, SDK, operations evidence, release safety, GitOps, OpenTofu, and evidence index.
-- `docs/public/REVIEWER_QUICKSTART.md` - shortest external review path with 5-minute, 15-minute, and 45-minute verification tracks.
-- `docs/public/ENGINEERING_REVIEW_GUIDE.md` - short review path for demo, CI, API, recovery, GitOps, and IaC evidence.
+- `docs/public/REVIEWER_QUICKSTART.md` - shortest external verification path with 5-minute, 15-minute, and 45-minute verification tracks.
+- `docs/public/ENGINEERING_REVIEW_GUIDE.md` - short verification path for demo, CI, API, recovery, GitOps, and IaC evidence.
 - `docs/public/PROJECT_STATUS.md` - current public-safe engineering status, limits, and next work.
 - `docs/public/TECHNICAL_CAPABILITY_MAP.md` - capability-to-evidence map with verifier commands.
 - `docs/public/EVIDENCE_INDEX.md` - machine-readable capability-to-evidence index contract.
@@ -235,8 +235,8 @@ incident queue, mitigation, recovery, and resolution evidence path.
 - `scripts/check_public_private_infra_scheduled_alerting.sh` - public-safe scheduled validation alerting.
 - `scripts/check_public_platform_maturity_70.sh` - public-safe 70 percent milestone validation.
 - `scripts/check_public_system_review_path.sh` - public-safe compact system review path validation.
-- `scripts/check_public_reviewer_quickstart.sh` - public-safe reviewer quickstart validation.
-- `scripts/check_public_review_guide.sh` - public-safe short review path validation.
+- `scripts/check_public_reviewer_quickstart.sh` - public-safe verification quickstart validation.
+- `scripts/check_public_review_guide.sh` - public-safe short verification path validation.
 - `scripts/check_public_observability_proof.sh` - public-safe observability proof validation.
 - `scripts/check_public_alert_routing.sh` - public-safe alert routing validation.
 - `scripts/check_public_engineering_proof.sh` - public-safe proof tab and evidence contract validation.

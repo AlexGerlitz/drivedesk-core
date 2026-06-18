@@ -49,7 +49,7 @@ The script emits JSON like this:
 {
   "schema_version": 1,
   "check": "public_gitops_layout",
-  "data_profile": "synthetic_fake_data",
+  "data_profile": "synthetic_demo_data",
   "delivery_model": "argocd_gitops",
   "checks": {
     "argocd_project_present": true,

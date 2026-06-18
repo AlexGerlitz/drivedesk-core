@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "index_id": "drivedesk-core-public-evidence-index",
-  "data_profile": "synthetic_fake_data",
+  "data_profile": "synthetic_demo_data",
   "status": "validated",
   "generated_from": "public_safe_export",
   "public_root_url": "https://alexgerlitz.github.io/drivedesk-core/",

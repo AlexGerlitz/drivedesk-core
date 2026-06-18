@@ -45,7 +45,7 @@ The script emits JSON like this:
 {
   "schema_version": 1,
   "check": "public_gitops_drift_remediation",
-  "data_profile": "synthetic_fake_data",
+  "data_profile": "synthetic_demo_data",
   "remediation_model": "gitops_plan_only_reconcile_or_rollback",
   "checks": {
     "production_drift_carried_forward": true,

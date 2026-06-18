@@ -69,6 +69,8 @@ Implemented foundation:
 - generated OpenAPI client SDK artifacts for Python, JavaScript, and TypeScript.
 - public-safe synthetic backup/restore drill with machine-readable evidence.
 - public-safe synthetic release rollback drill with machine-readable evidence.
+- public-safe GitOps image promotion/drift evidence with candidate tag,
+  rollback tag, desired state, observed state, and synthetic `OutOfSync`.
 - synthetic business workflow in the public demo payload:
   lead -> student -> contract -> audit -> outbox -> integration sync.
 

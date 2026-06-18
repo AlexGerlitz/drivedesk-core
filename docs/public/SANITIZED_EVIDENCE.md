@@ -48,6 +48,12 @@ GitOps layout validation source file:
 docs/public/evidence/gitops-layout.sanitized.json
 ```
 
+GitOps promotion and drift validation source file:
+
+```text
+docs/public/evidence/gitops-promotion-drift.sanitized.json
+```
+
 Verified signals:
 
 - CI completed successfully;
@@ -92,6 +98,10 @@ Verified signals:
 - Argo CD applications reference the Helm chart path;
 - build, staging, canary, and production overlays were validated;
 - public-safe evidence gates are referenced by the promotion order.
+- the public GitOps promotion manifest records the candidate image tag;
+- the previous release tag is preserved as rollback context;
+- desired state is compared with observed state;
+- synthetic production drift is detected and marked `OutOfSync`.
 
 ## Human Explanation
 
@@ -115,6 +125,8 @@ The public version keeps only the operational shape and health results.
 - Helm chart packaging is checked through an executable public validation.
 - GitOps desired-state delivery is checked through an executable public
   validation.
+- GitOps image promotion and drift detection are checked through an executable
+  public validation.
 
 ## What This Leaves Out
 

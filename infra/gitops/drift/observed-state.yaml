@@ -1,0 +1,23 @@
+apiVersion: drivedesk.dev/v1alpha1
+kind: ObservedState
+metadata:
+  name: drivedesk-core-public-observed-state
+spec:
+  source: synthetic_cluster_snapshot
+  environments:
+    - name: build
+      application: drivedesk-core-build
+      observedTag: gitops-candidate-2026-06-18
+      syncStatus: Synced
+    - name: staging
+      application: drivedesk-core-staging
+      observedTag: gitops-candidate-2026-06-18
+      syncStatus: Synced
+    - name: canary
+      application: drivedesk-core-canary
+      observedTag: gitops-candidate-2026-06-18
+      syncStatus: Synced
+    - name: production
+      application: drivedesk-core-production
+      observedTag: gitops-previous-release
+      syncStatus: OutOfSync

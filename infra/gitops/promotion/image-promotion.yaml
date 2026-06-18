@@ -1,0 +1,36 @@
+apiVersion: drivedesk.dev/v1alpha1
+kind: ImagePromotion
+metadata:
+  name: drivedesk-core-public-image-promotion
+spec:
+  artifact: drivedesk-core
+  chartPath: infra/helm/drivedesk-core
+  candidateImage:
+    repository: ghcr.io/alexgerlitz/drivedesk-core-public
+    tag: gitops-candidate-2026-06-18
+  previousImage:
+    repository: ghcr.io/alexgerlitz/drivedesk-core-public
+    tag: gitops-previous-release
+  targetStages:
+    - name: build
+      valuesFile: infra/gitops/environments/build/values.yaml
+      desiredTag: gitops-candidate-2026-06-18
+    - name: staging
+      valuesFile: infra/gitops/environments/staging/values.yaml
+      desiredTag: gitops-candidate-2026-06-18
+    - name: canary
+      valuesFile: infra/gitops/environments/canary/values.yaml
+      desiredTag: gitops-candidate-2026-06-18
+    - name: production
+      valuesFile: infra/gitops/environments/production/values.yaml
+      desiredTag: gitops-candidate-2026-06-18
+  gates:
+    - public_export_secret_scan
+    - public_demo_api_smoke
+    - helm_chart_render
+    - gitops_layout
+    - slo_canary_gate
+    - staged_promotion_drill
+  rollback:
+    valuesFile: infra/gitops/environments/production/values.yaml
+    restoreTag: gitops-previous-release

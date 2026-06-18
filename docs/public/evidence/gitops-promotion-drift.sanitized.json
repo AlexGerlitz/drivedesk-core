@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "check": "public_gitops_promotion_drift",
+  "data_profile": "synthetic_fake_data",
+  "delivery_model": "argocd_gitops_image_promotion",
+  "promotion": {
+    "candidate_tag": "gitops-candidate-2026-06-18",
+    "previous_tag": "gitops-previous-release",
+    "stages": ["build", "staging", "canary", "production"],
+    "drifted_stages": ["production"]
+  },
+  "checks": {
+    "promotion_files_present": true,
+    "candidate_image_recorded": true,
+    "previous_image_recorded": true,
+    "stage_values_files_referenced": true,
+    "promotion_gates_referenced": true,
+    "rollback_tag_recorded": true,
+    "desired_state_recorded": true,
+    "observed_state_recorded": true,
+    "drift_detected": true,
+    "out_of_sync_recorded": true,
+    "synced_stages_recorded": true,
+    "environment_values_still_public_safe": true,
+    "promotion_order_links_gitops_layout": true,
+    "private_markers_absent": true,
+    "production_data_touched": false
+  },
+  "redaction": {
+    "paths_included": false,
+    "hostnames_included": false,
+    "addresses_included": false,
+    "credentials_included": false,
+    "raw_logs_included": false,
+    "production_data_included": false
+  }
+}

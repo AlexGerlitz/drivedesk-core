@@ -21,6 +21,7 @@ Implemented baseline:
 - public-safe synthetic staged promotion drill for the exported Core surface.
 - public-safe Helm chart foundation and render validation for the exported Core surface.
 - public-safe GitOps delivery foundation and Argo CD layout validation for the exported Core surface.
+- public-safe GitOps image promotion and drift detection for the exported Core surface.
 
 What this gives us:
 
@@ -43,6 +44,8 @@ What this gives us:
   pretending the app is already a microservice platform.
 - GitOps desired-state delivery connects the Helm chart to build, staging,
   canary, and production promotion flow without exposing a live cluster.
+- image promotion and drift evidence shows the difference between desired state
+  and observed state, including a safe rollback tag.
 
 ## Next Layers
 
@@ -50,7 +53,7 @@ Recommended next DevOps tasks:
 
 1. Broaden generated client examples from the OpenAPI schema.
 2. Add private runtime rollout evidence for the staging control plane.
-3. Add image tag promotion evidence for the GitOps overlays.
+3. Add drift remediation evidence for the GitOps overlays.
 4. Add Terraform/OpenTofu only after the target infrastructure shape is clear.
 
 ## Human Summary

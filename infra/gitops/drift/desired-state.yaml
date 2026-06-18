@@ -1,0 +1,22 @@
+apiVersion: drivedesk.dev/v1alpha1
+kind: DesiredState
+metadata:
+  name: drivedesk-core-public-desired-state
+spec:
+  source:
+    repository: https://github.com/AlexGerlitz/drivedesk-core.git
+    revision: main
+    chartPath: infra/helm/drivedesk-core
+  environments:
+    - name: build
+      application: drivedesk-core-build
+      desiredTag: gitops-candidate-2026-06-18
+    - name: staging
+      application: drivedesk-core-staging
+      desiredTag: gitops-candidate-2026-06-18
+    - name: canary
+      application: drivedesk-core-canary
+      desiredTag: gitops-candidate-2026-06-18
+    - name: production
+      application: drivedesk-core-production
+      desiredTag: gitops-candidate-2026-06-18

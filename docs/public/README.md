@@ -42,6 +42,7 @@ credentials.
 - `STAGED_PROMOTION_EVIDENCE.md` - public-safe staged release promotion drill.
 - `HELM_CHART.md` - public-safe Helm chart foundation.
 - `GITOPS_DELIVERY.md` - public-safe GitOps delivery foundation.
+- `GITOPS_PROMOTION_DRIFT.md` - public-safe GitOps image promotion and drift evidence.
 - `ARCHITECTURE_DIAGRAMS.md` - public-safe architecture diagrams.
 - `PUBLIC_DEMO_PLAN.md` - future live demo plan.
 - `ROADMAP.md` - public-safe engineering roadmap.
@@ -60,6 +61,8 @@ credentials.
   evidence snapshot.
 - `evidence/gitops-layout.sanitized.json` - machine-readable GitOps layout
   evidence snapshot.
+- `evidence/gitops-promotion-drift.sanitized.json` - machine-readable GitOps
+  image promotion and drift evidence snapshot.
 - `assets/drivedesk-core-demo-overview.png` - public demo screenshot.
 
 The public repository export also generates:
@@ -88,6 +91,7 @@ The public repository export also generates:
 - `scripts/check_public_staged_promotion.sh` - public-safe staged promotion drill.
 - `scripts/check_public_helm_render.sh` - public-safe Helm chart validation.
 - `scripts/check_public_gitops_layout.sh` - public-safe GitOps layout validation.
+- `scripts/check_public_gitops_promotion_drift.sh` - public-safe GitOps promotion and drift validation.
 - `scripts/generate_public_demo_sdk.py` - generated SDK builder from OpenAPI.
 - `scripts/check_public_demo_sdk.sh` - generated SDK drift and runtime smoke.
 - `sdk/generated/public-demo/` - generated Python, JavaScript, and TypeScript

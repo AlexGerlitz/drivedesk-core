@@ -5,6 +5,29 @@
 DriveDesk Core is a modular monolith backend foundation for a business
 operations platform.
 
+## 60-Second Reviewer Snapshot
+
+This repository is built as public proof for remote backend/platform, integration,
+AI workflow, and DevOps work.
+
+| What to check | Why it matters |
+| --- | --- |
+| [Public demo](https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/) | Shows the product direction with safe synthetic data. |
+| [Portfolio case study](docs/public/PORTFOLIO_CASE_STUDY.md) | Explains the business problem, architecture, integration model, and operating evidence. |
+| [System design](docs/public/SYSTEM_DESIGN.md) | Shows tenant boundaries, API/runtime shape, worker/outbox, and adapter contracts. |
+| [OpenAPI schema](docs/openapi.json) | Makes the API surface reviewable instead of only described in prose. |
+| [CI workflow](.github/workflows/ci.yml) | Shows the test/release gate for the public foundation. |
+
+Best-fit evidence:
+
+- backend/platform ownership: FastAPI, PostgreSQL, Alembic, RBAC, audit, outbox, worker;
+- integration ownership: adapter catalog, scopes, mapping validation, transforms, diagnostics,
+  reconciliation, incident review, and operator runbooks;
+- AI/business-ops direction: workflow rules, synthetic lead-to-student path, documents, tasks,
+  payments, contracts, and operator-facing demo data;
+- DevOps/release thinking: Docker Compose, CI, public demo health, backup/restore drill, rollback
+  drill, SLO canary gate, and sanitized evidence.
+
 It includes:
 
 - FastAPI API;

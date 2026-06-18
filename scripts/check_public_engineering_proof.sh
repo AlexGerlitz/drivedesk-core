@@ -181,6 +181,19 @@ for path in sdk_files:
     require("alertRouting" in read_text(path), f"generated SDK file missing alertRouting: {relative(path)}")
     require("incidentResponse" in read_text(path), f"generated SDK file missing incidentResponse: {relative(path)}")
 
+require(
+    "build_adapter_operation_plan" in read_text(root / "sdk/generated/public-demo/python/drivedesk_public_demo_client.py"),
+    "generated Python SDK missing adapter operation helper",
+)
+require(
+    "buildAdapterOperationPlan" in read_text(root / "sdk/generated/public-demo/javascript/drivedesk-public-demo-client.mjs"),
+    "generated JavaScript SDK missing adapter operation helper",
+)
+require(
+    "AdapterOperationPlan" in read_text(root / "sdk/generated/public-demo/typescript/drivedesk-public-demo-client.d.ts"),
+    "generated TypeScript SDK missing adapter operation type",
+)
+
 proof_doc = read_text(proof_doc_path)
 for token in [
     "engineeringProof",
@@ -191,6 +204,7 @@ for token in [
     "Backup and restore",
     "Release safety",
     "GitOps and IaC",
+    "adapter operation plan helpers",
 ]:
     require(token in proof_doc, f"ENGINEERING_PROOF.md missing {token}")
 

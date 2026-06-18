@@ -54,6 +54,134 @@ export class DriveDeskPublicDemoClient {
     validatePublicDemoPayload(payload);
     return payload;
   }
+
+  async getAdapterOperationPlan(scenarioId, options = {}) {
+    const payload = await this.getPublicDemo();
+    return buildAdapterOperationPlan(payload, scenarioId, options);
+  }
+}
+
+export function getAdapterScenario(payload, scenarioId) {
+  if (!Array.isArray(payload.adapterScenarios)) {
+    throw new Error("adapterScenarios is missing");
+  }
+
+  const scenario = payload.adapterScenarios.find((item) => item?.id === scenarioId);
+  if (!scenario) {
+    throw new Error(`unknown adapter scenario: ${scenarioId}`);
+  }
+
+  return scenario;
+}
+
+export function buildAdapterOperationPlan(payload, scenarioId, options = {}) {
+  validatePublicDemoPayload(payload);
+  const scenario = getAdapterScenario(payload, scenarioId);
+  const [method, path] = splitAdapterEndpoint(scenario.endpoint);
+  const requestId = options.requestId || "demo-request-001";
+  const headers = {
+    Accept: "application/json",
+    "X-DriveDesk-Tenant": payload.tenant?.slug || "demo-academy",
+  };
+
+  if (method !== "GET") {
+    headers["Content-Type"] = "application/json";
+    headers["Idempotency-Key"] = `${scenarioId}:${requestId}`;
+  }
+
+  return {
+    scenarioId,
+    adapter: scenario.adapter,
+    operation: scenario.operation,
+    phase: scenario.phase,
+    executionMode: "contract_only",
+    safeToRunAgainstPublicDemo: false,
+    request: {
+      method,
+      path,
+      headers,
+      body: adapterOperationBody(scenario, requestId),
+    },
+    expectedResponse: {
+      status: scenario.status,
+      outputs: [...(scenario.outputs || [])],
+      evidence: scenario.evidence,
+      sideEffects: adapterSideEffects(scenario),
+    },
+  };
+}
+
+function splitAdapterEndpoint(endpoint) {
+  const match = /^(GET|POST|PUT|PATCH|DELETE)\s+(.+)$/.exec(String(endpoint || "").trim());
+  if (!match) {
+    throw new Error(`invalid adapter endpoint contract: ${endpoint}`);
+  }
+  return [match[1], match[2]];
+}
+
+function adapterOperationBody(scenario, requestId) {
+  const base = {
+    requestId,
+    scenarioId: scenario.id,
+    operation: scenario.operation,
+  };
+
+  if (scenario.phase === "preview") {
+    return {
+      ...base,
+      dryRun: true,
+      mappingProfile: "public-demo-v1",
+      sourceRef: "synthetic-file-import",
+      sampleRows: [
+        { externalId: "lead-001", personRef: "person-demo-001", courseRef: "course-b" },
+      ],
+    };
+  }
+
+  if (scenario.phase === "execute") {
+    return {
+      ...base,
+      dryRun: false,
+      previewId: "preview-demo-001",
+      confirm: true,
+    };
+  }
+
+  if (scenario.phase === "retry") {
+    return {
+      ...base,
+      failedJobId: "job-demo-retry-001",
+      retryMode: "same_payload",
+      attempt: 3,
+    };
+  }
+
+  if (scenario.phase === "operator_review") {
+    return null;
+  }
+
+  throw new Error(`unsupported adapter scenario phase: ${scenario.phase}`);
+}
+
+function adapterSideEffects(scenario) {
+  const outputs = new Set(scenario.outputs || []);
+  const sideEffects = [];
+  if (outputs.has("mapping_preview")) {
+    sideEffects.push("validates mapping without creating outbox events");
+  }
+  if (outputs.has("outbox_event")) {
+    sideEffects.push("creates outbox event for asynchronous adapter processing");
+  }
+  if (outputs.has("adapter_job")) {
+    sideEffects.push("records adapter job status for operator visibility");
+  }
+  if (outputs.has("retry_scheduled")) {
+    sideEffects.push("schedules retry with bounded attempt tracking");
+  }
+  if (outputs.has("review_card")) {
+    sideEffects.push("creates operator review card for dead-letter handling");
+  }
+  return sideEffects;
 }
 
 export function validatePublicDemoPayload(payload) {
@@ -210,11 +338,13 @@ async function main() {
       : process.env.BASE_URL || "http://localhost:8080";
   const client = new DriveDeskPublicDemoClient(baseUrl);
   const payload = await client.getPublicDemo();
+  const adapterPlan = buildAdapterOperationPlan(payload, "adapter-file-import-preview");
   console.log(
     "generated js SDK ok:",
     payload.tenant.slug,
     payload.dataSource,
     `workflow=${payload.workflow.currentStage}`,
+    `adapterPlan=${adapterPlan.phase}`,
     `operation=${OPERATION_ID}`,
   );
 }

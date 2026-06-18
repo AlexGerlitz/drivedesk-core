@@ -1,4 +1,17 @@
 {
+  "adapter_helper_mode": "contract_only",
+  "adapter_helper_phases": [
+    "preview",
+    "execute",
+    "retry",
+    "operator_review"
+  ],
+  "adapter_helper_scenarios": [
+    "adapter-file-import-preview",
+    "adapter-file-import-execute",
+    "adapter-accounting-export-retry",
+    "adapter-dead-letter-review"
+  ],
   "data_profile": "synthetic_fake_data",
   "generated_files": [
     "README.md",

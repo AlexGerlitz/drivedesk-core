@@ -168,7 +168,9 @@ The public repository export also generates:
   client artifacts.
 - `examples/curl/demo-public.sh` - curl client example.
 - `examples/python/demo_public_client.py` - Python client example.
+- `examples/python/demo_adapter_operation_plan.py` - Python adapter operation plan SDK example.
 - `examples/js/demo-public-fetch.js` - JavaScript fetch client example.
+- `examples/js/demo-adapter-operation-plan.mjs` - JavaScript adapter operation plan SDK example.
 - `PUBLIC_EXPORT_MANIFEST.md` - file list and export boundary summary.
 
 Hosted demo:

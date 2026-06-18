@@ -211,7 +211,9 @@ incident queue, mitigation, recovery, and resolution evidence path.
 - `scripts/check_public_demo_api.sh` - local API contract and examples smoke.
 - `examples/curl/demo-public.sh` - curl client example.
 - `examples/python/demo_public_client.py` - Python client example.
+- `examples/python/demo_adapter_operation_plan.py` - Python adapter operation plan SDK example.
 - `examples/js/demo-public-fetch.js` - JavaScript fetch client example.
+- `examples/js/demo-adapter-operation-plan.mjs` - JavaScript adapter operation plan SDK example.
 
 ## Local Run
 
@@ -262,6 +264,8 @@ bash scripts/check_public_gitops_drift_remediation.sh
 BASE_URL=http://localhost:8080 bash examples/curl/demo-public.sh
 BASE_URL=http://localhost:8080 python examples/python/demo_public_client.py
 BASE_URL=http://localhost:8080 node examples/js/demo-public-fetch.js
+BASE_URL=http://localhost:8080 python examples/python/demo_adapter_operation_plan.py
+BASE_URL=http://localhost:8080 node examples/js/demo-adapter-operation-plan.mjs
 ```
 
 Docker Compose:

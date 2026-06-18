@@ -3,6 +3,44 @@ export const PUBLIC_DEMO_PATH: "/demo/public";
 export const OPERATION_ID: "public_demo_demo_public_get";
 export const REQUIRED_FIELDS: Array<"schemaVersion" | "generatedAt" | "dataSource" | "apiContract" | "tenant" | "health" | "metrics" | "workQueue" | "members" | "auditEvents" | "outbox" | "adapters" | "adapterScenarios" | "integrationJobs" | "integrationHealth" | "integrationReadiness" | "recoveryEvidence" | "alertRouting" | "incidentResponse" | "engineeringProof" | "workflow" | "workflowScenarios" | "timeline" | "domainEvents">;
 
+export type AdapterScenarioPhase = "preview" | "execute" | "retry" | "operator_review";
+
+export interface AdapterScenario {
+  id: string;
+  title: string;
+  adapter: "file.import.fake" | "accounting.export.mock" | string;
+  operation: string;
+  phase: AdapterScenarioPhase;
+  endpoint: string;
+  requiredScope: string;
+  status: string;
+  detail: string;
+  inputs: string[];
+  outputs: string[];
+  evidence: string;
+}
+
+export interface AdapterOperationPlan {
+  scenarioId: string;
+  adapter: string;
+  operation: string;
+  phase: AdapterScenarioPhase;
+  executionMode: "contract_only";
+  safeToRunAgainstPublicDemo: false;
+  request: {
+    method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+    path: string;
+    headers: Record<string, string>;
+    body: Record<string, unknown> | null;
+  };
+  expectedResponse: {
+    status: string;
+    outputs: string[];
+    evidence: string;
+    sideEffects: string[];
+  };
+}
+
 export interface PublicDemoPayload {
   schemaVersion: 1;
   generatedAt: string;
@@ -16,20 +54,7 @@ export interface PublicDemoPayload {
   auditEvents: Array<Record<string, string>>;
   outbox: Array<Record<string, unknown>>;
   adapters: Array<Record<string, string>>;
-  adapterScenarios: Array<{
-    id: string;
-    title: string;
-    adapter: "file.import.fake" | "accounting.export.mock" | string;
-    operation: string;
-    phase: "preview" | "execute" | "retry" | "operator_review";
-    endpoint: string;
-    requiredScope: string;
-    status: string;
-    detail: string;
-    inputs: string[];
-    outputs: string[];
-    evidence: string;
-  }>;
+  adapterScenarios: AdapterScenario[];
   integrationJobs: Array<Record<string, unknown>>;
   integrationHealth: Array<Record<string, string>>;
   integrationReadiness: Array<Record<string, unknown>>;
@@ -79,6 +104,16 @@ export interface PublicDemoPayload {
 export class DriveDeskPublicDemoClient {
   constructor(baseUrl?: string, options?: { fetchImpl?: typeof fetch });
   getPublicDemo(): Promise<PublicDemoPayload>;
+  getAdapterOperationPlan(
+    scenarioId: string,
+    options?: { requestId?: string },
+  ): Promise<AdapterOperationPlan>;
 }
 
+export function getAdapterScenario(payload: PublicDemoPayload, scenarioId: string): AdapterScenario;
+export function buildAdapterOperationPlan(
+  payload: PublicDemoPayload,
+  scenarioId: string,
+  options?: { requestId?: string },
+): AdapterOperationPlan;
 export function validatePublicDemoPayload(payload: PublicDemoPayload): void;

@@ -52,6 +52,8 @@ Client examples:
 BASE_URL=http://localhost:8080 bash examples/curl/demo-public.sh
 BASE_URL=http://localhost:8080 python examples/python/demo_public_client.py
 BASE_URL=http://localhost:8080 node examples/js/demo-public-fetch.js
+BASE_URL=http://localhost:8080 python examples/python/demo_adapter_operation_plan.py
+BASE_URL=http://localhost:8080 node examples/js/demo-adapter-operation-plan.mjs
 ```
 
 Generated SDK smoke:
@@ -96,7 +98,8 @@ using the same operation contracts documented in
 
 The generated SDK is documented in `CLIENT_SDK.md`. It demonstrates that the
 exported OpenAPI schema can produce working Python, JavaScript, and TypeScript
-client artifacts.
+client artifacts, including typed adapter operation helpers that turn
+`adapterScenarios` into contract-only request/response plans.
 
 ## Safety Boundary
 

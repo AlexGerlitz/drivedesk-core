@@ -21,6 +21,7 @@ else
 fi
 
 export PYTHONPATH="$ROOT/apps/api:$ROOT/apps/worker:$ROOT/packages/core${PYTHONPATH:+:$PYTHONPATH}"
+export PYTHONDONTWRITEBYTECODE=1
 
 TEMP_DIR="$(mktemp -d -t drivedesk-public-demo-sdk.XXXXXX)"
 SERVER_PID=""
@@ -62,6 +63,7 @@ if [[ ! -d "$ROOT/sdk/generated/public-demo" ]]; then
   exit 1
 fi
 
+find "$ROOT/sdk/generated/public-demo" -type d -name __pycache__ -prune -exec rm -rf {} +
 diff -ru "$ROOT/sdk/generated/public-demo" "$GENERATED_DIR"
 
 if [[ -n "${DRIVEDESK_DEMO_BASE_URL:-}" ]]; then
@@ -116,9 +118,11 @@ else:
 PY
 
 "$PYTHON_BIN" sdk/generated/public-demo/python/drivedesk_public_demo_client.py --base-url "$BASE_URL"
+BASE_URL="$BASE_URL" "$PYTHON_BIN" examples/python/demo_adapter_operation_plan.py
 
 if command -v node >/dev/null 2>&1; then
   node sdk/generated/public-demo/javascript/drivedesk-public-demo-client.mjs --base-url "$BASE_URL"
+  BASE_URL="$BASE_URL" node examples/js/demo-adapter-operation-plan.mjs
 else
   echo "node not available; skipped generated JS SDK client"
 fi

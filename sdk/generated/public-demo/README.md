@@ -25,6 +25,17 @@ Run the SDK smoke:
 bash scripts/check_public_demo_sdk.sh
 ```
 
+Adapter operation helpers:
+
+- `getAdapterScenario` / `get_adapter_scenario`
+- `buildAdapterOperationPlan` / `build_adapter_operation_plan`
+- `DriveDeskPublicDemoClient.getAdapterOperationPlan`
+- `DriveDeskPublicDemoClient.get_adapter_operation_plan`
+
+These helpers turn the public `adapterScenarios` payload into a typed
+contract-only request/response plan for mapping preview, execution, retry, and
+operator-review flows. They do not mutate the public demo.
+
 Engineering summary: this is the public-safe integration proof. DriveDesk
 publishes an OpenAPI contract and generates a small SDK from it instead of
 relying on hand-written request examples only.

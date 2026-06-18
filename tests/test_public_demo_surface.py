@@ -353,7 +353,9 @@ def test_public_demo_api_scripts_and_examples_exist() -> None:
         "scripts/generate_public_demo_sdk.py",
         "examples/curl/demo-public.sh",
         "examples/python/demo_public_client.py",
+        "examples/python/demo_adapter_operation_plan.py",
         "examples/js/demo-public-fetch.js",
+        "examples/js/demo-adapter-operation-plan.mjs",
         "sdk/generated/public-demo/README.md",
         "sdk/generated/public-demo/openapi-client-manifest.json",
         "sdk/generated/public-demo/python/drivedesk_public_demo_client.py",
@@ -485,20 +487,35 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
         ],
         "examples/curl/demo-public.sh": ["/demo/public", "api.synthetic", "student_sync"],
         "examples/python/demo_public_client.py": ["/demo/public", "api.synthetic", "student_sync"],
+        "examples/python/demo_adapter_operation_plan.py": [
+            "get_adapter_operation_plan",
+            "adapter-file-import-preview",
+            "contract_only",
+        ],
         "examples/js/demo-public-fetch.js": ["/demo/public", "api.synthetic", "student_sync"],
+        "examples/js/demo-adapter-operation-plan.mjs": [
+            "getAdapterOperationPlan",
+            "adapter-file-import-preview",
+            "contract_only",
+        ],
         "sdk/generated/public-demo/python/drivedesk_public_demo_client.py": [
             "/demo/public",
             "public_demo_demo_public_get",
             "student_sync",
+            "build_adapter_operation_plan",
+            "contract_only",
         ],
         "sdk/generated/public-demo/javascript/drivedesk-public-demo-client.mjs": [
             "/demo/public",
             "public_demo_demo_public_get",
             "student_sync",
+            "buildAdapterOperationPlan",
+            "contract_only",
         ],
         "sdk/generated/public-demo/typescript/drivedesk-public-demo-client.d.ts": [
             "PublicDemoPayload",
             "student_sync",
+            "AdapterOperationPlan",
         ],
     }
 

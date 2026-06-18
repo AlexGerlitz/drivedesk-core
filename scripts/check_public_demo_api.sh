@@ -21,6 +21,7 @@ else
 fi
 
 export PYTHONPATH="$ROOT/apps/api:$ROOT/apps/worker:$ROOT/packages/core${PYTHONPATH:+:$PYTHONPATH}"
+export PYTHONDONTWRITEBYTECODE=1
 
 SERVER_PID=""
 LOG_FILE=""
@@ -434,9 +435,11 @@ PY
 
 BASE_URL="$BASE_URL" bash examples/curl/demo-public.sh
 BASE_URL="$BASE_URL" "$PYTHON_BIN" examples/python/demo_public_client.py
+BASE_URL="$BASE_URL" "$PYTHON_BIN" examples/python/demo_adapter_operation_plan.py
 
 if command -v node >/dev/null 2>&1; then
   BASE_URL="$BASE_URL" node examples/js/demo-public-fetch.js
+  BASE_URL="$BASE_URL" node examples/js/demo-adapter-operation-plan.mjs
 else
   echo "node not available; skipped JS demo client"
 fi

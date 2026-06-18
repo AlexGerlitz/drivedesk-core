@@ -45,7 +45,7 @@ Required fields:
 | `docs/public/EVIDENCE_INDEX.md` | Public capability-to-evidence index contract |
 | `docs/public/evidence/public-evidence-index.sanitized.json` | Machine-readable index of docs, evidence, verifiers, URLs, and boundaries |
 | `docs/public/SYSTEM_DESIGN.md` | Core architecture, async boundaries, adapters, and observability |
-| `sdk/generated/public-demo/` | OpenAPI-driven Python, JavaScript, and TypeScript clients |
+| `sdk/generated/public-demo/` | OpenAPI-driven Python, JavaScript, and TypeScript clients with adapter operation plan helpers |
 
 ## Verification
 
@@ -62,7 +62,7 @@ The check validates:
 - the FastAPI synthetic demo payload;
 - the public demo HTML and JavaScript render surface;
 - the generated OpenAPI schema;
-- generated Python, JavaScript, and TypeScript SDK artifacts;
+- generated Python, JavaScript, and TypeScript SDK artifacts, including adapter operation plan helpers;
 - referenced public-safe documents and evidence paths;
 - public CI/export integration.
 

@@ -16,8 +16,10 @@ else
 fi
 
 export PYTHONPATH="$ROOT/apps/api:$ROOT/apps/worker:$ROOT/packages/core"
+export PYTHONDONTWRITEBYTECODE=1
 
 "$PYTHON_BIN" -m compileall -q apps packages tests examples scripts
+find "$ROOT" -type d -name __pycache__ -prune -exec rm -rf {} +
 "$PYTHON_BIN" -m pytest -q
 bash scripts/check_public_export_secrets.sh
 bash scripts/check_public_demo_api.sh

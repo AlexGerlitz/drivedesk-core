@@ -49,6 +49,14 @@ class DriveDeskPublicDemoClient:
         validate_public_demo_payload(payload)
         return payload
 
+    def get_adapter_operation_plan(
+        self,
+        scenario_id: str,
+        request_id: str = "demo-request-001",
+    ) -> dict[str, Any]:
+        payload = self.get_public_demo()
+        return build_adapter_operation_plan(payload, scenario_id, request_id=request_id)
+
     def _get_json(self, path: str) -> dict[str, Any]:
         request = urllib.request.Request(
             f"{self.base_url}{path}",
@@ -56,6 +64,120 @@ class DriveDeskPublicDemoClient:
         )
         with urllib.request.urlopen(request, timeout=self.timeout) as response:
             return json.loads(response.read().decode("utf-8"))
+
+
+def get_adapter_scenario(payload: dict[str, Any], scenario_id: str) -> dict[str, Any]:
+    scenarios = payload.get("adapterScenarios")
+    if not isinstance(scenarios, list):
+        raise ValueError("adapterScenarios is missing")
+
+    for scenario in scenarios:
+        if isinstance(scenario, dict) and scenario.get("id") == scenario_id:
+            return scenario
+
+    raise ValueError(f"unknown adapter scenario: {scenario_id}")
+
+
+def build_adapter_operation_plan(
+    payload: dict[str, Any],
+    scenario_id: str,
+    request_id: str = "demo-request-001",
+) -> dict[str, Any]:
+    validate_public_demo_payload(payload)
+    scenario = get_adapter_scenario(payload, scenario_id)
+    method, path = _split_adapter_endpoint(str(scenario.get("endpoint", "")))
+    headers: dict[str, str] = {
+        "Accept": "application/json",
+        "X-DriveDesk-Tenant": str((payload.get("tenant") or {}).get("slug", "demo-academy")),
+    }
+    if method != "GET":
+        headers["Content-Type"] = "application/json"
+        headers["Idempotency-Key"] = f"{scenario_id}:{request_id}"
+
+    return {
+        "scenarioId": scenario_id,
+        "adapter": scenario.get("adapter"),
+        "operation": scenario.get("operation"),
+        "phase": scenario.get("phase"),
+        "executionMode": "contract_only",
+        "safeToRunAgainstPublicDemo": False,
+        "request": {
+            "method": method,
+            "path": path,
+            "headers": headers,
+            "body": _adapter_operation_body(scenario, request_id),
+        },
+        "expectedResponse": {
+            "status": scenario.get("status"),
+            "outputs": list(scenario.get("outputs", [])),
+            "evidence": scenario.get("evidence"),
+            "sideEffects": _adapter_side_effects(scenario),
+        },
+    }
+
+
+def _split_adapter_endpoint(endpoint: str) -> tuple[str, str]:
+    parts = endpoint.strip().split(maxsplit=1)
+    if len(parts) == 2 and parts[0] in {"GET", "POST", "PUT", "PATCH", "DELETE"}:
+        return parts[0], parts[1]
+    raise ValueError(f"invalid adapter endpoint contract: {endpoint}")
+
+
+def _adapter_operation_body(scenario: dict[str, Any], request_id: str) -> dict[str, Any] | None:
+    phase = scenario.get("phase")
+    base = {
+        "requestId": request_id,
+        "scenarioId": scenario.get("id"),
+        "operation": scenario.get("operation"),
+    }
+
+    if phase == "preview":
+        return {
+            **base,
+            "dryRun": True,
+            "mappingProfile": "public-demo-v1",
+            "sourceRef": "synthetic-file-import",
+            "sampleRows": [
+                {"externalId": "lead-001", "personRef": "person-demo-001", "courseRef": "course-b"},
+            ],
+        }
+
+    if phase == "execute":
+        return {
+            **base,
+            "dryRun": False,
+            "previewId": "preview-demo-001",
+            "confirm": True,
+        }
+
+    if phase == "retry":
+        return {
+            **base,
+            "failedJobId": "job-demo-retry-001",
+            "retryMode": "same_payload",
+            "attempt": 3,
+        }
+
+    if phase == "operator_review":
+        return None
+
+    raise ValueError(f"unsupported adapter scenario phase: {phase}")
+
+
+def _adapter_side_effects(scenario: dict[str, Any]) -> list[str]:
+    outputs = set(scenario.get("outputs", []))
+    side_effects: list[str] = []
+    if "mapping_preview" in outputs:
+        side_effects.append("validates mapping without creating outbox events")
+    if "outbox_event" in outputs:
+        side_effects.append("creates outbox event for asynchronous adapter processing")
+    if "adapter_job" in outputs:
+        side_effects.append("records adapter job status for operator visibility")
+    if "retry_scheduled" in outputs:
+        side_effects.append("schedules retry with bounded attempt tracking")
+    if "review_card" in outputs:
+        side_effects.append("creates operator review card for dead-letter handling")
+    return side_effects
 
 
 def validate_public_demo_payload(payload: dict[str, Any]) -> None:
@@ -206,11 +328,13 @@ def main() -> None:
 
     client = DriveDeskPublicDemoClient(args.base_url)
     payload = client.get_public_demo()
+    adapter_plan = build_adapter_operation_plan(payload, "adapter-file-import-preview")
     print(
         "generated python SDK ok:",
         payload["tenant"]["slug"],
         payload["dataSource"],
         f"workflow={payload['workflow']['currentStage']}",
+        f"adapterPlan={adapter_plan['phase']}",
         f"operation={OPERATION_ID}",
     )
 

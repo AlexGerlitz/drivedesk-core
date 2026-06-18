@@ -1645,6 +1645,46 @@ def test_file_import_adapter_retry_and_dead_letter(
         in metrics_response.text
     )
 
+    review_response = client.get(
+        f"/tenants/{tenant_id}/integration-operator-review",
+        headers=owner_headers,
+    )
+    assert review_response.status_code == 200
+    review_items = review_response.json()
+    assert {item["status"] for item in review_items} == {"retry", "dead_letter"}
+    assert {item["operation_key"] for item in review_items} == {"file_import_execute"}
+    assert {item["required_connection_scope"] for item in review_items} == {"file_import:execute"}
+    assert {item["adapter_key"] for item in review_items} == {"file.import.fake"}
+    assert {item["payload_summary"]["raw_records_redacted"] for item in review_items} == {1}
+    assert all("records" not in item["payload_summary"] for item in review_items)
+    assert all("source_name" not in item["payload_summary"] for item in review_items)
+    assert all(item["retry_endpoint"].startswith(f"/tenants/{tenant_id}/outbox-events/") for item in review_items)
+
+    dead_letter_review_response = client.get(
+        f"/tenants/{tenant_id}/integration-operator-review?status=dead_letter",
+        headers=owner_headers,
+    )
+    assert dead_letter_review_response.status_code == 200
+    dead_letter_review = dead_letter_review_response.json()
+    assert len(dead_letter_review) == 1
+    assert dead_letter_review[0]["status"] == "dead_letter"
+    assert dead_letter_review[0]["severity"] == "operator_review"
+    assert "review mapping/provider contract" in dead_letter_review[0]["recommended_action"]
+
+    invalid_review_filter_response = client.get(
+        f"/tenants/{tenant_id}/integration-operator-review?status=processed",
+        headers=owner_headers,
+    )
+    assert invalid_review_filter_response.status_code == 400
+    assert invalid_review_filter_response.json()["detail"] == "status must be retry or dead_letter"
+
+    manager_review_response = client.get(
+        f"/tenants/{tenant_id}/integration-operator-review",
+        headers={"X-Actor-Id": "manager_1", "X-Actor-Role": "manager"},
+    )
+    assert manager_review_response.status_code == 403
+    assert manager_review_response.json()["detail"] == "permission required: outbox:read"
+
     processed_event = next(event for event in events if event.status == "processed")
     processed_retry_response = client.post(
         f"/tenants/{tenant_id}/outbox-events/{processed_event.id}/retry",
@@ -1719,6 +1759,13 @@ def test_file_import_adapter_retry_and_dead_letter(
     assert 'drivedesk_integration_job_errors{adapter_key="file.import.fake",status="pending"} 0' in (
         recovery_metrics_response.text
     )
+
+    empty_review_response = client.get(
+        f"/tenants/{tenant_id}/integration-operator-review",
+        headers=owner_headers,
+    )
+    assert empty_review_response.status_code == 200
+    assert empty_review_response.json() == []
 
 
 def test_worker_adapter_logs_are_structured_json(

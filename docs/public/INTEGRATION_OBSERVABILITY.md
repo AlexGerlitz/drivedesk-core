@@ -92,6 +92,11 @@ sequenceDiagram
 
 Temporary failures move to `retry` with a future retry time. Permanent failures
 move to `dead_letter` and require operator review.
+Operators can list failed integration jobs through
+`GET /tenants/{tenant_id}/integration-operator-review`. That review queue
+returns adapter key, operation key, required scope, status, attempts, safe
+payload summary, recommended action, and retry endpoint without returning raw
+provider payloads.
 After review, operators can call
 `POST /tenants/{tenant_id}/outbox-events/{event_id}/retry` to move a failed
 event back to `pending`. That recovery action writes
@@ -102,6 +107,7 @@ The public-safe operational contract is:
 - retry and dead-letter counts are visible through metrics;
 - structured logs explain the safe failure context;
 - runbooks describe first checks and recovery;
+- operator review cards are available through a tenant-scoped API;
 - operator retry requests are audited;
 - the public demo shows Integration Health with fake data.
 

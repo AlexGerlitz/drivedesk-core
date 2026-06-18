@@ -12,6 +12,16 @@ reviewed event back into the worker queue without editing the database by hand.
 POST /tenants/{tenant_id}/outbox-events/{event_id}/retry
 ```
 
+Before retrying, operators can inspect failed integration jobs through:
+
+```text
+GET /tenants/{tenant_id}/integration-operator-review
+```
+
+That read-only review endpoint shows operation key, status, attempts, last
+error, required connection scope, redacted payload summary, recommended action,
+and the retry endpoint. It does not return raw records or provider payloads.
+
 Request body:
 
 ```json

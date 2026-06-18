@@ -171,6 +171,27 @@ class OutboxEventRetryRequest(BaseModel):
     reset_attempts: bool = False
 
 
+class IntegrationOperatorReviewItemRead(BaseModel):
+    id: str
+    tenant_id: str
+    adapter_key: str
+    operation_key: str | None = None
+    event_type: str
+    status: Literal["retry", "dead_letter"]
+    severity: Literal["retryable", "operator_review"]
+    attempts: int
+    last_error: str | None = None
+    last_duration_ms: float | None = None
+    next_retry_at: datetime | None = None
+    dead_lettered_at: datetime | None = None
+    created_at: datetime | None = None
+    integration_connection_id: str | None = None
+    required_connection_scope: str | None = None
+    payload_summary: dict[str, Any] = Field(default_factory=dict)
+    recommended_action: str
+    retry_endpoint: str
+
+
 class IntegrationConnectionCreate(BaseModel):
     name: str = Field(min_length=2, max_length=120)
     adapter_key: str = Field(min_length=2, max_length=128, pattern=r"^[a-z0-9][a-z0-9_.-]*$")

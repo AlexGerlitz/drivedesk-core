@@ -72,6 +72,7 @@ from drivedesk_api.schemas import (
     IntegrationConnectionRead,
     IntegrationMappingPreviewCreate,
     IntegrationMappingPreviewRead,
+    IntegrationOperatorReviewItemRead,
     LoginRequest,
     MembershipCreate,
     MembershipRead,
@@ -106,6 +107,7 @@ from drivedesk_api.services import (
     ensure_tenant_exists,
     list_business_records,
     list_integration_connections,
+    list_integration_operator_review,
     list_platform_admins,
     list_workflow_action_runs,
     list_workflow_rules,
@@ -554,6 +556,29 @@ def build_app(settings: Settings | None = None) -> FastAPI:
             event_id=event_id,
             payload=payload,
             actor=actor,
+        )
+
+    @api.get(
+        "/tenants/{tenant_id}/integration-operator-review",
+        response_model=list[IntegrationOperatorReviewItemRead],
+        tags=["integrations"],
+    )
+    async def list_integration_operator_review_endpoint(
+        tenant_id: str,
+        status_filter: str | None = Query(default=None, alias="status"),
+        adapter_key: str | None = Query(default=None),
+        limit: int = Query(default=50, ge=1, le=100),
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> list[dict[str, object]]:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.OUTBOX_READ)
+        return await list_integration_operator_review(
+            session,
+            tenant_id=tenant_id,
+            status_filter=status_filter,
+            adapter_key=adapter_key,
+            limit=limit,
         )
 
     @api.post(

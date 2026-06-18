@@ -48,6 +48,7 @@ Implemented foundation:
 - runtime adapter catalog for executable adapter metadata;
 - tenant-owned integration connection profiles with safe config and mapping;
 - mapping validation against runtime adapter requirements;
+- tenant-scoped operator review queue for retry and dead-letter integration jobs;
 - integration adapter metrics grouped by adapter and status;
 - structured adapter worker logs for started, completed, failed, and
   dead-lettered jobs;
@@ -153,6 +154,9 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
   `file_import:execute`.
 - Runtime adapter operation contracts now describe operation keys, endpoints,
   events, required scopes, idempotency keys, and retry/dead-letter behavior.
+- Integration operator review now turns failed `retry` and `dead_letter` jobs
+  into safe review cards with operation keys, required scopes, redacted payload
+  summaries, recommended actions, and audited retry endpoints.
 - The hosted public demo uses static fallback on GitHub Pages and can be pointed
   at `GET /demo/public` for API-backed fake data, including workflow stages,
   timeline, domain events, audit, and outbox state.

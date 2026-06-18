@@ -14,6 +14,7 @@ operations, or commercial details.
 - Tenant-owned integration connection profiles with safe config and mapping.
 - Integration connection scopes for preview and execution boundaries.
 - Structured adapter operation contracts in the runtime catalog.
+- Tenant-scoped operator review queue for retry and dead-letter integration jobs.
 - Mapping validation against runtime adapter requirements.
 - Runtime mapping transform and read-only mapping preview.
 - Integration observability for adapter metrics, structured logs, and failed-job runbooks.
@@ -53,7 +54,7 @@ operations, or commercial details.
   event, and outbox shape.
 - More public-safe evidence around local run, CI, OpenAPI, and demo health.
 - Broader generated client SDK examples from the OpenAPI schema.
-- More adapter recovery examples with payload mapping and operator review notes.
+- More adapter recovery examples with payload mapping and follow-up actions.
 
 ## Later
 

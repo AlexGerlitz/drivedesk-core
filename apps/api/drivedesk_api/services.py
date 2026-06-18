@@ -42,6 +42,7 @@ from drivedesk_core import (
     AdapterExecutionError,
     AdapterValidationError,
     build_adapter_mapping_preview,
+    list_adapter_descriptors,
     resolve_adapter,
     resolve_adapter_connection_scopes,
     validate_adapter_connection_scope,
@@ -1049,6 +1050,118 @@ async def list_pending_outbox(session: AsyncSession, limit: int = 25) -> list[Ou
 async def count_outbox_by_status(session: AsyncSession) -> dict[str, int]:
     result = await session.execute(select(OutboxEvent.status, func.count()).group_by(OutboxEvent.status))
     return {status: count for status, count in result.all()}
+
+
+def _adapter_operation_by_event_type(adapter_key: str | None, event_type: str) -> dict[str, object] | None:
+    for descriptor in list_adapter_descriptors():
+        if descriptor.get("key") != (adapter_key or "internal.noop"):
+            continue
+        for operation in descriptor.get("operation_contracts", []):
+            if isinstance(operation, dict) and operation.get("event_type") == event_type:
+                return operation
+    return None
+
+
+def _safe_outbox_payload_summary(payload_json: str) -> tuple[str | None, dict[str, object]]:
+    try:
+        payload = json.loads(payload_json or "{}")
+    except json.JSONDecodeError:
+        return None, {"payload_valid": False}
+    if not isinstance(payload, dict):
+        return None, {"payload_valid": False}
+
+    summary: dict[str, object] = {"payload_valid": True}
+    integration_connection_id = payload.get("integration_connection_id")
+    if isinstance(integration_connection_id, str) and integration_connection_id:
+        summary["has_integration_connection"] = True
+    else:
+        integration_connection_id = None
+        summary["has_integration_connection"] = False
+
+    for key in ("source_format", "record_count", "simulate_failure"):
+        value = payload.get(key)
+        if isinstance(value, str | int) or value is None:
+            summary[key] = value
+
+    mapping = payload.get("mapping")
+    if isinstance(mapping, dict):
+        summary["mapping_keys"] = sorted(str(key) for key in mapping.keys())
+
+    scopes = payload.get("connection_scopes")
+    if isinstance(scopes, list) and all(isinstance(scope, str) for scope in scopes):
+        summary["connection_scopes"] = sorted(scopes)
+
+    records = payload.get("records")
+    if isinstance(records, list):
+        summary["raw_records_redacted"] = len(records)
+
+    return integration_connection_id, summary
+
+
+async def list_integration_operator_review(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    status_filter: str | None = None,
+    adapter_key: str | None = None,
+    limit: int = 50,
+) -> list[dict[str, object]]:
+    await ensure_tenant_exists(session, tenant_id)
+    allowed_statuses = {"retry", "dead_letter"}
+    statuses = [status_filter] if status_filter else sorted(allowed_statuses)
+    if any(status_value not in allowed_statuses for status_value in statuses):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="status must be retry or dead_letter",
+        )
+
+    query = (
+        select(OutboxEvent)
+        .where(
+            OutboxEvent.tenant_id == tenant_id,
+            OutboxEvent.status.in_(statuses),
+            OutboxEvent.adapter_key.is_not(None),
+        )
+        .order_by(OutboxEvent.created_at.desc())
+        .limit(limit)
+    )
+    if adapter_key:
+        query = query.where(OutboxEvent.adapter_key == adapter_key)
+
+    result = await session.execute(query)
+    review_items: list[dict[str, object]] = []
+    for event in result.scalars().all():
+        operation = _adapter_operation_by_event_type(event.adapter_key, event.event_type)
+        integration_connection_id, payload_summary = _safe_outbox_payload_summary(event.payload_json)
+        status_value = "retry" if event.status == "retry" else "dead_letter"
+        severity = "retryable" if status_value == "retry" else "operator_review"
+        review_items.append(
+            {
+                "id": event.id,
+                "tenant_id": event.tenant_id,
+                "adapter_key": event.adapter_key or "internal.noop",
+                "operation_key": operation.get("key") if operation else None,
+                "event_type": event.event_type,
+                "status": status_value,
+                "severity": severity,
+                "attempts": event.attempts,
+                "last_error": event.last_error,
+                "last_duration_ms": event.last_duration_ms,
+                "next_retry_at": event.next_retry_at,
+                "dead_lettered_at": event.dead_lettered_at,
+                "created_at": event.created_at,
+                "integration_connection_id": integration_connection_id,
+                "required_connection_scope": operation.get("required_connection_scope") if operation else None,
+                "payload_summary": payload_summary,
+                "recommended_action": (
+                    "wait for the provider or retry after confirming it recovered"
+                    if status_value == "retry"
+                    else "review mapping/provider contract, then requeue with an operator reason"
+                ),
+                "retry_endpoint": f"/tenants/{tenant_id}/outbox-events/{event.id}/retry",
+            }
+        )
+    return review_items
 
 
 async def retry_outbox_event(

@@ -448,6 +448,32 @@ Public docs:
 - `docs/public/INTEGRATION_OPERATION_CONTRACTS.md`;
 - `docs/adr/0036-structured-adapter-operation-contracts.md`.
 
+## Sprint 4J Integration Operator Review Queue
+
+Sprint 4J adds a tenant-scoped review queue for failed integration work.
+
+New endpoint:
+
+- `GET /tenants/{tenant_id}/integration-operator-review`.
+
+Why this matters:
+
+- operators can see only `retry` and `dead_letter` integration jobs;
+- review cards include adapter key, operation key, event type, status, attempts,
+  last error, required scope, redacted payload summary, recommended action, and
+  retry endpoint;
+- raw records, source names, credentials, config values, mapping values, and
+  provider payloads are not returned;
+- recovery remains a separate audited action through
+  `POST /tenants/{tenant_id}/outbox-events/{event_id}/retry`;
+- future 1C, bank, KKT, webhook, and file adapters can reuse the same operator
+  review shape.
+
+Public docs:
+
+- `docs/public/INTEGRATION_OPERATOR_REVIEW.md`;
+- `docs/adr/0037-integration-operator-review-queue.md`.
+
 ## Local Commands
 
 Run the API without Docker:

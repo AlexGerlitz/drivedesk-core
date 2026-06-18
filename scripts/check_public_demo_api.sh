@@ -199,6 +199,7 @@ assert "/tenants/{tenant_id}/workflow-action-runs" in openapi["paths"], openapi[
 assert "/tenants/{tenant_id}/outbox-events/{event_id}/retry" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/integration-connections" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/integration-mapping-preview" in openapi["paths"], openapi["paths"].keys()
+assert "/tenants/{tenant_id}/integration-operator-review" in openapi["paths"], openapi["paths"].keys()
 assert "/integration-adapters" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/public" in openapi["paths"], openapi["paths"].keys()
 assert "/health" in openapi["paths"], openapi["paths"].keys()
@@ -210,6 +211,7 @@ if openapi_file.exists():
     assert "/tenants/{tenant_id}/outbox-events/{event_id}/retry" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/integration-connections" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/integration-mapping-preview" in generated["paths"], generated["paths"].keys()
+    assert "/tenants/{tenant_id}/integration-operator-review" in generated["paths"], generated["paths"].keys()
     assert "/integration-adapters" in generated["paths"], generated["paths"].keys()
 
 print(

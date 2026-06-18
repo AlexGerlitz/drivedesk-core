@@ -19,6 +19,7 @@ shape needed for later providers:
 - field mapping transform and preview;
 - connection scope enforcement;
 - operation-level contracts for preview and execution;
+- operator review queue for failed integration jobs;
 - retry state for temporary failures;
 - dead-letter state for permanent failures;
 - result payload stored on the outbox event;
@@ -42,8 +43,12 @@ Adapter execution returns a normalized result:
 
 Temporary failures become retryable worker state. Permanent failures become
 dead-letter state and need operator review.
+Failed integration jobs are listed through
+`GET /tenants/{tenant_id}/integration-operator-review` with redacted payload
+summaries and retry endpoints.
 Reviewed `retry` and `dead_letter` events can be moved back to `pending`
-through the outbox recovery endpoint. See `OUTBOX_RECOVERY.md`.
+through the outbox recovery endpoint. See `INTEGRATION_OPERATOR_REVIEW.md` and
+`OUTBOX_RECOVERY.md`.
 
 ## API Slice
 
@@ -54,6 +59,7 @@ GET /integration-adapters
 POST /tenants/{tenant_id}/integration-connections
 GET /tenants/{tenant_id}/integration-connections
 POST /tenants/{tenant_id}/integration-mapping-preview
+GET /tenants/{tenant_id}/integration-operator-review
 POST /tenants/{tenant_id}/integration-imports/file
 POST /tenants/{tenant_id}/outbox-events/{event_id}/retry
 ```

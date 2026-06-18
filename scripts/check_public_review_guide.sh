@@ -53,7 +53,7 @@ guide = read(guide_path)
 
 for token in [
     "Engineering Review Guide",
-    "Live demo Proof tab",
+    "Live demo Operations and Proof tabs",
     "bash scripts/ci_smoke_public.sh",
     "bash scripts/check_public_review_guide.sh",
     "bash scripts/check_public_project_status.sh",

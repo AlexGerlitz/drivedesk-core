@@ -39,6 +39,7 @@ def test_public_demo_html_links_static_assets() -> None:
     assert 'id="metricGrid"' in html
     assert 'id="workQueueRows"' in html
     assert 'data-view="workflow"' in html
+    assert 'data-view="operations"' in html
     assert 'data-view="proof"' in html
     assert 'id="workflowStageRows"' in html
     assert 'id="workflowTimelineRows"' in html
@@ -48,6 +49,10 @@ def test_public_demo_html_links_static_assets() -> None:
     assert 'id="syncJobRows"' in html
     assert 'id="outboxRows"' in html
     assert 'id="recoveryRows"' in html
+    assert 'id="alertRoutingSummaryRows"' in html
+    assert 'id="alertRouteRows"' in html
+    assert 'id="alertBindingRows"' in html
+    assert 'id="alertRunbookRows"' in html
     assert 'id="proofSummaryRows"' in html
     assert 'id="proofGateRows"' in html
     assert 'id="proofEvidenceRows"' in html
@@ -119,6 +124,22 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
     assert any(item["name"] == "Incident runbooks" for item in payload["integrationReadiness"])
     assert any(item["metric"] == "drivedesk_integration_reconciliations" for item in payload["integrationHealth"])
     assert any(item["metric"] == "drivedesk_integration_incidents" for item in payload["integrationHealth"])
+    assert payload["alertRouting"]["summary"]
+    assert {route["name"] for route in payload["alertRouting"]["routes"]} >= {
+        "platform-critical-page",
+        "platform-warning-ticket",
+        "scheduled-validation-notice",
+    }
+    assert {binding["alert"] for binding in payload["alertRouting"]["bindings"]} >= {
+        "DriveDeskApiTargetDown",
+        "DriveDeskIntegrationDeadLetters",
+        "DriveDeskScheduledValidationMissed",
+    }
+    assert {binding["state"] for binding in payload["alertRouting"]["bindings"]} == {"routed"}
+    assert {action["evidence"] for action in payload["alertRouting"]["runbookActions"]} >= {
+        "ALERT_ROUTING_EVIDENCE.md",
+        "alert.silence.created",
+    }
     assert len(payload["recoveryEvidence"]) >= 4
     assert payload["engineeringProof"]["milestone"] == "engineering_70"
     assert payload["engineeringProof"]["status"] == "validated"
@@ -183,7 +204,9 @@ def test_public_demo_can_load_api_backed_data_with_static_fallback() -> None:
     assert "fillWorkflowTimeline" in script
     assert "fillDomainEvents" in script
     assert "fillRecoveryEvidence" in script
+    assert "fillAlertRouting" in script
     assert "fillEngineeringProof" in script
+    assert "alertRouting" in script
     assert "engineeringProof" in script
     assert "recoveryEvidence" in script
     assert "demoApi" in script

@@ -7,6 +7,7 @@ staging runtime.
 
 - show the product direction;
 - show API and workflow behavior with fake data;
+- show operations behavior with alert routing, escalation, and runbook links;
 - show engineering quality through CI, docs, tests, and architecture;
 - keep a public demo health workflow for the hosted surface;
 - keep operational tooling separate from the public demo.
@@ -20,6 +21,7 @@ Recommended first public demo:
 - fake tenant and fake users;
 - read-only workflow state with timeline and domain events;
 - public OpenAPI docs generated from the demo API;
+- public-safe Operations tab with alert routing and runbook bindings;
 - generated client SDK example from the OpenAPI contract;
 - public demo screenshot in the repository README;
 - link to the public repository and case study.
@@ -38,6 +40,8 @@ Use synthetic data only:
 - sample workflow stages;
 - sample timeline events;
 - sample domain events;
+- sample alert routes;
+- sample alert-to-runbook bindings;
 - sample driving-school domain objects later.
 
 ## Review Flow
@@ -52,11 +56,12 @@ The public path should make it possible to:
 6. See fake operational workflows.
 7. Inspect the workflow tab for the synthetic lead-to-student flow.
 8. Inspect the integration adapter tab.
-9. Inspect `GET /demo/public` in `docs/openapi.json`.
-10. Run `bash scripts/check_public_demo_api.sh`.
-11. Run `bash scripts/check_public_demo_sdk.sh`.
-12. Run the curl, Python, or JavaScript demo client example.
-13. Read sanitized evidence that staging checks, metrics, logs, and alerts exist.
+9. Inspect the Operations tab for alert routes and runbook bindings.
+10. Inspect `GET /demo/public` in `docs/openapi.json`.
+11. Run `bash scripts/check_public_demo_api.sh`.
+12. Run `bash scripts/check_public_demo_sdk.sh`.
+13. Run the curl, Python, or JavaScript demo client example.
+14. Read sanitized evidence that staging checks, metrics, logs, and alerts exist.
 
 ## Runtime Boundary
 
@@ -86,3 +91,4 @@ Alertmanager, SSH, production backups, or private GitHub Actions secrets.
 14. Add a public-safe synthetic workflow with stages, timeline, domain events,
     audit events, and outbox handoff.
 15. Add generated OpenAPI client SDK artifacts and SDK smoke checks.
+16. Add a public-safe Operations tab backed by the `alertRouting` demo payload.

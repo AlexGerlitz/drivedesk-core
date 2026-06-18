@@ -113,6 +113,20 @@ def validate_public_demo_payload(payload: dict[str, Any]) -> None:
     if not isinstance(gates, list) or len(gates) < 5:
         raise ValueError("engineeringProof.gates is missing or too short")
 
+    alert_routing = payload.get("alertRouting") or {{}}
+    routes = alert_routing.get("routes")
+    if not isinstance(routes, list) or len(routes) < 3:
+        raise ValueError("alertRouting.routes is missing or too short")
+
+    bindings = alert_routing.get("bindings")
+    if not isinstance(bindings, list) or len(bindings) < 5:
+        raise ValueError("alertRouting.bindings is missing or too short")
+
+    alert_names = {{binding.get("alert") for binding in bindings if isinstance(binding, dict)}}
+    required_alerts = {{"DriveDeskApiTargetDown", "DriveDeskIntegrationDeadLetters", "DriveDeskScheduledValidationMissed"}}
+    if not required_alerts.issubset(alert_names):
+        raise ValueError(f"alertRouting.bindings does not include required alerts: {{sorted(required_alerts - alert_names)}}")
+
     domain_events = payload.get("domainEvents")
     if not isinstance(domain_events, list):
         raise ValueError("domainEvents is missing")
@@ -221,6 +235,21 @@ export function validatePublicDemoPayload(payload) {{
     throw new Error("engineeringProof.gates is missing or too short");
   }}
 
+  if (!Array.isArray(payload.alertRouting?.routes) || payload.alertRouting.routes.length < 3) {{
+    throw new Error("alertRouting.routes is missing or too short");
+  }}
+
+  if (!Array.isArray(payload.alertRouting?.bindings) || payload.alertRouting.bindings.length < 5) {{
+    throw new Error("alertRouting.bindings is missing or too short");
+  }}
+
+  const alertNames = new Set(payload.alertRouting.bindings.map((binding) => binding?.alert));
+  for (const requiredAlert of ["DriveDeskApiTargetDown", "DriveDeskIntegrationDeadLetters", "DriveDeskScheduledValidationMissed"]) {{
+    if (!alertNames.has(requiredAlert)) {{
+      throw new Error(`alertRouting.bindings does not include required alert: ${{requiredAlert}}`);
+    }}
+  }}
+
   if (!Array.isArray(payload.domainEvents)) {{
     throw new Error("domainEvents is missing");
   }}
@@ -283,6 +312,12 @@ export interface PublicDemoPayload {{
   integrationHealth: Array<Record<string, string>>;
   integrationReadiness: Array<Record<string, unknown>>;
   recoveryEvidence: Array<Record<string, string>>;
+  alertRouting: {{
+    summary: Array<Record<string, string>>;
+    routes: Array<Record<string, string>>;
+    bindings: Array<Record<string, string>>;
+    runbookActions: Array<Record<string, string>>;
+  }};
   engineeringProof: {{
     milestone: "engineering_70";
     status: "validated";

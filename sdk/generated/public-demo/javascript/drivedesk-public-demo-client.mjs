@@ -20,6 +20,7 @@ export const REQUIRED_FIELDS = [
   "integrationHealth",
   "integrationReadiness",
   "recoveryEvidence",
+  "alertRouting",
   "engineeringProof",
   "workflow",
   "timeline",
@@ -92,6 +93,21 @@ export function validatePublicDemoPayload(payload) {
 
   if (!Array.isArray(payload.engineeringProof?.gates) || payload.engineeringProof.gates.length < 5) {
     throw new Error("engineeringProof.gates is missing or too short");
+  }
+
+  if (!Array.isArray(payload.alertRouting?.routes) || payload.alertRouting.routes.length < 3) {
+    throw new Error("alertRouting.routes is missing or too short");
+  }
+
+  if (!Array.isArray(payload.alertRouting?.bindings) || payload.alertRouting.bindings.length < 5) {
+    throw new Error("alertRouting.bindings is missing or too short");
+  }
+
+  const alertNames = new Set(payload.alertRouting.bindings.map((binding) => binding?.alert));
+  for (const requiredAlert of ["DriveDeskApiTargetDown", "DriveDeskIntegrationDeadLetters", "DriveDeskScheduledValidationMissed"]) {
+    if (!alertNames.has(requiredAlert)) {
+      throw new Error(`alertRouting.bindings does not include required alert: ${requiredAlert}`);
+    }
   }
 
   if (!Array.isArray(payload.domainEvents)) {

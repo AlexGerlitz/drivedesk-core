@@ -1243,6 +1243,17 @@ def test_public_demo_endpoint_is_read_only_synthetic_contract(
     assert len(payload["workQueue"]) >= 4
     assert len(payload["integrationJobs"]) >= 3
     assert len(payload["integrationHealth"]) >= 4
+    assert {route["name"] for route in payload["alertRouting"]["routes"]} >= {
+        "platform-critical-page",
+        "platform-warning-ticket",
+        "scheduled-validation-notice",
+    }
+    assert {binding["alert"] for binding in payload["alertRouting"]["bindings"]} >= {
+        "DriveDeskApiTargetDown",
+        "DriveDeskIntegrationDeadLetters",
+        "DriveDeskScheduledValidationMissed",
+    }
+    assert {binding["state"] for binding in payload["alertRouting"]["bindings"]} == {"routed"}
     assert payload["engineeringProof"]["milestone"] == "engineering_70"
     assert payload["engineeringProof"]["status"] == "validated"
     assert len(payload["engineeringProof"]["summary"]) >= 4

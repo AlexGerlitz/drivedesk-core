@@ -2119,6 +2119,11 @@
             "title": "Adapters",
             "type": "array"
           },
+          "alertRouting": {
+            "additionalProperties": true,
+            "title": "Alertrouting",
+            "type": "object"
+          },
           "apiContract": {
             "additionalProperties": {
               "type": "string"
@@ -2281,6 +2286,7 @@
           "integrationHealth",
           "integrationReadiness",
           "recoveryEvidence",
+          "alertRouting",
           "engineeringProof",
           "workflow",
           "timeline",

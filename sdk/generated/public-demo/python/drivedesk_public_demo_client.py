@@ -26,6 +26,7 @@ REQUIRED_FIELDS = [
   "integrationHealth",
   "integrationReadiness",
   "recoveryEvidence",
+  "alertRouting",
   "engineeringProof",
   "workflow",
   "timeline",
@@ -91,6 +92,20 @@ def validate_public_demo_payload(payload: dict[str, Any]) -> None:
     gates = proof.get("gates")
     if not isinstance(gates, list) or len(gates) < 5:
         raise ValueError("engineeringProof.gates is missing or too short")
+
+    alert_routing = payload.get("alertRouting") or {}
+    routes = alert_routing.get("routes")
+    if not isinstance(routes, list) or len(routes) < 3:
+        raise ValueError("alertRouting.routes is missing or too short")
+
+    bindings = alert_routing.get("bindings")
+    if not isinstance(bindings, list) or len(bindings) < 5:
+        raise ValueError("alertRouting.bindings is missing or too short")
+
+    alert_names = {binding.get("alert") for binding in bindings if isinstance(binding, dict)}
+    required_alerts = {"DriveDeskApiTargetDown", "DriveDeskIntegrationDeadLetters", "DriveDeskScheduledValidationMissed"}
+    if not required_alerts.issubset(alert_names):
+        raise ValueError(f"alertRouting.bindings does not include required alerts: {sorted(required_alerts - alert_names)}")
 
     domain_events = payload.get("domainEvents")
     if not isinstance(domain_events, list):

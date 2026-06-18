@@ -8,14 +8,14 @@ prove the current engineering surface.
 
 | Step | What to inspect | Proof |
 | --- | --- | --- |
-| 1 | Live demo Proof tab | `engineeringProof` payload with gates and evidence |
+| 1 | Live demo Operations and Proof tabs | `alertRouting` and `engineeringProof` payloads |
 | 2 | Root CI badge | `bash scripts/ci_smoke_public.sh` |
 | 3 | Project status | `docs/public/PROJECT_STATUS.md` |
 | 4 | Proof contract | `bash scripts/check_public_engineering_proof.sh` |
 | 5 | API contract | `docs/openapi.json` and `GET /demo/public` |
 | 6 | Capability map | `docs/public/TECHNICAL_CAPABILITY_MAP.md` |
 | 7 | Observability proof | `docs/public/OBSERVABILITY_PROOF.md` |
-| 8 | Alert routing | `docs/public/ALERT_ROUTING_EVIDENCE.md` |
+| 8 | Alert routing | Operations tab and `docs/public/ALERT_ROUTING_EVIDENCE.md` |
 | 9 | Recovery and release safety | backup/restore, rollback, canary, staged promotion checks |
 | 10 | Infrastructure story | Helm, GitOps, OpenTofu, drift, and sanitized runtime evidence |
 

@@ -17,8 +17,8 @@ GET /demo/public
 The endpoint returns the same product-shaped fake data used by the public demo
 shell: tenant, health, metrics, work queue, workflow stages, timeline entries,
 domain events, members, audit events, outbox events, adapter contracts, sync
-jobs, Integration Health, recovery evidence, and the `engineeringProof`
-contract rendered by the Proof tab.
+jobs, Integration Health, alert routing, recovery evidence, and the
+`engineeringProof` contract rendered by the Operations and Proof tabs.
 
 ## Runtime Modes
 
@@ -62,8 +62,8 @@ bash scripts/check_public_demo_sdk.sh
 `check_public_demo_api.sh` starts a temporary local API when no
 `DRIVEDESK_DEMO_BASE_URL` is provided. It checks `/health`, `/ready`,
 `/demo/public`, `/openapi.json`, the generated `docs/openapi.json` when
-present, and then runs the curl, Python, and JavaScript examples against the
-same API.
+present, alert routes, alert-to-runbook bindings, and then runs the curl,
+Python, and JavaScript examples against the same API.
 
 The Proof tab contract is documented in `ENGINEERING_PROOF.md` and checked by:
 

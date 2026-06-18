@@ -19,6 +19,10 @@ Verifier:
 bash scripts/check_public_alert_routing.sh
 ```
 
+The same synthetic routing contract is also visible in the public demo
+Operations tab and exposed by the read-only `GET /demo/public` `alertRouting`
+payload.
+
 ## Route Model
 
 | Route | Signal | Receiver | Escalation |

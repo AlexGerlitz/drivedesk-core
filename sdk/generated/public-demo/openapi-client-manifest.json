@@ -27,6 +27,7 @@
     "integrationHealth",
     "integrationReadiness",
     "recoveryEvidence",
+    "alertRouting",
     "engineeringProof",
     "workflow",
     "timeline",

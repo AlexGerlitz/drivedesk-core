@@ -23,6 +23,7 @@
           <button class="nav-tab" type="button" data-view="work">Work</button>
           <button class="nav-tab" type="button" data-view="integrations">Integrations</button>
           <button class="nav-tab" type="button" data-view="system">System</button>
+          <button class="nav-tab" type="button" data-view="operations">Operations</button>
           <button class="nav-tab" type="button" data-view="proof">Proof</button>
         </nav>
       </aside>
@@ -180,6 +181,53 @@
               <div class="event-list" id="recoveryRows"></div>
             </section>
           </div>
+        </section>
+
+        <section class="view" id="view-operations" aria-labelledby="operationsTitle">
+          <div class="section-heading">
+            <h2 id="operationsTitle">Operations Control</h2>
+            <span class="muted">Alert routing and runbooks</span>
+          </div>
+          <div class="proof-summary-grid" id="alertRoutingSummaryRows"></div>
+          <div class="dashboard-grid">
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Alert Routes</h3>
+                <span class="muted">Alertmanager-style tree</span>
+              </div>
+              <div class="event-list" id="alertRouteRows"></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Runbook Actions</h3>
+                <span class="muted">Operator response</span>
+              </div>
+              <div class="event-list" id="alertRunbookRows"></div>
+            </section>
+          </div>
+
+          <section class="panel">
+            <div class="panel-header">
+              <h3>Alert Bindings</h3>
+              <span class="muted">Signals to owners</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Alert</th>
+                    <th>Service</th>
+                    <th>Severity</th>
+                    <th>Route</th>
+                    <th>Owner</th>
+                    <th>Runbook</th>
+                  </tr>
+                </thead>
+                <tbody id="alertBindingRows"></tbody>
+              </table>
+            </div>
+          </section>
         </section>
 
         <section class="view" id="view-proof" aria-labelledby="proofTitle">

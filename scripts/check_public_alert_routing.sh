@@ -39,6 +39,9 @@ project_status_path = root / "docs/public/PROJECT_STATUS.md"
 capability_map_path = root / "docs/public/TECHNICAL_CAPABILITY_MAP.md"
 roadmap_path = root / "docs/public/ROADMAP.md"
 observability_doc_path = root / "docs/public/OBSERVABILITY_PROOF.md"
+demo_html_path = root / "apps/admin/public-demo/index.html"
+demo_app_path = root / "apps/admin/public-demo/app.js"
+demo_data_path = root / "apps/admin/public-demo/demo-data.js"
 root_readme_path = root / "README.md"
 index_path = root / "index.html"
 export_script_path = root / "scripts/export_public_repo.sh"
@@ -206,6 +209,38 @@ for token in [
     "public-safe routing proof",
 ]:
     require(token in doc, f"alert routing doc missing {token}")
+
+demo_html = read(demo_html_path)
+for token in [
+    'data-view="operations"',
+    "Operations Control",
+    "alertRoutingSummaryRows",
+    "alertRouteRows",
+    "alertBindingRows",
+    "alertRunbookRows",
+]:
+    require(token in demo_html, f"public demo HTML missing alert routing token: {token}")
+
+demo_app = read(demo_app_path)
+for token in [
+    "fillAlertRouting",
+    "alertRouting",
+    "routing.routes",
+    "routing.bindings",
+    "routing.runbookActions",
+]:
+    require(token in demo_app, f"public demo app missing alert routing token: {token}")
+
+demo_data = read(demo_data_path)
+for token in [
+    '"alertRouting"',
+    "platform-critical-page",
+    "platform-warning-ticket",
+    "scheduled-validation-notice",
+    "DriveDeskScheduledValidationMissed",
+    "alert.silence.created",
+]:
+    require(token in demo_data, f"public demo data missing alert routing token: {token}")
 
 adr = read(adr_path)
 for token in [

@@ -133,6 +133,21 @@ assert {event["event"] for event in demo["domainEvents"]} >= {
 }
 assert len(demo["integrationHealth"]) >= 6, demo
 assert len(demo["recoveryEvidence"]) >= 4, demo
+assert {route["name"] for route in demo["alertRouting"]["routes"]} >= {
+    "platform-critical-page",
+    "platform-warning-ticket",
+    "scheduled-validation-notice",
+}, demo
+assert {binding["alert"] for binding in demo["alertRouting"]["bindings"]} >= {
+    "DriveDeskApiTargetDown",
+    "DriveDeskIntegrationDeadLetters",
+    "DriveDeskScheduledValidationMissed",
+}, demo
+assert {binding["state"] for binding in demo["alertRouting"]["bindings"]} == {"routed"}, demo
+assert {action["evidence"] for action in demo["alertRouting"]["runbookActions"]} >= {
+    "ALERT_ROUTING_EVIDENCE.md",
+    "alert.silence.created",
+}, demo
 assert demo["engineeringProof"]["milestone"] == "engineering_70", demo
 assert demo["engineeringProof"]["status"] == "validated", demo
 assert len(demo["engineeringProof"]["summary"]) >= 4, demo

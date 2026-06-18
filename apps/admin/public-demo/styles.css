@@ -345,6 +345,10 @@ h3 {
   overflow: hidden;
 }
 
+.dashboard-grid + .panel {
+  margin-top: 18px;
+}
+
 .panel-header {
   display: flex;
   align-items: center;

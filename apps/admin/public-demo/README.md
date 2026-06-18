@@ -36,6 +36,7 @@ surface for the Core concepts that already exist in the backend:
 - integration adapters;
 - retry and dead-letter sync jobs;
 - integration health metrics;
+- alert routing, escalation, and runbook bindings;
 - synthetic workflow stages, timeline, and domain events;
 - engineering proof gates and public-safe evidence chain;
 - API-backed synthetic demo contract;

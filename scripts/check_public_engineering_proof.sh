@@ -155,6 +155,7 @@ public_demo_schema = openapi.get("components", {}).get("schemas", {}).get("Publi
 required_fields = set(public_demo_schema.get("required", []))
 require("engineeringProof" in required_fields, "OpenAPI PublicDemoRead does not require engineeringProof")
 require("recoveryEvidence" in required_fields, "OpenAPI PublicDemoRead does not require recoveryEvidence")
+require("alertRouting" in required_fields, "OpenAPI PublicDemoRead does not require alertRouting")
 
 sdk_files = [
     root / "sdk/generated/public-demo/openapi-client-manifest.json",
@@ -165,6 +166,7 @@ sdk_files = [
 for path in sdk_files:
     require(path.is_file(), f"generated SDK file missing: {relative(path)}")
     require("engineeringProof" in read_text(path), f"generated SDK file missing engineeringProof: {relative(path)}")
+    require("alertRouting" in read_text(path), f"generated SDK file missing alertRouting: {relative(path)}")
 
 proof_doc = read_text(proof_doc_path)
 for token in [

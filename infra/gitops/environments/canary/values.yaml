@@ -1,0 +1,18 @@
+app:
+  environment: canary
+
+image:
+  repository: ghcr.io/alexgerlitz/drivedesk-core-public
+  tag: gitops-canary
+
+runtimeSecret:
+  name: drivedesk-core-runtime-canary
+
+api:
+  replicas: 1
+
+worker:
+  replicas: 1
+
+podLabels:
+  drivedesk.dev/stage: canary

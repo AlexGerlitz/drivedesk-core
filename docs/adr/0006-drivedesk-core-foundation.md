@@ -17,6 +17,7 @@ Use this repository shape:
 - `packages/core` for domain primitives;
 - `infra/docker` for local runtime.
 - `infra/helm` for Kubernetes-style packaging.
+- `infra/gitops` for Argo CD desired-state delivery.
 
 Sprint 0 starts with health endpoints, worker heartbeat, core event primitives,
 tenant/audit database tables, Docker Compose, and CI smoke checks.
@@ -28,3 +29,5 @@ tenant/audit database tables, Docker Compose, and CI smoke checks.
 - The Helm chart foundation packages API, worker, migrations, service, config,
   runtime Secret references, and probes without changing the modular monolith
   into premature microservices.
+- The GitOps delivery foundation links the Helm chart to build, staging,
+  canary, and production desired-state manifests.

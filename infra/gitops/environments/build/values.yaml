@@ -1,0 +1,18 @@
+app:
+  environment: build
+
+image:
+  repository: ghcr.io/alexgerlitz/drivedesk-core-public
+  tag: gitops-build
+
+runtimeSecret:
+  name: drivedesk-core-runtime-build
+
+api:
+  replicas: 1
+
+worker:
+  replicas: 1
+
+podLabels:
+  drivedesk.dev/stage: build

@@ -1,0 +1,18 @@
+app:
+  environment: staging
+
+image:
+  repository: ghcr.io/alexgerlitz/drivedesk-core-public
+  tag: gitops-staging
+
+runtimeSecret:
+  name: drivedesk-core-runtime-staging
+
+api:
+  replicas: 2
+
+worker:
+  replicas: 1
+
+podLabels:
+  drivedesk.dev/stage: staging

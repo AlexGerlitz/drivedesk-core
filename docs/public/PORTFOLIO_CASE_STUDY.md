@@ -183,6 +183,8 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
 - Helm chart foundation now packages the modular monolith into Kubernetes-style
   API, worker, migration, service, config, runtime Secret reference, and probe
   contracts without changing the app into microservices.
+- GitOps delivery foundation now connects the Helm chart to Argo CD-style
+  build, staging, canary, and production desired state.
 - Alertmanager currently uses an internal receiver; external notification
   routing is a later step.
 - The frontend is intentionally not the center of the current work; the backend
@@ -196,6 +198,7 @@ Recommended next slices:
 2. Additional mock adapters for webhook and accounting export flows.
 3. More workflow rule actions for notifications, approvals, and mapping-specific adapter jobs.
 4. More deployment evidence around private runtime rollout checks.
+5. Image tag promotion evidence for the GitOps overlays.
 
 ## Interview Summary
 

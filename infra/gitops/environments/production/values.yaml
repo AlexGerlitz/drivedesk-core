@@ -1,0 +1,18 @@
+app:
+  environment: production
+
+image:
+  repository: ghcr.io/alexgerlitz/drivedesk-core-public
+  tag: gitops-production
+
+runtimeSecret:
+  name: drivedesk-core-runtime-production
+
+api:
+  replicas: 3
+
+worker:
+  replicas: 2
+
+podLabels:
+  drivedesk.dev/stage: production

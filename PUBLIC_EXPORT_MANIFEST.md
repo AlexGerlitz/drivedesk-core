@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-18T04:18:07Z
+Generated at: 2026-06-18T04:32:46Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -11,6 +11,7 @@ Copied public-safe areas:
 - packages/core
 - infra/docker
 - infra/helm
+- infra/gitops
 - examples
 - tests/test_drivedesk_foundation.py
 - tests/test_drivedesk_core_api.py
@@ -115,6 +116,13 @@ Copied public-safe areas:
 - public Helm chart check: api_deployment_template_present
 - public Helm chart check: runtime_secret_refs_present
 - public Helm chart ADR: 0047-public-safe-helm-chart-foundation
+- public GitOps delivery foundation doc
+- public GitOps path: infra/gitops
+- public GitOps validation script: scripts/check_public_gitops_layout.sh
+- public GitOps evidence snapshot: docs/public/evidence/gitops-layout.sanitized.json
+- public GitOps check: argocd_applications_present
+- public GitOps check: staged_promotion_order_present
+- public GitOps ADR: 0048-public-safe-gitops-delivery-foundation
 - public tenant-owned repository helper surface
 - public auth observability alerting surface
 - public demo local run script

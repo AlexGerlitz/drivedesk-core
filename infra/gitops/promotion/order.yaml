@@ -1,0 +1,29 @@
+apiVersion: drivedesk.dev/v1alpha1
+kind: PromotionOrder
+metadata:
+  name: drivedesk-core-public-promotion
+spec:
+  artifact: drivedesk-core
+  chartPath: infra/helm/drivedesk-core
+  evidence:
+    - public_export_secret_scan
+    - public_demo_api_smoke
+    - backup_restore_drill
+    - release_rollback_drill
+    - slo_canary_gate
+    - staged_promotion_drill
+    - helm_chart_render
+    - gitops_layout
+  stages:
+    - name: build
+      application: drivedesk-core-build
+      valuesFile: infra/gitops/environments/build/values.yaml
+    - name: staging
+      application: drivedesk-core-staging
+      valuesFile: infra/gitops/environments/staging/values.yaml
+    - name: canary
+      application: drivedesk-core-canary
+      valuesFile: infra/gitops/environments/canary/values.yaml
+    - name: production
+      application: drivedesk-core-production
+      valuesFile: infra/gitops/environments/production/values.yaml

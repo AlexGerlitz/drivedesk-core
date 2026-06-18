@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: drivedesk-core
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: drivedesk-core
+    app.kubernetes.io/part-of: drivedesk
+spec:
+  description: Public-safe DriveDesk Core GitOps project
+  sourceRepos:
+    - https://github.com/AlexGerlitz/drivedesk-core.git
+  destinations:
+    - namespace: drivedesk-build
+      server: https://kubernetes.default.svc
+    - namespace: drivedesk-staging
+      server: https://kubernetes.default.svc
+    - namespace: drivedesk-canary
+      server: https://kubernetes.default.svc
+    - namespace: drivedesk-production
+      server: https://kubernetes.default.svc

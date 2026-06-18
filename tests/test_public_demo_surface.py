@@ -171,6 +171,7 @@ def test_public_demo_api_scripts_and_examples_exist() -> None:
         "scripts/check_public_slo_canary_gate.sh",
         "scripts/check_public_staged_promotion.sh",
         "scripts/check_public_helm_render.sh",
+        "scripts/check_public_gitops_layout.sh",
         "scripts/generate_public_demo_sdk.py",
         "examples/curl/demo-public.sh",
         "examples/python/demo_public_client.py",
@@ -225,6 +226,12 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
             "api_deployment_template_present",
             "runtime_secret_refs_present",
             "helm_template_ran",
+        ],
+        "scripts/check_public_gitops_layout.sh": [
+            "public_gitops_layout",
+            "argocd_applications_present",
+            "staged_promotion_order_present",
+            "evidence_gates_referenced",
         ],
         "scripts/generate_public_demo_sdk.py": [
             "/demo/public",

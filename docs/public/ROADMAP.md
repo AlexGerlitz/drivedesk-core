@@ -52,6 +52,7 @@ operations, or commercial details.
 - Public-safe synthetic SLO canary gate drill and sanitized evidence snapshot.
 - Public-safe synthetic staged promotion drill and sanitized evidence snapshot.
 - Public-safe Helm chart foundation with render validation.
+- Public-safe GitOps delivery foundation with Argo CD layout validation.
 
 ## Next
 
@@ -61,6 +62,7 @@ operations, or commercial details.
 - Broader generated client SDK examples from the OpenAPI schema.
 - More adapter recovery examples with payload mapping and follow-up actions.
 - More deployment evidence around private runtime rollout checks.
+- More GitOps evidence around image tag promotion and drift checks.
 
 ## Later
 

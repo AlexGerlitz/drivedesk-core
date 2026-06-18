@@ -42,6 +42,12 @@ Helm chart validation source file:
 docs/public/evidence/helm-render.sanitized.json
 ```
 
+GitOps layout validation source file:
+
+```text
+docs/public/evidence/gitops-layout.sanitized.json
+```
+
 Verified signals:
 
 - CI completed successfully;
@@ -81,6 +87,11 @@ Verified signals:
   config, runtime Secret reference, and probe templates;
 - chart values schema was validated;
 - private infrastructure markers were absent from the chart.
+- the public GitOps delivery foundation contains Argo CD project, application,
+  environment, and promotion metadata;
+- Argo CD applications reference the Helm chart path;
+- build, staging, canary, and production overlays were validated;
+- public-safe evidence gates are referenced by the promotion order.
 
 ## Human Explanation
 
@@ -102,6 +113,8 @@ The public version keeps only the operational shape and health results.
 - SLO canary promotion is checked through an executable public drill.
 - Staged release promotion is checked through an executable public drill.
 - Helm chart packaging is checked through an executable public validation.
+- GitOps desired-state delivery is checked through an executable public
+  validation.
 
 ## What This Leaves Out
 

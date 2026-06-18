@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: drivedesk-core-canary
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: drivedesk-core
+    app.kubernetes.io/part-of: drivedesk
+    drivedesk.dev/stage: canary
+spec:
+  project: drivedesk-core
+  source:
+    repoURL: https://github.com/AlexGerlitz/drivedesk-core.git
+    targetRevision: main
+    path: infra/helm/drivedesk-core
+    helm:
+      valueFiles:
+        - ../../gitops/environments/canary/values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: drivedesk-canary
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

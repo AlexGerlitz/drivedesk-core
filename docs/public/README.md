@@ -41,6 +41,7 @@ credentials.
 - `SLO_CANARY_GATE_EVIDENCE.md` - public-safe SLO canary promotion gate drill.
 - `STAGED_PROMOTION_EVIDENCE.md` - public-safe staged release promotion drill.
 - `HELM_CHART.md` - public-safe Helm chart foundation.
+- `GITOPS_DELIVERY.md` - public-safe GitOps delivery foundation.
 - `ARCHITECTURE_DIAGRAMS.md` - public-safe architecture diagrams.
 - `PUBLIC_DEMO_PLAN.md` - future live demo plan.
 - `ROADMAP.md` - public-safe engineering roadmap.
@@ -56,6 +57,8 @@ credentials.
 - `evidence/staged-promotion.sanitized.json` - machine-readable synthetic staged
   promotion evidence snapshot.
 - `evidence/helm-render.sanitized.json` - machine-readable Helm chart validation
+  evidence snapshot.
+- `evidence/gitops-layout.sanitized.json` - machine-readable GitOps layout
   evidence snapshot.
 - `assets/drivedesk-core-demo-overview.png` - public demo screenshot.
 
@@ -84,6 +87,7 @@ The public repository export also generates:
 - `scripts/check_public_slo_canary_gate.sh` - public-safe SLO canary gate drill.
 - `scripts/check_public_staged_promotion.sh` - public-safe staged promotion drill.
 - `scripts/check_public_helm_render.sh` - public-safe Helm chart validation.
+- `scripts/check_public_gitops_layout.sh` - public-safe GitOps layout validation.
 - `scripts/generate_public_demo_sdk.py` - generated SDK builder from OpenAPI.
 - `scripts/check_public_demo_sdk.sh` - generated SDK drift and runtime smoke.
 - `sdk/generated/public-demo/` - generated Python, JavaScript, and TypeScript
@@ -136,9 +140,10 @@ https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 33. Read the SLO canary gate evidence overview.
 34. Read the staged promotion evidence overview.
 35. Read the Helm chart foundation overview.
-36. Read the case study.
-37. Check CI and public demo health workflow results.
-38. Run the public smoke checks locally.
+36. Read the GitOps delivery foundation overview.
+37. Read the case study.
+38. Check CI and public demo health workflow results.
+39. Run the public smoke checks locally.
 
 ## Human Explanation
 

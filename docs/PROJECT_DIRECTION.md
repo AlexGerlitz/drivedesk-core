@@ -33,6 +33,7 @@ apps/admin     future frontend workspace
 packages/core  domain primitives
 infra/docker   local Docker runtime
 infra/helm     Kubernetes packaging foundation
+infra/gitops   Argo CD GitOps delivery foundation
 docs           architecture notes and ADRs
 tests          API and foundation tests
 ```

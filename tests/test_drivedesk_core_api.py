@@ -1253,6 +1253,8 @@ def test_public_demo_endpoint_is_read_only_synthetic_contract(
         "Release safety",
         "GitOps and IaC",
     }
+    gate_by_name = {gate["name"]: gate for gate in payload["engineeringProof"]["gates"]}
+    assert gate_by_name["Core smoke"]["command"] == "bash scripts/ci_smoke_public.sh"
     assert {job["status"] for job in payload["integrationJobs"]} >= {"processed", "retry", "dead_letter"}
 
     serialized = json.dumps(payload).lower()

@@ -448,7 +448,7 @@ def build_public_demo_payload() -> dict[str, Any]:
                 {
                     "name": "Core smoke",
                     "status": "passed",
-                    "command": "bash scripts/ci_smoke.sh",
+                    "command": "bash scripts/ci_smoke_public.sh",
                     "evidence": "API, worker, RBAC, outbox, integration, and observability checks",
                 },
                 {

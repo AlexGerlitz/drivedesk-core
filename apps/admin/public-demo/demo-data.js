@@ -546,7 +546,7 @@ window.DRIVEDESK_DEMO_DATA = {
       {
         "name": "Core smoke",
         "status": "passed",
-        "command": "bash scripts/ci_smoke.sh",
+        "command": "bash scripts/ci_smoke_public.sh",
         "evidence": "API, worker, RBAC, outbox, integration, and observability checks"
       },
       {

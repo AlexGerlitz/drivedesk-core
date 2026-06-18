@@ -7,6 +7,7 @@ infrastructure, production history, customer data, or operational credentials.
 ## Documents
 
 - `PORTFOLIO_CASE_STUDY.md` - engineering case study and current system shape.
+- `ENGINEERING_PROOF.md` - proof tab payload, gates, evidence, and verifier contract.
 - `SYSTEM_DESIGN.md` - public-safe system design overview.
 - `API_BACKED_DEMO.md` - read-only synthetic API contract for the public demo.
 - `WORKFLOW_DEMO.md` - synthetic business workflow, timeline, events, audit,
@@ -135,6 +136,7 @@ The public repository export also generates:
 - `scripts/check_public_private_infra_scheduled_validation.sh` - public-safe recurring scheduled validation.
 - `scripts/check_public_private_infra_scheduled_alerting.sh` - public-safe scheduled validation alerting.
 - `scripts/check_public_portfolio_70_milestone.sh` - public-safe 70 percent milestone validation.
+- `scripts/check_public_engineering_proof.sh` - public-safe proof tab and evidence contract validation.
 - `scripts/check_public_gitops_layout.sh` - public-safe GitOps layout validation.
 - `scripts/check_public_gitops_image_automation.sh` - public-safe GitOps image automation validation.
 - `scripts/check_public_gitops_promotion_drift.sh` - public-safe GitOps promotion and drift validation.
@@ -154,15 +156,16 @@ Hosted demo:
 https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 ```
 
-## Showcase Path
+## Verification Path
 
-1. Open the hosted demo.
+1. Open the hosted demo and switch to the Proof tab.
 2. Inspect `docs/openapi.json`.
 3. Run `bash scripts/ci_smoke_public.sh`.
-4. Run `bash scripts/check_public_demo_api.sh`.
-5. Run one generated client example from `examples/`.
-6. Review `PORTFOLIO_70_MILESTONE.md` and `SANITIZED_EVIDENCE.md`.
-7. Review `SYSTEM_DESIGN.md`, `GITOPS_DELIVERY.md`, and the recovery evidence docs.
+4. Run `bash scripts/check_public_engineering_proof.sh`.
+5. Run `bash scripts/check_public_demo_api.sh`.
+6. Run one generated client example from `examples/`.
+7. Review `ENGINEERING_PROOF.md`, `PORTFOLIO_70_MILESTONE.md`, and `SANITIZED_EVIDENCE.md`.
+8. Review `SYSTEM_DESIGN.md`, `GITOPS_DELIVERY.md`, and the recovery evidence docs.
 
 ## Engineering Summary
 

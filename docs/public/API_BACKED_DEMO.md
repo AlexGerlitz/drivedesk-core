@@ -17,7 +17,8 @@ GET /demo/public
 The endpoint returns the same product-shaped fake data used by the public demo
 shell: tenant, health, metrics, work queue, workflow stages, timeline entries,
 domain events, members, audit events, outbox events, adapter contracts, sync
-jobs, and Integration Health.
+jobs, Integration Health, recovery evidence, and the `engineeringProof`
+contract rendered by the Proof tab.
 
 ## Runtime Modes
 
@@ -64,6 +65,12 @@ bash scripts/check_public_demo_sdk.sh
 present, and then runs the curl, Python, and JavaScript examples against the
 same API.
 
+The Proof tab contract is documented in `ENGINEERING_PROOF.md` and checked by:
+
+```bash
+bash scripts/check_public_engineering_proof.sh
+```
+
 The workflow payload is documented in `WORKFLOW_DEMO.md`. It demonstrates the
 synthetic path:
 
@@ -90,4 +97,5 @@ The endpoint is read-only and fake-data only:
 This is the first public frontend/backend contract. The static demo works
 without infrastructure, and the same UI can be pointed at the FastAPI endpoint
 to verify that the backend owns the demo payload shape: workflow, timeline,
-domain events, audit, and outbox data.
+domain events, audit, outbox data, recovery evidence, and engineering proof
+gates.

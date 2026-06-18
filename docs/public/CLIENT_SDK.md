@@ -61,6 +61,7 @@ The SDK is not meant to be a full production client yet. It proves a foundation:
 - DriveDesk publishes a machine-readable API contract.
 - The contract can generate working client code.
 - The generated client validates the product-shaped demo payload.
+- The generated client validates the `engineeringProof` gate shape.
 - The public repo can prove this in CI without private infrastructure.
 
 ## Engineering Summary

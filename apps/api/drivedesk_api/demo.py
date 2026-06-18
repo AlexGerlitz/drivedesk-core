@@ -389,6 +389,30 @@ def build_public_demo_payload() -> dict[str, Any]:
                 "detail": "promotion history hash recorded for auditability",
                 "evidence": "promotion_history_hash_recorded",
             },
+            {
+                "name": "Scheduled validation",
+                "state": "success",
+                "detail": "daily public-safe validation workflow is recorded",
+                "evidence": "infra.scheduled_validation.healthy",
+            },
+            {
+                "name": "Missed-run guard",
+                "state": "success",
+                "detail": "missed scheduled checks require operator review",
+                "evidence": "missed_run_guard_recorded",
+            },
+            {
+                "name": "Scheduled alerting",
+                "state": "success",
+                "detail": "failed or missed scheduled checks produce runbook-backed alert evidence",
+                "evidence": "infra.scheduled_validation.alerting.ready",
+            },
+            {
+                "name": "Failure artifact",
+                "state": "success",
+                "detail": "workflow failures upload a public-safe alert artifact",
+                "evidence": "public-scheduled-validation-alert",
+            },
         ],
         "workflow": {
             "id": "wf-demo-lead-to-student",

@@ -35,6 +35,7 @@ bash scripts/check_public_private_infra_remediation.sh
 bash scripts/check_public_private_infra_remediation_execution.sh
 bash scripts/check_public_private_infra_post_remediation_drift_refresh.sh
 bash scripts/check_public_private_infra_scheduled_validation.sh
+bash scripts/check_public_private_infra_scheduled_alerting.sh
 bash scripts/check_public_gitops_layout.sh
 bash scripts/check_public_gitops_image_automation.sh
 bash scripts/check_public_gitops_promotion_drift.sh

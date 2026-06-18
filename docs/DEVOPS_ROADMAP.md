@@ -28,6 +28,7 @@ Implemented baseline:
 - public-safe private infrastructure remediation execution evidence for the exported Core surface.
 - public-safe post-remediation drift refresh evidence for the exported Core surface.
 - public-safe recurring scheduled validation evidence for the exported Core surface.
+- public-safe scheduled validation alerting evidence for the exported Core surface.
 - public-safe GitOps delivery foundation and Argo CD layout validation for the exported Core surface.
 - public-safe GitOps image promotion and drift detection for the exported Core surface.
 - public-safe GitOps drift remediation planning for the exported Core surface.
@@ -75,6 +76,9 @@ What this gives us:
 - recurring scheduled validation evidence records a daily public-safe workflow,
   manual dispatch fallback, missed-run guard, sample successful runs, and no
   runtime mutation.
+- scheduled validation alerting evidence records what happens when the
+  scheduled loop is missed or fails: GitHub Actions failure artifact, operator
+  review route, runbook keys, and blocked promotion.
 - GitOps desired-state delivery connects the Helm chart to build, staging,
   canary, and production promotion flow without exposing a live cluster.
 - image promotion and drift evidence shows the difference between desired state
@@ -89,10 +93,10 @@ What this gives us:
 
 Recommended next DevOps tasks:
 
-1. Add scheduled validation alerting and notification evidence.
-2. Broaden generated client examples from the OpenAPI schema.
-3. Add broader generated client examples from the OpenAPI schema.
-4. Add policy-as-code proposals only as text-only design notes unless the owner
+1. Broaden generated client examples from the OpenAPI schema.
+2. Add public-safe external notification adapter design once real private
+   destinations are chosen.
+3. Add policy-as-code proposals only as text-only design notes unless the owner
    explicitly requests policy changes.
 
 ## Human Summary

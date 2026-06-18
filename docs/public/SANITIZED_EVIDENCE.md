@@ -90,6 +90,12 @@ Private infrastructure scheduled validation source file:
 docs/public/evidence/private-infra-scheduled-validation.sanitized.json
 ```
 
+Private infrastructure scheduled alerting source file:
+
+```text
+docs/public/evidence/private-infra-scheduled-alerting.sanitized.json
+```
+
 GitOps layout validation source file:
 
 ```text
@@ -128,6 +134,9 @@ Verified signals:
 - Alertmanager listener was private;
 - Prometheus scraped required targets;
 - Loki returned recent API logs;
+- scheduled validation has missed-run, failed-run, and secret-boundary alert
+  signals;
+- scheduled validation failure emits a public-safe GitHub Actions artifact;
 - Alertmanager was ready;
 - Prometheus loaded alert rules;
 - active alerts count was zero at collection time.

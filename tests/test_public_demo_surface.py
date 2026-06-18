@@ -141,6 +141,8 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
         "no_residual_drift_recorded",
         "infra.scheduled_validation.healthy",
         "missed_run_guard_recorded",
+        "infra.scheduled_validation.alerting.ready",
+        "public-scheduled-validation-alert",
     }
     assert len(payload["outbox"]) >= 3
     assert {event["status"] for event in payload["outbox"]} >= {"processed", "pending"}

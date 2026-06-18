@@ -101,11 +101,22 @@ Public-safe scheduled validation:
 
 ```bash
 bash scripts/check_public_private_infra_scheduled_validation.sh
+bash scripts/check_public_private_infra_scheduled_alerting.sh
 ```
 
 The check validates the recurring scheduled validation workflow, daily cron,
 manual dispatch fallback, missed-run guard, sample successful runs, secret
 boundary recheck, and no runtime mutation.
+
+Public-safe scheduled alerting:
+
+```bash
+bash scripts/check_public_private_infra_scheduled_alerting.sh
+```
+
+The check validates missed-run, failed-run, and secret-boundary alert signals,
+the GitHub Actions failure artifact, runbook keys, notification routes, and no
+external notification secrets.
 
 Core endpoints:
 

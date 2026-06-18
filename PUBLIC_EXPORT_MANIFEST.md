@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-18T08:38:26Z
+Generated at: 2026-06-18T09:08:26Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -183,6 +183,14 @@ Copied public-safe areas:
 - public private infrastructure scheduled validation check: missed_run_guard_recorded
 - public private infrastructure scheduled validation event: infra.scheduled_validation.healthy
 - public private infrastructure scheduled validation ADR: 0059-public-safe-private-infra-scheduled-validation
+- public private infrastructure scheduled alerting doc
+- public private infrastructure scheduled alerting workflow failure artifact: public-scheduled-validation-alert
+- public private infrastructure scheduled alerting script: scripts/check_public_private_infra_scheduled_alerting.sh
+- public private infrastructure scheduled alerting evidence snapshot: docs/public/evidence/private-infra-scheduled-alerting.sanitized.json
+- public private infrastructure scheduled alerting model: scheduled_validation_alerting
+- public private infrastructure scheduled alerting check: workflow_failure_handler_present
+- public private infrastructure scheduled alerting event: infra.scheduled_validation.alerting.ready
+- public private infrastructure scheduled alerting ADR: 0060-public-safe-private-infra-scheduled-alerting
 - public GitOps delivery foundation doc
 - public GitOps path: infra/gitops
 - public GitOps validation script: scripts/check_public_gitops_layout.sh

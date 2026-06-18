@@ -153,6 +153,10 @@ assert {item["evidence"] for item in demo["recoveryEvidence"]} >= {
     "release.staged_promotion.completed",
     "production_approval_recorded",
     "promotion_history_hash_recorded",
+    "infra.scheduled_validation.healthy",
+    "missed_run_guard_recorded",
+    "infra.scheduled_validation.alerting.ready",
+    "public-scheduled-validation-alert",
 }, demo
 assert all(item["state"] == "success" for item in demo["recoveryEvidence"]), demo
 assert any(item["metric"] == "drivedesk_integration_reconciliations" for item in demo["integrationHealth"]), demo

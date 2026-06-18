@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "check": "public_private_infra_scheduled_alerting",
+  "alerting_model": "scheduled_validation_alerting",
+  "data_profile": "sanitized_private_staging_summary",
+  "source": {
+    "alerting_contract": "infra/state-validation/private-infra-scheduled-alerting.sanitized.json",
+    "scheduled_validation_contract": "infra/state-validation/private-infra-scheduled-validation.sanitized.json",
+    "scheduled_validation_evidence": "docs/public/evidence/private-infra-scheduled-validation.sanitized.json",
+    "workflow": ".github/workflows/scheduled-validation.yml"
+  },
+  "environment": {
+    "name": "private_staging",
+    "public_route": false,
+    "production_data_touched": false
+  },
+  "alert_policy": {
+    "policy_id": "private-infra-scheduled-alerting-2026-06-18",
+    "deduplication_key": "private-infra-scheduled-validation",
+    "notification_channels": [
+      "github_actions_failure",
+      "public_safe_failure_artifact",
+      "operator_review"
+    ],
+    "external_notifications_enabled": false,
+    "requires_private_secrets": false,
+    "signals_recorded": [
+      "infra.scheduled_validation.missed",
+      "infra.scheduled_validation.failed",
+      "infra.scheduled_validation.secret_boundary_failed"
+    ]
+  },
+  "workflow_failure_handler": {
+    "failure_step": "Emit scheduled validation alert payload",
+    "artifact_step": "Upload scheduled validation alert payload",
+    "artifact_name": "public-scheduled-validation-alert",
+    "artifact_path": ".scheduled-validation-alert/alert.json",
+    "emits_event_type": "infra.scheduled_validation.failed",
+    "runbook_key": "scheduled_validation.failed",
+    "read_only": true
+  },
+  "checks": {
+    "alerting_contract_present": true,
+    "workflow_failure_handler_present": true,
+    "missed_run_alert_recorded": true,
+    "failed_run_alert_recorded": true,
+    "secret_boundary_alert_recorded": true,
+    "runbook_catalog_recorded": true,
+    "notification_routes_recorded": true,
+    "scheduled_validation_source_referenced": true,
+    "no_external_secret_required": true,
+    "no_apply_no_mutation": true,
+    "private_markers_absent": true,
+    "production_data_touched": false
+  },
+  "decision": {
+    "event_type": "infra.scheduled_validation.alerting.ready",
+    "recommended_action": "review failed or missed scheduled validation before release promotion",
+    "automatic_public_apply": false,
+    "production_data_touched": false
+  },
+  "redaction": {
+    "paths_included": false,
+    "hostnames_included": false,
+    "addresses_included": false,
+    "credentials_included": false,
+    "raw_logs_included": false,
+    "request_bodies_included": false,
+    "production_data_included": false
+  }
+}

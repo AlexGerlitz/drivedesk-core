@@ -46,3 +46,27 @@ jobs:
           else
             bash scripts/check_secrets.sh
           fi
+
+      - name: Emit scheduled validation alert payload
+        if: failure()
+        run: |
+          mkdir -p .scheduled-validation-alert
+          cat > .scheduled-validation-alert/alert.json <<'JSON'
+          {
+            "schema_version": 1,
+            "event_type": "infra.scheduled_validation.failed",
+            "severity": "critical",
+            "runbook_key": "scheduled_validation.failed",
+            "notification_route": "github_actions_failure_artifact",
+            "secondary_route": "operator_review",
+            "production_data_touched": false
+          }
+          JSON
+
+      - name: Upload scheduled validation alert payload
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-scheduled-validation-alert
+          path: .scheduled-validation-alert/alert.json
+          if-no-files-found: ignore

@@ -1,0 +1,120 @@
+{
+  "schema_version": 1,
+  "alerting_model": "scheduled_validation_alerting",
+  "data_profile": "sanitized_private_staging_summary",
+  "environment": {
+    "name": "private_staging",
+    "public_route": false,
+    "production_data_touched": false
+  },
+  "source_contracts": [
+    "infra/state-validation/private-infra-scheduled-validation.sanitized.json",
+    "docs/public/evidence/private-infra-scheduled-validation.sanitized.json",
+    ".github/workflows/scheduled-validation.yml"
+  ],
+  "alert_policy": {
+    "policy_id": "private-infra-scheduled-alerting-2026-06-18",
+    "deduplication_key": "private-infra-scheduled-validation",
+    "notification_channels": [
+      "github_actions_failure",
+      "public_safe_failure_artifact",
+      "operator_review"
+    ],
+    "external_notifications_enabled": false,
+    "requires_private_secrets": false,
+    "signals": [
+      {
+        "event_type": "infra.scheduled_validation.missed",
+        "severity": "warning",
+        "condition": "latest_run_age_hours > 26",
+        "runbook_key": "scheduled_validation.missed",
+        "notification_route": "operator_review",
+        "recommended_action": "verify workflow schedule, latest run status, and repository Actions availability"
+      },
+      {
+        "event_type": "infra.scheduled_validation.failed",
+        "severity": "critical",
+        "condition": "scheduled validation workflow conclusion is not success",
+        "runbook_key": "scheduled_validation.failed",
+        "notification_route": "github_actions_failure_artifact",
+        "recommended_action": "open failed job logs, run the public-safe checker locally, and block release promotion"
+      },
+      {
+        "event_type": "infra.scheduled_validation.secret_boundary_failed",
+        "severity": "critical",
+        "condition": "secret boundary recheck fails",
+        "runbook_key": "scheduled_validation.secret_boundary_failed",
+        "notification_route": "operator_review",
+        "recommended_action": "stop public export, inspect changed files, rotate exposed secret if any real credential appears"
+      }
+    ]
+  },
+  "workflow_failure_handler": {
+    "workflow_path": ".github/workflows/scheduled-validation.yml",
+    "failure_step": "Emit scheduled validation alert payload",
+    "artifact_step": "Upload scheduled validation alert payload",
+    "artifact_name": "public-scheduled-validation-alert",
+    "artifact_path": ".scheduled-validation-alert/alert.json",
+    "emits_event_type": "infra.scheduled_validation.failed",
+    "runbook_key": "scheduled_validation.failed",
+    "read_only": true
+  },
+  "runbooks": [
+    {
+      "runbook_key": "scheduled_validation.missed",
+      "summary": "Scheduled validation did not run inside the expected interval.",
+      "severity": "warning",
+      "first_actions": [
+        "check GitHub Actions schedule availability",
+        "run workflow_dispatch manually",
+        "run scripts/check_public_private_infra_scheduled_validation.sh locally"
+      ],
+      "release_gate": "hold promotion until a fresh validation succeeds"
+    },
+    {
+      "runbook_key": "scheduled_validation.failed",
+      "summary": "Scheduled validation ran and failed.",
+      "severity": "critical",
+      "first_actions": [
+        "open failed GitHub Actions job",
+        "inspect public-safe alert artifact",
+        "run scripts/check_public_private_infra_scheduled_alerting.sh locally",
+        "keep release promotion blocked until root cause is fixed"
+      ],
+      "release_gate": "block promotion"
+    },
+    {
+      "runbook_key": "scheduled_validation.secret_boundary_failed",
+      "summary": "The public/private secret boundary check failed.",
+      "severity": "critical",
+      "first_actions": [
+        "stop public export",
+        "inspect the exact changed file",
+        "remove sensitive value from Git history if needed",
+        "rotate any exposed credential before continuing"
+      ],
+      "release_gate": "block promotion"
+    }
+  ],
+  "boundaries": {
+    "no_public_apply": true,
+    "no_production_apply": true,
+    "no_opentofu_apply": true,
+    "no_gitops_sync": true,
+    "no_runtime_mutation": true,
+    "no_service_restart": true,
+    "no_external_notification_secret": true,
+    "no_raw_logs": true,
+    "no_request_bodies": true,
+    "no_credentials": true,
+    "no_private_paths": true,
+    "no_addresses": true,
+    "no_production_data": true
+  },
+  "decision": {
+    "event_type": "infra.scheduled_validation.alerting.ready",
+    "recommended_action": "keep scheduled validation alerting enabled and review failures before promotion",
+    "automatic_public_apply": false,
+    "production_data_touched": false
+  }
+}

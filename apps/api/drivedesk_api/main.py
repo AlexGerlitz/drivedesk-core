@@ -15,6 +15,7 @@ from drivedesk_api.db import (
     BusinessRecord,
     IntegrationConnection,
     IntegrationConnectionCheck,
+    IntegrationIncident,
     IntegrationReconciliation,
     Membership,
     OutboxEvent,
@@ -79,11 +80,15 @@ from drivedesk_api.schemas import (
     IntegrationConnectionCreate,
     IntegrationConnectionHealthRead,
     IntegrationConnectionRead,
+    IntegrationIncidentCreate,
+    IntegrationIncidentRead,
+    IntegrationIncidentStatusChange,
     IntegrationMappingPreviewCreate,
     IntegrationMappingPreviewRead,
     IntegrationOperatorReviewItemRead,
     IntegrationReconciliationCreate,
     IntegrationReconciliationRead,
+    IntegrationRunbookRead,
     LoginRequest,
     MembershipCreate,
     MembershipRead,
@@ -105,13 +110,16 @@ from drivedesk_api.services import (
     count_business_records_by_type_status,
     count_integration_connection_checks_by_adapter_status,
     count_integration_connections_by_adapter_status,
+    count_integration_incidents_by_adapter_severity_status,
     count_integration_reconciliations_by_adapter_status,
     count_outbox_by_status,
     count_workflow_action_runs_by_action_status,
     count_workflow_rules_by_status_trigger_action,
+    change_integration_incident_status,
     create_accounting_export_job,
     create_business_record,
     create_file_import_job,
+    create_integration_incident,
     create_integration_connection,
     create_integration_reconciliation,
     create_membership,
@@ -124,6 +132,7 @@ from drivedesk_api.services import (
     list_business_records,
     list_integration_connection_checks,
     list_integration_connections,
+    list_integration_incidents,
     list_integration_operator_review,
     list_integration_reconciliations,
     list_platform_admins,
@@ -143,6 +152,7 @@ from drivedesk_api.tenant_scope import list_tenants_for_actor, list_users_for_ac
 from drivedesk_core import __version__ as core_version
 from drivedesk_core import (
     list_adapter_descriptors,
+    list_integration_runbooks,
     list_lifecycle_policies,
     preview_lifecycle_transition,
 )
@@ -209,6 +219,10 @@ def build_app(settings: Settings | None = None) -> FastAPI:
     async def list_integration_adapters_endpoint() -> list[dict[str, object]]:
         return list_adapter_descriptors()
 
+    @api.get("/integration-runbooks", response_model=list[IntegrationRunbookRead], tags=["integrations"])
+    async def list_integration_runbooks_endpoint() -> list[dict[str, object]]:
+        return list_integration_runbooks()
+
     @api.get(
         "/business-record-lifecycle-policies",
         response_model=list[BusinessRecordLifecyclePolicyRead],
@@ -231,6 +245,7 @@ def build_app(settings: Settings | None = None) -> FastAPI:
             integration_connection_rows = await count_integration_connections_by_adapter_status(session)
             integration_connection_check_rows = await count_integration_connection_checks_by_adapter_status(session)
             integration_reconciliation_rows = await count_integration_reconciliations_by_adapter_status(session)
+            integration_incident_rows = await count_integration_incidents_by_adapter_severity_status(session)
         except Exception as exc:
             # Keep Prometheus scrapeable even when storage-backed aggregates degrade.
             storage_available = False
@@ -245,6 +260,7 @@ def build_app(settings: Settings | None = None) -> FastAPI:
             integration_connection_rows = []
             integration_connection_check_rows = []
             integration_reconciliation_rows = []
+            integration_incident_rows = []
             log_json(
                 metrics_logger,
                 "metrics.storage_unavailable",
@@ -267,6 +283,7 @@ def build_app(settings: Settings | None = None) -> FastAPI:
                 integration_connection_rows=integration_connection_rows,
                 integration_connection_check_rows=integration_connection_check_rows,
                 integration_reconciliation_rows=integration_reconciliation_rows,
+                integration_incident_rows=integration_incident_rows,
                 storage_available=storage_available,
             ),
             media_type="text/plain; version=0.0.4; charset=utf-8",
@@ -662,6 +679,76 @@ def build_app(settings: Settings | None = None) -> FastAPI:
             adapter_key=adapter_key,
             outbox_event_id=outbox_event_id,
             limit=limit,
+        )
+
+    @api.post(
+        "/tenants/{tenant_id}/integration-incidents",
+        response_model=IntegrationIncidentRead,
+        status_code=201,
+        tags=["integrations"],
+    )
+    async def create_integration_incident_endpoint(
+        tenant_id: str,
+        payload: IntegrationIncidentCreate,
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> IntegrationIncident:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.TENANT_WRITE)
+        return await create_integration_incident(
+            session,
+            tenant_id=tenant_id,
+            payload=payload,
+            actor=actor,
+        )
+
+    @api.get(
+        "/tenants/{tenant_id}/integration-incidents",
+        response_model=list[IntegrationIncidentRead],
+        tags=["integrations"],
+    )
+    async def list_integration_incidents_endpoint(
+        tenant_id: str,
+        status_filter: str | None = Query(default=None, alias="status"),
+        severity: str | None = Query(default=None),
+        adapter_key: str | None = Query(default=None),
+        source_type: str | None = Query(default=None),
+        limit: int = Query(default=50, ge=1, le=100),
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> list[IntegrationIncident]:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.TENANT_READ)
+        return await list_integration_incidents(
+            session,
+            tenant_id=tenant_id,
+            status_filter=status_filter,
+            severity=severity,
+            adapter_key=adapter_key,
+            source_type=source_type,
+            limit=limit,
+        )
+
+    @api.post(
+        "/tenants/{tenant_id}/integration-incidents/{incident_id}/status",
+        response_model=IntegrationIncidentRead,
+        tags=["integrations"],
+    )
+    async def change_integration_incident_status_endpoint(
+        tenant_id: str,
+        incident_id: str,
+        payload: IntegrationIncidentStatusChange,
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> IntegrationIncident:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.TENANT_WRITE)
+        return await change_integration_incident_status(
+            session,
+            tenant_id=tenant_id,
+            incident_id=incident_id,
+            payload=payload,
+            actor=actor,
         )
 
     @api.post(

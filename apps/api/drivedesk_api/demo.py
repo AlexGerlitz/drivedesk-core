@@ -271,6 +271,13 @@ def build_public_demo_payload() -> dict[str, Any]:
                 "detail": "provider evidence verified",
                 "metric": "drivedesk_integration_reconciliations",
             },
+            {
+                "label": "Open incidents",
+                "value": "2",
+                "state": "open",
+                "detail": "runbook-backed operator cards",
+                "metric": "drivedesk_integration_incidents",
+            },
         ],
         "integrationReadiness": [
             {
@@ -297,6 +304,11 @@ def build_public_demo_payload() -> dict[str, Any]:
                 "name": "Reconciliation evidence",
                 "state": "active",
                 "progress": 40,
+            },
+            {
+                "name": "Incident runbooks",
+                "state": "active",
+                "progress": 35,
             },
             {
                 "name": "Public demo runtime",

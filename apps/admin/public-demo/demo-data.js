@@ -308,6 +308,13 @@ window.DRIVEDESK_DEMO_DATA = {
       "state": "matched",
       "detail": "provider evidence verified",
       "metric": "drivedesk_integration_reconciliations"
+    },
+    {
+      "label": "Open incidents",
+      "value": "2",
+      "state": "open",
+      "detail": "runbook-backed operator cards",
+      "metric": "drivedesk_integration_incidents"
     }
   ],
   "integrationReadiness": [
@@ -335,6 +342,11 @@ window.DRIVEDESK_DEMO_DATA = {
       "name": "Reconciliation evidence",
       "state": "active",
       "progress": 40
+    },
+    {
+      "name": "Incident runbooks",
+      "state": "active",
+      "progress": 35
     },
     {
       "name": "Public demo runtime",

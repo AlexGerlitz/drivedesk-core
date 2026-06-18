@@ -16,6 +16,7 @@ from drivedesk_api.db import (
     BusinessRecord,
     IntegrationConnection,
     IntegrationConnectionCheck,
+    IntegrationIncident,
     IntegrationReconciliation,
     Membership,
     OutboxEvent,
@@ -34,6 +35,8 @@ from drivedesk_api.schemas import (
     FileImportCreate,
     IntegrationConnectionCheckCreate,
     IntegrationConnectionCreate,
+    IntegrationIncidentCreate,
+    IntegrationIncidentStatusChange,
     IntegrationMappingPreviewCreate,
     IntegrationReconciliationCreate,
     MembershipCreate,
@@ -50,8 +53,10 @@ from drivedesk_core import (
     build_adapter_connection_diagnostics,
     build_adapter_mapping_preview,
     list_adapter_descriptors,
+    list_integration_runbooks,
     resolve_adapter,
     resolve_adapter_connection_scopes,
+    select_integration_runbook,
     validate_adapter_connection_scope,
     validate_adapter_connection_profile,
 )
@@ -1334,6 +1339,26 @@ async def count_integration_reconciliations_by_adapter_status(session: AsyncSess
     ]
 
 
+async def count_integration_incidents_by_adapter_severity_status(session: AsyncSession) -> list[dict[str, object]]:
+    result = await session.execute(
+        select(
+            IntegrationIncident.adapter_key,
+            IntegrationIncident.severity,
+            IntegrationIncident.status,
+            func.count().label("incident_count"),
+        ).group_by(IntegrationIncident.adapter_key, IntegrationIncident.severity, IntegrationIncident.status)
+    )
+    return [
+        {
+            "adapter_key": row.adapter_key,
+            "severity": row.severity,
+            "status": row.status,
+            "incident_count": int(row.incident_count or 0),
+        }
+        for row in result.all()
+    ]
+
+
 async def ensure_tenant_exists(session: AsyncSession, tenant_id: str) -> Tenant:
     tenant = await session.get(Tenant, tenant_id)
     if not tenant:
@@ -1671,6 +1696,240 @@ async def list_integration_reconciliations(
 
     result = await session.execute(query)
     return list(result.scalars().all())
+
+
+def _incident_safe_payload_summary(payload_summary: dict[str, object]) -> dict[str, object]:
+    allowed_keys = {
+        "payload_valid",
+        "has_integration_connection",
+        "source_format",
+        "record_count",
+        "document_count",
+        "document_types",
+        "raw_records_redacted",
+        "raw_documents_redacted",
+        "connection_scopes",
+        "mapping_keys",
+        "simulate_failure",
+    }
+    return {key: payload_summary[key] for key in sorted(allowed_keys) if key in payload_summary}
+
+
+def _primary_runbook_action(runbook: dict[str, object]) -> str:
+    actions = runbook.get("recommended_actions")
+    if isinstance(actions, list) and actions:
+        return " | ".join(str(action) for action in actions)
+    return str(runbook.get("summary") or "Review the integration incident.")
+
+
+def _incident_from_outbox_event(event: OutboxEvent, *, tenant_id: str) -> tuple[dict[str, object], dict[str, object]]:
+    runbook = select_integration_runbook("outbox_event", event.status)
+    if not runbook:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="outbox event does not require an integration incident runbook",
+        )
+
+    operation = _adapter_operation_by_event_type(event.adapter_key, event.event_type)
+    _, payload_summary = _safe_outbox_payload_summary(event.payload_json)
+    evidence = {
+        "source_type": "outbox_event",
+        "outbox_event_id": event.id,
+        "event_type": event.event_type,
+        "outbox_status": event.status,
+        "adapter_key": event.adapter_key or "internal.noop",
+        "operation_key": operation.get("key") if operation else None,
+        "attempts": event.attempts,
+        "last_error_present": bool(event.last_error),
+        "next_retry_at": event.next_retry_at.isoformat() if event.next_retry_at else None,
+        "dead_lettered_at": event.dead_lettered_at.isoformat() if event.dead_lettered_at else None,
+        "payload_summary": _incident_safe_payload_summary(payload_summary),
+        "retry_endpoint": f"/tenants/{tenant_id}/outbox-events/{event.id}/retry",
+    }
+    return runbook, evidence
+
+
+def _incident_from_reconciliation(
+    reconciliation: IntegrationReconciliation,
+) -> tuple[dict[str, object], dict[str, object]]:
+    runbook = select_integration_runbook("reconciliation", reconciliation.status)
+    if not runbook:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="reconciliation does not require an integration incident runbook",
+        )
+
+    actual = _safe_json_dict(reconciliation.actual_json)
+    diff = _safe_json_dict(reconciliation.diff_json)
+    evidence = {
+        "source_type": "reconciliation",
+        "reconciliation_id": reconciliation.id,
+        "outbox_event_id": reconciliation.outbox_event_id,
+        "reconciliation_status": reconciliation.status,
+        "adapter_key": reconciliation.adapter_key,
+        "operation_key": reconciliation.operation_key,
+        "diff_keys": sorted(diff.keys()),
+        "provider_status": actual.get("provider_status"),
+        "provider_reference_present": bool(actual.get("provider_reference")),
+        "note_present": bool(actual.get("note_present")),
+    }
+    return runbook, evidence
+
+
+async def create_integration_incident(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    payload: IntegrationIncidentCreate,
+    actor: ActorContext,
+) -> IntegrationIncident:
+    await ensure_tenant_exists(session, tenant_id)
+
+    if payload.source_type == "outbox_event":
+        source = await session.get(OutboxEvent, payload.source_id)
+        if not source or source.tenant_id != tenant_id:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="outbox event not found")
+        runbook, evidence = _incident_from_outbox_event(source, tenant_id=tenant_id)
+        adapter_key = source.adapter_key or "internal.noop"
+        operation_key = evidence.get("operation_key")
+    else:
+        source = await session.get(IntegrationReconciliation, payload.source_id)
+        if not source or source.tenant_id != tenant_id:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="reconciliation not found")
+        runbook, evidence = _incident_from_reconciliation(source)
+        adapter_key = source.adapter_key
+        operation_key = source.operation_key
+
+    if payload.note:
+        evidence["operator_note_present"] = True
+
+    incident = IntegrationIncident(
+        id=new_id(),
+        tenant_id=tenant_id,
+        source_type=payload.source_type,
+        source_id=payload.source_id,
+        adapter_key=adapter_key,
+        operation_key=str(operation_key) if operation_key else None,
+        runbook_key=str(runbook["key"]),
+        severity=str(runbook["severity"]),
+        status="open",
+        summary=str(runbook["summary"]),
+        recommended_action=_primary_runbook_action(runbook),
+        evidence_json=json.dumps(evidence, ensure_ascii=False, sort_keys=True),
+        created_at=datetime.now(UTC),
+    )
+    session.add(incident)
+    await write_audit(
+        session,
+        tenant_id=tenant_id,
+        actor=actor,
+        event_type="integration.incident.created",
+        entity_type="integration_incident",
+        entity_id=incident.id,
+        summary=incident.summary,
+        metadata={
+            "integration_incident_id": incident.id,
+            "source_type": incident.source_type,
+            "source_id": incident.source_id,
+            "adapter_key": incident.adapter_key,
+            "operation_key": incident.operation_key,
+            "runbook_key": incident.runbook_key,
+            "severity": incident.severity,
+            "status": incident.status,
+            "operator_note_present": bool(payload.note),
+        },
+    )
+    await commit_or_conflict(session, "integration incident already exists")
+    return incident
+
+
+async def list_integration_incidents(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    status_filter: str | None = None,
+    severity: str | None = None,
+    adapter_key: str | None = None,
+    source_type: str | None = None,
+    limit: int = 50,
+) -> list[IntegrationIncident]:
+    await ensure_tenant_exists(session, tenant_id)
+    allowed_statuses = {"open", "acknowledged", "resolved"}
+    if status_filter and status_filter not in allowed_statuses:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="status must be open, acknowledged, or resolved",
+        )
+    allowed_severities = {"info", "warning", "critical"}
+    if severity and severity not in allowed_severities:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="severity must be info, warning, or critical",
+        )
+    allowed_source_types = {"outbox_event", "reconciliation"}
+    if source_type and source_type not in allowed_source_types:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="source_type must be outbox_event or reconciliation",
+        )
+
+    query = (
+        select(IntegrationIncident)
+        .where(IntegrationIncident.tenant_id == tenant_id)
+        .order_by(IntegrationIncident.created_at.desc())
+        .limit(limit)
+    )
+    if status_filter:
+        query = query.where(IntegrationIncident.status == status_filter)
+    if severity:
+        query = query.where(IntegrationIncident.severity == severity)
+    if adapter_key:
+        query = query.where(IntegrationIncident.adapter_key == adapter_key)
+    if source_type:
+        query = query.where(IntegrationIncident.source_type == source_type)
+
+    result = await session.execute(query)
+    return list(result.scalars().all())
+
+
+async def change_integration_incident_status(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    incident_id: str,
+    payload: IntegrationIncidentStatusChange,
+    actor: ActorContext,
+) -> IntegrationIncident:
+    await ensure_tenant_exists(session, tenant_id)
+    incident = await session.get(IntegrationIncident, incident_id)
+    if not incident or incident.tenant_id != tenant_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="integration incident not found")
+
+    previous_status = incident.status
+    incident.status = payload.status
+    incident.updated_at = datetime.now(UTC)
+    incident.resolved_at = datetime.now(UTC) if payload.status == "resolved" else None
+    await write_audit(
+        session,
+        tenant_id=tenant_id,
+        actor=actor,
+        event_type="integration.incident.status_changed",
+        entity_type="integration_incident",
+        entity_id=incident.id,
+        summary=f"Integration incident status changed to {incident.status}",
+        metadata={
+            "integration_incident_id": incident.id,
+            "source_type": incident.source_type,
+            "source_id": incident.source_id,
+            "adapter_key": incident.adapter_key,
+            "runbook_key": incident.runbook_key,
+            "previous_status": previous_status,
+            "new_status": incident.status,
+            "operator_note_present": bool(payload.note),
+        },
+    )
+    await commit_or_conflict(session, "integration incident status update failed")
+    return incident
 
 
 async def retry_outbox_event(

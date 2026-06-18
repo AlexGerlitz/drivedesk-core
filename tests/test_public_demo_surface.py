@@ -108,10 +108,12 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
         "POST /tenants/{tenant_id}/integration-exports/accounting"
     )
     assert len(payload["integrationJobs"]) >= 3
-    assert len(payload["integrationHealth"]) >= 5
+    assert len(payload["integrationHealth"]) >= 6
     assert any(item["name"] == "Connection diagnostics" for item in payload["integrationReadiness"])
     assert any(item["name"] == "Reconciliation evidence" for item in payload["integrationReadiness"])
+    assert any(item["name"] == "Incident runbooks" for item in payload["integrationReadiness"])
     assert any(item["metric"] == "drivedesk_integration_reconciliations" for item in payload["integrationHealth"])
+    assert any(item["metric"] == "drivedesk_integration_incidents" for item in payload["integrationHealth"])
     assert len(payload["outbox"]) >= 3
     assert {event["status"] for event in payload["outbox"]} >= {"processed", "pending"}
     assert {job["status"] for job in payload["integrationJobs"]} >= {"processed", "retry", "dead_letter"}

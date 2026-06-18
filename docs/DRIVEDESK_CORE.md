@@ -580,6 +580,36 @@ Public docs:
 - `docs/public/INTEGRATION_RECONCILIATION.md`;
 - `docs/adr/0041-integration-reconciliation-evidence.md`.
 
+## Sprint 4O Integration Incident Runbooks
+
+Sprint 4O adds runbook-backed incident workflow for integration signals.
+
+New endpoints:
+
+- `GET /integration-runbooks`;
+- `POST /tenants/{tenant_id}/integration-incidents`;
+- `GET /tenants/{tenant_id}/integration-incidents`;
+- `POST /tenants/{tenant_id}/integration-incidents/{incident_id}/status`.
+
+Why this matters:
+
+- retry/dead-letter outbox events and reconciliation mismatches can become
+  operator-owned incident cards;
+- incidents attach a stable runbook key, severity, recommended action, safe
+  evidence, and lifecycle status;
+- status flow is `open -> acknowledged -> resolved`;
+- safe evidence excludes raw documents, imported rows, names, phone numbers,
+  provider responses, provider references, batch ids, and secrets;
+- creating an incident writes `integration.incident.created`;
+- status changes write `integration.incident.status_changed`;
+- Prometheus exposes `drivedesk_integration_incidents`;
+- future Alertmanager rules can point at the same runbook keys.
+
+Public docs:
+
+- `docs/public/INTEGRATION_INCIDENT_RUNBOOKS.md`;
+- `docs/adr/0042-integration-incident-runbooks.md`.
+
 ## Local Commands
 
 Run the API without Docker:

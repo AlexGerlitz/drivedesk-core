@@ -28,6 +28,7 @@ from drivedesk_api.db import (
     BusinessRecord,
     IntegrationConnection,
     IntegrationConnectionCheck,
+    IntegrationIncident,
     IntegrationReconciliation,
     OutboxEvent,
     PlatformAdmin,
@@ -2319,6 +2320,258 @@ def test_integration_reconciliation_evidence_flow(
     )
     assert "batch_reconcile_001" not in metrics_response.text
     assert export_event_id not in metrics_response.text
+
+
+def test_integration_incident_runbook_flow(
+    api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, session_factory = api_client
+    owner_headers = {"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"}
+    manager_headers = {"X-Actor-Id": "manager_1", "X-Actor-Role": "manager"}
+
+    runbooks_response = client.get("/integration-runbooks")
+    assert runbooks_response.status_code == 200
+    runbooks = {item["key"]: item for item in runbooks_response.json()}
+    assert runbooks["integration.retry_backlog"]["alert_name"] == "DriveDeskIntegrationRetries"
+    assert runbooks["integration.dead_letter"]["severity"] == "critical"
+    assert runbooks["integration.reconciliation_mismatch"]["source_statuses"] == ["mismatched"]
+
+    tenant_response = client.post(
+        "/tenants",
+        json={"slug": "integration-incidents", "name": "Integration Incidents"},
+        headers=owner_headers,
+    )
+    assert tenant_response.status_code == 201
+    tenant_id = tenant_response.json()["id"]
+
+    retry_response = client.post(
+        f"/tenants/{tenant_id}/integration-exports/accounting",
+        json={
+            "export_batch_id": "incident_retry_batch",
+            "simulate_failure": "retryable",
+            "documents": [
+                {
+                    "document_id": "incident_retry_doc",
+                    "document_type": "invoice",
+                    "amount_cents": 1000,
+                    "currency": "RUB",
+                    "counterparty_ref": "incident_retry_counterparty",
+                }
+            ],
+        },
+        headers=owner_headers,
+    )
+    assert retry_response.status_code == 202
+    retry_event_id = retry_response.json()["id"]
+
+    permanent_response = client.post(
+        f"/tenants/{tenant_id}/integration-exports/accounting",
+        json={
+            "export_batch_id": "incident_dead_batch",
+            "simulate_failure": "permanent",
+            "documents": [
+                {
+                    "document_id": "incident_dead_doc",
+                    "document_type": "invoice",
+                    "amount_cents": 1000,
+                    "currency": "RUB",
+                    "counterparty_ref": "incident_dead_counterparty",
+                }
+            ],
+        },
+        headers=owner_headers,
+    )
+    assert permanent_response.status_code == 202
+    dead_event_id = permanent_response.json()["id"]
+
+    processed = asyncio.run(process_outbox_once(session_factory=session_factory))
+    assert processed >= 2
+
+    manager_create_response = client.post(
+        f"/tenants/{tenant_id}/integration-incidents",
+        json={"source_type": "outbox_event", "source_id": retry_event_id},
+        headers=manager_headers,
+    )
+    assert manager_create_response.status_code == 403
+    assert manager_create_response.json()["detail"] == "permission required: tenant:write"
+
+    retry_incident_response = client.post(
+        f"/tenants/{tenant_id}/integration-incidents",
+        json={"source_type": "outbox_event", "source_id": retry_event_id, "note": "provider status checked"},
+        headers=owner_headers,
+    )
+    assert retry_incident_response.status_code == 201
+    retry_incident = retry_incident_response.json()
+    assert retry_incident["source_type"] == "outbox_event"
+    assert retry_incident["runbook_key"] == "integration.retry_backlog"
+    assert retry_incident["severity"] == "warning"
+    assert retry_incident["status"] == "open"
+    retry_evidence = json.loads(retry_incident["evidence_json"])
+    assert retry_evidence["payload_summary"]["document_count"] == 1
+    assert retry_evidence["payload_summary"]["raw_documents_redacted"] == 1
+    assert retry_evidence["retry_endpoint"].endswith(f"/outbox-events/{retry_event_id}/retry")
+    assert retry_evidence["operator_note_present"] is True
+
+    dead_incident_response = client.post(
+        f"/tenants/{tenant_id}/integration-incidents",
+        json={"source_type": "outbox_event", "source_id": dead_event_id},
+        headers=owner_headers,
+    )
+    assert dead_incident_response.status_code == 201
+    dead_incident = dead_incident_response.json()
+    assert dead_incident["runbook_key"] == "integration.dead_letter"
+    assert dead_incident["severity"] == "critical"
+
+    success_response = client.post(
+        f"/tenants/{tenant_id}/integration-exports/accounting",
+        json={
+            "export_batch_id": "incident_success_batch",
+            "documents": [
+                {
+                    "document_id": "incident_success_doc",
+                    "document_type": "receipt",
+                    "amount_cents": 5000,
+                    "currency": "RUB",
+                    "counterparty_ref": "incident_success_counterparty",
+                }
+            ],
+        },
+        headers=owner_headers,
+    )
+    assert success_response.status_code == 202
+    success_event_id = success_response.json()["id"]
+    processed = asyncio.run(process_outbox_once(session_factory=session_factory))
+    assert processed >= 1
+
+    processed_incident_response = client.post(
+        f"/tenants/{tenant_id}/integration-incidents",
+        json={"source_type": "outbox_event", "source_id": success_event_id},
+        headers=owner_headers,
+    )
+    assert processed_incident_response.status_code == 409
+    assert processed_incident_response.json()["detail"] == (
+        "outbox event does not require an integration incident runbook"
+    )
+
+    outbox_response = client.get(f"/tenants/{tenant_id}/outbox-events", headers=owner_headers)
+    assert outbox_response.status_code == 200
+    success_event = next(event for event in outbox_response.json() if event["id"] == success_event_id)
+    result = json.loads(success_event["result_json"])
+    reconciliation_response = client.post(
+        f"/tenants/{tenant_id}/integration-reconciliations",
+        json={
+            "outbox_event_id": success_event_id,
+            "provider_status": "success",
+            "provider_reference": "provider-reference-not-returned",
+            "records_received": 1,
+            "records_accepted": 0,
+            "records_rejected": 1,
+        },
+        headers=owner_headers,
+    )
+    assert reconciliation_response.status_code == 201
+    reconciliation = reconciliation_response.json()
+    assert reconciliation["status"] == "mismatched"
+    assert result["records_accepted"] == 1
+
+    reconciliation_incident_response = client.post(
+        f"/tenants/{tenant_id}/integration-incidents",
+        json={"source_type": "reconciliation", "source_id": reconciliation["id"]},
+        headers=owner_headers,
+    )
+    assert reconciliation_incident_response.status_code == 201
+    reconciliation_incident = reconciliation_incident_response.json()
+    assert reconciliation_incident["runbook_key"] == "integration.reconciliation_mismatch"
+    assert reconciliation_incident["severity"] == "critical"
+    reconciliation_evidence = json.loads(reconciliation_incident["evidence_json"])
+    assert reconciliation_evidence["provider_reference_present"] is True
+    assert set(reconciliation_evidence["diff_keys"]) == {"external_ref", "records_accepted", "records_rejected"}
+
+    serialized_incidents = json.dumps(
+        [retry_incident, dead_incident, reconciliation_incident],
+        ensure_ascii=False,
+    )
+    assert "incident_retry_doc" not in serialized_incidents
+    assert "incident_dead_doc" not in serialized_incidents
+    assert "incident_success_doc" not in serialized_incidents
+    assert "incident_retry_counterparty" not in serialized_incidents
+    assert "provider-reference-not-returned" not in serialized_incidents
+    assert "incident_retry_batch" not in serialized_incidents
+
+    critical_response = client.get(
+        f"/tenants/{tenant_id}/integration-incidents?severity=critical",
+        headers=manager_headers,
+    )
+    assert critical_response.status_code == 200
+    assert {item["runbook_key"] for item in critical_response.json()} == {
+        "integration.dead_letter",
+        "integration.reconciliation_mismatch",
+    }
+
+    invalid_filter_response = client.get(
+        f"/tenants/{tenant_id}/integration-incidents?status=dead_letter",
+        headers=owner_headers,
+    )
+    assert invalid_filter_response.status_code == 400
+    assert invalid_filter_response.json()["detail"] == "status must be open, acknowledged, or resolved"
+
+    manager_status_response = client.post(
+        f"/tenants/{tenant_id}/integration-incidents/{retry_incident['id']}/status",
+        json={"status": "acknowledged"},
+        headers=manager_headers,
+    )
+    assert manager_status_response.status_code == 403
+    assert manager_status_response.json()["detail"] == "permission required: tenant:write"
+
+    acknowledged_response = client.post(
+        f"/tenants/{tenant_id}/integration-incidents/{retry_incident['id']}/status",
+        json={"status": "acknowledged", "note": "operator is investigating"},
+        headers=owner_headers,
+    )
+    assert acknowledged_response.status_code == 200
+    assert acknowledged_response.json()["status"] == "acknowledged"
+    assert acknowledged_response.json()["resolved_at"] is None
+
+    resolved_response = client.post(
+        f"/tenants/{tenant_id}/integration-incidents/{retry_incident['id']}/status",
+        json={"status": "resolved", "note": "provider recovered"},
+        headers=owner_headers,
+    )
+    assert resolved_response.status_code == 200
+    assert resolved_response.json()["status"] == "resolved"
+    assert resolved_response.json()["resolved_at"] is not None
+
+    async def incident_state() -> tuple[list[IntegrationIncident], list[str]]:
+        async with session_factory() as session:
+            incident_result = await session.execute(select(IntegrationIncident).order_by(IntegrationIncident.created_at))
+            audit_result = await session.execute(
+                select(AuditEvent.event_type)
+                .where(AuditEvent.tenant_id == tenant_id)
+                .order_by(AuditEvent.created_at)
+            )
+            return list(incident_result.scalars().all()), list(audit_result.scalars().all())
+
+    incidents, audit_events = asyncio.run(incident_state())
+    assert [item.runbook_key for item in incidents] == [
+        "integration.retry_backlog",
+        "integration.dead_letter",
+        "integration.reconciliation_mismatch",
+    ]
+    assert Counter(audit_events)["integration.incident.created"] == 3
+    assert Counter(audit_events)["integration.incident.status_changed"] == 2
+
+    metrics_response = client.get("/metrics")
+    assert metrics_response.status_code == 200
+    assert (
+        'drivedesk_integration_incidents{adapter_key="accounting.export.mock",severity="warning",status="resolved"} 1'
+        in metrics_response.text
+    )
+    assert (
+        'drivedesk_integration_incidents{adapter_key="accounting.export.mock",severity="critical",status="open"} 2'
+        in metrics_response.text
+    )
+    assert "incident_retry_batch" not in metrics_response.text
+    assert retry_event_id not in metrics_response.text
 
 
 def test_file_import_adapter_retry_and_dead_letter(

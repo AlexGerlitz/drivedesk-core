@@ -162,6 +162,26 @@ class IntegrationReconciliation(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), index=True)
 
 
+class IntegrationIncident(Base):
+    __tablename__ = "dd_integration_incidents"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(36), index=True)
+    source_type: Mapped[str] = mapped_column(String(64), index=True)
+    source_id: Mapped[str] = mapped_column(String(36), index=True)
+    adapter_key: Mapped[str] = mapped_column(String(128), index=True)
+    operation_key: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
+    runbook_key: Mapped[str] = mapped_column(String(128), index=True)
+    severity: Mapped[str] = mapped_column(String(32), index=True)
+    status: Mapped[str] = mapped_column(String(32), default="open", index=True)
+    summary: Mapped[str] = mapped_column(String(255))
+    recommended_action: Mapped[str] = mapped_column(Text)
+    evidence_json: Mapped[str] = mapped_column(Text, default="{}")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), index=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
 class BusinessRecord(Base):
     __tablename__ = "dd_business_records"
 

@@ -6,7 +6,7 @@ integration adapters. It uses synthetic providers and fake data only.
 ## Goal
 
 DriveDesk integrations should not be invisible background magic. Every adapter
-job should produce enough safe operational signal to answer six questions:
+job should produce enough safe operational signal to answer seven questions:
 
 1. Which adapter ran?
 2. Did it succeed, retry, or go to dead letter?
@@ -14,6 +14,7 @@ job should produce enough safe operational signal to answer six questions:
 4. How long did the adapter take?
 5. Which safe log event explains the result?
 6. Does provider-side evidence match the outbox result?
+7. Which runbook-backed incidents are open?
 
 ## Metrics
 
@@ -27,6 +28,7 @@ drivedesk_integration_adapter_duration_milliseconds{adapter_key="file.import.fak
 drivedesk_integration_connections{adapter_key="file.import.fake",status="active"} 1
 drivedesk_integration_connection_checks{adapter_key="file.import.fake",status="passed"} 1
 drivedesk_integration_reconciliations{adapter_key="accounting.export.mock",status="matched"} 1
+drivedesk_integration_incidents{adapter_key="accounting.export.mock",severity="critical",status="open"} 2
 drivedesk_integration_jobs{adapter_key="accounting.export.mock",status="dead_letter"} 1
 drivedesk_integration_connections{adapter_key="accounting.export.mock",status="active"} 1
 ```
@@ -43,6 +45,7 @@ Metric meaning:
 | `drivedesk_integration_connection_checks` | Number of connection diagnostics grouped by adapter and result status. |
 | `drivedesk_integration_connection_check_duration_milliseconds` | Average connection diagnostics duration. |
 | `drivedesk_integration_reconciliations` | Number of provider evidence reconciliations grouped by adapter and status. |
+| `drivedesk_integration_incidents` | Number of runbook-backed integration incidents grouped by adapter, severity, and status. |
 
 The labels use `adapter_key` and `status` only. They do not include names,
 connection ids, phone numbers, tenant-specific provider payloads, file contents,

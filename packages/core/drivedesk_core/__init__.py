@@ -32,6 +32,7 @@ from drivedesk_core.lifecycle import (
     list_lifecycle_policies,
     preview_lifecycle_transition,
 )
+from drivedesk_core.runbooks import IntegrationRunbook, list_integration_runbooks, select_integration_runbook
 
 __all__ = [
     "ActorRef",
@@ -43,6 +44,7 @@ __all__ = [
     "DomainEvent",
     "FakeFileImportAdapter",
     "IntegrationAdapter",
+    "IntegrationRunbook",
     "LifecyclePolicy",
     "LifecycleTransition",
     "MockAccountingExportAdapter",
@@ -53,11 +55,13 @@ __all__ = [
     "describe_adapter",
     "execute_adapter",
     "list_adapter_descriptors",
+    "list_integration_runbooks",
     "list_lifecycle_policies",
     "normalize_adapter_records",
     "preview_lifecycle_transition",
     "resolve_adapter",
     "resolve_adapter_connection_scopes",
+    "select_integration_runbook",
     "describe_lifecycle_policy",
     "validate_adapter_connection_scope",
     "validate_adapter_connection_profile",

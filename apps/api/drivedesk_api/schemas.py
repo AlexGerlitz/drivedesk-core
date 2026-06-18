@@ -275,6 +275,49 @@ class IntegrationReconciliationRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class IntegrationRunbookRead(BaseModel):
+    key: str
+    title: str
+    severity: Literal["info", "warning", "critical"]
+    source_type: Literal["outbox_event", "reconciliation"]
+    source_statuses: list[str]
+    alert_name: str | None = None
+    summary: str
+    recommended_actions: list[str]
+    evidence_fields: list[str]
+
+
+class IntegrationIncidentCreate(BaseModel):
+    source_type: Literal["outbox_event", "reconciliation"]
+    source_id: str = Field(min_length=1, max_length=36)
+    note: str | None = Field(default=None, min_length=2, max_length=255)
+
+
+class IntegrationIncidentStatusChange(BaseModel):
+    status: Literal["acknowledged", "resolved"]
+    note: str | None = Field(default=None, min_length=2, max_length=255)
+
+
+class IntegrationIncidentRead(BaseModel):
+    id: str
+    tenant_id: str
+    source_type: str
+    source_id: str
+    adapter_key: str
+    operation_key: str | None = None
+    runbook_key: str
+    severity: Literal["info", "warning", "critical"]
+    status: Literal["open", "acknowledged", "resolved"]
+    summary: str
+    recommended_action: str
+    evidence_json: str
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+    resolved_at: datetime | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class IntegrationMappingPreviewCreate(BaseModel):
     adapter_key: str = Field(default="file.import.fake", min_length=2, max_length=128, pattern=r"^[a-z0-9][a-z0-9_.-]*$")
     integration_connection_id: str | None = Field(default=None, min_length=1, max_length=36)

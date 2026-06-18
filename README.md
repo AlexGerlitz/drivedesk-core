@@ -68,13 +68,14 @@ It includes:
 22. Read `docs/public/INTEGRATION_ACCOUNTING_EXPORT.md`.
 23. Read `docs/public/INTEGRATION_CONNECTION_DIAGNOSTICS.md`.
 24. Read `docs/public/INTEGRATION_RECONCILIATION.md`.
-25. Read `docs/public/INTEGRATION_OPERATOR_REVIEW.md`.
-26. Read `docs/public/INTEGRATION_CONNECTIONS.md`.
-27. Read `docs/public/SYSTEM_DESIGN.md`.
-28. Read `docs/public/INTEGRATION_ADAPTERS.md`.
-29. Read `docs/public/INTEGRATION_OBSERVABILITY.md`.
-30. Read `docs/public/OUTBOX_RECOVERY.md`.
-31. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
+25. Read `docs/public/INTEGRATION_INCIDENT_RUNBOOKS.md`.
+26. Read `docs/public/INTEGRATION_OPERATOR_REVIEW.md`.
+27. Read `docs/public/INTEGRATION_CONNECTIONS.md`.
+28. Read `docs/public/SYSTEM_DESIGN.md`.
+29. Read `docs/public/INTEGRATION_ADAPTERS.md`.
+30. Read `docs/public/INTEGRATION_OBSERVABILITY.md`.
+31. Read `docs/public/OUTBOX_RECOVERY.md`.
+32. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
 27. Check `.github/workflows/ci.yml`.
 28. Run `bash scripts/ci_smoke_public.sh` locally.
 
@@ -102,6 +103,7 @@ It includes:
 - `docs/public/INTEGRATION_ACCOUNTING_EXPORT.md` - executable outbound accounting export adapter.
 - `docs/public/INTEGRATION_CONNECTION_DIAGNOSTICS.md` - safe connection health-checks and metrics.
 - `docs/public/INTEGRATION_RECONCILIATION.md` - safe provider evidence comparison and diff.
+- `docs/public/INTEGRATION_INCIDENT_RUNBOOKS.md` - runbook-backed incident cards for integration signals.
 - `docs/public/INTEGRATION_OPERATOR_REVIEW.md` - safe review queue for failed integration jobs.
 - `docs/public/INTEGRATION_CONNECTIONS.md` - tenant-owned adapter profiles and mapping.
 - `docs/public/INTEGRATION_ADAPTERS.md` - adapter contract and retry model.
@@ -238,6 +240,7 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/public/INTEGRATION_ACCOUNTING_EXPORT.md`
 - `docs/public/INTEGRATION_CONNECTION_DIAGNOSTICS.md`
 - `docs/public/INTEGRATION_RECONCILIATION.md`
+- `docs/public/INTEGRATION_INCIDENT_RUNBOOKS.md`
 - `docs/public/INTEGRATION_OPERATOR_REVIEW.md`
 - `docs/public/INTEGRATION_CONNECTIONS.md`
 - `docs/public/INTEGRATION_ADAPTERS.md`
@@ -279,3 +282,4 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/adr/0039-mock-accounting-export-adapter.md`
 - `docs/adr/0040-integration-connection-diagnostics.md`
 - `docs/adr/0041-integration-reconciliation-evidence.md`
+- `docs/adr/0042-integration-incident-runbooks.md`

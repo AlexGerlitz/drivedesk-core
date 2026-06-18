@@ -282,6 +282,19 @@ def build_integration_reconciliation_metrics_lines(reconciliation_rows: list[dic
     return lines
 
 
+def build_integration_incident_metrics_lines(incident_rows: list[dict[str, object]]) -> list[str]:
+    lines = [
+        "# HELP drivedesk_integration_incidents Integration incidents by adapter, severity, and status.",
+        "# TYPE drivedesk_integration_incidents gauge",
+    ]
+    for row in incident_rows:
+        labels = prometheus_labels(
+            {"adapter_key": row["adapter_key"], "severity": row["severity"], "status": row["status"]}
+        )
+        lines.append(f"drivedesk_integration_incidents{labels} {row['incident_count']}")
+    return lines
+
+
 def build_readiness_metrics_lines(settings: Settings) -> list[str]:
     dependencies = {
         "database_url_configured": bool(settings.database_url),
@@ -320,6 +333,7 @@ def build_metrics_text(
     integration_connection_rows: list[dict[str, object]] | None = None,
     integration_connection_check_rows: list[dict[str, object]] | None = None,
     integration_reconciliation_rows: list[dict[str, object]] | None = None,
+    integration_incident_rows: list[dict[str, object]] | None = None,
     storage_available: bool = True,
 ) -> str:
     labels = prometheus_labels(
@@ -356,6 +370,7 @@ def build_metrics_text(
     lines.extend(build_integration_connection_metrics_lines(integration_connection_rows or []))
     lines.extend(build_integration_connection_check_metrics_lines(integration_connection_check_rows or []))
     lines.extend(build_integration_reconciliation_metrics_lines(integration_reconciliation_rows or []))
+    lines.extend(build_integration_incident_metrics_lines(integration_incident_rows or []))
     lines.append("")
     return "\n".join(lines)
 

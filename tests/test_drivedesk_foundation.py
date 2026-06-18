@@ -27,6 +27,7 @@ from drivedesk_core import (
     TenantRef,
     build_adapter_connection_diagnostics,
     build_event,
+    list_integration_runbooks,
     list_lifecycle_policies,
     preview_lifecycle_transition,
 )
@@ -267,6 +268,29 @@ def test_adapter_connection_diagnostics_are_safe_and_operation_aware() -> None:
     assert accounting["missing_operation_scopes"] == []
 
 
+def test_integration_runbook_catalog_covers_operational_states() -> None:
+    runbooks = {runbook["key"]: runbook for runbook in list_integration_runbooks()}
+
+    assert set(runbooks) >= {
+        "integration.retry_backlog",
+        "integration.dead_letter",
+        "integration.reconciliation_mismatch",
+        "integration.reconciliation_blocked",
+        "integration.reconciliation_pending",
+    }
+    assert runbooks["integration.retry_backlog"]["source_type"] == "outbox_event"
+    assert runbooks["integration.retry_backlog"]["source_statuses"] == ["retry"]
+    assert runbooks["integration.retry_backlog"]["alert_name"] == "DriveDeskIntegrationRetries"
+    assert runbooks["integration.dead_letter"]["severity"] == "critical"
+    assert runbooks["integration.dead_letter"]["source_statuses"] == ["dead_letter"]
+    assert runbooks["integration.reconciliation_mismatch"]["source_type"] == "reconciliation"
+    assert runbooks["integration.reconciliation_mismatch"]["source_statuses"] == ["mismatched"]
+    assert runbooks["integration.reconciliation_mismatch"]["alert_name"] == (
+        "DriveDeskIntegrationReconciliationMismatch"
+    )
+    assert "provider" in runbooks["integration.reconciliation_mismatch"]["summary"].lower()
+
+
 def test_business_record_lifecycle_policy_contract() -> None:
     policies = {policy["record_type"]: policy for policy in list_lifecycle_policies()}
 
@@ -394,6 +418,10 @@ def test_api_metrics_endpoint(api_client: TestClient) -> None:
         response.text
     )
     assert "# TYPE drivedesk_integration_reconciliations gauge" in response.text
+    assert "# HELP drivedesk_integration_incidents Integration incidents by adapter, severity, and status." in (
+        response.text
+    )
+    assert "# TYPE drivedesk_integration_incidents gauge" in response.text
 
 
 def test_api_metrics_endpoint_degrades_without_database_schema() -> None:
@@ -425,6 +453,9 @@ def test_api_metrics_endpoint_degrades_without_database_schema() -> None:
         response.text
     )
     assert "# HELP drivedesk_integration_reconciliations Integration reconciliation results by adapter and status." in (
+        response.text
+    )
+    assert "# HELP drivedesk_integration_incidents Integration incidents by adapter, severity, and status." in (
         response.text
     )
 

@@ -48,10 +48,14 @@ Core endpoints:
 - `GET /tenants/{tenant_id}/workflow-rules`.
 - `GET /tenants/{tenant_id}/workflow-action-runs`.
 - `GET /integration-adapters`.
+- `GET /integration-runbooks`.
 - `POST /tenants/{tenant_id}/integration-connections`.
 - `GET /tenants/{tenant_id}/integration-connections`.
 - `POST /tenants/{tenant_id}/integration-reconciliations`.
 - `GET /tenants/{tenant_id}/integration-reconciliations`.
+- `POST /tenants/{tenant_id}/integration-incidents`.
+- `GET /tenants/{tenant_id}/integration-incidents`.
+- `POST /tenants/{tenant_id}/integration-incidents/{incident_id}/status`.
 - `POST /tenants/{tenant_id}/integration-mapping-preview`.
 - `POST /tenants/{tenant_id}/integration-imports/file`.
 - `GET /demo/public`.
@@ -130,6 +134,9 @@ Integration endpoints:
 - `GET /integration-adapters` lists executable runtime adapters with
   public-safe contract metadata, payload shape, mapping examples, and
   connection-profile support flags.
+- `GET /integration-runbooks` lists public-safe runbook descriptors for retry,
+  dead-letter, reconciliation mismatch, blocked, and pending integration
+  signals.
 - `POST /tenants/{tenant_id}/integration-connections` creates a tenant-owned
   adapter profile with safe config and mapping JSON.
   The API validates adapter support, required mapping keys, non-empty mapping
@@ -141,6 +148,12 @@ Integration endpoints:
   evidence.
 - `GET /tenants/{tenant_id}/integration-reconciliations` lists safe
   reconciliation outcomes filtered by status, adapter key, or outbox event.
+- `POST /tenants/{tenant_id}/integration-incidents` creates a tenant-owned
+  runbook-backed incident from an outbox or reconciliation signal.
+- `GET /tenants/{tenant_id}/integration-incidents` lists incident cards by
+  status, severity, adapter, or source type.
+- `POST /tenants/{tenant_id}/integration-incidents/{incident_id}/status`
+  acknowledges or resolves an integration incident.
 - `POST /tenants/{tenant_id}/integration-mapping-preview` previews mapping
   transforms and accepted/rejected rows without creating outbox work.
   Stored connection previews require `file_import:preview`.

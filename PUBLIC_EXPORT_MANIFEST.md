@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-18T02:40:17Z
+Generated at: 2026-06-18T03:00:58Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -61,6 +61,9 @@ Copied public-safe areas:
 - public integration connection endpoint: /tenants/{tenant_id}/integration-connections
 - public integration connection diagnostics endpoint: /tenants/{tenant_id}/integration-connections/{connection_id}/health-checks
 - public integration reconciliation endpoint: /tenants/{tenant_id}/integration-reconciliations
+- public integration runbook catalog endpoint: /integration-runbooks
+- public integration incident endpoint: /tenants/{tenant_id}/integration-incidents
+- public integration incident status endpoint: /tenants/{tenant_id}/integration-incidents/{incident_id}/status
 - public integration mapping preview endpoint: /tenants/{tenant_id}/integration-mapping-preview
 - public accounting export endpoint: /tenants/{tenant_id}/integration-exports/accounting
 - public integration operator review endpoint: /tenants/{tenant_id}/integration-operator-review
@@ -71,10 +74,12 @@ Copied public-safe areas:
 - public integration connection metric: drivedesk_integration_connections
 - public integration diagnostics metric: drivedesk_integration_connection_checks
 - public integration reconciliation metric: drivedesk_integration_reconciliations
+- public integration incident metric: drivedesk_integration_incidents
 - public integration operator review ADR: 0037-integration-operator-review-queue
 - public mock accounting export ADR: 0039-mock-accounting-export-adapter
 - public integration connection diagnostics ADR: 0040-integration-connection-diagnostics
 - public integration reconciliation ADR: 0041-integration-reconciliation-evidence
+- public integration incident runbooks ADR: 0042-integration-incident-runbooks
 - public tenant-owned repository helper surface
 - public auth observability alerting surface
 - public demo local run script

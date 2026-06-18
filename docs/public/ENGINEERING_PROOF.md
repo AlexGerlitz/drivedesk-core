@@ -42,6 +42,8 @@ Required fields:
 | --- | --- |
 | `docs/public/PLATFORM_MATURITY_70.md` | Milestone contract and evidence groups |
 | `docs/public/SANITIZED_EVIDENCE.md` | Sanitized runtime, recovery, release, GitOps, and boundary evidence |
+| `docs/public/EVIDENCE_INDEX.md` | Public capability-to-evidence index contract |
+| `docs/public/evidence/public-evidence-index.sanitized.json` | Machine-readable index of docs, evidence, verifiers, URLs, and boundaries |
 | `docs/public/SYSTEM_DESIGN.md` | Core architecture, async boundaries, adapters, and observability |
 | `sdk/generated/public-demo/` | OpenAPI-driven Python, JavaScript, and TypeScript clients |
 
@@ -51,6 +53,7 @@ Run the proof contract check:
 
 ```bash
 bash scripts/check_public_engineering_proof.sh
+bash scripts/check_public_evidence_index.sh
 ```
 
 The check validates:

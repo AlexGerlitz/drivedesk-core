@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-18T14:30:41Z
+Generated at: 2026-06-18T15:03:18Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -203,6 +203,9 @@ Copied public-safe areas:
 - public technical capability map doc
 - public technical capability map validation script: scripts/check_public_technical_capability_map.sh
 - public technical capability map links capabilities to evidence and verifier commands
+- public evidence index doc
+- public evidence index validation script: scripts/check_public_evidence_index.sh
+- public evidence index snapshot: docs/public/evidence/public-evidence-index.sanitized.json
 - public observability proof doc
 - public observability proof validation script: scripts/check_public_observability_proof.sh
 - public observability proof evidence snapshot: docs/public/evidence/observability-proof.sanitized.json

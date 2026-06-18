@@ -102,6 +102,12 @@ Platform maturity 70 percent milestone source file:
 docs/public/evidence/platform-maturity-70.sanitized.json
 ```
 
+Public evidence index source file:
+
+```text
+docs/public/evidence/public-evidence-index.sanitized.json
+```
+
 GitOps layout validation source file:
 
 ```text
@@ -214,6 +220,11 @@ Verified signals:
   complete evidence groups, 70 recorded points, public-safe boundaries, and
   remaining work before commercial SaaS completeness;
 - `platform.maturity_70.reached` evidence is recorded.
+- the public evidence index ties capability groups to public docs, sanitized
+  evidence files, verifier commands, public URLs, and boundary notes;
+- `docs/public/EVIDENCE_INDEX.md` and
+  `docs/public/evidence/public-evidence-index.sanitized.json` are checked by
+  `bash scripts/check_public_evidence_index.sh`.
 - the public GitOps delivery foundation contains Argo CD project, application,
   environment, and promotion metadata;
 - Argo CD applications reference the Helm chart path;
@@ -275,6 +286,7 @@ The public version keeps only the operational shape and health results.
   public validation and a scheduled GitHub Actions workflow.
 - The 70 percent DevOps/platform milestone is checked through an executable
   public validation.
+- The public evidence index is checked through an executable public validation.
 - GitOps desired-state delivery is checked through an executable public
   validation.
 - GitOps image promotion and drift detection are checked through an executable

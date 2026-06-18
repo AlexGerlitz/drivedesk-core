@@ -22,6 +22,7 @@ implementation surface, evidence, and verifier commands.
 | GitOps delivery | Helm chart, Argo CD layout, image automation, drift and remediation evidence | `docs/public/HELM_CHART.md`, `docs/public/GITOPS_DELIVERY.md`, `docs/public/GITOPS_IMAGE_AUTOMATION.md`, `docs/public/GITOPS_DRIFT_REMEDIATION.md` | `bash scripts/check_public_helm_render.sh && bash scripts/check_public_gitops_layout.sh && bash scripts/check_public_gitops_image_automation.sh` |
 | OpenTofu and infra drift | Public-safe plan summary, state drift, runtime rollout, scheduled validation and alerting | `docs/public/OPENTOFU_PLAN_EVIDENCE.md`, `docs/public/INFRA_STATE_DRIFT_EVIDENCE.md`, `docs/public/PRIVATE_INFRA_SCHEDULED_VALIDATION.md`, `docs/public/PRIVATE_INFRA_SCHEDULED_ALERTING.md` | `bash scripts/check_public_opentofu_plan.sh && bash scripts/check_public_infra_state_drift.sh && bash scripts/check_public_private_infra_scheduled_validation.sh && bash scripts/check_public_private_infra_scheduled_alerting.sh` |
 | Sanitized evidence boundary | Public-safe evidence files with no raw logs, credentials, hostnames, addresses, or production data | `docs/public/SANITIZED_EVIDENCE.md`, `docs/public/evidence/*.sanitized.json`, `PUBLIC_EXPORT_MANIFEST.md` | `bash scripts/check_public_export_secrets.sh` |
+| Evidence index | Machine-readable mapping from public capabilities to docs, evidence files, verifier commands, public URLs, and boundary notes | `docs/public/EVIDENCE_INDEX.md`, `docs/public/evidence/public-evidence-index.sanitized.json` | `bash scripts/check_public_evidence_index.sh` |
 | Engineering proof contract | Demo Proof tab, API payload, OpenAPI schema, SDK artifacts, docs, and CI gates | `docs/public/ENGINEERING_PROOF.md`, `docs/public/evidence/platform-maturity-70.sanitized.json` | `bash scripts/check_public_engineering_proof.sh` |
 
 ## Review Order
@@ -33,9 +34,10 @@ implementation surface, evidence, and verifier commands.
 5. Run `bash scripts/ci_smoke_public.sh`.
 6. Run `bash scripts/check_public_project_status.sh`.
 7. Run `bash scripts/check_public_technical_capability_map.sh`.
-8. Run `bash scripts/check_public_observability_proof.sh`.
-9. Run `bash scripts/check_public_alert_routing.sh`.
-10. Run the capability-specific verifier from the table above.
+8. Run `bash scripts/check_public_evidence_index.sh`.
+9. Run `bash scripts/check_public_observability_proof.sh`.
+10. Run `bash scripts/check_public_alert_routing.sh`.
+11. Run the capability-specific verifier from the table above.
 
 ## Boundary
 

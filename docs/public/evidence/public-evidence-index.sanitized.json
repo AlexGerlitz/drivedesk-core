@@ -1,0 +1,258 @@
+{
+  "schema_version": 1,
+  "index_id": "drivedesk-core-public-evidence-index",
+  "data_profile": "synthetic_fake_data",
+  "status": "validated",
+  "generated_from": "public_safe_export",
+  "public_root_url": "https://alexgerlitz.github.io/drivedesk-core/",
+  "redaction": {
+    "addresses_included": false,
+    "credentials_included": false,
+    "hostnames_included": false,
+    "paths_included": false,
+    "production_data_included": false,
+    "raw_logs_included": false,
+    "request_bodies_included": false
+  },
+  "entries": [
+    {
+      "capability_id": "public-entrypoint",
+      "title": "Public engineering entrypoint",
+      "status": "validated",
+      "public_doc": "docs/public/ENGINEERING_REVIEW_GUIDE.md",
+      "evidence_files": [
+        "index.html",
+        "docs/public/PROJECT_STATUS.md"
+      ],
+      "verifiers": [
+        "bash scripts/check_public_pages_entrypoint.sh",
+        "bash scripts/check_public_review_guide.sh"
+      ],
+      "public_urls": [
+        "https://alexgerlitz.github.io/drivedesk-core/",
+        "apps/admin/public-demo/"
+      ],
+      "boundary": "static public surface with synthetic data only"
+    },
+    {
+      "capability_id": "api-and-sdk",
+      "title": "Read-only API contract and generated SDK",
+      "status": "validated",
+      "public_doc": "docs/public/API_BACKED_DEMO.md",
+      "evidence_files": [
+        "docs/openapi.json",
+        "sdk/generated/public-demo/openapi-client-manifest.json"
+      ],
+      "verifiers": [
+        "bash scripts/check_public_demo_api.sh",
+        "bash scripts/check_public_demo_sdk.sh"
+      ],
+      "public_urls": [
+        "docs/openapi.json",
+        "docs/public/CLIENT_SDK.md"
+      ],
+      "boundary": "GET /demo/public exposes synthetic demo payload only"
+    },
+    {
+      "capability_id": "core-domain",
+      "title": "Tenant, RBAC, audit, outbox, and workflow foundation",
+      "status": "validated",
+      "public_doc": "docs/public/SYSTEM_DESIGN.md",
+      "evidence_files": [
+        "docs/public/BUSINESS_RECORDS.md",
+        "docs/public/WORKFLOW_RULES.md",
+        "docs/public/WORKFLOW_ACTION_RUNS.md"
+      ],
+      "verifiers": [
+        "bash scripts/ci_smoke_public.sh"
+      ],
+      "public_urls": [
+        "docs/public/TENANT_ISOLATION.md",
+        "docs/public/AUTH_FOUNDATION.md"
+      ],
+      "boundary": "tenant-scoped public contracts without private records"
+    },
+    {
+      "capability_id": "integration-hub",
+      "title": "Integration adapter hub",
+      "status": "validated",
+      "public_doc": "docs/public/INTEGRATION_ADAPTER_CATALOG.md",
+      "evidence_files": [
+        "docs/public/INTEGRATION_OPERATION_CONTRACTS.md",
+        "docs/public/INTEGRATION_RECONCILIATION.md",
+        "docs/public/INTEGRATION_OPERATOR_REVIEW.md"
+      ],
+      "verifiers": [
+        "bash scripts/check_public_demo_api.sh"
+      ],
+      "public_urls": [
+        "docs/public/INTEGRATION_CONNECTION_DIAGNOSTICS.md",
+        "docs/public/INTEGRATION_INCIDENT_RUNBOOKS.md"
+      ],
+      "boundary": "fake providers and sanitized adapter evidence only"
+    },
+    {
+      "capability_id": "observability",
+      "title": "Metrics, logs, alerts, runbooks, and dashboards",
+      "status": "validated",
+      "public_doc": "docs/public/OBSERVABILITY_PROOF.md",
+      "evidence_files": [
+        "docs/public/evidence/observability-proof.sanitized.json",
+        "infra/observability/observability-proof.sanitized.json"
+      ],
+      "verifiers": [
+        "bash scripts/check_public_observability_proof.sh"
+      ],
+      "public_urls": [
+        "docs/public/OBSERVABILITY_PROOF.md"
+      ],
+      "boundary": "aggregate public-safe signals with no raw logs"
+    },
+    {
+      "capability_id": "alert-routing",
+      "title": "Alert routing and escalation",
+      "status": "validated",
+      "public_doc": "docs/public/ALERT_ROUTING_EVIDENCE.md",
+      "evidence_files": [
+        "docs/public/evidence/alert-routing.sanitized.json",
+        "infra/observability/alert-routing.sanitized.json"
+      ],
+      "verifiers": [
+        "bash scripts/check_public_alert_routing.sh"
+      ],
+      "public_urls": [
+        "apps/admin/public-demo/",
+        "docs/public/ALERT_ROUTING_EVIDENCE.md"
+      ],
+      "boundary": "alert names, receivers, and runbook keys without private channels"
+    },
+    {
+      "capability_id": "incident-response",
+      "title": "Incident response workflow",
+      "status": "validated",
+      "public_doc": "docs/public/INCIDENT_RESPONSE_DEMO.md",
+      "evidence_files": [
+        "docs/public/INTEGRATION_INCIDENT_RUNBOOKS.md",
+        "docs/public/evidence/alert-routing.sanitized.json"
+      ],
+      "verifiers": [
+        "bash scripts/check_public_demo_api.sh",
+        "bash scripts/check_public_engineering_proof.sh"
+      ],
+      "public_urls": [
+        "apps/admin/public-demo/",
+        "docs/public/INCIDENT_RESPONSE_DEMO.md"
+      ],
+      "boundary": "synthetic incident queue and runbook references"
+    },
+    {
+      "capability_id": "release-safety",
+      "title": "Backup, rollback, canary, and staged promotion",
+      "status": "validated",
+      "public_doc": "docs/public/RELEASE_ROLLBACK_EVIDENCE.md",
+      "evidence_files": [
+        "docs/public/evidence/backup-restore-drill.sanitized.json",
+        "docs/public/evidence/release-rollback-drill.sanitized.json",
+        "docs/public/evidence/slo-canary-gate.sanitized.json",
+        "docs/public/evidence/staged-promotion.sanitized.json"
+      ],
+      "verifiers": [
+        "bash scripts/check_public_backup_restore.sh",
+        "bash scripts/check_public_release_rollback.sh",
+        "bash scripts/check_public_slo_canary_gate.sh",
+        "bash scripts/check_public_staged_promotion.sh"
+      ],
+      "public_urls": [
+        "docs/public/BACKUP_RESTORE_EVIDENCE.md",
+        "docs/public/SLO_CANARY_GATE_EVIDENCE.md",
+        "docs/public/STAGED_PROMOTION_EVIDENCE.md"
+      ],
+      "boundary": "synthetic drills only; no production backup material"
+    },
+    {
+      "capability_id": "gitops-iac",
+      "title": "Helm, GitOps, OpenTofu, and drift evidence",
+      "status": "validated",
+      "public_doc": "docs/public/GITOPS_DELIVERY.md",
+      "evidence_files": [
+        "docs/public/evidence/gitops-layout.sanitized.json",
+        "docs/public/evidence/gitops-image-automation.sanitized.json",
+        "docs/public/evidence/opentofu-plan.sanitized.json",
+        "docs/public/evidence/infra-state-drift.sanitized.json"
+      ],
+      "verifiers": [
+        "bash scripts/check_public_helm_render.sh",
+        "bash scripts/check_public_gitops_layout.sh",
+        "bash scripts/check_public_gitops_image_automation.sh",
+        "bash scripts/check_public_opentofu_plan.sh",
+        "bash scripts/check_public_infra_state_drift.sh"
+      ],
+      "public_urls": [
+        "docs/public/HELM_CHART.md",
+        "docs/public/OPENTOFU_PLAN_EVIDENCE.md",
+        "docs/public/INFRA_STATE_DRIFT_EVIDENCE.md"
+      ],
+      "boundary": "plan-only public IaC evidence with no live provider state"
+    },
+    {
+      "capability_id": "private-infra-validation",
+      "title": "Private staging validation and remediation evidence",
+      "status": "validated",
+      "public_doc": "docs/public/PRIVATE_INFRA_VALIDATION.md",
+      "evidence_files": [
+        "docs/public/evidence/private-infra-validation.sanitized.json",
+        "docs/public/evidence/private-infra-remediation-plan.sanitized.json",
+        "docs/public/evidence/private-infra-remediation-execution.sanitized.json",
+        "docs/public/evidence/private-infra-post-remediation-drift-refresh.sanitized.json"
+      ],
+      "verifiers": [
+        "bash scripts/check_public_private_infra_validation.sh",
+        "bash scripts/check_public_private_infra_remediation.sh",
+        "bash scripts/check_public_private_infra_remediation_execution.sh",
+        "bash scripts/check_public_private_infra_post_remediation_drift_refresh.sh"
+      ],
+      "public_urls": [
+        "docs/public/PRIVATE_INFRA_REMEDIATION.md",
+        "docs/public/PRIVATE_INFRA_REMEDIATION_EXECUTION.md"
+      ],
+      "boundary": "sanitized private staging summaries without runtime mutation"
+    },
+    {
+      "capability_id": "scheduled-validation",
+      "title": "Recurring validation and scheduled alerting",
+      "status": "validated",
+      "public_doc": "docs/public/PRIVATE_INFRA_SCHEDULED_VALIDATION.md",
+      "evidence_files": [
+        "docs/public/evidence/private-infra-scheduled-validation.sanitized.json",
+        "docs/public/evidence/private-infra-scheduled-alerting.sanitized.json",
+        ".github/workflows/scheduled-validation.yml"
+      ],
+      "verifiers": [
+        "bash scripts/check_public_private_infra_scheduled_validation.sh",
+        "bash scripts/check_public_private_infra_scheduled_alerting.sh"
+      ],
+      "public_urls": [
+        "docs/public/PRIVATE_INFRA_SCHEDULED_ALERTING.md"
+      ],
+      "boundary": "public-safe scheduler contract and failure artifact shape"
+    },
+    {
+      "capability_id": "platform-maturity",
+      "title": "70-point DevOps/platform maturity milestone",
+      "status": "validated",
+      "public_doc": "docs/public/PLATFORM_MATURITY_70.md",
+      "evidence_files": [
+        "docs/public/evidence/platform-maturity-70.sanitized.json",
+        "infra/platform-maturity/platform-maturity-70.sanitized.json"
+      ],
+      "verifiers": [
+        "bash scripts/check_public_platform_maturity_70.sh"
+      ],
+      "public_urls": [
+        "docs/public/ENGINEERING_PROOF.md",
+        "docs/public/PLATFORM_MATURITY_70.md"
+      ],
+      "boundary": "engineering maturity evidence, not commercial SaaS completion"
+    }
+  ]
+}

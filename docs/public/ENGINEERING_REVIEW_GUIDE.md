@@ -14,10 +14,11 @@ prove the current engineering surface.
 | 4 | Proof contract | `bash scripts/check_public_engineering_proof.sh` |
 | 5 | API contract | `docs/openapi.json` and `GET /demo/public` |
 | 6 | Capability map | `docs/public/TECHNICAL_CAPABILITY_MAP.md` |
-| 7 | Observability proof | `docs/public/OBSERVABILITY_PROOF.md` |
-| 8 | Alert routing | Operations tab and `docs/public/ALERT_ROUTING_EVIDENCE.md` |
-| 9 | Recovery and release safety | backup/restore, rollback, canary, staged promotion checks |
-| 10 | Infrastructure story | Helm, GitOps, OpenTofu, drift, and sanitized runtime evidence |
+| 7 | Evidence index | `docs/public/EVIDENCE_INDEX.md`, `docs/public/evidence/public-evidence-index.sanitized.json` |
+| 8 | Observability proof | `docs/public/OBSERVABILITY_PROOF.md` |
+| 9 | Alert routing | Operations tab and `docs/public/ALERT_ROUTING_EVIDENCE.md` |
+| 10 | Recovery and release safety | backup/restore, rollback, canary, staged promotion checks |
+| 11 | Infrastructure story | Helm, GitOps, OpenTofu, drift, and sanitized runtime evidence |
 
 ## Review Commands
 
@@ -26,6 +27,7 @@ bash scripts/ci_smoke_public.sh
 bash scripts/check_public_review_guide.sh
 bash scripts/check_public_project_status.sh
 bash scripts/check_public_technical_capability_map.sh
+bash scripts/check_public_evidence_index.sh
 bash scripts/check_public_observability_proof.sh
 bash scripts/check_public_alert_routing.sh
 bash scripts/check_public_engineering_proof.sh
@@ -47,6 +49,7 @@ bash scripts/check_public_opentofu_plan.sh
 | Project status | `docs/public/PROJECT_STATUS.md` |
 | Public proof contract | `docs/public/ENGINEERING_PROOF.md` |
 | Capability map | `docs/public/TECHNICAL_CAPABILITY_MAP.md` |
+| Evidence index | `docs/public/EVIDENCE_INDEX.md`, `docs/public/evidence/public-evidence-index.sanitized.json` |
 | Observability proof | `docs/public/OBSERVABILITY_PROOF.md` |
 | Alert routing | `docs/public/ALERT_ROUTING_EVIDENCE.md` |
 | Incident response | `docs/public/INCIDENT_RESPONSE_DEMO.md` |

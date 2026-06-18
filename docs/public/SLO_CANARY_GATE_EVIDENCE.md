@@ -66,7 +66,7 @@ The script emits JSON like this:
 
 ## Redaction Boundary
 
-The public drill uses temporary local files and synthetic fake data. It does
+The public drill uses temporary local files and synthetic demo data. It does
 not include private deployment paths, hostnames, addresses, credentials, raw
 logs, production data, or incident payloads.
 

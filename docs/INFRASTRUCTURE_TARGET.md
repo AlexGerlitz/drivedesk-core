@@ -15,7 +15,7 @@ CI smoke checks
 
 Later layers can add:
 
-- staging with fake data;
+- staging with synthetic data;
 - container registry;
 - Kubernetes;
 - Helm;

@@ -2693,7 +2693,7 @@ def test_file_import_adapter_retry_and_dead_letter(
     assert retry_event.attempts == 1
     assert retry_event.last_duration_ms is not None
     assert retry_event.next_retry_at is not None
-    assert retry_event.last_error == "Fake provider is temporarily unavailable."
+    assert retry_event.last_error == "Synthetic provider is temporarily unavailable."
 
     dead_event = statuses_by_source["permanent-file"]
     assert dead_event.status == "dead_letter"
@@ -2701,7 +2701,7 @@ def test_file_import_adapter_retry_and_dead_letter(
     assert dead_event.last_duration_ms is not None
     assert dead_event.dead_lettered_at is not None
     assert dead_event.next_retry_at is None
-    assert dead_event.last_error == "Fake provider rejected the import contract."
+    assert dead_event.last_error == "Synthetic provider rejected the import contract."
 
     metrics_response = client.get("/metrics")
     assert metrics_response.status_code == 200

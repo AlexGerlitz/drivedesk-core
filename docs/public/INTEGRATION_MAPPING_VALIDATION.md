@@ -29,7 +29,7 @@ Connection creation checks:
 - the same mapping remains valid when a file-import job references the
   connection later.
 
-For the public fake file-import adapter, the required mapping keys are:
+For the public synthetic file-import adapter, the required mapping keys are:
 
 ```json
 ["external_id", "display_name"]

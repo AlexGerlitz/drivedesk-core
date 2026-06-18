@@ -14,7 +14,7 @@ DriveDesk now exposes:
 GET /demo/public
 ```
 
-The endpoint returns the same product-shaped fake data used by the public demo
+The endpoint returns the same product-shaped synthetic demo data used by the public demo
 shell: tenant, health, metrics, work queue, workflow stages, timeline entries,
 workflow scenarios, domain events, members, audit events, outbox events, adapter
 contracts, adapter operation scenarios, sync jobs, Integration Health, alert
@@ -103,7 +103,7 @@ client artifacts, including typed adapter operation helpers that turn
 
 ## Safety Boundary
 
-The endpoint is read-only and fake-data only:
+The endpoint is read-only and synthetic-data only:
 
 - no production database access is required;
 - no private infrastructure details are returned;

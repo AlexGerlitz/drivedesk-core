@@ -277,7 +277,7 @@ class FakeFileImportAdapter:
     adapter_key = "file.import.fake"
     descriptor = AdapterDescriptor(
         key=adapter_key,
-        name="Fake File Import",
+        name="Synthetic File Import",
         status="active",
         category="file_import",
         direction="inbound",
@@ -336,7 +336,7 @@ class FakeFileImportAdapter:
         ],
         failure_modes=["retryable", "permanent"],
         public_notes=[
-            "Safe fake adapter for public demos and contract tests.",
+            "Safe synthetic adapter for public demos and contract tests.",
             "Real provider values are handled outside the public adapter catalog.",
         ],
     )
@@ -345,13 +345,13 @@ class FakeFileImportAdapter:
         simulated_failure = payload.get("simulate_failure")
         if simulated_failure == "retryable":
             raise AdapterExecutionError(
-                "Fake provider is temporarily unavailable.",
+                "Synthetic provider is temporarily unavailable.",
                 adapter_key=self.adapter_key,
                 retryable=True,
             )
         if simulated_failure == "permanent":
             raise AdapterExecutionError(
-                "Fake provider rejected the import contract.",
+                "Synthetic provider rejected the import contract.",
                 adapter_key=self.adapter_key,
                 retryable=False,
             )
@@ -396,15 +396,15 @@ class FakeFileImportAdapter:
 
         accepted = len(accepted_external_ids)
         status = "success" if rejected == 0 else "partial_success"
-        source_name = str(payload.get("source_name") or "fake-file")
+        source_name = str(payload.get("source_name") or "synthetic-file")
         return AdapterResult(
             adapter_key=self.adapter_key,
             status=status,
-            message=f"Imported {accepted} fake records from {source_name}.",
+            message=f"Imported {accepted} synthetic records from {source_name}.",
             records_received=len(records),
             records_accepted=accepted,
             records_rejected=rejected,
-            external_ref=f"fake-import:{source_name}",
+            external_ref=f"synthetic-import:{source_name}",
             details={
                 "source_name": source_name,
                 "source_format": str(payload.get("source_format") or "json"),

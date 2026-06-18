@@ -27,7 +27,7 @@ Each operation contract declares:
 - idempotency keys;
 - whether retry, dead-letter, and operator review apply.
 
-The fake file-import adapter exposes two operations:
+The synthetic file-import adapter exposes two operations:
 
 - `file_import_preview`, requiring `file_import:preview`;
 - `file_import_execute`, requiring `file_import:execute`.

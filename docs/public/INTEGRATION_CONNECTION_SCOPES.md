@@ -19,7 +19,7 @@ The runtime adapter catalog exposes two fields:
 
 ## File Import Scopes
 
-The public fake file-import adapter supports:
+The public synthetic file-import adapter supports:
 
 | Scope | Meaning |
 | --- | --- |

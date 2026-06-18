@@ -3,7 +3,7 @@
 DriveDesk integration mappings are used at runtime, not only stored as profile
 metadata.
 
-The first executable example is the fake file-import adapter:
+The first executable example is the synthetic file-import adapter:
 
 ```json
 {

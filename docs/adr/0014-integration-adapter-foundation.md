@@ -13,7 +13,7 @@ outbox events, and a worker loop.
 Add the first adapter foundation:
 
 - provider-neutral adapter result and execution error contract;
-- fake file import adapter for public-safe testing;
+- synthetic file import adapter for public-safe testing;
 - API endpoint that creates an integration outbox event;
 - worker execution through adapter resolution;
 - outbox statuses for `processed`, `retry`, and `dead_letter`;

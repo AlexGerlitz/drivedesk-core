@@ -6,7 +6,7 @@ staging runtime.
 ## Demo Goals
 
 - show the product direction;
-- show API and workflow behavior with fake data;
+- show API and workflow behavior with synthetic demo data;
 - show operations behavior with alert routing, escalation, incident response,
   and runbook links;
 - show engineering quality through CI, docs, tests, and architecture;
@@ -19,7 +19,7 @@ Recommended first public demo:
 
 - a small hosted web shell or static frontend;
 - a read-only synthetic FastAPI demo endpoint;
-- fake tenant and fake users;
+- synthetic tenant and users;
 - read-only workflow state with timeline and domain events;
 - public OpenAPI docs generated from the demo API;
 - public-safe Operations tab with alert routing and runbook bindings;
@@ -57,7 +57,7 @@ The public path should make it possible to:
 3. Inspect `docs/openapi.json` for the API contract.
 4. Run the public repo locally.
 5. Open `https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/`.
-6. See fake operational workflows.
+6. See synthetic operational workflows.
 7. Inspect the workflow tab for the synthetic lead-to-student flow.
 8. Inspect the integration adapter tab.
 9. Inspect the Operations tab for alert routes and runbook bindings.

@@ -123,7 +123,7 @@ sequenceDiagram
 ```mermaid
 flowchart LR
   Visitor["External Reviewer"] --> PublicDemo["Public Demo UI"]
-  PublicDemo --> DemoAPI["Demo API With Fake Data"]
+  PublicDemo --> DemoAPI["Demo API With Synthetic Data"]
   DemoAPI --> DemoDB["Demo Database"]
 
   PrivateRuntime["Private Engineering Runtime"] --> PrivateObservability["Private Observability"]

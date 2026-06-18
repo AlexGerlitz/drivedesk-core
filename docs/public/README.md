@@ -123,7 +123,7 @@ infrastructure, production history, customer data, or operational credentials.
 The public repository export also generates:
 
 - `docs/openapi.json` - FastAPI OpenAPI schema from the exported API.
-- `apps/admin/public-demo/index.html` - static fake-data product demo shell.
+- `apps/admin/public-demo/index.html` - static synthetic product demo shell.
 - `GET /demo/public` - read-only synthetic demo payload in the exported API.
 - `incidentResponse` - public-safe incident response contract in the demo
   payload and Incidents tab.

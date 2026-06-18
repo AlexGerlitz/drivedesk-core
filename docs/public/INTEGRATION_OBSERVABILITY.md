@@ -1,7 +1,7 @@
 # DriveDesk Integration Observability
 
 This document describes the public-safe observability contract for DriveDesk
-integration adapters. It uses synthetic providers and fake data only.
+integration adapters. It uses synthetic providers and demo data only.
 
 ## Goal
 
@@ -124,7 +124,7 @@ The public-safe operational contract is:
 - connection diagnostics expose latest integration readiness before work is
   queued;
 - operator retry requests are audited;
-- the public demo shows Integration Health with fake data.
+- the public demo shows Integration Health with synthetic demo data.
 
 ## Engineering Summary
 

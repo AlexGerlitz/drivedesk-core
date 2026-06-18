@@ -1,7 +1,7 @@
 # DriveDesk Integration Adapters
 
 This document describes the public-safe adapter foundation in DriveDesk Core.
-It uses synthetic data and fake providers only.
+It uses synthetic data and providers only.
 
 ## Goal
 
@@ -9,7 +9,7 @@ DriveDesk should be the operational workspace. External systems should connect
 through adapters instead of leaking provider-specific payloads into the core
 domain.
 
-The first implementation slice was a fake file import adapter. The current
+The first implementation slice was a synthetic file import adapter. The current
 public runtime also includes a mock accounting export adapter. Together they
 prove the shape needed for later providers:
 
@@ -35,11 +35,11 @@ Adapter execution returns a normalized result:
 {
   "adapter_key": "file.import.fake",
   "status": "partial_success",
-  "message": "Imported 2 fake records from demo-leads-json.",
+  "message": "Imported 2 synthetic records from demo-leads-json.",
   "records_received": 3,
   "records_accepted": 2,
   "records_rejected": 1,
-  "external_ref": "fake-import:demo-leads-json"
+  "external_ref": "synthetic-import:demo-leads-json"
 }
 ```
 

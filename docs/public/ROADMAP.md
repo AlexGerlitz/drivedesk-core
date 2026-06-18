@@ -13,7 +13,7 @@ Fast external review path: `docs/public/REVIEWER_QUICKSTART.md`.
 - Core modular monolith foundation.
 - FastAPI health, readiness, and metrics endpoints.
 - Tenant, user, membership, RBAC, audit, and outbox primitives.
-- Fake file import adapter with retry and dead-letter state.
+- Synthetic file import adapter with retry and dead-letter state.
 - Runtime adapter catalog with `GET /integration-adapters`.
 - Tenant-owned integration connection profiles with safe config and mapping.
 - Integration connection scopes for preview and execution boundaries.

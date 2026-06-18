@@ -45,7 +45,7 @@ Implemented foundation:
 - tenant-owned workflow rules for business record status automation;
 - workflow rule audit, configured outbox handoff, and aggregate workflow metrics;
 - workflow actions for task record creation and adapter sync requests;
-- fake file import adapter with retry and dead-letter states;
+- synthetic file import adapter with retry and dead-letter states;
 - runtime adapter catalog for executable adapter metadata;
 - tenant-owned integration connection profiles with safe config and mapping;
 - mapping validation against runtime adapter requirements;
@@ -107,7 +107,7 @@ boundary.
 
 ## DevOps Story
 
-The staging runtime is private and fake-data only. It is treated like a real
+The staging runtime is private and synthetic-data only. It is treated like a real
 service:
 
 - deployed by GitHub Actions;
@@ -178,7 +178,7 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
   into safe review cards with operation keys, required scopes, redacted payload
   summaries, recommended actions, and audited retry endpoints.
 - The hosted public demo uses static fallback on GitHub Pages and can be pointed
-  at `GET /demo/public` for API-backed fake data, including workflow stages,
+  at `GET /demo/public` for API-backed synthetic demo data, including workflow stages,
   timeline, domain events, audit, and outbox state.
 - Backup/restore evidence now has a public-safe drill that creates a synthetic
   temporary database, writes a backup, restores it into a separate temporary

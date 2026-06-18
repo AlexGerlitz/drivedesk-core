@@ -26,7 +26,7 @@ It includes:
 - tenant-owned workflow rules for business record status automation;
 - workflow rule audit, configured outbox handoff, and aggregate workflow metrics;
 - workflow actions for task record creation and adapter sync requests;
-- fake file import adapter with retry and dead-letter state;
+- synthetic file import adapter with retry and dead-letter state;
 - runtime adapter catalog for executable adapter metadata;
 - synthetic lead-to-student workflow in the public demo payload;
 - generated OpenAPI client SDK example for the public demo API;
@@ -165,7 +165,7 @@ incident queue, mitigation, recovery, and resolution evidence path.
 - `docs/public/SANITIZED_EVIDENCE.md` - sanitized staging evidence.
 - `docs/public/PUBLIC_DEMO_PLAN.md` - future public demo plan.
 - `docs/public/ROADMAP.md` - public-safe engineering roadmap.
-- `apps/admin/public-demo/index.html` - static fake-data product demo shell.
+- `apps/admin/public-demo/index.html` - static synthetic product demo shell.
 - `docs/openapi.json` - generated FastAPI OpenAPI schema.
 - `GET /demo/public` - read-only synthetic demo payload in the exported API.
 - `GET /integration-adapters` - runtime adapter catalog endpoint.

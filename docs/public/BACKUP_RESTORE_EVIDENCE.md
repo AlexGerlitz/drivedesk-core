@@ -54,7 +54,7 @@ The script emits JSON like this:
 
 ## Redaction Boundary
 
-The public drill uses only synthetic fake data. It does not include private
+The public drill uses only synthetic demo data. It does not include private
 paths, hostnames, addresses, raw logs, credentials, or production data.
 
 The static public evidence snapshot is stored at:

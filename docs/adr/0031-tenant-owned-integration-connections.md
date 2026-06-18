@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-DriveDesk already has an adapter execution contract and a fake file import
+DriveDesk already has an adapter execution contract and a synthetic file import
 adapter. That proves the worker and outbox path, but the adapter is still
 selected directly by the endpoint.
 

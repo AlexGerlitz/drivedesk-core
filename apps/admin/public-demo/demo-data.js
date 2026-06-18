@@ -164,7 +164,7 @@ window.DRIVEDESK_DEMO_DATA = {
   "adapters": [
     {
       "key": "file.import.fake",
-      "name": "Fake File Import",
+      "name": "Synthetic File Import",
       "status": "active",
       "direction": "inbound",
       "connectionProfileSupported": true,
@@ -765,7 +765,7 @@ window.DRIVEDESK_DEMO_DATA = {
     {
       "name": "Data boundary",
       "state": "success",
-      "detail": "synthetic fake data only",
+      "detail": "synthetic demo data only",
       "evidence": "production_data_touched_false"
     },
     {

@@ -93,7 +93,7 @@
         "docs/public/INTEGRATION_CONNECTION_DIAGNOSTICS.md",
         "docs/public/INTEGRATION_INCIDENT_RUNBOOKS.md"
       ],
-      "boundary": "fake providers and sanitized adapter evidence only"
+      "boundary": "synthetic providers and sanitized adapter evidence only"
     },
     {
       "capability_id": "observability",

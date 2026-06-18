@@ -3,7 +3,7 @@
 This document explains the public-safe synthetic workflow shown in the
 DriveDesk Core demo.
 
-The workflow is fake-data only. It exists to show the engineering shape of a
+The workflow uses synthetic demo data only. It exists to show the engineering shape of a
 real business process without exposing private operations, customers,
 infrastructure, credentials, or production data.
 

@@ -34,7 +34,7 @@ inspection.
   "status": "dead_letter",
   "severity": "operator_review",
   "attempts": 1,
-  "last_error": "Fake provider rejected the import contract.",
+  "last_error": "Synthetic provider rejected the import contract.",
   "required_connection_scope": "file_import:execute",
   "payload_summary": {
     "payload_valid": true,

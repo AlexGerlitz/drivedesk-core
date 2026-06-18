@@ -14,7 +14,7 @@ result before an import creates retryable or dead-letter work.
 DriveDesk Core maps external provider fields into adapter-owned canonical fields
 inside the adapter boundary.
 
-For the fake file-import adapter:
+For the synthetic file-import adapter:
 
 - `external_id` can be mapped from a source field such as `lead_id`;
 - `display_name` can be mapped from a source field such as `full_name`;

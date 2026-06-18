@@ -695,7 +695,7 @@ def build_public_demo_payload() -> dict[str, Any]:
             {
                 "name": "Data boundary",
                 "state": "success",
-                "detail": "synthetic fake data only",
+                "detail": "synthetic demo data only",
                 "evidence": "production_data_touched_false",
             },
             {

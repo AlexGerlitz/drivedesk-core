@@ -67,6 +67,7 @@ Implemented foundation:
 - public demo API smoke that validates health, readiness, OpenAPI, and example clients.
 - curl, Python, and JavaScript public demo clients for `GET /demo/public`.
 - generated OpenAPI client SDK artifacts for Python, JavaScript, and TypeScript.
+- public-safe synthetic backup/restore drill with machine-readable evidence.
 - synthetic business workflow in the public demo payload:
   lead -> student -> contract -> audit -> outbox -> integration sync.
 
@@ -164,6 +165,9 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
 - The hosted public demo uses static fallback on GitHub Pages and can be pointed
   at `GET /demo/public` for API-backed fake data, including workflow stages,
   timeline, domain events, audit, and outbox state.
+- Backup/restore evidence now has a public-safe drill that creates a synthetic
+  temporary database, writes a backup, restores it into a separate temporary
+  database, and checks counts, schema, integrity, and redaction boundaries.
 - Alertmanager currently uses an internal receiver; external notification
   routing is a later step.
 - The frontend is intentionally not the center of the current work; the backend
@@ -173,10 +177,10 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
 
 Recommended next slices:
 
-1. Backup and restore evidence for the staging runtime.
-2. Broader generated API clients from OpenAPI for more endpoints.
-3. Additional mock adapters for webhook and accounting export flows.
-4. More workflow rule actions for notifications, approvals, and mapping-specific adapter jobs.
+1. Broader generated API clients from OpenAPI for more endpoints.
+2. Additional mock adapters for webhook and accounting export flows.
+3. More workflow rule actions for notifications, approvals, and mapping-specific adapter jobs.
+4. More deployment evidence around restore drills, SLO burn, and release rollback.
 
 ## Interview Summary
 

@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "drill": "public_synthetic_backup_restore",
+  "data_profile": "synthetic_fake_data",
+  "source_database": "temporary_sqlite",
+  "backup_format": "sqlite_backup",
+  "restore_target": "temporary_sqlite",
+  "checks": {
+    "source_integrity_ok": true,
+    "backup_integrity_ok": true,
+    "restore_integrity_ok": true,
+    "counts_match": true,
+    "core_tables_present": true,
+    "tenant_slug_restored": true,
+    "drill_audit_event_restored": true,
+    "backup_sha256_recorded": true,
+    "production_data_touched": false
+  },
+  "source_counts": {
+    "tenants": 1,
+    "users": 1,
+    "memberships": 1,
+    "business_records": 2,
+    "outbox_events": 1,
+    "audit_events": 1,
+    "integration_connections": 1,
+    "integration_connection_checks": 1,
+    "integration_reconciliations": 1,
+    "integration_incidents": 1
+  },
+  "restored_counts": {
+    "tenants": 1,
+    "users": 1,
+    "memberships": 1,
+    "business_records": 2,
+    "outbox_events": 1,
+    "audit_events": 1,
+    "integration_connections": 1,
+    "integration_connection_checks": 1,
+    "integration_reconciliations": 1,
+    "integration_incidents": 1
+  },
+  "artifact": {
+    "backup_size_bytes_min": 4096,
+    "backup_sha256_prefix_recorded": true
+  },
+  "redaction": {
+    "paths_included": false,
+    "hostnames_included": false,
+    "addresses_included": false,
+    "credentials_included": false,
+    "raw_logs_included": false,
+    "production_data_included": false
+  }
+}

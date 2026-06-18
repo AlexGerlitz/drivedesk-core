@@ -15,6 +15,7 @@ Implemented baseline:
 - DriveDesk foundation image build in CI;
 - DriveDesk Core API, RBAC, audit, and outbox tests;
 - manual and scheduled security audit workflow already present in the repo.
+- public-safe synthetic backup/restore drill for the exported Core surface.
 
 What this gives us:
 
@@ -25,18 +26,17 @@ What this gives us:
 - the new foundation is checked alongside the old runtime.
 - tenant, user, audit, and outbox behavior is covered before deployment work
   starts.
+- backup/restore can be demonstrated without copying private data into the
+  public repository.
 
 ## Next Layers
 
 Recommended next DevOps tasks:
 
-1. Add a staging compose environment with fake data.
-2. Add a small deployment target on the DE control-plane node without PII.
-3. Add structured JSON logs for the DriveDesk Core API.
-4. Add Prometheus metrics for API health and worker heartbeat.
-5. Add a basic Grafana dashboard.
-6. Add Helm chart skeleton after the compose contract is stable.
-7. Add Terraform/OpenTofu only after the target infrastructure shape is clear.
+1. Add more deployment evidence around release rollback and SLO burn.
+2. Broaden generated client examples from the OpenAPI schema.
+3. Add a Helm chart skeleton after the compose contract is stable.
+4. Add Terraform/OpenTofu only after the target infrastructure shape is clear.
 
 ## Human Summary
 

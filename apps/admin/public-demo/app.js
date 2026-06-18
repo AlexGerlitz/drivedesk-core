@@ -49,7 +49,8 @@
         Array.isArray(payload.timeline) &&
         Array.isArray(payload.domainEvents) &&
         Array.isArray(payload.integrationJobs) &&
-        Array.isArray(payload.integrationHealth)
+        Array.isArray(payload.integrationHealth) &&
+        Array.isArray(payload.recoveryEvidence)
     );
   }
 
@@ -414,6 +415,31 @@
     });
   }
 
+  function fillRecoveryEvidence() {
+    var rows = document.getElementById("recoveryRows");
+    clear(rows);
+    data.recoveryEvidence.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var name = document.createElement("strong");
+      name.appendChild(text(item.name));
+      top.append(name, chip(item.state, statusTone(item.state)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(item.evidence));
+
+      row.append(top, detail, evidence);
+      rows.appendChild(row);
+    });
+  }
+
   function statusTone(status) {
     if (
       ["done", "ready", "online", "validated", "processed", "green", "active", "success", "observed", "matched", "resolved"].indexOf(status) >= 0
@@ -474,6 +500,7 @@
     fillAudit();
     fillOutbox();
     fillHealth();
+    fillRecoveryEvidence();
   }
 
   async function init() {

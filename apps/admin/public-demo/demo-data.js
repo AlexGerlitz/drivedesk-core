@@ -354,6 +354,32 @@ window.DRIVEDESK_DEMO_DATA = {
       "progress": 35
     }
   ],
+  "recoveryEvidence": [
+    {
+      "name": "Synthetic backup",
+      "state": "success",
+      "detail": "temporary SQLite backup artifact created",
+      "evidence": "backup_sha256_recorded"
+    },
+    {
+      "name": "Restore drill",
+      "state": "success",
+      "detail": "restored into a separate temporary database",
+      "evidence": "restore_integrity_ok"
+    },
+    {
+      "name": "Schema contract",
+      "state": "success",
+      "detail": "core tables and row counts matched after restore",
+      "evidence": "counts_match"
+    },
+    {
+      "name": "Data boundary",
+      "state": "success",
+      "detail": "synthetic fake data only",
+      "evidence": "production_data_touched_false"
+    }
+  ],
   "workflow": {
     "id": "wf-demo-lead-to-student",
     "title": "Lead to enrolled student",

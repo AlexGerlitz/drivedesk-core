@@ -132,6 +132,7 @@ assert {event["event"] for event in demo["domainEvents"]} >= {
     "student.sync.requested",
 }
 assert len(demo["integrationHealth"]) >= 6, demo
+assert len(demo["recoveryEvidence"]) >= 4, demo
 assert {item["state"] for item in demo["integrationHealth"]} >= {
     "processed",
     "retry",
@@ -139,6 +140,13 @@ assert {item["state"] for item in demo["integrationHealth"]} >= {
     "matched",
     "open",
 }
+assert {item["evidence"] for item in demo["recoveryEvidence"]} >= {
+    "backup_sha256_recorded",
+    "restore_integrity_ok",
+    "counts_match",
+    "production_data_touched_false",
+}, demo
+assert all(item["state"] == "success" for item in demo["recoveryEvidence"]), demo
 assert any(item["metric"] == "drivedesk_integration_reconciliations" for item in demo["integrationHealth"]), demo
 assert any(item["metric"] == "drivedesk_integration_incidents" for item in demo["integrationHealth"]), demo
 assert {adapter["key"] for adapter in demo["adapters"]} >= {

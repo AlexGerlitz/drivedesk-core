@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-18T03:00:58Z
+Generated at: 2026-06-18T03:17:31Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -38,6 +38,7 @@ Copied public-safe areas:
 - public integration observability overview
 - public roadmap
 - public demo integration health surface
+- public demo recoveryRows surface
 - public demo API-backed loading surface
 - public demo synthetic business workflow surface
 - public demo generated OpenAPI SDK
@@ -80,6 +81,12 @@ Copied public-safe areas:
 - public integration connection diagnostics ADR: 0040-integration-connection-diagnostics
 - public integration reconciliation ADR: 0041-integration-reconciliation-evidence
 - public integration incident runbooks ADR: 0042-integration-incident-runbooks
+- public backup restore evidence doc
+- public backup restore drill script: scripts/check_public_backup_restore.sh
+- public backup restore evidence snapshot: docs/public/evidence/backup-restore-drill.sanitized.json
+- public backup restore check: restore_integrity_ok
+- public backup restore audit event: backup_restore.drill.completed
+- public backup restore ADR: 0043-public-safe-backup-restore-drill
 - public tenant-owned repository helper surface
 - public auth observability alerting surface
 - public demo local run script

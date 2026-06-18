@@ -46,6 +46,7 @@ def test_public_demo_html_links_static_assets() -> None:
     assert 'id="adapterRows"' in html
     assert 'id="syncJobRows"' in html
     assert 'id="outboxRows"' in html
+    assert 'id="recoveryRows"' in html
 
 
 def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
@@ -114,6 +115,13 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
     assert any(item["name"] == "Incident runbooks" for item in payload["integrationReadiness"])
     assert any(item["metric"] == "drivedesk_integration_reconciliations" for item in payload["integrationHealth"])
     assert any(item["metric"] == "drivedesk_integration_incidents" for item in payload["integrationHealth"])
+    assert len(payload["recoveryEvidence"]) >= 4
+    assert {item["evidence"] for item in payload["recoveryEvidence"]} >= {
+        "backup_sha256_recorded",
+        "restore_integrity_ok",
+        "counts_match",
+        "production_data_touched_false",
+    }
     assert len(payload["outbox"]) >= 3
     assert {event["status"] for event in payload["outbox"]} >= {"processed", "pending"}
     assert {job["status"] for job in payload["integrationJobs"]} >= {"processed", "retry", "dead_letter"}
@@ -133,6 +141,8 @@ def test_public_demo_can_load_api_backed_data_with_static_fallback() -> None:
     assert "fillWorkflow" in script
     assert "fillWorkflowTimeline" in script
     assert "fillDomainEvents" in script
+    assert "fillRecoveryEvidence" in script
+    assert "recoveryEvidence" in script
     assert "demoApi" in script
     assert "data-demo-api-path" not in script
     assert "dataset.demoApiPath" in script
@@ -148,6 +158,7 @@ def test_public_demo_api_scripts_and_examples_exist() -> None:
         "scripts/run_public_demo_local.sh",
         "scripts/check_public_demo_api.sh",
         "scripts/check_public_demo_sdk.sh",
+        "scripts/check_public_backup_restore.sh",
         "scripts/generate_public_demo_sdk.py",
         "examples/curl/demo-public.sh",
         "examples/python/demo_public_client.py",
@@ -172,6 +183,12 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
             "sdk/generated/public-demo",
             "drivedesk_public_demo_client.py",
             "drivedesk-public-demo-client.mjs",
+        ],
+        "scripts/check_public_backup_restore.sh": [
+            "public_synthetic_backup_restore",
+            "backup_restore.drill.completed",
+            "restore_integrity_ok",
+            "production_data_touched",
         ],
         "scripts/generate_public_demo_sdk.py": [
             "/demo/public",

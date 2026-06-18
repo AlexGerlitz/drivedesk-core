@@ -12,6 +12,12 @@ Source file:
 docs/public/evidence/de-staging-evidence.sanitized.json
 ```
 
+Recovery drill source file:
+
+```text
+docs/public/evidence/backup-restore-drill.sanitized.json
+```
+
 Verified signals:
 
 - CI completed successfully;
@@ -29,6 +35,10 @@ Verified signals:
 - Alertmanager was ready;
 - Prometheus loaded alert rules;
 - active alerts count was zero at collection time.
+- the public synthetic backup/restore drill created a temporary backup artifact;
+- the restore target passed integrity checks;
+- restored row counts matched the source counts;
+- production data was not touched.
 
 ## Human Explanation
 
@@ -45,6 +55,7 @@ The public version keeps only the operational shape and health results.
 - Alert rules are loaded.
 - Alertmanager is reachable.
 - Evidence is machine-readable.
+- Backup/restore is checked through an executable public drill.
 
 ## What This Leaves Out
 

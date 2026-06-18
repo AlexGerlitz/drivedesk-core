@@ -45,6 +45,14 @@ It includes:
 
 ![DriveDesk Core demo overview](docs/public/assets/drivedesk-core-demo-overview.png)
 
+## Fast Review
+
+Start with `docs/public/ENGINEERING_REVIEW_GUIDE.md`.
+
+It maps the live demo, public CI, proof contract, OpenAPI, generated SDK,
+recovery drills, release gates, GitOps, OpenTofu, and public/private boundary
+into one short review path.
+
 ## Verification Path
 
 1. Open the live demo and switch to the Proof tab.
@@ -59,6 +67,7 @@ It includes:
 ## What To Review First
 
 - `docs/public/PORTFOLIO_CASE_STUDY.md` - engineering case study.
+- `docs/public/ENGINEERING_REVIEW_GUIDE.md` - short review path for demo, CI, API, recovery, GitOps, and IaC evidence.
 - `docs/public/ENGINEERING_PROOF.md` - proof tab payload, gates, evidence, and verifier contract.
 - `docs/public/SYSTEM_DESIGN.md` - system design overview.
 - `docs/public/API_BACKED_DEMO.md` - read-only synthetic demo API contract.
@@ -160,6 +169,7 @@ It includes:
 - `scripts/check_public_private_infra_scheduled_validation.sh` - public-safe recurring scheduled validation.
 - `scripts/check_public_private_infra_scheduled_alerting.sh` - public-safe scheduled validation alerting.
 - `scripts/check_public_portfolio_70_milestone.sh` - public-safe 70 percent milestone validation.
+- `scripts/check_public_review_guide.sh` - public-safe short review path validation.
 - `scripts/check_public_engineering_proof.sh` - public-safe proof tab and evidence contract validation.
 - `scripts/check_public_gitops_layout.sh` - public-safe GitOps layout validation.
 - `scripts/check_public_gitops_image_automation.sh` - public-safe GitOps image automation validation.
@@ -205,6 +215,7 @@ bash scripts/check_public_private_infra_post_remediation_drift_refresh.sh
 bash scripts/check_public_private_infra_scheduled_validation.sh
 bash scripts/check_public_private_infra_scheduled_alerting.sh
 bash scripts/check_public_portfolio_70_milestone.sh
+bash scripts/check_public_review_guide.sh
 bash scripts/check_public_engineering_proof.sh
 bash scripts/check_public_gitops_layout.sh
 bash scripts/check_public_gitops_image_automation.sh
@@ -241,6 +252,7 @@ bash scripts/check_public_private_infra_post_remediation_drift_refresh.sh
 bash scripts/check_public_private_infra_scheduled_validation.sh
 bash scripts/check_public_private_infra_scheduled_alerting.sh
 bash scripts/check_public_portfolio_70_milestone.sh
+bash scripts/check_public_review_guide.sh
 bash scripts/check_public_engineering_proof.sh
 bash scripts/check_public_gitops_layout.sh
 bash scripts/check_public_gitops_image_automation.sh

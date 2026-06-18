@@ -7,6 +7,7 @@ infrastructure, production history, customer data, or operational credentials.
 ## Documents
 
 - `PORTFOLIO_CASE_STUDY.md` - engineering case study and current system shape.
+- `ENGINEERING_REVIEW_GUIDE.md` - short review path for demo, CI, API, recovery, GitOps, and IaC evidence.
 - `ENGINEERING_PROOF.md` - proof tab payload, gates, evidence, and verifier contract.
 - `SYSTEM_DESIGN.md` - public-safe system design overview.
 - `API_BACKED_DEMO.md` - read-only synthetic API contract for the public demo.

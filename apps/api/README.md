@@ -121,7 +121,7 @@ external notification secrets.
 Public-safe 70 percent DevOps/platform milestone:
 
 ```bash
-bash scripts/check_public_portfolio_70_milestone.sh
+bash scripts/check_public_platform_maturity_70.sh
 ```
 
 The check validates the 70-point milestone, public-safe evidence groups,

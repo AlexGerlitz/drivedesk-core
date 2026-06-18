@@ -6,7 +6,7 @@ infrastructure, production history, customer data, or operational credentials.
 
 ## Documents
 
-- `PORTFOLIO_CASE_STUDY.md` - engineering case study and current system shape.
+- `ENGINEERING_CASE_STUDY.md` - engineering case study and current system shape.
 - `ENGINEERING_REVIEW_GUIDE.md` - short review path for demo, CI, API, recovery, GitOps, and IaC evidence.
 - `PROJECT_STATUS.md` - current public-safe engineering status, limits, and next work.
 - `TECHNICAL_CAPABILITY_MAP.md` - capability-to-evidence map with verifier commands.
@@ -57,7 +57,7 @@ infrastructure, production history, customer data, or operational credentials.
 - `PRIVATE_INFRA_POST_REMEDIATION_DRIFT_REFRESH.md` - public-safe post-remediation drift refresh evidence.
 - `PRIVATE_INFRA_SCHEDULED_VALIDATION.md` - public-safe recurring scheduled validation evidence.
 - `PRIVATE_INFRA_SCHEDULED_ALERTING.md` - public-safe scheduled validation alerting evidence.
-- `PORTFOLIO_70_MILESTONE.md` - public-safe 70 percent DevOps/platform milestone.
+- `PLATFORM_MATURITY_70.md` - public-safe 70 percent DevOps/platform milestone.
 - `GITOPS_DELIVERY.md` - public-safe GitOps delivery foundation.
 - `GITOPS_PROMOTION_DRIFT.md` - public-safe GitOps image promotion and drift evidence.
 - `GITOPS_DRIFT_REMEDIATION.md` - public-safe GitOps drift remediation evidence.
@@ -96,7 +96,7 @@ infrastructure, production history, customer data, or operational credentials.
   machine-readable recurring scheduled validation evidence snapshot.
 - `evidence/private-infra-scheduled-alerting.sanitized.json` -
   machine-readable scheduled validation alerting evidence snapshot.
-- `evidence/portfolio-70-milestone.sanitized.json` - machine-readable 70
+- `evidence/platform-maturity-70.sanitized.json` - machine-readable 70
   percent DevOps/platform milestone evidence snapshot.
 - `evidence/gitops-layout.sanitized.json` - machine-readable GitOps layout
   evidence snapshot.
@@ -148,7 +148,7 @@ The public repository export also generates:
 - `scripts/check_public_private_infra_post_remediation_drift_refresh.sh` - public-safe post-remediation drift refresh validation.
 - `scripts/check_public_private_infra_scheduled_validation.sh` - public-safe recurring scheduled validation.
 - `scripts/check_public_private_infra_scheduled_alerting.sh` - public-safe scheduled validation alerting.
-- `scripts/check_public_portfolio_70_milestone.sh` - public-safe 70 percent milestone validation.
+- `scripts/check_public_platform_maturity_70.sh` - public-safe 70 percent milestone validation.
 - `scripts/check_public_project_status.sh` - public-safe project status validation.
 - `scripts/check_public_technical_capability_map.sh` - public-safe capability map validation.
 - `scripts/check_public_observability_proof.sh` - public-safe observability proof validation.
@@ -181,7 +181,7 @@ https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 4. Run `bash scripts/check_public_engineering_proof.sh`.
 5. Run `bash scripts/check_public_demo_api.sh`.
 6. Run one generated client example from `examples/`.
-7. Review `PROJECT_STATUS.md`, `TECHNICAL_CAPABILITY_MAP.md`, `OBSERVABILITY_PROOF.md`, `ALERT_ROUTING_EVIDENCE.md`, `INCIDENT_RESPONSE_DEMO.md`, `ENGINEERING_PROOF.md`, `PORTFOLIO_70_MILESTONE.md`, and `SANITIZED_EVIDENCE.md`.
+7. Review `PROJECT_STATUS.md`, `TECHNICAL_CAPABILITY_MAP.md`, `OBSERVABILITY_PROOF.md`, `ALERT_ROUTING_EVIDENCE.md`, `INCIDENT_RESPONSE_DEMO.md`, `ENGINEERING_PROOF.md`, `PLATFORM_MATURITY_70.md`, and `SANITIZED_EVIDENCE.md`.
 8. Review `SYSTEM_DESIGN.md`, `GITOPS_DELIVERY.md`, and the recovery evidence docs.
 
 ## Engineering Summary

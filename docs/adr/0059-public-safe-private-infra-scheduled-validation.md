@@ -7,7 +7,7 @@ Status: accepted
 DriveDesk already records a public-safe operational loop for infrastructure
 validation, drift detection, remediation planning, reviewed execution, and
 post-remediation drift refresh. That proves the loop can run once, but a
-DevOps/platform portfolio project also needs to show how the loop stays alive
+DevOps/platform engineering project also needs to show how the loop stays alive
 over time.
 
 The public repository must still avoid live endpoints, private paths,

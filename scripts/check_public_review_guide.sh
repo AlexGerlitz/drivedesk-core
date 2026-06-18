@@ -78,7 +78,7 @@ for token in [
     "docs/public/ALERT_ROUTING_EVIDENCE.md",
     "docs/public/INCIDENT_RESPONSE_DEMO.md",
     "docs/public/ENGINEERING_PROOF.md",
-    "docs/public/PORTFOLIO_CASE_STUDY.md",
+    "docs/public/ENGINEERING_CASE_STUDY.md",
     "docs/public/SANITIZED_EVIDENCE.md",
     "docs/public/GITOPS_DELIVERY.md",
     "docs/public/OPENTOFU_PLAN_EVIDENCE.md",
@@ -141,7 +141,7 @@ for path in [
     "docs/public/ALERT_ROUTING_EVIDENCE.md",
     "docs/public/INCIDENT_RESPONSE_DEMO.md",
     "docs/public/ENGINEERING_PROOF.md",
-    "docs/public/PORTFOLIO_CASE_STUDY.md",
+    "docs/public/ENGINEERING_CASE_STUDY.md",
     "docs/public/SANITIZED_EVIDENCE.md",
 ]:
     require((root / path).is_file(), f"review guide evidence target missing: {path}")

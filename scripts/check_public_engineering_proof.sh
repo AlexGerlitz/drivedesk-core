@@ -100,7 +100,7 @@ for name, command in expected_gates.items():
     require(bool(gate.get("evidence")), f"{name} evidence missing")
 
 expected_evidence_paths = {
-    "docs/public/PORTFOLIO_70_MILESTONE.md",
+    "docs/public/PLATFORM_MATURITY_70.md",
     "docs/public/SANITIZED_EVIDENCE.md",
     "docs/public/SYSTEM_DESIGN.md",
     "sdk/generated/public-demo/",

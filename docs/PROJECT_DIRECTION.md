@@ -38,7 +38,7 @@ infra/opentofu public-safe IaC plan and state drift evidence
 infra/runtime-rollout public-safe private staging rollout evidence
 infra/state-validation public-safe private infrastructure validation, scheduled validation, and scheduled alerting evidence
 infra/state-remediation public-safe private infrastructure remediation plan, execution, and drift refresh evidence
-infra/portfolio public-safe portfolio milestone evidence
+infra/platform-maturity public-safe platform maturity milestone evidence
 docs           architecture notes and ADRs
 tests          API and foundation tests
 ```

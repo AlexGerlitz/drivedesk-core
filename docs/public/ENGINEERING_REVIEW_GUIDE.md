@@ -50,7 +50,7 @@ bash scripts/check_public_opentofu_plan.sh
 | Observability proof | `docs/public/OBSERVABILITY_PROOF.md` |
 | Alert routing | `docs/public/ALERT_ROUTING_EVIDENCE.md` |
 | Incident response | `docs/public/INCIDENT_RESPONSE_DEMO.md` |
-| Case study | `docs/public/PORTFOLIO_CASE_STUDY.md` |
+| Case study | `docs/public/ENGINEERING_CASE_STUDY.md` |
 | Sanitized runtime evidence | `docs/public/SANITIZED_EVIDENCE.md` |
 | Backup and restore | `docs/public/BACKUP_RESTORE_EVIDENCE.md` |
 | Release safety | `docs/public/RELEASE_ROLLBACK_EVIDENCE.md`, `docs/public/SLO_CANARY_GATE_EVIDENCE.md`, `docs/public/STAGED_PROMOTION_EVIDENCE.md` |

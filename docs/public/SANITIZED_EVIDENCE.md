@@ -96,10 +96,10 @@ Private infrastructure scheduled alerting source file:
 docs/public/evidence/private-infra-scheduled-alerting.sanitized.json
 ```
 
-Portfolio 70 percent milestone source file:
+Platform maturity 70 percent milestone source file:
 
 ```text
-docs/public/evidence/portfolio-70-milestone.sanitized.json
+docs/public/evidence/platform-maturity-70.sanitized.json
 ```
 
 GitOps layout validation source file:
@@ -213,7 +213,7 @@ Verified signals:
 - the public 70 percent DevOps/platform milestone evidence records seven
   complete evidence groups, 70 recorded points, public-safe boundaries, and
   remaining work before commercial SaaS completeness;
-- `portfolio.milestone_70.reached` evidence is recorded.
+- `platform.maturity_70.reached` evidence is recorded.
 - the public GitOps delivery foundation contains Argo CD project, application,
   environment, and promotion metadata;
 - Argo CD applications reference the Helm chart path;

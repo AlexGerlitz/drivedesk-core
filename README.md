@@ -78,12 +78,12 @@ incident queue, mitigation, recovery, and resolution evidence path.
 4. Run `bash scripts/check_public_engineering_proof.sh`.
 5. Run `bash scripts/check_public_demo_api.sh`.
 6. Run one generated client example from `examples/`.
-7. Review `docs/public/PROJECT_STATUS.md`, `docs/public/TECHNICAL_CAPABILITY_MAP.md`, `docs/public/OBSERVABILITY_PROOF.md`, `docs/public/ALERT_ROUTING_EVIDENCE.md`, `docs/public/INCIDENT_RESPONSE_DEMO.md`, `docs/public/ENGINEERING_PROOF.md`, `docs/public/PORTFOLIO_70_MILESTONE.md`, and `docs/public/SANITIZED_EVIDENCE.md`.
+7. Review `docs/public/PROJECT_STATUS.md`, `docs/public/TECHNICAL_CAPABILITY_MAP.md`, `docs/public/OBSERVABILITY_PROOF.md`, `docs/public/ALERT_ROUTING_EVIDENCE.md`, `docs/public/INCIDENT_RESPONSE_DEMO.md`, `docs/public/ENGINEERING_PROOF.md`, `docs/public/PLATFORM_MATURITY_70.md`, and `docs/public/SANITIZED_EVIDENCE.md`.
 8. Review `docs/public/SYSTEM_DESIGN.md`, `docs/public/GITOPS_DELIVERY.md`, and the recovery evidence docs.
 
 ## What To Review First
 
-- `docs/public/PORTFOLIO_CASE_STUDY.md` - engineering case study.
+- `docs/public/ENGINEERING_CASE_STUDY.md` - engineering case study.
 - `docs/public/ENGINEERING_REVIEW_GUIDE.md` - short review path for demo, CI, API, recovery, GitOps, and IaC evidence.
 - `docs/public/PROJECT_STATUS.md` - current public-safe engineering status, limits, and next work.
 - `docs/public/TECHNICAL_CAPABILITY_MAP.md` - capability-to-evidence map with verifier commands.
@@ -137,7 +137,7 @@ incident queue, mitigation, recovery, and resolution evidence path.
 - `docs/public/PRIVATE_INFRA_POST_REMEDIATION_DRIFT_REFRESH.md` - public-safe post-remediation drift refresh evidence.
 - `docs/public/PRIVATE_INFRA_SCHEDULED_VALIDATION.md` - public-safe recurring scheduled validation evidence.
 - `docs/public/PRIVATE_INFRA_SCHEDULED_ALERTING.md` - public-safe scheduled validation alerting evidence.
-- `docs/public/PORTFOLIO_70_MILESTONE.md` - public-safe 70 percent DevOps/platform milestone.
+- `docs/public/PLATFORM_MATURITY_70.md` - public-safe 70 percent DevOps/platform milestone.
 - `docs/public/OBSERVABILITY_PROOF.md` - public-safe observability proof.
 - `docs/public/ALERT_ROUTING_EVIDENCE.md` - public-safe alert routing proof.
 - `docs/public/INCIDENT_RESPONSE_DEMO.md` - public-safe incident response proof.
@@ -194,7 +194,7 @@ incident queue, mitigation, recovery, and resolution evidence path.
 - `scripts/check_public_private_infra_post_remediation_drift_refresh.sh` - public-safe post-remediation drift refresh validation.
 - `scripts/check_public_private_infra_scheduled_validation.sh` - public-safe recurring scheduled validation.
 - `scripts/check_public_private_infra_scheduled_alerting.sh` - public-safe scheduled validation alerting.
-- `scripts/check_public_portfolio_70_milestone.sh` - public-safe 70 percent milestone validation.
+- `scripts/check_public_platform_maturity_70.sh` - public-safe 70 percent milestone validation.
 - `scripts/check_public_review_guide.sh` - public-safe short review path validation.
 - `scripts/check_public_observability_proof.sh` - public-safe observability proof validation.
 - `scripts/check_public_alert_routing.sh` - public-safe alert routing validation.
@@ -242,7 +242,7 @@ bash scripts/check_public_private_infra_remediation_execution.sh
 bash scripts/check_public_private_infra_post_remediation_drift_refresh.sh
 bash scripts/check_public_private_infra_scheduled_validation.sh
 bash scripts/check_public_private_infra_scheduled_alerting.sh
-bash scripts/check_public_portfolio_70_milestone.sh
+bash scripts/check_public_platform_maturity_70.sh
 bash scripts/check_public_review_guide.sh
 bash scripts/check_public_pages_entrypoint.sh
 bash scripts/check_public_project_status.sh
@@ -284,7 +284,7 @@ bash scripts/check_public_private_infra_remediation_execution.sh
 bash scripts/check_public_private_infra_post_remediation_drift_refresh.sh
 bash scripts/check_public_private_infra_scheduled_validation.sh
 bash scripts/check_public_private_infra_scheduled_alerting.sh
-bash scripts/check_public_portfolio_70_milestone.sh
+bash scripts/check_public_platform_maturity_70.sh
 bash scripts/check_public_review_guide.sh
 bash scripts/check_public_pages_entrypoint.sh
 bash scripts/check_public_project_status.sh
@@ -325,7 +325,7 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/INFRASTRUCTURE_TARGET.md`
 - `docs/DEVOPS_ROADMAP.md`
 - `docs/public/README.md`
-- `docs/public/PORTFOLIO_CASE_STUDY.md`
+- `docs/public/ENGINEERING_CASE_STUDY.md`
 - `docs/public/SYSTEM_DESIGN.md`
 - `docs/public/API_BACKED_DEMO.md`
 - `docs/public/WORKFLOW_DEMO.md`

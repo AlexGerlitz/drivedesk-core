@@ -1,14 +1,14 @@
 {
   "schema_version": 1,
-  "check": "public_portfolio_70_milestone",
-  "milestone": "devops_platform_portfolio_70",
+  "check": "public_platform_maturity_70",
+  "milestone": "devops_platform_maturity_70",
   "snapshot_date": "2026-06-18",
   "target": {
     "objective": "DriveDesk DevOps/platform milestone",
     "current_milestone_percent": 70,
     "engineering_scope": "devops_platform_engineering",
     "commercial_saas_ready": false,
-    "public_claim": "70 percent DevOps/platform portfolio milestone reached"
+    "public_claim": "70 percent DevOps/platform maturity milestone reached"
   },
   "completion_model": {
     "total_points_required": 70,
@@ -42,7 +42,7 @@
       "engineering_value": "Provides a safe demo, OpenAPI schema, generated clients, and a guided engineering path.",
       "evidence": [
         "docs/public/README.md",
-        "docs/public/PORTFOLIO_CASE_STUDY.md",
+        "docs/public/ENGINEERING_CASE_STUDY.md",
         "docs/public/API_BACKED_DEMO.md",
         "apps/admin/public-demo/index.html",
         "sdk/generated/public-demo/openapi-client-manifest.json"
@@ -155,7 +155,7 @@
   "verification_chain": {
     "private_smoke": "bash scripts/ci_smoke.sh",
     "public_release_gate": "bash scripts/public_repo_release_gate.sh",
-    "milestone_check": "bash scripts/check_public_portfolio_70_milestone.sh",
+    "milestone_check": "bash scripts/check_public_platform_maturity_70.sh",
     "public_export_boundary": "scripts/export_public_repo.sh",
     "public_repo": "AlexGerlitz/drivedesk-core"
   },
@@ -178,11 +178,11 @@
     "longer production incident history"
   ],
   "decision": {
-    "event_type": "portfolio.milestone_70.reached",
+    "event_type": "platform.maturity_70.reached",
     "milestone_reached": true,
-    "claim": "70 percent DevOps/platform portfolio milestone reached",
+    "claim": "70 percent DevOps/platform maturity milestone reached",
     "production_commercial_saas_ready": false,
-    "next_goal": "move from portfolio milestone to production-grade product maturity"
+    "next_goal": "move from platform maturity milestone to production-grade product maturity"
   },
   "redaction": {
     "hostnames_included": false,

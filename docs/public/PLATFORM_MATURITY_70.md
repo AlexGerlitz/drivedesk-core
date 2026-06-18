@@ -14,19 +14,19 @@ engineering surface.
 Machine-readable evidence:
 
 ```text
-docs/public/evidence/portfolio-70-milestone.sanitized.json
+docs/public/evidence/platform-maturity-70.sanitized.json
 ```
 
 Source contract:
 
 ```text
-infra/portfolio/portfolio-70-milestone.sanitized.json
+infra/platform-maturity/platform-maturity-70.sanitized.json
 ```
 
 Executable check:
 
 ```bash
-bash scripts/check_public_portfolio_70_milestone.sh
+bash scripts/check_public_platform_maturity_70.sh
 ```
 
 ## Completion Model

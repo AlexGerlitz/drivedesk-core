@@ -1,4 +1,4 @@
-# ADR-0061: Public-Safe Portfolio 70 Percent Milestone
+# ADR-0061: Public-Safe Platform Maturity 70 Percent Milestone
 
 Status: accepted
 
@@ -11,20 +11,20 @@ logs, or runtime secret material.
 
 The current goal is not to prove that DriveDesk is a finished commercial SaaS
 product. The goal is to prove that it has reached a serious DevOps/platform
-portfolio foundation.
+platform maturity foundation.
 
 ## Decision
 
 Add a public-safe 70 percent DevOps/platform milestone artifact:
 
 - source contract:
-  `infra/portfolio/portfolio-70-milestone.sanitized.json`;
+  `infra/platform-maturity/platform-maturity-70.sanitized.json`;
 - public evidence:
-  `docs/public/evidence/portfolio-70-milestone.sanitized.json`;
+  `docs/public/evidence/platform-maturity-70.sanitized.json`;
 - public explanation:
-  `docs/public/PORTFOLIO_70_MILESTONE.md`;
+  `docs/public/PLATFORM_MATURITY_70.md`;
 - executable checker:
-  `scripts/check_public_portfolio_70_milestone.sh`.
+  `scripts/check_public_platform_maturity_70.sh`.
 
 The milestone is split into seven evidence groups:
 
@@ -46,5 +46,5 @@ groups are present, complete, public-safe, and tied to executable gates.
 - The private repository keeps the real product and private operations.
 - The milestone is checked by automation instead of being a docs-only claim.
 - The artifact explicitly avoids claiming commercial SaaS completeness.
-- Future work can move from portfolio maturity toward product maturity without
+- Future work can move from platform maturity toward product maturity without
   rewriting the public proof chain.

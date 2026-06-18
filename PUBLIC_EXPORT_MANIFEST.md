@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-18T13:49:44Z
+Generated at: 2026-06-18T14:08:55Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -192,11 +192,11 @@ Copied public-safe areas:
 - public private infrastructure scheduled alerting check: workflow_failure_handler_present
 - public private infrastructure scheduled alerting event: infra.scheduled_validation.alerting.ready
 - public private infrastructure scheduled alerting ADR: 0060-public-safe-private-infra-scheduled-alerting
-- public portfolio 70 milestone doc
-- public portfolio 70 milestone script: scripts/check_public_portfolio_70_milestone.sh
-- public portfolio 70 milestone evidence snapshot: docs/public/evidence/portfolio-70-milestone.sanitized.json
-- public portfolio 70 milestone event: portfolio.milestone_70.reached
-- public portfolio 70 milestone ADR: 0061-public-safe-portfolio-70-milestone
+- public platform maturity 70 milestone doc
+- public platform maturity 70 milestone script: scripts/check_public_platform_maturity_70.sh
+- public platform maturity 70 milestone evidence snapshot: docs/public/evidence/platform-maturity-70.sanitized.json
+- public platform maturity 70 milestone event: platform.maturity_70.reached
+- public platform maturity 70 milestone ADR: 0061-public-safe-platform-maturity-70
 - public project status doc
 - public project status validation script: scripts/check_public_project_status.sh
 - public project status links current state, limits, next work, and verification

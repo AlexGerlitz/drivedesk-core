@@ -877,7 +877,7 @@ window.DRIVEDESK_DEMO_DATA = {
       {
         "title": "Milestone contract",
         "kind": "doc",
-        "path": "docs/public/PORTFOLIO_70_MILESTONE.md",
+        "path": "docs/public/PLATFORM_MATURITY_70.md",
         "summary": "Seven evidence groups with executable validation gates"
       },
       {

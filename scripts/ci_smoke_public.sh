@@ -36,7 +36,7 @@ bash scripts/check_public_private_infra_remediation_execution.sh
 bash scripts/check_public_private_infra_post_remediation_drift_refresh.sh
 bash scripts/check_public_private_infra_scheduled_validation.sh
 bash scripts/check_public_private_infra_scheduled_alerting.sh
-bash scripts/check_public_portfolio_70_milestone.sh
+bash scripts/check_public_platform_maturity_70.sh
 bash scripts/check_public_review_guide.sh
 bash scripts/check_public_pages_entrypoint.sh
 bash scripts/check_public_project_status.sh

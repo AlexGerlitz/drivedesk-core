@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="${ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
-PORTFOLIO_DIR="${PORTFOLIO_DIR:-"$ROOT/infra/portfolio"}"
+MATURITY_DIR="${MATURITY_DIR:-"$ROOT/infra/platform-maturity"}"
 PUBLIC_DOCS="${PUBLIC_DOCS:-"$ROOT/docs/public"}"
 
 cd "$ROOT"
@@ -22,21 +22,21 @@ else
   exit 1
 fi
 
-"$PYTHON_BIN" - <<'PY' "$PORTFOLIO_DIR" "$PUBLIC_DOCS" "$ROOT"
+"$PYTHON_BIN" - <<'PY' "$MATURITY_DIR" "$PUBLIC_DOCS" "$ROOT"
 from __future__ import annotations
 
 import json
 import sys
 from pathlib import Path
 
-portfolio_dir = Path(sys.argv[1])
+maturity_dir = Path(sys.argv[1])
 public_docs = Path(sys.argv[2])
 root = Path(sys.argv[3])
 
-contract_path = portfolio_dir / "portfolio-70-milestone.sanitized.json"
-evidence_path = public_docs / "evidence/portfolio-70-milestone.sanitized.json"
-doc_path = public_docs / "PORTFOLIO_70_MILESTONE.md"
-adr_path = root / "docs/adr/0061-public-safe-portfolio-70-milestone.md"
+contract_path = maturity_dir / "platform-maturity-70.sanitized.json"
+evidence_path = public_docs / "evidence/platform-maturity-70.sanitized.json"
+doc_path = public_docs / "PLATFORM_MATURITY_70.md"
+adr_path = root / "docs/adr/0061-public-safe-platform-maturity-70.md"
 ci_smoke_path = root / "scripts/ci_smoke.sh"
 public_gate_path = root / "scripts/public_repo_release_gate.sh"
 export_path = root / "scripts/export_public_repo.sh"
@@ -139,8 +139,8 @@ checks = {
     "contract_and_evidence_match": contract == evidence,
     "milestone_shape_recorded": (
         contract.get("schema_version") == 1
-        and contract.get("check") == "public_portfolio_70_milestone"
-        and contract.get("milestone") == "devops_platform_portfolio_70"
+        and contract.get("check") == "public_platform_maturity_70"
+        and contract.get("milestone") == "devops_platform_maturity_70"
         and contract.get("target", {}).get("current_milestone_percent") == 70
         and contract.get("target", {}).get("engineering_scope") == "devops_platform_engineering"
     ),
@@ -166,7 +166,7 @@ checks = {
         and contract.get("verification_chain", {}).get("public_release_gate")
         == "bash scripts/public_repo_release_gate.sh"
         and contract.get("verification_chain", {}).get("milestone_check")
-        == "bash scripts/check_public_portfolio_70_milestone.sh"
+        == "bash scripts/check_public_platform_maturity_70.sh"
         and contract.get("verification_chain", {}).get("public_export_boundary")
         == "scripts/export_public_repo.sh"
     ),
@@ -197,26 +197,26 @@ checks = {
     "automation_wired": (
         (
             private_repo_mode
-            and "check_public_portfolio_70_milestone.sh" in ci_smoke_text
-            and "check_public_portfolio_70_milestone.sh" in public_gate_text
-            and "check_public_portfolio_70_milestone.sh" in export_text
-            and "PORTFOLIO_70_MILESTONE.md" in public_gate_text
-            and "portfolio-70-milestone.sanitized.json" in public_gate_text
-            and "0061-public-safe-portfolio-70-milestone.md" in public_gate_text
+            and "check_public_platform_maturity_70.sh" in ci_smoke_text
+            and "check_public_platform_maturity_70.sh" in public_gate_text
+            and "check_public_platform_maturity_70.sh" in export_text
+            and "PLATFORM_MATURITY_70.md" in public_gate_text
+            and "platform-maturity-70.sanitized.json" in public_gate_text
+            and "0061-public-safe-platform-maturity-70.md" in public_gate_text
         )
         or (
             public_export_mode
-            and "check_public_portfolio_70_milestone.sh" in public_smoke_text
+            and "check_public_platform_maturity_70.sh" in public_smoke_text
             and doc_path.is_file()
             and evidence_path.is_file()
             and adr_path.is_file()
         )
     ),
     "decision_recorded": (
-        contract.get("decision", {}).get("event_type") == "portfolio.milestone_70.reached"
+        contract.get("decision", {}).get("event_type") == "platform.maturity_70.reached"
         and contract.get("decision", {}).get("milestone_reached") is True
         and contract.get("decision", {}).get("claim")
-        == "70 percent DevOps/platform portfolio milestone reached"
+        == "70 percent DevOps/platform maturity milestone reached"
     ),
     "redaction_boundary_recorded": (
         contract.get("redaction", {}).get("hostnames_included") is False
@@ -238,10 +238,10 @@ if missing_references:
 if failed:
     for name in failed:
         print(f"failed check: {name}", file=sys.stderr)
-    raise SystemExit("public portfolio 70 milestone check failed")
+    raise SystemExit("public platform maturity 70 milestone check failed")
 
 print(
-    "public portfolio 70 milestone check ok: "
+    "public platform maturity 70 milestone check ok: "
     f"milestone={contract['milestone']} "
     f"points={points} "
     f"event={contract['decision']['event_type']}"

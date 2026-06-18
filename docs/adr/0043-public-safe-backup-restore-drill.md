@@ -6,7 +6,7 @@ Status: accepted
 
 DriveDesk already has public smoke checks, generated OpenAPI evidence,
 observability docs, integration recovery, and incident runbooks. The next
-portfolio-grade DevOps question is:
+production-grade DevOps question is:
 
 ```text
 Can this platform prove that data can be backed up and restored?

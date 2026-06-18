@@ -40,7 +40,7 @@ Required fields:
 
 | Artifact | Purpose |
 | --- | --- |
-| `docs/public/PORTFOLIO_70_MILESTONE.md` | Milestone contract and evidence groups |
+| `docs/public/PLATFORM_MATURITY_70.md` | Milestone contract and evidence groups |
 | `docs/public/SANITIZED_EVIDENCE.md` | Sanitized runtime, recovery, release, GitOps, and boundary evidence |
 | `docs/public/SYSTEM_DESIGN.md` | Core architecture, async boundaries, adapters, and observability |
 | `sdk/generated/public-demo/` | OpenAPI-driven Python, JavaScript, and TypeScript clients |

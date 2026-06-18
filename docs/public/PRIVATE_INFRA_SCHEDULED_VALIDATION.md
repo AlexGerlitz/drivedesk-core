@@ -23,7 +23,8 @@ It runs:
 
 - `scripts/check_public_private_infra_scheduled_validation.sh`;
 - `scripts/check_public_private_infra_post_remediation_drift_refresh.sh`;
-- `scripts/check_public_export_secrets.sh`.
+- `scripts/check_public_export_secrets.sh` when the public export helper is
+  present, otherwise `scripts/check_secrets.sh` in the private repository.
 
 ## What The Check Does
 
@@ -50,7 +51,8 @@ The check verifies:
 - the cron expression is recorded in public-safe evidence;
 - the scheduled checker runs from the workflow;
 - post-remediation drift refresh is rechecked;
-- public secret boundary is rechecked;
+- public/private secret boundary is rechecked with the scanner available in
+  that checkout;
 - sample successful runs are recorded;
 - missed-run guard and investigation route are recorded;
 - the scheduled validation is read-only;

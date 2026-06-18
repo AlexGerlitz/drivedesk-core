@@ -40,4 +40,9 @@ jobs:
         run: bash scripts/check_public_private_infra_post_remediation_drift_refresh.sh
 
       - name: Recheck public secret boundary
-        run: bash scripts/check_public_export_secrets.sh
+        run: |
+          if [[ -x scripts/check_public_export_secrets.sh ]]; then
+            bash scripts/check_public_export_secrets.sh
+          else
+            bash scripts/check_secrets.sh
+          fi

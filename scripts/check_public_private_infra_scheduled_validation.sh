@@ -177,6 +177,7 @@ result_checks = {
     ),
     "secret_boundary_rechecked": (
         "bash scripts/check_public_export_secrets.sh" in workflow_text
+        and "bash scripts/check_secrets.sh" in workflow_text
         and checks.get("secret_boundary_rechecked") is True
     ),
     "sample_runs_recorded": (

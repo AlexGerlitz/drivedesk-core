@@ -131,6 +131,21 @@ class IntegrationConnection(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
 
+class IntegrationConnectionCheck(Base):
+    __tablename__ = "dd_integration_connection_checks"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(36), index=True)
+    integration_connection_id: Mapped[str] = mapped_column(String(36), index=True)
+    adapter_key: Mapped[str] = mapped_column(String(128), index=True)
+    check_type: Mapped[str] = mapped_column(String(64), default="synthetic_preflight", index=True)
+    status: Mapped[str] = mapped_column(String(32), index=True)
+    summary: Mapped[str] = mapped_column(String(255))
+    details_json: Mapped[str] = mapped_column(Text, default="{}")
+    duration_ms: Mapped[float | None] = mapped_column(Float, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), index=True)
+
+
 class BusinessRecord(Base):
     __tablename__ = "dd_business_records"
 

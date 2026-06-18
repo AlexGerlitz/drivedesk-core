@@ -25,6 +25,7 @@ from drivedesk_core import (
     ActorRef,
     MockAccountingExportAdapter,
     TenantRef,
+    build_adapter_connection_diagnostics,
     build_event,
     list_lifecycle_policies,
     preview_lifecycle_transition,
@@ -238,6 +239,34 @@ def test_adapter_catalog_describes_runtime_adapters() -> None:
     assert descriptors["internal.noop"]["connection_profile_supported"] is False
 
 
+def test_adapter_connection_diagnostics_are_safe_and_operation_aware() -> None:
+    diagnostics = build_adapter_connection_diagnostics(
+        "file.import.fake",
+        mapping={"external_id": "lead_id", "display_name": "full_name"},
+        scopes=["file_import:preview"],
+    )
+
+    assert diagnostics["adapter_key"] == "file.import.fake"
+    assert diagnostics["direction"] == "inbound"
+    assert diagnostics["mapping_keys"] == ["display_name", "external_id"]
+    assert diagnostics["scopes"] == ["file_import:preview"]
+    assert diagnostics["operation_keys"] == ["file_import_preview", "file_import_execute"]
+    assert diagnostics["executable_operation_keys"] == ["file_import_preview"]
+    assert diagnostics["missing_operation_scopes"] == ["file_import:execute"]
+    assert "lead_id" not in json.dumps(diagnostics)
+    assert "full_name" not in json.dumps(diagnostics)
+
+    accounting = build_adapter_connection_diagnostics(
+        "accounting.export.mock",
+        mapping={},
+        scopes=["accounting:export"],
+    )
+    assert accounting["adapter_key"] == "accounting.export.mock"
+    assert accounting["direction"] == "outbound"
+    assert accounting["executable_operation_keys"] == ["accounting_export_execute"]
+    assert accounting["missing_operation_scopes"] == []
+
+
 def test_business_record_lifecycle_policy_contract() -> None:
     policies = {policy["record_type"]: policy for policy in list_lifecycle_policies()}
 
@@ -357,6 +386,10 @@ def test_api_metrics_endpoint(api_client: TestClient) -> None:
     assert "# TYPE drivedesk_workflow_action_runs gauge" in response.text
     assert "# HELP drivedesk_integration_connections Integration connections by adapter and status." in response.text
     assert "# TYPE drivedesk_integration_connections gauge" in response.text
+    assert "# HELP drivedesk_integration_connection_checks Integration connection health checks by adapter and status." in (
+        response.text
+    )
+    assert "# TYPE drivedesk_integration_connection_checks gauge" in response.text
 
 
 def test_api_metrics_endpoint_degrades_without_database_schema() -> None:
@@ -384,6 +417,9 @@ def test_api_metrics_endpoint_degrades_without_database_schema() -> None:
     assert "# HELP drivedesk_workflow_rules Current workflow rules by status, trigger, and action." in response.text
     assert "# HELP drivedesk_workflow_action_runs Workflow action runs by action type and status." in response.text
     assert "# HELP drivedesk_integration_connections Integration connections by adapter and status." in response.text
+    assert "# HELP drivedesk_integration_connection_checks Integration connection health checks by adapter and status." in (
+        response.text
+    )
 
 
 def test_api_request_log_is_structured_json(caplog: pytest.LogCaptureFixture) -> None:

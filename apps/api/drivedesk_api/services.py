@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from time import perf_counter
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
@@ -14,6 +15,7 @@ from drivedesk_api.db import (
     AuditEvent,
     BusinessRecord,
     IntegrationConnection,
+    IntegrationConnectionCheck,
     Membership,
     OutboxEvent,
     PlatformAdmin,
@@ -29,6 +31,7 @@ from drivedesk_api.schemas import (
     BusinessRecordTransition,
     BusinessRecordType,
     FileImportCreate,
+    IntegrationConnectionCheckCreate,
     IntegrationConnectionCreate,
     IntegrationMappingPreviewCreate,
     MembershipCreate,
@@ -42,6 +45,7 @@ from drivedesk_api.tenant_repository import list_tenant_owned, tenant_owned_sele
 from drivedesk_core import (
     AdapterExecutionError,
     AdapterValidationError,
+    build_adapter_connection_diagnostics,
     build_adapter_mapping_preview,
     list_adapter_descriptors,
     resolve_adapter,
@@ -285,6 +289,208 @@ async def list_integration_connections(session: AsyncSession, *, tenant_id: str)
         tenant_id,
         order_by=IntegrationConnection.created_at.desc(),
     )
+
+
+async def _tenant_integration_connection(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    connection_id: str,
+) -> IntegrationConnection:
+    await ensure_tenant_exists(session, tenant_id)
+    connection = await session.get(IntegrationConnection, connection_id)
+    if not connection or connection.tenant_id != tenant_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="integration connection not found")
+    return connection
+
+
+def _json_object_from_connection(raw_json: str, *, field_name: str) -> dict[str, object]:
+    try:
+        payload = json.loads(raw_json or "{}")
+    except json.JSONDecodeError as exc:
+        raise AdapterValidationError(
+            f"integration connection {field_name} is invalid",
+            adapter_key="integration_connection",
+        ) from exc
+    if not isinstance(payload, dict):
+        raise AdapterValidationError(
+            f"integration connection {field_name} is invalid",
+            adapter_key="integration_connection",
+        )
+    return payload
+
+
+def _raw_connection_scopes(connection: IntegrationConnection) -> list[str]:
+    try:
+        scopes = json.loads(connection.scopes_json or "[]")
+    except json.JSONDecodeError as exc:
+        raise AdapterValidationError(
+            "integration connection scopes are invalid",
+            adapter_key=connection.adapter_key,
+        ) from exc
+    if not isinstance(scopes, list) or any(not isinstance(scope, str) for scope in scopes):
+        raise AdapterValidationError(
+            "integration connection scopes are invalid",
+            adapter_key=connection.adapter_key,
+        )
+    return scopes
+
+
+async def run_integration_connection_check(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    connection_id: str,
+    payload: IntegrationConnectionCheckCreate,
+    actor: ActorContext,
+) -> IntegrationConnectionCheck:
+    connection = await _tenant_integration_connection(session, tenant_id=tenant_id, connection_id=connection_id)
+    started_at = perf_counter()
+    check_status = "passed"
+    summary = "Integration connection diagnostics passed."
+    details: dict[str, object] = {
+        "connection_status": connection.status,
+        "adapter_key": connection.adapter_key,
+        "check_type": payload.check_type,
+        "simulated": bool(payload.simulate_failure),
+    }
+
+    try:
+        if payload.simulate_failure == "provider_unavailable":
+            raise AdapterValidationError(
+                "synthetic provider is unavailable",
+                adapter_key=connection.adapter_key,
+            )
+        if payload.simulate_failure == "credential_rejected":
+            raise AdapterValidationError(
+                "synthetic credentials were rejected",
+                adapter_key=connection.adapter_key,
+            )
+        if connection.status != "active":
+            raise AdapterValidationError(
+                "integration connection is not active",
+                adapter_key=connection.adapter_key,
+            )
+        config = _json_object_from_connection(connection.config_json, field_name="config")
+        mapping = _json_object_from_connection(connection.mapping_json, field_name="mapping")
+        diagnostics = build_adapter_connection_diagnostics(
+            connection.adapter_key,
+            mapping=mapping,
+            scopes=_raw_connection_scopes(connection),
+        )
+        details.update(
+            {
+                **diagnostics,
+                "config_keys": sorted(str(key) for key in config.keys()),
+            }
+        )
+    except (AdapterExecutionError, AdapterValidationError) as exc:
+        check_status = "failed"
+        summary = exc.message
+        details.update(
+            {
+                "error_type": exc.__class__.__name__,
+                "adapter_key": getattr(exc, "adapter_key", connection.adapter_key),
+            }
+        )
+
+    duration_ms = round((perf_counter() - started_at) * 1000, 3)
+    check = IntegrationConnectionCheck(
+        id=new_id(),
+        tenant_id=tenant_id,
+        integration_connection_id=connection.id,
+        adapter_key=connection.adapter_key,
+        check_type=payload.check_type,
+        status=check_status,
+        summary=summary,
+        details_json=json.dumps(details, ensure_ascii=False, sort_keys=True),
+        duration_ms=duration_ms,
+        created_at=datetime.now(UTC),
+    )
+    session.add(check)
+    await write_audit(
+        session,
+        tenant_id=tenant_id,
+        actor=actor,
+        event_type="integration_connection.health_checked",
+        entity_type="integration_connection",
+        entity_id=connection.id,
+        summary=f"Integration connection health check {check_status}: {connection.adapter_key}",
+        metadata={
+            "integration_connection_id": connection.id,
+            "adapter_key": connection.adapter_key,
+            "check_status": check_status,
+            "check_type": payload.check_type,
+            "duration_ms": duration_ms,
+            "detail_keys": sorted(details.keys()),
+            "simulated": bool(payload.simulate_failure),
+        },
+    )
+    await commit_or_conflict(session, "integration connection check failed")
+    return check
+
+
+async def list_integration_connection_checks(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    connection_id: str,
+    limit: int = 25,
+) -> list[IntegrationConnectionCheck]:
+    await _tenant_integration_connection(session, tenant_id=tenant_id, connection_id=connection_id)
+    result = await session.execute(
+        select(IntegrationConnectionCheck)
+        .where(
+            IntegrationConnectionCheck.tenant_id == tenant_id,
+            IntegrationConnectionCheck.integration_connection_id == connection_id,
+        )
+        .order_by(IntegrationConnectionCheck.created_at.desc())
+        .limit(limit)
+    )
+    return list(result.scalars().all())
+
+
+async def get_integration_connection_health(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    connection_id: str,
+) -> dict[str, object]:
+    connection = await _tenant_integration_connection(session, tenant_id=tenant_id, connection_id=connection_id)
+    result = await session.execute(
+        select(IntegrationConnectionCheck)
+        .where(
+            IntegrationConnectionCheck.tenant_id == tenant_id,
+            IntegrationConnectionCheck.integration_connection_id == connection_id,
+        )
+        .order_by(IntegrationConnectionCheck.created_at.desc())
+    )
+    checks = list(result.scalars().all())
+    latest = checks[0] if checks else None
+    last_success = next((check.created_at for check in checks if check.status == "passed"), None)
+    last_failure = next((check.created_at for check in checks if check.status == "failed"), None)
+    latest_details: dict[str, object] = {}
+    if latest is not None:
+        try:
+            parsed_details = json.loads(latest.details_json or "{}")
+            if isinstance(parsed_details, dict):
+                latest_details = parsed_details
+        except json.JSONDecodeError:
+            latest_details = {"details_valid": False}
+
+    return {
+        "tenant_id": tenant_id,
+        "integration_connection_id": connection.id,
+        "adapter_key": connection.adapter_key,
+        "connection_status": connection.status,
+        "latest_status": latest.status if latest else "never_checked",
+        "latest_checked_at": latest.created_at if latest else None,
+        "last_success_at": last_success,
+        "last_failure_at": last_failure,
+        "check_count": len(checks),
+        "latest_summary": latest.summary if latest else None,
+        "latest_details": latest_details,
+    }
 
 
 async def preview_integration_mapping(
@@ -1083,6 +1289,26 @@ async def count_integration_connections_by_adapter_status(session: AsyncSession)
             "adapter_key": row.adapter_key,
             "status": row.status,
             "connection_count": int(row.connection_count or 0),
+        }
+        for row in result.all()
+    ]
+
+
+async def count_integration_connection_checks_by_adapter_status(session: AsyncSession) -> list[dict[str, object]]:
+    result = await session.execute(
+        select(
+            IntegrationConnectionCheck.adapter_key,
+            IntegrationConnectionCheck.status,
+            func.count().label("check_count"),
+            func.avg(IntegrationConnectionCheck.duration_ms).label("avg_duration_ms"),
+        ).group_by(IntegrationConnectionCheck.adapter_key, IntegrationConnectionCheck.status)
+    )
+    return [
+        {
+            "adapter_key": row.adapter_key,
+            "status": row.status,
+            "check_count": int(row.check_count or 0),
+            "avg_duration_ms": float(row.avg_duration_ms) if row.avg_duration_ms is not None else None,
         }
         for row in result.all()
     ]

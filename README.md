@@ -66,13 +66,14 @@ It includes:
 20. Read `docs/public/INTEGRATION_CONNECTION_SCOPES.md`.
 21. Read `docs/public/INTEGRATION_OPERATION_CONTRACTS.md`.
 22. Read `docs/public/INTEGRATION_ACCOUNTING_EXPORT.md`.
-23. Read `docs/public/INTEGRATION_OPERATOR_REVIEW.md`.
-24. Read `docs/public/INTEGRATION_CONNECTIONS.md`.
-25. Read `docs/public/SYSTEM_DESIGN.md`.
-26. Read `docs/public/INTEGRATION_ADAPTERS.md`.
-27. Read `docs/public/INTEGRATION_OBSERVABILITY.md`.
-28. Read `docs/public/OUTBOX_RECOVERY.md`.
-29. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
+23. Read `docs/public/INTEGRATION_CONNECTION_DIAGNOSTICS.md`.
+24. Read `docs/public/INTEGRATION_OPERATOR_REVIEW.md`.
+25. Read `docs/public/INTEGRATION_CONNECTIONS.md`.
+26. Read `docs/public/SYSTEM_DESIGN.md`.
+27. Read `docs/public/INTEGRATION_ADAPTERS.md`.
+28. Read `docs/public/INTEGRATION_OBSERVABILITY.md`.
+29. Read `docs/public/OUTBOX_RECOVERY.md`.
+30. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
 27. Check `.github/workflows/ci.yml`.
 28. Run `bash scripts/ci_smoke_public.sh` locally.
 
@@ -98,6 +99,7 @@ It includes:
 - `docs/public/INTEGRATION_CONNECTION_SCOPES.md` - least-privilege connection scopes.
 - `docs/public/INTEGRATION_OPERATION_CONTRACTS.md` - operation-level adapter contracts.
 - `docs/public/INTEGRATION_ACCOUNTING_EXPORT.md` - executable outbound accounting export adapter.
+- `docs/public/INTEGRATION_CONNECTION_DIAGNOSTICS.md` - safe connection health-checks and metrics.
 - `docs/public/INTEGRATION_OPERATOR_REVIEW.md` - safe review queue for failed integration jobs.
 - `docs/public/INTEGRATION_CONNECTIONS.md` - tenant-owned adapter profiles and mapping.
 - `docs/public/INTEGRATION_ADAPTERS.md` - adapter contract and retry model.
@@ -232,6 +234,7 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/public/INTEGRATION_CONNECTION_SCOPES.md`
 - `docs/public/INTEGRATION_OPERATION_CONTRACTS.md`
 - `docs/public/INTEGRATION_ACCOUNTING_EXPORT.md`
+- `docs/public/INTEGRATION_CONNECTION_DIAGNOSTICS.md`
 - `docs/public/INTEGRATION_OPERATOR_REVIEW.md`
 - `docs/public/INTEGRATION_CONNECTIONS.md`
 - `docs/public/INTEGRATION_ADAPTERS.md`
@@ -271,3 +274,4 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/adr/0037-integration-operator-review-queue.md`
 - `docs/adr/0038-business-record-lifecycle-policy-catalog.md`
 - `docs/adr/0039-mock-accounting-export-adapter.md`
+- `docs/adr/0040-integration-connection-diagnostics.md`

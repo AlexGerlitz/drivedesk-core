@@ -525,6 +525,33 @@ Public docs:
 - `docs/public/INTEGRATION_ACCOUNTING_EXPORT.md`;
 - `docs/adr/0039-mock-accounting-export-adapter.md`.
 
+## Sprint 4M Integration Connection Diagnostics
+
+Sprint 4M adds a safe diagnostics surface for tenant-owned integration
+connections.
+
+New endpoints:
+
+- `POST /tenants/{tenant_id}/integration-connections/{connection_id}/health-checks`;
+- `GET /tenants/{tenant_id}/integration-connections/{connection_id}/health-checks`;
+- `GET /tenants/{tenant_id}/integration-connections/{connection_id}/health`.
+
+Why this matters:
+
+- operators can test a connection profile before scheduling imports or exports;
+- diagnostics store latest status, last success, last failure, and check history;
+- details expose config key names, mapping key names, scopes, operation keys,
+  executable operations, and missing scopes, but not values or raw payloads;
+- each run writes `integration_connection.health_checked`;
+- Prometheus exposes `drivedesk_integration_connection_checks` and
+  `drivedesk_integration_connection_check_duration_milliseconds`;
+- real provider checks can reuse the same storage and API later.
+
+Public docs:
+
+- `docs/public/INTEGRATION_CONNECTION_DIAGNOSTICS.md`;
+- `docs/adr/0040-integration-connection-diagnostics.md`.
+
 ## Local Commands
 
 Run the API without Docker:

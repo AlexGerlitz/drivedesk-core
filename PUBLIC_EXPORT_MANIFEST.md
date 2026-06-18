@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-18T02:00:35Z
+Generated at: 2026-06-18T02:19:05Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -59,6 +59,7 @@ Copied public-safe areas:
 - public outbox recovery endpoint: /tenants/{tenant_id}/outbox-events/{event_id}/retry
 - public outbox recovery audit event: outbox_event.retry_requested
 - public integration connection endpoint: /tenants/{tenant_id}/integration-connections
+- public integration connection diagnostics endpoint: /tenants/{tenant_id}/integration-connections/{connection_id}/health-checks
 - public integration mapping preview endpoint: /tenants/{tenant_id}/integration-mapping-preview
 - public accounting export endpoint: /tenants/{tenant_id}/integration-exports/accounting
 - public integration operator review endpoint: /tenants/{tenant_id}/integration-operator-review
@@ -67,8 +68,10 @@ Copied public-safe areas:
 - public integration connection scope: accounting:export
 - public integration connection audit event: integration_connection.created
 - public integration connection metric: drivedesk_integration_connections
+- public integration diagnostics metric: drivedesk_integration_connection_checks
 - public integration operator review ADR: 0037-integration-operator-review-queue
 - public mock accounting export ADR: 0039-mock-accounting-export-adapter
+- public integration connection diagnostics ADR: 0040-integration-connection-diagnostics
 - public tenant-owned repository helper surface
 - public auth observability alerting surface
 - public demo local run script

@@ -109,6 +109,7 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
     )
     assert len(payload["integrationJobs"]) >= 3
     assert len(payload["integrationHealth"]) >= 4
+    assert any(item["name"] == "Connection diagnostics" for item in payload["integrationReadiness"])
     assert len(payload["outbox"]) >= 3
     assert {event["status"] for event in payload["outbox"]} >= {"processed", "pending"}
     assert {job["status"] for job in payload["integrationJobs"]} >= {"processed", "retry", "dead_letter"}

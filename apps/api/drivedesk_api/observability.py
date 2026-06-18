@@ -246,6 +246,31 @@ def build_integration_connection_metrics_lines(integration_connection_rows: list
     return lines
 
 
+def build_integration_connection_check_metrics_lines(check_rows: list[dict[str, object]]) -> list[str]:
+    lines = [
+        "# HELP drivedesk_integration_connection_checks Integration connection health checks by adapter and status.",
+        "# TYPE drivedesk_integration_connection_checks gauge",
+    ]
+    for row in check_rows:
+        labels = prometheus_labels({"adapter_key": row["adapter_key"], "status": row["status"]})
+        lines.append(f"drivedesk_integration_connection_checks{labels} {row['check_count']}")
+
+    lines.extend(
+        [
+            "# HELP drivedesk_integration_connection_check_duration_milliseconds Average integration connection check duration.",
+            "# TYPE drivedesk_integration_connection_check_duration_milliseconds gauge",
+        ]
+    )
+    for row in check_rows:
+        avg_duration_ms = row.get("avg_duration_ms")
+        if avg_duration_ms is None:
+            continue
+        labels = prometheus_labels({"adapter_key": row["adapter_key"], "status": row["status"]})
+        lines.append(f"drivedesk_integration_connection_check_duration_milliseconds{labels} {avg_duration_ms:.3f}")
+
+    return lines
+
+
 def build_readiness_metrics_lines(settings: Settings) -> list[str]:
     dependencies = {
         "database_url_configured": bool(settings.database_url),
@@ -282,6 +307,7 @@ def build_metrics_text(
     workflow_rule_rows: list[dict[str, object]] | None = None,
     workflow_action_run_rows: list[dict[str, object]] | None = None,
     integration_connection_rows: list[dict[str, object]] | None = None,
+    integration_connection_check_rows: list[dict[str, object]] | None = None,
     storage_available: bool = True,
 ) -> str:
     labels = prometheus_labels(
@@ -316,6 +342,7 @@ def build_metrics_text(
     lines.extend(build_workflow_rule_metrics_lines(workflow_rule_rows or []))
     lines.extend(build_workflow_action_run_metrics_lines(workflow_action_run_rows or []))
     lines.extend(build_integration_connection_metrics_lines(integration_connection_rows or []))
+    lines.extend(build_integration_connection_check_metrics_lines(integration_connection_check_rows or []))
     lines.append("")
     return "\n".join(lines)
 

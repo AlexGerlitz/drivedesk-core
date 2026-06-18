@@ -215,6 +215,40 @@ class IntegrationConnectionRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class IntegrationConnectionCheckCreate(BaseModel):
+    check_type: Literal["synthetic_preflight"] = "synthetic_preflight"
+    simulate_failure: Literal["provider_unavailable", "credential_rejected"] | None = None
+
+
+class IntegrationConnectionCheckRead(BaseModel):
+    id: str
+    tenant_id: str
+    integration_connection_id: str
+    adapter_key: str
+    check_type: str
+    status: Literal["passed", "failed"]
+    summary: str
+    details_json: str
+    duration_ms: float | None = None
+    created_at: datetime | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class IntegrationConnectionHealthRead(BaseModel):
+    tenant_id: str
+    integration_connection_id: str
+    adapter_key: str
+    connection_status: IntegrationConnectionStatus
+    latest_status: Literal["never_checked", "passed", "failed"]
+    latest_checked_at: datetime | None = None
+    last_success_at: datetime | None = None
+    last_failure_at: datetime | None = None
+    check_count: int
+    latest_summary: str | None = None
+    latest_details: dict[str, Any] = Field(default_factory=dict)
+
+
 class IntegrationMappingPreviewCreate(BaseModel):
     adapter_key: str = Field(default="file.import.fake", min_length=2, max_length=128, pattern=r"^[a-z0-9][a-z0-9_.-]*$")
     integration_connection_id: str | None = Field(default=None, min_length=1, max_length=36)

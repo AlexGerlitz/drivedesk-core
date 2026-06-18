@@ -278,8 +278,13 @@ def build_public_demo_payload() -> dict[str, Any]:
             },
             {
                 "name": "Accounting export adapter",
-                "state": "design",
-                "progress": 15,
+                "state": "active",
+                "progress": 55,
+            },
+            {
+                "name": "Connection diagnostics",
+                "state": "active",
+                "progress": 45,
             },
             {
                 "name": "Public demo runtime",

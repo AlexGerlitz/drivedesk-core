@@ -581,6 +581,40 @@ def validate_adapter_connection_profile(
     return descriptor
 
 
+def build_adapter_connection_diagnostics(
+    adapter_key: str,
+    *,
+    mapping: dict[str, object],
+    scopes: list[str] | None = None,
+) -> dict[str, object]:
+    descriptor = validate_adapter_connection_profile(adapter_key, mapping=mapping, scopes=scopes)
+    resolved_scopes = resolve_adapter_connection_scopes(adapter_key, scopes=scopes)
+    operation_keys: list[str] = []
+    executable_operation_keys: list[str] = []
+    missing_operation_scopes: list[str] = []
+    for operation in descriptor.operation_contracts:
+        operation_keys.append(operation.key)
+        required_scope = operation.required_connection_scope
+        if required_scope is None or required_scope in resolved_scopes:
+            executable_operation_keys.append(operation.key)
+            continue
+        missing_operation_scopes.append(required_scope)
+
+    return {
+        "adapter_key": descriptor.key,
+        "adapter_status": descriptor.status,
+        "direction": descriptor.direction,
+        "connection_profile_supported": descriptor.connection_profile_supported,
+        "required_mapping_keys": list(descriptor.required_mapping_keys),
+        "mapping_keys": sorted(str(key) for key in mapping.keys()),
+        "scopes": resolved_scopes,
+        "operation_keys": operation_keys,
+        "executable_operation_keys": executable_operation_keys,
+        "missing_operation_scopes": sorted(set(missing_operation_scopes)),
+        "capabilities": list(descriptor.capabilities),
+    }
+
+
 def execute_adapter(adapter_key: str | None, payload: dict[str, object]) -> AdapterResult:
     adapter = resolve_adapter(adapter_key)
     return adapter.execute(payload)

@@ -14,6 +14,7 @@ from drivedesk_api.db import (
     AuditEvent,
     BusinessRecord,
     IntegrationConnection,
+    IntegrationConnectionCheck,
     Membership,
     OutboxEvent,
     PlatformAdmin,
@@ -72,7 +73,10 @@ from drivedesk_api.schemas import (
     BusinessRecordTransition,
     BusinessRecordType,
     FileImportCreate,
+    IntegrationConnectionCheckCreate,
+    IntegrationConnectionCheckRead,
     IntegrationConnectionCreate,
+    IntegrationConnectionHealthRead,
     IntegrationConnectionRead,
     IntegrationMappingPreviewCreate,
     IntegrationMappingPreviewRead,
@@ -96,6 +100,7 @@ from drivedesk_api.schemas import (
 )
 from drivedesk_api.services import (
     count_business_records_by_type_status,
+    count_integration_connection_checks_by_adapter_status,
     count_integration_connections_by_adapter_status,
     count_outbox_by_status,
     count_workflow_action_runs_by_action_status,
@@ -110,7 +115,9 @@ from drivedesk_api.services import (
     create_user,
     create_workflow_rule,
     ensure_tenant_exists,
+    get_integration_connection_health,
     list_business_records,
+    list_integration_connection_checks,
     list_integration_connections,
     list_integration_operator_review,
     list_platform_admins,
@@ -118,6 +125,7 @@ from drivedesk_api.services import (
     list_workflow_rules,
     preview_integration_mapping,
     retry_outbox_event,
+    run_integration_connection_check,
     summarize_integration_outbox,
     transition_business_record,
     write_audit,
@@ -215,6 +223,7 @@ def build_app(settings: Settings | None = None) -> FastAPI:
             workflow_rule_rows = await count_workflow_rules_by_status_trigger_action(session)
             workflow_action_run_rows = await count_workflow_action_runs_by_action_status(session)
             integration_connection_rows = await count_integration_connections_by_adapter_status(session)
+            integration_connection_check_rows = await count_integration_connection_checks_by_adapter_status(session)
         except Exception as exc:
             # Keep Prometheus scrapeable even when storage-backed aggregates degrade.
             storage_available = False
@@ -227,6 +236,7 @@ def build_app(settings: Settings | None = None) -> FastAPI:
             workflow_rule_rows = []
             workflow_action_run_rows = []
             integration_connection_rows = []
+            integration_connection_check_rows = []
             log_json(
                 metrics_logger,
                 "metrics.storage_unavailable",
@@ -247,6 +257,7 @@ def build_app(settings: Settings | None = None) -> FastAPI:
                 workflow_rule_rows=workflow_rule_rows,
                 workflow_action_run_rows=workflow_action_run_rows,
                 integration_connection_rows=integration_connection_rows,
+                integration_connection_check_rows=integration_connection_check_rows,
                 storage_available=storage_available,
             ),
             media_type="text/plain; version=0.0.4; charset=utf-8",
@@ -627,6 +638,65 @@ def build_app(settings: Settings | None = None) -> FastAPI:
         await ensure_tenant_exists(session, tenant_id)
         require_tenant_permission(actor, tenant_id, Permission.TENANT_READ)
         return await list_integration_connections(session, tenant_id=tenant_id)
+
+    @api.post(
+        "/tenants/{tenant_id}/integration-connections/{connection_id}/health-checks",
+        response_model=IntegrationConnectionCheckRead,
+        status_code=201,
+        tags=["integrations"],
+    )
+    async def run_integration_connection_check_endpoint(
+        tenant_id: str,
+        connection_id: str,
+        payload: IntegrationConnectionCheckCreate,
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> IntegrationConnectionCheck:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.TENANT_WRITE)
+        return await run_integration_connection_check(
+            session,
+            tenant_id=tenant_id,
+            connection_id=connection_id,
+            payload=payload,
+            actor=actor,
+        )
+
+    @api.get(
+        "/tenants/{tenant_id}/integration-connections/{connection_id}/health-checks",
+        response_model=list[IntegrationConnectionCheckRead],
+        tags=["integrations"],
+    )
+    async def list_integration_connection_checks_endpoint(
+        tenant_id: str,
+        connection_id: str,
+        limit: int = Query(default=25, ge=1, le=100),
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> list[IntegrationConnectionCheck]:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.TENANT_READ)
+        return await list_integration_connection_checks(
+            session,
+            tenant_id=tenant_id,
+            connection_id=connection_id,
+            limit=limit,
+        )
+
+    @api.get(
+        "/tenants/{tenant_id}/integration-connections/{connection_id}/health",
+        response_model=IntegrationConnectionHealthRead,
+        tags=["integrations"],
+    )
+    async def get_integration_connection_health_endpoint(
+        tenant_id: str,
+        connection_id: str,
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> dict[str, object]:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.TENANT_READ)
+        return await get_integration_connection_health(session, tenant_id=tenant_id, connection_id=connection_id)
 
     @api.post(
         "/tenants/{tenant_id}/integration-mapping-preview",

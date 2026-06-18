@@ -24,6 +24,7 @@ drivedesk_integration_job_attempts{adapter_key="file.import.fake",status="proces
 drivedesk_integration_job_errors{adapter_key="file.import.fake",status="retry"} 1
 drivedesk_integration_adapter_duration_milliseconds{adapter_key="file.import.fake",status="processed"} 12.4
 drivedesk_integration_connections{adapter_key="file.import.fake",status="active"} 1
+drivedesk_integration_connection_checks{adapter_key="file.import.fake",status="passed"} 1
 drivedesk_integration_jobs{adapter_key="accounting.export.mock",status="dead_letter"} 1
 drivedesk_integration_connections{adapter_key="accounting.export.mock",status="active"} 1
 ```
@@ -37,6 +38,8 @@ Metric meaning:
 | `drivedesk_integration_job_errors` | Jobs with a recorded adapter error. |
 | `drivedesk_integration_adapter_duration_milliseconds` | Average adapter duration for jobs with duration evidence. |
 | `drivedesk_integration_connections` | Number of tenant-owned connection profiles grouped by adapter and status. |
+| `drivedesk_integration_connection_checks` | Number of connection diagnostics grouped by adapter and result status. |
+| `drivedesk_integration_connection_check_duration_milliseconds` | Average connection diagnostics duration. |
 
 The labels use `adapter_key` and `status` only. They do not include names,
 connection ids, phone numbers, tenant-specific provider payloads, file contents,
@@ -112,6 +115,8 @@ The public-safe operational contract is:
 - structured logs explain the safe failure context;
 - runbooks describe first checks and recovery;
 - operator review cards are available through a tenant-scoped API;
+- connection diagnostics expose latest integration readiness before work is
+  queued;
 - operator retry requests are audited;
 - the public demo shows Integration Health with fake data.
 

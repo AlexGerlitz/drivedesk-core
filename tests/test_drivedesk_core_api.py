@@ -27,6 +27,7 @@ from drivedesk_api.db import (
     Base,
     BusinessRecord,
     IntegrationConnection,
+    IntegrationConnectionCheck,
     OutboxEvent,
     PlatformAdmin,
     User,
@@ -1884,6 +1885,177 @@ def test_accounting_export_adapter_flow_and_operator_review(
     )
     assert "Demo accounting export profile" not in metrics_response.text
     assert connection["id"] not in metrics_response.text
+
+
+def test_integration_connection_health_checks(
+    api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, session_factory = api_client
+    owner_headers = {"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"}
+
+    tenant_response = client.post(
+        "/tenants",
+        json={"slug": "connection-health", "name": "Connection Health"},
+        headers=owner_headers,
+    )
+    assert tenant_response.status_code == 201
+    tenant_id = tenant_response.json()["id"]
+
+    connection_response = client.post(
+        f"/tenants/{tenant_id}/integration-connections",
+        json={
+            "name": "Health file import profile",
+            "adapter_key": "file.import.fake",
+            "config": {"mode": "synthetic", "api_token": "not-returned"},
+            "mapping": {"external_id": "lead_id", "display_name": "full_name"},
+            "scopes": ["file_import:preview"],
+        },
+        headers=owner_headers,
+    )
+    assert connection_response.status_code == 201
+    connection = connection_response.json()
+
+    never_checked_response = client.get(
+        f"/tenants/{tenant_id}/integration-connections/{connection['id']}/health",
+        headers=owner_headers,
+    )
+    assert never_checked_response.status_code == 200
+    never_checked = never_checked_response.json()
+    assert never_checked["latest_status"] == "never_checked"
+    assert never_checked["last_success_at"] is None
+    assert never_checked["last_failure_at"] is None
+    assert never_checked["check_count"] == 0
+
+    manager_run_response = client.post(
+        f"/tenants/{tenant_id}/integration-connections/{connection['id']}/health-checks",
+        json={},
+        headers={"X-Actor-Id": "manager_1", "X-Actor-Role": "manager"},
+    )
+    assert manager_run_response.status_code == 403
+    assert manager_run_response.json()["detail"] == "permission required: tenant:write"
+
+    check_response = client.post(
+        f"/tenants/{tenant_id}/integration-connections/{connection['id']}/health-checks",
+        json={},
+        headers=owner_headers,
+    )
+    assert check_response.status_code == 201
+    check = check_response.json()
+    assert check["tenant_id"] == tenant_id
+    assert check["integration_connection_id"] == connection["id"]
+    assert check["adapter_key"] == "file.import.fake"
+    assert check["status"] == "passed"
+    assert check["summary"] == "Integration connection diagnostics passed."
+    assert check["duration_ms"] is not None
+    check_details = json.loads(check["details_json"])
+    assert check_details["mapping_keys"] == ["display_name", "external_id"]
+    assert check_details["config_keys"] == ["api_token", "mode"]
+    assert check_details["scopes"] == ["file_import:preview"]
+    assert check_details["operation_keys"] == ["file_import_preview", "file_import_execute"]
+    assert check_details["executable_operation_keys"] == ["file_import_preview"]
+    assert check_details["missing_operation_scopes"] == ["file_import:execute"]
+    serialized_details = json.dumps(check_details)
+    assert "lead_id" not in serialized_details
+    assert "full_name" not in serialized_details
+    assert "not-returned" not in serialized_details
+
+    failed_response = client.post(
+        f"/tenants/{tenant_id}/integration-connections/{connection['id']}/health-checks",
+        json={"simulate_failure": "provider_unavailable"},
+        headers=owner_headers,
+    )
+    assert failed_response.status_code == 201
+    failed_check = failed_response.json()
+    assert failed_check["status"] == "failed"
+    assert failed_check["summary"] == "synthetic provider is unavailable"
+    failed_details = json.loads(failed_check["details_json"])
+    assert failed_details["simulated"] is True
+    assert failed_details["error_type"] == "AdapterValidationError"
+
+    disabled_connection_response = client.post(
+        f"/tenants/{tenant_id}/integration-connections",
+        json={
+            "name": "Disabled health profile",
+            "adapter_key": "accounting.export.mock",
+            "status": "disabled",
+        },
+        headers=owner_headers,
+    )
+    assert disabled_connection_response.status_code == 201
+    disabled_connection = disabled_connection_response.json()
+
+    disabled_check_response = client.post(
+        f"/tenants/{tenant_id}/integration-connections/{disabled_connection['id']}/health-checks",
+        json={},
+        headers=owner_headers,
+    )
+    assert disabled_check_response.status_code == 201
+    disabled_check = disabled_check_response.json()
+    assert disabled_check["adapter_key"] == "accounting.export.mock"
+    assert disabled_check["status"] == "failed"
+    assert disabled_check["summary"] == "integration connection is not active"
+
+    checks_response = client.get(
+        f"/tenants/{tenant_id}/integration-connections/{connection['id']}/health-checks",
+        headers={"X-Actor-Id": "manager_1", "X-Actor-Role": "manager"},
+    )
+    assert checks_response.status_code == 200
+    checks = checks_response.json()
+    assert [item["status"] for item in checks] == ["failed", "passed"]
+    assert all(item["integration_connection_id"] == connection["id"] for item in checks)
+
+    health_response = client.get(
+        f"/tenants/{tenant_id}/integration-connections/{connection['id']}/health",
+        headers=owner_headers,
+    )
+    assert health_response.status_code == 200
+    health = health_response.json()
+    assert health["latest_status"] == "failed"
+    assert health["last_success_at"] is not None
+    assert health["last_failure_at"] is not None
+    assert health["check_count"] == 2
+    assert health["latest_summary"] == "synthetic provider is unavailable"
+    assert health["latest_details"]["simulated"] is True
+
+    not_found_response = client.post(
+        f"/tenants/{tenant_id}/integration-connections/missing-connection/health-checks",
+        json={},
+        headers=owner_headers,
+    )
+    assert not_found_response.status_code == 404
+    assert not_found_response.json()["detail"] == "integration connection not found"
+
+    async def health_check_state() -> tuple[list[IntegrationConnectionCheck], list[str]]:
+        async with session_factory() as session:
+            checks_result = await session.execute(
+                select(IntegrationConnectionCheck).order_by(IntegrationConnectionCheck.created_at)
+            )
+            audit_result = await session.execute(
+                select(AuditEvent.event_type)
+                .where(AuditEvent.tenant_id == tenant_id)
+                .order_by(AuditEvent.created_at)
+            )
+            return list(checks_result.scalars().all()), list(audit_result.scalars().all())
+
+    stored_checks, audit_events = asyncio.run(health_check_state())
+    assert [item.status for item in stored_checks] == ["passed", "failed", "failed"]
+    assert Counter(audit_events)["integration_connection.health_checked"] == 3
+
+    metrics_response = client.get("/metrics")
+    assert metrics_response.status_code == 200
+    assert 'drivedesk_integration_connection_checks{adapter_key="file.import.fake",status="passed"} 1' in (
+        metrics_response.text
+    )
+    assert 'drivedesk_integration_connection_checks{adapter_key="file.import.fake",status="failed"} 1' in (
+        metrics_response.text
+    )
+    assert (
+        'drivedesk_integration_connection_checks{adapter_key="accounting.export.mock",status="failed"} 1'
+        in metrics_response.text
+    )
+    assert "Health file import profile" not in metrics_response.text
+    assert connection["id"] not in metrics_response.text
+    assert "not-returned" not in metrics_response.text
 
 
 def test_file_import_adapter_retry_and_dead_letter(

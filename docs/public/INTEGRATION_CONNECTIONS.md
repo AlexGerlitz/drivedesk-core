@@ -32,6 +32,8 @@ descriptor. Scope behavior is documented in `INTEGRATION_CONNECTION_SCOPES.md`.
 GET /integration-adapters
 POST /tenants/{tenant_id}/integration-connections
 GET /tenants/{tenant_id}/integration-connections
+POST /tenants/{tenant_id}/integration-connections/{connection_id}/health-checks
+GET /tenants/{tenant_id}/integration-connections/{connection_id}/health
 POST /tenants/{tenant_id}/integration-mapping-preview
 ```
 
@@ -93,12 +95,29 @@ Before scheduling a job, clients can call
 rejected normalized rows without creating outbox work. When preview references a
 stored connection, the connection must have the `file_import:preview` scope.
 
+## Diagnostics
+
+Connection profiles can be checked before scheduling integration work:
+
+```text
+POST /tenants/{tenant_id}/integration-connections/{connection_id}/health-checks
+GET /tenants/{tenant_id}/integration-connections/{connection_id}/health-checks
+GET /tenants/{tenant_id}/integration-connections/{connection_id}/health
+```
+
+Diagnostics store safe results in `dd_integration_connection_checks` and expose
+latest status, last success, last failure, and check history. Details return
+config key names, mapping key names, scopes, operation keys, and missing
+operation scopes, but not config values, mapping values, credentials, raw
+records, or raw documents. See `INTEGRATION_CONNECTION_DIAGNOSTICS.md`.
+
 ## Audit Event
 
 Connection creation writes:
 
 ```text
 integration_connection.created
+integration_connection.health_checked
 ```
 
 The audit event stores the connection id, adapter key, status, config keys, and
@@ -110,6 +129,7 @@ mapping keys. It also stores scope labels. It does not store credentials.
 
 ```text
 drivedesk_integration_connections{adapter_key="file.import.fake",status="active"} 1
+drivedesk_integration_connection_checks{adapter_key="file.import.fake",status="passed"} 1
 ```
 
 Metric labels are intentionally limited to:

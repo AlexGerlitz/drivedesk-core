@@ -105,6 +105,14 @@ def validate_public_demo_payload(payload: dict[str, Any]) -> None:
     if not isinstance(stages, list) or len(stages) < 5:
         raise ValueError("workflow.stages is missing or too short")
 
+    proof = payload.get("engineeringProof") or {{}}
+    if proof.get("milestone") != "engineering_70":
+        raise ValueError(f"unexpected engineeringProof.milestone: {{proof.get('milestone')}}")
+
+    gates = proof.get("gates")
+    if not isinstance(gates, list) or len(gates) < 5:
+        raise ValueError("engineeringProof.gates is missing or too short")
+
     domain_events = payload.get("domainEvents")
     if not isinstance(domain_events, list):
         raise ValueError("domainEvents is missing")
@@ -205,6 +213,14 @@ export function validatePublicDemoPayload(payload) {{
     throw new Error("workflow.stages is missing or too short");
   }}
 
+  if (payload.engineeringProof?.milestone !== "engineering_70") {{
+    throw new Error(`unexpected engineeringProof.milestone: ${{payload.engineeringProof?.milestone}}`);
+  }}
+
+  if (!Array.isArray(payload.engineeringProof?.gates) || payload.engineeringProof.gates.length < 5) {{
+    throw new Error("engineeringProof.gates is missing or too short");
+  }}
+
   if (!Array.isArray(payload.domainEvents)) {{
     throw new Error("domainEvents is missing");
   }}
@@ -266,6 +282,15 @@ export interface PublicDemoPayload {{
   integrationJobs: Array<Record<string, unknown>>;
   integrationHealth: Array<Record<string, string>>;
   integrationReadiness: Array<Record<string, unknown>>;
+  recoveryEvidence: Array<Record<string, string>>;
+  engineeringProof: {{
+    milestone: "engineering_70";
+    status: "validated";
+    updatedAt: string;
+    summary: Array<Record<string, string>>;
+    gates: Array<Record<string, string>>;
+    evidence: Array<Record<string, string>>;
+  }};
   workflow: {{
     id: "wf-demo-lead-to-student";
     currentStage: "student_sync";

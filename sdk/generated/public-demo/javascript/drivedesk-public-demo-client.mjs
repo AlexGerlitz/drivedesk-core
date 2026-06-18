@@ -19,6 +19,8 @@ export const REQUIRED_FIELDS = [
   "integrationJobs",
   "integrationHealth",
   "integrationReadiness",
+  "recoveryEvidence",
+  "engineeringProof",
   "workflow",
   "timeline",
   "domainEvents"
@@ -82,6 +84,14 @@ export function validatePublicDemoPayload(payload) {
 
   if (!Array.isArray(payload.workflow?.stages) || payload.workflow.stages.length < 5) {
     throw new Error("workflow.stages is missing or too short");
+  }
+
+  if (payload.engineeringProof?.milestone !== "engineering_70") {
+    throw new Error(`unexpected engineeringProof.milestone: ${payload.engineeringProof?.milestone}`);
+  }
+
+  if (!Array.isArray(payload.engineeringProof?.gates) || payload.engineeringProof.gates.length < 5) {
+    throw new Error("engineeringProof.gates is missing or too short");
   }
 
   if (!Array.isArray(payload.domainEvents)) {

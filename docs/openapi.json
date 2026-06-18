@@ -2151,6 +2151,11 @@
             "title": "Domainevents",
             "type": "array"
           },
+          "engineeringProof": {
+            "additionalProperties": true,
+            "title": "Engineeringproof",
+            "type": "object"
+          },
           "generatedAt": {
             "title": "Generatedat",
             "type": "string"
@@ -2214,6 +2219,16 @@
             "title": "Outbox",
             "type": "array"
           },
+          "recoveryEvidence": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "title": "Recoveryevidence",
+            "type": "array"
+          },
           "schemaVersion": {
             "title": "Schemaversion",
             "type": "integer"
@@ -2265,6 +2280,8 @@
           "integrationJobs",
           "integrationHealth",
           "integrationReadiness",
+          "recoveryEvidence",
+          "engineeringProof",
           "workflow",
           "timeline",
           "domainEvents"

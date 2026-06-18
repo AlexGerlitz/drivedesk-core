@@ -50,7 +50,11 @@
         Array.isArray(payload.domainEvents) &&
         Array.isArray(payload.integrationJobs) &&
         Array.isArray(payload.integrationHealth) &&
-        Array.isArray(payload.recoveryEvidence)
+        Array.isArray(payload.recoveryEvidence) &&
+        payload.engineeringProof &&
+        Array.isArray(payload.engineeringProof.summary) &&
+        Array.isArray(payload.engineeringProof.gates) &&
+        Array.isArray(payload.engineeringProof.evidence)
     );
   }
 
@@ -440,9 +444,83 @@
     });
   }
 
+  function fillEngineeringProof() {
+    var proof = data.engineeringProof;
+    var meta = document.getElementById("proofMeta");
+    meta.textContent = proof.milestone + " - " + proof.status + " - " + proof.updatedAt;
+
+    var summaryRows = document.getElementById("proofSummaryRows");
+    clear(summaryRows);
+    proof.summary.forEach(function (item) {
+      var card = document.createElement("article");
+      card.className = "metric-card";
+      card.dataset.tone = item.tone || "blue";
+
+      var label = document.createElement("span");
+      label.className = "muted";
+      label.appendChild(text(item.label));
+
+      var value = document.createElement("strong");
+      value.appendChild(text(item.value));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      card.append(label, value, detail);
+      summaryRows.appendChild(card);
+    });
+
+    var gateRows = document.getElementById("proofGateRows");
+    clear(gateRows);
+    proof.gates.forEach(function (gate) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var name = document.createElement("strong");
+      name.appendChild(text(gate.name));
+      top.append(name, chip(gate.status, statusTone(gate.status)));
+
+      var command = document.createElement("code");
+      command.appendChild(text(gate.command));
+
+      var evidence = document.createElement("span");
+      evidence.className = "muted";
+      evidence.appendChild(text(gate.evidence));
+
+      row.append(top, command, evidence);
+      gateRows.appendChild(row);
+    });
+
+    var evidenceRows = document.getElementById("proofEvidenceRows");
+    clear(evidenceRows);
+    proof.evidence.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(item.title));
+      top.append(title, chip(item.kind, "blue"));
+
+      var path = document.createElement("code");
+      path.appendChild(text(item.path));
+
+      var summary = document.createElement("span");
+      summary.className = "muted";
+      summary.appendChild(text(item.summary));
+
+      row.append(top, path, summary);
+      evidenceRows.appendChild(row);
+    });
+  }
+
   function statusTone(status) {
     if (
-      ["done", "ready", "online", "validated", "processed", "green", "active", "success", "observed", "matched", "resolved"].indexOf(status) >= 0
+      ["done", "ready", "online", "validated", "processed", "green", "active", "success", "observed", "matched", "resolved", "passed"].indexOf(status) >= 0
     ) {
       return "green";
     }
@@ -501,6 +579,7 @@
     fillOutbox();
     fillHealth();
     fillRecoveryEvidence();
+    fillEngineeringProof();
   }
 
   async function init() {

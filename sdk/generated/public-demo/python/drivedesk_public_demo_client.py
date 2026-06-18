@@ -25,6 +25,8 @@ REQUIRED_FIELDS = [
   "integrationJobs",
   "integrationHealth",
   "integrationReadiness",
+  "recoveryEvidence",
+  "engineeringProof",
   "workflow",
   "timeline",
   "domainEvents"
@@ -81,6 +83,14 @@ def validate_public_demo_payload(payload: dict[str, Any]) -> None:
     stages = workflow.get("stages")
     if not isinstance(stages, list) or len(stages) < 5:
         raise ValueError("workflow.stages is missing or too short")
+
+    proof = payload.get("engineeringProof") or {}
+    if proof.get("milestone") != "engineering_70":
+        raise ValueError(f"unexpected engineeringProof.milestone: {proof.get('milestone')}")
+
+    gates = proof.get("gates")
+    if not isinstance(gates, list) or len(gates) < 5:
+        raise ValueError("engineeringProof.gates is missing or too short")
 
     domain_events = payload.get("domainEvents")
     if not isinstance(domain_events, list):

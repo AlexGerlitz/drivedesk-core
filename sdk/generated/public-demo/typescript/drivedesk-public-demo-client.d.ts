@@ -1,7 +1,7 @@
 // Generated from DriveDesk Core OpenAPI. Do not edit by hand.
 export const PUBLIC_DEMO_PATH: "/demo/public";
 export const OPERATION_ID: "public_demo_demo_public_get";
-export const REQUIRED_FIELDS: Array<"schemaVersion" | "generatedAt" | "dataSource" | "apiContract" | "tenant" | "health" | "metrics" | "workQueue" | "members" | "auditEvents" | "outbox" | "adapters" | "integrationJobs" | "integrationHealth" | "integrationReadiness" | "workflow" | "timeline" | "domainEvents">;
+export const REQUIRED_FIELDS: Array<"schemaVersion" | "generatedAt" | "dataSource" | "apiContract" | "tenant" | "health" | "metrics" | "workQueue" | "members" | "auditEvents" | "outbox" | "adapters" | "integrationJobs" | "integrationHealth" | "integrationReadiness" | "recoveryEvidence" | "engineeringProof" | "workflow" | "timeline" | "domainEvents">;
 
 export interface PublicDemoPayload {
   schemaVersion: 1;
@@ -19,6 +19,15 @@ export interface PublicDemoPayload {
   integrationJobs: Array<Record<string, unknown>>;
   integrationHealth: Array<Record<string, string>>;
   integrationReadiness: Array<Record<string, unknown>>;
+  recoveryEvidence: Array<Record<string, string>>;
+  engineeringProof: {
+    milestone: "engineering_70";
+    status: "validated";
+    updatedAt: string;
+    summary: Array<Record<string, string>>;
+    gates: Array<Record<string, string>>;
+    evidence: Array<Record<string, string>>;
+  };
   workflow: {
     id: "wf-demo-lead-to-student";
     currentStage: "student_sync";

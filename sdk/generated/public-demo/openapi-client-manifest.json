@@ -26,6 +26,8 @@
     "integrationJobs",
     "integrationHealth",
     "integrationReadiness",
+    "recoveryEvidence",
+    "engineeringProof",
     "workflow",
     "timeline",
     "domainEvents"

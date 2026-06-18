@@ -23,6 +23,7 @@
           <button class="nav-tab" type="button" data-view="work">Work</button>
           <button class="nav-tab" type="button" data-view="integrations">Integrations</button>
           <button class="nav-tab" type="button" data-view="system">System</button>
+          <button class="nav-tab" type="button" data-view="proof">Proof</button>
         </nav>
       </aside>
 
@@ -177,6 +178,31 @@
                 <span class="muted">Restore drill</span>
               </div>
               <div class="event-list" id="recoveryRows"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="view-proof" aria-labelledby="proofTitle">
+          <div class="section-heading">
+            <h2 id="proofTitle">Engineering Proof</h2>
+            <span class="muted" id="proofMeta"></span>
+          </div>
+          <div class="proof-summary-grid" id="proofSummaryRows"></div>
+          <div class="dashboard-grid">
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Validated Gates</h3>
+                <span class="muted">Executable checks</span>
+              </div>
+              <div class="proof-gate-list" id="proofGateRows"></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Evidence Chain</h3>
+                <span class="muted">Public-safe artifacts</span>
+              </div>
+              <div class="event-list" id="proofEvidenceRows"></div>
             </section>
           </div>
         </section>

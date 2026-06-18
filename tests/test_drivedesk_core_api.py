@@ -1243,6 +1243,16 @@ def test_public_demo_endpoint_is_read_only_synthetic_contract(
     assert len(payload["workQueue"]) >= 4
     assert len(payload["integrationJobs"]) >= 3
     assert len(payload["integrationHealth"]) >= 4
+    assert payload["engineeringProof"]["milestone"] == "engineering_70"
+    assert payload["engineeringProof"]["status"] == "validated"
+    assert len(payload["engineeringProof"]["summary"]) >= 4
+    assert {gate["name"] for gate in payload["engineeringProof"]["gates"]} >= {
+        "Core smoke",
+        "Public demo API",
+        "Backup and restore",
+        "Release safety",
+        "GitOps and IaC",
+    }
     assert {job["status"] for job in payload["integrationJobs"]} >= {"processed", "retry", "dead_letter"}
 
     serialized = json.dumps(payload).lower()

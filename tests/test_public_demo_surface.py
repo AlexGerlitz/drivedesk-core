@@ -39,6 +39,7 @@ def test_public_demo_html_links_static_assets() -> None:
     assert 'id="metricGrid"' in html
     assert 'id="workQueueRows"' in html
     assert 'data-view="workflow"' in html
+    assert 'data-view="proof"' in html
     assert 'id="workflowStageRows"' in html
     assert 'id="workflowTimelineRows"' in html
     assert 'id="domainEventRows"' in html
@@ -47,6 +48,9 @@ def test_public_demo_html_links_static_assets() -> None:
     assert 'id="syncJobRows"' in html
     assert 'id="outboxRows"' in html
     assert 'id="recoveryRows"' in html
+    assert 'id="proofSummaryRows"' in html
+    assert 'id="proofGateRows"' in html
+    assert 'id="proofEvidenceRows"' in html
 
 
 def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
@@ -116,6 +120,19 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
     assert any(item["metric"] == "drivedesk_integration_reconciliations" for item in payload["integrationHealth"])
     assert any(item["metric"] == "drivedesk_integration_incidents" for item in payload["integrationHealth"])
     assert len(payload["recoveryEvidence"]) >= 4
+    assert payload["engineeringProof"]["milestone"] == "engineering_70"
+    assert payload["engineeringProof"]["status"] == "validated"
+    assert len(payload["engineeringProof"]["summary"]) >= 4
+    assert len(payload["engineeringProof"]["gates"]) >= 5
+    assert {gate["name"] for gate in payload["engineeringProof"]["gates"]} >= {
+        "Core smoke",
+        "Public demo API",
+        "Backup and restore",
+        "Release safety",
+        "GitOps and IaC",
+    }
+    assert {item["kind"] for item in payload["engineeringProof"]["evidence"]} >= {"doc", "sdk"}
+    assert any(item["path"] == "sdk/generated/public-demo/" for item in payload["engineeringProof"]["evidence"])
     assert {item["evidence"] for item in payload["recoveryEvidence"]} >= {
         "backup_sha256_recorded",
         "restore_integrity_ok",
@@ -164,6 +181,8 @@ def test_public_demo_can_load_api_backed_data_with_static_fallback() -> None:
     assert "fillWorkflowTimeline" in script
     assert "fillDomainEvents" in script
     assert "fillRecoveryEvidence" in script
+    assert "fillEngineeringProof" in script
+    assert "engineeringProof" in script
     assert "recoveryEvidence" in script
     assert "demoApi" in script
     assert "data-demo-api-path" not in script

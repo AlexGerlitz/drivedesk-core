@@ -512,6 +512,95 @@ window.DRIVEDESK_DEMO_DATA = {
       "evidence": "public-scheduled-validation-alert"
     }
   ],
+  "engineeringProof": {
+    "milestone": "engineering_70",
+    "status": "validated",
+    "updatedAt": "2026-06-18T10:14:36Z",
+    "summary": [
+      {
+        "label": "CI/CD",
+        "value": "green",
+        "detail": "smoke, release, SDK, and public export gates",
+        "tone": "green"
+      },
+      {
+        "label": "Runtime",
+        "value": "observable",
+        "detail": "health, readiness, metrics, logs, and SLO evidence",
+        "tone": "blue"
+      },
+      {
+        "label": "Recovery",
+        "value": "drilled",
+        "detail": "backup, restore, rollback, and staged promotion",
+        "tone": "violet"
+      },
+      {
+        "label": "Boundary",
+        "value": "public-safe",
+        "detail": "synthetic data, redacted evidence, no secrets",
+        "tone": "green"
+      }
+    ],
+    "gates": [
+      {
+        "name": "Core smoke",
+        "status": "passed",
+        "command": "bash scripts/ci_smoke.sh",
+        "evidence": "API, worker, RBAC, outbox, integration, and observability checks"
+      },
+      {
+        "name": "Public demo API",
+        "status": "passed",
+        "command": "bash scripts/check_public_demo_api.sh",
+        "evidence": "GET /demo/public, OpenAPI, examples, generated clients"
+      },
+      {
+        "name": "Backup and restore",
+        "status": "passed",
+        "command": "bash scripts/check_public_backup_restore.sh",
+        "evidence": "backup_sha256_recorded, restore_integrity_ok, counts_match"
+      },
+      {
+        "name": "Release safety",
+        "status": "passed",
+        "command": "bash scripts/check_public_release_rollback.sh && bash scripts/check_public_staged_promotion.sh",
+        "evidence": "rollback, canary gate, approval, and promotion history"
+      },
+      {
+        "name": "GitOps and IaC",
+        "status": "passed",
+        "command": "bash scripts/check_public_gitops_layout.sh && bash scripts/check_public_opentofu_plan.sh",
+        "evidence": "Helm, Argo CD layout, OpenTofu plan, drift records"
+      }
+    ],
+    "evidence": [
+      {
+        "title": "Milestone contract",
+        "kind": "doc",
+        "path": "docs/public/PORTFOLIO_70_MILESTONE.md",
+        "summary": "Seven evidence groups with executable validation gates"
+      },
+      {
+        "title": "Sanitized evidence index",
+        "kind": "doc",
+        "path": "docs/public/SANITIZED_EVIDENCE.md",
+        "summary": "Runtime, recovery, release, GitOps, and boundary evidence"
+      },
+      {
+        "title": "System design",
+        "kind": "doc",
+        "path": "docs/public/SYSTEM_DESIGN.md",
+        "summary": "Core architecture, async boundaries, adapters, and observability"
+      },
+      {
+        "title": "Generated SDK",
+        "kind": "sdk",
+        "path": "sdk/generated/public-demo/",
+        "summary": "OpenAPI-driven Python, JavaScript, and TypeScript client artifacts"
+      }
+    ]
+  },
   "workflow": {
     "id": "wf-demo-lead-to-student",
     "title": "Lead to enrolled student",

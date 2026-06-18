@@ -133,6 +133,18 @@ assert {event["event"] for event in demo["domainEvents"]} >= {
 }
 assert len(demo["integrationHealth"]) >= 6, demo
 assert len(demo["recoveryEvidence"]) >= 4, demo
+assert demo["engineeringProof"]["milestone"] == "engineering_70", demo
+assert demo["engineeringProof"]["status"] == "validated", demo
+assert len(demo["engineeringProof"]["summary"]) >= 4, demo
+assert len(demo["engineeringProof"]["gates"]) >= 5, demo
+assert {gate["name"] for gate in demo["engineeringProof"]["gates"]} >= {
+    "Core smoke",
+    "Public demo API",
+    "Backup and restore",
+    "Release safety",
+    "GitOps and IaC",
+}, demo
+assert {item["kind"] for item in demo["engineeringProof"]["evidence"]} >= {"doc", "sdk"}, demo
 assert {item["state"] for item in demo["integrationHealth"]} >= {
     "processed",
     "retry",

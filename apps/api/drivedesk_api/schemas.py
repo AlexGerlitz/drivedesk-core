@@ -467,6 +467,8 @@ class PublicDemoRead(BaseModel):
     integrationJobs: list[dict[str, Any]]
     integrationHealth: list[dict[str, str]]
     integrationReadiness: list[dict[str, Any]]
+    recoveryEvidence: list[dict[str, str]]
+    engineeringProof: dict[str, Any]
     workflow: dict[str, Any]
     timeline: list[dict[str, str]]
     domainEvents: list[dict[str, str]]

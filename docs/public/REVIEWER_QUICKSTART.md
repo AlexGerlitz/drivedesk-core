@@ -3,15 +3,18 @@
 This is the shortest external review path for DriveDesk Core. Use it when you
 want to verify the project shape before reading the full documentation set.
 
+For the compact system map, start with `docs/public/SYSTEM_REVIEW_PATH.md`.
+
 ## 5-Minute Pass
 
 | Step | Inspect | What it proves |
 | --- | --- | --- |
-| 1 | GitHub Pages root review hub | The public entrypoint is published and wired to demo, CI, OpenAPI, docs, and evidence. |
-| 2 | Public demo Workflow, Operations, Incidents, and Proof tabs; Public demo Operations, Incidents, and Proof tabs | The demo is not a static screenshot; it exposes an end-to-end workflow-to-proof path, operational contracts, incidents, and proof payloads. |
-| 3 | `docs/public/PROJECT_STATUS.md` | Current capability state, limits, and next work are explicit. |
-| 4 | `docs/public/TECHNICAL_CAPABILITY_MAP.md` | Each visible capability maps to implementation surface, evidence, and verifier commands. |
-| 5 | `docs/public/ENGINEERING_PROOF.md` | The proof tab, API payload, OpenAPI schema, SDK artifacts, and CI gates share one contract. |
+| 1 | `docs/public/SYSTEM_REVIEW_PATH.md` | The compact system path ties the public root, demo, API, SDK, operations evidence, release safety, GitOps, OpenTofu, and evidence index together. |
+| 2 | GitHub Pages root review hub | The public entrypoint is published and wired to demo, CI, OpenAPI, docs, and evidence. |
+| 3 | Public demo Workflow, Operations, Incidents, and Proof tabs | The demo is not a static screenshot; it exposes an end-to-end workflow-to-proof path, operational contracts, incidents, and proof payloads. |
+| 4 | `docs/public/PROJECT_STATUS.md` | Current capability state, limits, and next work are explicit. |
+| 5 | `docs/public/TECHNICAL_CAPABILITY_MAP.md` | Each visible capability maps to implementation surface, evidence, and verifier commands. |
+| 6 | `docs/public/ENGINEERING_PROOF.md` | The proof tab, API payload, OpenAPI schema, SDK artifacts, and CI gates share one contract. |
 
 Pass criteria: the reviewer can identify the current architecture, public demo,
 API contract, SDK surface, observability evidence, incident response evidence,
@@ -23,6 +26,7 @@ Run the fast public checks:
 
 ```bash
 bash scripts/check_public_pages_entrypoint.sh
+bash scripts/check_public_system_review_path.sh
 bash scripts/check_public_reviewer_quickstart.sh
 bash scripts/check_public_project_status.sh
 bash scripts/check_public_technical_capability_map.sh

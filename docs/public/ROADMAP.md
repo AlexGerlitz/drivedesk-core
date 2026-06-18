@@ -5,6 +5,7 @@ describes the platform work without exposing private infrastructure, customer
 operations, or commercial details.
 
 Current status snapshot: `docs/public/PROJECT_STATUS.md`.
+Compact system review path: `docs/public/SYSTEM_REVIEW_PATH.md`.
 Fast external review path: `docs/public/REVIEWER_QUICKSTART.md`.
 
 ## Now
@@ -49,6 +50,8 @@ Fast external review path: `docs/public/REVIEWER_QUICKSTART.md`.
 - Curl, Python, and JavaScript public demo client examples.
 - Generated OpenAPI client SDK example and SDK smoke.
 - Public export gate, public CI, and GitHub Pages demo.
+- Public system review path tying the public root, demo, API, SDK, operations
+  evidence, release safety, GitOps, OpenTofu, and evidence index together.
 - Public system design overview.
 - Public-safe synthetic backup/restore drill and sanitized evidence snapshot.
 - Public-safe synthetic release rollback drill and sanitized evidence snapshot.

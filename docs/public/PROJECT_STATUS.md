@@ -8,7 +8,7 @@ work so the repository can be reviewed without private operational context.
 
 | Area | Current state | Evidence | Verification |
 | --- | --- | --- | --- |
-| Public entrypoint | GitHub Pages root review hub and reviewer quickstart are generated from the private export pipeline. | `index.html`, `docs/public/REVIEWER_QUICKSTART.md`, `docs/public/ENGINEERING_REVIEW_GUIDE.md` | `bash scripts/check_public_pages_entrypoint.sh && bash scripts/check_public_reviewer_quickstart.sh` |
+| Public entrypoint | GitHub Pages root review hub, compact system review path, and quickstart are generated from the private export pipeline. | `index.html`, `docs/public/SYSTEM_REVIEW_PATH.md`, `docs/public/REVIEWER_QUICKSTART.md`, `docs/public/ENGINEERING_REVIEW_GUIDE.md` | `bash scripts/check_public_pages_entrypoint.sh && bash scripts/check_public_system_review_path.sh && bash scripts/check_public_reviewer_quickstart.sh` |
 | API contract | Read-only synthetic demo API and generated OpenAPI schema are present. | `docs/openapi.json`, `GET /demo/public`, `docs/public/API_BACKED_DEMO.md` | `bash scripts/check_public_demo_api.sh` |
 | Client SDK | Python, JavaScript, and TypeScript demo clients are generated from OpenAPI, including typed adapter operation helpers. | `docs/public/CLIENT_SDK.md`, `sdk/generated/public-demo/`, `examples/python/demo_adapter_operation_plan.py`, `examples/js/demo-adapter-operation-plan.mjs` | `bash scripts/check_public_demo_sdk.sh` |
 | Auth and tenant boundary | Public-safe auth, RBAC, platform-admin, and tenant-isolation contracts are documented and tested. | `docs/public/AUTH_FOUNDATION.md`, `docs/public/TENANT_ISOLATION.md`, `docs/public/PLATFORM_ADMIN.md` | `bash scripts/ci_smoke_public.sh` |
@@ -54,6 +54,7 @@ Longer public-safe direction lives in `docs/public/ROADMAP.md`.
 
 ```bash
 bash scripts/ci_smoke_public.sh
+bash scripts/check_public_system_review_path.sh
 bash scripts/check_public_reviewer_quickstart.sh
 bash scripts/check_public_project_status.sh
 bash scripts/check_public_technical_capability_map.sh

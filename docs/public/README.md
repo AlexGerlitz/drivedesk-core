@@ -7,6 +7,9 @@ infrastructure, production history, customer data, or operational credentials.
 ## Documents
 
 - `ENGINEERING_CASE_STUDY.md` - engineering case study and current system shape.
+- `SYSTEM_REVIEW_PATH.md` - compact engineering route through the public root,
+  demo, API, SDK, operations evidence, release safety, GitOps, OpenTofu, and
+  evidence index.
 - `REVIEWER_QUICKSTART.md` - shortest external review path with 5-minute,
   15-minute, and 45-minute verification tracks.
 - `ENGINEERING_REVIEW_GUIDE.md` - short review path for demo, CI, API, recovery, GitOps, and IaC evidence.
@@ -154,6 +157,7 @@ The public repository export also generates:
 - `scripts/check_public_private_infra_scheduled_validation.sh` - public-safe recurring scheduled validation.
 - `scripts/check_public_private_infra_scheduled_alerting.sh` - public-safe scheduled validation alerting.
 - `scripts/check_public_platform_maturity_70.sh` - public-safe 70 percent milestone validation.
+- `scripts/check_public_system_review_path.sh` - public-safe compact system review path validation.
 - `scripts/check_public_reviewer_quickstart.sh` - public-safe reviewer quickstart validation.
 - `scripts/check_public_project_status.sh` - public-safe project status validation.
 - `scripts/check_public_technical_capability_map.sh` - public-safe capability map validation.
@@ -184,15 +188,17 @@ https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 
 ## Verification Path
 
-1. Start with `REVIEWER_QUICKSTART.md`.
-2. Open the hosted demo and switch to the Proof tab.
-3. Inspect `docs/openapi.json`.
-4. Run `bash scripts/ci_smoke_public.sh`.
-5. Run `bash scripts/check_public_engineering_proof.sh`.
-6. Run `bash scripts/check_public_demo_api.sh`.
-7. Run one generated client example from `examples/`.
-8. Review `PROJECT_STATUS.md`, `TECHNICAL_CAPABILITY_MAP.md`, `EVIDENCE_INDEX.md`, `OBSERVABILITY_PROOF.md`, `ALERT_ROUTING_EVIDENCE.md`, `INCIDENT_RESPONSE_DEMO.md`, `ENGINEERING_PROOF.md`, `PLATFORM_MATURITY_70.md`, and `SANITIZED_EVIDENCE.md`.
-9. Review `SYSTEM_DESIGN.md`, `GITOPS_DELIVERY.md`, and the recovery evidence docs.
+1. Start with `SYSTEM_REVIEW_PATH.md`.
+2. Continue with `REVIEWER_QUICKSTART.md`.
+3. Open the hosted demo and switch to the Workflow, Operations, Incidents, and Proof tabs.
+4. Inspect `docs/openapi.json`.
+5. Run `bash scripts/check_public_system_review_path.sh`.
+6. Run `bash scripts/ci_smoke_public.sh`.
+7. Run `bash scripts/check_public_engineering_proof.sh`.
+8. Run `bash scripts/check_public_demo_api.sh`.
+9. Run one generated client example from `examples/`.
+10. Review `PROJECT_STATUS.md`, `TECHNICAL_CAPABILITY_MAP.md`, `EVIDENCE_INDEX.md`, `OBSERVABILITY_PROOF.md`, `ALERT_ROUTING_EVIDENCE.md`, `INCIDENT_RESPONSE_DEMO.md`, `ENGINEERING_PROOF.md`, `PLATFORM_MATURITY_70.md`, and `SANITIZED_EVIDENCE.md`.
+11. Review `SYSTEM_DESIGN.md`, `GITOPS_DELIVERY.md`, and the recovery evidence docs.
 
 ## Engineering Summary
 

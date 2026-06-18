@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-18T17:17:57Z
+Generated at: 2026-06-18T17:49:59Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -24,6 +24,7 @@ Copied public-safe areas:
 - generated docs/openapi.json
 - generated public demo SDK
 - public Pages root review entrypoint
+- public system review path
 - static public demo shell
 - public demo screenshot
 - public demo health workflow

@@ -39,6 +39,7 @@ bash scripts/check_public_private_infra_post_remediation_drift_refresh.sh
 bash scripts/check_public_private_infra_scheduled_validation.sh
 bash scripts/check_public_private_infra_scheduled_alerting.sh
 bash scripts/check_public_platform_maturity_70.sh
+bash scripts/check_public_system_review_path.sh
 bash scripts/check_public_reviewer_quickstart.sh
 bash scripts/check_public_review_guide.sh
 bash scripts/check_public_pages_entrypoint.sh

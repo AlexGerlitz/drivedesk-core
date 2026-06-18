@@ -9,6 +9,12 @@ internal paths, credentials, and raw logs.
 Recommended public review entrypoint:
 
 ```text
+docs/public/SYSTEM_REVIEW_PATH.md
+```
+
+Timeboxed verification path:
+
+```text
 docs/public/REVIEWER_QUICKSTART.md
 ```
 
@@ -228,6 +234,9 @@ Verified signals:
 - `platform.maturity_70.reached` evidence is recorded.
 - the public evidence index ties capability groups to public docs, sanitized
   evidence files, verifier commands, public URLs, and boundary notes;
+- `docs/public/SYSTEM_REVIEW_PATH.md` provides the compact route through the
+  public root, demo, API, SDK, operations evidence, release safety, GitOps,
+  OpenTofu, and evidence index;
 - `docs/public/EVIDENCE_INDEX.md` and
   `docs/public/evidence/public-evidence-index.sanitized.json` are checked by
   `bash scripts/check_public_evidence_index.sh`.

@@ -375,6 +375,7 @@
       <div class="brand">DriveDesk Core</div>
       <nav class="topnav" aria-label="Review links">
         <a class="button primary" href="apps/admin/public-demo/">Open Demo</a>
+        <a class="button" href="docs/public/SYSTEM_REVIEW_PATH.md">System Path</a>
         <a class="button" href="docs/public/REVIEWER_QUICKSTART.md">Quickstart</a>
         <a class="button" href="docs/public/ENGINEERING_REVIEW_GUIDE.md">Review Guide</a>
         <a class="button" href="docs/public/PROJECT_STATUS.md">Status</a>
@@ -400,6 +401,7 @@
           </p>
           <div class="action-row">
             <a class="button primary" href="apps/admin/public-demo/">Open Demo</a>
+            <a class="button" href="docs/public/SYSTEM_REVIEW_PATH.md">System Path</a>
             <a class="button" href="docs/public/REVIEWER_QUICKSTART.md">Quickstart</a>
             <a class="button" href="docs/public/ENGINEERING_REVIEW_GUIDE.md">Read Review Guide</a>
             <a class="button" href="docs/public/PROJECT_STATUS.md">Project Status</a>
@@ -426,30 +428,36 @@
 
       <section class="evidence-heading" aria-labelledby="flowTitle">
         <h2 id="flowTitle">Review Flow</h2>
-        <p>Follow the same path the release gate protects: architecture, demo, API contract, then operational evidence.</p>
+        <p>Follow the same path the release gate protects: system path, architecture, demo, API contract, then operational evidence.</p>
       </section>
 
       <section class="review-flow" aria-label="Review flow">
         <article class="flow-step">
           <span>1</span>
+          <h2>System path</h2>
+          <p>Start with the compact route that ties the public root, demo, API, SDK, operations evidence, GitOps, OpenTofu, and evidence index together.</p>
+          <a href="docs/public/SYSTEM_REVIEW_PATH.md">Open system path</a>
+        </article>
+        <article class="flow-step">
+          <span>2</span>
           <h2>Architecture</h2>
           <p>Start with the modular monolith, data boundary, adapter hub, and runtime shape.</p>
           <a href="docs/public/SYSTEM_DESIGN.md">Open system design</a>
         </article>
         <article class="flow-step">
-          <span>2</span>
+          <span>3</span>
           <h2>Live demo</h2>
           <p>Use the Overview, Operations, Incidents, and Proof tabs with synthetic data.</p>
           <a href="apps/admin/public-demo/">Open demo</a>
         </article>
         <article class="flow-step">
-          <span>3</span>
+          <span>4</span>
           <h2>API and SDK</h2>
           <p>Check the read-only demo endpoint, OpenAPI schema, and generated clients.</p>
           <a href="docs/public/API_BACKED_DEMO.md">Open API notes</a>
         </article>
         <article class="flow-step">
-          <span>4</span>
+          <span>5</span>
           <h2>Release evidence</h2>
           <p>Follow the gates for rollback, SLO canary, staged promotion, and drift handling.</p>
           <a href="docs/public/SANITIZED_EVIDENCE.md">Open evidence</a>
@@ -479,6 +487,11 @@
       </section>
 
       <section class="grid" aria-label="Evidence links">
+        <article class="card">
+          <h2>System path</h2>
+          <p>Compact engineering route through the public root, demo, API, SDK, operations evidence, release safety, GitOps, OpenTofu, and evidence index.</p>
+          <a href="docs/public/SYSTEM_REVIEW_PATH.md">Open path</a>
+        </article>
         <article class="card">
           <h2>Project status</h2>
           <p>Current public-safe engineering state, validated surface, limits, and next work in one page.</p>
@@ -536,6 +549,7 @@
         </section>
         <pre><code>bash scripts/ci_smoke_public.sh
 bash scripts/check_public_pages_entrypoint.sh
+bash scripts/check_public_system_review_path.sh
 bash scripts/check_public_reviewer_quickstart.sh
 bash scripts/check_public_project_status.sh
 bash scripts/check_public_technical_capability_map.sh

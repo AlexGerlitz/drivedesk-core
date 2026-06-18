@@ -59,6 +59,7 @@ if is_public_export:
         "Architecture Trace",
         "Evidence Matrix",
         "apps/admin/public-demo/",
+        "docs/public/SYSTEM_REVIEW_PATH.md",
         "docs/public/SYSTEM_DESIGN.md",
         "docs/public/API_BACKED_DEMO.md",
         "docs/public/SANITIZED_EVIDENCE.md",
@@ -75,12 +76,14 @@ if is_public_export:
         "https://github.com/AlexGerlitz/drivedesk-core/actions/workflows/ci.yml",
         "bash scripts/ci_smoke_public.sh",
         "bash scripts/check_public_pages_entrypoint.sh",
+        "bash scripts/check_public_system_review_path.sh",
         "bash scripts/check_public_engineering_proof.sh",
     ]:
         require(token in html, f"public Pages index missing {token}")
 
     for path in [
         "apps/admin/public-demo/index.html",
+        "docs/public/SYSTEM_REVIEW_PATH.md",
         "docs/public/SYSTEM_DESIGN.md",
         "docs/public/API_BACKED_DEMO.md",
         "docs/public/SANITIZED_EVIDENCE.md",
@@ -117,20 +120,25 @@ else:
     require('cat > "$EXPORT_DIR/index.html"' in export_script, "export script does not generate root index.html")
     require("PUBLIC_ROOT_URL" in export_script, "export script missing public root URL")
     require("check_public_pages_entrypoint.sh" in export_script, "export script missing Pages entrypoint check")
+    require("SYSTEM_REVIEW_PATH.md" in export_script, "export script missing system review path")
     require("REVIEWER_QUICKSTART.md" in export_script, "export script missing reviewer quickstart")
 
     if private_smoke_path.is_file():
+        require("check_public_system_review_path.sh" in read(private_smoke_path), "private smoke missing system review path check")
         require("check_public_reviewer_quickstart.sh" in read(private_smoke_path), "private smoke missing reviewer quickstart check")
         require("check_public_pages_entrypoint.sh" in read(private_smoke_path), "private smoke missing Pages entrypoint check")
 
     if release_gate_path.is_file():
         gate_text = read(release_gate_path)
         require('"index.html"' in gate_text, "release gate missing root index.html requirement")
+        require("SYSTEM_REVIEW_PATH.md" in gate_text, "release gate missing system review path")
+        require("check_public_system_review_path.sh" in gate_text, "release gate missing system review path check")
         require("REVIEWER_QUICKSTART.md" in gate_text, "release gate missing reviewer quickstart")
         require("check_public_reviewer_quickstart.sh" in gate_text, "release gate missing reviewer quickstart check")
         require("check_public_pages_entrypoint.sh" in gate_text, "release gate missing Pages entrypoint check")
 
 if public_smoke_path.is_file():
+    require("check_public_system_review_path.sh" in read(public_smoke_path), "public smoke missing system review path check")
     require("check_public_reviewer_quickstart.sh" in read(public_smoke_path), "public smoke missing reviewer quickstart check")
     require("check_public_pages_entrypoint.sh" in read(public_smoke_path), "public smoke missing Pages entrypoint check")
 

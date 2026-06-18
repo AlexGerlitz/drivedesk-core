@@ -244,6 +244,10 @@ assert {gate["name"] for gate in demo["engineeringProof"]["gates"]} >= {
 }, demo
 assert {item["kind"] for item in demo["engineeringProof"]["evidence"]} >= {"doc", "sdk"}, demo
 assert any(
+    item["path"] == "docs/public/SYSTEM_REVIEW_PATH.md"
+    for item in demo["engineeringProof"]["evidence"]
+), demo
+assert any(
     item["path"] == "docs/public/REVIEWER_QUICKSTART.md"
     for item in demo["engineeringProof"]["evidence"]
 ), demo

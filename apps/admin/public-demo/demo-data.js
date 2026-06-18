@@ -965,6 +965,12 @@ window.DRIVEDESK_DEMO_DATA = {
     ],
     "evidence": [
       {
+        "title": "System review path",
+        "kind": "doc",
+        "path": "docs/public/SYSTEM_REVIEW_PATH.md",
+        "summary": "Compact route through public root, demo, API, SDK, operations evidence, release safety, GitOps, OpenTofu, and evidence index"
+      },
+      {
         "title": "Reviewer quickstart",
         "kind": "doc",
         "path": "docs/public/REVIEWER_QUICKSTART.md",

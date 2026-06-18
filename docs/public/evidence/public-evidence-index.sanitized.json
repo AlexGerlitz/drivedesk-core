@@ -19,14 +19,16 @@
       "capability_id": "public-entrypoint",
       "title": "Public engineering entrypoint",
       "status": "validated",
-      "public_doc": "docs/public/REVIEWER_QUICKSTART.md",
+      "public_doc": "docs/public/SYSTEM_REVIEW_PATH.md",
       "evidence_files": [
         "index.html",
+        "docs/public/REVIEWER_QUICKSTART.md",
         "docs/public/ENGINEERING_REVIEW_GUIDE.md",
         "docs/public/PROJECT_STATUS.md"
       ],
       "verifiers": [
         "bash scripts/check_public_pages_entrypoint.sh",
+        "bash scripts/check_public_system_review_path.sh",
         "bash scripts/check_public_reviewer_quickstart.sh",
         "bash scripts/check_public_review_guide.sh"
       ],

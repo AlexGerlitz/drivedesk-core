@@ -1300,6 +1300,10 @@ def test_public_demo_endpoint_is_read_only_synthetic_contract(
     }
     gate_by_name = {gate["name"]: gate for gate in payload["engineeringProof"]["gates"]}
     assert gate_by_name["Core smoke"]["command"] == "bash scripts/ci_smoke_public.sh"
+    assert any(
+        item["path"] == "docs/public/SYSTEM_REVIEW_PATH.md"
+        for item in payload["engineeringProof"]["evidence"]
+    )
     assert {job["status"] for job in payload["integrationJobs"]} >= {"processed", "retry", "dead_letter"}
 
     serialized = json.dumps(payload).lower()

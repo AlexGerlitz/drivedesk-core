@@ -57,6 +57,8 @@ for token in [
     "Technical Capability Map",
     "Capability Matrix",
     "Public review entrypoint",
+    "SYSTEM_REVIEW_PATH.md",
+    "bash scripts/check_public_system_review_path.sh",
     "REVIEWER_QUICKSTART.md",
     "Project status",
     "Read-only API contract",
@@ -117,6 +119,7 @@ for token in [
     require(token in text, f"technical capability map missing {token}")
 
 target_paths = [
+    "docs/public/SYSTEM_REVIEW_PATH.md",
     "docs/public/REVIEWER_QUICKSTART.md",
     "docs/public/ENGINEERING_REVIEW_GUIDE.md",
     "docs/public/PROJECT_STATUS.md",
@@ -159,6 +162,8 @@ for path in target_paths:
 
 require("TECHNICAL_CAPABILITY_MAP.md" in read(docs_readme_path), "docs/public README missing capability map")
 require("TECHNICAL_CAPABILITY_MAP.md" in read(review_guide_path), "review guide missing capability map")
+require("SYSTEM_REVIEW_PATH.md" in read(docs_readme_path), "docs/public README missing system review path")
+require("SYSTEM_REVIEW_PATH.md" in read(review_guide_path), "review guide missing system review path")
 require("REVIEWER_QUICKSTART.md" in read(docs_readme_path), "docs/public README missing reviewer quickstart")
 require("REVIEWER_QUICKSTART.md" in read(review_guide_path), "review guide missing reviewer quickstart")
 
@@ -172,9 +177,15 @@ if is_public_export:
     ]:
         require((root / path).is_file(), f"public export target missing: {path}")
     require("TECHNICAL_CAPABILITY_MAP.md" in read(root_readme_path), "public README missing capability map")
+    require("SYSTEM_REVIEW_PATH.md" in read(root_readme_path), "public README missing system review path")
     require("REVIEWER_QUICKSTART.md" in read(root_readme_path), "public README missing reviewer quickstart")
     require("TECHNICAL_CAPABILITY_MAP.md" in read(index_path), "public Pages root missing capability map")
+    require("SYSTEM_REVIEW_PATH.md" in read(index_path), "public Pages root missing system review path")
     require("REVIEWER_QUICKSTART.md" in read(index_path), "public Pages root missing reviewer quickstart")
+    require(
+        "check_public_system_review_path.sh" in read(public_smoke_path),
+        "public smoke missing system review path check",
+    )
     require(
         "check_public_reviewer_quickstart.sh" in read(public_smoke_path),
         "public smoke missing reviewer quickstart check",
@@ -186,7 +197,12 @@ if is_public_export:
 else:
     export_script = read(export_script_path)
     require("TECHNICAL_CAPABILITY_MAP.md" in export_script, "export script missing capability map")
+    require("SYSTEM_REVIEW_PATH.md" in export_script, "export script missing system review path")
     require("REVIEWER_QUICKSTART.md" in export_script, "export script missing reviewer quickstart")
+    require(
+        'copy_path "scripts/check_public_system_review_path.sh"' in export_script,
+        "export script missing system review path check copy",
+    )
     require(
         'copy_path "scripts/check_public_reviewer_quickstart.sh"' in export_script,
         "export script missing reviewer quickstart check copy",
@@ -196,12 +212,20 @@ else:
         "export script missing capability map check copy",
     )
     require(
+        "check_public_system_review_path.sh" in read(private_smoke_path),
+        "private smoke missing system review path check",
+    )
+    require(
         "check_public_reviewer_quickstart.sh" in read(private_smoke_path),
         "private smoke missing reviewer quickstart check",
     )
     require(
         "check_public_technical_capability_map.sh" in read(private_smoke_path),
         "private smoke missing capability map check",
+    )
+    require(
+        "check_public_system_review_path.sh" in read(release_gate_path),
+        "release gate missing system review path check",
     )
     require(
         "check_public_reviewer_quickstart.sh" in read(release_gate_path),
@@ -213,6 +237,10 @@ else:
     )
 
 if public_smoke_path.is_file():
+    require(
+        "check_public_system_review_path.sh" in read(public_smoke_path),
+        "public smoke missing system review path check",
+    )
     require(
         "check_public_reviewer_quickstart.sh" in read(public_smoke_path),
         "public smoke missing reviewer quickstart check",

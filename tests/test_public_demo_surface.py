@@ -133,6 +133,8 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
         "loopback_boundary_recorded",
         "infra.private_state.validated",
         "no_runtime_mutation_recorded",
+        "infra.remediation.plan.ready",
+        "rollback_attached",
     }
     assert len(payload["outbox"]) >= 3
     assert {event["status"] for event in payload["outbox"]} >= {"processed", "pending"}
@@ -179,6 +181,7 @@ def test_public_demo_api_scripts_and_examples_exist() -> None:
         "scripts/check_public_infra_state_drift.sh",
         "scripts/check_public_runtime_rollout.sh",
         "scripts/check_public_private_infra_validation.sh",
+        "scripts/check_public_private_infra_remediation.sh",
         "scripts/check_public_gitops_layout.sh",
         "scripts/check_public_gitops_image_automation.sh",
         "scripts/check_public_gitops_promotion_drift.sh",
@@ -261,6 +264,12 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
             "read_only_collector_recorded",
             "no_runtime_mutation_recorded",
             "infra.private_state.validated",
+        ],
+        "scripts/check_public_private_infra_remediation.sh": [
+            "public_private_infra_remediation_plan",
+            "plan_only_no_apply",
+            "rollback_attached",
+            "infra.remediation.plan.ready",
         ],
         "scripts/check_public_gitops_layout.sh": [
             "public_gitops_layout",

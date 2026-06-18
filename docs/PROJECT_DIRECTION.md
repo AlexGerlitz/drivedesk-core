@@ -37,6 +37,7 @@ infra/gitops   Argo CD GitOps delivery foundation
 infra/opentofu public-safe IaC plan and state drift evidence
 infra/runtime-rollout public-safe private staging rollout evidence
 infra/state-validation public-safe private infrastructure validation evidence
+infra/state-remediation public-safe private infrastructure remediation plan evidence
 docs           architecture notes and ADRs
 tests          API and foundation tests
 ```

@@ -66,6 +66,12 @@ Private infrastructure validation source file:
 docs/public/evidence/private-infra-validation.sanitized.json
 ```
 
+Private infrastructure remediation plan source file:
+
+```text
+docs/public/evidence/private-infra-remediation-plan.sanitized.json
+```
+
 GitOps layout validation source file:
 
 ```text
@@ -151,6 +157,11 @@ Verified signals:
   contracts are referenced by the validation evidence;
 - no runtime mutation, infrastructure apply, service restart, raw logs, request
   bodies, private paths, or production data are included in public artifacts.
+- the public private infrastructure remediation plan evidence carries forward
+  validation and drift results into plan-only actions;
+- remediation actions include operator review, preflight gates, rollback
+  context, postcheck gates, and no public apply;
+- `infra.remediation.plan.ready` evidence is recorded.
 - the public GitOps delivery foundation contains Argo CD project, application,
   environment, and promotion metadata;
 - Argo CD applications reference the Helm chart path;
@@ -202,6 +213,8 @@ The public version keeps only the operational shape and health results.
 - Runtime rollout evidence is checked through an executable public validation.
 - Private infrastructure validation is checked through an executable public
   validation.
+- Private infrastructure remediation planning is checked through an executable
+  public validation.
 - GitOps desired-state delivery is checked through an executable public
   validation.
 - GitOps image promotion and drift detection are checked through an executable

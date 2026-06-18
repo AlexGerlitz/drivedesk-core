@@ -31,6 +31,7 @@ bash scripts/check_public_opentofu_plan.sh
 bash scripts/check_public_infra_state_drift.sh
 bash scripts/check_public_runtime_rollout.sh
 bash scripts/check_public_private_infra_validation.sh
+bash scripts/check_public_private_infra_remediation.sh
 bash scripts/check_public_gitops_layout.sh
 bash scripts/check_public_gitops_image_automation.sh
 bash scripts/check_public_gitops_promotion_drift.sh

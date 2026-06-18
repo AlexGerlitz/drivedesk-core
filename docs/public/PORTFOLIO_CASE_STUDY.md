@@ -209,6 +209,9 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
 - Private infrastructure validation now records a read-only
   staging/control-plane check that references OpenTofu, drift, runtime rollout,
   GitOps, and sanitized staging evidence before any mutation is allowed.
+- Private infrastructure remediation planning now turns validation and drift
+  evidence into operator-reviewed, plan-only actions with preflight gates,
+  rollback context, postchecks, and no public apply.
 - GitOps delivery foundation now connects the Helm chart to Argo CD-style
   build, staging, canary, and production desired state.
 - GitOps image automation now records the image digest, SBOM, Trivy scan
@@ -223,10 +226,10 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
 
 Recommended next slices:
 
-1. Broader generated API clients from OpenAPI for more endpoints.
-2. Additional mock adapters for webhook and accounting export flows.
-3. More workflow rule actions for notifications, approvals, and mapping-specific adapter jobs.
-4. Private infrastructure state validation against the staging control plane.
+1. Reviewed private remediation execution evidence after plan approval.
+2. Broader generated API clients from OpenAPI for more endpoints.
+3. Additional mock adapters for webhook and accounting export flows.
+4. More workflow rule actions for notifications, approvals, and mapping-specific adapter jobs.
 5. Broader public observability examples with synthetic metric snapshots.
 
 ## Interview Summary

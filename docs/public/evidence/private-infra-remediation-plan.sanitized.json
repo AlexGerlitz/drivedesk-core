@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "check": "public_private_infra_remediation_plan",
+  "data_profile": "sanitized_private_staging_summary",
+  "remediation_model": "private_control_plane_remediation_plan",
+  "source": {
+    "remediation_contract": "infra/state-remediation/private-infra-remediation-plan.sanitized.json",
+    "validation_contract": "infra/state-validation/private-infra-validation.sanitized.json",
+    "validation_evidence": "docs/public/evidence/private-infra-validation.sanitized.json",
+    "infra_state_drift": "infra/opentofu/state/drift-summary.sanitized.json",
+    "opentofu_plan": "infra/opentofu/public/plan-summary.sanitized.json",
+    "runtime_rollout": "docs/public/evidence/runtime-rollout.sanitized.json",
+    "gitops_remediation": "docs/public/evidence/gitops-drift-remediation.sanitized.json",
+    "staging_evidence": "docs/public/evidence/de-staging-evidence.sanitized.json"
+  },
+  "environment": {
+    "name": "private_staging",
+    "public_route": false,
+    "production_data_touched": false
+  },
+  "plan": {
+    "plan_id": "private-infra-remediation-2026-06-18",
+    "mode": "plan_only",
+    "approval_required": true,
+    "automatic_apply": false,
+    "drifted_components": [
+      "observability",
+      "backup_storage"
+    ],
+    "actions": [
+      {
+        "component": "observability",
+        "recommended_action": "reconcile_after_review",
+        "rollback": "restore_previous_observability_config"
+      },
+      {
+        "component": "backup_storage",
+        "recommended_action": "reconcile_after_review",
+        "rollback": "keep_previous_backup_storage_target"
+      }
+    ]
+  },
+  "checks": {
+    "remediation_contract_present": true,
+    "validation_evidence_referenced": true,
+    "drift_inputs_referenced": true,
+    "drifted_components_carried_forward": true,
+    "source_contracts_referenced": true,
+    "opentofu_contract_referenced": true,
+    "runtime_rollout_referenced": true,
+    "gitops_remediation_referenced": true,
+    "preflight_gates_recorded": true,
+    "postcheck_gates_recorded": true,
+    "rollback_attached": true,
+    "operator_review_required": true,
+    "plan_only_no_apply": true,
+    "no_runtime_mutation_recorded": true,
+    "redaction_boundary_recorded": true,
+    "private_markers_absent": true,
+    "production_data_touched": false
+  },
+  "decision": {
+    "event_type": "infra.remediation.plan.ready",
+    "recommended_action": "review_plan_before_private_apply",
+    "operator_review_required": true,
+    "automatic_public_apply": false,
+    "production_data_touched": false
+  },
+  "redaction": {
+    "paths_included": false,
+    "hostnames_included": false,
+    "addresses_included": false,
+    "credentials_included": false,
+    "raw_logs_included": false,
+    "request_bodies_included": false,
+    "production_data_included": false
+  }
+}

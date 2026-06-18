@@ -67,6 +67,16 @@ The check validates a read-only private staging/control-plane validation
 boundary, OpenTofu/GitOps/runtime rollout references, sanitized evidence, and no
 runtime mutation.
 
+Public-safe private infrastructure remediation planning:
+
+```bash
+bash scripts/check_public_private_infra_remediation.sh
+```
+
+The check validates a plan-only remediation boundary after read-only validation
+and drift detection, including operator review, preflight gates, rollback
+context, postcheck gates, and no public apply.
+
 Core endpoints:
 
 - `POST /auth/login`;

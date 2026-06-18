@@ -450,6 +450,18 @@ window.DRIVEDESK_DEMO_DATA = {
       "state": "success",
       "detail": "validation evidence records no apply, restart, or runtime mutation",
       "evidence": "no_runtime_mutation_recorded"
+    },
+    {
+      "name": "Infra remediation plan",
+      "state": "success",
+      "detail": "drift converted into operator-reviewed plan-only actions",
+      "evidence": "infra.remediation.plan.ready"
+    },
+    {
+      "name": "Rollback attached",
+      "state": "success",
+      "detail": "each planned remediation action keeps rollback context",
+      "evidence": "rollback_attached"
     }
   ],
   "workflow": {

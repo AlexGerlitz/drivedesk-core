@@ -24,6 +24,7 @@
           <button class="nav-tab" type="button" data-view="integrations">Integrations</button>
           <button class="nav-tab" type="button" data-view="system">System</button>
           <button class="nav-tab" type="button" data-view="operations">Operations</button>
+          <button class="nav-tab" type="button" data-view="incidents">Incidents</button>
           <button class="nav-tab" type="button" data-view="proof">Proof</button>
         </nav>
       </aside>
@@ -228,6 +229,62 @@
               </table>
             </div>
           </section>
+        </section>
+
+        <section class="view" id="view-incidents" aria-labelledby="incidentsTitle">
+          <div class="section-heading">
+            <h2 id="incidentsTitle">Incident Response</h2>
+            <span class="muted">Runbook-backed recovery</span>
+          </div>
+          <div class="proof-summary-grid" id="incidentSummaryRows"></div>
+          <div class="dashboard-grid">
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Incident Queue</h3>
+                <span class="muted">Owner and status</span>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Incident</th>
+                      <th>Severity</th>
+                      <th>Status</th>
+                      <th>Owner</th>
+                      <th>Runbook</th>
+                    </tr>
+                  </thead>
+                  <tbody id="incidentRows"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Response Timeline</h3>
+                <span class="muted">Signal to recovery</span>
+              </div>
+              <ol class="timeline" id="incidentTimelineRows"></ol>
+            </section>
+          </div>
+
+          <div class="dashboard-grid">
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Recovery Actions</h3>
+                <span class="muted">Operator workflow</span>
+              </div>
+              <div class="event-list" id="incidentActionRows"></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Resolution Evidence</h3>
+                <span class="muted">Close criteria</span>
+              </div>
+              <div class="event-list" id="incidentEvidenceRows"></div>
+            </section>
+          </div>
         </section>
 
         <section class="view" id="view-proof" aria-labelledby="proofTitle">

@@ -205,6 +205,7 @@ for token in [
     "platform-critical-page",
     "public-oncall-page",
     "DriveDeskScheduledValidationMissed",
+    "INCIDENT_RESPONSE_DEMO.md",
     "alert.silence.created",
     "public-safe routing proof",
 ]:

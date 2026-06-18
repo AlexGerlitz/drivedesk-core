@@ -1254,6 +1254,21 @@ def test_public_demo_endpoint_is_read_only_synthetic_contract(
         "DriveDeskScheduledValidationMissed",
     }
     assert {binding["state"] for binding in payload["alertRouting"]["bindings"]} == {"routed"}
+    assert {incident["status"] for incident in payload["incidentResponse"]["incidents"]} >= {
+        "open",
+        "acknowledged",
+        "resolved",
+    }
+    assert {incident["alert"] for incident in payload["incidentResponse"]["incidents"]} >= {
+        "DriveDeskApiHighLatencyP95",
+        "DriveDeskIntegrationDeadLetters",
+        "DriveDeskScheduledValidationMissed",
+    }
+    assert {event["event"] for event in payload["incidentResponse"]["timeline"]} >= {
+        "alert.fired",
+        "integration.incident.status_changed",
+        "incident.resolved",
+    }
     assert payload["engineeringProof"]["milestone"] == "engineering_70"
     assert payload["engineeringProof"]["status"] == "validated"
     assert len(payload["engineeringProof"]["summary"]) >= 4

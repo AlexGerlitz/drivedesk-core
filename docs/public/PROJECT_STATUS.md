@@ -20,6 +20,7 @@ work so the repository can be reviewed without private operational context.
 | Capability map | Each visible capability is linked to implementation surface, evidence, and verifier command. | `docs/public/TECHNICAL_CAPABILITY_MAP.md` | `bash scripts/check_public_technical_capability_map.sh` |
 | Observability proof | Metrics, structured logs, alerts, runbooks, and dashboard panels are represented with public-safe synthetic evidence. | `docs/public/OBSERVABILITY_PROOF.md`, `docs/public/evidence/observability-proof.sanitized.json` | `bash scripts/check_public_observability_proof.sh` |
 | Alert routing | Alertmanager-style routes, receivers, dedupe keys, escalation, silences, and runbook bindings are represented in evidence and the demo Operations tab. | `apps/admin/public-demo/index.html`, `docs/public/ALERT_ROUTING_EVIDENCE.md`, `docs/public/evidence/alert-routing.sanitized.json` | `bash scripts/check_public_alert_routing.sh && bash scripts/check_public_demo_api.sh` |
+| Incident response | Runbook-backed incidents, owners, mitigation, recovery timeline, and resolution evidence are represented in the demo Incidents tab. | `apps/admin/public-demo/index.html`, `docs/public/INCIDENT_RESPONSE_DEMO.md`, `docs/public/INTEGRATION_INCIDENT_RUNBOOKS.md` | `bash scripts/check_public_demo_api.sh && bash scripts/check_public_engineering_proof.sh` |
 
 ## Current Limits
 

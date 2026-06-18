@@ -53,7 +53,7 @@ guide = read(guide_path)
 
 for token in [
     "Engineering Review Guide",
-    "Live demo Operations and Proof tabs",
+    "Live demo Operations, Incidents, and Proof tabs",
     "bash scripts/ci_smoke_public.sh",
     "bash scripts/check_public_review_guide.sh",
     "bash scripts/check_public_project_status.sh",
@@ -76,6 +76,7 @@ for token in [
     "docs/public/TECHNICAL_CAPABILITY_MAP.md",
     "docs/public/OBSERVABILITY_PROOF.md",
     "docs/public/ALERT_ROUTING_EVIDENCE.md",
+    "docs/public/INCIDENT_RESPONSE_DEMO.md",
     "docs/public/ENGINEERING_PROOF.md",
     "docs/public/PORTFOLIO_CASE_STUDY.md",
     "docs/public/SANITIZED_EVIDENCE.md",
@@ -104,6 +105,10 @@ require(
 require(
     "ALERT_ROUTING_EVIDENCE.md" in read(public_docs_readme_path),
     "docs/public README missing ALERT_ROUTING_EVIDENCE.md",
+)
+require(
+    "INCIDENT_RESPONSE_DEMO.md" in read(public_docs_readme_path),
+    "docs/public README missing INCIDENT_RESPONSE_DEMO.md",
 )
 
 is_public_export = (root / "PUBLIC_EXPORT_MANIFEST.md").is_file()
@@ -134,6 +139,7 @@ for path in [
     "docs/public/TECHNICAL_CAPABILITY_MAP.md",
     "docs/public/OBSERVABILITY_PROOF.md",
     "docs/public/ALERT_ROUTING_EVIDENCE.md",
+    "docs/public/INCIDENT_RESPONSE_DEMO.md",
     "docs/public/ENGINEERING_PROOF.md",
     "docs/public/PORTFOLIO_CASE_STUDY.md",
     "docs/public/SANITIZED_EVIDENCE.md",

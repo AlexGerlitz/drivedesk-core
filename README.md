@@ -67,15 +67,18 @@ metrics, structured logs, alert, runbook, and dashboard evidence path.
 Use `docs/public/ALERT_ROUTING_EVIDENCE.md` when you need the public-safe
 alert route, receiver, dedupe, escalation, silence, and runbook binding path.
 
+Use `docs/public/INCIDENT_RESPONSE_DEMO.md` when you need the public-safe
+incident queue, mitigation, recovery, and resolution evidence path.
+
 ## Verification Path
 
-1. Open the live demo and switch to the Proof tab.
+1. Open the live demo and switch to the Operations, Incidents, and Proof tabs.
 2. Inspect `docs/openapi.json`.
 3. Run `bash scripts/ci_smoke_public.sh`.
 4. Run `bash scripts/check_public_engineering_proof.sh`.
 5. Run `bash scripts/check_public_demo_api.sh`.
 6. Run one generated client example from `examples/`.
-7. Review `docs/public/PROJECT_STATUS.md`, `docs/public/TECHNICAL_CAPABILITY_MAP.md`, `docs/public/OBSERVABILITY_PROOF.md`, `docs/public/ALERT_ROUTING_EVIDENCE.md`, `docs/public/ENGINEERING_PROOF.md`, `docs/public/PORTFOLIO_70_MILESTONE.md`, and `docs/public/SANITIZED_EVIDENCE.md`.
+7. Review `docs/public/PROJECT_STATUS.md`, `docs/public/TECHNICAL_CAPABILITY_MAP.md`, `docs/public/OBSERVABILITY_PROOF.md`, `docs/public/ALERT_ROUTING_EVIDENCE.md`, `docs/public/INCIDENT_RESPONSE_DEMO.md`, `docs/public/ENGINEERING_PROOF.md`, `docs/public/PORTFOLIO_70_MILESTONE.md`, and `docs/public/SANITIZED_EVIDENCE.md`.
 8. Review `docs/public/SYSTEM_DESIGN.md`, `docs/public/GITOPS_DELIVERY.md`, and the recovery evidence docs.
 
 ## What To Review First
@@ -86,6 +89,8 @@ alert route, receiver, dedupe, escalation, silence, and runbook binding path.
 - `docs/public/TECHNICAL_CAPABILITY_MAP.md` - capability-to-evidence map with verifier commands.
 - `docs/public/OBSERVABILITY_PROOF.md` - public-safe metrics, logs, alerts, and dashboard evidence.
 - `docs/public/ALERT_ROUTING_EVIDENCE.md` - public-safe alert routing, dedupe, escalation, and silence evidence.
+- `docs/public/INCIDENT_RESPONSE_DEMO.md` - public-safe incident queue,
+  mitigation, recovery, and resolution evidence.
 - `docs/public/ENGINEERING_PROOF.md` - proof tab payload, gates, evidence, and verifier contract.
 - `docs/public/SYSTEM_DESIGN.md` - system design overview.
 - `docs/public/API_BACKED_DEMO.md` - read-only synthetic demo API contract.
@@ -135,6 +140,7 @@ alert route, receiver, dedupe, escalation, silence, and runbook binding path.
 - `docs/public/PORTFOLIO_70_MILESTONE.md` - public-safe 70 percent DevOps/platform milestone.
 - `docs/public/OBSERVABILITY_PROOF.md` - public-safe observability proof.
 - `docs/public/ALERT_ROUTING_EVIDENCE.md` - public-safe alert routing proof.
+- `docs/public/INCIDENT_RESPONSE_DEMO.md` - public-safe incident response proof.
 - `docs/public/ARCHITECTURE_DIAGRAMS.md` - architecture diagrams.
 - `docs/public/SANITIZED_EVIDENCE.md` - sanitized staging evidence.
 - `docs/public/PUBLIC_DEMO_PLAN.md` - future public demo plan.

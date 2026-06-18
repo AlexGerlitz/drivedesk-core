@@ -76,6 +76,10 @@ static_proof = static_payload.get("engineeringProof", {})
 api_proof = api_payload.get("engineeringProof", {})
 
 require(static_proof == api_proof, "static and API engineeringProof payloads differ")
+require(
+    static_payload.get("incidentResponse") == api_payload.get("incidentResponse"),
+    "static and API incidentResponse payloads differ",
+)
 require(static_proof.get("milestone") == "engineering_70", "engineeringProof milestone mismatch")
 require(static_proof.get("status") == "validated", "engineeringProof status mismatch")
 require(len(static_proof.get("summary", [])) >= 4, "engineeringProof summary too short")
@@ -133,7 +137,12 @@ for command in expected_gates.values():
 html = read_text(demo_html_path)
 for token in [
     'data-view="proof"',
+    'data-view="incidents"',
     'id="view-proof"',
+    'id="view-incidents"',
+    'id="incidentSummaryRows"',
+    'id="incidentRows"',
+    'id="incidentTimelineRows"',
     'id="proofSummaryRows"',
     'id="proofGateRows"',
     'id="proofEvidenceRows"',
@@ -142,6 +151,8 @@ for token in [
 
 app = read_text(demo_app_path)
 for token in [
+    "fillIncidentResponse",
+    "payload.incidentResponse",
     "fillEngineeringProof",
     "payload.engineeringProof",
     "engineeringProof.summary",
@@ -156,6 +167,7 @@ required_fields = set(public_demo_schema.get("required", []))
 require("engineeringProof" in required_fields, "OpenAPI PublicDemoRead does not require engineeringProof")
 require("recoveryEvidence" in required_fields, "OpenAPI PublicDemoRead does not require recoveryEvidence")
 require("alertRouting" in required_fields, "OpenAPI PublicDemoRead does not require alertRouting")
+require("incidentResponse" in required_fields, "OpenAPI PublicDemoRead does not require incidentResponse")
 
 sdk_files = [
     root / "sdk/generated/public-demo/openapi-client-manifest.json",
@@ -167,6 +179,7 @@ for path in sdk_files:
     require(path.is_file(), f"generated SDK file missing: {relative(path)}")
     require("engineeringProof" in read_text(path), f"generated SDK file missing engineeringProof: {relative(path)}")
     require("alertRouting" in read_text(path), f"generated SDK file missing alertRouting: {relative(path)}")
+    require("incidentResponse" in read_text(path), f"generated SDK file missing incidentResponse: {relative(path)}")
 
 proof_doc = read_text(proof_doc_path)
 for token in [

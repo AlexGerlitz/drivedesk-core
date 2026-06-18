@@ -13,6 +13,8 @@ infrastructure, production history, customer data, or operational credentials.
 - `ENGINEERING_PROOF.md` - proof tab payload, gates, evidence, and verifier contract.
 - `OBSERVABILITY_PROOF.md` - public-safe metrics, logs, alerts, and dashboard evidence.
 - `ALERT_ROUTING_EVIDENCE.md` - public-safe alert routing, dedupe, escalation, and silence evidence.
+- `INCIDENT_RESPONSE_DEMO.md` - public-safe incident queue, recovery actions,
+  and resolution evidence in the demo.
 - `SYSTEM_DESIGN.md` - public-safe system design overview.
 - `API_BACKED_DEMO.md` - read-only synthetic API contract for the public demo.
 - `WORKFLOW_DEMO.md` - synthetic business workflow, timeline, events, audit,
@@ -115,6 +117,8 @@ The public repository export also generates:
 - `docs/openapi.json` - FastAPI OpenAPI schema from the exported API.
 - `apps/admin/public-demo/index.html` - static fake-data product demo shell.
 - `GET /demo/public` - read-only synthetic demo payload in the exported API.
+- `incidentResponse` - public-safe incident response contract in the demo
+  payload and Incidents tab.
 - `GET /business-record-lifecycle-policies` - public-safe lifecycle policy catalog.
 - `POST /tenants/{tenant_id}/integration-exports/accounting` - public-safe
   outbound accounting export contract in the exported API.
@@ -177,7 +181,7 @@ https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 4. Run `bash scripts/check_public_engineering_proof.sh`.
 5. Run `bash scripts/check_public_demo_api.sh`.
 6. Run one generated client example from `examples/`.
-7. Review `PROJECT_STATUS.md`, `TECHNICAL_CAPABILITY_MAP.md`, `OBSERVABILITY_PROOF.md`, `ALERT_ROUTING_EVIDENCE.md`, `ENGINEERING_PROOF.md`, `PORTFOLIO_70_MILESTONE.md`, and `SANITIZED_EVIDENCE.md`.
+7. Review `PROJECT_STATUS.md`, `TECHNICAL_CAPABILITY_MAP.md`, `OBSERVABILITY_PROOF.md`, `ALERT_ROUTING_EVIDENCE.md`, `INCIDENT_RESPONSE_DEMO.md`, `ENGINEERING_PROOF.md`, `PORTFOLIO_70_MILESTONE.md`, and `SANITIZED_EVIDENCE.md`.
 8. Review `SYSTEM_DESIGN.md`, `GITOPS_DELIVERY.md`, and the recovery evidence docs.
 
 ## Engineering Summary

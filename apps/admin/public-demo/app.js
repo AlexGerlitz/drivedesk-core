@@ -56,6 +56,12 @@
         Array.isArray(payload.alertRouting.routes) &&
         Array.isArray(payload.alertRouting.bindings) &&
         Array.isArray(payload.alertRouting.runbookActions) &&
+        payload.incidentResponse &&
+        Array.isArray(payload.incidentResponse.summary) &&
+        Array.isArray(payload.incidentResponse.incidents) &&
+        Array.isArray(payload.incidentResponse.timeline) &&
+        Array.isArray(payload.incidentResponse.recoveryActions) &&
+        Array.isArray(payload.incidentResponse.resolutionEvidence) &&
         payload.engineeringProof &&
         Array.isArray(payload.engineeringProof.summary) &&
         Array.isArray(payload.engineeringProof.gates) &&
@@ -626,13 +632,137 @@
     });
   }
 
+  function fillIncidentResponse() {
+    var incidentResponse = data.incidentResponse;
+
+    var summaryRows = document.getElementById("incidentSummaryRows");
+    clear(summaryRows);
+    incidentResponse.summary.forEach(function (item) {
+      var card = document.createElement("article");
+      card.className = "metric-card";
+      card.dataset.tone = item.tone || "blue";
+
+      var label = document.createElement("span");
+      label.className = "muted";
+      label.appendChild(text(item.label));
+
+      var value = document.createElement("strong");
+      value.appendChild(text(item.value));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      card.append(label, value, detail);
+      summaryRows.appendChild(card);
+    });
+
+    var incidentRows = document.getElementById("incidentRows");
+    clear(incidentRows);
+    incidentResponse.incidents.forEach(function (incident) {
+      var row = document.createElement("tr");
+
+      var titleCell = document.createElement("td");
+      var title = document.createElement("strong");
+      title.appendChild(text(incident.id));
+      var summary = document.createElement("div");
+      summary.className = "muted";
+      summary.appendChild(text(incident.title));
+      titleCell.append(title, summary);
+      row.appendChild(titleCell);
+
+      var severityCell = document.createElement("td");
+      severityCell.appendChild(chip(incident.severity, statusTone(incident.severity)));
+      row.appendChild(severityCell);
+
+      var statusCell = document.createElement("td");
+      statusCell.appendChild(chip(incident.status, statusTone(incident.status)));
+      row.appendChild(statusCell);
+
+      var ownerCell = document.createElement("td");
+      ownerCell.appendChild(text(incident.owner));
+      row.appendChild(ownerCell);
+
+      var runbookCell = document.createElement("td");
+      var runbook = document.createElement("code");
+      runbook.appendChild(text(incident.runbook));
+      runbookCell.appendChild(runbook);
+      row.appendChild(runbookCell);
+
+      incidentRows.appendChild(row);
+    });
+
+    var timelineRows = document.getElementById("incidentTimelineRows");
+    clear(timelineRows);
+    incidentResponse.timeline.forEach(function (event) {
+      var row = document.createElement("li");
+      var time = document.createElement("time");
+      time.appendChild(text(event.time + " " + event.actor));
+      var title = document.createElement("strong");
+      title.appendChild(text(event.state));
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(event.detail));
+      var code = document.createElement("code");
+      code.appendChild(text(event.event));
+      row.append(time, title, detail, code);
+      timelineRows.appendChild(row);
+    });
+
+    var actionRows = document.getElementById("incidentActionRows");
+    clear(actionRows);
+    incidentResponse.recoveryActions.forEach(function (action) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var name = document.createElement("strong");
+      name.appendChild(text(action.name));
+      top.append(name, chip(action.state, statusTone(action.state)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(action.owner + " - " + action.detail));
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(action.evidence));
+
+      row.append(top, detail, evidence);
+      actionRows.appendChild(row);
+    });
+
+    var evidenceRows = document.getElementById("incidentEvidenceRows");
+    clear(evidenceRows);
+    incidentResponse.resolutionEvidence.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var name = document.createElement("strong");
+      name.appendChild(text(item.name));
+      top.append(name, chip(item.state, statusTone(item.state)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(item.evidence));
+
+      row.append(top, detail, evidence);
+      evidenceRows.appendChild(row);
+    });
+  }
+
   function statusTone(status) {
     if (
       ["done", "ready", "online", "validated", "processed", "green", "active", "success", "observed", "matched", "resolved", "passed", "routed"].indexOf(status) >= 0
     ) {
       return "green";
     }
-    if (["blocked", "waiting", "pending", "retry", "partial_success", "current", "open", "acknowledged", "warning"].indexOf(status) >= 0) {
+    if (["blocked", "waiting", "pending", "retry", "partial_success", "current", "open", "acknowledged", "warning", "mitigating", "fired"].indexOf(status) >= 0) {
       return "amber";
     }
     if (["high", "dead_letter", "critical"].indexOf(status) >= 0) {
@@ -688,6 +818,7 @@
     fillHealth();
     fillRecoveryEvidence();
     fillAlertRouting();
+    fillIncidentResponse();
     fillEngineeringProof();
   }
 

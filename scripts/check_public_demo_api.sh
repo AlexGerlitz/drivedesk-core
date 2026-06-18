@@ -148,6 +148,31 @@ assert {action["evidence"] for action in demo["alertRouting"]["runbookActions"]}
     "ALERT_ROUTING_EVIDENCE.md",
     "alert.silence.created",
 }, demo
+assert {incident["status"] for incident in demo["incidentResponse"]["incidents"]} >= {
+    "open",
+    "acknowledged",
+    "resolved",
+}, demo
+assert {incident["alert"] for incident in demo["incidentResponse"]["incidents"]} >= {
+    "DriveDeskApiHighLatencyP95",
+    "DriveDeskIntegrationDeadLetters",
+    "DriveDeskScheduledValidationMissed",
+}, demo
+assert {event["event"] for event in demo["incidentResponse"]["timeline"]} >= {
+    "alert.fired",
+    "integration.incident.status_changed",
+    "incident.resolved",
+}, demo
+assert {action["evidence"] for action in demo["incidentResponse"]["recoveryActions"]} >= {
+    "outbox.retry.requested",
+    "postcheck.gates.passed",
+    "incident.resolved",
+}, demo
+assert {item["evidence"] for item in demo["incidentResponse"]["resolutionEvidence"]} >= {
+    "drivedesk_integration_incidents",
+    "INTEGRATION_INCIDENT_RUNBOOKS.md",
+    "postcheck.gates.passed",
+}, demo
 assert demo["engineeringProof"]["milestone"] == "engineering_70", demo
 assert demo["engineeringProof"]["status"] == "validated", demo
 assert len(demo["engineeringProof"]["summary"]) >= 4, demo

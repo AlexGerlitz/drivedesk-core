@@ -127,6 +127,20 @@ def validate_public_demo_payload(payload: dict[str, Any]) -> None:
     if not required_alerts.issubset(alert_names):
         raise ValueError(f"alertRouting.bindings does not include required alerts: {{sorted(required_alerts - alert_names)}}")
 
+    incident_response = payload.get("incidentResponse") or {{}}
+    incidents = incident_response.get("incidents")
+    if not isinstance(incidents, list) or len(incidents) < 3:
+        raise ValueError("incidentResponse.incidents is missing or too short")
+
+    incident_statuses = {{incident.get("status") for incident in incidents if isinstance(incident, dict)}}
+    required_statuses = {{"open", "acknowledged", "resolved"}}
+    if not required_statuses.issubset(incident_statuses):
+        raise ValueError(f"incidentResponse.incidents does not include required statuses: {{sorted(required_statuses - incident_statuses)}}")
+
+    incident_timeline = incident_response.get("timeline")
+    if not isinstance(incident_timeline, list) or len(incident_timeline) < 5:
+        raise ValueError("incidentResponse.timeline is missing or too short")
+
     domain_events = payload.get("domainEvents")
     if not isinstance(domain_events, list):
         raise ValueError("domainEvents is missing")
@@ -250,6 +264,21 @@ export function validatePublicDemoPayload(payload) {{
     }}
   }}
 
+  if (!Array.isArray(payload.incidentResponse?.incidents) || payload.incidentResponse.incidents.length < 3) {{
+    throw new Error("incidentResponse.incidents is missing or too short");
+  }}
+
+  const incidentStatuses = new Set(payload.incidentResponse.incidents.map((incident) => incident?.status));
+  for (const requiredStatus of ["open", "acknowledged", "resolved"]) {{
+    if (!incidentStatuses.has(requiredStatus)) {{
+      throw new Error(`incidentResponse.incidents does not include required status: ${{requiredStatus}}`);
+    }}
+  }}
+
+  if (!Array.isArray(payload.incidentResponse?.timeline) || payload.incidentResponse.timeline.length < 5) {{
+    throw new Error("incidentResponse.timeline is missing or too short");
+  }}
+
   if (!Array.isArray(payload.domainEvents)) {{
     throw new Error("domainEvents is missing");
   }}
@@ -317,6 +346,13 @@ export interface PublicDemoPayload {{
     routes: Array<Record<string, string>>;
     bindings: Array<Record<string, string>>;
     runbookActions: Array<Record<string, string>>;
+  }};
+  incidentResponse: {{
+    summary: Array<Record<string, string>>;
+    incidents: Array<Record<string, string>>;
+    timeline: Array<Record<string, string>>;
+    recoveryActions: Array<Record<string, string>>;
+    resolutionEvidence: Array<Record<string, string>>;
   }};
   engineeringProof: {{
     milestone: "engineering_70";

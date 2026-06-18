@@ -21,6 +21,7 @@ export const REQUIRED_FIELDS = [
   "integrationReadiness",
   "recoveryEvidence",
   "alertRouting",
+  "incidentResponse",
   "engineeringProof",
   "workflow",
   "timeline",
@@ -108,6 +109,21 @@ export function validatePublicDemoPayload(payload) {
     if (!alertNames.has(requiredAlert)) {
       throw new Error(`alertRouting.bindings does not include required alert: ${requiredAlert}`);
     }
+  }
+
+  if (!Array.isArray(payload.incidentResponse?.incidents) || payload.incidentResponse.incidents.length < 3) {
+    throw new Error("incidentResponse.incidents is missing or too short");
+  }
+
+  const incidentStatuses = new Set(payload.incidentResponse.incidents.map((incident) => incident?.status));
+  for (const requiredStatus of ["open", "acknowledged", "resolved"]) {
+    if (!incidentStatuses.has(requiredStatus)) {
+      throw new Error(`incidentResponse.incidents does not include required status: ${requiredStatus}`);
+    }
+  }
+
+  if (!Array.isArray(payload.incidentResponse?.timeline) || payload.incidentResponse.timeline.length < 5) {
+    throw new Error("incidentResponse.timeline is missing or too short");
   }
 
   if (!Array.isArray(payload.domainEvents)) {

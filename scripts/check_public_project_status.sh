@@ -73,6 +73,7 @@ for token in [
     "Capability map",
     "Observability proof",
     "Alert routing",
+    "Incident response",
     "synthetic data",
     "sanitized evidence",
     "docs/openapi.json",
@@ -84,6 +85,8 @@ for token in [
     "docs/public/evidence/observability-proof.sanitized.json",
     "docs/public/ALERT_ROUTING_EVIDENCE.md",
     "docs/public/evidence/alert-routing.sanitized.json",
+    "docs/public/INCIDENT_RESPONSE_DEMO.md",
+    "docs/public/INTEGRATION_INCIDENT_RUNBOOKS.md",
     "bash scripts/ci_smoke_public.sh",
     "bash scripts/check_public_project_status.sh",
     "bash scripts/check_public_technical_capability_map.sh",
@@ -120,6 +123,7 @@ target_paths = [
     "docs/public/TECHNICAL_CAPABILITY_MAP.md",
     "docs/public/OBSERVABILITY_PROOF.md",
     "docs/public/ALERT_ROUTING_EVIDENCE.md",
+    "docs/public/INCIDENT_RESPONSE_DEMO.md",
     "docs/public/ROADMAP.md",
 ]
 for path in target_paths:

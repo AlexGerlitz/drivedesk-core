@@ -28,6 +28,7 @@
     "integrationReadiness",
     "recoveryEvidence",
     "alertRouting",
+    "incidentResponse",
     "engineeringProof",
     "workflow",
     "timeline",

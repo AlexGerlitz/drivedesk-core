@@ -23,6 +23,10 @@ The same synthetic routing contract is also visible in the public demo
 Operations tab and exposed by the read-only `GET /demo/public` `alertRouting`
 payload.
 
+The follow-up operator path is visible in `INCIDENT_RESPONSE_DEMO.md` and the
+demo Incidents tab. That layer turns routed alerts into incident status,
+mitigation, verification, and resolution evidence.
+
 ## Route Model
 
 | Route | Signal | Receiver | Escalation |
@@ -85,6 +89,7 @@ customer data, addresses, or credentials.
 ## Related Docs
 
 - `docs/public/OBSERVABILITY_PROOF.md`
+- `docs/public/INCIDENT_RESPONSE_DEMO.md`
 - `docs/public/RUNTIME_ROLLOUT_EVIDENCE.md`
 - `docs/public/SLO_CANARY_GATE_EVIDENCE.md`
 - `docs/public/AUTH_OBSERVABILITY.md`

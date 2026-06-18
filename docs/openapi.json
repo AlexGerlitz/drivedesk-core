@@ -2172,6 +2172,11 @@
             "title": "Health",
             "type": "object"
           },
+          "incidentResponse": {
+            "additionalProperties": true,
+            "title": "Incidentresponse",
+            "type": "object"
+          },
           "integrationHealth": {
             "items": {
               "additionalProperties": {
@@ -2287,6 +2292,7 @@
           "integrationReadiness",
           "recoveryEvidence",
           "alertRouting",
+          "incidentResponse",
           "engineeringProof",
           "workflow",
           "timeline",

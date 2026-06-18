@@ -8,7 +8,7 @@ prove the current engineering surface.
 
 | Step | What to inspect | Proof |
 | --- | --- | --- |
-| 1 | Live demo Operations and Proof tabs | `alertRouting` and `engineeringProof` payloads |
+| 1 | Live demo Operations, Incidents, and Proof tabs | `alertRouting`, `incidentResponse`, and `engineeringProof` payloads |
 | 2 | Root CI badge | `bash scripts/ci_smoke_public.sh` |
 | 3 | Project status | `docs/public/PROJECT_STATUS.md` |
 | 4 | Proof contract | `bash scripts/check_public_engineering_proof.sh` |
@@ -49,6 +49,7 @@ bash scripts/check_public_opentofu_plan.sh
 | Capability map | `docs/public/TECHNICAL_CAPABILITY_MAP.md` |
 | Observability proof | `docs/public/OBSERVABILITY_PROOF.md` |
 | Alert routing | `docs/public/ALERT_ROUTING_EVIDENCE.md` |
+| Incident response | `docs/public/INCIDENT_RESPONSE_DEMO.md` |
 | Case study | `docs/public/PORTFOLIO_CASE_STUDY.md` |
 | Sanitized runtime evidence | `docs/public/SANITIZED_EVIDENCE.md` |
 | Backup and restore | `docs/public/BACKUP_RESTORE_EVIDENCE.md` |

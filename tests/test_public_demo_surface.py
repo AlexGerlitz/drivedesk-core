@@ -40,6 +40,7 @@ def test_public_demo_html_links_static_assets() -> None:
     assert 'id="workQueueRows"' in html
     assert 'data-view="workflow"' in html
     assert 'data-view="operations"' in html
+    assert 'data-view="incidents"' in html
     assert 'data-view="proof"' in html
     assert 'id="workflowStageRows"' in html
     assert 'id="workflowTimelineRows"' in html
@@ -53,6 +54,11 @@ def test_public_demo_html_links_static_assets() -> None:
     assert 'id="alertRouteRows"' in html
     assert 'id="alertBindingRows"' in html
     assert 'id="alertRunbookRows"' in html
+    assert 'id="incidentSummaryRows"' in html
+    assert 'id="incidentRows"' in html
+    assert 'id="incidentTimelineRows"' in html
+    assert 'id="incidentActionRows"' in html
+    assert 'id="incidentEvidenceRows"' in html
     assert 'id="proofSummaryRows"' in html
     assert 'id="proofGateRows"' in html
     assert 'id="proofEvidenceRows"' in html
@@ -140,6 +146,32 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
         "ALERT_ROUTING_EVIDENCE.md",
         "alert.silence.created",
     }
+    assert payload["incidentResponse"]["summary"]
+    assert {incident["status"] for incident in payload["incidentResponse"]["incidents"]} >= {
+        "open",
+        "acknowledged",
+        "resolved",
+    }
+    assert {incident["alert"] for incident in payload["incidentResponse"]["incidents"]} >= {
+        "DriveDeskApiHighLatencyP95",
+        "DriveDeskIntegrationDeadLetters",
+        "DriveDeskScheduledValidationMissed",
+    }
+    assert {event["event"] for event in payload["incidentResponse"]["timeline"]} >= {
+        "alert.fired",
+        "integration.incident.status_changed",
+        "incident.resolved",
+    }
+    assert {action["evidence"] for action in payload["incidentResponse"]["recoveryActions"]} >= {
+        "outbox.retry.requested",
+        "postcheck.gates.passed",
+        "incident.resolved",
+    }
+    assert {item["evidence"] for item in payload["incidentResponse"]["resolutionEvidence"]} >= {
+        "drivedesk_integration_incidents",
+        "INTEGRATION_INCIDENT_RUNBOOKS.md",
+        "postcheck.gates.passed",
+    }
     assert len(payload["recoveryEvidence"]) >= 4
     assert payload["engineeringProof"]["milestone"] == "engineering_70"
     assert payload["engineeringProof"]["status"] == "validated"
@@ -205,8 +237,10 @@ def test_public_demo_can_load_api_backed_data_with_static_fallback() -> None:
     assert "fillDomainEvents" in script
     assert "fillRecoveryEvidence" in script
     assert "fillAlertRouting" in script
+    assert "fillIncidentResponse" in script
     assert "fillEngineeringProof" in script
     assert "alertRouting" in script
+    assert "incidentResponse" in script
     assert "engineeringProof" in script
     assert "recoveryEvidence" in script
     assert "demoApi" in script

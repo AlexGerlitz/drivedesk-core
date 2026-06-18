@@ -55,6 +55,8 @@ if is_public_export:
         "<!doctype html>",
         "DriveDesk Core",
         "Public Engineering Surface",
+        "Start Here",
+        "System Snapshot",
         "Review Flow",
         "Architecture Trace",
         "Evidence Matrix",

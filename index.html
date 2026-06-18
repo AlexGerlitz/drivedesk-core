@@ -167,12 +167,39 @@
       border-top: 1px solid var(--line);
     }
 
-    .review-flow {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 12px;
-      padding: 6px 0 20px;
-    }
+        .review-flow {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 12px;
+          padding: 6px 0 20px;
+        }
+
+        .snapshot-grid {
+          display: grid;
+          grid-template-columns: repeat(5, minmax(0, 1fr));
+          gap: 12px;
+          padding: 6px 0 24px;
+        }
+
+        .snapshot-card {
+          min-height: 176px;
+          padding: 16px;
+          border: 1px solid var(--line);
+          border-radius: 8px;
+          background: var(--panel);
+        }
+
+        .snapshot-card h2 {
+          margin: 0;
+          font-size: 17px;
+          letter-spacing: 0;
+        }
+
+        .snapshot-card p {
+          margin: 8px 0 0;
+          color: var(--muted);
+          font-size: 14px;
+        }
 
     .flow-step {
       min-height: 158px;
@@ -357,11 +384,12 @@
         min-height: 0;
       }
 
-      .grid,
-      .review-flow,
-      .status-strip {
-        grid-template-columns: 1fr;
-      }
+          .grid,
+          .review-flow,
+          .snapshot-grid,
+          .status-strip {
+            grid-template-columns: 1fr;
+          }
 
       h1 {
         font-size: 40px;
@@ -373,20 +401,16 @@
   <div class="shell">
     <header class="topbar">
       <div class="brand">DriveDesk Core</div>
-      <nav class="topnav" aria-label="Review links">
-        <a class="button primary" href="apps/admin/public-demo/">Open Demo</a>
-        <a class="button" href="docs/public/SYSTEM_REVIEW_PATH.md">System Path</a>
-        <a class="button" href="docs/public/REVIEWER_QUICKSTART.md">Quickstart</a>
-        <a class="button" href="docs/public/ENGINEERING_REVIEW_GUIDE.md">Review Guide</a>
-        <a class="button" href="docs/public/PROJECT_STATUS.md">Status</a>
-        <a class="button" href="docs/public/TECHNICAL_CAPABILITY_MAP.md">Capability Map</a>
-        <a class="button" href="docs/public/EVIDENCE_INDEX.md">Evidence Index</a>
-        <a class="button" href="docs/public/OBSERVABILITY_PROOF.md">Observability</a>
-        <a class="button" href="docs/public/ALERT_ROUTING_EVIDENCE.md">Alert Routing</a>
-        <a class="button" href="docs/public/INCIDENT_RESPONSE_DEMO.md">Incidents</a>
-        <a class="button" href="docs/openapi.json">OpenAPI</a>
-        <a class="button" href="https://github.com/AlexGerlitz/drivedesk-core/actions/workflows/ci.yml">CI</a>
-      </nav>
+          <nav class="topnav" aria-label="Review links">
+            <a class="button primary" href="apps/admin/public-demo/">Open Demo</a>
+            <a class="button" href="docs/public/SYSTEM_REVIEW_PATH.md">System Path</a>
+            <a class="button" href="docs/public/REVIEWER_QUICKSTART.md">Quickstart</a>
+            <a class="button" href="docs/public/ENGINEERING_REVIEW_GUIDE.md">Review Guide</a>
+            <a class="button" href="docs/public/PROJECT_STATUS.md">Status</a>
+            <a class="button" href="docs/public/EVIDENCE_INDEX.md">Evidence Index</a>
+            <a class="button" href="docs/openapi.json">OpenAPI</a>
+            <a class="button" href="https://github.com/AlexGerlitz/drivedesk-core/actions/workflows/ci.yml">CI</a>
+          </nav>
     </header>
 
     <main>
@@ -399,20 +423,13 @@
             the API contract, SDK artifacts, release gates, observability, GitOps,
             OpenTofu plan evidence, and incident response trail.
           </p>
-          <div class="action-row">
-            <a class="button primary" href="apps/admin/public-demo/">Open Demo</a>
-            <a class="button" href="docs/public/SYSTEM_REVIEW_PATH.md">System Path</a>
-            <a class="button" href="docs/public/REVIEWER_QUICKSTART.md">Quickstart</a>
-            <a class="button" href="docs/public/ENGINEERING_REVIEW_GUIDE.md">Read Review Guide</a>
-            <a class="button" href="docs/public/PROJECT_STATUS.md">Project Status</a>
-            <a class="button" href="docs/public/TECHNICAL_CAPABILITY_MAP.md">Capability Map</a>
-            <a class="button" href="docs/public/EVIDENCE_INDEX.md">Evidence Index</a>
-            <a class="button" href="docs/public/OBSERVABILITY_PROOF.md">Observability</a>
-            <a class="button" href="docs/public/ALERT_ROUTING_EVIDENCE.md">Alert Routing</a>
-            <a class="button" href="docs/public/INCIDENT_RESPONSE_DEMO.md">Incidents</a>
-            <a class="button" href="docs/public/ENGINEERING_PROOF.md">Proof Contract</a>
-            <a class="button" href="docs/public/PLATFORM_MATURITY_70.md">Maturity 70</a>
-          </div>
+              <div class="action-row">
+                <a class="button primary" href="apps/admin/public-demo/">Open Demo</a>
+                <a class="button" href="docs/public/SYSTEM_REVIEW_PATH.md">System Path</a>
+                <a class="button" href="docs/public/PROJECT_STATUS.md">Project Status</a>
+                <a class="button" href="docs/public/TECHNICAL_CAPABILITY_MAP.md">Capability Map</a>
+                <a class="button" href="docs/public/EVIDENCE_INDEX.md">Evidence Index</a>
+              </div>
           <div class="status-strip" aria-label="Engineering status">
             <div class="status"><strong>Runtime</strong><span>API, worker, Postgres, Redis</span></div>
             <div class="status"><strong>Delivery</strong><span>CI, Helm, GitOps, gates</span></div>
@@ -423,11 +440,39 @@
         <figure class="screenshot">
           <img src="docs/public/assets/drivedesk-core-demo-overview.png" alt="DriveDesk Core public demo overview">
           <figcaption>Public demo surface backed by static synthetic data and the read-only `GET /demo/public` contract.</figcaption>
-        </figure>
-      </section>
+            </figure>
+          </section>
 
-      <section class="evidence-heading" aria-labelledby="flowTitle">
-        <h2 id="flowTitle">Review Flow</h2>
+          <section class="evidence-heading" aria-labelledby="startTitle">
+            <h2 id="startTitle">Start Here: System Snapshot</h2>
+            <p>Use this page as the entrypoint, then follow the checked docs and commands when deeper proof is needed.</p>
+          </section>
+
+          <section class="snapshot-grid" aria-label="System snapshot">
+            <article class="snapshot-card">
+              <h2>Runtime</h2>
+              <p>FastAPI demo API, worker contract, Postgres-shaped repositories, Redis/outbox job model, and metrics endpoint.</p>
+            </article>
+            <article class="snapshot-card">
+              <h2>Product core</h2>
+              <p>Tenants, RBAC, audit log, outbox recovery, business records, workflow rules, tasks, and documents.</p>
+            </article>
+            <article class="snapshot-card">
+              <h2>Integration hub</h2>
+              <p>Adapter catalog, scopes, mapping preview, operation contracts, diagnostics, reconciliation, and operator review.</p>
+            </article>
+            <article class="snapshot-card">
+              <h2>Operations</h2>
+              <p>Metrics, structured logs, alert routing, incident response, recovery drills, rollback, and SLO canary evidence.</p>
+            </article>
+            <article class="snapshot-card">
+              <h2>Delivery</h2>
+              <p>Docker Compose, Helm, GitOps, OpenTofu plan evidence, CI gates, Pages health, and public/private export gate.</p>
+            </article>
+          </section>
+
+          <section class="evidence-heading" aria-labelledby="flowTitle">
+            <h2 id="flowTitle">Review Flow</h2>
         <p>Follow the same path the release gate protects: system path, architecture, demo, API contract, then operational evidence.</p>
       </section>
 
@@ -527,13 +572,18 @@
           <p>Read-only public demo API with generated Python, JavaScript, and TypeScript client artifacts.</p>
           <a href="docs/public/API_BACKED_DEMO.md">Open API notes</a>
         </article>
-        <article class="card">
-          <h2>Release safety</h2>
-          <p>Backup/restore, rollback, SLO canary gate, and staged promotion evidence on synthetic data.</p>
-          <a href="docs/public/SANITIZED_EVIDENCE.md">Open evidence</a>
-        </article>
-        <article class="card">
-          <h2>Proof contract</h2>
+            <article class="card">
+              <h2>Release safety</h2>
+              <p>Backup/restore, rollback, SLO canary gate, staged promotion, and platform maturity evidence on synthetic data.</p>
+              <a href="docs/public/SANITIZED_EVIDENCE.md">Open evidence</a>
+            </article>
+            <article class="card">
+              <h2>Platform maturity</h2>
+              <p>Public-safe 70 percent DevOps/platform milestone tied to verified runtime, delivery, operations, security, and recovery evidence.</p>
+              <a href="docs/public/PLATFORM_MATURITY_70.md">Open maturity evidence</a>
+            </article>
+            <article class="card">
+              <h2>Proof contract</h2>
           <p>Connects the demo Proof tab, API payload, OpenAPI schema, SDK artifacts, docs, and CI checks.</p>
           <a href="docs/public/ENGINEERING_PROOF.md">Open proof</a>
         </article>

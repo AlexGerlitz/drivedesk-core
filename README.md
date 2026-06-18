@@ -47,6 +47,25 @@ It includes:
 
 ![DriveDesk Core demo overview](docs/public/assets/drivedesk-core-demo-overview.png)
 
+## Start Here
+
+| Need | Open | What it proves |
+| --- | --- | --- |
+| Fast system route | `docs/public/SYSTEM_REVIEW_PATH.md` | How the public root, demo, API, SDK, operations evidence, release safety, GitOps, OpenTofu, and evidence index fit together. |
+| Live product surface | [public review hub](https://alexgerlitz.github.io/drivedesk-core/) and [public demo](https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/) | Browser-visible workflow, operations, incidents, and proof tabs on synthetic demo data. |
+| Current project state | `docs/public/PROJECT_STATUS.md` | What is implemented, what is intentionally public-safe, and what remains private. |
+| Verification commands | `bash scripts/ci_smoke_public.sh` | Public smoke path covering docs, demo contract, OpenAPI, SDK examples, and release evidence. |
+
+## System Snapshot
+
+| Layer | Public evidence |
+| --- | --- |
+| Runtime | FastAPI demo API, background-worker contract, Postgres-shaped repositories, Redis/outbox job model, and `GET /metrics`. |
+| Product core | Tenants, RBAC, audit log, outbox recovery, business records, lifecycle policies, workflow rules, tasks, and documents. |
+| Integration hub | Adapter catalog, connection scopes, mapping validation, mapping transform preview, operation contracts, diagnostics, reconciliation, and operator review. |
+| Operations | Prometheus-style metrics, structured logs, Alertmanager-style routing, incident response, backup/restore, rollback, SLO canary, and staged promotion evidence. |
+| Delivery | Docker Compose, Helm chart, GitOps manifests, OpenTofu plan evidence, CI gates, Pages health check, and public/private export gate. |
+
 ## Fast Review
 
 Start with `docs/public/SYSTEM_REVIEW_PATH.md`.
@@ -98,7 +117,7 @@ incident queue, mitigation, recovery, and resolution evidence path.
 10. Review `docs/public/PROJECT_STATUS.md`, `docs/public/TECHNICAL_CAPABILITY_MAP.md`, `docs/public/EVIDENCE_INDEX.md`, `docs/public/OBSERVABILITY_PROOF.md`, `docs/public/ALERT_ROUTING_EVIDENCE.md`, `docs/public/INCIDENT_RESPONSE_DEMO.md`, `docs/public/ENGINEERING_PROOF.md`, `docs/public/PLATFORM_MATURITY_70.md`, and `docs/public/SANITIZED_EVIDENCE.md`.
 11. Review `docs/public/SYSTEM_DESIGN.md`, `docs/public/GITOPS_DELIVERY.md`, and the recovery evidence docs.
 
-## What To Review First
+## Full Artifact Reference
 
 - `docs/public/ENGINEERING_CASE_STUDY.md` - engineering case study.
 - `docs/public/SYSTEM_REVIEW_PATH.md` - compact engineering route through the public root, demo, API, SDK, operations evidence, release safety, GitOps, OpenTofu, and evidence index.

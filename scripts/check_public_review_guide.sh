@@ -129,7 +129,10 @@ if is_public_export and root_readme_path.is_file():
     require("SYSTEM_REVIEW_PATH.md" in root_readme, "root README missing system review path link")
     require("REVIEWER_QUICKSTART.md" in root_readme, "root README missing reviewer quickstart link")
     require("ENGINEERING_REVIEW_GUIDE.md" in root_readme, "root README missing review guide link")
+    require("Start Here" in root_readme, "root README missing Start Here section")
+    require("System Snapshot" in root_readme, "root README missing System Snapshot section")
     require("Fast Review" in root_readme, "root README missing Fast Review section")
+    require("Full Artifact Reference" in root_readme, "root README missing Full Artifact Reference section")
 
 if export_script_path.is_file():
     export_script = read(export_script_path)

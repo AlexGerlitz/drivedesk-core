@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "check": "public_helm_chart_render",
+  "data_profile": "synthetic_fake_data",
+  "deployment_model": "kubernetes_helm_chart",
+  "chart": {
+    "name": "drivedesk-core",
+    "path": "infra/helm/drivedesk-core",
+    "helm_binary_required": false
+  },
+  "checks": {
+    "chart_files_present": true,
+    "chart_metadata_valid": true,
+    "values_schema_valid": true,
+    "public_values_present": true,
+    "api_deployment_template_present": true,
+    "worker_deployment_template_present": true,
+    "migration_job_template_present": true,
+    "service_template_present": true,
+    "runtime_secret_refs_present": true,
+    "health_probes_present": true,
+    "private_markers_absent": true,
+    "helm_binary_required": false,
+    "production_data_touched": false
+  },
+  "redaction": {
+    "paths_included": false,
+    "hostnames_included": false,
+    "addresses_included": false,
+    "credentials_included": false,
+    "raw_logs_included": false,
+    "production_data_included": false
+  }
+}

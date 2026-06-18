@@ -32,6 +32,7 @@ apps/worker    background worker
 apps/admin     future frontend workspace
 packages/core  domain primitives
 infra/docker   local Docker runtime
+infra/helm     Kubernetes packaging foundation
 docs           architecture notes and ADRs
 tests          API and foundation tests
 ```

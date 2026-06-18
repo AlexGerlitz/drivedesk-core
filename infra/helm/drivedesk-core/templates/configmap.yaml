@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "drivedesk-core.fullname" . }}-config
+  labels:
+    {{- include "drivedesk-core.labels" . | nindent 4 }}
+data:
+  DRIVEDESK_ENVIRONMENT: {{ .Values.app.environment | quote }}

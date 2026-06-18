@@ -1,0 +1,44 @@
+{{- if .Values.migrations.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "drivedesk-core.fullname" . }}-migrate
+  labels:
+    {{- include "drivedesk-core.labels" . | nindent 4 }}
+    app.kubernetes.io/component: migrate
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        {{- include "drivedesk-core.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: migrate
+    spec:
+      restartPolicy: Never
+      serviceAccountName: {{ include "drivedesk-core.serviceAccountName" . }}
+      containers:
+        - name: migrate
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            {{- toYaml .Values.migrations.command | nindent 12 }}
+          env:
+            - name: DRIVEDESK_ENVIRONMENT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "drivedesk-core.fullname" . }}-config
+                  key: DRIVEDESK_ENVIRONMENT
+            - name: DRIVEDESK_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.runtimeSecret.name }}
+                  key: {{ .Values.runtimeSecret.databaseUrlKey }}
+            - name: DRIVEDESK_REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.runtimeSecret.name }}
+                  key: {{ .Values.runtimeSecret.redisUrlKey }}
+{{- end }}

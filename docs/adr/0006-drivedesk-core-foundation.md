@@ -16,6 +16,7 @@ Use this repository shape:
 - `apps/admin` for the future frontend workspace;
 - `packages/core` for domain primitives;
 - `infra/docker` for local runtime.
+- `infra/helm` for Kubernetes-style packaging.
 
 Sprint 0 starts with health endpoints, worker heartbeat, core event primitives,
 tenant/audit database tables, Docker Compose, and CI smoke checks.
@@ -24,4 +25,6 @@ tenant/audit database tables, Docker Compose, and CI smoke checks.
 
 - New product work has a clear namespace.
 - API and worker can evolve separately while staying in one repository.
-- Future Kubernetes and Helm work can grow from the compose contract.
+- The Helm chart foundation packages API, worker, migrations, service, config,
+  runtime Secret references, and probes without changing the modular monolith
+  into premature microservices.

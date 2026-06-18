@@ -180,6 +180,9 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
   synthetic release through build, staging, canary, and production gates,
   records production approval, and emits `release.staged_promotion.completed`
   evidence.
+- Helm chart foundation now packages the modular monolith into Kubernetes-style
+  API, worker, migration, service, config, runtime Secret reference, and probe
+  contracts without changing the app into microservices.
 - Alertmanager currently uses an internal receiver; external notification
   routing is a later step.
 - The frontend is intentionally not the center of the current work; the backend

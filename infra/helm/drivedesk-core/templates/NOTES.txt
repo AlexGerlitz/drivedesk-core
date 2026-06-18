@@ -1,0 +1,9 @@
+DriveDesk Core has been rendered.
+
+This chart expects runtime connection strings to be provided by an existing
+Kubernetes Secret named:
+
+  {{ .Values.runtimeSecret.name }}
+
+The public chart includes API, worker, migration, service, config, and probe
+contracts only. It does not include private infrastructure endpoints.

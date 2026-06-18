@@ -1,0 +1,81 @@
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  repository: ghcr.io/example/drivedesk-core
+  tag: "public-demo"
+  pullPolicy: IfNotPresent
+
+app:
+  environment: staging
+
+serviceAccount:
+  create: true
+  name: ""
+
+runtimeSecret:
+  name: drivedesk-core-runtime
+  databaseUrlKey: DRIVEDESK_DATABASE_URL
+  redisUrlKey: DRIVEDESK_REDIS_URL
+
+api:
+  replicas: 2
+  port: 8080
+  command:
+    - uvicorn
+    - drivedesk_api.main:app
+    - --host
+    - 0.0.0.0
+    - --port
+    - "8080"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+worker:
+  replicas: 1
+  command:
+    - python
+    - -m
+    - drivedesk_worker.main
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+migrations:
+  enabled: true
+  command:
+    - alembic
+    - -c
+    - apps/api/alembic.ini
+    - upgrade
+    - head
+
+service:
+  type: ClusterIP
+  port: 80
+
+probes:
+  liveness:
+    path: /health
+    initialDelaySeconds: 20
+    periodSeconds: 30
+  readiness:
+    path: /ready
+    initialDelaySeconds: 10
+    periodSeconds: 10
+
+podAnnotations: {}
+podLabels: {}
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

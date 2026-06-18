@@ -81,9 +81,10 @@ It includes:
 33. Read `docs/public/RELEASE_ROLLBACK_EVIDENCE.md`.
 34. Read `docs/public/SLO_CANARY_GATE_EVIDENCE.md`.
 35. Read `docs/public/STAGED_PROMOTION_EVIDENCE.md`.
-36. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
-37. Check `.github/workflows/ci.yml`.
-38. Run `bash scripts/ci_smoke_public.sh` locally.
+36. Read `docs/public/HELM_CHART.md`.
+37. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
+38. Check `.github/workflows/ci.yml`.
+39. Run `bash scripts/ci_smoke_public.sh` locally.
 
 ## What To Review First
 
@@ -119,6 +120,7 @@ It includes:
 - `docs/public/RELEASE_ROLLBACK_EVIDENCE.md` - public-safe bad-release rollback drill.
 - `docs/public/SLO_CANARY_GATE_EVIDENCE.md` - public-safe SLO canary promotion gate drill.
 - `docs/public/STAGED_PROMOTION_EVIDENCE.md` - public-safe staged release promotion drill.
+- `docs/public/HELM_CHART.md` - public-safe Helm chart foundation.
 - `docs/public/ARCHITECTURE_DIAGRAMS.md` - architecture diagrams.
 - `docs/public/SANITIZED_EVIDENCE.md` - sanitized staging evidence.
 - `docs/public/PUBLIC_DEMO_PLAN.md` - future public demo plan.
@@ -162,6 +164,7 @@ It includes:
 - `scripts/check_public_release_rollback.sh` - public-safe release rollback drill.
 - `scripts/check_public_slo_canary_gate.sh` - public-safe SLO canary gate drill.
 - `scripts/check_public_staged_promotion.sh` - public-safe staged promotion drill.
+- `scripts/check_public_helm_render.sh` - public-safe Helm chart validation.
 - `scripts/run_public_demo_local.sh` - one-command local API run.
 - `scripts/check_public_demo_api.sh` - local API contract and examples smoke.
 - `examples/curl/demo-public.sh` - curl client example.
@@ -191,6 +194,7 @@ bash scripts/check_public_backup_restore.sh
 bash scripts/check_public_release_rollback.sh
 bash scripts/check_public_slo_canary_gate.sh
 bash scripts/check_public_staged_promotion.sh
+bash scripts/check_public_helm_render.sh
 BASE_URL=http://localhost:8080 bash examples/curl/demo-public.sh
 BASE_URL=http://localhost:8080 python examples/python/demo_public_client.py
 BASE_URL=http://localhost:8080 node examples/js/demo-public-fetch.js
@@ -211,6 +215,7 @@ bash scripts/check_public_backup_restore.sh
 bash scripts/check_public_release_rollback.sh
 bash scripts/check_public_slo_canary_gate.sh
 bash scripts/check_public_staged_promotion.sh
+bash scripts/check_public_helm_render.sh
 ```
 
 ## Public Demo Shell
@@ -272,6 +277,7 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/public/RELEASE_ROLLBACK_EVIDENCE.md`
 - `docs/public/SLO_CANARY_GATE_EVIDENCE.md`
 - `docs/public/STAGED_PROMOTION_EVIDENCE.md`
+- `docs/public/HELM_CHART.md`
 - `docs/public/ARCHITECTURE_DIAGRAMS.md`
 - `docs/public/PUBLIC_DEMO_PLAN.md`
 - `docs/public/SANITIZED_EVIDENCE.md`
@@ -313,3 +319,4 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/adr/0044-public-safe-release-rollback-drill.md`
 - `docs/adr/0045-public-safe-slo-canary-gate-drill.md`
 - `docs/adr/0046-public-safe-staged-promotion-drill.md`
+- `docs/adr/0047-public-safe-helm-chart-foundation.md`

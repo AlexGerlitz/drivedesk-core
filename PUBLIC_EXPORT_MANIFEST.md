@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-18T04:01:40Z
+Generated at: 2026-06-18T04:18:07Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -10,6 +10,7 @@ Copied public-safe areas:
 - apps/admin
 - packages/core
 - infra/docker
+- infra/helm
 - examples
 - tests/test_drivedesk_foundation.py
 - tests/test_drivedesk_core_api.py
@@ -107,6 +108,13 @@ Copied public-safe areas:
 - public staged promotion check: promotion_history_hash_recorded
 - public staged promotion audit event: release.staged_promotion.completed
 - public staged promotion ADR: 0046-public-safe-staged-promotion-drill
+- public Helm chart foundation doc
+- public Helm chart path: infra/helm/drivedesk-core
+- public Helm chart validation script: scripts/check_public_helm_render.sh
+- public Helm chart evidence snapshot: docs/public/evidence/helm-render.sanitized.json
+- public Helm chart check: api_deployment_template_present
+- public Helm chart check: runtime_secret_refs_present
+- public Helm chart ADR: 0047-public-safe-helm-chart-foundation
 - public tenant-owned repository helper surface
 - public auth observability alerting surface
 - public demo local run script

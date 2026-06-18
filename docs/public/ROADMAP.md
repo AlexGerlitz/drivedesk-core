@@ -51,6 +51,7 @@ operations, or commercial details.
 - Public-safe synthetic release rollback drill and sanitized evidence snapshot.
 - Public-safe synthetic SLO canary gate drill and sanitized evidence snapshot.
 - Public-safe synthetic staged promotion drill and sanitized evidence snapshot.
+- Public-safe Helm chart foundation with render validation.
 
 ## Next
 

@@ -26,6 +26,7 @@ bash scripts/check_public_backup_restore.sh
 bash scripts/check_public_release_rollback.sh
 bash scripts/check_public_slo_canary_gate.sh
 bash scripts/check_public_staged_promotion.sh
+bash scripts/check_public_helm_render.sh
 
 if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
   docker compose -f infra/docker/docker-compose.foundation.yml config --quiet

@@ -36,6 +36,12 @@ Staged promotion drill source file:
 docs/public/evidence/staged-promotion.sanitized.json
 ```
 
+Helm chart validation source file:
+
+```text
+docs/public/evidence/helm-render.sanitized.json
+```
+
 Verified signals:
 
 - CI completed successfully;
@@ -71,6 +77,10 @@ Verified signals:
 - synthetic production approval was recorded;
 - promotion history was hashed;
 - `release.staged_promotion.completed` evidence was recorded.
+- the public Helm chart foundation contains API, worker, migration, service,
+  config, runtime Secret reference, and probe templates;
+- chart values schema was validated;
+- private infrastructure markers were absent from the chart.
 
 ## Human Explanation
 
@@ -91,6 +101,7 @@ The public version keeps only the operational shape and health results.
 - Bad-release rollback is checked through an executable public drill.
 - SLO canary promotion is checked through an executable public drill.
 - Staged release promotion is checked through an executable public drill.
+- Helm chart packaging is checked through an executable public validation.
 
 ## What This Leaves Out
 

@@ -44,6 +44,8 @@ def test_public_demo_html_links_static_assets() -> None:
     assert 'data-view="proof"' in html
     assert 'id="workflowStageRows"' in html
     assert 'id="workflowScenarioRows"' in html
+    assert 'id="endToEndScenarioRows"' in html
+    assert 'id="endToEndScenarioMeta"' in html
     assert 'id="workflowTimelineRows"' in html
     assert 'id="domainEventRows"' in html
     assert 'id="integrationHealthRows"' in html
@@ -106,6 +108,34 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
     )
     assert scenario_by_id["scenario-signature-task"]["evidence"] == "workflow.task_record.created"
     assert scenario_by_id["scenario-accounting-export"]["status"] == "pending"
+    assert payload["endToEndScenario"]["id"] == "scenario-approval-notification-adapter-incident"
+    assert payload["endToEndScenario"]["status"] == "reviewable"
+    assert payload["endToEndScenario"]["currentStep"] == "incident_resolved"
+    assert len(payload["endToEndScenario"]["chain"]) >= 6
+    assert {step["step"] for step in payload["endToEndScenario"]["chain"]} >= {
+        "approval",
+        "notification",
+        "adapter",
+        "incident",
+        "recovery",
+        "proof",
+    }
+    assert {step["evidence"] for step in payload["endToEndScenario"]["chain"]} >= {
+        "workflow.contract_approved",
+        "notification.manager_signature_task.created",
+        "integration.accounting_export.requested",
+        "integration.incident.status_changed",
+        "postcheck.gates.passed",
+        "docs/public/ENGINEERING_PROOF.md",
+    }
+    assert set(payload["endToEndScenario"]["proof"]) >= {
+        "workflow.contract_approved",
+        "notification.manager_signature_task.created",
+        "integration.accounting_export.requested",
+        "integration.incident.status_changed",
+        "postcheck.gates.passed",
+        "docs/public/ENGINEERING_PROOF.md",
+    }
     assert len(payload["timeline"]) >= 5
     assert len(payload["domainEvents"]) >= 4
     assert {event["event"] for event in payload["domainEvents"]} >= {
@@ -305,6 +335,7 @@ def test_public_demo_can_load_api_backed_data_with_static_fallback() -> None:
     assert "operations: " in script
     assert "fillWorkflow" in script
     assert "fillWorkflowScenarios" in script
+    assert "fillEndToEndScenario" in script
     assert "fillWorkflowTimeline" in script
     assert "fillDomainEvents" in script
     assert "fillAdapterScenarios" in script
@@ -316,6 +347,7 @@ def test_public_demo_can_load_api_backed_data_with_static_fallback() -> None:
     assert "incidentResponse" in script
     assert "engineeringProof" in script
     assert "workflowScenarios" in script
+    assert "endToEndScenario" in script
     assert "adapterScenarios" in script
     assert "recoveryEvidence" in script
     assert "demoApi" in script

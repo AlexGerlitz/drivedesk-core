@@ -68,6 +68,7 @@ for token in [
     "Audit and outbox recovery",
     "Business records and workflow automation",
     "reusable workflow scenarios",
+    "end-to-end workflow-to-proof scenario",
     "Integration adapter model",
     "operation scenarios",
     "Recovery drills",

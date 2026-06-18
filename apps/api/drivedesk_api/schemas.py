@@ -474,5 +474,6 @@ class PublicDemoRead(BaseModel):
     engineeringProof: dict[str, Any]
     workflow: dict[str, Any]
     workflowScenarios: list[dict[str, Any]]
+    endToEndScenario: dict[str, Any]
     timeline: list[dict[str, str]]
     domainEvents: list[dict[str, str]]

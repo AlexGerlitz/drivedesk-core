@@ -72,6 +72,7 @@ for token in [
     "Auth and tenant boundary",
     "Business workflow",
     "reusable workflow scenarios",
+    "end-to-end workflow-to-proof scenario",
     "Integration hub",
     "operation scenarios",
     "typed SDK operation plans",

@@ -8,14 +8,14 @@ want to verify the project shape before reading the full documentation set.
 | Step | Inspect | What it proves |
 | --- | --- | --- |
 | 1 | GitHub Pages root review hub | The public entrypoint is published and wired to demo, CI, OpenAPI, docs, and evidence. |
-| 2 | Public demo Operations, Incidents, and Proof tabs | The demo is not a static screenshot; it exposes operational contracts, incidents, and proof payloads. |
+| 2 | Public demo Workflow, Operations, Incidents, and Proof tabs; Public demo Operations, Incidents, and Proof tabs | The demo is not a static screenshot; it exposes an end-to-end workflow-to-proof path, operational contracts, incidents, and proof payloads. |
 | 3 | `docs/public/PROJECT_STATUS.md` | Current capability state, limits, and next work are explicit. |
 | 4 | `docs/public/TECHNICAL_CAPABILITY_MAP.md` | Each visible capability maps to implementation surface, evidence, and verifier commands. |
 | 5 | `docs/public/ENGINEERING_PROOF.md` | The proof tab, API payload, OpenAPI schema, SDK artifacts, and CI gates share one contract. |
 
 Pass criteria: the reviewer can identify the current architecture, public demo,
 API contract, SDK surface, observability evidence, incident response evidence,
-and release safety gates without private access.
+end-to-end scenario, and release safety gates without private access.
 
 ## 15-Minute Verification
 
@@ -70,6 +70,12 @@ Pass criteria: the repository proves a coherent engineering chain:
 
 ```text
 review hub -> demo -> API -> SDK -> workflow -> adapter -> observability -> incident -> release gate -> evidence
+```
+
+The fastest demo-specific chain is:
+
+```text
+approval -> notification -> adapter -> incident -> recovery -> proof
 ```
 
 ## Boundary

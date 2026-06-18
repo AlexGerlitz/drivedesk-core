@@ -80,6 +80,10 @@ require(
     static_payload.get("incidentResponse") == api_payload.get("incidentResponse"),
     "static and API incidentResponse payloads differ",
 )
+require(
+    static_payload.get("endToEndScenario") == api_payload.get("endToEndScenario"),
+    "static and API endToEndScenario payloads differ",
+)
 require(static_proof.get("milestone") == "engineering_70", "engineeringProof milestone mismatch")
 require(static_proof.get("status") == "validated", "engineeringProof status mismatch")
 require(len(static_proof.get("summary", [])) >= 4, "engineeringProof summary too short")
@@ -120,6 +124,37 @@ for item in static_proof.get("evidence", []):
     require(bool(item.get("summary")), f"evidence summary missing for {item_path}")
     require((root / item_path).exists(), f"evidence target missing: {item_path}")
 
+end_to_end = static_payload.get("endToEndScenario", {})
+require(
+    end_to_end.get("id") == "scenario-approval-notification-adapter-incident",
+    "endToEndScenario id mismatch",
+)
+require(end_to_end.get("status") == "reviewable", "endToEndScenario status mismatch")
+require(end_to_end.get("currentStep") == "incident_resolved", "endToEndScenario current step mismatch")
+chain = end_to_end.get("chain", [])
+require(isinstance(chain, list) and len(chain) >= 6, "endToEndScenario chain too short")
+chain_steps = {step.get("step") for step in chain if isinstance(step, dict)}
+require(
+    {"approval", "notification", "adapter", "incident", "recovery", "proof"}.issubset(chain_steps),
+    "endToEndScenario required steps missing",
+)
+chain_evidence = {step.get("evidence") for step in chain if isinstance(step, dict)}
+require(
+    {
+        "workflow.contract_approved",
+        "notification.manager_signature_task.created",
+        "integration.accounting_export.requested",
+        "integration.incident.status_changed",
+        "postcheck.gates.passed",
+        "docs/public/ENGINEERING_PROOF.md",
+    }.issubset(chain_evidence),
+    "endToEndScenario evidence chain missing",
+)
+require(
+    "docs/public/ENGINEERING_PROOF.md" in set(end_to_end.get("proof", [])),
+    "endToEndScenario proof list missing engineering proof doc",
+)
+
 available_or_generated_public_scripts = {
     "scripts/ci_smoke_public.sh",
 }
@@ -144,6 +179,8 @@ for token in [
     'id="incidentSummaryRows"',
     'id="incidentRows"',
     'id="incidentTimelineRows"',
+    'id="endToEndScenarioRows"',
+    'id="endToEndScenarioMeta"',
     'id="proofSummaryRows"',
     'id="proofGateRows"',
     'id="proofEvidenceRows"',
@@ -154,6 +191,8 @@ app = read_text(demo_app_path)
 for token in [
     "fillIncidentResponse",
     "payload.incidentResponse",
+    "fillEndToEndScenario",
+    "payload.endToEndScenario",
     "fillEngineeringProof",
     "payload.engineeringProof",
     "engineeringProof.summary",
@@ -169,6 +208,7 @@ require("engineeringProof" in required_fields, "OpenAPI PublicDemoRead does not 
 require("recoveryEvidence" in required_fields, "OpenAPI PublicDemoRead does not require recoveryEvidence")
 require("alertRouting" in required_fields, "OpenAPI PublicDemoRead does not require alertRouting")
 require("incidentResponse" in required_fields, "OpenAPI PublicDemoRead does not require incidentResponse")
+require("endToEndScenario" in required_fields, "OpenAPI PublicDemoRead does not require endToEndScenario")
 
 sdk_files = [
     root / "sdk/generated/public-demo/openapi-client-manifest.json",
@@ -181,6 +221,7 @@ for path in sdk_files:
     require("engineeringProof" in read_text(path), f"generated SDK file missing engineeringProof: {relative(path)}")
     require("alertRouting" in read_text(path), f"generated SDK file missing alertRouting: {relative(path)}")
     require("incidentResponse" in read_text(path), f"generated SDK file missing incidentResponse: {relative(path)}")
+    require("endToEndScenario" in read_text(path), f"generated SDK file missing endToEndScenario: {relative(path)}")
 
 require(
     "build_adapter_operation_plan" in read_text(root / "sdk/generated/public-demo/python/drivedesk_public_demo_client.py"),
@@ -205,6 +246,8 @@ for token in [
     "Backup and restore",
     "Release safety",
     "GitOps and IaC",
+    "approval -> notification -> adapter -> incident -> recovery -> proof",
+    "endToEndScenario",
     "adapter operation plan helpers",
     "docs/public/REVIEWER_QUICKSTART.md",
 ]:

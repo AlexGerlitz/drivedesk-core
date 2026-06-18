@@ -2164,6 +2164,11 @@
             "title": "Domainevents",
             "type": "array"
           },
+          "endToEndScenario": {
+            "additionalProperties": true,
+            "title": "Endtoendscenario",
+            "type": "object"
+          },
           "engineeringProof": {
             "additionalProperties": true,
             "title": "Engineeringproof",
@@ -2313,6 +2318,7 @@
           "engineeringProof",
           "workflow",
           "workflowScenarios",
+          "endToEndScenario",
           "timeline",
           "domainEvents"
         ],

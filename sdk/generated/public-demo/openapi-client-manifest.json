@@ -46,6 +46,7 @@
     "engineeringProof",
     "workflow",
     "workflowScenarios",
+    "endToEndScenario",
     "timeline",
     "domainEvents"
   ],

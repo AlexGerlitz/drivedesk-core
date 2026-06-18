@@ -26,6 +26,7 @@ export const REQUIRED_FIELDS = [
   "engineeringProof",
   "workflow",
   "workflowScenarios",
+  "endToEndScenario",
   "timeline",
   "domainEvents"
 ];

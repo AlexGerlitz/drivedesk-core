@@ -1,7 +1,7 @@
 // Generated from DriveDesk Core OpenAPI. Do not edit by hand.
 export const PUBLIC_DEMO_PATH: "/demo/public";
 export const OPERATION_ID: "public_demo_demo_public_get";
-export const REQUIRED_FIELDS: Array<"schemaVersion" | "generatedAt" | "dataSource" | "apiContract" | "tenant" | "health" | "metrics" | "workQueue" | "members" | "auditEvents" | "outbox" | "adapters" | "adapterScenarios" | "integrationJobs" | "integrationHealth" | "integrationReadiness" | "recoveryEvidence" | "alertRouting" | "incidentResponse" | "engineeringProof" | "workflow" | "workflowScenarios" | "timeline" | "domainEvents">;
+export const REQUIRED_FIELDS: Array<"schemaVersion" | "generatedAt" | "dataSource" | "apiContract" | "tenant" | "health" | "metrics" | "workQueue" | "members" | "auditEvents" | "outbox" | "adapters" | "adapterScenarios" | "integrationJobs" | "integrationHealth" | "integrationReadiness" | "recoveryEvidence" | "alertRouting" | "incidentResponse" | "engineeringProof" | "workflow" | "workflowScenarios" | "endToEndScenario" | "timeline" | "domainEvents">;
 
 export type AdapterScenarioPhase = "preview" | "execute" | "retry" | "operator_review";
 

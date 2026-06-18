@@ -13,7 +13,7 @@ implementation surface, evidence, and verifier commands.
 | Generated client SDK | Python, JavaScript, and TypeScript demo clients plus typed adapter operation plans | `docs/public/CLIENT_SDK.md`, `sdk/generated/public-demo/`, `examples/python/demo_adapter_operation_plan.py`, `examples/js/demo-adapter-operation-plan.mjs` | `bash scripts/check_public_demo_sdk.sh` |
 | Auth, RBAC, and tenant boundary | Bearer-token auth, tenant-scoped helpers, platform-admin model | `docs/public/AUTH_FOUNDATION.md`, `docs/public/TENANT_ISOLATION.md`, `docs/public/PLATFORM_ADMIN.md` | `bash scripts/ci_smoke_public.sh` |
 | Audit and outbox recovery | Audited retry path for failed outbox jobs | `docs/public/OUTBOX_RECOVERY.md`, `docs/adr/0030-outbox-retry-recovery.md` | `bash scripts/ci_smoke_public.sh` |
-| Business records and workflow automation | Tenant-owned records, lifecycle transitions, reusable workflow scenarios, workflow rules, action runs | `docs/public/BUSINESS_RECORDS.md`, `docs/public/BUSINESS_RECORD_LIFECYCLE.md`, `docs/public/WORKFLOW_RULES.md`, `docs/public/WORKFLOW_ACTION_RUNS.md`, `docs/public/WORKFLOW_DEMO.md` | `bash scripts/ci_smoke_public.sh && bash scripts/check_public_demo_api.sh` |
+| Business records and workflow automation | Tenant-owned records, lifecycle transitions, reusable workflow scenarios, end-to-end workflow-to-proof scenario, workflow rules, action runs | `docs/public/BUSINESS_RECORDS.md`, `docs/public/BUSINESS_RECORD_LIFECYCLE.md`, `docs/public/WORKFLOW_RULES.md`, `docs/public/WORKFLOW_ACTION_RUNS.md`, `docs/public/WORKFLOW_DEMO.md` | `bash scripts/ci_smoke_public.sh && bash scripts/check_public_demo_api.sh` |
 | Integration adapter model | Runtime adapter catalog, operation scenarios, typed SDK operation plans, mapping preview, scopes, diagnostics, reconciliation, incident cards | `docs/public/INTEGRATION_ADAPTER_CATALOG.md`, `docs/public/INTEGRATION_OPERATION_CONTRACTS.md`, `docs/public/INTEGRATION_RECONCILIATION.md`, `docs/public/CLIENT_SDK.md` | `bash scripts/check_public_demo_api.sh && bash scripts/check_public_demo_sdk.sh` |
 | Recovery drills | Synthetic backup/restore, rollback, canary gate, and staged promotion evidence | `docs/public/BACKUP_RESTORE_EVIDENCE.md`, `docs/public/RELEASE_ROLLBACK_EVIDENCE.md`, `docs/public/SLO_CANARY_GATE_EVIDENCE.md`, `docs/public/STAGED_PROMOTION_EVIDENCE.md` | `bash scripts/check_public_backup_restore.sh && bash scripts/check_public_release_rollback.sh && bash scripts/check_public_slo_canary_gate.sh && bash scripts/check_public_staged_promotion.sh` |
 | Observability proof | Metrics, structured logs, alert rules, runbooks, and dashboard panels represented as public-safe evidence | `docs/public/OBSERVABILITY_PROOF.md`, `docs/public/evidence/observability-proof.sanitized.json` | `bash scripts/check_public_observability_proof.sh` |
@@ -29,7 +29,7 @@ implementation surface, evidence, and verifier commands.
 
 1. Open `docs/public/REVIEWER_QUICKSTART.md`.
 2. Open the GitHub Pages root review hub.
-3. Open the live demo and switch to the Operations, Incidents, and Proof tabs.
+3. Open the live demo and switch to the Workflow, Operations, Incidents, and Proof tabs.
 4. Read `docs/public/PROJECT_STATUS.md`.
 5. Inspect `docs/openapi.json` and `GET /demo/public`.
 6. Run `bash scripts/ci_smoke_public.sh`.

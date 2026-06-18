@@ -152,6 +152,35 @@ assert scenario_by_id["scenario-contract-approval-sync"]["trigger"] == (
 ), demo
 assert scenario_by_id["scenario-signature-task"]["evidence"] == "workflow.task_record.created", demo
 assert scenario_by_id["scenario-accounting-export"]["status"] == "pending", demo
+end_to_end = demo["endToEndScenario"]
+assert end_to_end["id"] == "scenario-approval-notification-adapter-incident", demo
+assert end_to_end["status"] == "reviewable", demo
+assert end_to_end["currentStep"] == "incident_resolved", demo
+assert len(end_to_end["chain"]) >= 6, demo
+assert {step["step"] for step in end_to_end["chain"]} >= {
+    "approval",
+    "notification",
+    "adapter",
+    "incident",
+    "recovery",
+    "proof",
+}, demo
+assert {step["evidence"] for step in end_to_end["chain"]} >= {
+    "workflow.contract_approved",
+    "notification.manager_signature_task.created",
+    "integration.accounting_export.requested",
+    "integration.incident.status_changed",
+    "postcheck.gates.passed",
+    "docs/public/ENGINEERING_PROOF.md",
+}, demo
+assert set(end_to_end["proof"]) >= {
+    "workflow.contract_approved",
+    "notification.manager_signature_task.created",
+    "integration.accounting_export.requested",
+    "integration.incident.status_changed",
+    "postcheck.gates.passed",
+    "docs/public/ENGINEERING_PROOF.md",
+}, demo
 assert len(demo["timeline"]) >= 5, demo
 assert len(demo["domainEvents"]) >= 4, demo
 assert {event["event"] for event in demo["domainEvents"]} >= {

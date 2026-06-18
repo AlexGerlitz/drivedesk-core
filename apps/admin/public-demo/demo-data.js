@@ -1087,6 +1087,71 @@ window.DRIVEDESK_DEMO_DATA = {
       "evidence": "workflow.contract_sync.requested"
     }
   ],
+  "endToEndScenario": {
+    "id": "scenario-approval-notification-adapter-incident",
+    "title": "Approval to recovery proof",
+    "summary": "Synthetic path from contract approval through notification, adapter export, dead-letter incident, recovery, and public evidence.",
+    "status": "reviewable",
+    "currentStep": "incident_resolved",
+    "chain": [
+      {
+        "step": "approval",
+        "title": "Contract approved",
+        "owner": "Operations",
+        "state": "processed",
+        "source": "workflowScenarios.scenario-contract-approval-sync",
+        "evidence": "workflow.contract_approved"
+      },
+      {
+        "step": "notification",
+        "title": "Manager notification queued",
+        "owner": "Workflow engine",
+        "state": "ready",
+        "source": "workflowScenarios.scenario-signature-task",
+        "evidence": "notification.manager_signature_task.created"
+      },
+      {
+        "step": "adapter",
+        "title": "Accounting export requested",
+        "owner": "Integration hub",
+        "state": "retry",
+        "source": "workflowScenarios.scenario-accounting-export",
+        "evidence": "integration.accounting_export.requested"
+      },
+      {
+        "step": "incident",
+        "title": "Dead-letter incident opened",
+        "owner": "Operator",
+        "state": "acknowledged",
+        "source": "incidentResponse.incidents",
+        "evidence": "integration.incident.status_changed"
+      },
+      {
+        "step": "recovery",
+        "title": "Retry and postcheck completed",
+        "owner": "Operator",
+        "state": "resolved",
+        "source": "incidentResponse.recoveryActions",
+        "evidence": "postcheck.gates.passed"
+      },
+      {
+        "step": "proof",
+        "title": "Public evidence linked",
+        "owner": "Release gate",
+        "state": "validated",
+        "source": "engineeringProof.evidence",
+        "evidence": "docs/public/ENGINEERING_PROOF.md"
+      }
+    ],
+    "proof": [
+      "workflow.contract_approved",
+      "notification.manager_signature_task.created",
+      "integration.accounting_export.requested",
+      "integration.incident.status_changed",
+      "postcheck.gates.passed",
+      "docs/public/ENGINEERING_PROOF.md"
+    ]
+  },
   "timeline": [
     {
       "time": "09:16",

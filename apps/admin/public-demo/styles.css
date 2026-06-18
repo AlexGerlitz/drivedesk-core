@@ -353,6 +353,10 @@ h3 {
   margin-bottom: 18px;
 }
 
+.end-to-end-panel {
+  margin-bottom: 18px;
+}
+
 .adapter-scenario-panel {
   margin-bottom: 18px;
 }
@@ -461,6 +465,11 @@ td {
 }
 
 .workflow-scenario-row {
+  display: grid;
+  gap: 10px;
+}
+
+.end-to-end-row {
   display: grid;
   gap: 10px;
 }

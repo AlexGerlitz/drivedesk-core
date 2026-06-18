@@ -47,6 +47,9 @@
         payload.workflow &&
         Array.isArray(payload.workflow.stages) &&
         Array.isArray(payload.workflowScenarios) &&
+        payload.endToEndScenario &&
+        Array.isArray(payload.endToEndScenario.chain) &&
+        Array.isArray(payload.endToEndScenario.proof) &&
         Array.isArray(payload.timeline) &&
         Array.isArray(payload.domainEvents) &&
         Array.isArray(payload.adapterScenarios) &&
@@ -423,6 +426,35 @@
       evidence.appendChild(text(scenario.evidence));
 
       row.append(top, trigger, detail, outputs, evidence);
+      rows.appendChild(row);
+    });
+  }
+
+  function fillEndToEndScenario() {
+    var scenario = data.endToEndScenario;
+    var meta = document.getElementById("endToEndScenarioMeta");
+    meta.textContent = scenario.status + " - " + scenario.currentStep;
+
+    var rows = document.getElementById("endToEndScenarioRows");
+    clear(rows);
+    scenario.chain.forEach(function (step) {
+      var row = document.createElement("article");
+      row.className = "event-row end-to-end-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(step.title));
+      top.append(title, chip(step.state, statusTone(step.state)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(step.step + " - " + step.owner + " - " + step.source));
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(step.evidence));
+
+      row.append(top, detail, evidence);
       rows.appendChild(row);
     });
   }
@@ -884,6 +916,7 @@
     fillWorkQueue();
     fillWorkflow();
     fillWorkflowScenarios();
+    fillEndToEndScenario();
     fillWorkflowTimeline();
     fillDomainEvents();
     fillIntegrations();

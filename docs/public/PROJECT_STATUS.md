@@ -12,7 +12,7 @@ work so the repository can be reviewed without private operational context.
 | API contract | Read-only synthetic demo API and generated OpenAPI schema are present. | `docs/openapi.json`, `GET /demo/public`, `docs/public/API_BACKED_DEMO.md` | `bash scripts/check_public_demo_api.sh` |
 | Client SDK | Python, JavaScript, and TypeScript demo clients are generated from OpenAPI, including typed adapter operation helpers. | `docs/public/CLIENT_SDK.md`, `sdk/generated/public-demo/`, `examples/python/demo_adapter_operation_plan.py`, `examples/js/demo-adapter-operation-plan.mjs` | `bash scripts/check_public_demo_sdk.sh` |
 | Auth and tenant boundary | Public-safe auth, RBAC, platform-admin, and tenant-isolation contracts are documented and tested. | `docs/public/AUTH_FOUNDATION.md`, `docs/public/TENANT_ISOLATION.md`, `docs/public/PLATFORM_ADMIN.md` | `bash scripts/ci_smoke_public.sh` |
-| Business workflow | Tenant-owned business records, lifecycle transitions, reusable workflow scenarios, workflow rules, action runs, audit, and outbox handoff are covered. | `docs/public/BUSINESS_RECORDS.md`, `docs/public/WORKFLOW_RULES.md`, `docs/public/WORKFLOW_ACTION_RUNS.md`, `docs/public/WORKFLOW_DEMO.md` | `bash scripts/ci_smoke_public.sh && bash scripts/check_public_demo_api.sh` |
+| Business workflow | Tenant-owned business records, lifecycle transitions, reusable workflow scenarios, end-to-end workflow-to-proof scenario, workflow rules, action runs, audit, and outbox handoff are covered. | `docs/public/BUSINESS_RECORDS.md`, `docs/public/WORKFLOW_RULES.md`, `docs/public/WORKFLOW_ACTION_RUNS.md`, `docs/public/WORKFLOW_DEMO.md` | `bash scripts/ci_smoke_public.sh && bash scripts/check_public_demo_api.sh` |
 | Integration hub | Adapter catalog, mapping, scopes, operation scenarios, typed SDK operation plans, operation contracts, diagnostics, reconciliation, incident cards, and operator review are represented with public-safe providers. | `docs/public/INTEGRATION_ADAPTER_CATALOG.md`, `docs/public/INTEGRATION_OPERATION_CONTRACTS.md`, `docs/public/INTEGRATION_RECONCILIATION.md`, `docs/public/CLIENT_SDK.md` | `bash scripts/check_public_demo_api.sh && bash scripts/check_public_demo_sdk.sh` |
 | Recovery and release safety | Backup/restore, rollback, SLO canary gate, and staged promotion drills use sanitized synthetic evidence. | `docs/public/BACKUP_RESTORE_EVIDENCE.md`, `docs/public/RELEASE_ROLLBACK_EVIDENCE.md`, `docs/public/SLO_CANARY_GATE_EVIDENCE.md`, `docs/public/STAGED_PROMOTION_EVIDENCE.md` | `bash scripts/check_public_backup_restore.sh && bash scripts/check_public_release_rollback.sh && bash scripts/check_public_slo_canary_gate.sh && bash scripts/check_public_staged_promotion.sh` |
 | GitOps and IaC | Helm, Argo CD, OpenTofu, image automation, drift detection, and remediation are modeled with public-safe manifests and evidence. | `docs/public/GITOPS_DELIVERY.md`, `docs/public/GITOPS_IMAGE_AUTOMATION.md`, `docs/public/OPENTOFU_PLAN_EVIDENCE.md`, `docs/public/INFRA_STATE_DRIFT_EVIDENCE.md` | `bash scripts/check_public_helm_render.sh && bash scripts/check_public_gitops_layout.sh && bash scripts/check_public_opentofu_plan.sh && bash scripts/check_public_infra_state_drift.sh` |
@@ -39,8 +39,8 @@ work so the repository can be reviewed without private operational context.
 
 Longer public-safe direction lives in `docs/public/ROADMAP.md`.
 
-1. Expand scenario coverage with approval and notification variants on top of
-   the reusable workflow examples.
+1. Expand scenario coverage with additional notification variants on top of the
+   reusable workflow and end-to-end examples.
 2. Expand the public observability proof into richer synthetic dashboard
    examples.
 3. Deepen the admin frontend shell around the existing API and public demo

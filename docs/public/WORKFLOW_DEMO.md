@@ -15,6 +15,12 @@ The demo follows one operational path:
 lead -> student -> contract -> audit -> outbox -> integration sync
 ```
 
+It also exposes one reviewable end-to-end scenario:
+
+```text
+approval -> notification -> adapter -> incident -> recovery -> proof
+```
+
 That means DriveDesk does not only display records. It models the work as a
 sequence of state changes, evidence, events, and integration handoff.
 
@@ -30,6 +36,7 @@ Important fields:
 | `workflow` | Current workflow state, owner, and stages. |
 | `workflow.stages` | Human-readable business steps and their evidence. |
 | `workflowScenarios` | Reusable automation scenarios with trigger, action type, outputs, and evidence. |
+| `endToEndScenario` | One connected operational chain from approval to public proof evidence. |
 | `timeline` | Ordered user-facing activity history. |
 | `domainEvents` | Internal event stream between platform components. |
 | `auditEvents` | Reviewable action log. |
@@ -66,6 +73,25 @@ These scenarios are deliberately small. The important part is that a business
 state change can produce different controlled effects without bypassing audit,
 action-run history, outbox delivery, or operator-visible evidence.
 
+## End-To-End Scenario
+
+The demo includes `endToEndScenario` so one complete synthetic chain can be
+followed across the product and operations layers.
+
+| Step | Owner | State | Evidence |
+| --- | --- | --- | --- |
+| Approval | Operations | `processed` | `workflow.contract_approved` |
+| Notification | Workflow engine | `ready` | `notification.manager_signature_task.created` |
+| Adapter | Integration hub | `retry` | `integration.accounting_export.requested` |
+| Incident | Operator | `acknowledged` | `integration.incident.status_changed` |
+| Recovery | Operator | `resolved` | `postcheck.gates.passed` |
+| Proof | Release gate | `validated` | `docs/public/ENGINEERING_PROOF.md` |
+
+This is intentionally synthetic. The value is the contract shape: workflow
+automation can produce notifications and adapter work, adapter failures can
+become operator-visible incidents, incidents can be recovered through runbooks,
+and the result can be tied back to public-safe proof artifacts.
+
 ## Engineering Value
 
 This small workflow proves several platform ideas at once:
@@ -74,6 +100,8 @@ This small workflow proves several platform ideas at once:
 - the API owns the synthetic workflow payload;
 - reusable workflow scenarios can be represented as trigger -> action ->
   outputs -> evidence;
+- one end-to-end scenario connects approval, notification, adapter execution,
+  incident response, recovery, and proof evidence;
 - domain events are separate from user-facing timeline entries;
 - audit and outbox are visible parts of the product model;
 - integration work is treated as retryable background work;
@@ -84,4 +112,6 @@ This small workflow proves several platform ideas at once:
 DriveDesk models the process instead of only displaying records. A lead becomes
 a student, the contract step produces evidence, the audit trail records the
 change, workflow scenarios describe reusable automation, and the outbox prepares
-an integration sync. That is the foundation for larger automation later.
+an integration sync. The end-to-end scenario then shows how workflow output
+flows into notification, adapter, incident, recovery, and evidence layers. That
+is the foundation for larger automation later.

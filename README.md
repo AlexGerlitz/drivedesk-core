@@ -55,6 +55,9 @@ It maps the live demo, public CI, proof contract, OpenAPI, generated SDK,
 recovery drills, release gates, GitOps, OpenTofu, and public/private boundary
 into one short review path.
 
+Use `docs/public/TECHNICAL_CAPABILITY_MAP.md` when you need a direct
+capability-to-evidence matrix with verifier commands.
+
 ## Verification Path
 
 1. Open the live demo and switch to the Proof tab.
@@ -63,13 +66,14 @@ into one short review path.
 4. Run `bash scripts/check_public_engineering_proof.sh`.
 5. Run `bash scripts/check_public_demo_api.sh`.
 6. Run one generated client example from `examples/`.
-7. Review `docs/public/ENGINEERING_PROOF.md`, `docs/public/PORTFOLIO_70_MILESTONE.md`, and `docs/public/SANITIZED_EVIDENCE.md`.
+7. Review `docs/public/TECHNICAL_CAPABILITY_MAP.md`, `docs/public/ENGINEERING_PROOF.md`, `docs/public/PORTFOLIO_70_MILESTONE.md`, and `docs/public/SANITIZED_EVIDENCE.md`.
 8. Review `docs/public/SYSTEM_DESIGN.md`, `docs/public/GITOPS_DELIVERY.md`, and the recovery evidence docs.
 
 ## What To Review First
 
 - `docs/public/PORTFOLIO_CASE_STUDY.md` - engineering case study.
 - `docs/public/ENGINEERING_REVIEW_GUIDE.md` - short review path for demo, CI, API, recovery, GitOps, and IaC evidence.
+- `docs/public/TECHNICAL_CAPABILITY_MAP.md` - capability-to-evidence map with verifier commands.
 - `docs/public/ENGINEERING_PROOF.md` - proof tab payload, gates, evidence, and verifier contract.
 - `docs/public/SYSTEM_DESIGN.md` - system design overview.
 - `docs/public/API_BACKED_DEMO.md` - read-only synthetic demo API contract.
@@ -219,6 +223,7 @@ bash scripts/check_public_private_infra_scheduled_alerting.sh
 bash scripts/check_public_portfolio_70_milestone.sh
 bash scripts/check_public_review_guide.sh
 bash scripts/check_public_pages_entrypoint.sh
+bash scripts/check_public_technical_capability_map.sh
 bash scripts/check_public_engineering_proof.sh
 bash scripts/check_public_gitops_layout.sh
 bash scripts/check_public_gitops_image_automation.sh
@@ -257,6 +262,7 @@ bash scripts/check_public_private_infra_scheduled_alerting.sh
 bash scripts/check_public_portfolio_70_milestone.sh
 bash scripts/check_public_review_guide.sh
 bash scripts/check_public_pages_entrypoint.sh
+bash scripts/check_public_technical_capability_map.sh
 bash scripts/check_public_engineering_proof.sh
 bash scripts/check_public_gitops_layout.sh
 bash scripts/check_public_gitops_image_automation.sh

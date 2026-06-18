@@ -56,6 +56,7 @@ for token in [
     "Live demo Proof tab",
     "bash scripts/ci_smoke_public.sh",
     "bash scripts/check_public_review_guide.sh",
+    "bash scripts/check_public_technical_capability_map.sh",
     "bash scripts/check_public_engineering_proof.sh",
     "bash scripts/check_public_demo_api.sh",
     "bash scripts/check_public_demo_sdk.sh",
@@ -68,6 +69,7 @@ for token in [
     "docs/openapi.json",
     "GET /demo/public",
     "docs/public/SYSTEM_DESIGN.md",
+    "docs/public/TECHNICAL_CAPABILITY_MAP.md",
     "docs/public/ENGINEERING_PROOF.md",
     "docs/public/PORTFOLIO_CASE_STUDY.md",
     "docs/public/SANITIZED_EVIDENCE.md",
@@ -80,6 +82,10 @@ for token in [
 require(
     "ENGINEERING_REVIEW_GUIDE.md" in read(public_docs_readme_path),
     "docs/public README missing ENGINEERING_REVIEW_GUIDE.md",
+)
+require(
+    "TECHNICAL_CAPABILITY_MAP.md" in read(public_docs_readme_path),
+    "docs/public README missing TECHNICAL_CAPABILITY_MAP.md",
 )
 
 is_public_export = (root / "PUBLIC_EXPORT_MANIFEST.md").is_file()
@@ -106,6 +112,7 @@ if public_gate_path.is_file():
 
 for path in [
     "docs/public/SYSTEM_DESIGN.md",
+    "docs/public/TECHNICAL_CAPABILITY_MAP.md",
     "docs/public/ENGINEERING_PROOF.md",
     "docs/public/PORTFOLIO_CASE_STUDY.md",
     "docs/public/SANITIZED_EVIDENCE.md",

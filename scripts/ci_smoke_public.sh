@@ -24,6 +24,7 @@ bash scripts/check_public_demo_api.sh
 bash scripts/check_public_demo_sdk.sh
 bash scripts/check_public_backup_restore.sh
 bash scripts/check_public_release_rollback.sh
+bash scripts/check_public_slo_canary_gate.sh
 
 if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
   docker compose -f infra/docker/docker-compose.foundation.yml config --quiet

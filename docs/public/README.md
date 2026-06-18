@@ -38,6 +38,7 @@ credentials.
 - `OUTBOX_RECOVERY.md` - operator retry path for failed outbox events.
 - `BACKUP_RESTORE_EVIDENCE.md` - public-safe synthetic backup and restore drill.
 - `RELEASE_ROLLBACK_EVIDENCE.md` - public-safe bad-release rollback drill.
+- `SLO_CANARY_GATE_EVIDENCE.md` - public-safe SLO canary promotion gate drill.
 - `ARCHITECTURE_DIAGRAMS.md` - public-safe architecture diagrams.
 - `PUBLIC_DEMO_PLAN.md` - future live demo plan.
 - `ROADMAP.md` - public-safe engineering roadmap.
@@ -48,6 +49,8 @@ credentials.
   backup/restore evidence snapshot.
 - `evidence/release-rollback-drill.sanitized.json` - machine-readable synthetic
   release rollback evidence snapshot.
+- `evidence/slo-canary-gate.sanitized.json` - machine-readable synthetic SLO
+  canary gate evidence snapshot.
 - `assets/drivedesk-core-demo-overview.png` - public demo screenshot.
 
 The public repository export also generates:
@@ -72,6 +75,7 @@ The public repository export also generates:
 - `scripts/check_public_demo_api.sh` - local API contract and client-example smoke.
 - `scripts/check_public_backup_restore.sh` - public-safe synthetic recovery drill.
 - `scripts/check_public_release_rollback.sh` - public-safe release rollback drill.
+- `scripts/check_public_slo_canary_gate.sh` - public-safe SLO canary gate drill.
 - `scripts/generate_public_demo_sdk.py` - generated SDK builder from OpenAPI.
 - `scripts/check_public_demo_sdk.sh` - generated SDK drift and runtime smoke.
 - `sdk/generated/public-demo/` - generated Python, JavaScript, and TypeScript
@@ -121,9 +125,10 @@ https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 30. Read the outbox recovery overview.
 31. Read the backup and restore evidence overview.
 32. Read the release rollback evidence overview.
-33. Read the case study.
-34. Check CI and public demo health workflow results.
-35. Run the public smoke checks locally.
+33. Read the SLO canary gate evidence overview.
+34. Read the case study.
+35. Check CI and public demo health workflow results.
+36. Run the public smoke checks locally.
 
 ## Human Explanation
 

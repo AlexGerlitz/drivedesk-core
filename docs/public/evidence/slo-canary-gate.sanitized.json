@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "drill": "public_synthetic_slo_canary_gate",
+  "data_profile": "synthetic_fake_data",
+  "gate_model": "slo_canary_promotion_gate",
+  "slo": {
+    "availability_target_percent": 99.5,
+    "max_p95_latency_ms": 400,
+    "max_burn_rate": 1.0
+  },
+  "stable": {
+    "release_id": "stable-2026-06-18",
+    "availability_percent": 99.9,
+    "p95_latency_ms": 180,
+    "burn_rate": 0.2,
+    "gate_passed": true,
+    "violations": []
+  },
+  "candidate": {
+    "release_id": "candidate-2026-06-18",
+    "availability_percent": 98.2,
+    "p95_latency_ms": 620,
+    "burn_rate": 3.6,
+    "gate_passed": false,
+    "violations": [
+      "availability",
+      "p95_latency",
+      "error_budget_burn"
+    ]
+  },
+  "checks": {
+    "stable_baseline_within_slo": true,
+    "candidate_canary_evaluated": true,
+    "availability_violation_detected": true,
+    "latency_violation_detected": true,
+    "burn_rate_violation_detected": true,
+    "promotion_blocked": true,
+    "gate_audit_event_recorded": true,
+    "gate_decision_hash_recorded": true,
+    "candidate_metrics_hash_recorded": true,
+    "stable_metrics_hash_recorded": true,
+    "production_data_touched": false
+  },
+  "decision": {
+    "event_type": "release.canary_gate.blocked",
+    "promote": false,
+    "recommended_action": "keep stable release active and investigate candidate"
+  },
+  "artifacts": {
+    "stable_metrics_sha256_prefix_recorded": true,
+    "candidate_metrics_sha256_prefix_recorded": true,
+    "gate_audit_sha256_prefix_recorded": true,
+    "gate_decision_sha256_prefix_recorded": true
+  },
+  "redaction": {
+    "paths_included": false,
+    "hostnames_included": false,
+    "addresses_included": false,
+    "credentials_included": false,
+    "raw_logs_included": false,
+    "production_data_included": false
+  }
+}

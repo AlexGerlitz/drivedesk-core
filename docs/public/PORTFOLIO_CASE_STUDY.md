@@ -172,6 +172,10 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
 - Release rollback evidence now has a public-safe drill that promotes a bad
   candidate release, detects the readiness failure, rolls back to the stable
   release, and records `release.rollback.executed` evidence.
+- SLO canary gate evidence now has a public-safe drill that evaluates a
+  synthetic candidate against availability, p95 latency, and burn-rate
+  thresholds, blocks promotion, and records `release.canary_gate.blocked`
+  evidence.
 - Alertmanager currently uses an internal receiver; external notification
   routing is a later step.
 - The frontend is intentionally not the center of the current work; the backend
@@ -184,7 +188,7 @@ Recommended next slices:
 1. Broader generated API clients from OpenAPI for more endpoints.
 2. Additional mock adapters for webhook and accounting export flows.
 3. More workflow rule actions for notifications, approvals, and mapping-specific adapter jobs.
-4. More deployment evidence around SLO burn, canary gates, and staged promotion.
+4. More deployment evidence around staged promotion history and private runtime rollout checks.
 
 ## Interview Summary
 

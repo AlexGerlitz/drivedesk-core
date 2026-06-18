@@ -17,6 +17,7 @@ Implemented baseline:
 - manual and scheduled security audit workflow already present in the repo.
 - public-safe synthetic backup/restore drill for the exported Core surface.
 - public-safe synthetic release rollback drill for the exported Core surface.
+- public-safe synthetic SLO canary gate drill for the exported Core surface.
 
 What this gives us:
 
@@ -31,13 +32,15 @@ What this gives us:
   public repository.
 - bad-release rollback can be demonstrated without exposing private deployment
   targets.
+- bad candidates can be blocked by SLO-style promotion gates without exposing
+  private metrics or deployment targets.
 
 ## Next Layers
 
 Recommended next DevOps tasks:
 
-1. Add more deployment evidence around canary gates and SLO burn.
-2. Broaden generated client examples from the OpenAPI schema.
+1. Broaden generated client examples from the OpenAPI schema.
+2. Add staged promotion history evidence for the public release surface.
 3. Add a Helm chart skeleton after the compose contract is stable.
 4. Add Terraform/OpenTofu only after the target infrastructure shape is clear.
 

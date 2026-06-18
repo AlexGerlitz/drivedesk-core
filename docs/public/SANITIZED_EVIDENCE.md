@@ -24,6 +24,12 @@ Release rollback drill source file:
 docs/public/evidence/release-rollback-drill.sanitized.json
 ```
 
+SLO canary gate drill source file:
+
+```text
+docs/public/evidence/slo-canary-gate.sanitized.json
+```
+
 Verified signals:
 
 - CI completed successfully;
@@ -49,6 +55,11 @@ Verified signals:
 - the candidate readiness failure was detected;
 - rollback returned `current` to the stable release;
 - `release.rollback.executed` evidence was recorded.
+- the public synthetic SLO canary gate drill evaluated stable and candidate
+  release metrics;
+- availability, p95 latency, and error budget burn violations were detected;
+- candidate promotion was blocked;
+- `release.canary_gate.blocked` evidence was recorded.
 
 ## Human Explanation
 
@@ -67,6 +78,7 @@ The public version keeps only the operational shape and health results.
 - Evidence is machine-readable.
 - Backup/restore is checked through an executable public drill.
 - Bad-release rollback is checked through an executable public drill.
+- SLO canary promotion is checked through an executable public drill.
 
 ## What This Leaves Out
 

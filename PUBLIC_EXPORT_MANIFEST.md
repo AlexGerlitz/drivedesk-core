@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-18T03:29:10Z
+Generated at: 2026-06-18T03:50:40Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -93,6 +93,13 @@ Copied public-safe areas:
 - public release rollback check: candidate_health_failure_detected
 - public release rollback audit event: release.rollback.executed
 - public release rollback ADR: 0044-public-safe-release-rollback-drill
+- public SLO canary gate evidence doc
+- public SLO canary gate drill script: scripts/check_public_slo_canary_gate.sh
+- public SLO canary gate evidence snapshot: docs/public/evidence/slo-canary-gate.sanitized.json
+- public SLO canary gate check: promotion_blocked
+- public SLO canary gate check: burn_rate_violation_detected
+- public SLO canary gate audit event: release.canary_gate.blocked
+- public SLO canary gate ADR: 0045-public-safe-slo-canary-gate-drill
 - public tenant-owned repository helper surface
 - public auth observability alerting surface
 - public demo local run script

@@ -390,6 +390,24 @@ window.DRIVEDESK_DEMO_DATA = {
       "state": "success",
       "detail": "stable release healthy after rollback",
       "evidence": "stable_release_healthy_after_rollback"
+    },
+    {
+      "name": "SLO canary gate",
+      "state": "success",
+      "detail": "candidate release blocked before promotion",
+      "evidence": "release.canary_gate.blocked"
+    },
+    {
+      "name": "Promotion blocked",
+      "state": "success",
+      "detail": "availability, latency, and burn-rate violations detected",
+      "evidence": "promotion_blocked"
+    },
+    {
+      "name": "Error budget burn",
+      "state": "success",
+      "detail": "synthetic candidate exceeded the burn-rate threshold",
+      "evidence": "burn_rate_violation_detected"
     }
   ],
   "workflow": {

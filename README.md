@@ -79,9 +79,10 @@ It includes:
 31. Read `docs/public/OUTBOX_RECOVERY.md`.
 32. Read `docs/public/BACKUP_RESTORE_EVIDENCE.md`.
 33. Read `docs/public/RELEASE_ROLLBACK_EVIDENCE.md`.
-34. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
-35. Check `.github/workflows/ci.yml`.
-36. Run `bash scripts/ci_smoke_public.sh` locally.
+34. Read `docs/public/SLO_CANARY_GATE_EVIDENCE.md`.
+35. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
+36. Check `.github/workflows/ci.yml`.
+37. Run `bash scripts/ci_smoke_public.sh` locally.
 
 ## What To Review First
 
@@ -115,6 +116,7 @@ It includes:
 - `docs/public/OUTBOX_RECOVERY.md` - audited operator retry path for failed outbox jobs.
 - `docs/public/BACKUP_RESTORE_EVIDENCE.md` - public-safe synthetic backup and restore drill.
 - `docs/public/RELEASE_ROLLBACK_EVIDENCE.md` - public-safe bad-release rollback drill.
+- `docs/public/SLO_CANARY_GATE_EVIDENCE.md` - public-safe SLO canary promotion gate drill.
 - `docs/public/ARCHITECTURE_DIAGRAMS.md` - architecture diagrams.
 - `docs/public/SANITIZED_EVIDENCE.md` - sanitized staging evidence.
 - `docs/public/PUBLIC_DEMO_PLAN.md` - future public demo plan.
@@ -156,6 +158,7 @@ It includes:
 - `scripts/check_public_demo_sdk.sh` - generated SDK drift and runtime smoke.
 - `scripts/check_public_backup_restore.sh` - public-safe synthetic recovery drill.
 - `scripts/check_public_release_rollback.sh` - public-safe release rollback drill.
+- `scripts/check_public_slo_canary_gate.sh` - public-safe SLO canary gate drill.
 - `scripts/run_public_demo_local.sh` - one-command local API run.
 - `scripts/check_public_demo_api.sh` - local API contract and examples smoke.
 - `examples/curl/demo-public.sh` - curl client example.
@@ -183,6 +186,7 @@ bash scripts/check_public_demo_api.sh
 bash scripts/check_public_demo_sdk.sh
 bash scripts/check_public_backup_restore.sh
 bash scripts/check_public_release_rollback.sh
+bash scripts/check_public_slo_canary_gate.sh
 BASE_URL=http://localhost:8080 bash examples/curl/demo-public.sh
 BASE_URL=http://localhost:8080 python examples/python/demo_public_client.py
 BASE_URL=http://localhost:8080 node examples/js/demo-public-fetch.js
@@ -201,6 +205,7 @@ bash scripts/ci_smoke_public.sh
 bash scripts/check_public_demo_api.sh
 bash scripts/check_public_backup_restore.sh
 bash scripts/check_public_release_rollback.sh
+bash scripts/check_public_slo_canary_gate.sh
 ```
 
 ## Public Demo Shell
@@ -260,6 +265,7 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/public/OUTBOX_RECOVERY.md`
 - `docs/public/BACKUP_RESTORE_EVIDENCE.md`
 - `docs/public/RELEASE_ROLLBACK_EVIDENCE.md`
+- `docs/public/SLO_CANARY_GATE_EVIDENCE.md`
 - `docs/public/ARCHITECTURE_DIAGRAMS.md`
 - `docs/public/PUBLIC_DEMO_PLAN.md`
 - `docs/public/SANITIZED_EVIDENCE.md`
@@ -299,3 +305,4 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/adr/0042-integration-incident-runbooks.md`
 - `docs/adr/0043-public-safe-backup-restore-drill.md`
 - `docs/adr/0044-public-safe-release-rollback-drill.md`
+- `docs/adr/0045-public-safe-slo-canary-gate-drill.md`

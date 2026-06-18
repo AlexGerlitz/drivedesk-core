@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "check": "public_private_infra_scheduled_validation",
+  "data_profile": "sanitized_private_staging_summary",
+  "schedule_model": "recurring_private_infra_validation",
+  "source": {
+    "schedule_contract": "infra/state-validation/private-infra-scheduled-validation.sanitized.json",
+    "workflow": ".github/workflows/scheduled-validation.yml",
+    "post_remediation_drift_refresh": "infra/state-remediation/private-infra-post-remediation-drift-refresh.sanitized.json",
+    "post_remediation_drift_refresh_evidence": "docs/public/evidence/private-infra-post-remediation-drift-refresh.sanitized.json",
+    "remediation_execution": "infra/state-remediation/private-infra-remediation-execution.sanitized.json",
+    "remediation_execution_evidence": "docs/public/evidence/private-infra-remediation-execution.sanitized.json",
+    "validation_contract": "infra/state-validation/private-infra-validation.sanitized.json",
+    "validation_evidence": "docs/public/evidence/private-infra-validation.sanitized.json",
+    "runtime_rollout": "docs/public/evidence/runtime-rollout.sanitized.json",
+    "staging_evidence": "docs/public/evidence/de-staging-evidence.sanitized.json"
+  },
+  "environment": {
+    "name": "private_staging",
+    "public_route": false,
+    "production_data_touched": false
+  },
+  "scheduler": {
+    "schedule_id": "private-infra-scheduled-validation-2026-06-18",
+    "workflow_name": "Public Scheduled Validation",
+    "workflow_path": ".github/workflows/scheduled-validation.yml",
+    "cron_utc": "23 4 * * *",
+    "cadence": "daily",
+    "trigger_modes": [
+      "schedule",
+      "workflow_dispatch"
+    ],
+    "read_only": true,
+    "timeout_minutes": 12
+  },
+  "run_summary": {
+    "sampled_runs": 3,
+    "successful_runs": 3,
+    "failed_runs": 0,
+    "latest_run_within_slo": true,
+    "consecutive_successful_runs": 3,
+    "drift_status": "clean"
+  },
+  "checks": {
+    "schedule_contract_present": true,
+    "workflow_schedule_present": true,
+    "workflow_dispatch_present": true,
+    "scheduled_checker_runs": true,
+    "post_remediation_refresh_rechecked": true,
+    "secret_boundary_rechecked": true,
+    "sample_runs_recorded": true,
+    "missed_run_guard_recorded": true,
+    "read_only_schedule_recorded": true,
+    "no_apply_no_mutation": true,
+    "redaction_boundary_recorded": true,
+    "private_markers_absent": true,
+    "production_data_touched": false
+  },
+  "decision": {
+    "event_type": "infra.scheduled_validation.healthy",
+    "recommended_action": "continue_recurring_validation",
+    "automatic_public_apply": false,
+    "production_data_touched": false
+  },
+  "redaction": {
+    "paths_included": false,
+    "hostnames_included": false,
+    "addresses_included": false,
+    "credentials_included": false,
+    "raw_logs_included": false,
+    "request_bodies_included": false,
+    "production_data_included": false
+  }
+}

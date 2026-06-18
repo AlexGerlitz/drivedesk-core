@@ -84,6 +84,12 @@ Private infrastructure post-remediation drift refresh source file:
 docs/public/evidence/private-infra-post-remediation-drift-refresh.sanitized.json
 ```
 
+Private infrastructure scheduled validation source file:
+
+```text
+docs/public/evidence/private-infra-scheduled-validation.sanitized.json
+```
+
 GitOps layout validation source file:
 
 ```text
@@ -183,6 +189,12 @@ Verified signals:
 - the previously drifted observability and backup-storage components are marked
   resolved with no residual or accepted drift in the sanitized snapshot;
 - `infra.post_remediation_drift.clean` evidence is recorded.
+- the public private infrastructure scheduled validation evidence records a
+  recurring daily schedule, manual dispatch fallback, missed-run guard, and
+  three sampled successful runs;
+- the scheduled workflow rechecks post-remediation drift refresh and the public
+  secret boundary;
+- `infra.scheduled_validation.healthy` evidence is recorded.
 - the public GitOps delivery foundation contains Argo CD project, application,
   environment, and promotion metadata;
 - Argo CD applications reference the Helm chart path;
@@ -240,6 +252,8 @@ The public version keeps only the operational shape and health results.
   public validation.
 - Private infrastructure post-remediation drift refresh is checked through an
   executable public validation.
+- Private infrastructure scheduled validation is checked through an executable
+  public validation and a scheduled GitHub Actions workflow.
 - GitOps desired-state delivery is checked through an executable public
   validation.
 - GitOps image promotion and drift detection are checked through an executable

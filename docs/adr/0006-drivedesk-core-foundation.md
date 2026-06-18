@@ -53,3 +53,6 @@ tenant/audit database tables, Docker Compose, and CI smoke checks.
 - The post-remediation drift refresh layer records a read-only recheck after
   execution, resolved drift, no residual drift, no accepted drift, and no
   runtime mutation.
+- The scheduled validation layer records a recurring public-safe workflow,
+  manual dispatch fallback, missed-run guard, clean sample runs, and no runtime
+  mutation.

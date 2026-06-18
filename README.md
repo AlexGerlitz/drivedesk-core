@@ -89,13 +89,15 @@ It includes:
 41. Read `docs/public/PRIVATE_INFRA_REMEDIATION.md`.
 42. Read `docs/public/PRIVATE_INFRA_REMEDIATION_EXECUTION.md`.
 43. Read `docs/public/PRIVATE_INFRA_POST_REMEDIATION_DRIFT_REFRESH.md`.
-44. Read `docs/public/GITOPS_DELIVERY.md`.
-45. Read `docs/public/GITOPS_PROMOTION_DRIFT.md`.
-46. Read `docs/public/GITOPS_DRIFT_REMEDIATION.md`.
-47. Read `docs/public/GITOPS_IMAGE_AUTOMATION.md`.
-48. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
-49. Check `.github/workflows/ci.yml`.
-50. Run `bash scripts/ci_smoke_public.sh` locally.
+44. Read `docs/public/PRIVATE_INFRA_SCHEDULED_VALIDATION.md`.
+45. Read `docs/public/GITOPS_DELIVERY.md`.
+46. Read `docs/public/GITOPS_PROMOTION_DRIFT.md`.
+47. Read `docs/public/GITOPS_DRIFT_REMEDIATION.md`.
+48. Read `docs/public/GITOPS_IMAGE_AUTOMATION.md`.
+49. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
+50. Check `.github/workflows/ci.yml`.
+51. Check `.github/workflows/scheduled-validation.yml`.
+52. Run `bash scripts/ci_smoke_public.sh` locally.
 
 ## What To Review First
 
@@ -143,6 +145,7 @@ It includes:
 - `docs/public/PRIVATE_INFRA_REMEDIATION.md` - public-safe private infrastructure remediation plan evidence.
 - `docs/public/PRIVATE_INFRA_REMEDIATION_EXECUTION.md` - public-safe private infrastructure remediation execution evidence.
 - `docs/public/PRIVATE_INFRA_POST_REMEDIATION_DRIFT_REFRESH.md` - public-safe post-remediation drift refresh evidence.
+- `docs/public/PRIVATE_INFRA_SCHEDULED_VALIDATION.md` - public-safe recurring scheduled validation evidence.
 - `docs/public/ARCHITECTURE_DIAGRAMS.md` - architecture diagrams.
 - `docs/public/SANITIZED_EVIDENCE.md` - sanitized staging evidence.
 - `docs/public/PUBLIC_DEMO_PLAN.md` - future public demo plan.
@@ -194,6 +197,7 @@ It includes:
 - `scripts/check_public_private_infra_remediation.sh` - public-safe private infrastructure remediation plan validation.
 - `scripts/check_public_private_infra_remediation_execution.sh` - public-safe private infrastructure remediation execution validation.
 - `scripts/check_public_private_infra_post_remediation_drift_refresh.sh` - public-safe post-remediation drift refresh validation.
+- `scripts/check_public_private_infra_scheduled_validation.sh` - public-safe recurring scheduled validation.
 - `scripts/check_public_gitops_layout.sh` - public-safe GitOps layout validation.
 - `scripts/check_public_gitops_image_automation.sh` - public-safe GitOps image automation validation.
 - `scripts/check_public_gitops_promotion_drift.sh` - public-safe GitOps promotion and drift validation.
@@ -235,6 +239,7 @@ bash scripts/check_public_private_infra_validation.sh
 bash scripts/check_public_private_infra_remediation.sh
 bash scripts/check_public_private_infra_remediation_execution.sh
 bash scripts/check_public_private_infra_post_remediation_drift_refresh.sh
+bash scripts/check_public_private_infra_scheduled_validation.sh
 bash scripts/check_public_gitops_layout.sh
 bash scripts/check_public_gitops_image_automation.sh
 bash scripts/check_public_gitops_promotion_drift.sh
@@ -267,6 +272,7 @@ bash scripts/check_public_private_infra_validation.sh
 bash scripts/check_public_private_infra_remediation.sh
 bash scripts/check_public_private_infra_remediation_execution.sh
 bash scripts/check_public_private_infra_post_remediation_drift_refresh.sh
+bash scripts/check_public_private_infra_scheduled_validation.sh
 bash scripts/check_public_gitops_layout.sh
 bash scripts/check_public_gitops_image_automation.sh
 bash scripts/check_public_gitops_promotion_drift.sh

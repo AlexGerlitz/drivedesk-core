@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-18T08:02:57Z
+Generated at: 2026-06-18T08:27:53Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -175,6 +175,14 @@ Copied public-safe areas:
 - public private infrastructure post-remediation drift refresh check: no_residual_drift_recorded
 - public private infrastructure post-remediation drift refresh event: infra.post_remediation_drift.clean
 - public private infrastructure post-remediation drift refresh ADR: 0058-public-safe-private-infra-post-remediation-drift-refresh
+- public private infrastructure scheduled validation doc
+- public private infrastructure scheduled validation workflow: .github/workflows/scheduled-validation.yml
+- public private infrastructure scheduled validation script: scripts/check_public_private_infra_scheduled_validation.sh
+- public private infrastructure scheduled validation evidence snapshot: docs/public/evidence/private-infra-scheduled-validation.sanitized.json
+- public private infrastructure scheduled validation model: recurring_private_infra_validation
+- public private infrastructure scheduled validation check: missed_run_guard_recorded
+- public private infrastructure scheduled validation event: infra.scheduled_validation.healthy
+- public private infrastructure scheduled validation ADR: 0059-public-safe-private-infra-scheduled-validation
 - public GitOps delivery foundation doc
 - public GitOps path: infra/gitops
 - public GitOps validation script: scripts/check_public_gitops_layout.sh

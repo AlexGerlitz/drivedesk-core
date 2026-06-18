@@ -97,6 +97,16 @@ The check validates read-only drift refresh after reviewed execution, resolved
 components, no residual drift, no accepted drift, no apply, and no runtime
 mutation.
 
+Public-safe scheduled validation:
+
+```bash
+bash scripts/check_public_private_infra_scheduled_validation.sh
+```
+
+The check validates the recurring scheduled validation workflow, daily cron,
+manual dispatch fallback, missed-run guard, sample successful runs, secret
+boundary recheck, and no runtime mutation.
+
 Core endpoints:
 
 - `POST /auth/login`;

@@ -139,6 +139,8 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
         "post_remediation_validation_recorded",
         "infra.post_remediation_drift.clean",
         "no_residual_drift_recorded",
+        "infra.scheduled_validation.healthy",
+        "missed_run_guard_recorded",
     }
     assert len(payload["outbox"]) >= 3
     assert {event["status"] for event in payload["outbox"]} >= {"processed", "pending"}
@@ -188,6 +190,7 @@ def test_public_demo_api_scripts_and_examples_exist() -> None:
         "scripts/check_public_private_infra_remediation.sh",
         "scripts/check_public_private_infra_remediation_execution.sh",
         "scripts/check_public_private_infra_post_remediation_drift_refresh.sh",
+        "scripts/check_public_private_infra_scheduled_validation.sh",
         "scripts/check_public_gitops_layout.sh",
         "scripts/check_public_gitops_image_automation.sh",
         "scripts/check_public_gitops_promotion_drift.sh",
@@ -288,6 +291,12 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
             "read_only_refresh_recorded",
             "no_residual_drift_recorded",
             "infra.post_remediation_drift.clean",
+        ],
+        "scripts/check_public_private_infra_scheduled_validation.sh": [
+            "public_private_infra_scheduled_validation",
+            "workflow_schedule_present",
+            "missed_run_guard_recorded",
+            "infra.scheduled_validation.healthy",
         ],
         "scripts/check_public_gitops_layout.sh": [
             "public_gitops_layout",

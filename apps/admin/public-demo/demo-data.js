@@ -486,6 +486,18 @@ window.DRIVEDESK_DEMO_DATA = {
       "state": "success",
       "detail": "sanitized refresh records no residual or accepted drift",
       "evidence": "no_residual_drift_recorded"
+    },
+    {
+      "name": "Scheduled validation",
+      "state": "success",
+      "detail": "daily public-safe validation workflow is recorded",
+      "evidence": "infra.scheduled_validation.healthy"
+    },
+    {
+      "name": "Missed-run guard",
+      "state": "success",
+      "detail": "missed scheduled checks require operator review",
+      "evidence": "missed_run_guard_recorded"
     }
   ],
   "workflow": {

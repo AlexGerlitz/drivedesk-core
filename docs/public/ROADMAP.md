@@ -67,6 +67,8 @@ operations, or commercial details.
   production apply.
 - Public-safe post-remediation drift refresh evidence with resolved drift,
   read-only recheck, and no residual or accepted drift.
+- Public-safe recurring scheduled validation evidence with daily cron, manual
+  dispatch fallback, missed-run guard, and clean sample runs.
 - Public-safe GitOps delivery foundation with Argo CD layout validation.
 - Public-safe GitOps image promotion and drift detection evidence.
 - Public-safe GitOps drift remediation evidence with approval and rollback context.
@@ -79,7 +81,7 @@ operations, or commercial details.
   event, and outbox shape.
 - More public-safe evidence around local run, CI, OpenAPI, and demo health.
 - More adapter recovery examples with payload mapping and follow-up actions.
-- More deployment evidence around recurring scheduled validation.
+- More deployment evidence around scheduled validation alerting and notification routing.
 - Broader generated client SDK examples from the OpenAPI schema.
 
 ## Later

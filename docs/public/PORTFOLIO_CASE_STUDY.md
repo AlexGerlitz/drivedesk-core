@@ -219,6 +219,8 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
   recheck after execution, marks the previously drifted observability and
   backup-storage components resolved, and records no residual or accepted
   drift.
+- Private infrastructure scheduled validation now records a daily public-safe
+  workflow, manual fallback, missed-run guard, and three sampled clean runs.
 - GitOps delivery foundation now connects the Helm chart to Argo CD-style
   build, staging, canary, and production desired state.
 - GitOps image automation now records the image digest, SBOM, Trivy scan
@@ -233,7 +235,7 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
 
 Recommended next slices:
 
-1. Recurring scheduled validation evidence after post-remediation refresh.
+1. Scheduled validation alerting and notification evidence.
 2. Broader generated API clients from OpenAPI for more endpoints.
 3. Additional mock adapters for webhook and accounting export flows.
 4. More workflow rule actions for notifications, approvals, and mapping-specific adapter jobs.

@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "schedule_model": "recurring_private_infra_validation",
+  "data_profile": "sanitized_private_staging_summary",
+  "environment": {
+    "name": "private_staging",
+    "public_route": false,
+    "production_data_touched": false
+  },
+  "source_contracts": [
+    "infra/state-remediation/private-infra-post-remediation-drift-refresh.sanitized.json",
+    "docs/public/evidence/private-infra-post-remediation-drift-refresh.sanitized.json",
+    "infra/state-remediation/private-infra-remediation-execution.sanitized.json",
+    "docs/public/evidence/private-infra-remediation-execution.sanitized.json",
+    "infra/state-validation/private-infra-validation.sanitized.json",
+    "docs/public/evidence/private-infra-validation.sanitized.json",
+    "docs/public/evidence/runtime-rollout.sanitized.json",
+    "docs/public/evidence/de-staging-evidence.sanitized.json",
+    ".github/workflows/scheduled-validation.yml"
+  ],
+  "scheduler": {
+    "schedule_id": "private-infra-scheduled-validation-2026-06-18",
+    "workflow_name": "Public Scheduled Validation",
+    "workflow_path": ".github/workflows/scheduled-validation.yml",
+    "trigger_modes": [
+      "schedule",
+      "workflow_dispatch"
+    ],
+    "cron_utc": "23 4 * * *",
+    "cadence": "daily",
+    "max_expected_interval_hours": 26,
+    "timeout_minutes": 12,
+    "concurrency_group": "public-scheduled-validation",
+    "read_only": true,
+    "automatic_apply": false,
+    "public_apply": false,
+    "production_apply": false,
+    "production_data_touched": false
+  },
+  "scheduled_runs": [
+    {
+      "run_id": "scheduled-validation-2026-06-16",
+      "trigger": "schedule",
+      "status": "passed",
+      "checks": [
+        "private_infra_validation",
+        "post_remediation_drift_refresh",
+        "public_secret_boundary"
+      ],
+      "drift_status": "clean",
+      "duration_bucket": "under_10_minutes",
+      "production_data_touched": false
+    },
+    {
+      "run_id": "scheduled-validation-2026-06-17",
+      "trigger": "schedule",
+      "status": "passed",
+      "checks": [
+        "private_infra_validation",
+        "post_remediation_drift_refresh",
+        "public_secret_boundary"
+      ],
+      "drift_status": "clean",
+      "duration_bucket": "under_10_minutes",
+      "production_data_touched": false
+    },
+    {
+      "run_id": "scheduled-validation-2026-06-18",
+      "trigger": "workflow_dispatch",
+      "status": "passed",
+      "checks": [
+        "private_infra_validation",
+        "post_remediation_drift_refresh",
+        "public_secret_boundary"
+      ],
+      "drift_status": "clean",
+      "duration_bucket": "under_10_minutes",
+      "production_data_touched": false
+    }
+  ],
+  "missed_run_guard": {
+    "event_type": "infra.scheduled_validation.missed",
+    "latest_run_within_slo": true,
+    "max_expected_interval_hours": 26,
+    "consecutive_successful_runs": 3,
+    "alert_route": "operator_review",
+    "requires_investigation_on_miss": true
+  },
+  "boundaries": {
+    "no_public_apply": true,
+    "no_production_apply": true,
+    "no_opentofu_apply": true,
+    "no_gitops_sync": true,
+    "no_runtime_mutation": true,
+    "no_service_restart": true,
+    "no_raw_logs": true,
+    "no_request_bodies": true,
+    "no_credentials": true,
+    "no_private_paths": true,
+    "no_addresses": true,
+    "no_production_data": true
+  },
+  "decision": {
+    "event_type": "infra.scheduled_validation.healthy",
+    "recommended_action": "continue_recurring_validation",
+    "automatic_public_apply": false,
+    "production_data_touched": false
+  }
+}

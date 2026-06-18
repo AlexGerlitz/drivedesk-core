@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-18T12:41:20Z
+Generated at: 2026-06-18T13:01:35Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -208,6 +208,12 @@ Copied public-safe areas:
 - public observability proof evidence snapshot: docs/public/evidence/observability-proof.sanitized.json
 - public observability proof source snapshot: infra/observability/observability-proof.sanitized.json
 - public observability proof ADR: 0062-public-safe-observability-proof
+- public alert routing evidence doc
+- public alert routing evidence check: public_alert_routing_evidence
+- public alert routing validation script: scripts/check_public_alert_routing.sh
+- public alert routing evidence snapshot: docs/public/evidence/alert-routing.sanitized.json
+- public alert routing source snapshot: infra/observability/alert-routing.sanitized.json
+- public alert routing ADR: 0063-public-safe-alert-routing-evidence
 - public GitOps delivery foundation doc
 - public GitOps path: infra/gitops
 - public GitOps validation script: scripts/check_public_gitops_layout.sh

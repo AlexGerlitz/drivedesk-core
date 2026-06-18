@@ -17,6 +17,7 @@ implementation surface, evidence, and verifier commands.
 | Integration adapter model | Runtime adapter catalog, mapping preview, scopes, diagnostics, reconciliation, incident cards | `docs/public/INTEGRATION_ADAPTER_CATALOG.md`, `docs/public/INTEGRATION_OPERATION_CONTRACTS.md`, `docs/public/INTEGRATION_RECONCILIATION.md` | `bash scripts/check_public_demo_api.sh` |
 | Recovery drills | Synthetic backup/restore, rollback, canary gate, and staged promotion evidence | `docs/public/BACKUP_RESTORE_EVIDENCE.md`, `docs/public/RELEASE_ROLLBACK_EVIDENCE.md`, `docs/public/SLO_CANARY_GATE_EVIDENCE.md`, `docs/public/STAGED_PROMOTION_EVIDENCE.md` | `bash scripts/check_public_backup_restore.sh && bash scripts/check_public_release_rollback.sh && bash scripts/check_public_slo_canary_gate.sh && bash scripts/check_public_staged_promotion.sh` |
 | Observability proof | Metrics, structured logs, alert rules, runbooks, and dashboard panels represented as public-safe evidence | `docs/public/OBSERVABILITY_PROOF.md`, `docs/public/evidence/observability-proof.sanitized.json` | `bash scripts/check_public_observability_proof.sh` |
+| Alert routing | Alertmanager-style route tree, receivers, dedupe keys, escalation, silences, runbook bindings, and failure artifacts | `docs/public/ALERT_ROUTING_EVIDENCE.md`, `docs/public/evidence/alert-routing.sanitized.json` | `bash scripts/check_public_alert_routing.sh` |
 | GitOps delivery | Helm chart, Argo CD layout, image automation, drift and remediation evidence | `docs/public/HELM_CHART.md`, `docs/public/GITOPS_DELIVERY.md`, `docs/public/GITOPS_IMAGE_AUTOMATION.md`, `docs/public/GITOPS_DRIFT_REMEDIATION.md` | `bash scripts/check_public_helm_render.sh && bash scripts/check_public_gitops_layout.sh && bash scripts/check_public_gitops_image_automation.sh` |
 | OpenTofu and infra drift | Public-safe plan summary, state drift, runtime rollout, scheduled validation and alerting | `docs/public/OPENTOFU_PLAN_EVIDENCE.md`, `docs/public/INFRA_STATE_DRIFT_EVIDENCE.md`, `docs/public/PRIVATE_INFRA_SCHEDULED_VALIDATION.md`, `docs/public/PRIVATE_INFRA_SCHEDULED_ALERTING.md` | `bash scripts/check_public_opentofu_plan.sh && bash scripts/check_public_infra_state_drift.sh && bash scripts/check_public_private_infra_scheduled_validation.sh && bash scripts/check_public_private_infra_scheduled_alerting.sh` |
 | Sanitized evidence boundary | Public-safe evidence files with no raw logs, credentials, hostnames, addresses, or production data | `docs/public/SANITIZED_EVIDENCE.md`, `docs/public/evidence/*.sanitized.json`, `PUBLIC_EXPORT_MANIFEST.md` | `bash scripts/check_public_export_secrets.sh` |
@@ -32,7 +33,8 @@ implementation surface, evidence, and verifier commands.
 6. Run `bash scripts/check_public_project_status.sh`.
 7. Run `bash scripts/check_public_technical_capability_map.sh`.
 8. Run `bash scripts/check_public_observability_proof.sh`.
-9. Run the capability-specific verifier from the table above.
+9. Run `bash scripts/check_public_alert_routing.sh`.
+10. Run the capability-specific verifier from the table above.
 
 ## Boundary
 

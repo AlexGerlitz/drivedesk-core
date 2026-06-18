@@ -1,0 +1,194 @@
+{
+  "schema_version": 1,
+  "check": "public_alert_routing_evidence",
+  "routing_model": "alertmanager_style_route_tree",
+  "data_profile": "synthetic_fake_data",
+  "source": {
+    "observability_proof": "docs/public/evidence/observability-proof.sanitized.json",
+    "scheduled_alerting": "docs/public/evidence/private-infra-scheduled-alerting.sanitized.json"
+  },
+  "routes": [
+    {
+      "name": "platform-critical-page",
+      "matchers": {
+        "severity": "critical"
+      },
+      "receiver": "public-oncall-page",
+      "group_by": [
+        "alertname",
+        "service",
+        "stage"
+      ],
+      "group_wait_seconds": 30,
+      "group_interval_minutes": 5,
+      "repeat_interval_minutes": 30,
+      "escalation_minutes": 15,
+      "runbook_required": true,
+      "failure_artifact": "public-alert-routing-artifact"
+    },
+    {
+      "name": "platform-warning-ticket",
+      "matchers": {
+        "severity": "warning"
+      },
+      "receiver": "public-ticket-queue",
+      "group_by": [
+        "alertname",
+        "service",
+        "stage"
+      ],
+      "group_wait_seconds": 120,
+      "group_interval_minutes": 15,
+      "repeat_interval_minutes": 240,
+      "escalation_minutes": 60,
+      "runbook_required": true,
+      "failure_artifact": "public-alert-routing-artifact"
+    },
+    {
+      "name": "scheduled-validation-notice",
+      "matchers": {
+        "service": "scheduled-validation"
+      },
+      "receiver": "public-chat-notice",
+      "group_by": [
+        "alertname",
+        "service"
+      ],
+      "group_wait_seconds": 60,
+      "group_interval_minutes": 10,
+      "repeat_interval_minutes": 180,
+      "escalation_minutes": 45,
+      "runbook_required": true,
+      "failure_artifact": "public-scheduled-validation-alert"
+    }
+  ],
+  "receivers": [
+    {
+      "name": "public-oncall-page",
+      "channel_type": "synthetic_pager",
+      "external_secret_included": false,
+      "private_destination_included": false,
+      "payload_body_included": false
+    },
+    {
+      "name": "public-chat-notice",
+      "channel_type": "synthetic_chat",
+      "external_secret_included": false,
+      "private_destination_included": false,
+      "payload_body_included": false
+    },
+    {
+      "name": "public-ticket-queue",
+      "channel_type": "synthetic_ticket",
+      "external_secret_included": false,
+      "private_destination_included": false,
+      "payload_body_included": false
+    }
+  ],
+  "alert_bindings": [
+    {
+      "alert": "DriveDeskApiTargetDown",
+      "severity": "critical",
+      "service": "api",
+      "route": "platform-critical-page",
+      "owner": "platform",
+      "runbook": "docs/public/RUNTIME_ROLLOUT_EVIDENCE.md",
+      "dedupe_key": "alertname:service:stage",
+      "escalation_receiver": "public-ticket-queue"
+    },
+    {
+      "alert": "DriveDeskApiHighLatencyP95",
+      "severity": "warning",
+      "service": "api",
+      "route": "platform-warning-ticket",
+      "owner": "platform",
+      "runbook": "docs/public/SLO_CANARY_GATE_EVIDENCE.md",
+      "dedupe_key": "alertname:service:stage",
+      "escalation_receiver": "public-ticket-queue"
+    },
+    {
+      "alert": "DriveDeskIntegrationDeadLetters",
+      "severity": "warning",
+      "service": "integrations",
+      "route": "platform-warning-ticket",
+      "owner": "integrations",
+      "runbook": "docs/public/INTEGRATION_INCIDENT_RUNBOOKS.md",
+      "dedupe_key": "alertname:service:stage",
+      "escalation_receiver": "public-ticket-queue"
+    },
+    {
+      "alert": "DriveDeskAuthFailureSpike",
+      "severity": "critical",
+      "service": "auth",
+      "route": "platform-critical-page",
+      "owner": "security",
+      "runbook": "docs/public/AUTH_OBSERVABILITY.md",
+      "dedupe_key": "alertname:service:stage",
+      "escalation_receiver": "public-ticket-queue"
+    },
+    {
+      "alert": "DriveDeskScheduledValidationMissed",
+      "severity": "warning",
+      "service": "scheduled-validation",
+      "route": "scheduled-validation-notice",
+      "owner": "platform",
+      "runbook": "docs/public/PRIVATE_INFRA_SCHEDULED_ALERTING.md",
+      "dedupe_key": "alertname:service",
+      "escalation_receiver": "public-ticket-queue"
+    }
+  ],
+  "runbook_contract": {
+    "required_fields": [
+      "alert",
+      "severity",
+      "service",
+      "owner",
+      "first_action",
+      "evidence_artifact",
+      "rollback_or_mitigation"
+    ],
+    "raw_logs_required": false,
+    "request_body_required": false,
+    "private_runtime_access_required": false,
+    "sanitized_evidence_required": true
+  },
+  "silence_contract": {
+    "planned_maintenance_supported": true,
+    "required_matchers": [
+      "alertname",
+      "service",
+      "stage"
+    ],
+    "max_duration_minutes": 120,
+    "audit_event": "alert.silence.created",
+    "private_comment_required": false
+  },
+  "checks": {
+    "routes_present": true,
+    "receivers_present": true,
+    "critical_route_present": true,
+    "warning_route_present": true,
+    "scheduled_validation_route_present": true,
+    "alerts_bound_to_routes": true,
+    "runbooks_required": true,
+    "dedupe_keys_recorded": true,
+    "escalation_recorded": true,
+    "silence_contract_recorded": true,
+    "failure_artifacts_recorded": true,
+    "external_notification_secrets_absent": true,
+    "private_destinations_absent": true,
+    "payload_bodies_absent": true,
+    "public_docs_linked": true,
+    "private_markers_absent": true,
+    "production_data_touched": false
+  },
+  "redaction": {
+    "paths_included": false,
+    "hostnames_included": false,
+    "addresses_included": false,
+    "credentials_included": false,
+    "raw_logs_included": false,
+    "request_bodies_included": false,
+    "production_data_included": false
+  }
+}

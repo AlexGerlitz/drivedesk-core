@@ -12,6 +12,7 @@ infrastructure, production history, customer data, or operational credentials.
 - `TECHNICAL_CAPABILITY_MAP.md` - capability-to-evidence map with verifier commands.
 - `ENGINEERING_PROOF.md` - proof tab payload, gates, evidence, and verifier contract.
 - `OBSERVABILITY_PROOF.md` - public-safe metrics, logs, alerts, and dashboard evidence.
+- `ALERT_ROUTING_EVIDENCE.md` - public-safe alert routing, dedupe, escalation, and silence evidence.
 - `SYSTEM_DESIGN.md` - public-safe system design overview.
 - `API_BACKED_DEMO.md` - read-only synthetic API contract for the public demo.
 - `WORKFLOW_DEMO.md` - synthetic business workflow, timeline, events, audit,
@@ -105,6 +106,8 @@ infrastructure, production history, customer data, or operational credentials.
   image automation evidence snapshot.
 - `evidence/observability-proof.sanitized.json` - machine-readable public-safe
   observability evidence snapshot.
+- `evidence/alert-routing.sanitized.json` - machine-readable public-safe alert
+  routing evidence snapshot.
 - `assets/drivedesk-core-demo-overview.png` - public demo screenshot.
 
 The public repository export also generates:
@@ -145,6 +148,7 @@ The public repository export also generates:
 - `scripts/check_public_project_status.sh` - public-safe project status validation.
 - `scripts/check_public_technical_capability_map.sh` - public-safe capability map validation.
 - `scripts/check_public_observability_proof.sh` - public-safe observability proof validation.
+- `scripts/check_public_alert_routing.sh` - public-safe alert routing validation.
 - `scripts/check_public_engineering_proof.sh` - public-safe proof tab and evidence contract validation.
 - `scripts/check_public_gitops_layout.sh` - public-safe GitOps layout validation.
 - `scripts/check_public_gitops_image_automation.sh` - public-safe GitOps image automation validation.
@@ -173,7 +177,7 @@ https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 4. Run `bash scripts/check_public_engineering_proof.sh`.
 5. Run `bash scripts/check_public_demo_api.sh`.
 6. Run one generated client example from `examples/`.
-7. Review `PROJECT_STATUS.md`, `TECHNICAL_CAPABILITY_MAP.md`, `OBSERVABILITY_PROOF.md`, `ENGINEERING_PROOF.md`, `PORTFOLIO_70_MILESTONE.md`, and `SANITIZED_EVIDENCE.md`.
+7. Review `PROJECT_STATUS.md`, `TECHNICAL_CAPABILITY_MAP.md`, `OBSERVABILITY_PROOF.md`, `ALERT_ROUTING_EVIDENCE.md`, `ENGINEERING_PROOF.md`, `PORTFOLIO_70_MILESTONE.md`, and `SANITIZED_EVIDENCE.md`.
 8. Review `SYSTEM_DESIGN.md`, `GITOPS_DELIVERY.md`, and the recovery evidence docs.
 
 ## Engineering Summary

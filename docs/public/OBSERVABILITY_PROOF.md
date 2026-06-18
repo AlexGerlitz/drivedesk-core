@@ -63,6 +63,7 @@ commands only.
 
 - `docs/public/AUTH_OBSERVABILITY.md`
 - `docs/public/INTEGRATION_OBSERVABILITY.md`
+- `docs/public/ALERT_ROUTING_EVIDENCE.md`
 - `docs/public/SLO_CANARY_GATE_EVIDENCE.md`
 - `docs/public/RUNTIME_ROLLOUT_EVIDENCE.md`
 - `docs/public/PRIVATE_INFRA_SCHEDULED_ALERTING.md`

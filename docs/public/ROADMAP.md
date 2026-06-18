@@ -78,6 +78,9 @@ Current status snapshot: `docs/public/PROJECT_STATUS.md`.
 - Public-safe observability proof (`docs/public/OBSERVABILITY_PROOF.md`)
   connecting metrics, structured logs, alerts, runbooks, dashboards, and
   sanitized evidence.
+- Public-safe alert routing evidence (`docs/public/ALERT_ROUTING_EVIDENCE.md`)
+  connecting Alertmanager-style routes, receivers, dedupe keys, escalation,
+  silences, runbooks, and sanitized evidence.
 - Public-safe GitOps delivery foundation with Argo CD layout validation.
 - Public-safe GitOps image promotion and drift detection evidence.
 - Public-safe GitOps drift remediation evidence with approval and rollback context.
@@ -90,15 +93,15 @@ Current status snapshot: `docs/public/PROJECT_STATUS.md`.
   event, and outbox shape.
 - More public-safe evidence around local run, CI, OpenAPI, and demo health.
 - More adapter recovery examples with payload mapping and follow-up actions.
-- More evidence around external notification adapters once private destinations
-  and secrets are intentionally configured outside the public surface.
+- More evidence around external notification adapters once destinations and
+  secrets are intentionally configured outside the public surface.
 - Broader generated client SDK examples from the OpenAPI schema.
 
 ## Later
 
 - Richer workflow automation examples with notification, approval, and mapping actions.
 - Integration adapter SDK examples.
-- Richer public observability examples with synthetic dashboard and alert-routing evidence.
+- Richer public observability examples with synthetic dashboard evidence.
 - Deeper admin frontend shell.
 
 ## Engineering Summary

@@ -59,6 +59,7 @@ for token in [
     "bash scripts/check_public_project_status.sh",
     "bash scripts/check_public_technical_capability_map.sh",
     "bash scripts/check_public_observability_proof.sh",
+    "bash scripts/check_public_alert_routing.sh",
     "bash scripts/check_public_engineering_proof.sh",
     "bash scripts/check_public_demo_api.sh",
     "bash scripts/check_public_demo_sdk.sh",
@@ -74,6 +75,7 @@ for token in [
     "docs/public/PROJECT_STATUS.md",
     "docs/public/TECHNICAL_CAPABILITY_MAP.md",
     "docs/public/OBSERVABILITY_PROOF.md",
+    "docs/public/ALERT_ROUTING_EVIDENCE.md",
     "docs/public/ENGINEERING_PROOF.md",
     "docs/public/PORTFOLIO_CASE_STUDY.md",
     "docs/public/SANITIZED_EVIDENCE.md",
@@ -98,6 +100,10 @@ require(
 require(
     "OBSERVABILITY_PROOF.md" in read(public_docs_readme_path),
     "docs/public README missing OBSERVABILITY_PROOF.md",
+)
+require(
+    "ALERT_ROUTING_EVIDENCE.md" in read(public_docs_readme_path),
+    "docs/public README missing ALERT_ROUTING_EVIDENCE.md",
 )
 
 is_public_export = (root / "PUBLIC_EXPORT_MANIFEST.md").is_file()
@@ -127,6 +133,7 @@ for path in [
     "docs/public/PROJECT_STATUS.md",
     "docs/public/TECHNICAL_CAPABILITY_MAP.md",
     "docs/public/OBSERVABILITY_PROOF.md",
+    "docs/public/ALERT_ROUTING_EVIDENCE.md",
     "docs/public/ENGINEERING_PROOF.md",
     "docs/public/PORTFOLIO_CASE_STUDY.md",
     "docs/public/SANITIZED_EVIDENCE.md",

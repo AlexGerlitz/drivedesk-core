@@ -277,6 +277,7 @@
         <a class="button" href="docs/public/PROJECT_STATUS.md">Status</a>
         <a class="button" href="docs/public/TECHNICAL_CAPABILITY_MAP.md">Capability Map</a>
         <a class="button" href="docs/public/OBSERVABILITY_PROOF.md">Observability</a>
+        <a class="button" href="docs/public/ALERT_ROUTING_EVIDENCE.md">Alert Routing</a>
         <a class="button" href="docs/openapi.json">OpenAPI</a>
         <a class="button" href="https://github.com/AlexGerlitz/drivedesk-core/actions/workflows/ci.yml">CI</a>
       </nav>
@@ -298,6 +299,7 @@
             <a class="button" href="docs/public/PROJECT_STATUS.md">Project Status</a>
             <a class="button" href="docs/public/TECHNICAL_CAPABILITY_MAP.md">Capability Map</a>
             <a class="button" href="docs/public/OBSERVABILITY_PROOF.md">Observability</a>
+            <a class="button" href="docs/public/ALERT_ROUTING_EVIDENCE.md">Alert Routing</a>
             <a class="button" href="docs/public/ENGINEERING_PROOF.md">Proof Contract</a>
           </div>
           <div class="status-strip" aria-label="Engineering status">
@@ -330,6 +332,11 @@
           <a href="docs/public/OBSERVABILITY_PROOF.md">Open observability</a>
         </article>
         <article class="card">
+          <h2>Alert routing</h2>
+          <p>Alertmanager-style routes, receivers, dedupe keys, escalation, silence contract, and runbook bindings.</p>
+          <a href="docs/public/ALERT_ROUTING_EVIDENCE.md">Open alert routing</a>
+        </article>
+        <article class="card">
           <h2>API and SDK</h2>
           <p>Read-only public demo API with generated Python, JavaScript, and TypeScript client artifacts.</p>
           <a href="docs/public/API_BACKED_DEMO.md">Open API notes</a>
@@ -359,6 +366,7 @@ bash scripts/check_public_pages_entrypoint.sh
 bash scripts/check_public_project_status.sh
 bash scripts/check_public_technical_capability_map.sh
 bash scripts/check_public_observability_proof.sh
+bash scripts/check_public_alert_routing.sh
 bash scripts/check_public_review_guide.sh
 bash scripts/check_public_engineering_proof.sh
 bash scripts/check_public_demo_api.sh</code></pre>

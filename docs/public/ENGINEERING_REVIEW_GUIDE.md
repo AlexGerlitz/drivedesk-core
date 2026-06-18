@@ -10,17 +10,19 @@ prove the current engineering surface.
 | --- | --- | --- |
 | 1 | Live demo Proof tab | `engineeringProof` payload with gates and evidence |
 | 2 | Root CI badge | `bash scripts/ci_smoke_public.sh` |
-| 3 | Proof contract | `bash scripts/check_public_engineering_proof.sh` |
-| 4 | API contract | `docs/openapi.json` and `GET /demo/public` |
-| 5 | Capability map | `docs/public/TECHNICAL_CAPABILITY_MAP.md` |
-| 6 | Recovery and release safety | backup/restore, rollback, canary, staged promotion checks |
-| 7 | Infrastructure story | Helm, GitOps, OpenTofu, drift, and sanitized runtime evidence |
+| 3 | Project status | `docs/public/PROJECT_STATUS.md` |
+| 4 | Proof contract | `bash scripts/check_public_engineering_proof.sh` |
+| 5 | API contract | `docs/openapi.json` and `GET /demo/public` |
+| 6 | Capability map | `docs/public/TECHNICAL_CAPABILITY_MAP.md` |
+| 7 | Recovery and release safety | backup/restore, rollback, canary, staged promotion checks |
+| 8 | Infrastructure story | Helm, GitOps, OpenTofu, drift, and sanitized runtime evidence |
 
 ## Review Commands
 
 ```bash
 bash scripts/ci_smoke_public.sh
 bash scripts/check_public_review_guide.sh
+bash scripts/check_public_project_status.sh
 bash scripts/check_public_technical_capability_map.sh
 bash scripts/check_public_engineering_proof.sh
 bash scripts/check_public_demo_api.sh
@@ -38,6 +40,7 @@ bash scripts/check_public_opentofu_plan.sh
 | Area | Evidence |
 | --- | --- |
 | System design | `docs/public/SYSTEM_DESIGN.md` |
+| Project status | `docs/public/PROJECT_STATUS.md` |
 | Public proof contract | `docs/public/ENGINEERING_PROOF.md` |
 | Capability map | `docs/public/TECHNICAL_CAPABILITY_MAP.md` |
 | Case study | `docs/public/PORTFOLIO_CASE_STUDY.md` |

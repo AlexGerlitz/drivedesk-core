@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-18T11:33:07Z
+Generated at: 2026-06-18T12:15:48Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -197,6 +197,9 @@ Copied public-safe areas:
 - public portfolio 70 milestone evidence snapshot: docs/public/evidence/portfolio-70-milestone.sanitized.json
 - public portfolio 70 milestone event: portfolio.milestone_70.reached
 - public portfolio 70 milestone ADR: 0061-public-safe-portfolio-70-milestone
+- public project status doc
+- public project status validation script: scripts/check_public_project_status.sh
+- public project status links current state, limits, next work, and verification
 - public technical capability map doc
 - public technical capability map validation script: scripts/check_public_technical_capability_map.sh
 - public technical capability map links capabilities to evidence and verifier commands

@@ -8,6 +8,7 @@ implementation surface, evidence, and verifier commands.
 | Capability | Implementation surface | Evidence | Verifier |
 | --- | --- | --- | --- |
 | Public review entrypoint | GitHub Pages root `index.html` and static demo shell | `docs/public/ENGINEERING_REVIEW_GUIDE.md`, `docs/public/ENGINEERING_PROOF.md` | `bash scripts/check_public_pages_entrypoint.sh` |
+| Project status | Current public-safe state, limits, next work, and validation commands | `docs/public/PROJECT_STATUS.md`, `docs/public/ROADMAP.md` | `bash scripts/check_public_project_status.sh` |
 | Read-only API contract | FastAPI `GET /demo/public` and generated `docs/openapi.json` | `docs/public/API_BACKED_DEMO.md`, `examples/curl/demo-public.sh` | `bash scripts/check_public_demo_api.sh` |
 | Generated client SDK | Python, JavaScript, and TypeScript demo clients | `docs/public/CLIENT_SDK.md`, `sdk/generated/public-demo/` | `bash scripts/check_public_demo_sdk.sh` |
 | Auth, RBAC, and tenant boundary | Bearer-token auth, tenant-scoped helpers, platform-admin model | `docs/public/AUTH_FOUNDATION.md`, `docs/public/TENANT_ISOLATION.md`, `docs/public/PLATFORM_ADMIN.md` | `bash scripts/ci_smoke_public.sh` |
@@ -24,10 +25,12 @@ implementation surface, evidence, and verifier commands.
 
 1. Open the GitHub Pages root review hub.
 2. Open the live demo and switch to the Proof tab.
-3. Inspect `docs/openapi.json` and `GET /demo/public`.
-4. Run `bash scripts/ci_smoke_public.sh`.
-5. Run `bash scripts/check_public_technical_capability_map.sh`.
-6. Run the capability-specific verifier from the table above.
+3. Read `docs/public/PROJECT_STATUS.md`.
+4. Inspect `docs/openapi.json` and `GET /demo/public`.
+5. Run `bash scripts/ci_smoke_public.sh`.
+6. Run `bash scripts/check_public_project_status.sh`.
+7. Run `bash scripts/check_public_technical_capability_map.sh`.
+8. Run the capability-specific verifier from the table above.
 
 ## Boundary
 

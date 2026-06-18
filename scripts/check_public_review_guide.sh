@@ -56,6 +56,7 @@ for token in [
     "Live demo Proof tab",
     "bash scripts/ci_smoke_public.sh",
     "bash scripts/check_public_review_guide.sh",
+    "bash scripts/check_public_project_status.sh",
     "bash scripts/check_public_technical_capability_map.sh",
     "bash scripts/check_public_engineering_proof.sh",
     "bash scripts/check_public_demo_api.sh",
@@ -69,6 +70,7 @@ for token in [
     "docs/openapi.json",
     "GET /demo/public",
     "docs/public/SYSTEM_DESIGN.md",
+    "docs/public/PROJECT_STATUS.md",
     "docs/public/TECHNICAL_CAPABILITY_MAP.md",
     "docs/public/ENGINEERING_PROOF.md",
     "docs/public/PORTFOLIO_CASE_STUDY.md",
@@ -82,6 +84,10 @@ for token in [
 require(
     "ENGINEERING_REVIEW_GUIDE.md" in read(public_docs_readme_path),
     "docs/public README missing ENGINEERING_REVIEW_GUIDE.md",
+)
+require(
+    "PROJECT_STATUS.md" in read(public_docs_readme_path),
+    "docs/public README missing PROJECT_STATUS.md",
 )
 require(
     "TECHNICAL_CAPABILITY_MAP.md" in read(public_docs_readme_path),
@@ -112,6 +118,7 @@ if public_gate_path.is_file():
 
 for path in [
     "docs/public/SYSTEM_DESIGN.md",
+    "docs/public/PROJECT_STATUS.md",
     "docs/public/TECHNICAL_CAPABILITY_MAP.md",
     "docs/public/ENGINEERING_PROOF.md",
     "docs/public/PORTFOLIO_CASE_STUDY.md",

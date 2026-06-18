@@ -57,6 +57,7 @@ for token in [
     "Technical Capability Map",
     "Capability Matrix",
     "Public review entrypoint",
+    "Project status",
     "Read-only API contract",
     "Generated client SDK",
     "Auth, RBAC, and tenant boundary",
@@ -70,9 +71,12 @@ for token in [
     "Engineering proof contract",
     "docs/openapi.json",
     "GET /demo/public",
+    "docs/public/PROJECT_STATUS.md",
+    "docs/public/ROADMAP.md",
     "PUBLIC_EXPORT_MANIFEST.md",
     "docs/public/evidence/*.sanitized.json",
     "bash scripts/ci_smoke_public.sh",
+    "bash scripts/check_public_project_status.sh",
     "bash scripts/check_public_pages_entrypoint.sh",
     "bash scripts/check_public_demo_api.sh",
     "bash scripts/check_public_demo_sdk.sh",
@@ -94,6 +98,7 @@ for token in [
 
 target_paths = [
     "docs/public/ENGINEERING_REVIEW_GUIDE.md",
+    "docs/public/PROJECT_STATUS.md",
     "docs/public/ENGINEERING_PROOF.md",
     "docs/public/API_BACKED_DEMO.md",
     "docs/public/CLIENT_SDK.md",
@@ -121,6 +126,7 @@ target_paths = [
     "docs/public/PRIVATE_INFRA_SCHEDULED_VALIDATION.md",
     "docs/public/PRIVATE_INFRA_SCHEDULED_ALERTING.md",
     "docs/public/SANITIZED_EVIDENCE.md",
+    "docs/public/ROADMAP.md",
 ]
 for path in target_paths:
     require(path in text, f"technical capability map missing target path {path}")

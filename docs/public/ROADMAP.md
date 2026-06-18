@@ -4,6 +4,8 @@ This roadmap is the public-safe engineering direction for DriveDesk Core. It
 describes the platform work without exposing private infrastructure, customer
 operations, or commercial details.
 
+Current status snapshot: `docs/public/PROJECT_STATUS.md`.
+
 ## Now
 
 - Core modular monolith foundation.

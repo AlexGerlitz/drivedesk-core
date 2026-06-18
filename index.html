@@ -274,6 +274,7 @@
       <nav class="topnav" aria-label="Review links">
         <a class="button primary" href="apps/admin/public-demo/">Open Demo</a>
         <a class="button" href="docs/public/ENGINEERING_REVIEW_GUIDE.md">Review Guide</a>
+        <a class="button" href="docs/public/PROJECT_STATUS.md">Status</a>
         <a class="button" href="docs/public/TECHNICAL_CAPABILITY_MAP.md">Capability Map</a>
         <a class="button" href="docs/openapi.json">OpenAPI</a>
         <a class="button" href="https://github.com/AlexGerlitz/drivedesk-core/actions/workflows/ci.yml">CI</a>
@@ -293,6 +294,7 @@
           <div class="action-row">
             <a class="button primary" href="apps/admin/public-demo/">Open Demo</a>
             <a class="button" href="docs/public/ENGINEERING_REVIEW_GUIDE.md">Read Review Guide</a>
+            <a class="button" href="docs/public/PROJECT_STATUS.md">Project Status</a>
             <a class="button" href="docs/public/TECHNICAL_CAPABILITY_MAP.md">Capability Map</a>
             <a class="button" href="docs/public/ENGINEERING_PROOF.md">Proof Contract</a>
           </div>
@@ -310,6 +312,11 @@
       </section>
 
       <section class="grid" aria-label="Evidence links">
+        <article class="card">
+          <h2>Project status</h2>
+          <p>Current public-safe engineering state, validated surface, limits, and next work in one page.</p>
+          <a href="docs/public/PROJECT_STATUS.md">Open status</a>
+        </article>
         <article class="card">
           <h2>Capability map</h2>
           <p>Maps each backend, platform, integration, recovery, GitOps, and IaC capability to evidence and verifier commands.</p>
@@ -330,11 +337,6 @@
           <p>Connects the demo Proof tab, API payload, OpenAPI schema, SDK artifacts, docs, and CI checks.</p>
           <a href="docs/public/ENGINEERING_PROOF.md">Open proof</a>
         </article>
-        <article class="card">
-          <h2>GitOps and IaC</h2>
-          <p>Helm chart, Argo CD layout, OpenTofu plan, drift detection, and remediation evidence.</p>
-          <a href="docs/public/GITOPS_DELIVERY.md">Open GitOps</a>
-        </article>
       </section>
 
       <div class="commands">
@@ -347,6 +349,7 @@
         </section>
         <pre><code>bash scripts/ci_smoke_public.sh
 bash scripts/check_public_pages_entrypoint.sh
+bash scripts/check_public_project_status.sh
 bash scripts/check_public_technical_capability_map.sh
 bash scripts/check_public_review_guide.sh
 bash scripts/check_public_engineering_proof.sh

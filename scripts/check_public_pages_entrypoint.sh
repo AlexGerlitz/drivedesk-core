@@ -57,6 +57,7 @@ if is_public_export:
         "Public Engineering Surface",
         "apps/admin/public-demo/",
         "docs/public/ENGINEERING_REVIEW_GUIDE.md",
+        "docs/public/PROJECT_STATUS.md",
         "docs/public/TECHNICAL_CAPABILITY_MAP.md",
         "docs/public/ENGINEERING_PROOF.md",
         "docs/openapi.json",
@@ -71,6 +72,7 @@ if is_public_export:
     for path in [
         "apps/admin/public-demo/index.html",
         "docs/public/ENGINEERING_REVIEW_GUIDE.md",
+        "docs/public/PROJECT_STATUS.md",
         "docs/public/TECHNICAL_CAPABILITY_MAP.md",
         "docs/public/ENGINEERING_PROOF.md",
         "docs/openapi.json",

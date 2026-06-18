@@ -51,5 +51,5 @@ production data.
 
 - The public project now demonstrates the control loop after GitOps manifests:
   promote, compare, detect drift, and keep rollback context.
-- The evidence remains synthetic and reviewer-readable.
+- The evidence remains synthetic and readable.
 - This is not a claim that a public cluster exists.

@@ -52,7 +52,7 @@ production data.
 
 - The public project now demonstrates the operational loop after CI, GitOps,
   and infrastructure planning.
-- The evidence remains sanitized and reviewer-readable.
+- The evidence remains sanitized and readable.
 - This is not a claim that the public repository can deploy to private staging.
   It is a public-safe proof of the private staging rollout model and evidence
   boundary.

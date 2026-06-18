@@ -15,8 +15,8 @@ which adapters can this DriveDesk runtime execute, and what contract do they exp
 ## Why It Exists
 
 Connection profiles let a tenant configure an adapter. The adapter catalog lets
-the admin UI, generated clients, smoke tests, and reviewers discover the adapter
-contract before creating a connection or enqueueing a job.
+the admin UI, generated clients, smoke tests, and public API discover the
+adapter contract before creating a connection or enqueueing a job.
 
 This removes hardcoded UI assumptions such as:
 

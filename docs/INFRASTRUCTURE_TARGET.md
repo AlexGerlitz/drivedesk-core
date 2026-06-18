@@ -46,7 +46,7 @@ Health endpoint:
 curl http://127.0.0.1:8080/health
 ```
 
-## What This Gives Us
+## Verified Outcomes
 
 - Local development no longer depends on the frozen RU server.
 - API, worker, PostgreSQL, and Redis can be started together.

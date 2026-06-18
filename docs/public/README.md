@@ -1,9 +1,8 @@
 # DriveDesk Public Engineering Surface
 
 This folder contains the public-safe engineering surface for DriveDesk. It is
-written so an external reviewer can understand the project without access to
-private infrastructure, production history, customer data, or operational
-credentials.
+written so the project can be inspected without access to private
+infrastructure, production history, customer data, or operational credentials.
 
 ## Documents
 
@@ -155,66 +154,21 @@ Hosted demo:
 https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 ```
 
-## Reviewer Path
+## Showcase Path
 
 1. Open the hosted demo.
-2. Review the generated OpenAPI schema.
-3. Run `bash scripts/check_public_demo_api.sh`.
-4. Run one client example from `examples/`.
-5. Read the API-backed demo overview.
-6. Read the workflow demo overview.
-7. Read the workflow action run overview.
-8. Read the auth foundation overview.
-9. Read the auth observability overview.
-10. Read the session revocation overview.
-11. Read the platform-admin overview.
-12. Read the tenant isolation overview.
-13. Read the business records overview.
-14. Read the business record lifecycle overview.
-15. Read the generated client SDK overview.
-16. Read the system design overview.
-17. Read the integration adapter catalog overview.
-18. Read the integration mapping validation overview.
-19. Read the integration mapping transform overview.
-20. Read the integration connection scopes overview.
-21. Read the integration operation contracts overview.
-22. Read the accounting export adapter overview.
-23. Read the integration connection diagnostics overview.
-24. Read the integration reconciliation overview.
-25. Read the integration incident runbooks overview.
-26. Read the integration operator review overview.
-27. Read the integration connections overview.
-28. Read the integration adapters overview.
-29. Read the integration observability overview.
-30. Read the outbox recovery overview.
-31. Read the backup and restore evidence overview.
-32. Read the release rollback evidence overview.
-33. Read the SLO canary gate evidence overview.
-34. Read the staged promotion evidence overview.
-35. Read the Helm chart foundation overview.
-36. Read the OpenTofu plan evidence overview.
-37. Read the infrastructure state drift evidence overview.
-38. Read the runtime rollout evidence overview.
-39. Read the private infrastructure validation overview.
-40. Read the private infrastructure remediation plan overview.
-41. Read the private infrastructure remediation execution overview.
-42. Read the post-remediation drift refresh overview.
-43. Read the recurring scheduled validation overview.
-44. Read the scheduled validation alerting overview.
-45. Read the 70 percent DevOps/platform milestone overview.
-46. Read the GitOps delivery foundation overview.
-47. Read the GitOps image automation overview.
-48. Read the GitOps promotion drift overview.
-49. Read the GitOps drift remediation overview.
-50. Read the case study.
-51. Check CI, scheduled validation, scheduled alerting, and public demo health workflow results.
-52. Run the public smoke checks locally.
+2. Inspect `docs/openapi.json`.
+3. Run `bash scripts/ci_smoke_public.sh`.
+4. Run `bash scripts/check_public_demo_api.sh`.
+5. Run one generated client example from `examples/`.
+6. Review `PORTFOLIO_70_MILESTONE.md` and `SANITIZED_EVIDENCE.md`.
+7. Review `SYSTEM_DESIGN.md`, `GITOPS_DELIVERY.md`, and the recovery evidence docs.
 
-## Human Explanation
+## Engineering Summary
 
-The private repository keeps building the real product. This folder is the
-clean explanation layer for hiring and public review: what was built, why it was
-built that way, what checks exist, and how the architecture can evolve.
+The private repository keeps building the product. This folder is the public
+engineering surface: demo, API contract, generated clients, architecture docs,
+sanitized evidence, and repeatable validation gates.
 
 The export release gate makes this repeatable. Instead of manually copying
 files, the private source builds a fresh public package, validates the schema,

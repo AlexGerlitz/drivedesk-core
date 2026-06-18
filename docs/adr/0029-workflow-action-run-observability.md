@@ -59,8 +59,8 @@ Metric labels must stay limited to `action_type` and `status`.
 
 - Operators can trace automation effects without scraping raw logs.
 - Workflow action history can be shown in admin UI later.
-- Public portfolio reviewers can see a real execution-history layer behind the
-  automation feature.
+- The public surface shows a real execution-history layer behind the automation
+  feature.
 - Metrics stay aggregate-only and avoid rule names, tenant ids, user ids, record
   ids, titles, external references, action payloads, and request bodies.
 - The first status is `created`; future worker-backed action execution can add

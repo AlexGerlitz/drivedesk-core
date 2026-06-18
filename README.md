@@ -45,62 +45,15 @@ It includes:
 
 ![DriveDesk Core demo overview](docs/public/assets/drivedesk-core-demo-overview.png)
 
-## Reviewer Path
+## Showcase Path
 
 1. Open the live demo.
-2. Review `docs/openapi.json`.
-3. Run `bash scripts/check_public_demo_api.sh`.
-4. Run one client example from `examples/`.
-5. Read `docs/public/API_BACKED_DEMO.md`.
-6. Read `docs/public/WORKFLOW_DEMO.md`.
-7. Read `docs/public/WORKFLOW_RULES.md`.
-8. Read `docs/public/WORKFLOW_ACTION_RUNS.md`.
-9. Read `docs/public/AUTH_FOUNDATION.md`.
-10. Read `docs/public/AUTH_OBSERVABILITY.md`.
-11. Read `docs/public/SESSION_REVOCATION.md`.
-12. Read `docs/public/PLATFORM_ADMIN.md`.
-13. Read `docs/public/TENANT_ISOLATION.md`.
-14. Read `docs/public/BUSINESS_RECORDS.md`.
-15. Read `docs/public/BUSINESS_RECORD_LIFECYCLE.md`.
-16. Read `docs/public/CLIENT_SDK.md`.
-17. Read `docs/public/INTEGRATION_ADAPTER_CATALOG.md`.
-18. Read `docs/public/INTEGRATION_MAPPING_VALIDATION.md`.
-19. Read `docs/public/INTEGRATION_MAPPING_TRANSFORM.md`.
-20. Read `docs/public/INTEGRATION_CONNECTION_SCOPES.md`.
-21. Read `docs/public/INTEGRATION_OPERATION_CONTRACTS.md`.
-22. Read `docs/public/INTEGRATION_ACCOUNTING_EXPORT.md`.
-23. Read `docs/public/INTEGRATION_CONNECTION_DIAGNOSTICS.md`.
-24. Read `docs/public/INTEGRATION_RECONCILIATION.md`.
-25. Read `docs/public/INTEGRATION_INCIDENT_RUNBOOKS.md`.
-26. Read `docs/public/INTEGRATION_OPERATOR_REVIEW.md`.
-27. Read `docs/public/INTEGRATION_CONNECTIONS.md`.
-28. Read `docs/public/SYSTEM_DESIGN.md`.
-29. Read `docs/public/INTEGRATION_ADAPTERS.md`.
-30. Read `docs/public/INTEGRATION_OBSERVABILITY.md`.
-31. Read `docs/public/OUTBOX_RECOVERY.md`.
-32. Read `docs/public/BACKUP_RESTORE_EVIDENCE.md`.
-33. Read `docs/public/RELEASE_ROLLBACK_EVIDENCE.md`.
-34. Read `docs/public/SLO_CANARY_GATE_EVIDENCE.md`.
-35. Read `docs/public/STAGED_PROMOTION_EVIDENCE.md`.
-36. Read `docs/public/HELM_CHART.md`.
-37. Read `docs/public/OPENTOFU_PLAN_EVIDENCE.md`.
-38. Read `docs/public/INFRA_STATE_DRIFT_EVIDENCE.md`.
-39. Read `docs/public/RUNTIME_ROLLOUT_EVIDENCE.md`.
-40. Read `docs/public/PRIVATE_INFRA_VALIDATION.md`.
-41. Read `docs/public/PRIVATE_INFRA_REMEDIATION.md`.
-42. Read `docs/public/PRIVATE_INFRA_REMEDIATION_EXECUTION.md`.
-43. Read `docs/public/PRIVATE_INFRA_POST_REMEDIATION_DRIFT_REFRESH.md`.
-44. Read `docs/public/PRIVATE_INFRA_SCHEDULED_VALIDATION.md`.
-45. Read `docs/public/PRIVATE_INFRA_SCHEDULED_ALERTING.md`.
-46. Read `docs/public/GITOPS_DELIVERY.md`.
-47. Read `docs/public/GITOPS_PROMOTION_DRIFT.md`.
-48. Read `docs/public/GITOPS_DRIFT_REMEDIATION.md`.
-49. Read `docs/public/GITOPS_IMAGE_AUTOMATION.md`.
-50. Read `docs/public/PORTFOLIO_70_MILESTONE.md`.
-51. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
-52. Check `.github/workflows/ci.yml`.
-53. Check `.github/workflows/scheduled-validation.yml`.
-54. Run `bash scripts/ci_smoke_public.sh` locally.
+2. Inspect `docs/openapi.json`.
+3. Run `bash scripts/ci_smoke_public.sh`.
+4. Run `bash scripts/check_public_demo_api.sh`.
+5. Run one generated client example from `examples/`.
+6. Review `docs/public/PORTFOLIO_70_MILESTONE.md` and `docs/public/SANITIZED_EVIDENCE.md`.
+7. Review `docs/public/SYSTEM_DESIGN.md`, `docs/public/GITOPS_DELIVERY.md`, and the recovery evidence docs.
 
 ## What To Review First
 

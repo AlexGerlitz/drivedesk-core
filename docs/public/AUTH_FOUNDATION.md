@@ -169,8 +169,8 @@ auth.token.admin_revoked
 platform_admin.granted
 ```
 
-This matters because auth is an operational surface. A reviewer can now see not
-only that access works, but that failed access, guard activation, and token
+This matters because auth is an operational surface. DriveDesk exposes not only
+that access works, but that failed access, guard activation, and token
 revocation are visible system events.
 
 ## Next Hardening

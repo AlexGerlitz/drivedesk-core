@@ -29,7 +29,7 @@ Add a public-safe 70 percent DevOps/platform milestone artifact:
 The milestone is split into seven evidence groups:
 
 - core platform foundation;
-- public reviewer surface;
+- public engineering surface;
 - CI and release safety;
 - IaC, packaging, and GitOps;
 - observability and SRE;
@@ -41,11 +41,10 @@ groups are present, complete, public-safe, and tied to executable gates.
 
 ## Consequences
 
-- The public repository gets a clear reviewer entry point for the 70 percent
+- The public repository gets a clear engineering entry point for the 70 percent
   DevOps/platform milestone.
 - The private repository keeps the real product and private operations.
 - The milestone is checked by automation instead of being a docs-only claim.
 - The artifact explicitly avoids claiming commercial SaaS completeness.
 - Future work can move from portfolio maturity toward product maturity without
   rewriting the public proof chain.
-

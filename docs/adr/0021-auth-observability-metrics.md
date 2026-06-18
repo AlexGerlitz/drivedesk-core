@@ -56,8 +56,8 @@ drivedesk_metrics_storage_available 0
 
 - Auth is now visible in the same Prometheus surface as API, readiness, outbox,
   and integration health.
-- Public reviewers can see that security-sensitive flows are observable without
-  seeing private runtime data.
+- The public surface shows that security-sensitive flows are observable without
+  exposing private runtime data.
 - The public demo and staging scrape path can keep returning Prometheus text
   even if storage-backed metrics are temporarily unavailable.
 - ADR-0022 adds alert rules and a runbook on top of these aggregate signals.

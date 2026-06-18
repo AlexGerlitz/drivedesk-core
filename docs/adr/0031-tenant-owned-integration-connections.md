@@ -77,7 +77,7 @@ Metric labels are limited to `adapter_key` and `status`.
 - DriveDesk now has a real tenant-owned integration profile layer.
 - Import jobs can be tied to explicit connection configuration.
 - Connection creation is audit-visible through `integration_connection.created`.
-- Public portfolio reviewers can see the adapter hub moving from hardcoded
-  jobs toward configurable integration profiles.
+- The public surface shows the adapter hub moving from hardcoded jobs toward
+  configurable integration profiles.
 - Secret management remains a separate future concern instead of being mixed
   into connection JSON.

@@ -115,7 +115,7 @@ POST /tenants/{tenant_id}/integration-reconciliations
 That path records whether safe provider-side evidence matches the outbox result
 without storing raw provider responses.
 
-## Human Explanation
+## Engineering Summary
 
 This is the difference between a background job system and an operable
 integration platform. When a future 1C, bank, KKT, webhook, or file-import

@@ -14,7 +14,7 @@ Can this platform prove that data can be backed up and restored?
 
 The private production and staging environments may contain operational details
 that must not be copied into the public repository. The public project still
-needs a repeatable recovery proof that reviewers can run locally and in CI.
+needs a repeatable recovery proof that runs locally and in CI.
 
 ## Decision
 
@@ -50,9 +50,9 @@ paths, hostnames, addresses, raw logs, credentials, or production data.
 
 ## Consequences
 
-- Reviewers can run a real recovery check without access to private systems.
+- The recovery check can run without access to private systems.
 - Public CI can prove the exported project has a working backup/restore
   contract.
 - The check uses current application models, so schema drift is caught.
 - The public drill is not a substitute for private production restore drills.
-  It is a safe reviewer-facing proof of the recovery pattern.
+  It is a public-safe proof of the recovery pattern.

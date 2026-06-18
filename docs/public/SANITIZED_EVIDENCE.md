@@ -238,13 +238,13 @@ Verified signals:
 - the proposal is pull-request-only and records
   `gitops.image_update.proposed` evidence.
 
-## Human Explanation
+## Engineering Summary
 
 The evidence proves that the project is not just code in a repository. A real
 staging runtime was deployed, checked, observed, and summarized by automation.
 The public version keeps only the operational shape and health results.
 
-## What This Shows
+## Verified Capabilities
 
 - CI/CD is wired end to end.
 - Health and readiness checks exist.
@@ -282,7 +282,7 @@ The public version keeps only the operational shape and health results.
 - GitOps drift remediation is checked through an executable public validation.
 - GitOps image automation is checked through an executable public validation.
 
-## What This Leaves Out
+## Redaction Boundary
 
 The public evidence omits raw logs, request bodies, private infrastructure
 labels, credentials, internal hostnames, and server-specific addresses.

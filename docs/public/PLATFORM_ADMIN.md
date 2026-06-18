@@ -107,9 +107,8 @@ Multi-tenant platforms fail when local roles accidentally become global roles.
 This model gives DriveDesk a clear platform boundary before adding more tenants,
 admin UI, billing, or customer-facing controls.
 
-For a portfolio reviewer, this proves the project is not only building CRUD
-endpoints. It is building the operational control plane that a SaaS platform
-needs.
+DriveDesk is not only building CRUD endpoints. It is building the operational
+control plane that a SaaS platform needs.
 
 ## Next Hardening
 

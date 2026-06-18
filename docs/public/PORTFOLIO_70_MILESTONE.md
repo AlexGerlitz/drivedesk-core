@@ -1,13 +1,13 @@
 # DriveDesk 70 Percent DevOps Platform Milestone
 
 This document records the public-safe completion model for the DriveDesk
-DevOps/platform portfolio milestone.
+DevOps/platform milestone.
 
 It does not claim that DriveDesk is a finished commercial SaaS product. It
-claims that the project has reached a serious portfolio-grade DevOps/platform
-foundation: code, tests, CI, release gates, recovery evidence, observability,
+claims that the project has reached a serious DevOps/platform foundation: code,
+tests, CI, release gates, recovery evidence, observability,
 infrastructure-as-code evidence, GitOps evidence, and a repeatable public
-reviewer surface.
+engineering surface.
 
 ## Evidence Snapshot
 
@@ -38,7 +38,7 @@ DevOps/platform milestone.
 | Group | Points | What It Proves |
 | --- | ---: | --- |
 | Core platform foundation | 10 | API, worker, modular monolith, tenants, RBAC, audit, outbox, workflow, and integration primitives exist. |
-| Public reviewer surface | 10 | A reviewer can inspect a safe demo, OpenAPI schema, generated clients, docs, and release gate. |
+| Public engineering surface | 10 | Safe demo, OpenAPI schema, generated clients, docs, and release gate are available. |
 | CI and release safety | 10 | Changes are tested, promoted, blocked, rolled back, and checked on schedule. |
 | IaC, packaging, and GitOps | 10 | Docker, Helm, OpenTofu, Kubernetes packaging, and Git-owned desired state are represented. |
 | Observability and SRE | 10 | Health, metrics, logs, alert names, runbooks, and evidence are part of the project. |
@@ -59,9 +59,9 @@ DevOps/platform milestone.
 - Prometheus collects metrics, and Grafana is the dashboard layer used to read
   those metrics.
 
-## What This Gives Us
+## Verified Outcomes
 
-This gives DriveDesk a strong engineering story:
+This records the current DriveDesk engineering state:
 
 - the platform can be built and tested;
 - the public version can be exported repeatedly;
@@ -86,16 +86,12 @@ Not claimed yet:
 - paid onboarding and billing;
 - long production incident history.
 
-## Human Explanation
+## Engineering Summary
 
-For a hiring conversation, this milestone means:
+DriveDesk is no longer only an idea or a simple bot. It has a platform
+foundation and a public-safe proof chain covering build pipelines,
+infrastructure, rollout safety, observability, recovery, security boundaries,
+and public/private separation.
 
-> DriveDesk is already strong enough to discuss as a DevOps/platform portfolio
-> project. It demonstrates how I think about build pipelines, infrastructure,
-> rollout safety, observability, recovery, security boundaries, public/private
-> separation, and reviewer-friendly evidence.
-
-It is not the end of the product. It is the point where the project is no longer
-only an idea or a simple bot. It has a platform foundation and a public-safe
-proof chain.
-
+This milestone is not the end of the product. It is the point where further work
+can move from DevOps/platform foundation toward product maturity.

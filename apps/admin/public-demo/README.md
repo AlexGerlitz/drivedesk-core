@@ -26,8 +26,8 @@ Validate the API contract and example clients:
 bash scripts/check_public_demo_api.sh
 ```
 
-The shell is intentionally small. It gives reviewers a visible product surface
-for the Core concepts that already exist in the backend:
+The shell is intentionally small. It gives the public repo a visible product
+surface for the Core concepts that already exist in the backend:
 
 - tenant;
 - users and roles;

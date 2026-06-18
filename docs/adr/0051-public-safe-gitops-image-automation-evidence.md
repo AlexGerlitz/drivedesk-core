@@ -50,5 +50,5 @@ or production data.
 
 - The public project now demonstrates how image automation connects CI output
   to GitOps promotion.
-- The evidence remains synthetic and reviewer-readable.
+- The evidence remains synthetic and readable.
 - This is not a claim that a public image was pushed to a live registry.

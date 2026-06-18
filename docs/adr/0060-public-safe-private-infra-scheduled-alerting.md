@@ -7,8 +7,8 @@ Accepted
 ## Context
 
 DriveDesk already records public-safe recurring scheduled validation evidence.
-That proves the validation loop exists, but reviewers also need to see what
-happens when the loop fails or goes stale.
+That proves the validation loop exists, but the public evidence also needs to
+record what happens when the loop fails or goes stale.
 
 The public repository must not expose private infrastructure details, alerting
 secrets, notification endpoints, raw logs, request bodies, or production data.
@@ -21,7 +21,7 @@ Add a public-safe scheduled alerting layer:
   records the `scheduled_validation_alerting` model, alert policy, signals,
   notification routes, runbook keys, and redaction boundaries;
 - `docs/public/evidence/private-infra-scheduled-alerting.sanitized.json`
-  exposes a sanitized reviewer-facing evidence snapshot;
+  exposes a sanitized public evidence snapshot;
 - `.github/workflows/scheduled-validation.yml` emits and uploads a sanitized
   failure artifact only when scheduled validation fails;
 - `scripts/check_public_private_infra_scheduled_alerting.sh` validates the

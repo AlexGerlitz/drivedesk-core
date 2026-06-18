@@ -78,7 +78,7 @@ evidence_points = sum(group.get("points", 0) for group in evidence_groups)
 
 expected_groups = {
     "core_platform_foundation",
-    "public_reviewer_surface",
+    "public_engineering_surface",
     "ci_release_safety",
     "iac_packaging_gitops",
     "observability_sre",
@@ -142,7 +142,7 @@ checks = {
         and contract.get("check") == "public_portfolio_70_milestone"
         and contract.get("milestone") == "devops_platform_portfolio_70"
         and contract.get("target", {}).get("current_milestone_percent") == 70
-        and contract.get("target", {}).get("portfolio_scope") == "devops_platform_engineering"
+        and contract.get("target", {}).get("engineering_scope") == "devops_platform_engineering"
     ),
     "completion_model_recorded": (
         contract.get("completion_model", {}).get("total_points_required") == 70
@@ -156,7 +156,7 @@ checks = {
         group_ids == expected_groups
         and evidence_group_ids == expected_groups
         and all(group.get("status") == "complete" for group in groups)
-        and all(group.get("human_value") for group in groups)
+        and all(group.get("engineering_value") for group in groups)
         and all(group.get("evidence") for group in groups)
         and all(group.get("checks") for group in groups)
     ),

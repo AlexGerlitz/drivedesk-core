@@ -85,9 +85,9 @@ The endpoint is read-only and fake-data only:
 - no credentials or server paths are returned;
 - GitHub Pages can still run without an API.
 
-## Human Explanation
+## Engineering Summary
 
-This is the first public frontend/backend contract. The static demo remains
-stable for reviewers, while the same UI can be pointed at the FastAPI endpoint
-to prove that the backend owns the demo payload shape, including workflow,
-timeline, domain event, audit, and outbox data.
+This is the first public frontend/backend contract. The static demo works
+without infrastructure, and the same UI can be pointed at the FastAPI endpoint
+to verify that the backend owns the demo payload shape: workflow, timeline,
+domain events, audit, and outbox data.

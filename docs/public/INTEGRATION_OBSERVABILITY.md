@@ -126,7 +126,7 @@ The public-safe operational contract is:
 - operator retry requests are audited;
 - the public demo shows Integration Health with fake data.
 
-## Human Explanation
+## Engineering Summary
 
 This is what makes integrations production-shaped. A basic adapter only moves
 data. A serious adapter also tells operators whether it is healthy, why it

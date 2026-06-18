@@ -35,7 +35,7 @@ Implemented baseline:
 - public-safe GitOps drift remediation planning for the exported Core surface.
 - public-safe GitOps image automation evidence for the exported Core surface.
 
-What this gives us:
+Verified outcomes:
 
 - broken imports are caught early;
 - tests run on every push;
@@ -81,8 +81,8 @@ What this gives us:
   scheduled loop is missed or fails: GitHub Actions failure artifact, operator
   review route, runbook keys, and blocked promotion.
 - the 70 percent milestone evidence turns the broad DevOps work into a
-  checkable reviewer story: seven complete groups, public-safe evidence, and an
-  honest boundary that this is not yet a finished commercial SaaS.
+  checkable engineering state: seven complete groups, public-safe evidence, and
+  an honest boundary that this is not yet a finished commercial SaaS.
 - GitOps desired-state delivery connects the Helm chart to build, staging,
   canary, and production promotion flow without exposing a live cluster.
 - image promotion and drift evidence shows the difference between desired state
@@ -103,7 +103,7 @@ Recommended next DevOps tasks:
 3. Add policy-as-code proposals only as text-only design notes unless the owner
    explicitly requests policy changes.
 
-## Human Summary
+## Engineering Summary
 
 The point is not to collect tools. The point is to make every tool answer a
 real operational question: can it build, can it run, can it be restored, can it

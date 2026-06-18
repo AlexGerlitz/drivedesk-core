@@ -58,7 +58,7 @@ production data.
 
 - The public project now demonstrates the path from Docker Compose to Helm to
   GitOps delivery.
-- Argo CD manifests stay public-safe and reviewer-readable.
+- Argo CD manifests stay public-safe and readable.
 - The modular monolith remains intact; GitOps coordinates deployment state, not
   service decomposition.
 - This is a desired-state foundation, not a claim that a public cluster exists.

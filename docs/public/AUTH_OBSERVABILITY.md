@@ -49,9 +49,8 @@ The private runbook follows this order:
 4. Decide whether the activity is expected test traffic or suspicious behavior.
 5. Re-run health and evidence workflows after the fix.
 
-## Human Explanation
+## Engineering Summary
 
-This is the difference between "we have auth" and "we can operate auth." A
-reviewer can see that DriveDesk treats login failures, lockouts, and degraded
-metrics as observable incidents while keeping sensitive auth data out of public
-artifacts.
+This is the difference between "we have auth" and "we can operate auth."
+DriveDesk treats login failures, lockouts, and degraded metrics as observable
+incidents while keeping sensitive auth data out of public artifacts.

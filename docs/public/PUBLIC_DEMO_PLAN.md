@@ -1,7 +1,7 @@
 # DriveDesk Public Demo Plan
 
-The public demo should let an external reviewer understand DriveDesk without
-using the private staging runtime.
+The public demo should make DriveDesk understandable without using the private
+staging runtime.
 
 ## Demo Goals
 
@@ -9,7 +9,7 @@ using the private staging runtime.
 - show API and workflow behavior with fake data;
 - show engineering quality through CI, docs, tests, and architecture;
 - keep a public demo health workflow for the hosted surface;
-- keep operational tooling separate from the reviewer-facing demo.
+- keep operational tooling separate from the public demo.
 
 ## Demo Surface
 
@@ -42,7 +42,7 @@ Use synthetic data only:
 
 ## Review Flow
 
-An external reviewer should be able to:
+The public path should make it possible to:
 
 1. Read the public case study.
 2. Inspect architecture diagrams.
@@ -79,7 +79,7 @@ Alertmanager, SSH, production backups, or private GitHub Actions secrets.
 9. Add `GET /demo/public` as a read-only synthetic API payload.
 10. Let the static demo load API-backed data through `?demoApi=...` while
     keeping GitHub Pages on static fallback.
-11. Add a one-command local API run script for reviewers.
+11. Add a one-command local API run script.
 12. Add a public demo API smoke script that validates the endpoint, OpenAPI, and
     client examples.
 13. Add curl, Python, and JavaScript demo clients for `GET /demo/public`.

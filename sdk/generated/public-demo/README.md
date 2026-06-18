@@ -25,6 +25,6 @@ Run the SDK smoke:
 bash scripts/check_public_demo_sdk.sh
 ```
 
-Human explanation: this is the public-safe integration proof. A reviewer can
-see that DriveDesk publishes an OpenAPI contract and can generate a small SDK
-from it instead of relying on hand-written request examples only.
+Engineering summary: this is the public-safe integration proof. DriveDesk
+publishes an OpenAPI contract and generates a small SDK from it instead of
+relying on hand-written request examples only.

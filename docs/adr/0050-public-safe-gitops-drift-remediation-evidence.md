@@ -49,5 +49,5 @@ credentials, raw logs, runtime connection values, or production data.
 - The public project now demonstrates the loop after drift detection:
   evaluate, plan, require approval, attach rollback context, and avoid unsafe
   automatic production mutation.
-- The evidence remains synthetic and reviewer-readable.
+- The evidence remains synthetic and readable.
 - This is not a claim that a public cluster exists.

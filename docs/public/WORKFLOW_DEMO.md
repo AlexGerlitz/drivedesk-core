@@ -60,12 +60,9 @@ This small workflow proves several platform ideas at once:
 - integration work is treated as retryable background work;
 - the same payload works in static fallback and API-backed mode.
 
-## Human Explanation
+## Engineering Summary
 
-For a reviewer, this page answers: "Is this just a dashboard, or does the
-platform understand business processes?"
-
-The answer is that DriveDesk models the process. A lead becomes a student, the
-contract step produces evidence, the audit trail records the change, and the
-outbox prepares an integration sync. That is the foundation for larger
-automation later.
+DriveDesk models the process instead of only displaying records. A lead becomes
+a student, the contract step produces evidence, the audit trail records the
+change, and the outbox prepares an integration sync. That is the foundation for
+larger automation later.

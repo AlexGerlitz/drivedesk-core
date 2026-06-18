@@ -63,9 +63,9 @@ The SDK is not meant to be a full production client yet. It proves a foundation:
 - The generated client validates the product-shaped demo payload.
 - The public repo can prove this in CI without private infrastructure.
 
-## Human Explanation
+## Engineering Summary
 
-This is the integration story in a small form. A reviewer can see that DriveDesk
-does not only document endpoints manually. It exposes an OpenAPI contract, uses
-that contract to generate client code, and verifies that generated code against
-the running API.
+This is the integration surface in a small form. DriveDesk does not only
+document endpoints manually. It exposes an OpenAPI contract, uses that contract
+to generate client code, and verifies that generated code against the running
+API.

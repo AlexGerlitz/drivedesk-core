@@ -130,7 +130,7 @@ sequenceDiagram
 | `retry` | Adapter failed temporarily and has `next_retry_at`. |
 | `dead_letter` | Adapter failed permanently or exhausted retries. |
 
-## Human Explanation
+## Engineering Summary
 
 This is the first real proof of the DriveDesk integration idea. Later systems
 such as accounting exports, bank imports, website forms, telephony, or messaging

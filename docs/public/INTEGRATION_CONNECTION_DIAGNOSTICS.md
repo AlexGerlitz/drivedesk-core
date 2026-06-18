@@ -109,7 +109,7 @@ integration_connection.health_checked
 The audit event stores safe metadata such as adapter key, check status,
 duration, detail key names, and whether the failure was simulated.
 
-## Human Explanation
+## Engineering Summary
 
 This turns integrations into an operable platform surface. An operator can test
 a connection before running imports or exports, see a safe history of checks,

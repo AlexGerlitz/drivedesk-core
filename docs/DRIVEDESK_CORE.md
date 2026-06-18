@@ -41,7 +41,7 @@ packages/core/drivedesk_core/
   build_event()
 ```
 
-## What This Gives Us
+## Verified Outcomes
 
 - The new product has its own entrypoint instead of growing inside the old bot.
 - Core primitives can be tested without Telegram or web templates.
@@ -75,7 +75,7 @@ New endpoint groups:
 - tenant audit read;
 - tenant outbox read.
 
-What this gives us:
+Verified outcome:
 
 - DriveDesk now has a multi-tenant identity base.
 - Users can belong to organizations with roles.
@@ -116,7 +116,7 @@ Sprint 2 adds the first real Core auth path:
 - reusable tenant-scope helpers for Core list queries.
 - tenant-owned repository helpers for Core list queries with `tenant_id`.
 
-What this gives us:
+Verified outcome:
 
 - DriveDesk can authenticate a real API user instead of relying only on dev
   headers.
@@ -201,7 +201,7 @@ Supported record types:
 - `task`;
 - `document`.
 
-What this gives us:
+Verified outcome:
 
 - Future domain packs can start from one proven tenant-owned path.
 - Managers can create business records inside their tenant.
@@ -239,7 +239,7 @@ First supported actions:
 - `create_task_record`.
 - `request_adapter_sync`.
 
-What this gives us:
+Verified outcome:
 
 - DriveDesk can react to a business state change without hardcoding one-off
   side effects into the endpoint.
@@ -268,7 +268,7 @@ New endpoint:
 
 - `GET /tenants/{tenant_id}/workflow-action-runs`.
 
-What this gives us:
+Verified outcome:
 
 - each matched workflow action records `workflow.action_run.created` in audit;
 - each action run links the source business record and workflow rule;
@@ -286,7 +286,7 @@ New endpoint:
 
 - `POST /tenants/{tenant_id}/outbox-events/{event_id}/retry`.
 
-What this gives us:
+Verified outcome:
 
 - reviewed `retry` and `dead_letter` events can move back to `pending`;
 - `processed` and already `pending` events are rejected;
@@ -310,7 +310,7 @@ New endpoints:
 - `POST /tenants/{tenant_id}/integration-connections`;
 - `GET /tenants/{tenant_id}/integration-connections`.
 
-What this gives us:
+Verified outcome:
 
 - tenants can define adapter connections with safe config and mapping JSON;
 - adapter keys are validated against the runtime adapter registry;

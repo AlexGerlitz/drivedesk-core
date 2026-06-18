@@ -4,9 +4,9 @@
   "milestone": "devops_platform_portfolio_70",
   "snapshot_date": "2026-06-18",
   "target": {
-    "objective": "DriveDesk DevOps/platform portfolio milestone",
+    "objective": "DriveDesk DevOps/platform milestone",
     "current_milestone_percent": 70,
-    "portfolio_scope": "devops_platform_engineering",
+    "engineering_scope": "devops_platform_engineering",
     "commercial_saas_ready": false,
     "public_claim": "70 percent DevOps/platform portfolio milestone reached"
   },
@@ -22,7 +22,7 @@
       "id": "core_platform_foundation",
       "points": 10,
       "status": "complete",
-      "human_value": "Shows that DriveDesk is a real modular platform foundation, not only scripts and diagrams.",
+      "engineering_value": "Shows that DriveDesk is a real modular platform foundation, not only scripts and diagrams.",
       "evidence": [
         "apps/api/README.md",
         "docs/DRIVEDESK_CORE.md",
@@ -36,10 +36,10 @@
       ]
     },
     {
-      "id": "public_reviewer_surface",
+      "id": "public_engineering_surface",
       "points": 10,
       "status": "complete",
-      "human_value": "Gives an external reviewer a safe demo, OpenAPI schema, generated clients, and a guided reading path.",
+      "engineering_value": "Provides a safe demo, OpenAPI schema, generated clients, and a guided engineering path.",
       "evidence": [
         "docs/public/README.md",
         "docs/public/PORTFOLIO_CASE_STUDY.md",
@@ -57,7 +57,7 @@
       "id": "ci_release_safety",
       "points": 10,
       "status": "complete",
-      "human_value": "Shows how changes are checked, promoted, blocked, rolled back, and monitored by scheduled validation.",
+      "engineering_value": "Shows how changes are checked, promoted, blocked, rolled back, and monitored by scheduled validation.",
       "evidence": [
         ".github/workflows/ci.yml",
         ".github/workflows/scheduled-validation.yml",
@@ -79,7 +79,7 @@
       "id": "iac_packaging_gitops",
       "points": 10,
       "status": "complete",
-      "human_value": "Shows the path from local containers to Kubernetes packaging, infrastructure plans, and Git-owned desired state.",
+      "engineering_value": "Shows the path from local containers to Kubernetes packaging, infrastructure plans, and Git-owned desired state.",
       "evidence": [
         "infra/docker/docker-compose.foundation.yml",
         "infra/helm/drivedesk-core/Chart.yaml",
@@ -99,7 +99,7 @@
       "id": "observability_sre",
       "points": 10,
       "status": "complete",
-      "human_value": "Shows that the platform has health, metrics, logs, alert names, runbooks, and evidence instead of blind deploys.",
+      "engineering_value": "Shows that the platform has health, metrics, logs, alert names, runbooks, and evidence instead of blind deploys.",
       "evidence": [
         "docs/public/SANITIZED_EVIDENCE.md",
         "docs/public/AUTH_OBSERVABILITY.md",
@@ -117,7 +117,7 @@
       "id": "security_data_boundary",
       "points": 10,
       "status": "complete",
-      "human_value": "Shows public/private separation, redacted evidence, secret scanning, tenant isolation, auth audit, and data-residency thinking.",
+      "engineering_value": "Shows public/private separation, redacted evidence, secret scanning, tenant isolation, auth audit, and data-residency thinking.",
       "evidence": [
         "docs/public/TENANT_ISOLATION.md",
         "docs/public/AUTH_FOUNDATION.md",
@@ -135,7 +135,7 @@
       "id": "recovery_drift_operations",
       "points": 10,
       "status": "complete",
-      "human_value": "Shows backup/restore, drift detection, remediation planning, reviewed execution, and post-remediation recheck.",
+      "engineering_value": "Shows backup/restore, drift detection, remediation planning, reviewed execution, and post-remediation recheck.",
       "evidence": [
         "docs/public/BACKUP_RESTORE_EVIDENCE.md",
         "docs/public/INFRA_STATE_DRIFT_EVIDENCE.md",

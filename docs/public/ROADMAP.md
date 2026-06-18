@@ -46,7 +46,7 @@ operations, or commercial details.
 - Curl, Python, and JavaScript public demo client examples.
 - Generated OpenAPI client SDK example and SDK smoke.
 - Public export gate, public CI, and GitHub Pages demo.
-- Public system design overview for reviewers.
+- Public system design overview.
 - Public-safe synthetic backup/restore drill and sanitized evidence snapshot.
 - Public-safe synthetic release rollback drill and sanitized evidence snapshot.
 - Public-safe synthetic SLO canary gate drill and sanitized evidence snapshot.
@@ -96,7 +96,7 @@ operations, or commercial details.
 - Broader public observability examples with fake metrics.
 - Deeper admin frontend shell.
 
-## Human Explanation
+## Engineering Summary
 
 The private repository remains the real product source. The public repository is
 the clean engineering surface: enough code, docs, demo, and CI to review the

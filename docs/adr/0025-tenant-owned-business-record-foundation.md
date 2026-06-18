@@ -60,5 +60,5 @@ Each created record writes:
   when their lifecycle becomes complex.
 - Tenant isolation is proven against product-shaped data, not only Core admin
   tables.
-- Public reviewers can see how platform primitives turn into business-facing
+- The public surface shows how platform primitives turn into business-facing
   API endpoints.

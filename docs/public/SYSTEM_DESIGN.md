@@ -319,7 +319,7 @@ static fallback data.
 The separation is intentional:
 
 - workflow stages explain current business state;
-- timeline entries explain what a user or reviewer sees;
+- timeline entries explain what appears in the product surface;
 - domain events explain how platform components communicate;
 - audit events explain reviewability;
 - outbox events explain async integration handoff.
@@ -397,9 +397,8 @@ Services can be extracted later when the reason is concrete: independent
 scaling, independent release cadence, provider isolation, or operational risk
 reduction.
 
-## Human Explanation
+## Engineering Summary
 
-This page is the short answer to "how is the system built?" It lets a reviewer
-see the shape of the platform before reading code: where requests enter, where
-state is stored, how background work runs, where integrations belong, and how
-the public demo is separated from private operations.
+This page records the platform shape before reading code: where requests enter,
+where state is stored, how background work runs, where integrations belong, and
+how the public demo is separated from private operations.

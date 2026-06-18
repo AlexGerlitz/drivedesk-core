@@ -100,7 +100,7 @@ POST /tenants/{tenant_id}/business-records/{record_id}/transition
 Future enforcement can reuse the same policy helper when the product is ready to
 make invalid transitions hard failures.
 
-## Human Explanation
+## Engineering Summary
 
 For a real business platform, status is not just text. A payment, lesson,
 contract, task, and document each have their own normal path. This layer makes

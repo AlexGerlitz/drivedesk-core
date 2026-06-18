@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-18T07:12:37Z
+Generated at: 2026-06-18T07:36:53Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -162,6 +162,13 @@ Copied public-safe areas:
 - public private infrastructure remediation check: rollback_attached
 - public private infrastructure remediation event: infra.remediation.plan.ready
 - public private infrastructure remediation ADR: 0056-public-safe-private-infra-remediation-plan
+- public private infrastructure remediation execution doc
+- public private infrastructure remediation execution script: scripts/check_public_private_infra_remediation_execution.sh
+- public private infrastructure remediation execution evidence snapshot: docs/public/evidence/private-infra-remediation-execution.sanitized.json
+- public private infrastructure remediation execution check: reviewed_execution_recorded
+- public private infrastructure remediation execution check: post_remediation_validation_recorded
+- public private infrastructure remediation execution event: infra.remediation.execution.completed
+- public private infrastructure remediation execution ADR: 0057-public-safe-private-infra-remediation-execution
 - public GitOps delivery foundation doc
 - public GitOps path: infra/gitops
 - public GitOps validation script: scripts/check_public_gitops_layout.sh

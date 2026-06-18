@@ -62,6 +62,9 @@ operations, or commercial details.
   staging/control-plane checks before any apply or remediation.
 - Public-safe private infrastructure remediation plan evidence with operator
   review, preflight gates, rollback context, postchecks, and no public apply.
+- Public-safe private infrastructure remediation execution evidence with
+  reviewed execution, postchecks, rollback context, evidence refresh, and no
+  production apply.
 - Public-safe GitOps delivery foundation with Argo CD layout validation.
 - Public-safe GitOps image promotion and drift detection evidence.
 - Public-safe GitOps drift remediation evidence with approval and rollback context.
@@ -74,8 +77,7 @@ operations, or commercial details.
   event, and outbox shape.
 - More public-safe evidence around local run, CI, OpenAPI, and demo health.
 - More adapter recovery examples with payload mapping and follow-up actions.
-- More deployment evidence around reviewed private remediation execution and
-  post-remediation evidence refresh.
+- More deployment evidence around post-remediation drift refresh.
 - Broader generated client SDK examples from the OpenAPI schema.
 
 ## Later

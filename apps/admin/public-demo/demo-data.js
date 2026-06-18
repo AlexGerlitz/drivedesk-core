@@ -462,6 +462,18 @@ window.DRIVEDESK_DEMO_DATA = {
       "state": "success",
       "detail": "each planned remediation action keeps rollback context",
       "evidence": "rollback_attached"
+    },
+    {
+      "name": "Remediation execution",
+      "state": "success",
+      "detail": "reviewed private staging execution completed with no production apply",
+      "evidence": "infra.remediation.execution.completed"
+    },
+    {
+      "name": "Post-remediation validation",
+      "state": "success",
+      "detail": "postchecks and sanitized evidence refresh recorded",
+      "evidence": "post_remediation_validation_recorded"
     }
   ],
   "workflow": {

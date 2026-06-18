@@ -46,6 +46,7 @@ credentials.
 - `RUNTIME_ROLLOUT_EVIDENCE.md` - public-safe private staging runtime rollout evidence.
 - `PRIVATE_INFRA_VALIDATION.md` - public-safe private infrastructure validation evidence.
 - `PRIVATE_INFRA_REMEDIATION.md` - public-safe private infrastructure remediation plan evidence.
+- `PRIVATE_INFRA_REMEDIATION_EXECUTION.md` - public-safe private infrastructure remediation execution evidence.
 - `GITOPS_DELIVERY.md` - public-safe GitOps delivery foundation.
 - `GITOPS_PROMOTION_DRIFT.md` - public-safe GitOps image promotion and drift evidence.
 - `GITOPS_DRIFT_REMEDIATION.md` - public-safe GitOps drift remediation evidence.
@@ -76,6 +77,8 @@ credentials.
   infrastructure validation evidence snapshot.
 - `evidence/private-infra-remediation-plan.sanitized.json` - machine-readable
   private infrastructure remediation plan evidence snapshot.
+- `evidence/private-infra-remediation-execution.sanitized.json` - machine-readable
+  private infrastructure remediation execution evidence snapshot.
 - `evidence/gitops-layout.sanitized.json` - machine-readable GitOps layout
   evidence snapshot.
 - `evidence/gitops-promotion-drift.sanitized.json` - machine-readable GitOps
@@ -116,6 +119,7 @@ The public repository export also generates:
 - `scripts/check_public_runtime_rollout.sh` - public-safe private staging runtime rollout validation.
 - `scripts/check_public_private_infra_validation.sh` - public-safe private infrastructure validation.
 - `scripts/check_public_private_infra_remediation.sh` - public-safe private infrastructure remediation plan validation.
+- `scripts/check_public_private_infra_remediation_execution.sh` - public-safe private infrastructure remediation execution validation.
 - `scripts/check_public_gitops_layout.sh` - public-safe GitOps layout validation.
 - `scripts/check_public_gitops_image_automation.sh` - public-safe GitOps image automation validation.
 - `scripts/check_public_gitops_promotion_drift.sh` - public-safe GitOps promotion and drift validation.

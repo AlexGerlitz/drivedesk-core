@@ -212,6 +212,9 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
 - Private infrastructure remediation planning now turns validation and drift
   evidence into operator-reviewed, plan-only actions with preflight gates,
   rollback context, postchecks, and no public apply.
+- Private infrastructure remediation execution now records reviewed private
+  staging execution, passed preflight gates, passed postchecks, rollback
+  context, refreshed evidence, and no production apply.
 - GitOps delivery foundation now connects the Helm chart to Argo CD-style
   build, staging, canary, and production desired state.
 - GitOps image automation now records the image digest, SBOM, Trivy scan
@@ -226,7 +229,7 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
 
 Recommended next slices:
 
-1. Reviewed private remediation execution evidence after plan approval.
+1. Post-remediation drift refresh evidence after reviewed execution.
 2. Broader generated API clients from OpenAPI for more endpoints.
 3. Additional mock adapters for webhook and accounting export flows.
 4. More workflow rule actions for notifications, approvals, and mapping-specific adapter jobs.

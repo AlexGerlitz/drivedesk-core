@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "check": "public_private_infra_remediation_execution",
+  "data_profile": "sanitized_private_staging_summary",
+  "execution_model": "reviewed_private_control_plane_remediation_execution",
+  "source": {
+    "execution_contract": "infra/state-remediation/private-infra-remediation-execution.sanitized.json",
+    "remediation_plan": "infra/state-remediation/private-infra-remediation-plan.sanitized.json",
+    "remediation_plan_evidence": "docs/public/evidence/private-infra-remediation-plan.sanitized.json",
+    "validation_contract": "infra/state-validation/private-infra-validation.sanitized.json",
+    "validation_evidence": "docs/public/evidence/private-infra-validation.sanitized.json",
+    "infra_state_drift": "infra/opentofu/state/drift-summary.sanitized.json",
+    "opentofu_plan": "infra/opentofu/public/plan-summary.sanitized.json",
+    "runtime_rollout": "docs/public/evidence/runtime-rollout.sanitized.json",
+    "gitops_remediation": "docs/public/evidence/gitops-drift-remediation.sanitized.json",
+    "staging_evidence": "docs/public/evidence/de-staging-evidence.sanitized.json",
+    "backup_restore": "docs/public/evidence/backup-restore-drill.sanitized.json"
+  },
+  "environment": {
+    "name": "private_staging",
+    "public_route": false,
+    "production_data_touched": false
+  },
+  "approval": {
+    "review_id": "private-remediation-review-2026-06-18",
+    "plan_id": "private-infra-remediation-2026-06-18",
+    "event_type": "infra.remediation.execution.approved",
+    "reviewer_role": "operator",
+    "approval_recorded": true,
+    "automatic_approval": false,
+    "public_apply": false
+  },
+  "execution": {
+    "execution_id": "private-infra-remediation-execution-2026-06-18",
+    "mode": "reviewed_private_staging_execution_summary",
+    "plan_id": "private-infra-remediation-2026-06-18",
+    "components": [
+      "observability",
+      "backup_storage"
+    ],
+    "actions": [
+      {
+        "component": "observability",
+        "status": "completed",
+        "approved_action": "reconcile_after_review",
+        "rollback": "restore_previous_observability_config",
+        "rollback_executed": false
+      },
+      {
+        "component": "backup_storage",
+        "status": "completed",
+        "approved_action": "reconcile_after_review",
+        "rollback": "keep_previous_backup_storage_target",
+        "rollback_executed": false
+      }
+    ]
+  },
+  "post_remediation_validation": {
+    "event_type": "infra.remediation.execution.validated",
+    "drift_resolved_components": [
+      "observability",
+      "backup_storage"
+    ],
+    "private_validation_refreshed": true,
+    "runtime_health_refreshed": true,
+    "sanitized_evidence_refreshed": true
+  },
+  "checks": {
+    "execution_contract_present": true,
+    "remediation_plan_referenced": true,
+    "operator_review_recorded": true,
+    "reviewed_execution_recorded": true,
+    "drifted_components_executed": true,
+    "preflight_gates_passed": true,
+    "postcheck_gates_passed": true,
+    "rollback_available_not_used": true,
+    "post_remediation_validation_recorded": true,
+    "sanitized_evidence_refreshed": true,
+    "no_public_apply": true,
+    "no_production_apply": true,
+    "redaction_boundary_recorded": true,
+    "private_markers_absent": true,
+    "production_data_touched": false
+  },
+  "decision": {
+    "event_type": "infra.remediation.execution.completed",
+    "recommended_action": "continue_scheduled_validation",
+    "automatic_public_apply": false,
+    "production_data_touched": false
+  },
+  "redaction": {
+    "paths_included": false,
+    "hostnames_included": false,
+    "addresses_included": false,
+    "credentials_included": false,
+    "raw_logs_included": false,
+    "request_bodies_included": false,
+    "production_data_included": false
+  }
+}

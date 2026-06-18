@@ -77,6 +77,16 @@ The check validates a plan-only remediation boundary after read-only validation
 and drift detection, including operator review, preflight gates, rollback
 context, postcheck gates, and no public apply.
 
+Public-safe private infrastructure remediation execution validation:
+
+```bash
+bash scripts/check_public_private_infra_remediation_execution.sh
+```
+
+The check validates reviewed execution after the remediation plan, preflight
+gates, postchecks, rollback context, evidence refresh, no public apply, and no
+production apply.
+
 Core endpoints:
 
 - `POST /auth/login`;

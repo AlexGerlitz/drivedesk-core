@@ -54,6 +54,12 @@ Infrastructure state drift validation source file:
 docs/public/evidence/infra-state-drift.sanitized.json
 ```
 
+Runtime rollout validation source file:
+
+```text
+docs/public/evidence/runtime-rollout.sanitized.json
+```
+
 GitOps layout validation source file:
 
 ```text
@@ -127,6 +133,12 @@ Verified signals:
 - observability and backup storage drift are detected;
 - state backend and secret boundaries remain preserved;
 - the infrastructure drift decision is plan-only and does not apply changes.
+- the public runtime rollout evidence records build, deploy, runtime health,
+  observability, and evidence stages;
+- private staging deploy, health, and evidence results are linked through a
+  sanitized summary;
+- loopback-only runtime boundaries are recorded;
+- rollback remains an operator-reviewed action.
 - the public GitOps delivery foundation contains Argo CD project, application,
   environment, and promotion metadata;
 - Argo CD applications reference the Helm chart path;
@@ -175,6 +187,7 @@ The public version keeps only the operational shape and health results.
   validation.
 - Infrastructure state drift is checked through an executable public
   validation.
+- Runtime rollout evidence is checked through an executable public validation.
 - GitOps desired-state delivery is checked through an executable public
   validation.
 - GitOps image promotion and drift detection are checked through an executable

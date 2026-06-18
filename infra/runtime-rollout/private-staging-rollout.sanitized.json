@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "rollout_model": "github_actions_to_private_loopback_staging",
+  "data_profile": "synthetic_fake_data",
+  "environment": {
+    "name": "private_staging",
+    "public_route": false,
+    "control_plane": "private_de_control_plane",
+    "production_data_touched": false
+  },
+  "components": [
+    "api",
+    "worker",
+    "postgresql",
+    "redis",
+    "prometheus",
+    "loki",
+    "alloy",
+    "alertmanager",
+    "grafana"
+  ],
+  "stages": [
+    {
+      "name": "build",
+      "status": "passed",
+      "checks": [
+        "source_packaged",
+        "dependencies_declared",
+        "public_export_gate_available"
+      ]
+    },
+    {
+      "name": "deploy",
+      "status": "passed",
+      "checks": [
+        "staging_service_configured",
+        "compose_stack_started",
+        "migrations_executed",
+        "seed_data_loaded"
+      ]
+    },
+    {
+      "name": "runtime_health",
+      "status": "passed",
+      "checks": [
+        "api_health_ok",
+        "api_ready_ok",
+        "api_metrics_ok",
+        "worker_runtime_present"
+      ]
+    },
+    {
+      "name": "observability",
+      "status": "passed",
+      "checks": [
+        "prometheus_targets_up",
+        "prometheus_alert_rules_ok",
+        "loki_query_ok",
+        "alertmanager_ready_ok",
+        "grafana_dashboard_ok"
+      ]
+    },
+    {
+      "name": "evidence",
+      "status": "passed",
+      "checks": [
+        "sanitized_artifact_recorded",
+        "redaction_boundary_recorded",
+        "raw_logs_excluded",
+        "credentials_excluded"
+      ]
+    }
+  ],
+  "boundaries": {
+    "loopback_only": true,
+    "public_route": false,
+    "raw_logs_exported": false,
+    "credentials_exported": false,
+    "runtime_addresses_exported": false,
+    "production_data_touched": false
+  },
+  "workflows": {
+    "deploy": "private_staging_deploy",
+    "health": "private_staging_health",
+    "evidence": "private_staging_evidence"
+  },
+  "rollback": {
+    "strategy": "rerun_last_known_good_candidate_after_review",
+    "automatic_public_apply": false,
+    "operator_review_required": true
+  }
+}

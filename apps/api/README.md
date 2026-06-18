@@ -44,9 +44,18 @@ Public-safe infrastructure state drift validation:
 bash scripts/check_public_infra_state_drift.sh
 ```
 
-The check validates the public infrastructure contract, environment model,
-component model, state boundary, secret boundary, sanitized plan summary, and
-plan-only no-apply behavior.
+The check validates desired-vs-observed infrastructure state, drift detection,
+state backend boundary, secret boundary, and plan-only remediation behavior.
+
+Public-safe runtime rollout validation:
+
+```bash
+bash scripts/check_public_runtime_rollout.sh
+```
+
+The check validates private staging rollout stages, runtime health gates,
+observability gates, sanitized evidence, loopback-only boundary, and no
+production data exposure.
 
 Core endpoints:
 

@@ -39,3 +39,6 @@ tenant/audit database tables, Docker Compose, and CI smoke checks.
   resources.
 - The infrastructure state drift layer compares desired and synthetic observed
   state while preserving state, secret, and plan-only boundaries.
+- The runtime rollout evidence layer connects private staging deploy, health,
+  observability, and sanitized evidence gates without exposing private runtime
+  details.

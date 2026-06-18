@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "check": "public_runtime_rollout_evidence",
+  "data_profile": "synthetic_fake_data",
+  "rollout_model": "github_actions_to_private_loopback_staging",
+  "source": {
+    "rollout_contract": "infra/runtime-rollout/private-staging-rollout.sanitized.json",
+    "staging_evidence": "docs/public/evidence/de-staging-evidence.sanitized.json"
+  },
+  "runtime": {
+    "environment": "private_staging",
+    "public_route": false,
+    "control_plane": "private_de_control_plane",
+    "production_data_touched": false
+  },
+  "stages": [
+    "build",
+    "deploy",
+    "runtime_health",
+    "observability",
+    "evidence"
+  ],
+  "components": [
+    "api",
+    "worker",
+    "postgresql",
+    "redis",
+    "prometheus",
+    "loki",
+    "alloy",
+    "alertmanager",
+    "grafana"
+  ],
+  "checks": {
+    "rollout_contract_present": true,
+    "build_stage_recorded": true,
+    "deploy_stage_recorded": true,
+    "runtime_health_stage_recorded": true,
+    "observability_stage_recorded": true,
+    "evidence_stage_recorded": true,
+    "staging_deploy_success": true,
+    "staging_health_success": true,
+    "staging_evidence_success": true,
+    "loopback_boundary_recorded": true,
+    "public_route_disabled": true,
+    "api_health_ok": true,
+    "api_ready_ok": true,
+    "api_metrics_ok": true,
+    "prometheus_targets_up": true,
+    "prometheus_alert_rules_ok": true,
+    "loki_query_ok": true,
+    "alertmanager_ready_ok": true,
+    "grafana_dashboard_ok": true,
+    "rollback_strategy_recorded": true,
+    "private_markers_absent": true,
+    "production_data_touched": false
+  },
+  "decision": {
+    "event_type": "runtime.rollout.evidence_collected",
+    "promotion_basis": "private_staging_health_and_observability_gates",
+    "automatic_public_apply": false,
+    "operator_review_required": true,
+    "production_data_touched": false
+  },
+  "redaction": {
+    "paths_included": false,
+    "hostnames_included": false,
+    "addresses_included": false,
+    "credentials_included": false,
+    "raw_logs_included": false,
+    "request_bodies_included": false,
+    "production_data_included": false
+  }
+}

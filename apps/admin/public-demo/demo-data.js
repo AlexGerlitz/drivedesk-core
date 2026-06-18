@@ -426,6 +426,18 @@ window.DRIVEDESK_DEMO_DATA = {
       "state": "success",
       "detail": "promotion history hash recorded for auditability",
       "evidence": "promotion_history_hash_recorded"
+    },
+    {
+      "name": "Runtime rollout",
+      "state": "success",
+      "detail": "private staging rollout passed health and observability gates",
+      "evidence": "runtime.rollout.evidence_collected"
+    },
+    {
+      "name": "Loopback boundary",
+      "state": "success",
+      "detail": "public evidence records no public runtime route",
+      "evidence": "loopback_boundary_recorded"
     }
   ],
   "workflow": {

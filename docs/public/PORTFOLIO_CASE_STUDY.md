@@ -73,6 +73,8 @@ Implemented foundation:
   state boundary, secret boundary, and zero-destroy plan-only summary.
 - public-safe infrastructure state drift evidence with desired-vs-observed
   comparison, drift detection, and plan-only response.
+- public-safe private staging runtime rollout evidence with deploy, health,
+  observability, sanitized evidence, and rollback-review boundaries.
 - public-safe GitOps image promotion/drift evidence with candidate tag,
   rollback tag, desired state, observed state, and synthetic `OutOfSync`.
 - public-safe GitOps drift remediation evidence with plan-only reconcile,
@@ -199,6 +201,9 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
 - Infrastructure state drift evidence now compares desired and synthetic
   observed infrastructure state, detects observability and backup-storage drift,
   and keeps remediation plan-only.
+- Runtime rollout evidence now links private staging deployment, runtime health,
+  observability gates, sanitized evidence, and rollback review without exposing
+  private runtime details.
 - GitOps delivery foundation now connects the Helm chart to Argo CD-style
   build, staging, canary, and production desired state.
 - GitOps image automation now records the image digest, SBOM, Trivy scan
@@ -216,8 +221,8 @@ Recommended next slices:
 1. Broader generated API clients from OpenAPI for more endpoints.
 2. Additional mock adapters for webhook and accounting export flows.
 3. More workflow rule actions for notifications, approvals, and mapping-specific adapter jobs.
-4. More deployment evidence around private runtime rollout checks.
-5. Private infrastructure state validation against the staging control plane.
+4. Private infrastructure state validation against the staging control plane.
+5. Broader public observability examples with synthetic metric snapshots.
 
 ## Interview Summary
 

@@ -150,6 +150,9 @@ assert {item["evidence"] for item in demo["recoveryEvidence"]} >= {
     "release.canary_gate.blocked",
     "promotion_blocked",
     "burn_rate_violation_detected",
+    "release.staged_promotion.completed",
+    "production_approval_recorded",
+    "promotion_history_hash_recorded",
 }, demo
 assert all(item["state"] == "success" for item in demo["recoveryEvidence"]), demo
 assert any(item["metric"] == "drivedesk_integration_reconciliations" for item in demo["integrationHealth"]), demo

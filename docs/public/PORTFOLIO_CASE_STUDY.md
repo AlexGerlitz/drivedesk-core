@@ -176,6 +176,10 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
   synthetic candidate against availability, p95 latency, and burn-rate
   thresholds, blocks promotion, and records `release.canary_gate.blocked`
   evidence.
+- Staged promotion evidence now has a public-safe drill that moves a safe
+  synthetic release through build, staging, canary, and production gates,
+  records production approval, and emits `release.staged_promotion.completed`
+  evidence.
 - Alertmanager currently uses an internal receiver; external notification
   routing is a later step.
 - The frontend is intentionally not the center of the current work; the backend
@@ -188,7 +192,7 @@ Recommended next slices:
 1. Broader generated API clients from OpenAPI for more endpoints.
 2. Additional mock adapters for webhook and accounting export flows.
 3. More workflow rule actions for notifications, approvals, and mapping-specific adapter jobs.
-4. More deployment evidence around staged promotion history and private runtime rollout checks.
+4. More deployment evidence around private runtime rollout checks.
 
 ## Interview Summary
 

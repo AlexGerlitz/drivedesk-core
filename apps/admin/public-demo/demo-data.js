@@ -408,6 +408,24 @@ window.DRIVEDESK_DEMO_DATA = {
       "state": "success",
       "detail": "synthetic candidate exceeded the burn-rate threshold",
       "evidence": "burn_rate_violation_detected"
+    },
+    {
+      "name": "Staged promotion",
+      "state": "success",
+      "detail": "safe release promoted through build, staging, canary, and production",
+      "evidence": "release.staged_promotion.completed"
+    },
+    {
+      "name": "Production approval",
+      "state": "success",
+      "detail": "synthetic production approval recorded before promotion",
+      "evidence": "production_approval_recorded"
+    },
+    {
+      "name": "Promotion history",
+      "state": "success",
+      "detail": "promotion history hash recorded for auditability",
+      "evidence": "promotion_history_hash_recorded"
     }
   ],
   "workflow": {

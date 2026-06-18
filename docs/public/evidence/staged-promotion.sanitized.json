@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "drill": "public_synthetic_staged_promotion",
+  "data_profile": "synthetic_fake_data",
+  "promotion_model": "build_staging_canary_production",
+  "release_id": "candidate-2026-06-18-safe",
+  "stages": [
+    {
+      "name": "build",
+      "status": "passed",
+      "checks": {
+        "compile_smoke_passed": true,
+        "pytest_passed": true,
+        "secret_scan_passed": true,
+        "image_scan_passed": true,
+        "sbom_attached": true
+      }
+    },
+    {
+      "name": "staging",
+      "status": "passed",
+      "checks": {
+        "api_health_passed": true,
+        "public_demo_smoke_passed": true,
+        "backup_restore_drill_passed": true,
+        "release_rollback_drill_passed": true
+      }
+    },
+    {
+      "name": "canary",
+      "status": "passed",
+      "checks": {
+        "slo_canary_gate_passed": true,
+        "availability_within_slo": true,
+        "p95_latency_within_slo": true,
+        "error_budget_burn_within_limit": true
+      }
+    },
+    {
+      "name": "production",
+      "status": "promoted",
+      "checks": {
+        "manual_approval_recorded": true,
+        "rollback_plan_attached": true,
+        "post_promotion_monitoring_required": true,
+        "active_release_updated": true
+      }
+    }
+  ],
+  "checks": {
+    "build_manifest_hash_recorded": true,
+    "build_gate_passed": true,
+    "staging_gate_passed": true,
+    "canary_gate_passed": true,
+    "production_approval_recorded": true,
+    "rollback_plan_attached": true,
+    "production_promotion_completed": true,
+    "promotion_history_hash_recorded": true,
+    "release_audit_event_recorded": true,
+    "production_data_touched": false
+  },
+  "decision": {
+    "event_type": "release.staged_promotion.completed",
+    "promote": true,
+    "active_stage": "production",
+    "recommended_action": "monitor SLO burn and keep rollback plan attached"
+  },
+  "artifacts": {
+    "build_manifest_sha256_prefix_recorded": true,
+    "approval_sha256_prefix_recorded": true,
+    "promotion_history_sha256_prefix_recorded": true,
+    "release_audit_sha256_prefix_recorded": true
+  },
+  "redaction": {
+    "paths_included": false,
+    "hostnames_included": false,
+    "addresses_included": false,
+    "credentials_included": false,
+    "raw_logs_included": false,
+    "production_data_included": false
+  }
+}

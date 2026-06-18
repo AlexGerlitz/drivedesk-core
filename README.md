@@ -5,29 +5,6 @@
 DriveDesk Core is a modular monolith backend foundation for a business
 operations platform.
 
-## 60-Second Reviewer Snapshot
-
-This repository is built as public proof for remote backend/platform, integration,
-AI workflow, and DevOps work.
-
-| What to check | Why it matters |
-| --- | --- |
-| [Public demo](https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/) | Shows the product direction with safe synthetic data. |
-| [Portfolio case study](docs/public/PORTFOLIO_CASE_STUDY.md) | Explains the business problem, architecture, integration model, and operating evidence. |
-| [System design](docs/public/SYSTEM_DESIGN.md) | Shows tenant boundaries, API/runtime shape, worker/outbox, and adapter contracts. |
-| [OpenAPI schema](docs/openapi.json) | Makes the API surface reviewable instead of only described in prose. |
-| [CI workflow](.github/workflows/ci.yml) | Shows the test/release gate for the public foundation. |
-
-Best-fit evidence:
-
-- backend/platform ownership: FastAPI, PostgreSQL, Alembic, RBAC, audit, outbox, worker;
-- integration ownership: adapter catalog, scopes, mapping validation, transforms, diagnostics,
-  reconciliation, incident review, and operator runbooks;
-- AI/business-ops direction: workflow rules, synthetic lead-to-student path, documents, tasks,
-  payments, contracts, and operator-facing demo data;
-- DevOps/release thinking: Docker Compose, CI, public demo health, backup/restore drill, rollback
-  drill, SLO canary gate, and sanitized evidence.
-
 It includes:
 
 - FastAPI API;
@@ -103,9 +80,10 @@ It includes:
 32. Read `docs/public/BACKUP_RESTORE_EVIDENCE.md`.
 33. Read `docs/public/RELEASE_ROLLBACK_EVIDENCE.md`.
 34. Read `docs/public/SLO_CANARY_GATE_EVIDENCE.md`.
-35. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
-36. Check `.github/workflows/ci.yml`.
-37. Run `bash scripts/ci_smoke_public.sh` locally.
+35. Read `docs/public/STAGED_PROMOTION_EVIDENCE.md`.
+36. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
+37. Check `.github/workflows/ci.yml`.
+38. Run `bash scripts/ci_smoke_public.sh` locally.
 
 ## What To Review First
 
@@ -140,6 +118,7 @@ It includes:
 - `docs/public/BACKUP_RESTORE_EVIDENCE.md` - public-safe synthetic backup and restore drill.
 - `docs/public/RELEASE_ROLLBACK_EVIDENCE.md` - public-safe bad-release rollback drill.
 - `docs/public/SLO_CANARY_GATE_EVIDENCE.md` - public-safe SLO canary promotion gate drill.
+- `docs/public/STAGED_PROMOTION_EVIDENCE.md` - public-safe staged release promotion drill.
 - `docs/public/ARCHITECTURE_DIAGRAMS.md` - architecture diagrams.
 - `docs/public/SANITIZED_EVIDENCE.md` - sanitized staging evidence.
 - `docs/public/PUBLIC_DEMO_PLAN.md` - future public demo plan.
@@ -182,6 +161,7 @@ It includes:
 - `scripts/check_public_backup_restore.sh` - public-safe synthetic recovery drill.
 - `scripts/check_public_release_rollback.sh` - public-safe release rollback drill.
 - `scripts/check_public_slo_canary_gate.sh` - public-safe SLO canary gate drill.
+- `scripts/check_public_staged_promotion.sh` - public-safe staged promotion drill.
 - `scripts/run_public_demo_local.sh` - one-command local API run.
 - `scripts/check_public_demo_api.sh` - local API contract and examples smoke.
 - `examples/curl/demo-public.sh` - curl client example.
@@ -210,6 +190,7 @@ bash scripts/check_public_demo_sdk.sh
 bash scripts/check_public_backup_restore.sh
 bash scripts/check_public_release_rollback.sh
 bash scripts/check_public_slo_canary_gate.sh
+bash scripts/check_public_staged_promotion.sh
 BASE_URL=http://localhost:8080 bash examples/curl/demo-public.sh
 BASE_URL=http://localhost:8080 python examples/python/demo_public_client.py
 BASE_URL=http://localhost:8080 node examples/js/demo-public-fetch.js
@@ -229,6 +210,7 @@ bash scripts/check_public_demo_api.sh
 bash scripts/check_public_backup_restore.sh
 bash scripts/check_public_release_rollback.sh
 bash scripts/check_public_slo_canary_gate.sh
+bash scripts/check_public_staged_promotion.sh
 ```
 
 ## Public Demo Shell
@@ -289,6 +271,7 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/public/BACKUP_RESTORE_EVIDENCE.md`
 - `docs/public/RELEASE_ROLLBACK_EVIDENCE.md`
 - `docs/public/SLO_CANARY_GATE_EVIDENCE.md`
+- `docs/public/STAGED_PROMOTION_EVIDENCE.md`
 - `docs/public/ARCHITECTURE_DIAGRAMS.md`
 - `docs/public/PUBLIC_DEMO_PLAN.md`
 - `docs/public/SANITIZED_EVIDENCE.md`
@@ -329,3 +312,4 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/adr/0043-public-safe-backup-restore-drill.md`
 - `docs/adr/0044-public-safe-release-rollback-drill.md`
 - `docs/adr/0045-public-safe-slo-canary-gate-drill.md`
+- `docs/adr/0046-public-safe-staged-promotion-drill.md`

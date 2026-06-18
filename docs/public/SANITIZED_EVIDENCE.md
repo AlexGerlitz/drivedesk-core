@@ -30,6 +30,12 @@ SLO canary gate drill source file:
 docs/public/evidence/slo-canary-gate.sanitized.json
 ```
 
+Staged promotion drill source file:
+
+```text
+docs/public/evidence/staged-promotion.sanitized.json
+```
+
 Verified signals:
 
 - CI completed successfully;
@@ -60,6 +66,11 @@ Verified signals:
 - availability, p95 latency, and error budget burn violations were detected;
 - candidate promotion was blocked;
 - `release.canary_gate.blocked` evidence was recorded.
+- the public synthetic staged promotion drill moved a safe release through
+  build, staging, canary, and production gates;
+- synthetic production approval was recorded;
+- promotion history was hashed;
+- `release.staged_promotion.completed` evidence was recorded.
 
 ## Human Explanation
 
@@ -79,6 +90,7 @@ The public version keeps only the operational shape and health results.
 - Backup/restore is checked through an executable public drill.
 - Bad-release rollback is checked through an executable public drill.
 - SLO canary promotion is checked through an executable public drill.
+- Staged release promotion is checked through an executable public drill.
 
 ## What This Leaves Out
 

@@ -126,6 +126,9 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
         "release.canary_gate.blocked",
         "promotion_blocked",
         "burn_rate_violation_detected",
+        "release.staged_promotion.completed",
+        "production_approval_recorded",
+        "promotion_history_hash_recorded",
     }
     assert len(payload["outbox"]) >= 3
     assert {event["status"] for event in payload["outbox"]} >= {"processed", "pending"}
@@ -166,6 +169,7 @@ def test_public_demo_api_scripts_and_examples_exist() -> None:
         "scripts/check_public_backup_restore.sh",
         "scripts/check_public_release_rollback.sh",
         "scripts/check_public_slo_canary_gate.sh",
+        "scripts/check_public_staged_promotion.sh",
         "scripts/generate_public_demo_sdk.py",
         "examples/curl/demo-public.sh",
         "examples/python/demo_public_client.py",
@@ -208,6 +212,12 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
             "release.canary_gate.blocked",
             "promotion_blocked",
             "burn_rate_violation_detected",
+        ],
+        "scripts/check_public_staged_promotion.sh": [
+            "public_synthetic_staged_promotion",
+            "release.staged_promotion.completed",
+            "production_approval_recorded",
+            "promotion_history_hash_recorded",
         ],
         "scripts/generate_public_demo_sdk.py": [
             "/demo/public",

@@ -18,6 +18,7 @@ Implemented baseline:
 - public-safe synthetic backup/restore drill for the exported Core surface.
 - public-safe synthetic release rollback drill for the exported Core surface.
 - public-safe synthetic SLO canary gate drill for the exported Core surface.
+- public-safe synthetic staged promotion drill for the exported Core surface.
 
 What this gives us:
 
@@ -34,13 +35,15 @@ What this gives us:
   targets.
 - bad candidates can be blocked by SLO-style promotion gates without exposing
   private metrics or deployment targets.
+- safe candidates can be promoted through auditable build, staging, canary, and
+  production gates without exposing private deployment targets.
 
 ## Next Layers
 
 Recommended next DevOps tasks:
 
 1. Broaden generated client examples from the OpenAPI schema.
-2. Add staged promotion history evidence for the public release surface.
+2. Add private runtime rollout evidence for the staging control plane.
 3. Add a Helm chart skeleton after the compose contract is stable.
 4. Add Terraform/OpenTofu only after the target infrastructure shape is clear.
 

@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-18T03:50:40Z
+Generated at: 2026-06-18T04:01:40Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -100,6 +100,13 @@ Copied public-safe areas:
 - public SLO canary gate check: burn_rate_violation_detected
 - public SLO canary gate audit event: release.canary_gate.blocked
 - public SLO canary gate ADR: 0045-public-safe-slo-canary-gate-drill
+- public staged promotion evidence doc
+- public staged promotion drill script: scripts/check_public_staged_promotion.sh
+- public staged promotion evidence snapshot: docs/public/evidence/staged-promotion.sanitized.json
+- public staged promotion check: production_promotion_completed
+- public staged promotion check: promotion_history_hash_recorded
+- public staged promotion audit event: release.staged_promotion.completed
+- public staged promotion ADR: 0046-public-safe-staged-promotion-drill
 - public tenant-owned repository helper surface
 - public auth observability alerting surface
 - public demo local run script

@@ -71,6 +71,8 @@ Implemented foundation:
 - public-safe synthetic release rollback drill with machine-readable evidence.
 - public-safe GitOps image promotion/drift evidence with candidate tag,
   rollback tag, desired state, observed state, and synthetic `OutOfSync`.
+- public-safe GitOps drift remediation evidence with plan-only reconcile,
+  rollback, block, approval, and audit-event context.
 - synthetic business workflow in the public demo payload:
   lead -> student -> contract -> audit -> outbox -> integration sync.
 

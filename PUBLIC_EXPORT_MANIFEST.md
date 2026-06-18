@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-18T04:50:02Z
+Generated at: 2026-06-18T05:04:09Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -129,6 +129,12 @@ Copied public-safe areas:
 - public GitOps promotion drift check: drift_detected
 - public GitOps promotion drift check: out_of_sync_recorded
 - public GitOps promotion drift ADR: 0049-public-safe-gitops-promotion-drift-evidence
+- public GitOps drift remediation doc
+- public GitOps drift remediation validation script: scripts/check_public_gitops_drift_remediation.sh
+- public GitOps drift remediation evidence snapshot: docs/public/evidence/gitops-drift-remediation.sanitized.json
+- public GitOps drift remediation check: production_requires_approval
+- public GitOps drift remediation check: plan_only_no_cluster_mutation
+- public GitOps drift remediation ADR: 0050-public-safe-gitops-drift-remediation-evidence
 - public tenant-owned repository helper surface
 - public auth observability alerting surface
 - public demo local run script

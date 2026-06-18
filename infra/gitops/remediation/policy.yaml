@@ -1,0 +1,35 @@
+apiVersion: drivedesk.dev/v1alpha1
+kind: DriftRemediationPolicy
+metadata:
+  name: drivedesk-core-public-drift-remediation-policy
+spec:
+  artifact: drivedesk-core
+  chartPath: infra/helm/drivedesk-core
+  actions:
+    - name: reconcile
+      description: move observed state toward the desired Git state after gates pass
+    - name: rollback
+      description: restore the previous image tag when a candidate is unsafe
+    - name: block
+      description: keep the current observed state when evidence is missing or gates fail
+  stageRules:
+    - name: build
+      autoReconcile: true
+      requiresApproval: false
+    - name: staging
+      autoReconcile: true
+      requiresApproval: false
+    - name: canary
+      autoReconcile: true
+      requiresApproval: false
+    - name: production
+      autoReconcile: false
+      requiresApproval: true
+      fallbackTag: gitops-previous-release
+  requiredEvidence:
+    - public_gitops_promotion_drift
+    - public_synthetic_slo_canary_gate
+    - public_synthetic_staged_promotion
+    - public_helm_chart_render
+    - public_gitops_layout
+  noClusterMutation: true

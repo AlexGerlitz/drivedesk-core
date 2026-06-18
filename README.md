@@ -84,9 +84,10 @@ It includes:
 36. Read `docs/public/HELM_CHART.md`.
 37. Read `docs/public/GITOPS_DELIVERY.md`.
 38. Read `docs/public/GITOPS_PROMOTION_DRIFT.md`.
-39. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
-40. Check `.github/workflows/ci.yml`.
-41. Run `bash scripts/ci_smoke_public.sh` locally.
+39. Read `docs/public/GITOPS_DRIFT_REMEDIATION.md`.
+40. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
+41. Check `.github/workflows/ci.yml`.
+42. Run `bash scripts/ci_smoke_public.sh` locally.
 
 ## What To Review First
 
@@ -125,6 +126,7 @@ It includes:
 - `docs/public/HELM_CHART.md` - public-safe Helm chart foundation.
 - `docs/public/GITOPS_DELIVERY.md` - public-safe GitOps delivery foundation.
 - `docs/public/GITOPS_PROMOTION_DRIFT.md` - public-safe GitOps image promotion and drift evidence.
+- `docs/public/GITOPS_DRIFT_REMEDIATION.md` - public-safe GitOps drift remediation evidence.
 - `docs/public/ARCHITECTURE_DIAGRAMS.md` - architecture diagrams.
 - `docs/public/SANITIZED_EVIDENCE.md` - sanitized staging evidence.
 - `docs/public/PUBLIC_DEMO_PLAN.md` - future public demo plan.
@@ -171,6 +173,7 @@ It includes:
 - `scripts/check_public_helm_render.sh` - public-safe Helm chart validation.
 - `scripts/check_public_gitops_layout.sh` - public-safe GitOps layout validation.
 - `scripts/check_public_gitops_promotion_drift.sh` - public-safe GitOps promotion and drift validation.
+- `scripts/check_public_gitops_drift_remediation.sh` - public-safe GitOps drift remediation validation.
 - `scripts/run_public_demo_local.sh` - one-command local API run.
 - `scripts/check_public_demo_api.sh` - local API contract and examples smoke.
 - `examples/curl/demo-public.sh` - curl client example.
@@ -203,6 +206,7 @@ bash scripts/check_public_staged_promotion.sh
 bash scripts/check_public_helm_render.sh
 bash scripts/check_public_gitops_layout.sh
 bash scripts/check_public_gitops_promotion_drift.sh
+bash scripts/check_public_gitops_drift_remediation.sh
 BASE_URL=http://localhost:8080 bash examples/curl/demo-public.sh
 BASE_URL=http://localhost:8080 python examples/python/demo_public_client.py
 BASE_URL=http://localhost:8080 node examples/js/demo-public-fetch.js
@@ -226,6 +230,7 @@ bash scripts/check_public_staged_promotion.sh
 bash scripts/check_public_helm_render.sh
 bash scripts/check_public_gitops_layout.sh
 bash scripts/check_public_gitops_promotion_drift.sh
+bash scripts/check_public_gitops_drift_remediation.sh
 ```
 
 ## Public Demo Shell

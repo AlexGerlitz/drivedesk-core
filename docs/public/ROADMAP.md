@@ -54,6 +54,7 @@ operations, or commercial details.
 - Public-safe Helm chart foundation with render validation.
 - Public-safe GitOps delivery foundation with Argo CD layout validation.
 - Public-safe GitOps image promotion and drift detection evidence.
+- Public-safe GitOps drift remediation evidence with approval and rollback context.
 
 ## Next
 
@@ -63,7 +64,7 @@ operations, or commercial details.
 - Broader generated client SDK examples from the OpenAPI schema.
 - More adapter recovery examples with payload mapping and follow-up actions.
 - More deployment evidence around private runtime rollout checks.
-- More GitOps evidence around drift remediation and image automation.
+- More GitOps evidence around image automation.
 
 ## Later
 

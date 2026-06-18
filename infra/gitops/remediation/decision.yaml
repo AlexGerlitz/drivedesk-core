@@ -1,0 +1,43 @@
+apiVersion: drivedesk.dev/v1alpha1
+kind: DriftRemediationDecision
+metadata:
+  name: drivedesk-core-public-drift-remediation-decision
+spec:
+  inputs:
+    desiredState: infra/gitops/drift/desired-state.yaml
+    observedState: infra/gitops/drift/observed-state.yaml
+    promotion: infra/gitops/promotion/image-promotion.yaml
+    policy: infra/gitops/remediation/policy.yaml
+  auditEvent: gitops.drift_remediation.planned
+  noClusterMutation: true
+  decisions:
+    - stage: build
+      driftDetected: false
+      syncStatus: Synced
+      recommendedAction: none
+      applyMode: no_op
+    - stage: staging
+      driftDetected: false
+      syncStatus: Synced
+      recommendedAction: none
+      applyMode: no_op
+    - stage: canary
+      driftDetected: false
+      syncStatus: Synced
+      recommendedAction: none
+      applyMode: no_op
+    - stage: production
+      driftDetected: true
+      syncStatus: OutOfSync
+      desiredTag: gitops-candidate-2026-06-18
+      observedTag: gitops-previous-release
+      rollbackTag: gitops-previous-release
+      recommendedAction: reconcile_after_approval
+      applyMode: plan_only
+      approvalRequired: true
+      evidenceRequired:
+        - public_gitops_promotion_drift
+        - public_synthetic_slo_canary_gate
+        - public_synthetic_staged_promotion
+      rollbackAction: restore_previous_release
+      blockAction: keep_observed_release

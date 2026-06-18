@@ -21,6 +21,11 @@ infra/gitops/
     canary/values.yaml
     production/values.yaml
   promotion/order.yaml
+  promotion/image-promotion.yaml
+  drift/desired-state.yaml
+  drift/observed-state.yaml
+  remediation/policy.yaml
+  remediation/decision.yaml
 ```
 
 ## Delivery Shape
@@ -36,3 +41,7 @@ Git commit
 The manifests use public repository references, synthetic image tags, and
 runtime Secret references only. They do not include live cluster endpoints,
 server-specific addresses, raw logs, or runtime connection values.
+
+The remediation manifests are plan-only evidence. They show how drift would be
+handled through reconcile, rollback, or block decisions without applying
+anything to a cluster.

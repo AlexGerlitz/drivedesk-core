@@ -29,6 +29,7 @@ bash scripts/check_public_staged_promotion.sh
 bash scripts/check_public_helm_render.sh
 bash scripts/check_public_gitops_layout.sh
 bash scripts/check_public_gitops_promotion_drift.sh
+bash scripts/check_public_gitops_drift_remediation.sh
 
 if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
   docker compose -f infra/docker/docker-compose.foundation.yml config --quiet

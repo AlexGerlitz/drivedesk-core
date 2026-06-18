@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "check": "public_gitops_drift_remediation",
+  "data_profile": "synthetic_fake_data",
+  "remediation_model": "gitops_plan_only_reconcile_or_rollback",
+  "remediation": {
+    "audit_event": "gitops.drift_remediation.planned",
+    "drifted_stages": ["production"],
+    "production": {
+      "desired_tag": "gitops-candidate-2026-06-18",
+      "observed_tag": "gitops-previous-release",
+      "recommended_action": "reconcile_after_approval",
+      "apply_mode": "plan_only",
+      "approval_required": true,
+      "rollback_tag": "gitops-previous-release"
+    }
+  },
+  "checks": {
+    "remediation_files_present": true,
+    "drift_inputs_referenced": true,
+    "production_drift_carried_forward": true,
+    "policy_actions_defined": true,
+    "production_requires_approval": true,
+    "plan_only_no_cluster_mutation": true,
+    "rollback_option_attached": true,
+    "reconcile_action_recorded": true,
+    "block_action_recorded": true,
+    "evidence_gates_referenced": true,
+    "audit_event_recorded": true,
+    "private_markers_absent": true,
+    "production_data_touched": false
+  },
+  "redaction": {
+    "paths_included": false,
+    "hostnames_included": false,
+    "addresses_included": false,
+    "credentials_included": false,
+    "raw_logs_included": false,
+    "production_data_included": false
+  }
+}

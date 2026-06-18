@@ -173,6 +173,7 @@ def test_public_demo_api_scripts_and_examples_exist() -> None:
         "scripts/check_public_helm_render.sh",
         "scripts/check_public_gitops_layout.sh",
         "scripts/check_public_gitops_promotion_drift.sh",
+        "scripts/check_public_gitops_drift_remediation.sh",
         "scripts/generate_public_demo_sdk.py",
         "examples/curl/demo-public.sh",
         "examples/python/demo_public_client.py",
@@ -239,6 +240,12 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
             "drift_detected",
             "out_of_sync_recorded",
             "gitops-candidate-2026-06-18",
+        ],
+        "scripts/check_public_gitops_drift_remediation.sh": [
+            "public_gitops_drift_remediation",
+            "production_requires_approval",
+            "plan_only_no_cluster_mutation",
+            "gitops.drift_remediation.planned",
         ],
         "scripts/generate_public_demo_sdk.py": [
             "/demo/public",

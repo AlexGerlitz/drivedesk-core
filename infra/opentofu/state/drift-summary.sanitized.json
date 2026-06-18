@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "check": "public_infra_state_drift",
+  "data_profile": "synthetic_fake_data",
+  "drift_model": "opentofu_desired_vs_observed_state",
+  "source": {
+    "desired_state": "infra/opentofu/state/desired-state.sanitized.json",
+    "observed_state": "infra/opentofu/state/observed-state.sanitized.json",
+    "iac_stack": "infra/opentofu/public",
+    "plan_summary": "infra/opentofu/public/plan-summary.sanitized.json"
+  },
+  "drift": {
+    "detected": true,
+    "drift_count": 2,
+    "drifted_components": [
+      "observability",
+      "backup_storage"
+    ],
+    "in_sync_components": [
+      "network_boundary",
+      "kubernetes_runtime",
+      "gitops_controller",
+      "secrets_boundary",
+      "state_backend"
+    ],
+    "severity": "medium"
+  },
+  "decision": {
+    "event_type": "infra.state_drift.detected",
+    "recommended_action": "plan_remediation_after_review",
+    "apply_mode": "plan_only",
+    "apply_from_public_export": false,
+    "production_data_touched": false
+  },
+  "checks": {
+    "desired_state_recorded": true,
+    "observed_state_recorded": true,
+    "opentofu_plan_referenced": true,
+    "component_inventory_matched": true,
+    "state_backend_boundary_preserved": true,
+    "secret_values_excluded": true,
+    "drift_detected": true,
+    "drifted_components_recorded": true,
+    "in_sync_components_recorded": true,
+    "plan_only_no_apply": true,
+    "private_markers_absent": true,
+    "production_data_touched": false
+  },
+  "redaction": {
+    "paths_included": false,
+    "hostnames_included": false,
+    "addresses_included": false,
+    "credentials_included": false,
+    "raw_logs_included": false,
+    "production_data_included": false
+  }
+}

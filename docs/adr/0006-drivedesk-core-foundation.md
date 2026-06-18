@@ -37,3 +37,5 @@ tenant/audit database tables, Docker Compose, and CI smoke checks.
 - The OpenTofu evidence layer records public-safe infrastructure shape, state
   boundary, secret boundary, and plan-only summary without provisioning cloud
   resources.
+- The infrastructure state drift layer compares desired and synthetic observed
+  state while preserving state, secret, and plan-only boundaries.

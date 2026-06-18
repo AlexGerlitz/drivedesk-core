@@ -38,6 +38,12 @@ Public-safe OpenTofu plan validation:
 bash scripts/check_public_opentofu_plan.sh
 ```
 
+Public-safe infrastructure state drift validation:
+
+```bash
+bash scripts/check_public_infra_state_drift.sh
+```
+
 The check validates the public infrastructure contract, environment model,
 component model, state boundary, secret boundary, sanitized plan summary, and
 plan-only no-apply behavior.

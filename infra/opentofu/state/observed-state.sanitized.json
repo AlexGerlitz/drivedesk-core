@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "state_model": "public_opentofu_observed_state",
+  "data_profile": "synthetic_fake_data",
+  "source": {
+    "snapshot": "synthetic_runtime_snapshot",
+    "collection_mode": "public_safe_offline_evidence",
+    "live_infrastructure_queried": false
+  },
+  "environments": [
+    "build",
+    "staging",
+    "canary",
+    "production"
+  ],
+  "components": {
+    "network_boundary": {
+      "status": "in_sync",
+      "controls": [
+        "public_ingress_separated",
+        "private_runtime_not_public",
+        "network_policies_required"
+      ]
+    },
+    "kubernetes_runtime": {
+      "status": "in_sync",
+      "workloads": [
+        "api",
+        "worker",
+        "migration_job"
+      ]
+    },
+    "gitops_controller": {
+      "status": "in_sync",
+      "sync_mode": "reviewed_gitops_changes"
+    },
+    "observability": {
+      "status": "drifted",
+      "metrics_required": true,
+      "logs_required": true,
+      "log_retention_days": 7
+    },
+    "backup_storage": {
+      "status": "drifted",
+      "encrypted": true,
+      "immutability_required": false,
+      "restore_drill_required": true
+    },
+    "secrets_boundary": {
+      "status": "in_sync",
+      "external_secret_manager_required": true,
+      "secret_values_excluded": true
+    }
+  },
+  "state_backend": {
+    "status": "in_sync",
+    "encrypted_state_required": true,
+    "locking_required": true,
+    "public_backend_config_included": false,
+    "secrets_in_state_allowed": false
+  },
+  "redaction": {
+    "paths_included": false,
+    "hostnames_included": false,
+    "addresses_included": false,
+    "credentials_included": false,
+    "raw_logs_included": false,
+    "production_data_included": false
+  }
+}

@@ -71,6 +71,8 @@ Implemented foundation:
 - public-safe synthetic release rollback drill with machine-readable evidence.
 - public-safe OpenTofu plan evidence with environment model, component model,
   state boundary, secret boundary, and zero-destroy plan-only summary.
+- public-safe infrastructure state drift evidence with desired-vs-observed
+  comparison, drift detection, and plan-only response.
 - public-safe GitOps image promotion/drift evidence with candidate tag,
   rollback tag, desired state, observed state, and synthetic `OutOfSync`.
 - public-safe GitOps drift remediation evidence with plan-only reconcile,
@@ -194,6 +196,9 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
 - OpenTofu plan evidence now describes the target infrastructure contract,
   environments, components, encrypted-state expectation, secret boundary, and
   plan-only zero-destroy summary without provisioning cloud resources.
+- Infrastructure state drift evidence now compares desired and synthetic
+  observed infrastructure state, detects observability and backup-storage drift,
+  and keeps remediation plan-only.
 - GitOps delivery foundation now connects the Helm chart to Argo CD-style
   build, staging, canary, and production desired state.
 - GitOps image automation now records the image digest, SBOM, Trivy scan
@@ -212,7 +217,7 @@ Recommended next slices:
 2. Additional mock adapters for webhook and accounting export flows.
 3. More workflow rule actions for notifications, approvals, and mapping-specific adapter jobs.
 4. More deployment evidence around private runtime rollout checks.
-5. Public-safe infrastructure state drift evidence.
+5. Private infrastructure state validation against the staging control plane.
 
 ## Interview Summary
 

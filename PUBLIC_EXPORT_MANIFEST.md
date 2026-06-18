@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-18T05:45:41Z
+Generated at: 2026-06-18T06:11:44Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -125,6 +125,15 @@ Copied public-safe areas:
 - public OpenTofu check: plan_only_no_apply
 - public OpenTofu check: destroy_count_zero
 - public OpenTofu ADR: 0052-public-safe-opentofu-plan-evidence
+- public infrastructure state drift doc
+- public infrastructure state drift path: infra/opentofu/state
+- public infrastructure state drift validation script: scripts/check_public_infra_state_drift.sh
+- public infrastructure state drift evidence snapshot: docs/public/evidence/infra-state-drift.sanitized.json
+- public infrastructure state drift check: drift_detected
+- public infrastructure state drift check: state_backend_boundary_preserved
+- public infrastructure state drift check: plan_only_no_apply
+- public infrastructure state drift event: infra.state_drift.detected
+- public infrastructure state drift ADR: 0053-public-safe-infrastructure-state-drift-evidence
 - public GitOps delivery foundation doc
 - public GitOps path: infra/gitops
 - public GitOps validation script: scripts/check_public_gitops_layout.sh

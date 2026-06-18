@@ -42,6 +42,7 @@ credentials.
 - `STAGED_PROMOTION_EVIDENCE.md` - public-safe staged release promotion drill.
 - `HELM_CHART.md` - public-safe Helm chart foundation.
 - `OPENTOFU_PLAN_EVIDENCE.md` - public-safe OpenTofu plan evidence.
+- `INFRA_STATE_DRIFT_EVIDENCE.md` - public-safe infrastructure state drift evidence.
 - `GITOPS_DELIVERY.md` - public-safe GitOps delivery foundation.
 - `GITOPS_PROMOTION_DRIFT.md` - public-safe GitOps image promotion and drift evidence.
 - `GITOPS_DRIFT_REMEDIATION.md` - public-safe GitOps drift remediation evidence.
@@ -64,6 +65,8 @@ credentials.
   evidence snapshot.
 - `evidence/opentofu-plan.sanitized.json` - machine-readable OpenTofu plan
   evidence snapshot.
+- `evidence/infra-state-drift.sanitized.json` - machine-readable infrastructure
+  state drift evidence snapshot.
 - `evidence/gitops-layout.sanitized.json` - machine-readable GitOps layout
   evidence snapshot.
 - `evidence/gitops-promotion-drift.sanitized.json` - machine-readable GitOps
@@ -100,6 +103,7 @@ The public repository export also generates:
 - `scripts/check_public_staged_promotion.sh` - public-safe staged promotion drill.
 - `scripts/check_public_helm_render.sh` - public-safe Helm chart validation.
 - `scripts/check_public_opentofu_plan.sh` - public-safe OpenTofu plan validation.
+- `scripts/check_public_infra_state_drift.sh` - public-safe infrastructure state drift validation.
 - `scripts/check_public_gitops_layout.sh` - public-safe GitOps layout validation.
 - `scripts/check_public_gitops_image_automation.sh` - public-safe GitOps image automation validation.
 - `scripts/check_public_gitops_promotion_drift.sh` - public-safe GitOps promotion and drift validation.
@@ -157,13 +161,14 @@ https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 34. Read the staged promotion evidence overview.
 35. Read the Helm chart foundation overview.
 36. Read the OpenTofu plan evidence overview.
-37. Read the GitOps delivery foundation overview.
-38. Read the GitOps image automation overview.
-39. Read the GitOps promotion drift overview.
-40. Read the GitOps drift remediation overview.
-41. Read the case study.
-42. Check CI and public demo health workflow results.
-43. Run the public smoke checks locally.
+37. Read the infrastructure state drift evidence overview.
+38. Read the GitOps delivery foundation overview.
+39. Read the GitOps image automation overview.
+40. Read the GitOps promotion drift overview.
+41. Read the GitOps drift remediation overview.
+42. Read the case study.
+43. Check CI and public demo health workflow results.
+44. Run the public smoke checks locally.
 
 ## Human Explanation
 

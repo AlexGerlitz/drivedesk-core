@@ -172,6 +172,7 @@ def test_public_demo_api_scripts_and_examples_exist() -> None:
         "scripts/check_public_staged_promotion.sh",
         "scripts/check_public_helm_render.sh",
         "scripts/check_public_opentofu_plan.sh",
+        "scripts/check_public_infra_state_drift.sh",
         "scripts/check_public_gitops_layout.sh",
         "scripts/check_public_gitops_image_automation.sh",
         "scripts/check_public_gitops_promotion_drift.sh",
@@ -236,6 +237,12 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
             "state_boundary_recorded",
             "plan_only_no_apply",
             "destroy_count_zero",
+        ],
+        "scripts/check_public_infra_state_drift.sh": [
+            "public_infra_state_drift",
+            "state_backend_boundary_preserved",
+            "plan_only_no_apply",
+            "infra.state_drift.detected",
         ],
         "scripts/check_public_gitops_layout.sh": [
             "public_gitops_layout",

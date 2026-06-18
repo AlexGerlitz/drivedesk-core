@@ -28,6 +28,7 @@ bash scripts/check_public_slo_canary_gate.sh
 bash scripts/check_public_staged_promotion.sh
 bash scripts/check_public_helm_render.sh
 bash scripts/check_public_opentofu_plan.sh
+bash scripts/check_public_infra_state_drift.sh
 bash scripts/check_public_gitops_layout.sh
 bash scripts/check_public_gitops_image_automation.sh
 bash scripts/check_public_gitops_promotion_drift.sh

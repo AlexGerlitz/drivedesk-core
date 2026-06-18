@@ -137,6 +137,8 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
         "rollback_attached",
         "infra.remediation.execution.completed",
         "post_remediation_validation_recorded",
+        "infra.post_remediation_drift.clean",
+        "no_residual_drift_recorded",
     }
     assert len(payload["outbox"]) >= 3
     assert {event["status"] for event in payload["outbox"]} >= {"processed", "pending"}
@@ -185,6 +187,7 @@ def test_public_demo_api_scripts_and_examples_exist() -> None:
         "scripts/check_public_private_infra_validation.sh",
         "scripts/check_public_private_infra_remediation.sh",
         "scripts/check_public_private_infra_remediation_execution.sh",
+        "scripts/check_public_private_infra_post_remediation_drift_refresh.sh",
         "scripts/check_public_gitops_layout.sh",
         "scripts/check_public_gitops_image_automation.sh",
         "scripts/check_public_gitops_promotion_drift.sh",
@@ -279,6 +282,12 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
             "reviewed_execution_recorded",
             "post_remediation_validation_recorded",
             "infra.remediation.execution.completed",
+        ],
+        "scripts/check_public_private_infra_post_remediation_drift_refresh.sh": [
+            "public_private_infra_post_remediation_drift_refresh",
+            "read_only_refresh_recorded",
+            "no_residual_drift_recorded",
+            "infra.post_remediation_drift.clean",
         ],
         "scripts/check_public_gitops_layout.sh": [
             "public_gitops_layout",

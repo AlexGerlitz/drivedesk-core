@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-18T07:36:53Z
+Generated at: 2026-06-18T08:02:57Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -169,6 +169,12 @@ Copied public-safe areas:
 - public private infrastructure remediation execution check: post_remediation_validation_recorded
 - public private infrastructure remediation execution event: infra.remediation.execution.completed
 - public private infrastructure remediation execution ADR: 0057-public-safe-private-infra-remediation-execution
+- public private infrastructure post-remediation drift refresh doc
+- public private infrastructure post-remediation drift refresh script: scripts/check_public_private_infra_post_remediation_drift_refresh.sh
+- public private infrastructure post-remediation drift refresh evidence snapshot: docs/public/evidence/private-infra-post-remediation-drift-refresh.sanitized.json
+- public private infrastructure post-remediation drift refresh check: no_residual_drift_recorded
+- public private infrastructure post-remediation drift refresh event: infra.post_remediation_drift.clean
+- public private infrastructure post-remediation drift refresh ADR: 0058-public-safe-private-infra-post-remediation-drift-refresh
 - public GitOps delivery foundation doc
 - public GitOps path: infra/gitops
 - public GitOps validation script: scripts/check_public_gitops_layout.sh

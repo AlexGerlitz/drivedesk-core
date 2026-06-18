@@ -87,6 +87,16 @@ The check validates reviewed execution after the remediation plan, preflight
 gates, postchecks, rollback context, evidence refresh, no public apply, and no
 production apply.
 
+Public-safe post-remediation drift refresh validation:
+
+```bash
+bash scripts/check_public_private_infra_post_remediation_drift_refresh.sh
+```
+
+The check validates read-only drift refresh after reviewed execution, resolved
+components, no residual drift, no accepted drift, no apply, and no runtime
+mutation.
+
 Core endpoints:
 
 - `POST /auth/login`;

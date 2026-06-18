@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "refresh_model": "post_remediation_private_infra_drift_refresh",
+  "data_profile": "sanitized_private_staging_summary",
+  "environment": {
+    "name": "private_staging",
+    "public_route": false,
+    "production_data_touched": false
+  },
+  "source_contracts": [
+    "infra/state-remediation/private-infra-remediation-execution.sanitized.json",
+    "docs/public/evidence/private-infra-remediation-execution.sanitized.json",
+    "infra/state-remediation/private-infra-remediation-plan.sanitized.json",
+    "docs/public/evidence/private-infra-remediation-plan.sanitized.json",
+    "infra/state-validation/private-infra-validation.sanitized.json",
+    "docs/public/evidence/private-infra-validation.sanitized.json",
+    "infra/opentofu/state/drift-summary.sanitized.json",
+    "infra/opentofu/state/desired-state.sanitized.json",
+    "infra/opentofu/state/observed-state.sanitized.json",
+    "infra/opentofu/public/plan-summary.sanitized.json",
+    "docs/public/evidence/runtime-rollout.sanitized.json",
+    "docs/public/evidence/de-staging-evidence.sanitized.json",
+    "docs/public/evidence/backup-restore-drill.sanitized.json"
+  ],
+  "refresh": {
+    "refresh_id": "private-infra-post-remediation-drift-refresh-2026-06-18",
+    "execution_id": "private-infra-remediation-execution-2026-06-18",
+    "triggered_by_event": "infra.remediation.execution.completed",
+    "mode": "read_only_post_remediation_drift_refresh",
+    "read_only": true,
+    "automatic_apply": false,
+    "public_apply": false,
+    "production_apply": false,
+    "production_data_touched": false,
+    "compared_components": [
+      {
+        "component": "observability",
+        "previous_drift": "observability_drift_detected",
+        "refreshed_status": "aligned",
+        "residual_drift": false,
+        "accepted_exception": false,
+        "evidence_refs": [
+          "prometheus_targets",
+          "loki_query",
+          "alertmanager_ready",
+          "grafana_dashboard"
+        ]
+      },
+      {
+        "component": "backup_storage",
+        "previous_drift": "backup_storage_drift_detected",
+        "refreshed_status": "aligned",
+        "residual_drift": false,
+        "accepted_exception": false,
+        "evidence_refs": [
+          "backup_health",
+          "restore_drill",
+          "state_backend_boundary",
+          "secret_boundary"
+        ]
+      }
+    ],
+    "gates_passed": [
+      "private_validation_refreshed",
+      "runtime_health_refreshed",
+      "observability_evidence_refreshed",
+      "backup_restore_evidence_refreshed",
+      "sanitized_evidence_refreshed"
+    ]
+  },
+  "post_refresh_drift": {
+    "event_type": "infra.post_remediation_drift.refreshed",
+    "previous_drifted_components": [
+      "observability",
+      "backup_storage"
+    ],
+    "resolved_components": [
+      "observability",
+      "backup_storage"
+    ],
+    "residual_drift_components": [],
+    "accepted_drift_components": [],
+    "desired_state_compared": true,
+    "observed_state_compared": true,
+    "opentofu_plan_rechecked": true,
+    "gitops_desired_state_rechecked": true,
+    "runtime_evidence_rechecked": true
+  },
+  "boundaries": {
+    "no_public_apply": true,
+    "no_production_apply": true,
+    "no_opentofu_apply": true,
+    "no_gitops_sync": true,
+    "no_runtime_mutation": true,
+    "no_service_restart": true,
+    "no_raw_logs": true,
+    "no_request_bodies": true,
+    "no_credentials": true,
+    "no_private_paths": true,
+    "no_addresses": true,
+    "no_production_data": true
+  },
+  "decision": {
+    "event_type": "infra.post_remediation_drift.clean",
+    "recommended_action": "continue_scheduled_validation",
+    "automatic_public_apply": false,
+    "production_data_touched": false
+  }
+}

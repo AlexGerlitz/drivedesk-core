@@ -47,6 +47,7 @@ credentials.
 - `PRIVATE_INFRA_VALIDATION.md` - public-safe private infrastructure validation evidence.
 - `PRIVATE_INFRA_REMEDIATION.md` - public-safe private infrastructure remediation plan evidence.
 - `PRIVATE_INFRA_REMEDIATION_EXECUTION.md` - public-safe private infrastructure remediation execution evidence.
+- `PRIVATE_INFRA_POST_REMEDIATION_DRIFT_REFRESH.md` - public-safe post-remediation drift refresh evidence.
 - `GITOPS_DELIVERY.md` - public-safe GitOps delivery foundation.
 - `GITOPS_PROMOTION_DRIFT.md` - public-safe GitOps image promotion and drift evidence.
 - `GITOPS_DRIFT_REMEDIATION.md` - public-safe GitOps drift remediation evidence.
@@ -79,6 +80,8 @@ credentials.
   private infrastructure remediation plan evidence snapshot.
 - `evidence/private-infra-remediation-execution.sanitized.json` - machine-readable
   private infrastructure remediation execution evidence snapshot.
+- `evidence/private-infra-post-remediation-drift-refresh.sanitized.json` -
+  machine-readable post-remediation drift refresh evidence snapshot.
 - `evidence/gitops-layout.sanitized.json` - machine-readable GitOps layout
   evidence snapshot.
 - `evidence/gitops-promotion-drift.sanitized.json` - machine-readable GitOps
@@ -120,6 +123,7 @@ The public repository export also generates:
 - `scripts/check_public_private_infra_validation.sh` - public-safe private infrastructure validation.
 - `scripts/check_public_private_infra_remediation.sh` - public-safe private infrastructure remediation plan validation.
 - `scripts/check_public_private_infra_remediation_execution.sh` - public-safe private infrastructure remediation execution validation.
+- `scripts/check_public_private_infra_post_remediation_drift_refresh.sh` - public-safe post-remediation drift refresh validation.
 - `scripts/check_public_gitops_layout.sh` - public-safe GitOps layout validation.
 - `scripts/check_public_gitops_image_automation.sh` - public-safe GitOps image automation validation.
 - `scripts/check_public_gitops_promotion_drift.sh` - public-safe GitOps promotion and drift validation.
@@ -181,13 +185,15 @@ https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 38. Read the runtime rollout evidence overview.
 39. Read the private infrastructure validation overview.
 40. Read the private infrastructure remediation plan overview.
-41. Read the GitOps delivery foundation overview.
-42. Read the GitOps image automation overview.
-43. Read the GitOps promotion drift overview.
-44. Read the GitOps drift remediation overview.
-45. Read the case study.
-46. Check CI and public demo health workflow results.
-47. Run the public smoke checks locally.
+41. Read the private infrastructure remediation execution overview.
+42. Read the post-remediation drift refresh overview.
+43. Read the GitOps delivery foundation overview.
+44. Read the GitOps image automation overview.
+45. Read the GitOps promotion drift overview.
+46. Read the GitOps drift remediation overview.
+47. Read the case study.
+48. Check CI and public demo health workflow results.
+49. Run the public smoke checks locally.
 
 ## Human Explanation
 

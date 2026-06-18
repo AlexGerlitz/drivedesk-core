@@ -474,6 +474,18 @@ window.DRIVEDESK_DEMO_DATA = {
       "state": "success",
       "detail": "postchecks and sanitized evidence refresh recorded",
       "evidence": "post_remediation_validation_recorded"
+    },
+    {
+      "name": "Drift refresh clean",
+      "state": "success",
+      "detail": "read-only refresh marks repaired components aligned",
+      "evidence": "infra.post_remediation_drift.clean"
+    },
+    {
+      "name": "No residual drift",
+      "state": "success",
+      "detail": "sanitized refresh records no residual or accepted drift",
+      "evidence": "no_residual_drift_recorded"
     }
   ],
   "workflow": {

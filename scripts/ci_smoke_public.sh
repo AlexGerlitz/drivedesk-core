@@ -33,6 +33,7 @@ bash scripts/check_public_runtime_rollout.sh
 bash scripts/check_public_private_infra_validation.sh
 bash scripts/check_public_private_infra_remediation.sh
 bash scripts/check_public_private_infra_remediation_execution.sh
+bash scripts/check_public_private_infra_post_remediation_drift_refresh.sh
 bash scripts/check_public_gitops_layout.sh
 bash scripts/check_public_gitops_image_automation.sh
 bash scripts/check_public_gitops_promotion_drift.sh

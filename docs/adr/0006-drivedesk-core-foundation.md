@@ -44,3 +44,12 @@ tenant/audit database tables, Docker Compose, and CI smoke checks.
   details.
 - The private infrastructure validation layer records a read-only validation
   boundary before any apply, deploy, restart, or remediation decision.
+- The private infrastructure remediation planning layer records plan-only,
+  operator-reviewed actions with preflight gates, rollback context, postchecks,
+  and no public apply.
+- The private infrastructure remediation execution layer records reviewed
+  private staging execution, preflight gates, postchecks, rollback context,
+  evidence refresh, and no production apply.
+- The post-remediation drift refresh layer records a read-only recheck after
+  execution, resolved drift, no residual drift, no accepted drift, and no
+  runtime mutation.

@@ -26,6 +26,7 @@ Implemented baseline:
 - public-safe private infrastructure validation evidence for the exported Core surface.
 - public-safe private infrastructure remediation plan evidence for the exported Core surface.
 - public-safe private infrastructure remediation execution evidence for the exported Core surface.
+- public-safe post-remediation drift refresh evidence for the exported Core surface.
 - public-safe GitOps delivery foundation and Argo CD layout validation for the exported Core surface.
 - public-safe GitOps image promotion and drift detection for the exported Core surface.
 - public-safe GitOps drift remediation planning for the exported Core surface.
@@ -67,6 +68,9 @@ What this gives us:
 - private infrastructure remediation execution evidence records reviewed
   private staging execution, passed preflight gates, passed postchecks,
   rollback context, refreshed evidence, and no production apply.
+- post-remediation drift refresh evidence records a read-only recheck after
+  execution, resolved drift, no residual drift, no accepted drift, and no
+  runtime mutation.
 - GitOps desired-state delivery connects the Helm chart to build, staging,
   canary, and production promotion flow without exposing a live cluster.
 - image promotion and drift evidence shows the difference between desired state
@@ -81,7 +85,8 @@ What this gives us:
 
 Recommended next DevOps tasks:
 
-1. Add post-remediation drift refresh evidence after reviewed execution.
+1. Add recurring scheduled validation evidence after the post-remediation
+   refresh.
 2. Broaden generated client examples from the OpenAPI schema.
 3. Add broader generated client examples from the OpenAPI schema.
 4. Add policy-as-code proposals only as text-only design notes unless the owner

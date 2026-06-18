@@ -107,6 +107,7 @@ health, _ = get_json("/health")
 ready, _ = get_json("/ready")
 demo, demo_headers = get_json("/demo/public")
 adapters, _ = get_json("/integration-adapters")
+lifecycle_policies, _ = get_json("/business-record-lifecycle-policies")
 openapi, _ = get_json("/openapi.json")
 metrics, metrics_headers = get_text("/metrics")
 
@@ -173,6 +174,11 @@ assert "connection scope enforcement" in adapter_catalog["file.import.fake"]["ca
 assert "records" in adapter_catalog["file.import.fake"]["payload_schema"]["required"], adapters
 assert adapter_catalog["internal.noop"]["connection_profile_supported"] is False, adapters
 assert adapter_catalog["internal.noop"]["supported_connection_scopes"] == [], adapters
+lifecycle_catalog = {policy["record_type"]: policy for policy in lifecycle_policies}
+assert set(lifecycle_catalog) == {"contract", "document", "lesson", "payment", "task"}, lifecycle_policies
+assert lifecycle_catalog["contract"]["initial_status"] == "draft", lifecycle_policies
+assert "completed" in lifecycle_catalog["contract"]["terminal_statuses"], lifecycle_policies
+assert "confirmed" in lifecycle_catalog["payment"]["statuses"], lifecycle_policies
 assert demo_headers.get("access-control-allow-origin") == "*", demo_headers
 assert "public" in demo_headers.get("cache-control", ""), demo_headers
 assert metrics_headers.get("content-type", "").startswith("text/plain"), metrics_headers
@@ -193,6 +199,8 @@ assert "/auth/me" in openapi["paths"], openapi["paths"].keys()
 assert "/auth/logout" in openapi["paths"], openapi["paths"].keys()
 assert "/auth/sessions" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/business-records" in openapi["paths"], openapi["paths"].keys()
+assert "/business-record-lifecycle-policies" in openapi["paths"], openapi["paths"].keys()
+assert "/tenants/{tenant_id}/business-records/lifecycle-preview" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/business-records/{record_id}/transition" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/workflow-rules" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/workflow-action-runs" in openapi["paths"], openapi["paths"].keys()
@@ -209,6 +217,8 @@ if openapi_file.exists():
     assert "/demo/public" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/workflow-action-runs" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/outbox-events/{event_id}/retry" in generated["paths"], generated["paths"].keys()
+    assert "/business-record-lifecycle-policies" in generated["paths"], generated["paths"].keys()
+    assert "/tenants/{tenant_id}/business-records/lifecycle-preview" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/integration-connections" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/integration-mapping-preview" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/integration-operator-review" in generated["paths"], generated["paths"].keys()

@@ -251,6 +251,30 @@ class BusinessRecordTransition(BaseModel):
     reason: str | None = Field(default=None, min_length=2, max_length=255)
 
 
+class BusinessRecordLifecyclePolicyRead(BaseModel):
+    record_type: BusinessRecordType
+    initial_status: str
+    statuses: list[str]
+    terminal_statuses: list[str]
+    transitions: list[dict[str, Any]]
+
+
+class BusinessRecordLifecyclePreviewCreate(BaseModel):
+    record_type: BusinessRecordType
+    from_status: str = Field(min_length=2, max_length=32, pattern=r"^[a-z0-9][a-z0-9_-]*$")
+    to_status: str = Field(min_length=2, max_length=32, pattern=r"^[a-z0-9][a-z0-9_-]*$")
+
+
+class BusinessRecordLifecyclePreviewRead(BaseModel):
+    record_type: BusinessRecordType
+    from_status: str
+    to_status: str
+    valid: bool
+    reason: str
+    allowed_next_statuses: list[str]
+    terminal: bool
+
+
 class BusinessRecordRead(BaseModel):
     id: str
     tenant_id: str

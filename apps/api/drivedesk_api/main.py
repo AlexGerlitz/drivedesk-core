@@ -64,6 +64,9 @@ from drivedesk_api.schemas import (
     AuthMeRead,
     AuthSessionRead,
     BusinessRecordCreate,
+    BusinessRecordLifecyclePolicyRead,
+    BusinessRecordLifecyclePreviewCreate,
+    BusinessRecordLifecyclePreviewRead,
     BusinessRecordRead,
     BusinessRecordTransition,
     BusinessRecordType,
@@ -122,7 +125,11 @@ from drivedesk_api.settings import Settings, get_settings
 from drivedesk_api.tenant_repository import list_tenant_owned
 from drivedesk_api.tenant_scope import list_tenants_for_actor, list_users_for_actor
 from drivedesk_core import __version__ as core_version
-from drivedesk_core import list_adapter_descriptors
+from drivedesk_core import (
+    list_adapter_descriptors,
+    list_lifecycle_policies,
+    preview_lifecycle_transition,
+)
 
 
 request_logger = logging.getLogger("drivedesk.api.requests")
@@ -185,6 +192,14 @@ def build_app(settings: Settings | None = None) -> FastAPI:
     @api.get("/integration-adapters", response_model=list[AdapterContractRead], tags=["integrations"])
     async def list_integration_adapters_endpoint() -> list[dict[str, object]]:
         return list_adapter_descriptors()
+
+    @api.get(
+        "/business-record-lifecycle-policies",
+        response_model=list[BusinessRecordLifecyclePolicyRead],
+        tags=["business-records"],
+    )
+    async def list_business_record_lifecycle_policies_endpoint() -> list[dict[str, object]]:
+        return list_lifecycle_policies()
 
     @api.get("/metrics", include_in_schema=False)
     async def metrics(session: AsyncSession = Depends(get_session)) -> PlainTextResponse:
@@ -647,6 +662,25 @@ def build_app(settings: Settings | None = None) -> FastAPI:
         await ensure_tenant_exists(session, tenant_id)
         require_tenant_permission(actor, tenant_id, Permission.BUSINESS_RECORD_READ)
         return await list_business_records(session, tenant_id=tenant_id, record_type=record_type)
+
+    @api.post(
+        "/tenants/{tenant_id}/business-records/lifecycle-preview",
+        response_model=BusinessRecordLifecyclePreviewRead,
+        tags=["business-records"],
+    )
+    async def preview_business_record_lifecycle_endpoint(
+        tenant_id: str,
+        payload: BusinessRecordLifecyclePreviewCreate,
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> dict[str, object]:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.BUSINESS_RECORD_READ)
+        return preview_lifecycle_transition(
+            payload.record_type,
+            from_status=payload.from_status,
+            to_status=payload.to_status,
+        )
 
     @api.post(
         "/tenants/{tenant_id}/business-records/{record_id}/transition",

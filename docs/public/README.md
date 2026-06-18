@@ -20,6 +20,7 @@ credentials.
 - `PLATFORM_ADMIN.md` - dedicated platform-admin model and SaaS control-plane boundary.
 - `TENANT_ISOLATION.md` - tenant-scoped bearer access and cross-tenant boundaries.
 - `BUSINESS_RECORDS.md` - tenant-owned business record foundation.
+- `BUSINESS_RECORD_LIFECYCLE.md` - lifecycle policies and transition preview.
 - `CLIENT_SDK.md` - generated OpenAPI client SDK example.
 - `INTEGRATION_ADAPTER_CATALOG.md` - runtime adapter metadata and discovery contract.
 - `INTEGRATION_MAPPING_VALIDATION.md` - mapping validation against adapter requirements.
@@ -44,6 +45,7 @@ The public repository export also generates:
 - `docs/openapi.json` - FastAPI OpenAPI schema from the exported API.
 - `apps/admin/public-demo/index.html` - static fake-data product demo shell.
 - `GET /demo/public` - read-only synthetic demo payload in the exported API.
+- `GET /business-record-lifecycle-policies` - public-safe lifecycle policy catalog.
 - `GET /tenants/{tenant_id}/integration-operator-review` - public-safe
   integration failure review contract in the exported API.
 - `workflow`, `timeline`, and `domainEvents` - synthetic workflow contract in
@@ -80,21 +82,22 @@ https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 11. Read the platform-admin overview.
 12. Read the tenant isolation overview.
 13. Read the business records overview.
-14. Read the generated client SDK overview.
-15. Read the system design overview.
-16. Read the integration adapter catalog overview.
-17. Read the integration mapping validation overview.
-18. Read the integration mapping transform overview.
-19. Read the integration connection scopes overview.
-20. Read the integration operation contracts overview.
-21. Read the integration operator review overview.
-22. Read the integration connections overview.
-23. Read the integration adapters overview.
-24. Read the integration observability overview.
-25. Read the outbox recovery overview.
-26. Read the case study.
-27. Check CI and public demo health workflow results.
-28. Run the public smoke checks locally.
+14. Read the business record lifecycle overview.
+15. Read the generated client SDK overview.
+16. Read the system design overview.
+17. Read the integration adapter catalog overview.
+18. Read the integration mapping validation overview.
+19. Read the integration mapping transform overview.
+20. Read the integration connection scopes overview.
+21. Read the integration operation contracts overview.
+22. Read the integration operator review overview.
+23. Read the integration connections overview.
+24. Read the integration adapters overview.
+25. Read the integration observability overview.
+26. Read the outbox recovery overview.
+27. Read the case study.
+28. Check CI and public demo health workflow results.
+29. Run the public smoke checks locally.
 
 ## Human Explanation
 

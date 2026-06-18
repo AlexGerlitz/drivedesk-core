@@ -397,6 +397,145 @@
         "title": "BusinessRecordCreate",
         "type": "object"
       },
+      "BusinessRecordLifecyclePolicyRead": {
+        "properties": {
+          "initial_status": {
+            "title": "Initial Status",
+            "type": "string"
+          },
+          "record_type": {
+            "enum": [
+              "contract",
+              "payment",
+              "lesson",
+              "task",
+              "document"
+            ],
+            "title": "Record Type",
+            "type": "string"
+          },
+          "statuses": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Statuses",
+            "type": "array"
+          },
+          "terminal_statuses": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Terminal Statuses",
+            "type": "array"
+          },
+          "transitions": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Transitions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "record_type",
+          "initial_status",
+          "statuses",
+          "terminal_statuses",
+          "transitions"
+        ],
+        "title": "BusinessRecordLifecyclePolicyRead",
+        "type": "object"
+      },
+      "BusinessRecordLifecyclePreviewCreate": {
+        "properties": {
+          "from_status": {
+            "maxLength": 32,
+            "minLength": 2,
+            "pattern": "^[a-z0-9][a-z0-9_-]*$",
+            "title": "From Status",
+            "type": "string"
+          },
+          "record_type": {
+            "enum": [
+              "contract",
+              "payment",
+              "lesson",
+              "task",
+              "document"
+            ],
+            "title": "Record Type",
+            "type": "string"
+          },
+          "to_status": {
+            "maxLength": 32,
+            "minLength": 2,
+            "pattern": "^[a-z0-9][a-z0-9_-]*$",
+            "title": "To Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "record_type",
+          "from_status",
+          "to_status"
+        ],
+        "title": "BusinessRecordLifecyclePreviewCreate",
+        "type": "object"
+      },
+      "BusinessRecordLifecyclePreviewRead": {
+        "properties": {
+          "allowed_next_statuses": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Allowed Next Statuses",
+            "type": "array"
+          },
+          "from_status": {
+            "title": "From Status",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "record_type": {
+            "enum": [
+              "contract",
+              "payment",
+              "lesson",
+              "task",
+              "document"
+            ],
+            "title": "Record Type",
+            "type": "string"
+          },
+          "terminal": {
+            "title": "Terminal",
+            "type": "boolean"
+          },
+          "to_status": {
+            "title": "To Status",
+            "type": "string"
+          },
+          "valid": {
+            "title": "Valid",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "record_type",
+          "from_status",
+          "to_status",
+          "valid",
+          "reason",
+          "allowed_next_statuses",
+          "terminal"
+        ],
+        "title": "BusinessRecordLifecyclePreviewRead",
+        "type": "object"
+      },
       "BusinessRecordRead": {
         "properties": {
           "created_at": {
@@ -2277,6 +2416,31 @@
         ]
       }
     },
+    "/business-record-lifecycle-policies": {
+      "get": {
+        "operationId": "list_business_record_lifecycle_policies_endpoint_business_record_lifecycle_policies_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BusinessRecordLifecyclePolicyRead"
+                  },
+                  "title": "Response List Business Record Lifecycle Policies Endpoint Business Record Lifecycle Policies Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Business Record Lifecycle Policies Endpoint",
+        "tags": [
+          "business-records"
+        ]
+      }
+    },
     "/demo/public": {
       "get": {
         "operationId": "public_demo_demo_public_get",
@@ -2996,6 +3160,94 @@
           }
         },
         "summary": "Create Business Record Endpoint"
+      }
+    },
+    "/tenants/{tenant_id}/business-records/lifecycle-preview": {
+      "post": {
+        "operationId": "preview_business_record_lifecycle_endpoint_tenants__tenant_id__business_records_lifecycle_preview_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tenant_id",
+            "required": true,
+            "schema": {
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "X-Actor-Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Role",
+            "required": false,
+            "schema": {
+              "default": "viewer",
+              "title": "X-Actor-Role",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessRecordLifecyclePreviewCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessRecordLifecyclePreviewRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Preview Business Record Lifecycle Endpoint",
+        "tags": [
+          "business-records"
+        ]
       }
     },
     "/tenants/{tenant_id}/business-records/{record_id}/transition": {

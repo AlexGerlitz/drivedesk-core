@@ -127,6 +127,58 @@ def test_tenant_owned_repository_helper_filters_by_tenant(
         tenant_owned_select(User, tenant_a_id)
 
 
+def test_business_record_lifecycle_policy_catalog_and_preview(
+    api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, _ = api_client
+    owner_headers = {"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"}
+
+    policies_response = client.get("/business-record-lifecycle-policies")
+    assert policies_response.status_code == 200
+    policies = {policy["record_type"]: policy for policy in policies_response.json()}
+    assert set(policies) == {"contract", "document", "lesson", "payment", "task"}
+    assert policies["contract"]["initial_status"] == "draft"
+    assert policies["payment"]["terminal_statuses"] == ["cancelled", "refunded"]
+
+    tenant_response = client.post(
+        "/tenants",
+        json={"slug": "lifecycle-preview", "name": "Lifecycle Preview"},
+        headers=owner_headers,
+    )
+    assert tenant_response.status_code == 201
+    tenant_id = tenant_response.json()["id"]
+
+    accepted_response = client.post(
+        f"/tenants/{tenant_id}/business-records/lifecycle-preview",
+        json={"record_type": "contract", "from_status": "draft", "to_status": "approved"},
+        headers=owner_headers,
+    )
+    assert accepted_response.status_code == 200
+    accepted = accepted_response.json()
+    assert accepted["valid"] is True
+    assert accepted["allowed_next_statuses"] == ["approved", "pending_signature", "cancelled"]
+    assert accepted["terminal"] is False
+
+    rejected_response = client.post(
+        f"/tenants/{tenant_id}/business-records/lifecycle-preview",
+        json={"record_type": "contract", "from_status": "completed", "to_status": "active"},
+        headers=owner_headers,
+    )
+    assert rejected_response.status_code == 200
+    rejected = rejected_response.json()
+    assert rejected["valid"] is False
+    assert rejected["terminal"] is True
+    assert rejected["reason"] == "completed is terminal for contract."
+
+    forbidden_response = client.post(
+        f"/tenants/{tenant_id}/business-records/lifecycle-preview",
+        json={"record_type": "task", "from_status": "open", "to_status": "done"},
+        headers={"X-Actor-Id": "auth_1", "X-Actor-Role": "authenticated"},
+    )
+    assert forbidden_response.status_code == 403
+    assert forbidden_response.json()["detail"] == "permission required: business_record:read"
+
+
 def test_business_record_foundation_is_tenant_scoped_and_audited(
     api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
 ) -> None:

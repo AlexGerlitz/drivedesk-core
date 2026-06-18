@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-18T01:02:34Z
+Generated at: 2026-06-18T01:16:36Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -45,6 +45,8 @@ Copied public-safe areas:
 - public session revocation control-plane surface
 - public business record tenant-owned surface
 - public business record lifecycle and metrics surface
+- public business record lifecycle policy endpoint: /business-record-lifecycle-policies
+- public business record lifecycle preview endpoint: /tenants/{tenant_id}/business-records/lifecycle-preview
 - public business record outbox adapter key: internal.business_record
 - public workflow rule tenant-owned automation surface
 - public workflow rule audit and outbox surface

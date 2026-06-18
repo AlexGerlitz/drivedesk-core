@@ -34,6 +34,7 @@ operations, or commercial details.
 - Reusable tenant-owned repository helper module for models with `tenant_id`.
 - Tenant-owned business record foundation for contracts, payments, lessons, tasks, and documents.
 - Business record lifecycle transition endpoint with audit, outbox, and aggregate metrics.
+- Business record lifecycle policy catalog and tenant-scoped transition preview.
 - Tenant-owned workflow rule foundation for `business_record.status_changed` automation.
 - Workflow rule audit, configured outbox handoff, and aggregate workflow metrics.
 - Workflow actions for task-record creation and adapter-sync requests.
@@ -49,7 +50,6 @@ operations, or commercial details.
 
 ## Next
 
-- More detailed lifecycle validation examples for contracts, payments, lessons, tasks, and documents.
 - More public-safe workflow examples that reuse the same rule, action-run, task,
   event, and outbox shape.
 - More public-safe evidence around local run, CI, OpenAPI, and demo health.

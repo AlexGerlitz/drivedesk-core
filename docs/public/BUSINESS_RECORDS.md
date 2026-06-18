@@ -10,6 +10,8 @@ building detailed product modules.
 POST /tenants/{tenant_id}/business-records
 GET /tenants/{tenant_id}/business-records
 GET /tenants/{tenant_id}/business-records?record_type=contract
+GET /business-record-lifecycle-policies
+POST /tenants/{tenant_id}/business-records/lifecycle-preview
 POST /tenants/{tenant_id}/business-records/{record_id}/transition
 POST /tenants/{tenant_id}/workflow-rules
 GET /tenants/{tenant_id}/workflow-rules
@@ -37,6 +39,7 @@ shared platform behavior once:
 - lifecycle transitions;
 - aggregate Prometheus metrics.
 - reusable tenant-owned repository helpers.
+- lifecycle policy catalog and read-only transition preview.
 
 ## Verified Behavior
 
@@ -60,6 +63,10 @@ The Core API tests cover:
 - creating task records through workflow action `create_task_record`;
 - requesting adapter sync work through workflow action `request_adapter_sync`;
 - recording workflow action runs through `workflow.action_run.created`;
+- listing lifecycle policies for contracts, payments, lessons, tasks, and
+  documents through `GET /business-record-lifecycle-policies`;
+- previewing valid and invalid transitions through
+  `POST /tenants/{tenant_id}/business-records/lifecycle-preview`;
 - exposing aggregate metric rows such as:
 
 ```text
@@ -87,3 +94,6 @@ documents. It is the first stable platform path for tenant-owned business data.
 
 Future domain modules can move a record type into a dedicated table when it
 needs its own lifecycle, validation rules, integrations, or reporting shape.
+
+`BUSINESS_RECORD_LIFECYCLE.md` documents the current lifecycle policy catalog
+and preview contract.

@@ -41,6 +41,7 @@ Implemented foundation:
 - reusable tenant-scope helper module for Core list queries;
 - tenant-owned business record foundation for contracts, payments, lessons, tasks, and documents;
 - business record lifecycle transition endpoint with audit, outbox, and aggregate metrics;
+- business record lifecycle policy catalog with tenant-scoped transition preview;
 - tenant-owned workflow rules for business record status automation;
 - workflow rule audit, configured outbox handoff, and aggregate workflow metrics;
 - workflow actions for task record creation and adapter sync requests;
@@ -126,6 +127,9 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
   audit/outbox events and aggregate `drivedesk_business_records` metrics, while
   keeping titles, external refs, payloads, tenant ids, and user ids out of
   metrics.
+- Business record lifecycle policies now expose expected status paths for
+  contracts, payments, lessons, tasks, and documents, plus a tenant-scoped
+  preview endpoint for proposed transitions.
 - Workflow rules can now react to `business_record.status_changed`, write
   `workflow.rule.triggered` audit events, enqueue configured workflow outbox
   events such as `workflow.contract_approved`, and expose only aggregate

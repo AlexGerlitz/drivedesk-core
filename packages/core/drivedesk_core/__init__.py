@@ -23,6 +23,13 @@ from drivedesk_core.adapters import (
     validate_adapter_connection_profile,
 )
 from drivedesk_core.domain import ActorRef, DomainEvent, TenantRef, build_event
+from drivedesk_core.lifecycle import (
+    LifecyclePolicy,
+    LifecycleTransition,
+    describe_lifecycle_policy,
+    list_lifecycle_policies,
+    preview_lifecycle_transition,
+)
 
 __all__ = [
     "ActorRef",
@@ -34,15 +41,20 @@ __all__ = [
     "DomainEvent",
     "FakeFileImportAdapter",
     "IntegrationAdapter",
+    "LifecyclePolicy",
+    "LifecycleTransition",
     "TenantRef",
     "build_adapter_mapping_preview",
     "build_event",
     "describe_adapter",
     "execute_adapter",
     "list_adapter_descriptors",
+    "list_lifecycle_policies",
     "normalize_adapter_records",
+    "preview_lifecycle_transition",
     "resolve_adapter",
     "resolve_adapter_connection_scopes",
+    "describe_lifecycle_policy",
     "validate_adapter_connection_scope",
     "validate_adapter_connection_profile",
 ]

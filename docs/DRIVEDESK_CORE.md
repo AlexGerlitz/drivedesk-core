@@ -474,6 +474,32 @@ Public docs:
 - `docs/public/INTEGRATION_OPERATOR_REVIEW.md`;
 - `docs/adr/0037-integration-operator-review-queue.md`.
 
+## Sprint 4K Business Record Lifecycle Policy Catalog
+
+Sprint 4K adds machine-readable lifecycle policies for business records.
+
+New endpoints:
+
+- `GET /business-record-lifecycle-policies`;
+- `POST /tenants/{tenant_id}/business-records/lifecycle-preview`.
+
+Why this matters:
+
+- contracts, payments, lessons, tasks, and documents now have explicit initial
+  statuses, known statuses, terminal statuses, and allowed next statuses;
+- UI and workflow automation can preview a proposed status transition before
+  mutating data;
+- lifecycle preview returns `valid`, `reason`, `allowed_next_statuses`, and
+  `terminal`;
+- the current mutation endpoint remains
+  `POST /tenants/{tenant_id}/business-records/{record_id}/transition`;
+- future hard enforcement can reuse the same core helper.
+
+Public docs:
+
+- `docs/public/BUSINESS_RECORD_LIFECYCLE.md`;
+- `docs/adr/0038-business-record-lifecycle-policy-catalog.md`.
+
 ## Local Commands
 
 Run the API without Docker:

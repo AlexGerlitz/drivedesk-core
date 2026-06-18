@@ -21,7 +21,7 @@ from fastapi.testclient import TestClient
 from drivedesk_api.db import Base
 from drivedesk_api.main import build_app
 from drivedesk_api.session import get_session
-from drivedesk_core import ActorRef, TenantRef, build_event
+from drivedesk_core import ActorRef, TenantRef, build_event, list_lifecycle_policies, preview_lifecycle_transition
 from drivedesk_core.adapters import AdapterExecutionError, FakeFileImportAdapter, list_adapter_descriptors
 from drivedesk_worker.main import build_heartbeat, heartbeat_to_json
 
@@ -147,6 +147,24 @@ def test_adapter_catalog_describes_runtime_adapters() -> None:
     assert "mapping preview" in descriptors["file.import.fake"]["capabilities"]
     assert "connection scope enforcement" in descriptors["file.import.fake"]["capabilities"]
     assert descriptors["internal.noop"]["connection_profile_supported"] is False
+
+
+def test_business_record_lifecycle_policy_contract() -> None:
+    policies = {policy["record_type"]: policy for policy in list_lifecycle_policies()}
+
+    assert set(policies) == {"contract", "document", "lesson", "payment", "task"}
+    assert policies["contract"]["initial_status"] == "draft"
+    assert "completed" in policies["contract"]["terminal_statuses"]
+    assert "confirmed" in policies["payment"]["statuses"]
+
+    accepted = preview_lifecycle_transition("contract", from_status="draft", to_status="approved")
+    rejected = preview_lifecycle_transition("contract", from_status="completed", to_status="active")
+
+    assert accepted["valid"] is True
+    assert accepted["allowed_next_statuses"] == ["approved", "pending_signature", "cancelled"]
+    assert rejected["valid"] is False
+    assert rejected["terminal"] is True
+    assert rejected["reason"] == "completed is terminal for contract."
 
 
 def test_api_health_and_ready_endpoints() -> None:

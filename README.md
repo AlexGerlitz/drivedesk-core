@@ -58,19 +58,20 @@ It includes:
 12. Read `docs/public/PLATFORM_ADMIN.md`.
 13. Read `docs/public/TENANT_ISOLATION.md`.
 14. Read `docs/public/BUSINESS_RECORDS.md`.
-15. Read `docs/public/CLIENT_SDK.md`.
-16. Read `docs/public/INTEGRATION_ADAPTER_CATALOG.md`.
-17. Read `docs/public/INTEGRATION_MAPPING_VALIDATION.md`.
-18. Read `docs/public/INTEGRATION_MAPPING_TRANSFORM.md`.
-19. Read `docs/public/INTEGRATION_CONNECTION_SCOPES.md`.
-20. Read `docs/public/INTEGRATION_OPERATION_CONTRACTS.md`.
-21. Read `docs/public/INTEGRATION_OPERATOR_REVIEW.md`.
-22. Read `docs/public/INTEGRATION_CONNECTIONS.md`.
-23. Read `docs/public/SYSTEM_DESIGN.md`.
-24. Read `docs/public/INTEGRATION_ADAPTERS.md`.
-25. Read `docs/public/INTEGRATION_OBSERVABILITY.md`.
-26. Read `docs/public/OUTBOX_RECOVERY.md`.
-27. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
+15. Read `docs/public/BUSINESS_RECORD_LIFECYCLE.md`.
+16. Read `docs/public/CLIENT_SDK.md`.
+17. Read `docs/public/INTEGRATION_ADAPTER_CATALOG.md`.
+18. Read `docs/public/INTEGRATION_MAPPING_VALIDATION.md`.
+19. Read `docs/public/INTEGRATION_MAPPING_TRANSFORM.md`.
+20. Read `docs/public/INTEGRATION_CONNECTION_SCOPES.md`.
+21. Read `docs/public/INTEGRATION_OPERATION_CONTRACTS.md`.
+22. Read `docs/public/INTEGRATION_OPERATOR_REVIEW.md`.
+23. Read `docs/public/INTEGRATION_CONNECTIONS.md`.
+24. Read `docs/public/SYSTEM_DESIGN.md`.
+25. Read `docs/public/INTEGRATION_ADAPTERS.md`.
+26. Read `docs/public/INTEGRATION_OBSERVABILITY.md`.
+27. Read `docs/public/OUTBOX_RECOVERY.md`.
+28. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
 27. Check `.github/workflows/ci.yml`.
 28. Run `bash scripts/ci_smoke_public.sh` locally.
 
@@ -88,6 +89,7 @@ It includes:
 - `docs/public/PLATFORM_ADMIN.md` - dedicated platform-admin model and SaaS control-plane boundary.
 - `docs/public/TENANT_ISOLATION.md` - tenant isolation and bootstrap boundary overview.
 - `docs/public/BUSINESS_RECORDS.md` - tenant-owned business record foundation.
+- `docs/public/BUSINESS_RECORD_LIFECYCLE.md` - lifecycle policy catalog and preview validation.
 - `docs/public/CLIENT_SDK.md` - generated OpenAPI client SDK example.
 - `docs/public/INTEGRATION_ADAPTER_CATALOG.md` - runtime adapter metadata and discovery contract.
 - `docs/public/INTEGRATION_MAPPING_VALIDATION.md` - mapping validation against adapter requirements.
@@ -220,6 +222,7 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/public/PLATFORM_ADMIN.md`
 - `docs/public/TENANT_ISOLATION.md`
 - `docs/public/BUSINESS_RECORDS.md`
+- `docs/public/BUSINESS_RECORD_LIFECYCLE.md`
 - `docs/public/CLIENT_SDK.md`
 - `docs/public/INTEGRATION_ADAPTER_CATALOG.md`
 - `docs/public/INTEGRATION_MAPPING_VALIDATION.md`
@@ -263,3 +266,4 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/adr/0035-integration-connection-scopes.md`
 - `docs/adr/0036-structured-adapter-operation-contracts.md`
 - `docs/adr/0037-integration-operator-review-queue.md`
+- `docs/adr/0038-business-record-lifecycle-policy-catalog.md`

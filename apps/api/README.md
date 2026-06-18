@@ -22,6 +22,16 @@ Public demo contract smoke:
 bash scripts/check_public_demo_api.sh
 ```
 
+Public-safe GitOps image automation validation:
+
+```bash
+bash scripts/check_public_gitops_image_automation.sh
+```
+
+The check validates candidate image digest metadata, SBOM attachment, Trivy
+scanner evidence, provenance, target GitOps files, pull-request-only apply mode,
+and no direct registry or cluster mutation.
+
 Core endpoints:
 
 - `POST /auth/login`;

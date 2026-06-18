@@ -1,0 +1,36 @@
+apiVersion: drivedesk.dev/v1alpha1
+kind: ImageUpdateProposal
+metadata:
+  name: drivedesk-core-public-image-update-proposal
+spec:
+  inputs:
+    buildArtifact: infra/gitops/image-automation/build-artifact.yaml
+    promotionManifest: infra/gitops/promotion/image-promotion.yaml
+    desiredState: infra/gitops/drift/desired-state.yaml
+  auditEvent: gitops.image_update.proposed
+  applyMode: pull_request_only
+  noRegistryMutation: true
+  noClusterMutation: true
+  proposedImage:
+    repository: ghcr.io/alexgerlitz/drivedesk-core-public
+    tag: gitops-candidate-2026-06-18
+    digest: sha256:7d0d0f3f0c7b0ed1f7b4e1f9c6a3f1d2e8b7c4a5f1e2d3c4b5a6978877665544
+  targetFiles:
+    - path: infra/gitops/promotion/image-promotion.yaml
+      fields:
+        - spec.candidateImage.tag
+        - spec.candidateImage.digest
+    - path: infra/gitops/drift/desired-state.yaml
+      fields:
+        - spec.environments[].desiredTag
+  evidenceGates:
+    - public_export_secret_scan
+    - public_demo_api_smoke
+    - public_helm_chart_render
+    - public_gitops_layout
+    - public_gitops_promotion_drift
+    - public_gitops_drift_remediation
+  decision:
+    status: proposed
+    reviewerRequired: true
+    promotionFlow: build_to_gitops_to_staged_promotion

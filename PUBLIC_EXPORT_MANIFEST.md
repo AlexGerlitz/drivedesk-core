@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-18T05:04:09Z
+Generated at: 2026-06-18T05:24:44Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -123,6 +123,13 @@ Copied public-safe areas:
 - public GitOps check: argocd_applications_present
 - public GitOps check: staged_promotion_order_present
 - public GitOps ADR: 0048-public-safe-gitops-delivery-foundation
+- public GitOps image automation doc
+- public GitOps image automation validation script: scripts/check_public_gitops_image_automation.sh
+- public GitOps image automation evidence snapshot: docs/public/evidence/gitops-image-automation.sanitized.json
+- public GitOps image automation check: image_digest_recorded
+- public GitOps image automation check: pull_request_only_no_mutation
+- public GitOps image automation audit event: gitops.image_update.proposed
+- public GitOps image automation ADR: 0051-public-safe-gitops-image-automation-evidence
 - public GitOps promotion drift doc
 - public GitOps promotion drift validation script: scripts/check_public_gitops_promotion_drift.sh
 - public GitOps promotion drift evidence snapshot: docs/public/evidence/gitops-promotion-drift.sanitized.json

@@ -44,6 +44,7 @@ credentials.
 - `GITOPS_DELIVERY.md` - public-safe GitOps delivery foundation.
 - `GITOPS_PROMOTION_DRIFT.md` - public-safe GitOps image promotion and drift evidence.
 - `GITOPS_DRIFT_REMEDIATION.md` - public-safe GitOps drift remediation evidence.
+- `GITOPS_IMAGE_AUTOMATION.md` - public-safe GitOps image automation evidence.
 - `ARCHITECTURE_DIAGRAMS.md` - public-safe architecture diagrams.
 - `PUBLIC_DEMO_PLAN.md` - future live demo plan.
 - `ROADMAP.md` - public-safe engineering roadmap.
@@ -66,6 +67,8 @@ credentials.
   image promotion and drift evidence snapshot.
 - `evidence/gitops-drift-remediation.sanitized.json` - machine-readable GitOps
   drift remediation evidence snapshot.
+- `evidence/gitops-image-automation.sanitized.json` - machine-readable GitOps
+  image automation evidence snapshot.
 - `assets/drivedesk-core-demo-overview.png` - public demo screenshot.
 
 The public repository export also generates:
@@ -94,6 +97,7 @@ The public repository export also generates:
 - `scripts/check_public_staged_promotion.sh` - public-safe staged promotion drill.
 - `scripts/check_public_helm_render.sh` - public-safe Helm chart validation.
 - `scripts/check_public_gitops_layout.sh` - public-safe GitOps layout validation.
+- `scripts/check_public_gitops_image_automation.sh` - public-safe GitOps image automation validation.
 - `scripts/check_public_gitops_promotion_drift.sh` - public-safe GitOps promotion and drift validation.
 - `scripts/check_public_gitops_drift_remediation.sh` - public-safe GitOps drift remediation validation.
 - `scripts/generate_public_demo_sdk.py` - generated SDK builder from OpenAPI.
@@ -149,9 +153,12 @@ https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 34. Read the staged promotion evidence overview.
 35. Read the Helm chart foundation overview.
 36. Read the GitOps delivery foundation overview.
-37. Read the case study.
-38. Check CI and public demo health workflow results.
-39. Run the public smoke checks locally.
+37. Read the GitOps image automation overview.
+38. Read the GitOps promotion drift overview.
+39. Read the GitOps drift remediation overview.
+40. Read the case study.
+41. Check CI and public demo health workflow results.
+42. Run the public smoke checks locally.
 
 ## Human Explanation
 

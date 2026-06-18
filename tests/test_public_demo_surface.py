@@ -172,6 +172,7 @@ def test_public_demo_api_scripts_and_examples_exist() -> None:
         "scripts/check_public_staged_promotion.sh",
         "scripts/check_public_helm_render.sh",
         "scripts/check_public_gitops_layout.sh",
+        "scripts/check_public_gitops_image_automation.sh",
         "scripts/check_public_gitops_promotion_drift.sh",
         "scripts/check_public_gitops_drift_remediation.sh",
         "scripts/generate_public_demo_sdk.py",
@@ -234,6 +235,12 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
             "argocd_applications_present",
             "staged_promotion_order_present",
             "evidence_gates_referenced",
+        ],
+        "scripts/check_public_gitops_image_automation.sh": [
+            "public_gitops_image_automation",
+            "image_digest_recorded",
+            "pull_request_only_no_mutation",
+            "gitops.image_update.proposed",
         ],
         "scripts/check_public_gitops_promotion_drift.sh": [
             "public_gitops_promotion_drift",

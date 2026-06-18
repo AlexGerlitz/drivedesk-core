@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "check": "public_gitops_image_automation",
+  "data_profile": "synthetic_fake_data",
+  "automation_model": "ci_image_build_to_gitops_update_proposal",
+  "image": {
+    "repository": "ghcr.io/alexgerlitz/drivedesk-core-public",
+    "tag": "gitops-candidate-2026-06-18",
+    "digest": "sha256:7d0d0f3f0c7b0ed1f7b4e1f9c6a3f1d2e8b7c4a5f1e2d3c4b5a6978877665544"
+  },
+  "automation": {
+    "audit_event": "gitops.image_update.proposed",
+    "apply_mode": "pull_request_only",
+    "promotion_flow": "build_to_gitops_to_staged_promotion",
+    "reviewer_required": true
+  },
+  "checks": {
+    "image_automation_files_present": true,
+    "image_tag_recorded": true,
+    "image_digest_recorded": true,
+    "sbom_attached": true,
+    "scanner_recorded": true,
+    "critical_high_vulnerabilities_zero": true,
+    "provenance_attached": true,
+    "update_proposal_recorded": true,
+    "target_gitops_files_recorded": true,
+    "evidence_gates_referenced": true,
+    "pull_request_only_no_mutation": true,
+    "audit_event_recorded": true,
+    "remediation_flow_linked": true,
+    "private_markers_absent": true,
+    "production_data_touched": false
+  },
+  "redaction": {
+    "paths_included": false,
+    "hostnames_included": false,
+    "addresses_included": false,
+    "credentials_included": false,
+    "raw_logs_included": false,
+    "production_data_included": false
+  }
+}

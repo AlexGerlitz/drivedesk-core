@@ -85,9 +85,10 @@ It includes:
 37. Read `docs/public/GITOPS_DELIVERY.md`.
 38. Read `docs/public/GITOPS_PROMOTION_DRIFT.md`.
 39. Read `docs/public/GITOPS_DRIFT_REMEDIATION.md`.
-40. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
-41. Check `.github/workflows/ci.yml`.
-42. Run `bash scripts/ci_smoke_public.sh` locally.
+40. Read `docs/public/GITOPS_IMAGE_AUTOMATION.md`.
+41. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
+42. Check `.github/workflows/ci.yml`.
+43. Run `bash scripts/ci_smoke_public.sh` locally.
 
 ## What To Review First
 
@@ -127,6 +128,7 @@ It includes:
 - `docs/public/GITOPS_DELIVERY.md` - public-safe GitOps delivery foundation.
 - `docs/public/GITOPS_PROMOTION_DRIFT.md` - public-safe GitOps image promotion and drift evidence.
 - `docs/public/GITOPS_DRIFT_REMEDIATION.md` - public-safe GitOps drift remediation evidence.
+- `docs/public/GITOPS_IMAGE_AUTOMATION.md` - public-safe GitOps image automation evidence.
 - `docs/public/ARCHITECTURE_DIAGRAMS.md` - architecture diagrams.
 - `docs/public/SANITIZED_EVIDENCE.md` - sanitized staging evidence.
 - `docs/public/PUBLIC_DEMO_PLAN.md` - future public demo plan.
@@ -172,6 +174,7 @@ It includes:
 - `scripts/check_public_staged_promotion.sh` - public-safe staged promotion drill.
 - `scripts/check_public_helm_render.sh` - public-safe Helm chart validation.
 - `scripts/check_public_gitops_layout.sh` - public-safe GitOps layout validation.
+- `scripts/check_public_gitops_image_automation.sh` - public-safe GitOps image automation validation.
 - `scripts/check_public_gitops_promotion_drift.sh` - public-safe GitOps promotion and drift validation.
 - `scripts/check_public_gitops_drift_remediation.sh` - public-safe GitOps drift remediation validation.
 - `scripts/run_public_demo_local.sh` - one-command local API run.
@@ -205,6 +208,7 @@ bash scripts/check_public_slo_canary_gate.sh
 bash scripts/check_public_staged_promotion.sh
 bash scripts/check_public_helm_render.sh
 bash scripts/check_public_gitops_layout.sh
+bash scripts/check_public_gitops_image_automation.sh
 bash scripts/check_public_gitops_promotion_drift.sh
 bash scripts/check_public_gitops_drift_remediation.sh
 BASE_URL=http://localhost:8080 bash examples/curl/demo-public.sh
@@ -229,6 +233,7 @@ bash scripts/check_public_slo_canary_gate.sh
 bash scripts/check_public_staged_promotion.sh
 bash scripts/check_public_helm_render.sh
 bash scripts/check_public_gitops_layout.sh
+bash scripts/check_public_gitops_image_automation.sh
 bash scripts/check_public_gitops_promotion_drift.sh
 bash scripts/check_public_gitops_drift_remediation.sh
 ```
@@ -294,6 +299,9 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/public/STAGED_PROMOTION_EVIDENCE.md`
 - `docs/public/HELM_CHART.md`
 - `docs/public/GITOPS_DELIVERY.md`
+- `docs/public/GITOPS_PROMOTION_DRIFT.md`
+- `docs/public/GITOPS_DRIFT_REMEDIATION.md`
+- `docs/public/GITOPS_IMAGE_AUTOMATION.md`
 - `docs/public/ARCHITECTURE_DIAGRAMS.md`
 - `docs/public/PUBLIC_DEMO_PLAN.md`
 - `docs/public/SANITIZED_EVIDENCE.md`

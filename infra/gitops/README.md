@@ -26,6 +26,8 @@ infra/gitops/
   drift/observed-state.yaml
   remediation/policy.yaml
   remediation/decision.yaml
+  image-automation/build-artifact.yaml
+  image-automation/update-proposal.yaml
 ```
 
 ## Delivery Shape
@@ -45,3 +47,8 @@ server-specific addresses, raw logs, or runtime connection values.
 The remediation manifests are plan-only evidence. They show how drift would be
 handled through reconcile, rollback, or block decisions without applying
 anything to a cluster.
+
+The image automation manifests are proposal-only evidence. They show how a
+candidate image digest, SBOM, scanner result, provenance, and target GitOps
+files would be turned into a pull request instead of mutating a registry or
+cluster directly.

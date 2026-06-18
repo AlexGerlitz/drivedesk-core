@@ -31,3 +31,6 @@ tenant/audit database tables, Docker Compose, and CI smoke checks.
   into premature microservices.
 - The GitOps delivery foundation links the Helm chart to build, staging,
   canary, and production desired-state manifests.
+- The GitOps image automation evidence layer records candidate image digest,
+  SBOM, scan, provenance, and pull-request-only update proposal metadata
+  without mutating a registry or cluster.

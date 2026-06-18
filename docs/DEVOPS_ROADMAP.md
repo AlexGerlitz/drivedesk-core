@@ -23,6 +23,7 @@ Implemented baseline:
 - public-safe GitOps delivery foundation and Argo CD layout validation for the exported Core surface.
 - public-safe GitOps image promotion and drift detection for the exported Core surface.
 - public-safe GitOps drift remediation planning for the exported Core surface.
+- public-safe GitOps image automation evidence for the exported Core surface.
 
 What this gives us:
 
@@ -49,6 +50,9 @@ What this gives us:
   and observed state, including a safe rollback tag.
 - drift remediation evidence shows the response path after detection:
   reconcile after approval, rollback if needed, or block unsafe changes.
+- image automation evidence shows how a candidate image digest, SBOM, scanner
+  result, provenance, and GitOps update proposal move toward review without
+  mutating a registry or cluster directly.
 
 ## Next Layers
 
@@ -56,7 +60,7 @@ Recommended next DevOps tasks:
 
 1. Broaden generated client examples from the OpenAPI schema.
 2. Add private runtime rollout evidence for the staging control plane.
-3. Add image automation evidence for the GitOps overlays.
+3. Add policy-as-code evidence for public-safe deployment rules.
 4. Add Terraform/OpenTofu only after the target infrastructure shape is clear.
 
 ## Human Summary

@@ -60,6 +60,12 @@ GitOps drift remediation validation source file:
 docs/public/evidence/gitops-drift-remediation.sanitized.json
 ```
 
+GitOps image automation validation source file:
+
+```text
+docs/public/evidence/gitops-image-automation.sanitized.json
+```
+
 Verified signals:
 
 - CI completed successfully;
@@ -114,6 +120,14 @@ Verified signals:
 - remediation is recorded as plan-only and does not mutate a cluster;
 - rollback context is attached to the drift remediation decision;
 - `gitops.drift_remediation.planned` evidence is recorded.
+- the public GitOps image automation manifest records candidate image tag and
+  digest;
+- SBOM, vulnerability scanner, zero critical/high finding, and provenance
+  metadata are attached to the synthetic build artifact;
+- the image update proposal targets GitOps manifests instead of mutating a
+  registry or cluster directly;
+- the proposal is pull-request-only and records
+  `gitops.image_update.proposed` evidence.
 
 ## Human Explanation
 
@@ -140,6 +154,7 @@ The public version keeps only the operational shape and health results.
 - GitOps image promotion and drift detection are checked through an executable
   public validation.
 - GitOps drift remediation is checked through an executable public validation.
+- GitOps image automation is checked through an executable public validation.
 
 ## What This Leaves Out
 

@@ -1,0 +1,26 @@
+apiVersion: drivedesk.dev/v1alpha1
+kind: ImageBuildArtifact
+metadata:
+  name: drivedesk-core-public-image-build
+spec:
+  artifact: drivedesk-core
+  source:
+    repository: https://github.com/AlexGerlitz/drivedesk-core.git
+    branch: main
+    revision: public-synthetic-commit
+  image:
+    repository: ghcr.io/alexgerlitz/drivedesk-core-public
+    tag: gitops-candidate-2026-06-18
+    digest: sha256:7d0d0f3f0c7b0ed1f7b4e1f9c6a3f1d2e8b7c4a5f1e2d3c4b5a6978877665544
+  supplyChain:
+    sbomAttached: true
+    sbomFormat: spdx-json
+    scanner: trivy
+    criticalVulnerabilities: 0
+    highVulnerabilities: 0
+    provenanceAttached: true
+    signatureMode: keyless-github-actions-synthetic
+  automation:
+    noRegistryMutation: true
+    noClusterMutation: true
+    nextStep: propose_gitops_update

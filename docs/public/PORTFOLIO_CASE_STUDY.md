@@ -73,6 +73,8 @@ Implemented foundation:
   rollback tag, desired state, observed state, and synthetic `OutOfSync`.
 - public-safe GitOps drift remediation evidence with plan-only reconcile,
   rollback, block, approval, and audit-event context.
+- public-safe GitOps image automation evidence with candidate digest, SBOM,
+  scanner result, provenance, and pull-request-only update proposal.
 - synthetic business workflow in the public demo payload:
   lead -> student -> contract -> audit -> outbox -> integration sync.
 
@@ -189,6 +191,9 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
   contracts without changing the app into microservices.
 - GitOps delivery foundation now connects the Helm chart to Argo CD-style
   build, staging, canary, and production desired state.
+- GitOps image automation now records the image digest, SBOM, Trivy scan
+  result, provenance, target GitOps files, and `gitops.image_update.proposed`
+  audit context without mutating a registry or cluster directly.
 - Alertmanager currently uses an internal receiver; external notification
   routing is a later step.
 - The frontend is intentionally not the center of the current work; the backend
@@ -202,7 +207,7 @@ Recommended next slices:
 2. Additional mock adapters for webhook and accounting export flows.
 3. More workflow rule actions for notifications, approvals, and mapping-specific adapter jobs.
 4. More deployment evidence around private runtime rollout checks.
-5. Image tag promotion evidence for the GitOps overlays.
+5. Policy-as-code evidence for public-safe deployment rules.
 
 ## Interview Summary
 

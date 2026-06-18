@@ -167,6 +167,106 @@
       border-top: 1px solid var(--line);
     }
 
+    .review-flow {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      padding: 6px 0 20px;
+    }
+
+    .flow-step {
+      min-height: 158px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    .flow-step span {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      background: #e0ecff;
+      color: var(--blue);
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .flow-step h2 {
+      margin: 12px 0 0;
+      font-size: 17px;
+      letter-spacing: 0;
+    }
+
+    .flow-step p {
+      margin: 8px 0 12px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .flow-step a {
+      color: var(--blue);
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .architecture-strip {
+      display: grid;
+      grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+      gap: 18px;
+      align-items: stretch;
+      padding: 10px 0 24px;
+    }
+
+    .architecture-copy,
+    .architecture-trace {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      padding: 18px;
+    }
+
+    .architecture-copy h2,
+    .evidence-heading h2 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: 0;
+    }
+
+    .architecture-copy p,
+    .evidence-heading p {
+      margin: 10px 0 0;
+      color: var(--muted);
+    }
+
+    .trace-line {
+      display: grid;
+      grid-template-columns: 135px minmax(0, 1fr);
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .trace-line:last-child {
+      border-bottom: 0;
+    }
+
+    .trace-line strong {
+      font-size: 13px;
+    }
+
+    .trace-line span {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .evidence-heading {
+      padding: 12px 0 2px;
+    }
+
     .grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -248,6 +348,7 @@
 
     @media (max-width: 940px) {
       .hero,
+      .architecture-strip,
       .commands {
         grid-template-columns: 1fr;
       }
@@ -257,6 +358,7 @@
       }
 
       .grid,
+      .review-flow,
       .status-strip {
         grid-template-columns: 1fr;
       }
@@ -288,11 +390,11 @@
       <section class="hero" aria-labelledby="title">
         <div>
           <p class="eyebrow">Public Engineering Surface</p>
-          <h1 id="title">DriveDesk Core engineering review hub</h1>
+          <h1 id="title">DriveDesk Core product engineering review hub</h1>
           <p class="lead">
-            Modular monolith backend and DevOps foundation with synthetic demo data,
-            executable public checks, OpenAPI/SDK artifacts, recovery drills, release
-            gates, GitOps, OpenTofu, and sanitized runtime evidence.
+            Inspect the architecture, open the live operations demo, then verify
+            the API contract, SDK artifacts, release gates, observability, GitOps,
+            OpenTofu plan evidence, and incident response trail.
           </p>
           <div class="action-row">
             <a class="button primary" href="apps/admin/public-demo/">Open Demo</a>
@@ -303,11 +405,12 @@
             <a class="button" href="docs/public/ALERT_ROUTING_EVIDENCE.md">Alert Routing</a>
             <a class="button" href="docs/public/INCIDENT_RESPONSE_DEMO.md">Incidents</a>
             <a class="button" href="docs/public/ENGINEERING_PROOF.md">Proof Contract</a>
+            <a class="button" href="docs/public/PLATFORM_MATURITY_70.md">Maturity 70</a>
           </div>
           <div class="status-strip" aria-label="Engineering status">
-            <div class="status"><strong>CI</strong><span>public smoke path</span></div>
-            <div class="status"><strong>Data</strong><span>synthetic only</span></div>
-            <div class="status"><strong>Evidence</strong><span>sanitized artifacts</span></div>
+            <div class="status"><strong>Runtime</strong><span>API, worker, Postgres, Redis</span></div>
+            <div class="status"><strong>Delivery</strong><span>CI, Helm, GitOps, gates</span></div>
+            <div class="status"><strong>Operations</strong><span>metrics, alerts, incidents</span></div>
           </div>
         </div>
 
@@ -315,6 +418,60 @@
           <img src="docs/public/assets/drivedesk-core-demo-overview.png" alt="DriveDesk Core public demo overview">
           <figcaption>Public demo surface backed by static synthetic data and the read-only `GET /demo/public` contract.</figcaption>
         </figure>
+      </section>
+
+      <section class="evidence-heading" aria-labelledby="flowTitle">
+        <h2 id="flowTitle">Review Flow</h2>
+        <p>Follow the same path the release gate protects: architecture, demo, API contract, then operational evidence.</p>
+      </section>
+
+      <section class="review-flow" aria-label="Review flow">
+        <article class="flow-step">
+          <span>1</span>
+          <h2>Architecture</h2>
+          <p>Start with the modular monolith, data boundary, adapter hub, and runtime shape.</p>
+          <a href="docs/public/SYSTEM_DESIGN.md">Open system design</a>
+        </article>
+        <article class="flow-step">
+          <span>2</span>
+          <h2>Live demo</h2>
+          <p>Use the Overview, Operations, Incidents, and Proof tabs with synthetic data.</p>
+          <a href="apps/admin/public-demo/">Open demo</a>
+        </article>
+        <article class="flow-step">
+          <span>3</span>
+          <h2>API and SDK</h2>
+          <p>Check the read-only demo endpoint, OpenAPI schema, and generated clients.</p>
+          <a href="docs/public/API_BACKED_DEMO.md">Open API notes</a>
+        </article>
+        <article class="flow-step">
+          <span>4</span>
+          <h2>Release evidence</h2>
+          <p>Follow the gates for rollback, SLO canary, staged promotion, and drift handling.</p>
+          <a href="docs/public/SANITIZED_EVIDENCE.md">Open evidence</a>
+        </article>
+      </section>
+
+      <section class="architecture-strip" aria-label="Architecture trace">
+        <div class="architecture-copy">
+          <h2>Architecture Trace</h2>
+          <p>
+            The public hub is static and safe to inspect, but it mirrors the same
+            product boundaries used by the backend: tenant scope, audit, outbox,
+            adapter operations, runtime checks, and release evidence.
+          </p>
+        </div>
+        <div class="architecture-trace">
+          <div class="trace-line"><strong>Browser</strong><span>Static GitHub Pages shell with synthetic fallback data.</span></div>
+          <div class="trace-line"><strong>Demo API</strong><span>Optional read-only `GET /demo/public` contract with OpenAPI coverage.</span></div>
+          <div class="trace-line"><strong>Core</strong><span>Tenants, RBAC, audit, outbox, workflow rules, integration jobs.</span></div>
+          <div class="trace-line"><strong>Ops</strong><span>Prometheus-style metrics, alert routing, incident response, recovery evidence.</span></div>
+        </div>
+      </section>
+
+      <section class="evidence-heading" aria-labelledby="evidenceTitle">
+        <h2 id="evidenceTitle">Evidence Matrix</h2>
+        <p>Each link below maps to a checked public-safe artifact, not a loose note.</p>
       </section>
 
       <section class="grid" aria-label="Evidence links">

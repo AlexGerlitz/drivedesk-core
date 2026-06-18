@@ -31,6 +31,7 @@ It includes:
 - synthetic lead-to-student workflow in the public demo payload;
 - generated OpenAPI client SDK example for the public demo API;
 - public-safe synthetic backup/restore drill with sanitized evidence;
+- public-safe synthetic release rollback drill with sanitized evidence;
 - Docker Compose local runtime;
 - pytest coverage for the Core API;
 - architecture docs and ADRs.
@@ -77,9 +78,10 @@ It includes:
 30. Read `docs/public/INTEGRATION_OBSERVABILITY.md`.
 31. Read `docs/public/OUTBOX_RECOVERY.md`.
 32. Read `docs/public/BACKUP_RESTORE_EVIDENCE.md`.
-33. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
-34. Check `.github/workflows/ci.yml`.
-35. Run `bash scripts/ci_smoke_public.sh` locally.
+33. Read `docs/public/RELEASE_ROLLBACK_EVIDENCE.md`.
+34. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
+35. Check `.github/workflows/ci.yml`.
+36. Run `bash scripts/ci_smoke_public.sh` locally.
 
 ## What To Review First
 
@@ -112,6 +114,7 @@ It includes:
 - `docs/public/INTEGRATION_OBSERVABILITY.md` - adapter metrics and worker log signals.
 - `docs/public/OUTBOX_RECOVERY.md` - audited operator retry path for failed outbox jobs.
 - `docs/public/BACKUP_RESTORE_EVIDENCE.md` - public-safe synthetic backup and restore drill.
+- `docs/public/RELEASE_ROLLBACK_EVIDENCE.md` - public-safe bad-release rollback drill.
 - `docs/public/ARCHITECTURE_DIAGRAMS.md` - architecture diagrams.
 - `docs/public/SANITIZED_EVIDENCE.md` - sanitized staging evidence.
 - `docs/public/PUBLIC_DEMO_PLAN.md` - future public demo plan.
@@ -152,6 +155,7 @@ It includes:
 - `scripts/generate_public_demo_sdk.py` - SDK generator from OpenAPI.
 - `scripts/check_public_demo_sdk.sh` - generated SDK drift and runtime smoke.
 - `scripts/check_public_backup_restore.sh` - public-safe synthetic recovery drill.
+- `scripts/check_public_release_rollback.sh` - public-safe release rollback drill.
 - `scripts/run_public_demo_local.sh` - one-command local API run.
 - `scripts/check_public_demo_api.sh` - local API contract and examples smoke.
 - `examples/curl/demo-public.sh` - curl client example.
@@ -178,6 +182,7 @@ API contract and client examples:
 bash scripts/check_public_demo_api.sh
 bash scripts/check_public_demo_sdk.sh
 bash scripts/check_public_backup_restore.sh
+bash scripts/check_public_release_rollback.sh
 BASE_URL=http://localhost:8080 bash examples/curl/demo-public.sh
 BASE_URL=http://localhost:8080 python examples/python/demo_public_client.py
 BASE_URL=http://localhost:8080 node examples/js/demo-public-fetch.js
@@ -195,6 +200,7 @@ docker compose -f infra/docker/docker-compose.foundation.yml up --build
 bash scripts/ci_smoke_public.sh
 bash scripts/check_public_demo_api.sh
 bash scripts/check_public_backup_restore.sh
+bash scripts/check_public_release_rollback.sh
 ```
 
 ## Public Demo Shell
@@ -253,6 +259,7 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/public/INTEGRATION_OBSERVABILITY.md`
 - `docs/public/OUTBOX_RECOVERY.md`
 - `docs/public/BACKUP_RESTORE_EVIDENCE.md`
+- `docs/public/RELEASE_ROLLBACK_EVIDENCE.md`
 - `docs/public/ARCHITECTURE_DIAGRAMS.md`
 - `docs/public/PUBLIC_DEMO_PLAN.md`
 - `docs/public/SANITIZED_EVIDENCE.md`
@@ -291,3 +298,4 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/adr/0041-integration-reconciliation-evidence.md`
 - `docs/adr/0042-integration-incident-runbooks.md`
 - `docs/adr/0043-public-safe-backup-restore-drill.md`
+- `docs/adr/0044-public-safe-release-rollback-drill.md`

@@ -68,6 +68,7 @@ Implemented foundation:
 - curl, Python, and JavaScript public demo clients for `GET /demo/public`.
 - generated OpenAPI client SDK artifacts for Python, JavaScript, and TypeScript.
 - public-safe synthetic backup/restore drill with machine-readable evidence.
+- public-safe synthetic release rollback drill with machine-readable evidence.
 - synthetic business workflow in the public demo payload:
   lead -> student -> contract -> audit -> outbox -> integration sync.
 
@@ -168,6 +169,9 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
 - Backup/restore evidence now has a public-safe drill that creates a synthetic
   temporary database, writes a backup, restores it into a separate temporary
   database, and checks counts, schema, integrity, and redaction boundaries.
+- Release rollback evidence now has a public-safe drill that promotes a bad
+  candidate release, detects the readiness failure, rolls back to the stable
+  release, and records `release.rollback.executed` evidence.
 - Alertmanager currently uses an internal receiver; external notification
   routing is a later step.
 - The frontend is intentionally not the center of the current work; the backend
@@ -180,7 +184,7 @@ Recommended next slices:
 1. Broader generated API clients from OpenAPI for more endpoints.
 2. Additional mock adapters for webhook and accounting export flows.
 3. More workflow rule actions for notifications, approvals, and mapping-specific adapter jobs.
-4. More deployment evidence around restore drills, SLO burn, and release rollback.
+4. More deployment evidence around SLO burn, canary gates, and staged promotion.
 
 ## Interview Summary
 

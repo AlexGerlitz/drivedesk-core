@@ -18,6 +18,12 @@ Recovery drill source file:
 docs/public/evidence/backup-restore-drill.sanitized.json
 ```
 
+Release rollback drill source file:
+
+```text
+docs/public/evidence/release-rollback-drill.sanitized.json
+```
+
 Verified signals:
 
 - CI completed successfully;
@@ -39,6 +45,10 @@ Verified signals:
 - the restore target passed integrity checks;
 - restored row counts matched the source counts;
 - production data was not touched.
+- the public synthetic release rollback drill promoted a candidate release;
+- the candidate readiness failure was detected;
+- rollback returned `current` to the stable release;
+- `release.rollback.executed` evidence was recorded.
 
 ## Human Explanation
 
@@ -56,6 +66,7 @@ The public version keeps only the operational shape and health results.
 - Alertmanager is reachable.
 - Evidence is machine-readable.
 - Backup/restore is checked through an executable public drill.
+- Bad-release rollback is checked through an executable public drill.
 
 ## What This Leaves Out
 

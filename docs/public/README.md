@@ -37,6 +37,7 @@ credentials.
 - `INTEGRATION_OBSERVABILITY.md` - adapter metrics, worker logs, and failure visibility overview.
 - `OUTBOX_RECOVERY.md` - operator retry path for failed outbox events.
 - `BACKUP_RESTORE_EVIDENCE.md` - public-safe synthetic backup and restore drill.
+- `RELEASE_ROLLBACK_EVIDENCE.md` - public-safe bad-release rollback drill.
 - `ARCHITECTURE_DIAGRAMS.md` - public-safe architecture diagrams.
 - `PUBLIC_DEMO_PLAN.md` - future live demo plan.
 - `ROADMAP.md` - public-safe engineering roadmap.
@@ -45,6 +46,8 @@ credentials.
   evidence snapshot.
 - `evidence/backup-restore-drill.sanitized.json` - machine-readable synthetic
   backup/restore evidence snapshot.
+- `evidence/release-rollback-drill.sanitized.json` - machine-readable synthetic
+  release rollback evidence snapshot.
 - `assets/drivedesk-core-demo-overview.png` - public demo screenshot.
 
 The public repository export also generates:
@@ -68,6 +71,7 @@ The public repository export also generates:
 - `scripts/run_public_demo_local.sh` - one-command local API run.
 - `scripts/check_public_demo_api.sh` - local API contract and client-example smoke.
 - `scripts/check_public_backup_restore.sh` - public-safe synthetic recovery drill.
+- `scripts/check_public_release_rollback.sh` - public-safe release rollback drill.
 - `scripts/generate_public_demo_sdk.py` - generated SDK builder from OpenAPI.
 - `scripts/check_public_demo_sdk.sh` - generated SDK drift and runtime smoke.
 - `sdk/generated/public-demo/` - generated Python, JavaScript, and TypeScript
@@ -116,9 +120,10 @@ https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 29. Read the integration observability overview.
 30. Read the outbox recovery overview.
 31. Read the backup and restore evidence overview.
-32. Read the case study.
-33. Check CI and public demo health workflow results.
-34. Run the public smoke checks locally.
+32. Read the release rollback evidence overview.
+33. Read the case study.
+34. Check CI and public demo health workflow results.
+35. Run the public smoke checks locally.
 
 ## Human Explanation
 

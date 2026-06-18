@@ -48,6 +48,7 @@ operations, or commercial details.
 - Public export gate, public CI, and GitHub Pages demo.
 - Public system design overview for reviewers.
 - Public-safe synthetic backup/restore drill and sanitized evidence snapshot.
+- Public-safe synthetic release rollback drill and sanitized evidence snapshot.
 
 ## Next
 
@@ -56,7 +57,7 @@ operations, or commercial details.
 - More public-safe evidence around local run, CI, OpenAPI, and demo health.
 - Broader generated client SDK examples from the OpenAPI schema.
 - More adapter recovery examples with payload mapping and follow-up actions.
-- More deployment evidence around restore drills, release rollback, and SLO burn.
+- More deployment evidence around canary gates, staged promotion, and SLO burn.
 
 ## Later
 

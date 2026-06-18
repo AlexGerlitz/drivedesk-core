@@ -378,6 +378,18 @@ window.DRIVEDESK_DEMO_DATA = {
       "state": "success",
       "detail": "synthetic fake data only",
       "evidence": "production_data_touched_false"
+    },
+    {
+      "name": "Release rollback",
+      "state": "success",
+      "detail": "bad candidate release rolled back to stable",
+      "evidence": "release.rollback.executed"
+    },
+    {
+      "name": "Stable after rollback",
+      "state": "success",
+      "detail": "stable release healthy after rollback",
+      "evidence": "stable_release_healthy_after_rollback"
     }
   ],
   "workflow": {

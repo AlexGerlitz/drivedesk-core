@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "drill": "public_synthetic_release_rollback",
+  "data_profile": "synthetic_fake_data",
+  "deployment_model": "symlinked_release_directory",
+  "checks": {
+    "initial_stable_release_active": true,
+    "candidate_release_promoted": true,
+    "candidate_health_failure_detected": true,
+    "rollback_executed": true,
+    "stable_release_healthy_after_rollback": true,
+    "rollback_audit_event_recorded": true,
+    "rollback_audit_event_hash_recorded": true,
+    "candidate_manifest_hash_recorded": true,
+    "stable_manifest_hash_recorded": true,
+    "production_data_touched": false
+  },
+  "release_flow": {
+    "initial_release": "stable-2026-06-18",
+    "candidate_release": "candidate-2026-06-18",
+    "active_after_rollback": "stable-2026-06-18",
+    "rollback_event": "release.rollback.executed"
+  },
+  "artifacts": {
+    "stable_manifest_sha256_prefix_recorded": true,
+    "candidate_manifest_sha256_prefix_recorded": true,
+    "rollback_audit_sha256_prefix_recorded": true
+  },
+  "redaction": {
+    "paths_included": false,
+    "hostnames_included": false,
+    "addresses_included": false,
+    "credentials_included": false,
+    "raw_logs_included": false,
+    "production_data_included": false
+  }
+}

@@ -121,6 +121,8 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
         "restore_integrity_ok",
         "counts_match",
         "production_data_touched_false",
+        "release.rollback.executed",
+        "stable_release_healthy_after_rollback",
     }
     assert len(payload["outbox"]) >= 3
     assert {event["status"] for event in payload["outbox"]} >= {"processed", "pending"}
@@ -159,6 +161,7 @@ def test_public_demo_api_scripts_and_examples_exist() -> None:
         "scripts/check_public_demo_api.sh",
         "scripts/check_public_demo_sdk.sh",
         "scripts/check_public_backup_restore.sh",
+        "scripts/check_public_release_rollback.sh",
         "scripts/generate_public_demo_sdk.py",
         "examples/curl/demo-public.sh",
         "examples/python/demo_public_client.py",
@@ -189,6 +192,12 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
             "backup_restore.drill.completed",
             "restore_integrity_ok",
             "production_data_touched",
+        ],
+        "scripts/check_public_release_rollback.sh": [
+            "public_synthetic_release_rollback",
+            "release.rollback.executed",
+            "candidate_health_failure_detected",
+            "stable_release_healthy_after_rollback",
         ],
         "scripts/generate_public_demo_sdk.py": [
             "/demo/public",

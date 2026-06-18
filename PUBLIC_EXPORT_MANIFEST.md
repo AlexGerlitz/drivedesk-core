@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-18T03:17:31Z
+Generated at: 2026-06-18T03:29:10Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -87,6 +87,12 @@ Copied public-safe areas:
 - public backup restore check: restore_integrity_ok
 - public backup restore audit event: backup_restore.drill.completed
 - public backup restore ADR: 0043-public-safe-backup-restore-drill
+- public release rollback evidence doc
+- public release rollback drill script: scripts/check_public_release_rollback.sh
+- public release rollback evidence snapshot: docs/public/evidence/release-rollback-drill.sanitized.json
+- public release rollback check: candidate_health_failure_detected
+- public release rollback audit event: release.rollback.executed
+- public release rollback ADR: 0044-public-safe-release-rollback-drill
 - public tenant-owned repository helper surface
 - public auth observability alerting surface
 - public demo local run script

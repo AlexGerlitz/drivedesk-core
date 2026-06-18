@@ -61,6 +61,9 @@ state, public-safe limits, and next work in one page.
 Use `docs/public/TECHNICAL_CAPABILITY_MAP.md` when you need a direct
 capability-to-evidence matrix with verifier commands.
 
+Use `docs/public/OBSERVABILITY_PROOF.md` when you need the public-safe
+metrics, structured logs, alert, runbook, and dashboard evidence path.
+
 ## Verification Path
 
 1. Open the live demo and switch to the Proof tab.
@@ -69,7 +72,7 @@ capability-to-evidence matrix with verifier commands.
 4. Run `bash scripts/check_public_engineering_proof.sh`.
 5. Run `bash scripts/check_public_demo_api.sh`.
 6. Run one generated client example from `examples/`.
-7. Review `docs/public/PROJECT_STATUS.md`, `docs/public/TECHNICAL_CAPABILITY_MAP.md`, `docs/public/ENGINEERING_PROOF.md`, `docs/public/PORTFOLIO_70_MILESTONE.md`, and `docs/public/SANITIZED_EVIDENCE.md`.
+7. Review `docs/public/PROJECT_STATUS.md`, `docs/public/TECHNICAL_CAPABILITY_MAP.md`, `docs/public/OBSERVABILITY_PROOF.md`, `docs/public/ENGINEERING_PROOF.md`, `docs/public/PORTFOLIO_70_MILESTONE.md`, and `docs/public/SANITIZED_EVIDENCE.md`.
 8. Review `docs/public/SYSTEM_DESIGN.md`, `docs/public/GITOPS_DELIVERY.md`, and the recovery evidence docs.
 
 ## What To Review First
@@ -78,6 +81,7 @@ capability-to-evidence matrix with verifier commands.
 - `docs/public/ENGINEERING_REVIEW_GUIDE.md` - short review path for demo, CI, API, recovery, GitOps, and IaC evidence.
 - `docs/public/PROJECT_STATUS.md` - current public-safe engineering status, limits, and next work.
 - `docs/public/TECHNICAL_CAPABILITY_MAP.md` - capability-to-evidence map with verifier commands.
+- `docs/public/OBSERVABILITY_PROOF.md` - public-safe metrics, logs, alerts, and dashboard evidence.
 - `docs/public/ENGINEERING_PROOF.md` - proof tab payload, gates, evidence, and verifier contract.
 - `docs/public/SYSTEM_DESIGN.md` - system design overview.
 - `docs/public/API_BACKED_DEMO.md` - read-only synthetic demo API contract.
@@ -125,6 +129,7 @@ capability-to-evidence matrix with verifier commands.
 - `docs/public/PRIVATE_INFRA_SCHEDULED_VALIDATION.md` - public-safe recurring scheduled validation evidence.
 - `docs/public/PRIVATE_INFRA_SCHEDULED_ALERTING.md` - public-safe scheduled validation alerting evidence.
 - `docs/public/PORTFOLIO_70_MILESTONE.md` - public-safe 70 percent DevOps/platform milestone.
+- `docs/public/OBSERVABILITY_PROOF.md` - public-safe observability proof.
 - `docs/public/ARCHITECTURE_DIAGRAMS.md` - architecture diagrams.
 - `docs/public/SANITIZED_EVIDENCE.md` - sanitized staging evidence.
 - `docs/public/PUBLIC_DEMO_PLAN.md` - future public demo plan.
@@ -180,6 +185,7 @@ capability-to-evidence matrix with verifier commands.
 - `scripts/check_public_private_infra_scheduled_alerting.sh` - public-safe scheduled validation alerting.
 - `scripts/check_public_portfolio_70_milestone.sh` - public-safe 70 percent milestone validation.
 - `scripts/check_public_review_guide.sh` - public-safe short review path validation.
+- `scripts/check_public_observability_proof.sh` - public-safe observability proof validation.
 - `scripts/check_public_engineering_proof.sh` - public-safe proof tab and evidence contract validation.
 - `scripts/check_public_gitops_layout.sh` - public-safe GitOps layout validation.
 - `scripts/check_public_gitops_image_automation.sh` - public-safe GitOps image automation validation.
@@ -229,6 +235,7 @@ bash scripts/check_public_review_guide.sh
 bash scripts/check_public_pages_entrypoint.sh
 bash scripts/check_public_project_status.sh
 bash scripts/check_public_technical_capability_map.sh
+bash scripts/check_public_observability_proof.sh
 bash scripts/check_public_engineering_proof.sh
 bash scripts/check_public_gitops_layout.sh
 bash scripts/check_public_gitops_image_automation.sh
@@ -269,6 +276,7 @@ bash scripts/check_public_review_guide.sh
 bash scripts/check_public_pages_entrypoint.sh
 bash scripts/check_public_project_status.sh
 bash scripts/check_public_technical_capability_map.sh
+bash scripts/check_public_observability_proof.sh
 bash scripts/check_public_engineering_proof.sh
 bash scripts/check_public_gitops_layout.sh
 bash scripts/check_public_gitops_image_automation.sh

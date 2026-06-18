@@ -75,6 +75,9 @@ Current status snapshot: `docs/public/PROJECT_STATUS.md`.
   failed-run, secret-boundary signals, runbook keys, and failure artifact route.
 - Public-safe 70 percent DevOps/platform milestone evidence with seven complete
   evidence groups and an executable milestone check.
+- Public-safe observability proof (`docs/public/OBSERVABILITY_PROOF.md`)
+  connecting metrics, structured logs, alerts, runbooks, dashboards, and
+  sanitized evidence.
 - Public-safe GitOps delivery foundation with Argo CD layout validation.
 - Public-safe GitOps image promotion and drift detection evidence.
 - Public-safe GitOps drift remediation evidence with approval and rollback context.
@@ -95,7 +98,7 @@ Current status snapshot: `docs/public/PROJECT_STATUS.md`.
 
 - Richer workflow automation examples with notification, approval, and mapping actions.
 - Integration adapter SDK examples.
-- Broader public observability examples with fake metrics.
+- Richer public observability examples with synthetic dashboard and alert-routing evidence.
 - Deeper admin frontend shell.
 
 ## Engineering Summary

@@ -1,0 +1,188 @@
+{
+  "schema_version": 1,
+  "check": "public_observability_proof",
+  "observability_model": "metrics_logs_alerts_dashboards",
+  "data_profile": "synthetic_fake_data",
+  "summary": {
+    "purpose": "prove the public-safe observability loop without exposing private runtime telemetry",
+    "metrics_backend": "prometheus-compatible",
+    "logs_backend": "loki-compatible",
+    "dashboard_backend": "grafana-compatible",
+    "alerting_backend": "alertmanager-compatible"
+  },
+  "signals": {
+    "metrics": [
+      {
+        "name": "drivedesk_http_requests_total",
+        "type": "counter",
+        "safe_labels": [
+          "method",
+          "route",
+          "status"
+        ],
+        "purpose": "request volume by normalized route and status"
+      },
+      {
+        "name": "drivedesk_http_request_duration_seconds_bucket",
+        "type": "histogram",
+        "safe_labels": [
+          "method",
+          "route",
+          "le"
+        ],
+        "purpose": "API latency distribution without request bodies"
+      },
+      {
+        "name": "drivedesk_outbox_events",
+        "type": "gauge",
+        "safe_labels": [
+          "status",
+          "adapter_key"
+        ],
+        "purpose": "queue depth and failed handoff visibility"
+      },
+      {
+        "name": "drivedesk_integration_jobs",
+        "type": "gauge",
+        "safe_labels": [
+          "adapter_key",
+          "status"
+        ],
+        "purpose": "integration job health by public-safe adapter key"
+      },
+      {
+        "name": "drivedesk_auth_attempts_total",
+        "type": "counter",
+        "safe_labels": [
+          "outcome"
+        ],
+        "purpose": "aggregate login-attempt health without user identifiers"
+      }
+    ],
+    "logs": [
+      {
+        "event_type": "api.request.completed",
+        "service": "drivedesk-api",
+        "fields": [
+          "route",
+          "status",
+          "duration_ms",
+          "request_id"
+        ],
+        "raw_payload_included": false
+      },
+      {
+        "event_type": "adapter.completed",
+        "service": "drivedesk-worker",
+        "fields": [
+          "adapter_key",
+          "outbox_event_type",
+          "status",
+          "duration_ms"
+        ],
+        "raw_payload_included": false
+      },
+      {
+        "event_type": "outbox_event.retry_requested",
+        "service": "drivedesk-api",
+        "fields": [
+          "event_type",
+          "status",
+          "attempts"
+        ],
+        "raw_payload_included": false
+      }
+    ],
+    "alerts": [
+      {
+        "name": "DriveDeskApiTargetDown",
+        "severity": "critical",
+        "runbook": "docs/public/RUNTIME_ROLLOUT_EVIDENCE.md",
+        "source": "prometheus_rule"
+      },
+      {
+        "name": "DriveDeskApiHighLatencyP95",
+        "severity": "warning",
+        "runbook": "docs/public/SLO_CANARY_GATE_EVIDENCE.md",
+        "source": "prometheus_rule"
+      },
+      {
+        "name": "DriveDeskIntegrationDeadLetters",
+        "severity": "critical",
+        "runbook": "docs/public/INTEGRATION_INCIDENT_RUNBOOKS.md",
+        "source": "prometheus_rule"
+      },
+      {
+        "name": "DriveDeskAuthFailureSpike",
+        "severity": "warning",
+        "runbook": "docs/public/AUTH_OBSERVABILITY.md",
+        "source": "prometheus_rule"
+      },
+      {
+        "name": "DriveDeskNoRecentLogs",
+        "severity": "warning",
+        "runbook": "docs/public/OBSERVABILITY_PROOF.md",
+        "source": "loki_log_signal"
+      }
+    ],
+    "dashboards": [
+      {
+        "title": "API availability and latency",
+        "panels": [
+          "request rate",
+          "p95 latency",
+          "5xx errors"
+        ],
+        "datasource": "prometheus-compatible"
+      },
+      {
+        "title": "Outbox and integration health",
+        "panels": [
+          "pending outbox events",
+          "integration retries",
+          "dead letters"
+        ],
+        "datasource": "prometheus-compatible"
+      },
+      {
+        "title": "Auth and workflow health",
+        "panels": [
+          "auth attempts",
+          "active sessions",
+          "workflow action runs"
+        ],
+        "datasource": "prometheus-compatible"
+      },
+      {
+        "title": "Structured logs by service",
+        "panels": [
+          "api log events",
+          "worker log events",
+          "adapter failures"
+        ],
+        "datasource": "loki-compatible"
+      }
+    ]
+  },
+  "checks": {
+    "metrics_present": true,
+    "metrics_use_safe_labels": true,
+    "structured_logs_present": true,
+    "raw_log_payloads_absent": true,
+    "alerts_have_runbooks": true,
+    "dashboard_panels_reference_metrics_and_logs": true,
+    "loki_signal_present": true,
+    "prometheus_rule_signal_present": true,
+    "public_docs_linked": true,
+    "private_markers_absent": true,
+    "production_data_touched": false
+  },
+  "redaction": {
+    "paths_included": false,
+    "hostnames_included": false,
+    "addresses_included": false,
+    "credentials_included": false,
+    "raw_logs_included": false,
+    "production_data_included": false
+  }
+}

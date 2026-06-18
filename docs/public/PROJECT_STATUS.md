@@ -18,6 +18,7 @@ work so the repository can be reviewed without private operational context.
 | GitOps and IaC | Helm, Argo CD, OpenTofu, image automation, drift detection, and remediation are modeled with public-safe manifests and evidence. | `docs/public/GITOPS_DELIVERY.md`, `docs/public/GITOPS_IMAGE_AUTOMATION.md`, `docs/public/OPENTOFU_PLAN_EVIDENCE.md`, `docs/public/INFRA_STATE_DRIFT_EVIDENCE.md` | `bash scripts/check_public_helm_render.sh && bash scripts/check_public_gitops_layout.sh && bash scripts/check_public_opentofu_plan.sh && bash scripts/check_public_infra_state_drift.sh` |
 | Evidence boundary | Public export contains synthetic data and sanitized evidence only. | `PUBLIC_EXPORT_MANIFEST.md`, `docs/public/SANITIZED_EVIDENCE.md`, `docs/public/evidence/*.sanitized.json` | `bash scripts/check_public_export_secrets.sh` |
 | Capability map | Each visible capability is linked to implementation surface, evidence, and verifier command. | `docs/public/TECHNICAL_CAPABILITY_MAP.md` | `bash scripts/check_public_technical_capability_map.sh` |
+| Observability proof | Metrics, structured logs, alerts, runbooks, and dashboard panels are represented with public-safe synthetic evidence. | `docs/public/OBSERVABILITY_PROOF.md`, `docs/public/evidence/observability-proof.sanitized.json` | `bash scripts/check_public_observability_proof.sh` |
 
 ## Current Limits
 
@@ -39,8 +40,8 @@ Longer public-safe direction lives in `docs/public/ROADMAP.md`.
    event, audit, and outbox shape.
 2. Add more adapter SDK examples with mapping, preview, execution, retry, and
    operator review paths.
-3. Expand public observability examples with synthetic metrics, logs, alert
-   rules, and dashboard evidence.
+3. Expand the public observability proof into richer synthetic dashboard and
+   alert-routing examples.
 4. Deepen the admin frontend shell around the existing API and public demo
    contract.
 5. Keep public and private repositories separated through the export gate and
@@ -52,6 +53,7 @@ Longer public-safe direction lives in `docs/public/ROADMAP.md`.
 bash scripts/ci_smoke_public.sh
 bash scripts/check_public_project_status.sh
 bash scripts/check_public_technical_capability_map.sh
+bash scripts/check_public_observability_proof.sh
 bash scripts/check_public_engineering_proof.sh
 bash scripts/check_public_demo_api.sh
 bash scripts/check_public_export_secrets.sh

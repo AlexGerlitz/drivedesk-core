@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-18T12:15:48Z
+Generated at: 2026-06-18T12:41:20Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -203,6 +203,11 @@ Copied public-safe areas:
 - public technical capability map doc
 - public technical capability map validation script: scripts/check_public_technical_capability_map.sh
 - public technical capability map links capabilities to evidence and verifier commands
+- public observability proof doc
+- public observability proof validation script: scripts/check_public_observability_proof.sh
+- public observability proof evidence snapshot: docs/public/evidence/observability-proof.sanitized.json
+- public observability proof source snapshot: infra/observability/observability-proof.sanitized.json
+- public observability proof ADR: 0062-public-safe-observability-proof
 - public GitOps delivery foundation doc
 - public GitOps path: infra/gitops
 - public GitOps validation script: scripts/check_public_gitops_layout.sh

@@ -71,6 +71,7 @@ for token in [
     "GitOps and IaC",
     "Evidence boundary",
     "Capability map",
+    "Observability proof",
     "synthetic data",
     "sanitized evidence",
     "docs/openapi.json",
@@ -78,9 +79,12 @@ for token in [
     "PUBLIC_EXPORT_MANIFEST.md",
     "docs/public/SANITIZED_EVIDENCE.md",
     "docs/public/TECHNICAL_CAPABILITY_MAP.md",
+    "docs/public/OBSERVABILITY_PROOF.md",
+    "docs/public/evidence/observability-proof.sanitized.json",
     "bash scripts/ci_smoke_public.sh",
     "bash scripts/check_public_project_status.sh",
     "bash scripts/check_public_technical_capability_map.sh",
+    "bash scripts/check_public_observability_proof.sh",
     "bash scripts/check_public_engineering_proof.sh",
     "bash scripts/check_public_demo_api.sh",
     "bash scripts/check_public_export_secrets.sh",
@@ -110,6 +114,7 @@ target_paths = [
     "docs/public/INFRA_STATE_DRIFT_EVIDENCE.md",
     "docs/public/SANITIZED_EVIDENCE.md",
     "docs/public/TECHNICAL_CAPABILITY_MAP.md",
+    "docs/public/OBSERVABILITY_PROOF.md",
     "docs/public/ROADMAP.md",
 ]
 for path in target_paths:

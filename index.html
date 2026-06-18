@@ -169,7 +169,7 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 14px;
       padding: 18px 0 34px;
     }
@@ -276,6 +276,7 @@
         <a class="button" href="docs/public/ENGINEERING_REVIEW_GUIDE.md">Review Guide</a>
         <a class="button" href="docs/public/PROJECT_STATUS.md">Status</a>
         <a class="button" href="docs/public/TECHNICAL_CAPABILITY_MAP.md">Capability Map</a>
+        <a class="button" href="docs/public/OBSERVABILITY_PROOF.md">Observability</a>
         <a class="button" href="docs/openapi.json">OpenAPI</a>
         <a class="button" href="https://github.com/AlexGerlitz/drivedesk-core/actions/workflows/ci.yml">CI</a>
       </nav>
@@ -296,6 +297,7 @@
             <a class="button" href="docs/public/ENGINEERING_REVIEW_GUIDE.md">Read Review Guide</a>
             <a class="button" href="docs/public/PROJECT_STATUS.md">Project Status</a>
             <a class="button" href="docs/public/TECHNICAL_CAPABILITY_MAP.md">Capability Map</a>
+            <a class="button" href="docs/public/OBSERVABILITY_PROOF.md">Observability</a>
             <a class="button" href="docs/public/ENGINEERING_PROOF.md">Proof Contract</a>
           </div>
           <div class="status-strip" aria-label="Engineering status">
@@ -321,6 +323,11 @@
           <h2>Capability map</h2>
           <p>Maps each backend, platform, integration, recovery, GitOps, and IaC capability to evidence and verifier commands.</p>
           <a href="docs/public/TECHNICAL_CAPABILITY_MAP.md">Open map</a>
+        </article>
+        <article class="card">
+          <h2>Observability</h2>
+          <p>Public-safe metrics, structured logs, alert names, runbooks, and dashboard evidence.</p>
+          <a href="docs/public/OBSERVABILITY_PROOF.md">Open observability</a>
         </article>
         <article class="card">
           <h2>API and SDK</h2>
@@ -351,6 +358,7 @@
 bash scripts/check_public_pages_entrypoint.sh
 bash scripts/check_public_project_status.sh
 bash scripts/check_public_technical_capability_map.sh
+bash scripts/check_public_observability_proof.sh
 bash scripts/check_public_review_guide.sh
 bash scripts/check_public_engineering_proof.sh
 bash scripts/check_public_demo_api.sh</code></pre>

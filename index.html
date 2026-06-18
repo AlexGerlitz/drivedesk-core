@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="DriveDesk Core public engineering review hub with demo, CI, OpenAPI, SDK, recovery, GitOps, and IaC evidence.">
+  <title>DriveDesk Core Engineering Review</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --text: #111827;
+      --muted: #4b5563;
+      --line: #d7dce5;
+      --blue: #1d4ed8;
+      --green: #047857;
+      --red: #b42318;
+      --shadow: 0 18px 55px rgba(15, 23, 42, 0.10);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    a { color: inherit; }
+
+    .shell {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 22px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand {
+      font-weight: 800;
+      letter-spacing: 0;
+      font-size: 20px;
+    }
+
+    .topnav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      padding: 9px 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--text);
+      font-weight: 700;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .button.primary {
+      border-color: var(--blue);
+      background: var(--blue);
+      color: #ffffff;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 0.92fr) minmax(420px, 1.08fr);
+      gap: 34px;
+      align-items: center;
+      min-height: 620px;
+      padding: 44px 0 28px;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--green);
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 720px;
+      font-size: 52px;
+      line-height: 1.04;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      margin: 20px 0 0;
+      max-width: 670px;
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 26px;
+    }
+
+    .status-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 26px;
+    }
+
+    .status {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    .status strong {
+      display: block;
+      font-size: 13px;
+    }
+
+    .status span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 2px;
+    }
+
+    .screenshot {
+      margin: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .screenshot img {
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 16 / 10;
+      object-fit: cover;
+    }
+
+    .screenshot figcaption {
+      padding: 12px 14px;
+      color: var(--muted);
+      font-size: 13px;
+      border-top: 1px solid var(--line);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      padding: 18px 0 34px;
+    }
+
+    .card {
+      min-height: 176px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    .card h2 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+
+    .card p {
+      margin: 10px 0 14px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .card a {
+      color: var(--blue);
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .commands {
+      display: grid;
+      grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+      gap: 18px;
+      align-items: start;
+      padding: 10px 0 52px;
+    }
+
+    .commands section,
+    .commands pre {
+      margin: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    .commands section {
+      padding: 18px;
+    }
+
+    .commands h2 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: 0;
+    }
+
+    .commands p {
+      margin: 10px 0 0;
+      color: var(--muted);
+    }
+
+    pre {
+      padding: 18px;
+      overflow: auto;
+      color: #0f172a;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    footer {
+      padding: 20px 0 34px;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+      font-size: 13px;
+    }
+
+    @media (max-width: 940px) {
+      .hero,
+      .commands {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        min-height: 0;
+      }
+
+      .grid,
+      .status-strip {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 40px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">DriveDesk Core</div>
+      <nav class="topnav" aria-label="Review links">
+        <a class="button primary" href="apps/admin/public-demo/">Open Demo</a>
+        <a class="button" href="docs/public/ENGINEERING_REVIEW_GUIDE.md">Review Guide</a>
+        <a class="button" href="docs/openapi.json">OpenAPI</a>
+        <a class="button" href="https://github.com/AlexGerlitz/drivedesk-core/actions/workflows/ci.yml">CI</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="title">
+        <div>
+          <p class="eyebrow">Public Engineering Surface</p>
+          <h1 id="title">DriveDesk Core engineering review hub</h1>
+          <p class="lead">
+            Modular monolith backend and DevOps foundation with synthetic demo data,
+            executable public checks, OpenAPI/SDK artifacts, recovery drills, release
+            gates, GitOps, OpenTofu, and sanitized runtime evidence.
+          </p>
+          <div class="action-row">
+            <a class="button primary" href="apps/admin/public-demo/">Open Demo</a>
+            <a class="button" href="docs/public/ENGINEERING_REVIEW_GUIDE.md">Read Review Guide</a>
+            <a class="button" href="docs/public/ENGINEERING_PROOF.md">Proof Contract</a>
+          </div>
+          <div class="status-strip" aria-label="Engineering status">
+            <div class="status"><strong>CI</strong><span>public smoke path</span></div>
+            <div class="status"><strong>Data</strong><span>synthetic only</span></div>
+            <div class="status"><strong>Evidence</strong><span>sanitized artifacts</span></div>
+          </div>
+        </div>
+
+        <figure class="screenshot">
+          <img src="docs/public/assets/drivedesk-core-demo-overview.png" alt="DriveDesk Core public demo overview">
+          <figcaption>Public demo surface backed by static synthetic data and the read-only `GET /demo/public` contract.</figcaption>
+        </figure>
+      </section>
+
+      <section class="grid" aria-label="Evidence links">
+        <article class="card">
+          <h2>Proof contract</h2>
+          <p>Connects the demo Proof tab, API payload, OpenAPI schema, SDK artifacts, docs, and CI checks.</p>
+          <a href="docs/public/ENGINEERING_PROOF.md">Open proof</a>
+        </article>
+        <article class="card">
+          <h2>API and SDK</h2>
+          <p>Read-only public demo API with generated Python, JavaScript, and TypeScript client artifacts.</p>
+          <a href="docs/public/API_BACKED_DEMO.md">Open API notes</a>
+        </article>
+        <article class="card">
+          <h2>Release safety</h2>
+          <p>Backup/restore, rollback, SLO canary gate, and staged promotion evidence on synthetic data.</p>
+          <a href="docs/public/SANITIZED_EVIDENCE.md">Open evidence</a>
+        </article>
+        <article class="card">
+          <h2>GitOps and IaC</h2>
+          <p>Helm chart, Argo CD layout, OpenTofu plan, drift detection, and remediation evidence.</p>
+          <a href="docs/public/GITOPS_DELIVERY.md">Open GitOps</a>
+        </article>
+      </section>
+
+      <div class="commands">
+        <section>
+          <h2>Verification path</h2>
+          <p>
+            Start with the review guide, then run the public smoke path. The same
+            commands are used by CI and the public release gate.
+          </p>
+        </section>
+        <pre><code>bash scripts/ci_smoke_public.sh
+bash scripts/check_public_pages_entrypoint.sh
+bash scripts/check_public_review_guide.sh
+bash scripts/check_public_engineering_proof.sh
+bash scripts/check_public_demo_api.sh</code></pre>
+      </div>
+    </main>
+
+    <footer>
+      Public URL: <a href="https://alexgerlitz.github.io/drivedesk-core/">https://alexgerlitz.github.io/drivedesk-core/</a>
+    </footer>
+  </div>
+</body>
+</html>

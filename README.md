@@ -41,6 +41,8 @@ It includes:
 
 ## Live Demo
 
+[Open the public DriveDesk Core review hub](https://alexgerlitz.github.io/drivedesk-core/)
+
 [Open the public DriveDesk Core demo](https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/)
 
 ![DriveDesk Core demo overview](docs/public/assets/drivedesk-core-demo-overview.png)
@@ -216,6 +218,7 @@ bash scripts/check_public_private_infra_scheduled_validation.sh
 bash scripts/check_public_private_infra_scheduled_alerting.sh
 bash scripts/check_public_portfolio_70_milestone.sh
 bash scripts/check_public_review_guide.sh
+bash scripts/check_public_pages_entrypoint.sh
 bash scripts/check_public_engineering_proof.sh
 bash scripts/check_public_gitops_layout.sh
 bash scripts/check_public_gitops_image_automation.sh
@@ -253,6 +256,7 @@ bash scripts/check_public_private_infra_scheduled_validation.sh
 bash scripts/check_public_private_infra_scheduled_alerting.sh
 bash scripts/check_public_portfolio_70_milestone.sh
 bash scripts/check_public_review_guide.sh
+bash scripts/check_public_pages_entrypoint.sh
 bash scripts/check_public_engineering_proof.sh
 bash scripts/check_public_gitops_layout.sh
 bash scripts/check_public_gitops_image_automation.sh

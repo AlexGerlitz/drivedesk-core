@@ -38,6 +38,30 @@ scope/recovery behavior applies?
 Preview is a read-only API operation. Execute is an outbox-backed operation that
 the worker can process, retry, or move to dead-letter.
 
+## Accounting Export Operations
+
+| Operation | Scope | Recovery |
+| --- | --- | --- |
+| `accounting_export_execute` | `accounting:export` | retry, dead-letter, and operator review |
+
+The outbound export operation uses:
+
+```json
+{
+  "key": "accounting_export_execute",
+  "event_type": "accounting.export.requested",
+  "endpoint": "POST /tenants/{tenant_id}/integration-exports/accounting",
+  "required_connection_scope": "accounting:export",
+  "idempotency_keys": ["tenant_id", "export_batch_id", "documents_hash"],
+  "retryable": true,
+  "dead_letter": true,
+  "operator_review": true
+}
+```
+
+This proves that inbound imports and outbound exports can use the same
+operation-contract model.
+
 ## Why This Matters
 
 Structured operation contracts keep the Integration Hub explicit:
@@ -45,7 +69,7 @@ Structured operation contracts keep the Integration Hub explicit:
 - UI can show exactly which operations a profile can perform;
 - SDK examples can point to the right endpoint and required scope;
 - worker behavior can be documented per operation;
-- public docs can describe 1C, bank, KKT, webhook, and file-import adapters
-  through the same shape later.
+- public docs can describe 1C, bank, KKT, webhook, file-import, and accounting
+  adapters through the same shape later.
 
 This avoids building future integrations as one-off code paths.

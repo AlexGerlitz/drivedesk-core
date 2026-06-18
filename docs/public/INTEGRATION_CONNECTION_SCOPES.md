@@ -109,6 +109,35 @@ rejects the profile at creation time.
 400 Unsupported connection scopes for file.import.fake: accounting:export
 ```
 
+## Accounting Export Scope
+
+The mock accounting export adapter supports:
+
+| Scope | Meaning |
+| --- | --- |
+| `accounting:export` | Can enqueue and execute synthetic accounting document export work. |
+
+```json
+{
+  "name": "Demo accounting export profile",
+  "adapter_key": "accounting.export.mock",
+  "config": {
+    "provider": "mock-accounting",
+    "mode": "synthetic"
+  },
+  "scopes": ["accounting:export"]
+}
+```
+
+This profile can call:
+
+```text
+POST /tenants/{tenant_id}/integration-exports/accounting
+```
+
+It cannot be used for file-import work because the endpoint verifies adapter
+compatibility before enqueueing an outbox event.
+
 ## What This Proves
 
 - adapter descriptors control connection capabilities;

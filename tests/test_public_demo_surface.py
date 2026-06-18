@@ -95,6 +95,18 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
         "source_format",
         "records_hash",
     ]
+    assert adapter_by_key["accounting.export.mock"]["status"] == "active"
+    assert adapter_by_key["accounting.export.mock"]["supportedConnectionScopes"] == ["accounting:export"]
+    assert adapter_by_key["accounting.export.mock"]["defaultConnectionScopes"] == ["accounting:export"]
+    accounting_operations = {
+        operation["key"]: operation
+        for operation in adapter_by_key["accounting.export.mock"]["operationContracts"]
+    }
+    assert accounting_operations["accounting_export_execute"]["eventType"] == "accounting.export.requested"
+    assert accounting_operations["accounting_export_execute"]["requiredConnectionScope"] == "accounting:export"
+    assert accounting_operations["accounting_export_execute"]["endpoint"] == (
+        "POST /tenants/{tenant_id}/integration-exports/accounting"
+    )
     assert len(payload["integrationJobs"]) >= 3
     assert len(payload["integrationHealth"]) >= 4
     assert len(payload["outbox"]) >= 3

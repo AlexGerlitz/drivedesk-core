@@ -44,33 +44,6 @@ def _public_adapter_rows() -> list[dict[str, Any]]:
                 "contract": descriptor["purpose"],
             }
         )
-    rows.append(
-        {
-            "key": "accounting.export.mock",
-            "name": "Accounting Export",
-            "status": "planned",
-            "direction": "outbound",
-            "connectionProfileSupported": True,
-            "requiredMappingKeys": ["external_ref"],
-            "supportedConnectionScopes": ["accounting:export"],
-            "defaultConnectionScopes": ["accounting:export"],
-            "operationContracts": [
-                {
-                    "key": "accounting_export_execute",
-                    "title": "Export accounting document",
-                    "trigger": "worker.outbox.pending",
-                    "eventType": "accounting.export.requested",
-                    "endpoint": "planned adapter worker",
-                    "requiredConnectionScope": "accounting:export",
-                    "idempotencyKeys": ["tenant_id", "document_id", "external_ref"],
-                    "retryable": True,
-                    "deadLetter": True,
-                    "operatorReview": True,
-                }
-            ],
-            "contract": "Future adapter boundary for accounting exports and reconciliation status.",
-        }
-    )
     return rows
 
 

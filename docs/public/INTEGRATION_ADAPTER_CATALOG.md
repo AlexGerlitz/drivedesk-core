@@ -28,27 +28,27 @@ and replaces them with runtime metadata:
 
 ```json
 {
-  "key": "file.import.fake",
-  "name": "Fake File Import",
+  "key": "accounting.export.mock",
+  "name": "Mock Accounting Export",
   "status": "active",
-  "direction": "inbound",
+  "direction": "outbound",
   "connection_profile_supported": true,
   "connection_profile_required": false,
-  "required_mapping_keys": ["external_id", "display_name"],
-  "supported_connection_scopes": ["file_import:execute", "file_import:preview"],
-  "default_connection_scopes": ["file_import:execute", "file_import:preview"],
+  "required_mapping_keys": [],
+  "supported_connection_scopes": ["accounting:export"],
+  "default_connection_scopes": ["accounting:export"],
   "operation_contracts": [
     {
-      "key": "file_import_execute",
-      "event_type": "integration.file_import.requested",
-      "required_connection_scope": "file_import:execute"
+      "key": "accounting_export_execute",
+      "event_type": "accounting.export.requested",
+      "endpoint": "POST /tenants/{tenant_id}/integration-exports/accounting",
+      "required_connection_scope": "accounting:export"
     }
   ],
   "capabilities": [
-    "payload validation",
-    "field mapping transform",
-    "mapping preview",
-    "connection scope enforcement"
+    "outbound export boundary",
+    "connection scope enforcement",
+    "retryable failure simulation"
   ]
 }
 ```
@@ -63,7 +63,7 @@ Each adapter descriptor includes:
 | `name` | Human-readable adapter name. |
 | `status` | Runtime status such as `active`. |
 | `category` | Adapter family, for example `file_import` or `internal`. |
-| `direction` | Data direction, for example `inbound` or `internal`. |
+| `direction` | Data direction, for example `inbound`, `outbound`, or `internal`. |
 | `purpose` | Short public-safe explanation. |
 | `connection_profile_supported` | Whether tenant-owned connection profiles can point at this adapter. |
 | `connection_profile_required` | Whether a job must provide a connection profile. |
@@ -84,6 +84,7 @@ The current catalog contains executable adapters only:
 | Adapter | Direction | Connection Profile | Purpose |
 | --- | --- | --- | --- |
 | `file.import.fake` | `inbound` | supported | Synthetic file import adapter for contract tests and public demos. |
+| `accounting.export.mock` | `outbound` | supported | Synthetic accounting export adapter for outbound contract tests. |
 | `internal.noop` | `internal` | not supported | Internal acknowledgement path for default outbox events. |
 
 Planned provider adapters can appear in product docs and public demo data, but
@@ -106,6 +107,9 @@ POST /tenants/{tenant_id}/integration-mapping-preview
 POST /tenants/{tenant_id}/integration-imports/file
         |
         v
+POST /tenants/{tenant_id}/integration-exports/accounting
+        |
+        v
 outbox -> worker -> adapter
 ```
 
@@ -117,7 +121,8 @@ values.
 
 The public smoke test validates:
 
-- `/integration-adapters` returns `file.import.fake` and `internal.noop`;
+- `/integration-adapters` returns `file.import.fake`, `accounting.export.mock`,
+  and `internal.noop`;
 - OpenAPI includes `GET /integration-adapters`;
 - the file-import descriptor exposes `connection_profile_supported`;
 - the file-import descriptor exposes `required_mapping_keys`;
@@ -125,6 +130,8 @@ The public smoke test validates:
 - the file-import descriptor exposes `default_connection_scopes`;
 - the file-import descriptor exposes `operation_contracts`;
 - the file-import execute operation declares `integration.file_import.requested`;
+- the accounting export operation declares `accounting.export.requested`;
+- the accounting export operation declares `accounting:export`;
 - the file-import descriptor exposes mapping transform and preview capabilities;
 - the file-import descriptor includes mapping and payload examples;
 - the public demo adapter cards include connection-profile metadata.

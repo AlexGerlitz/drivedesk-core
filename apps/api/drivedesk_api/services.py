@@ -24,6 +24,7 @@ from drivedesk_api.db import (
 )
 from drivedesk_api.rbac import ActorContext
 from drivedesk_api.schemas import (
+    AccountingExportCreate,
     BusinessRecordCreate,
     BusinessRecordTransition,
     BusinessRecordType,
@@ -332,6 +333,23 @@ async def _active_connection_for_file_import(
     tenant_id: str,
     connection_id: str | None,
 ) -> IntegrationConnection | None:
+    return await _active_connection_for_adapter(
+        session,
+        tenant_id=tenant_id,
+        connection_id=connection_id,
+        adapter_key="file.import.fake",
+        required_scope="file_import:execute",
+    )
+
+
+async def _active_connection_for_adapter(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    connection_id: str | None,
+    adapter_key: str,
+    required_scope: str,
+) -> IntegrationConnection | None:
     if not connection_id:
         return None
 
@@ -340,18 +358,24 @@ async def _active_connection_for_file_import(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="integration connection not found")
     if connection.status != "active":
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="integration connection is not active")
-    if connection.adapter_key != "file.import.fake":
+    if connection.adapter_key != adapter_key:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="integration connection adapter mismatch")
     scopes = _connection_scopes(connection)
+    try:
+        mapping = json.loads(connection.mapping_json)
+    except json.JSONDecodeError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="integration connection mapping is invalid") from exc
+    if not isinstance(mapping, dict):
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="integration connection mapping is invalid")
     try:
         validate_adapter_connection_scope(
             connection.adapter_key,
             scopes=scopes,
-            required_scope="file_import:execute",
+            required_scope=required_scope,
         )
         validate_adapter_connection_profile(
             connection.adapter_key,
-            mapping=json.loads(connection.mapping_json),
+            mapping=mapping,
             scopes=scopes,
         )
     except (AdapterExecutionError, AdapterValidationError) as exc:
@@ -425,6 +449,68 @@ async def create_file_import_job(
         },
     )
     await commit_or_conflict(session, "file import job already exists")
+    return event
+
+
+async def create_accounting_export_job(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    payload: AccountingExportCreate,
+    actor: ActorContext,
+) -> OutboxEvent:
+    await ensure_tenant_exists(session, tenant_id)
+    connection = await _active_connection_for_adapter(
+        session,
+        tenant_id=tenant_id,
+        connection_id=payload.integration_connection_id,
+        adapter_key="accounting.export.mock",
+        required_scope="accounting:export",
+    )
+    documents = payload.documents
+    export_batch_id = payload.export_batch_id.strip()
+    document_types = sorted(
+        {
+            str(document.get("document_type")).strip()
+            for document in documents
+            if isinstance(document.get("document_type"), str) and str(document.get("document_type")).strip()
+        }
+    )
+    adapter_key = connection.adapter_key if connection else "accounting.export.mock"
+    scopes = _connection_scopes(connection) if connection else []
+    await write_audit(
+        session,
+        tenant_id=tenant_id,
+        actor=actor,
+        event_type="integration.accounting_export.requested",
+        entity_type="integration_job",
+        summary=f"Accounting export requested: {export_batch_id}",
+        metadata={
+            "adapter_key": adapter_key,
+            "integration_connection_id": connection.id if connection else None,
+            "export_batch_id": export_batch_id,
+            "document_count": len(documents),
+            "document_types": document_types,
+            "scopes": scopes,
+        },
+    )
+    event = await enqueue_outbox(
+        session,
+        tenant_id=tenant_id,
+        event_type="accounting.export.requested",
+        adapter_key=adapter_key,
+        payload={
+            "adapter_key": adapter_key,
+            "integration_connection_id": connection.id if connection else None,
+            "export_batch_id": export_batch_id,
+            "document_count": len(documents),
+            "document_types": document_types,
+            "connection_scopes": scopes,
+            "documents": documents,
+            "simulate_failure": payload.simulate_failure,
+        },
+    )
+    await commit_or_conflict(session, "accounting export job already exists")
     return event
 
 
@@ -1078,7 +1164,7 @@ def _safe_outbox_payload_summary(payload_json: str) -> tuple[str | None, dict[st
         integration_connection_id = None
         summary["has_integration_connection"] = False
 
-    for key in ("source_format", "record_count", "simulate_failure"):
+    for key in ("source_format", "record_count", "export_batch_id", "document_count", "simulate_failure"):
         value = payload.get(key)
         if isinstance(value, str | int) or value is None:
             summary[key] = value
@@ -1094,6 +1180,14 @@ def _safe_outbox_payload_summary(payload_json: str) -> tuple[str | None, dict[st
     records = payload.get("records")
     if isinstance(records, list):
         summary["raw_records_redacted"] = len(records)
+
+    document_types = payload.get("document_types")
+    if isinstance(document_types, list) and all(isinstance(document_type, str) for document_type in document_types):
+        summary["document_types"] = sorted(document_types)
+
+    documents = payload.get("documents")
+    if isinstance(documents, list):
+        summary["raw_documents_redacted"] = len(documents)
 
     return integration_connection_id, summary
 

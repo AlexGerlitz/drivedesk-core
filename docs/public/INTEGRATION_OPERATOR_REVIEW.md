@@ -12,6 +12,7 @@ should be used after the issue is checked.
 GET /tenants/{tenant_id}/integration-operator-review
 GET /tenants/{tenant_id}/integration-operator-review?status=dead_letter
 GET /tenants/{tenant_id}/integration-operator-review?adapter_key=file.import.fake
+GET /tenants/{tenant_id}/integration-operator-review?adapter_key=accounting.export.mock
 ```
 
 The endpoint returns only jobs in:
@@ -68,6 +69,27 @@ returns safe operational facts:
 
 That keeps operator review useful without turning dashboards, screenshots, logs,
 or public examples into data-leak surfaces.
+
+For outbound accounting export jobs, the same endpoint returns a safe document
+summary:
+
+```json
+{
+  "adapter_key": "accounting.export.mock",
+  "operation_key": "accounting_export_execute",
+  "event_type": "accounting.export.requested",
+  "required_connection_scope": "accounting:export",
+  "payload_summary": {
+    "payload_valid": true,
+    "export_batch_id": "retryable-accounting-batch",
+    "document_count": 1,
+    "document_types": ["invoice"],
+    "raw_documents_redacted": 1
+  }
+}
+```
+
+The raw `documents` list is not returned.
 
 ## Operational Flow
 

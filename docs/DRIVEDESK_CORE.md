@@ -500,6 +500,31 @@ Public docs:
 - `docs/public/BUSINESS_RECORD_LIFECYCLE.md`;
 - `docs/adr/0038-business-record-lifecycle-policy-catalog.md`.
 
+## Sprint 4L Mock Accounting Export Adapter
+
+Sprint 4L adds an executable outbound integration adapter.
+
+New endpoint:
+
+- `POST /tenants/{tenant_id}/integration-exports/accounting`.
+
+Why this matters:
+
+- `accounting.export.mock` proves the outbound side of the Integration Hub;
+- accounting export jobs use the same outbox, worker, retry, dead-letter,
+  metrics, and operator-review path as inbound file imports;
+- tenant-owned connection profiles can scope the adapter with
+  `accounting:export`;
+- operator review redacts raw `documents` and exposes only safe batch, count,
+  and type summaries;
+- future 1C, KKT, bank, and ERP adapters can reuse the same shape without
+  adding a new service boundary.
+
+Public docs:
+
+- `docs/public/INTEGRATION_ACCOUNTING_EXPORT.md`;
+- `docs/adr/0039-mock-accounting-export-adapter.md`.
+
 ## Local Commands
 
 Run the API without Docker:

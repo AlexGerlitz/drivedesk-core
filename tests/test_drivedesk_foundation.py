@@ -21,7 +21,14 @@ from fastapi.testclient import TestClient
 from drivedesk_api.db import Base
 from drivedesk_api.main import build_app
 from drivedesk_api.session import get_session
-from drivedesk_core import ActorRef, TenantRef, build_event, list_lifecycle_policies, preview_lifecycle_transition
+from drivedesk_core import (
+    ActorRef,
+    MockAccountingExportAdapter,
+    TenantRef,
+    build_event,
+    list_lifecycle_policies,
+    preview_lifecycle_transition,
+)
 from drivedesk_core.adapters import AdapterExecutionError, FakeFileImportAdapter, list_adapter_descriptors
 from drivedesk_worker.main import build_heartbeat, heartbeat_to_json
 
@@ -116,10 +123,72 @@ def test_fake_file_import_adapter_contract() -> None:
         raise AssertionError("expected retryable adapter failure")
 
 
+def test_mock_accounting_export_adapter_contract() -> None:
+    adapter = MockAccountingExportAdapter()
+
+    result = adapter.execute(
+        {
+            "export_batch_id": "batch_2026_06",
+            "documents": [
+                {
+                    "document_id": "doc_001",
+                    "document_type": "invoice",
+                    "amount_cents": 120000,
+                    "currency": "RUB",
+                    "counterparty_ref": "counterparty_demo_1",
+                },
+                {
+                    "document_id": "doc_002",
+                    "document_type": "receipt",
+                    "amount_cents": 50000,
+                    "currency": "RUB",
+                    "counterparty_ref": "counterparty_demo_2",
+                },
+                {"document_id": "doc_rejected", "document_type": "invoice"},
+            ],
+        }
+    )
+
+    assert result.adapter_key == "accounting.export.mock"
+    assert result.status == "partial_success"
+    assert result.records_received == 3
+    assert result.records_accepted == 2
+    assert result.records_rejected == 1
+    payload = result.to_payload()
+    assert payload["external_ref"] == "mock-accounting-export:batch_2026_06"
+    assert payload["details"]["accepted_document_ids"] == ["doc_001", "doc_002"]
+    assert payload["details"]["document_types"] == ["invoice", "receipt"]
+
+    success_result = adapter.execute(
+        {
+            "export_batch_id": "batch_success",
+            "documents": [
+                {
+                    "document_id": "doc_success",
+                    "document_type": "invoice",
+                    "amount_cents": 0,
+                    "currency": "RUB",
+                    "counterparty_ref": "counterparty_demo",
+                }
+            ],
+        }
+    )
+    assert success_result.status == "success"
+    assert success_result.records_rejected == 0
+
+    try:
+        adapter.execute({"simulate_failure": "retryable", "documents": []})
+    except AdapterExecutionError as exc:
+        assert exc.retryable is True
+        assert exc.adapter_key == "accounting.export.mock"
+    else:
+        raise AssertionError("expected retryable accounting adapter failure")
+
+
 def test_adapter_catalog_describes_runtime_adapters() -> None:
     descriptors = {item["key"]: item for item in list_adapter_descriptors()}
 
-    assert set(descriptors) == {"file.import.fake", "internal.noop"}
+    assert set(descriptors) == {"accounting.export.mock", "file.import.fake", "internal.noop"}
     assert descriptors["file.import.fake"]["connection_profile_supported"] is True
     assert descriptors["file.import.fake"]["connection_profile_required"] is False
     assert descriptors["file.import.fake"]["mapping_example"] == {
@@ -146,6 +215,26 @@ def test_adapter_catalog_describes_runtime_adapters() -> None:
     assert "field mapping transform" in descriptors["file.import.fake"]["capabilities"]
     assert "mapping preview" in descriptors["file.import.fake"]["capabilities"]
     assert "connection scope enforcement" in descriptors["file.import.fake"]["capabilities"]
+    assert descriptors["accounting.export.mock"]["direction"] == "outbound"
+    assert descriptors["accounting.export.mock"]["connection_profile_supported"] is True
+    assert descriptors["accounting.export.mock"]["required_mapping_keys"] == []
+    assert descriptors["accounting.export.mock"]["supported_connection_scopes"] == ["accounting:export"]
+    assert descriptors["accounting.export.mock"]["default_connection_scopes"] == ["accounting:export"]
+    accounting_operation_contracts = {
+        item["key"]: item for item in descriptors["accounting.export.mock"]["operation_contracts"]
+    }
+    assert set(accounting_operation_contracts) == {"accounting_export_execute"}
+    assert accounting_operation_contracts["accounting_export_execute"]["event_type"] == (
+        "accounting.export.requested"
+    )
+    assert accounting_operation_contracts["accounting_export_execute"]["endpoint"] == (
+        "POST /tenants/{tenant_id}/integration-exports/accounting"
+    )
+    assert accounting_operation_contracts["accounting_export_execute"]["required_connection_scope"] == (
+        "accounting:export"
+    )
+    assert accounting_operation_contracts["accounting_export_execute"]["retryable"] is True
+    assert accounting_operation_contracts["accounting_export_execute"]["dead_letter"] is True
     assert descriptors["internal.noop"]["connection_profile_supported"] is False
 
 
@@ -186,7 +275,7 @@ def test_api_integration_adapter_catalog_endpoint() -> None:
 
     assert response.status_code == 200
     payload = {item["key"]: item for item in response.json()}
-    assert set(payload) == {"file.import.fake", "internal.noop"}
+    assert set(payload) == {"accounting.export.mock", "file.import.fake", "internal.noop"}
     assert payload["file.import.fake"]["status"] == "active"
     assert payload["file.import.fake"]["direction"] == "inbound"
     assert payload["file.import.fake"]["connection_profile_supported"] is True
@@ -214,6 +303,17 @@ def test_api_integration_adapter_catalog_endpoint() -> None:
     assert "mapping preview" in payload["file.import.fake"]["capabilities"]
     assert "connection scope enforcement" in payload["file.import.fake"]["capabilities"]
     assert "payload validation" in payload["file.import.fake"]["capabilities"]
+    assert payload["accounting.export.mock"]["status"] == "active"
+    assert payload["accounting.export.mock"]["direction"] == "outbound"
+    assert payload["accounting.export.mock"]["supported_connection_scopes"] == ["accounting:export"]
+    accounting_api_contracts = {
+        item["key"]: item for item in payload["accounting.export.mock"]["operation_contracts"]
+    }
+    assert accounting_api_contracts["accounting_export_execute"]["idempotency_keys"] == [
+        "tenant_id",
+        "export_batch_id",
+        "documents_hash",
+    ]
     assert payload["internal.noop"]["direction"] == "internal"
 
 

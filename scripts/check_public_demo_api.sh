@@ -136,13 +136,17 @@ assert {item["state"] for item in demo["integrationHealth"]} >= {
     "retry",
     "dead_letter",
 }
-assert {adapter["key"] for adapter in demo["adapters"]} >= {"file.import.fake", "internal.noop"}, demo
+assert {adapter["key"] for adapter in demo["adapters"]} >= {
+    "accounting.export.mock",
+    "file.import.fake",
+    "internal.noop",
+}, demo
 assert any(adapter.get("connectionProfileSupported") for adapter in demo["adapters"]), demo
 assert any(adapter.get("requiredMappingKeys") for adapter in demo["adapters"]), demo
 assert any(adapter.get("supportedConnectionScopes") for adapter in demo["adapters"]), demo
 assert any(adapter.get("operationContracts") for adapter in demo["adapters"]), demo
 adapter_catalog = {adapter["key"]: adapter for adapter in adapters}
-assert set(adapter_catalog) == {"file.import.fake", "internal.noop"}, adapters
+assert set(adapter_catalog) == {"accounting.export.mock", "file.import.fake", "internal.noop"}, adapters
 assert adapter_catalog["file.import.fake"]["direction"] == "inbound", adapters
 assert adapter_catalog["file.import.fake"]["connection_profile_supported"] is True, adapters
 assert adapter_catalog["file.import.fake"]["required_mapping_keys"] == ["external_id", "display_name"], adapters
@@ -172,6 +176,34 @@ assert "field mapping transform" in adapter_catalog["file.import.fake"]["capabil
 assert "mapping preview" in adapter_catalog["file.import.fake"]["capabilities"], adapters
 assert "connection scope enforcement" in adapter_catalog["file.import.fake"]["capabilities"], adapters
 assert "records" in adapter_catalog["file.import.fake"]["payload_schema"]["required"], adapters
+assert adapter_catalog["accounting.export.mock"]["direction"] == "outbound", adapters
+assert adapter_catalog["accounting.export.mock"]["connection_profile_supported"] is True, adapters
+assert adapter_catalog["accounting.export.mock"]["required_mapping_keys"] == [], adapters
+assert adapter_catalog["accounting.export.mock"]["supported_connection_scopes"] == [
+    "accounting:export",
+], adapters
+assert adapter_catalog["accounting.export.mock"]["default_connection_scopes"] == [
+    "accounting:export",
+], adapters
+accounting_operation_contracts = {
+    operation["key"]: operation
+    for operation in adapter_catalog["accounting.export.mock"]["operation_contracts"]
+}
+assert set(accounting_operation_contracts) == {"accounting_export_execute"}, adapters
+assert accounting_operation_contracts["accounting_export_execute"]["required_connection_scope"] == (
+    "accounting:export"
+), adapters
+assert accounting_operation_contracts["accounting_export_execute"]["event_type"] == (
+    "accounting.export.requested"
+), adapters
+assert accounting_operation_contracts["accounting_export_execute"]["endpoint"] == (
+    "POST /tenants/{tenant_id}/integration-exports/accounting"
+), adapters
+assert accounting_operation_contracts["accounting_export_execute"]["idempotency_keys"] == [
+    "tenant_id",
+    "export_batch_id",
+    "documents_hash",
+], adapters
 assert adapter_catalog["internal.noop"]["connection_profile_supported"] is False, adapters
 assert adapter_catalog["internal.noop"]["supported_connection_scopes"] == [], adapters
 lifecycle_catalog = {policy["record_type"]: policy for policy in lifecycle_policies}
@@ -208,6 +240,7 @@ assert "/tenants/{tenant_id}/outbox-events/{event_id}/retry" in openapi["paths"]
 assert "/tenants/{tenant_id}/integration-connections" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/integration-mapping-preview" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/integration-operator-review" in openapi["paths"], openapi["paths"].keys()
+assert "/tenants/{tenant_id}/integration-exports/accounting" in openapi["paths"], openapi["paths"].keys()
 assert "/integration-adapters" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/public" in openapi["paths"], openapi["paths"].keys()
 assert "/health" in openapi["paths"], openapi["paths"].keys()
@@ -222,6 +255,7 @@ if openapi_file.exists():
     assert "/tenants/{tenant_id}/integration-connections" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/integration-mapping-preview" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/integration-operator-review" in generated["paths"], generated["paths"].keys()
+    assert "/tenants/{tenant_id}/integration-exports/accounting" in generated["paths"], generated["paths"].keys()
     assert "/integration-adapters" in generated["paths"], generated["paths"].keys()
 
 print(

@@ -9,8 +9,9 @@ DriveDesk should be the operational workspace. External systems should connect
 through adapters instead of leaking provider-specific payloads into the core
 domain.
 
-The first implementation slice is a fake file import adapter. It proves the
-shape needed for later providers:
+The first implementation slice was a fake file import adapter. The current
+public runtime also includes a mock accounting export adapter. Together they
+prove the shape needed for later providers:
 
 - provider-neutral adapter contract;
 - API-created integration job;
@@ -19,6 +20,7 @@ shape needed for later providers:
 - field mapping transform and preview;
 - connection scope enforcement;
 - operation-level contracts for preview and execution;
+- outbound export execution;
 - operator review queue for failed integration jobs;
 - retry state for temporary failures;
 - dead-letter state for permanent failures;
@@ -38,6 +40,20 @@ Adapter execution returns a normalized result:
   "records_accepted": 2,
   "records_rejected": 1,
   "external_ref": "fake-import:demo-leads-json"
+}
+```
+
+Outbound export execution uses the same result shape:
+
+```json
+{
+  "adapter_key": "accounting.export.mock",
+  "status": "partial_success",
+  "message": "Exported 2 mock accounting documents from batch_2026_06.",
+  "records_received": 3,
+  "records_accepted": 2,
+  "records_rejected": 1,
+  "external_ref": "mock-accounting-export:batch_2026_06"
 }
 ```
 
@@ -61,6 +77,7 @@ GET /tenants/{tenant_id}/integration-connections
 POST /tenants/{tenant_id}/integration-mapping-preview
 GET /tenants/{tenant_id}/integration-operator-review
 POST /tenants/{tenant_id}/integration-imports/file
+POST /tenants/{tenant_id}/integration-exports/accounting
 POST /tenants/{tenant_id}/outbox-events/{event_id}/retry
 ```
 
@@ -82,6 +99,12 @@ The worker applies connection mapping before adapter validation, and clients can
 preview accepted/rejected normalized rows before creating outbox work. See
 `INTEGRATION_CONNECTIONS.md` and `INTEGRATION_MAPPING_TRANSFORM.md`.
 
+The accounting export endpoint accepts synthetic document summaries and creates
+an outbox event with `adapter_key = accounting.export.mock`. It can reference a
+tenant-owned connection profile scoped with `accounting:export`. Operator review
+redacts raw `documents` and returns only safe batch/count/type summaries. See
+`INTEGRATION_ACCOUNTING_EXPORT.md`.
+
 ## Worker Flow
 
 ```mermaid
@@ -89,9 +112,9 @@ sequenceDiagram
   participant API as API
   participant Outbox as Outbox
   participant Worker as Worker
-  participant Adapter as File Import Adapter
+  participant Adapter as Adapter
 
-  API->>Outbox: enqueue integration.file_import.requested
+  API->>Outbox: enqueue integration.file_import.requested or accounting.export.requested
   Worker->>Outbox: fetch pending or due retry event
   Worker->>Adapter: execute normalized adapter payload
   Adapter-->>Worker: success, retryable failure, or permanent failure

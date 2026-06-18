@@ -341,6 +341,13 @@ class FileImportCreate(BaseModel):
     simulate_failure: Literal["retryable", "permanent"] | None = None
 
 
+class AccountingExportCreate(BaseModel):
+    integration_connection_id: str | None = Field(default=None, min_length=1, max_length=36)
+    export_batch_id: str = Field(min_length=2, max_length=120)
+    documents: list[dict[str, Any]] = Field(min_length=1, max_length=50)
+    simulate_failure: Literal["retryable", "permanent"] | None = None
+
+
 class PublicDemoRead(BaseModel):
     schemaVersion: int
     generatedAt: str

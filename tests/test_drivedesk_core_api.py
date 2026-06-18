@@ -1619,6 +1619,273 @@ def test_file_import_adapter_success_flow(api_client: tuple[TestClient, async_se
     assert connection["id"] not in metrics_response.text
 
 
+def test_accounting_export_adapter_flow_and_operator_review(
+    api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, session_factory = api_client
+    owner_headers = {"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"}
+
+    tenant_response = client.post(
+        "/tenants",
+        json={"slug": "accounting-export", "name": "Accounting Export"},
+        headers=owner_headers,
+    )
+    assert tenant_response.status_code == 201
+    tenant_id = tenant_response.json()["id"]
+
+    connection_response = client.post(
+        f"/tenants/{tenant_id}/integration-connections",
+        json={
+            "name": "Demo accounting export profile",
+            "adapter_key": "accounting.export.mock",
+            "config": {"provider": "mock-accounting", "mode": "synthetic"},
+        },
+        headers=owner_headers,
+    )
+    assert connection_response.status_code == 201
+    connection = connection_response.json()
+    assert connection["tenant_id"] == tenant_id
+    assert connection["adapter_key"] == "accounting.export.mock"
+    assert connection["status"] == "active"
+    assert json.loads(connection["scopes_json"]) == ["accounting:export"]
+
+    disabled_connection_response = client.post(
+        f"/tenants/{tenant_id}/integration-connections",
+        json={
+            "name": "Disabled accounting export profile",
+            "adapter_key": "accounting.export.mock",
+            "status": "disabled",
+        },
+        headers=owner_headers,
+    )
+    assert disabled_connection_response.status_code == 201
+    disabled_connection = disabled_connection_response.json()
+
+    inactive_response = client.post(
+        f"/tenants/{tenant_id}/integration-exports/accounting",
+        json={
+            "integration_connection_id": disabled_connection["id"],
+            "export_batch_id": "disabled-batch",
+            "documents": [
+                {
+                    "document_id": "doc_disabled",
+                    "document_type": "invoice",
+                    "amount_cents": 1000,
+                    "currency": "RUB",
+                    "counterparty_ref": "counterparty_disabled",
+                }
+            ],
+        },
+        headers=owner_headers,
+    )
+    assert inactive_response.status_code == 409
+    assert inactive_response.json()["detail"] == "integration connection is not active"
+
+    async def insert_mismatched_connection() -> str:
+        async with session_factory() as session:
+            mismatch = IntegrationConnection(
+                id="manual-file-connection",
+                tenant_id=tenant_id,
+                name="Manual file profile",
+                adapter_key="file.import.fake",
+                status="active",
+                config_json="{}",
+                mapping_json='{"external_id":"lead_id","display_name":"full_name"}',
+                scopes_json='["file_import:execute"]',
+            )
+            session.add(mismatch)
+            await session.commit()
+            return mismatch.id
+
+    mismatched_connection_id = asyncio.run(insert_mismatched_connection())
+    mismatch_response = client.post(
+        f"/tenants/{tenant_id}/integration-exports/accounting",
+        json={
+            "integration_connection_id": mismatched_connection_id,
+            "export_batch_id": "wrong-adapter-batch",
+            "documents": [
+                {
+                    "document_id": "doc_wrong",
+                    "document_type": "invoice",
+                    "amount_cents": 1000,
+                    "currency": "RUB",
+                    "counterparty_ref": "counterparty_wrong",
+                }
+            ],
+        },
+        headers=owner_headers,
+    )
+    assert mismatch_response.status_code == 409
+    assert mismatch_response.json()["detail"] == "integration connection adapter mismatch"
+
+    export_response = client.post(
+        f"/tenants/{tenant_id}/integration-exports/accounting",
+        json={
+            "integration_connection_id": connection["id"],
+            "export_batch_id": "batch_2026_06",
+            "documents": [
+                {
+                    "document_id": "doc_001",
+                    "document_type": "invoice",
+                    "amount_cents": 120000,
+                    "currency": "RUB",
+                    "counterparty_ref": "counterparty_demo_1",
+                },
+                {
+                    "document_id": "doc_002",
+                    "document_type": "receipt",
+                    "amount_cents": 50000,
+                    "currency": "RUB",
+                    "counterparty_ref": "counterparty_demo_2",
+                },
+                {"document_id": "doc_rejected", "document_type": "invoice"},
+            ],
+        },
+        headers=owner_headers,
+    )
+    assert export_response.status_code == 202
+    export_event = export_response.json()
+    assert export_event["event_type"] == "accounting.export.requested"
+    assert export_event["adapter_key"] == "accounting.export.mock"
+    assert export_event["status"] == "pending"
+
+    processed = asyncio.run(process_outbox_once(session_factory=session_factory))
+    assert processed == 2
+
+    outbox_response = client.get(
+        f"/tenants/{tenant_id}/outbox-events",
+        headers=owner_headers,
+    )
+    assert outbox_response.status_code == 200
+    accounting_event = next(
+        event for event in outbox_response.json() if event["event_type"] == "accounting.export.requested"
+    )
+    result = json.loads(accounting_event["result_json"])
+    payload = json.loads(accounting_event["payload_json"])
+    assert accounting_event["status"] == "processed"
+    assert accounting_event["attempts"] == 1
+    assert accounting_event["last_duration_ms"] is not None
+    assert result["adapter_key"] == "accounting.export.mock"
+    assert result["status"] == "partial_success"
+    assert result["records_received"] == 3
+    assert result["records_accepted"] == 2
+    assert result["records_rejected"] == 1
+    assert result["external_ref"] == "mock-accounting-export:batch_2026_06"
+    assert result["details"]["accepted_document_ids"] == ["doc_001", "doc_002"]
+    assert result["details"]["document_types"] == ["invoice", "receipt"]
+    assert payload["integration_connection_id"] == connection["id"]
+    assert payload["connection_scopes"] == ["accounting:export"]
+    assert payload["document_count"] == 3
+    assert payload["document_types"] == ["invoice", "receipt"]
+
+    retry_response = client.post(
+        f"/tenants/{tenant_id}/integration-exports/accounting",
+        json={
+            "export_batch_id": "retryable-accounting-batch",
+            "simulate_failure": "retryable",
+            "documents": [
+                {
+                    "document_id": "doc_retry",
+                    "document_type": "invoice",
+                    "amount_cents": 1000,
+                    "currency": "RUB",
+                    "counterparty_ref": "counterparty_retry",
+                }
+            ],
+        },
+        headers=owner_headers,
+    )
+    assert retry_response.status_code == 202
+
+    permanent_response = client.post(
+        f"/tenants/{tenant_id}/integration-exports/accounting",
+        json={
+            "export_batch_id": "permanent-accounting-batch",
+            "simulate_failure": "permanent",
+            "documents": [
+                {
+                    "document_id": "doc_dead",
+                    "document_type": "invoice",
+                    "amount_cents": 1000,
+                    "currency": "RUB",
+                    "counterparty_ref": "counterparty_dead",
+                }
+            ],
+        },
+        headers=owner_headers,
+    )
+    assert permanent_response.status_code == 202
+
+    processed = asyncio.run(process_outbox_once(session_factory=session_factory))
+    assert processed == 2
+
+    review_response = client.get(
+        f"/tenants/{tenant_id}/integration-operator-review?adapter_key=accounting.export.mock",
+        headers=owner_headers,
+    )
+    assert review_response.status_code == 200
+    review_items = review_response.json()
+    assert {item["status"] for item in review_items} == {"retry", "dead_letter"}
+    assert {item["operation_key"] for item in review_items} == {"accounting_export_execute"}
+    assert {item["required_connection_scope"] for item in review_items} == {"accounting:export"}
+    assert {item["adapter_key"] for item in review_items} == {"accounting.export.mock"}
+    assert {item["payload_summary"]["raw_documents_redacted"] for item in review_items} == {1}
+    assert {item["payload_summary"]["document_count"] for item in review_items} == {1}
+    assert {tuple(item["payload_summary"]["document_types"]) for item in review_items} == {("invoice",)}
+    assert all("documents" not in item["payload_summary"] for item in review_items)
+    assert all("records" not in item["payload_summary"] for item in review_items)
+
+    async def accounting_state() -> tuple[list[IntegrationConnection], list[str]]:
+        async with session_factory() as session:
+            connections = await list_tenant_owned(
+                session,
+                IntegrationConnection,
+                tenant_id,
+                order_by=IntegrationConnection.created_at.desc(),
+            )
+            audit_result = await session.execute(
+                select(AuditEvent.event_type)
+                .where(
+                    AuditEvent.tenant_id == tenant_id,
+                    AuditEvent.event_type.in_(
+                        [
+                            "integration_connection.created",
+                            "integration.accounting_export.requested",
+                        ]
+                    ),
+                )
+                .order_by(AuditEvent.created_at)
+            )
+            return connections, list(audit_result.scalars().all())
+
+    connections, audit_events = asyncio.run(accounting_state())
+    assert {item.adapter_key for item in connections} == {"accounting.export.mock", "file.import.fake"}
+    assert Counter(audit_events) == Counter(
+        {
+            "integration_connection.created": 2,
+            "integration.accounting_export.requested": 3,
+        }
+    )
+
+    metrics_response = client.get("/metrics")
+    assert metrics_response.status_code == 200
+    assert 'drivedesk_integration_connections{adapter_key="accounting.export.mock",status="active"} 1' in (
+        metrics_response.text
+    )
+    assert 'drivedesk_integration_connections{adapter_key="accounting.export.mock",status="disabled"} 1' in (
+        metrics_response.text
+    )
+    assert 'drivedesk_integration_jobs{adapter_key="accounting.export.mock",status="processed"} 1' in (
+        metrics_response.text
+    )
+    assert 'drivedesk_integration_jobs{adapter_key="accounting.export.mock",status="retry"} 1' in metrics_response.text
+    assert 'drivedesk_integration_jobs{adapter_key="accounting.export.mock",status="dead_letter"} 1' in (
+        metrics_response.text
+    )
+    assert "Demo accounting export profile" not in metrics_response.text
+    assert connection["id"] not in metrics_response.text
+
+
 def test_file_import_adapter_retry_and_dead_letter(
     api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
 ) -> None:

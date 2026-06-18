@@ -24,6 +24,8 @@ drivedesk_integration_job_attempts{adapter_key="file.import.fake",status="proces
 drivedesk_integration_job_errors{adapter_key="file.import.fake",status="retry"} 1
 drivedesk_integration_adapter_duration_milliseconds{adapter_key="file.import.fake",status="processed"} 12.4
 drivedesk_integration_connections{adapter_key="file.import.fake",status="active"} 1
+drivedesk_integration_jobs{adapter_key="accounting.export.mock",status="dead_letter"} 1
+drivedesk_integration_connections{adapter_key="accounting.export.mock",status="active"} 1
 ```
 
 Metric meaning:
@@ -97,6 +99,8 @@ Operators can list failed integration jobs through
 returns adapter key, operation key, required scope, status, attempts, safe
 payload summary, recommended action, and retry endpoint without returning raw
 provider payloads.
+For accounting exports, the safe payload summary includes batch id, document
+count, document types, and `raw_documents_redacted`, but not raw `documents`.
 After review, operators can call
 `POST /tenants/{tenant_id}/outbox-events/{event_id}/retry` to move a failed
 event back to `pending`. That recovery action writes

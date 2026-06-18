@@ -413,9 +413,126 @@ class FakeFileImportAdapter:
         )
 
 
+class MockAccountingExportAdapter:
+    adapter_key = "accounting.export.mock"
+    descriptor = AdapterDescriptor(
+        key=adapter_key,
+        name="Mock Accounting Export",
+        status="active",
+        category="accounting_export",
+        direction="outbound",
+        purpose="Export synthetic accounting documents through the shared outbox adapter boundary.",
+        connection_profile_supported=True,
+        connection_profile_required=False,
+        payload_schema={
+            "type": "object",
+            "required": ["export_batch_id", "documents"],
+            "properties": {
+                "export_batch_id": "idempotent export batch label",
+                "documents": "list of accounting document summaries",
+                "simulate_failure": "optional retryable or permanent test mode",
+            },
+        },
+        config_example={"provider": "mock-accounting", "mode": "synthetic"},
+        mapping_example={},
+        required_mapping_keys=[],
+        supported_connection_scopes=["accounting:export"],
+        default_connection_scopes=["accounting:export"],
+        operation_contracts=[
+            AdapterOperationContract(
+                key="accounting_export_execute",
+                title="Export accounting documents",
+                trigger="api.outbox.enqueue",
+                event_type="accounting.export.requested",
+                endpoint="POST /tenants/{tenant_id}/integration-exports/accounting",
+                required_connection_scope="accounting:export",
+                idempotency_keys=["tenant_id", "export_batch_id", "documents_hash"],
+                retryable=True,
+                dead_letter=True,
+                operator_review=True,
+            ),
+        ],
+        capabilities=[
+            "outbound export boundary",
+            "connection scope enforcement",
+            "document count summary",
+            "retryable failure simulation",
+            "permanent failure simulation",
+        ],
+        failure_modes=["retryable", "permanent"],
+        public_notes=[
+            "Safe mock adapter for accounting export contracts.",
+            "Real 1C, KKT, and bank provider payloads stay outside public docs and demos.",
+        ],
+    )
+
+    def execute(self, payload: dict[str, object]) -> AdapterResult:
+        simulated_failure = payload.get("simulate_failure")
+        if simulated_failure == "retryable":
+            raise AdapterExecutionError(
+                "Mock accounting provider is temporarily unavailable.",
+                adapter_key=self.adapter_key,
+                retryable=True,
+            )
+        if simulated_failure == "permanent":
+            raise AdapterExecutionError(
+                "Mock accounting provider rejected the export contract.",
+                adapter_key=self.adapter_key,
+                retryable=False,
+            )
+
+        documents = payload.get("documents")
+        if not isinstance(documents, list):
+            raise AdapterExecutionError(
+                "Accounting export payload must contain a documents list.",
+                adapter_key=self.adapter_key,
+                retryable=False,
+            )
+
+        accepted_document_ids: list[str] = []
+        document_types: set[str] = set()
+        rejected = 0
+        for document in documents:
+            if not isinstance(document, dict):
+                rejected += 1
+                continue
+
+            document_id = str(document.get("document_id") or "").strip()
+            document_type = str(document.get("document_type") or "").strip()
+            currency = str(document.get("currency") or "").strip()
+            counterparty_ref = str(document.get("counterparty_ref") or "").strip()
+            amount_cents = document.get("amount_cents")
+            amount_valid = isinstance(amount_cents, int) and amount_cents >= 0
+
+            if document_id and document_type and currency and counterparty_ref and amount_valid:
+                accepted_document_ids.append(document_id)
+                document_types.add(document_type)
+            else:
+                rejected += 1
+
+        accepted = len(accepted_document_ids)
+        export_batch_id = str(payload.get("export_batch_id") or "mock-accounting-export")
+        status = "success" if rejected == 0 else "partial_success"
+        return AdapterResult(
+            adapter_key=self.adapter_key,
+            status=status,
+            message=f"Exported {accepted} mock accounting documents from {export_batch_id}.",
+            records_received=len(documents),
+            records_accepted=accepted,
+            records_rejected=rejected,
+            external_ref=f"mock-accounting-export:{export_batch_id}",
+            details={
+                "export_batch_id": export_batch_id,
+                "accepted_document_ids": accepted_document_ids,
+                "document_types": sorted(document_types),
+            },
+        )
+
+
 ADAPTERS: dict[str, IntegrationAdapter] = {
     NoopAdapter.adapter_key: NoopAdapter(),
     FakeFileImportAdapter.adapter_key: FakeFileImportAdapter(),
+    MockAccountingExportAdapter.adapter_key: MockAccountingExportAdapter(),
 }
 
 

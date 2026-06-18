@@ -27,6 +27,7 @@ credentials.
 - `INTEGRATION_MAPPING_TRANSFORM.md` - runtime field mapping transform and preview.
 - `INTEGRATION_CONNECTION_SCOPES.md` - least-privilege connection scopes.
 - `INTEGRATION_OPERATION_CONTRACTS.md` - operation-level adapter contracts.
+- `INTEGRATION_ACCOUNTING_EXPORT.md` - executable outbound accounting export adapter.
 - `INTEGRATION_OPERATOR_REVIEW.md` - safe operator queue for failed integration jobs.
 - `INTEGRATION_CONNECTIONS.md` - tenant-owned adapter profiles and mapping.
 - `INTEGRATION_ADAPTERS.md` - adapter contract, outbox, retry, and dead-letter overview.
@@ -46,6 +47,8 @@ The public repository export also generates:
 - `apps/admin/public-demo/index.html` - static fake-data product demo shell.
 - `GET /demo/public` - read-only synthetic demo payload in the exported API.
 - `GET /business-record-lifecycle-policies` - public-safe lifecycle policy catalog.
+- `POST /tenants/{tenant_id}/integration-exports/accounting` - public-safe
+  outbound accounting export contract in the exported API.
 - `GET /tenants/{tenant_id}/integration-operator-review` - public-safe
   integration failure review contract in the exported API.
 - `workflow`, `timeline`, and `domainEvents` - synthetic workflow contract in
@@ -90,14 +93,15 @@ https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 19. Read the integration mapping transform overview.
 20. Read the integration connection scopes overview.
 21. Read the integration operation contracts overview.
-22. Read the integration operator review overview.
-23. Read the integration connections overview.
-24. Read the integration adapters overview.
-25. Read the integration observability overview.
-26. Read the outbox recovery overview.
-27. Read the case study.
-28. Check CI and public demo health workflow results.
-29. Run the public smoke checks locally.
+22. Read the accounting export adapter overview.
+23. Read the integration operator review overview.
+24. Read the integration connections overview.
+25. Read the integration adapters overview.
+26. Read the integration observability overview.
+27. Read the outbox recovery overview.
+28. Read the case study.
+29. Check CI and public demo health workflow results.
+30. Run the public smoke checks locally.
 
 ## Human Explanation
 

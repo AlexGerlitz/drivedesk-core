@@ -226,28 +226,28 @@ window.DRIVEDESK_DEMO_DATA = {
     },
     {
       "key": "accounting.export.mock",
-      "name": "Accounting Export",
-      "status": "planned",
+      "name": "Mock Accounting Export",
+      "status": "active",
       "direction": "outbound",
       "connectionProfileSupported": true,
-      "requiredMappingKeys": ["external_ref"],
+      "requiredMappingKeys": [],
       "supportedConnectionScopes": ["accounting:export"],
       "defaultConnectionScopes": ["accounting:export"],
       "operationContracts": [
         {
           "key": "accounting_export_execute",
-          "title": "Export accounting document",
-          "trigger": "worker.outbox.pending",
+          "title": "Export accounting documents",
+          "trigger": "api.outbox.enqueue",
           "eventType": "accounting.export.requested",
-          "endpoint": "planned adapter worker",
+          "endpoint": "POST /tenants/{tenant_id}/integration-exports/accounting",
           "requiredConnectionScope": "accounting:export",
-          "idempotencyKeys": ["tenant_id", "document_id", "external_ref"],
+          "idempotencyKeys": ["tenant_id", "export_batch_id", "documents_hash"],
           "retryable": true,
           "deadLetter": true,
           "operatorReview": true
         }
       ],
-      "contract": "Future adapter boundary for accounting exports and reconciliation status."
+      "contract": "Exports synthetic accounting document batches through the shared outbox adapter boundary."
     }
   ],
   "integrationJobs": [

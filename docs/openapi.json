@@ -30,6 +30,60 @@
         "title": "AccessTokenRead",
         "type": "object"
       },
+      "AccountingExportCreate": {
+        "properties": {
+          "documents": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "maxItems": 50,
+            "minItems": 1,
+            "title": "Documents",
+            "type": "array"
+          },
+          "export_batch_id": {
+            "maxLength": 120,
+            "minLength": 2,
+            "title": "Export Batch Id",
+            "type": "string"
+          },
+          "integration_connection_id": {
+            "anyOf": [
+              {
+                "maxLength": 36,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Integration Connection Id"
+          },
+          "simulate_failure": {
+            "anyOf": [
+              {
+                "enum": [
+                  "retryable",
+                  "permanent"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Simulate Failure"
+          }
+        },
+        "required": [
+          "export_batch_id",
+          "documents"
+        ],
+        "title": "AccountingExportCreate",
+        "type": "object"
+      },
       "AdapterContractRead": {
         "properties": {
           "capabilities": {
@@ -3504,6 +3558,94 @@
           }
         },
         "summary": "Create Integration Connection Endpoint"
+      }
+    },
+    "/tenants/{tenant_id}/integration-exports/accounting": {
+      "post": {
+        "operationId": "create_accounting_export_endpoint_tenants__tenant_id__integration_exports_accounting_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tenant_id",
+            "required": true,
+            "schema": {
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "X-Actor-Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Role",
+            "required": false,
+            "schema": {
+              "default": "viewer",
+              "title": "X-Actor-Role",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountingExportCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutboxEventRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Accounting Export Endpoint",
+        "tags": [
+          "integrations"
+        ]
       }
     },
     "/tenants/{tenant_id}/integration-imports/file": {

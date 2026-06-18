@@ -59,6 +59,7 @@ from drivedesk_api.rbac import (
 )
 from drivedesk_api.schemas import (
     AccessTokenRead,
+    AccountingExportCreate,
     AdapterContractRead,
     AuditEventRead,
     AuthMeRead,
@@ -99,6 +100,7 @@ from drivedesk_api.services import (
     count_outbox_by_status,
     count_workflow_action_runs_by_action_status,
     count_workflow_rules_by_status_trigger_action,
+    create_accounting_export_job,
     create_business_record,
     create_file_import_job,
     create_integration_connection,
@@ -744,6 +746,22 @@ def build_app(settings: Settings | None = None) -> FastAPI:
         await ensure_tenant_exists(session, tenant_id)
         require_tenant_permission(actor, tenant_id, Permission.TENANT_WRITE)
         return await create_file_import_job(session, tenant_id=tenant_id, payload=payload, actor=actor)
+
+    @api.post(
+        "/tenants/{tenant_id}/integration-exports/accounting",
+        response_model=OutboxEventRead,
+        status_code=202,
+        tags=["integrations"],
+    )
+    async def create_accounting_export_endpoint(
+        tenant_id: str,
+        payload: AccountingExportCreate,
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> OutboxEvent:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.TENANT_WRITE)
+        return await create_accounting_export_job(session, tenant_id=tenant_id, payload=payload, actor=actor)
 
     return api
 

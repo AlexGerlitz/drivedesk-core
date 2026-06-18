@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-18T05:24:44Z
+Generated at: 2026-06-18T05:45:41Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -12,6 +12,7 @@ Copied public-safe areas:
 - infra/docker
 - infra/helm
 - infra/gitops
+- infra/opentofu
 - examples
 - tests/test_drivedesk_foundation.py
 - tests/test_drivedesk_core_api.py
@@ -116,6 +117,14 @@ Copied public-safe areas:
 - public Helm chart check: api_deployment_template_present
 - public Helm chart check: runtime_secret_refs_present
 - public Helm chart ADR: 0047-public-safe-helm-chart-foundation
+- public OpenTofu plan evidence doc
+- public OpenTofu path: infra/opentofu/public
+- public OpenTofu plan validation script: scripts/check_public_opentofu_plan.sh
+- public OpenTofu evidence snapshot: docs/public/evidence/opentofu-plan.sanitized.json
+- public OpenTofu check: state_boundary_recorded
+- public OpenTofu check: plan_only_no_apply
+- public OpenTofu check: destroy_count_zero
+- public OpenTofu ADR: 0052-public-safe-opentofu-plan-evidence
 - public GitOps delivery foundation doc
 - public GitOps path: infra/gitops
 - public GitOps validation script: scripts/check_public_gitops_layout.sh

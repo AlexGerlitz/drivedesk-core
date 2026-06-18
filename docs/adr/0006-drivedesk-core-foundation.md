@@ -34,3 +34,6 @@ tenant/audit database tables, Docker Compose, and CI smoke checks.
 - The GitOps image automation evidence layer records candidate image digest,
   SBOM, scan, provenance, and pull-request-only update proposal metadata
   without mutating a registry or cluster.
+- The OpenTofu evidence layer records public-safe infrastructure shape, state
+  boundary, secret boundary, and plan-only summary without provisioning cloud
+  resources.

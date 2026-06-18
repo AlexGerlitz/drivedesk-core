@@ -42,6 +42,12 @@ Helm chart validation source file:
 docs/public/evidence/helm-render.sanitized.json
 ```
 
+OpenTofu plan validation source file:
+
+```text
+docs/public/evidence/opentofu-plan.sanitized.json
+```
+
 GitOps layout validation source file:
 
 ```text
@@ -105,6 +111,11 @@ Verified signals:
   config, runtime Secret reference, and probe templates;
 - chart values schema was validated;
 - private infrastructure markers were absent from the chart.
+- the public OpenTofu plan evidence records build, staging, canary, and
+  production environment names;
+- infrastructure components are described as a public-safe contract;
+- encrypted state, state locking, and secret exclusion boundaries are recorded;
+- the public OpenTofu evidence is plan-only and has zero destroy operations.
 - the public GitOps delivery foundation contains Argo CD project, application,
   environment, and promotion metadata;
 - Argo CD applications reference the Helm chart path;
@@ -149,6 +160,8 @@ The public version keeps only the operational shape and health results.
 - SLO canary promotion is checked through an executable public drill.
 - Staged release promotion is checked through an executable public drill.
 - Helm chart packaging is checked through an executable public validation.
+- OpenTofu infrastructure shape is checked through an executable public
+  validation.
 - GitOps desired-state delivery is checked through an executable public
   validation.
 - GitOps image promotion and drift detection are checked through an executable

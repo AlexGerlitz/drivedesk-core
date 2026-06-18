@@ -52,6 +52,8 @@ operations, or commercial details.
 - Public-safe synthetic SLO canary gate drill and sanitized evidence snapshot.
 - Public-safe synthetic staged promotion drill and sanitized evidence snapshot.
 - Public-safe Helm chart foundation with render validation.
+- Public-safe OpenTofu plan evidence with environment, component, state, secret,
+  and plan-only boundaries.
 - Public-safe GitOps delivery foundation with Argo CD layout validation.
 - Public-safe GitOps image promotion and drift detection evidence.
 - Public-safe GitOps drift remediation evidence with approval and rollback context.
@@ -66,7 +68,7 @@ operations, or commercial details.
 - Broader generated client SDK examples from the OpenAPI schema.
 - More adapter recovery examples with payload mapping and follow-up actions.
 - More deployment evidence around private runtime rollout checks.
-- More deployment evidence around policy-as-code and infrastructure state
+- More deployment evidence around runtime rollout and infrastructure state
   validation.
 
 ## Later

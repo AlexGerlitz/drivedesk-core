@@ -32,6 +32,16 @@ The check validates candidate image digest metadata, SBOM attachment, Trivy
 scanner evidence, provenance, target GitOps files, pull-request-only apply mode,
 and no direct registry or cluster mutation.
 
+Public-safe OpenTofu plan validation:
+
+```bash
+bash scripts/check_public_opentofu_plan.sh
+```
+
+The check validates the public infrastructure contract, environment model,
+component model, state boundary, secret boundary, sanitized plan summary, and
+plan-only no-apply behavior.
+
 Core endpoints:
 
 - `POST /auth/login`;

@@ -34,6 +34,7 @@ packages/core  domain primitives
 infra/docker   local Docker runtime
 infra/helm     Kubernetes packaging foundation
 infra/gitops   Argo CD GitOps delivery foundation
+infra/opentofu public-safe IaC plan evidence
 docs           architecture notes and ADRs
 tests          API and foundation tests
 ```

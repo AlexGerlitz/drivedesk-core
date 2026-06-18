@@ -86,9 +86,10 @@ It includes:
 38. Read `docs/public/GITOPS_PROMOTION_DRIFT.md`.
 39. Read `docs/public/GITOPS_DRIFT_REMEDIATION.md`.
 40. Read `docs/public/GITOPS_IMAGE_AUTOMATION.md`.
-41. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
-42. Check `.github/workflows/ci.yml`.
-43. Run `bash scripts/ci_smoke_public.sh` locally.
+41. Read `docs/public/OPENTOFU_PLAN_EVIDENCE.md`.
+42. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
+43. Check `.github/workflows/ci.yml`.
+44. Run `bash scripts/ci_smoke_public.sh` locally.
 
 ## What To Review First
 
@@ -129,6 +130,7 @@ It includes:
 - `docs/public/GITOPS_PROMOTION_DRIFT.md` - public-safe GitOps image promotion and drift evidence.
 - `docs/public/GITOPS_DRIFT_REMEDIATION.md` - public-safe GitOps drift remediation evidence.
 - `docs/public/GITOPS_IMAGE_AUTOMATION.md` - public-safe GitOps image automation evidence.
+- `docs/public/OPENTOFU_PLAN_EVIDENCE.md` - public-safe OpenTofu plan evidence.
 - `docs/public/ARCHITECTURE_DIAGRAMS.md` - architecture diagrams.
 - `docs/public/SANITIZED_EVIDENCE.md` - sanitized staging evidence.
 - `docs/public/PUBLIC_DEMO_PLAN.md` - future public demo plan.
@@ -173,6 +175,7 @@ It includes:
 - `scripts/check_public_slo_canary_gate.sh` - public-safe SLO canary gate drill.
 - `scripts/check_public_staged_promotion.sh` - public-safe staged promotion drill.
 - `scripts/check_public_helm_render.sh` - public-safe Helm chart validation.
+- `scripts/check_public_opentofu_plan.sh` - public-safe OpenTofu plan validation.
 - `scripts/check_public_gitops_layout.sh` - public-safe GitOps layout validation.
 - `scripts/check_public_gitops_image_automation.sh` - public-safe GitOps image automation validation.
 - `scripts/check_public_gitops_promotion_drift.sh` - public-safe GitOps promotion and drift validation.
@@ -207,6 +210,7 @@ bash scripts/check_public_release_rollback.sh
 bash scripts/check_public_slo_canary_gate.sh
 bash scripts/check_public_staged_promotion.sh
 bash scripts/check_public_helm_render.sh
+bash scripts/check_public_opentofu_plan.sh
 bash scripts/check_public_gitops_layout.sh
 bash scripts/check_public_gitops_image_automation.sh
 bash scripts/check_public_gitops_promotion_drift.sh
@@ -232,6 +236,7 @@ bash scripts/check_public_release_rollback.sh
 bash scripts/check_public_slo_canary_gate.sh
 bash scripts/check_public_staged_promotion.sh
 bash scripts/check_public_helm_render.sh
+bash scripts/check_public_opentofu_plan.sh
 bash scripts/check_public_gitops_layout.sh
 bash scripts/check_public_gitops_image_automation.sh
 bash scripts/check_public_gitops_promotion_drift.sh
@@ -302,6 +307,7 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/public/GITOPS_PROMOTION_DRIFT.md`
 - `docs/public/GITOPS_DRIFT_REMEDIATION.md`
 - `docs/public/GITOPS_IMAGE_AUTOMATION.md`
+- `docs/public/OPENTOFU_PLAN_EVIDENCE.md`
 - `docs/public/ARCHITECTURE_DIAGRAMS.md`
 - `docs/public/PUBLIC_DEMO_PLAN.md`
 - `docs/public/SANITIZED_EVIDENCE.md`

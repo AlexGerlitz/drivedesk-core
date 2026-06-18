@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "check": "public_opentofu_plan",
+  "data_profile": "synthetic_fake_data",
+  "iac_model": "opentofu_plan_only_infrastructure_contract",
+  "stack": {
+    "path": "infra/opentofu/public",
+    "tool": "opentofu",
+    "environments": [
+      "build",
+      "staging",
+      "canary",
+      "production"
+    ],
+    "components": [
+      "network_boundary",
+      "kubernetes_runtime",
+      "gitops_controller",
+      "observability",
+      "backup_storage",
+      "secrets_boundary"
+    ]
+  },
+  "state": {
+    "encrypted_state_required": true,
+    "locking_required": true,
+    "public_backend_config_included": false,
+    "secrets_in_state_allowed": false
+  },
+  "plan": {
+    "mode": "plan_only",
+    "apply_from_public_export": false,
+    "create_count": 6,
+    "update_count": 0,
+    "delete_count": 0,
+    "destroy_count": 0,
+    "production_data_touched": false
+  },
+  "checks": {
+    "opentofu_files_present": true,
+    "environment_model_recorded": true,
+    "component_model_recorded": true,
+    "state_boundary_recorded": true,
+    "secret_values_excluded": true,
+    "plan_only_no_apply": true,
+    "destroy_count_zero": true,
+    "public_backend_config_absent": true,
+    "private_markers_absent": true,
+    "production_data_touched": false
+  },
+  "redaction": {
+    "paths_included": false,
+    "hostnames_included": false,
+    "addresses_included": false,
+    "credentials_included": false,
+    "raw_logs_included": false,
+    "production_data_included": false
+  }
+}

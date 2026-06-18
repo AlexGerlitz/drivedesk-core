@@ -16,6 +16,7 @@ from drivedesk_api.db import (
     BusinessRecord,
     IntegrationConnection,
     IntegrationConnectionCheck,
+    IntegrationReconciliation,
     Membership,
     OutboxEvent,
     PlatformAdmin,
@@ -34,6 +35,7 @@ from drivedesk_api.schemas import (
     IntegrationConnectionCheckCreate,
     IntegrationConnectionCreate,
     IntegrationMappingPreviewCreate,
+    IntegrationReconciliationCreate,
     MembershipCreate,
     OutboxEventRetryRequest,
     PlatformAdminCreate,
@@ -1314,6 +1316,24 @@ async def count_integration_connection_checks_by_adapter_status(session: AsyncSe
     ]
 
 
+async def count_integration_reconciliations_by_adapter_status(session: AsyncSession) -> list[dict[str, object]]:
+    result = await session.execute(
+        select(
+            IntegrationReconciliation.adapter_key,
+            IntegrationReconciliation.status,
+            func.count().label("reconciliation_count"),
+        ).group_by(IntegrationReconciliation.adapter_key, IntegrationReconciliation.status)
+    )
+    return [
+        {
+            "adapter_key": row.adapter_key,
+            "status": row.status,
+            "reconciliation_count": int(row.reconciliation_count or 0),
+        }
+        for row in result.all()
+    ]
+
+
 async def ensure_tenant_exists(session: AsyncSession, tenant_id: str) -> Tenant:
     tenant = await session.get(Tenant, tenant_id)
     if not tenant:
@@ -1482,6 +1502,175 @@ async def list_integration_operator_review(
             }
         )
     return review_items
+
+
+def _safe_json_dict(raw_json: str | None) -> dict[str, object]:
+    try:
+        payload = json.loads(raw_json or "{}")
+    except json.JSONDecodeError:
+        return {}
+    if not isinstance(payload, dict):
+        return {}
+    return payload
+
+
+def _safe_outbox_expected_evidence(event: OutboxEvent) -> dict[str, object]:
+    result = _safe_json_dict(event.result_json)
+    expected: dict[str, object] = {
+        "outbox_status": event.status,
+        "event_type": event.event_type,
+        "adapter_key": event.adapter_key or "internal.noop",
+        "attempts": event.attempts,
+        "processed": event.status == "processed",
+        "error_present": bool(event.last_error),
+    }
+    if event.status != "processed":
+        return expected
+
+    for key in ("status", "external_ref", "records_received", "records_accepted", "records_rejected"):
+        value = result.get(key)
+        if isinstance(value, str | int) or value is None:
+            expected[key] = value
+    return expected
+
+
+def _safe_provider_evidence(payload: IntegrationReconciliationCreate) -> dict[str, object]:
+    actual: dict[str, object] = {
+        "provider_status": payload.provider_status,
+        "provider_reference": payload.provider_reference,
+        "records_received": payload.records_received,
+        "records_accepted": payload.records_accepted,
+        "records_rejected": payload.records_rejected,
+    }
+    if payload.note:
+        actual["note_present"] = True
+    return actual
+
+
+def _integration_reconciliation_result(
+    event: OutboxEvent,
+    *,
+    actual: dict[str, object],
+    expected: dict[str, object],
+) -> tuple[str, str, dict[str, object]]:
+    if event.status in {"pending", "retry"}:
+        return "pending", "Outbox event is not processed yet.", {"outbox_status": event.status}
+    if event.status == "dead_letter":
+        return "blocked", "Outbox event is dead-lettered; reconciliation is blocked.", {"outbox_status": event.status}
+    if event.status != "processed":
+        return "pending", "Outbox event has not produced processed evidence.", {"outbox_status": event.status}
+
+    diff: dict[str, object] = {}
+    comparisons = {
+        "status": (expected.get("status"), actual.get("provider_status")),
+        "external_ref": (expected.get("external_ref"), actual.get("provider_reference")),
+        "records_received": (expected.get("records_received"), actual.get("records_received")),
+        "records_accepted": (expected.get("records_accepted"), actual.get("records_accepted")),
+        "records_rejected": (expected.get("records_rejected"), actual.get("records_rejected")),
+    }
+    for key, (expected_value, actual_value) in comparisons.items():
+        if expected_value != actual_value:
+            diff[key] = {
+                "expected": expected_value,
+                "actual": actual_value,
+            }
+
+    if diff:
+        return "mismatched", "Provider evidence does not match outbox result evidence.", diff
+    return "matched", "Provider evidence matches outbox result evidence.", {}
+
+
+async def create_integration_reconciliation(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    payload: IntegrationReconciliationCreate,
+    actor: ActorContext,
+) -> IntegrationReconciliation:
+    await ensure_tenant_exists(session, tenant_id)
+    event = await session.get(OutboxEvent, payload.outbox_event_id)
+    if not event or event.tenant_id != tenant_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="outbox event not found")
+
+    adapter_key = event.adapter_key or "internal.noop"
+    operation = _adapter_operation_by_event_type(event.adapter_key, event.event_type)
+    operation_key = operation.get("key") if operation else None
+    expected = _safe_outbox_expected_evidence(event)
+    actual = _safe_provider_evidence(payload)
+    reconciliation_status, summary, diff = _integration_reconciliation_result(
+        event,
+        actual=actual,
+        expected=expected,
+    )
+    reconciliation = IntegrationReconciliation(
+        id=new_id(),
+        tenant_id=tenant_id,
+        outbox_event_id=event.id,
+        adapter_key=adapter_key,
+        operation_key=str(operation_key) if operation_key else None,
+        status=reconciliation_status,
+        summary=summary,
+        expected_json=json.dumps(expected, ensure_ascii=False, sort_keys=True),
+        actual_json=json.dumps(actual, ensure_ascii=False, sort_keys=True),
+        diff_json=json.dumps(diff, ensure_ascii=False, sort_keys=True),
+        created_at=datetime.now(UTC),
+    )
+    session.add(reconciliation)
+    await write_audit(
+        session,
+        tenant_id=tenant_id,
+        actor=actor,
+        event_type="integration.reconciliation.recorded",
+        entity_type="integration_reconciliation",
+        entity_id=reconciliation.id,
+        summary=summary,
+        metadata={
+            "integration_reconciliation_id": reconciliation.id,
+            "outbox_event_id": event.id,
+            "adapter_key": adapter_key,
+            "operation_key": operation_key,
+            "status": reconciliation_status,
+            "diff_keys": sorted(diff.keys()),
+            "provider_status": payload.provider_status,
+            "provider_reference_present": bool(payload.provider_reference),
+        },
+    )
+    await commit_or_conflict(session, "integration reconciliation already exists")
+    return reconciliation
+
+
+async def list_integration_reconciliations(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    status_filter: str | None = None,
+    adapter_key: str | None = None,
+    outbox_event_id: str | None = None,
+    limit: int = 50,
+) -> list[IntegrationReconciliation]:
+    await ensure_tenant_exists(session, tenant_id)
+    allowed_statuses = {"matched", "mismatched", "pending", "blocked"}
+    if status_filter and status_filter not in allowed_statuses:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="status must be matched, mismatched, pending, or blocked",
+        )
+
+    query = (
+        select(IntegrationReconciliation)
+        .where(IntegrationReconciliation.tenant_id == tenant_id)
+        .order_by(IntegrationReconciliation.created_at.desc())
+        .limit(limit)
+    )
+    if status_filter:
+        query = query.where(IntegrationReconciliation.status == status_filter)
+    if adapter_key:
+        query = query.where(IntegrationReconciliation.adapter_key == adapter_key)
+    if outbox_event_id:
+        query = query.where(IntegrationReconciliation.outbox_event_id == outbox_event_id)
+
+    result = await session.execute(query)
+    return list(result.scalars().all())
 
 
 async def retry_outbox_event(

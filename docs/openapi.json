@@ -1359,6 +1359,176 @@
         "title": "IntegrationOperatorReviewItemRead",
         "type": "object"
       },
+      "IntegrationReconciliationCreate": {
+        "properties": {
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "minLength": 2,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "outbox_event_id": {
+            "maxLength": 36,
+            "minLength": 1,
+            "title": "Outbox Event Id",
+            "type": "string"
+          },
+          "provider_reference": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Reference"
+          },
+          "provider_status": {
+            "enum": [
+              "success",
+              "partial_success",
+              "failed",
+              "pending"
+            ],
+            "title": "Provider Status",
+            "type": "string"
+          },
+          "records_accepted": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Records Accepted"
+          },
+          "records_received": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Records Received"
+          },
+          "records_rejected": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Records Rejected"
+          }
+        },
+        "required": [
+          "outbox_event_id",
+          "provider_status"
+        ],
+        "title": "IntegrationReconciliationCreate",
+        "type": "object"
+      },
+      "IntegrationReconciliationRead": {
+        "properties": {
+          "actual_json": {
+            "title": "Actual Json",
+            "type": "string"
+          },
+          "adapter_key": {
+            "title": "Adapter Key",
+            "type": "string"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "diff_json": {
+            "title": "Diff Json",
+            "type": "string"
+          },
+          "expected_json": {
+            "title": "Expected Json",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "operation_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Operation Key"
+          },
+          "outbox_event_id": {
+            "title": "Outbox Event Id",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "matched",
+              "mismatched",
+              "pending",
+              "blocked"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "outbox_event_id",
+          "adapter_key",
+          "status",
+          "summary",
+          "expected_json",
+          "actual_json",
+          "diff_json"
+        ],
+        "title": "IntegrationReconciliationRead",
+        "type": "object"
+      },
       "LoginRequest": {
         "properties": {
           "email": {
@@ -4428,6 +4598,234 @@
           }
         },
         "summary": "List Integration Operator Review Endpoint",
+        "tags": [
+          "integrations"
+        ]
+      }
+    },
+    "/tenants/{tenant_id}/integration-reconciliations": {
+      "get": {
+        "operationId": "list_integration_reconciliations_endpoint_tenants__tenant_id__integration_reconciliations_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tenant_id",
+            "required": true,
+            "schema": {
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "adapter_key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Adapter Key"
+            }
+          },
+          {
+            "in": "query",
+            "name": "outbox_event_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Outbox Event Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "X-Actor-Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Role",
+            "required": false,
+            "schema": {
+              "default": "viewer",
+              "title": "X-Actor-Role",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/IntegrationReconciliationRead"
+                  },
+                  "title": "Response List Integration Reconciliations Endpoint Tenants  Tenant Id  Integration Reconciliations Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Integration Reconciliations Endpoint",
+        "tags": [
+          "integrations"
+        ]
+      },
+      "post": {
+        "operationId": "create_integration_reconciliation_endpoint_tenants__tenant_id__integration_reconciliations_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tenant_id",
+            "required": true,
+            "schema": {
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "X-Actor-Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Role",
+            "required": false,
+            "schema": {
+              "default": "viewer",
+              "title": "X-Actor-Role",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntegrationReconciliationCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationReconciliationRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Integration Reconciliation Endpoint",
         "tags": [
           "integrations"
         ]

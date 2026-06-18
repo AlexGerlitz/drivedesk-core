@@ -15,6 +15,7 @@ from drivedesk_api.db import (
     BusinessRecord,
     IntegrationConnection,
     IntegrationConnectionCheck,
+    IntegrationReconciliation,
     Membership,
     OutboxEvent,
     PlatformAdmin,
@@ -81,6 +82,8 @@ from drivedesk_api.schemas import (
     IntegrationMappingPreviewCreate,
     IntegrationMappingPreviewRead,
     IntegrationOperatorReviewItemRead,
+    IntegrationReconciliationCreate,
+    IntegrationReconciliationRead,
     LoginRequest,
     MembershipCreate,
     MembershipRead,
@@ -102,6 +105,7 @@ from drivedesk_api.services import (
     count_business_records_by_type_status,
     count_integration_connection_checks_by_adapter_status,
     count_integration_connections_by_adapter_status,
+    count_integration_reconciliations_by_adapter_status,
     count_outbox_by_status,
     count_workflow_action_runs_by_action_status,
     count_workflow_rules_by_status_trigger_action,
@@ -109,6 +113,7 @@ from drivedesk_api.services import (
     create_business_record,
     create_file_import_job,
     create_integration_connection,
+    create_integration_reconciliation,
     create_membership,
     create_platform_admin,
     create_tenant,
@@ -120,6 +125,7 @@ from drivedesk_api.services import (
     list_integration_connection_checks,
     list_integration_connections,
     list_integration_operator_review,
+    list_integration_reconciliations,
     list_platform_admins,
     list_workflow_action_runs,
     list_workflow_rules,
@@ -224,6 +230,7 @@ def build_app(settings: Settings | None = None) -> FastAPI:
             workflow_action_run_rows = await count_workflow_action_runs_by_action_status(session)
             integration_connection_rows = await count_integration_connections_by_adapter_status(session)
             integration_connection_check_rows = await count_integration_connection_checks_by_adapter_status(session)
+            integration_reconciliation_rows = await count_integration_reconciliations_by_adapter_status(session)
         except Exception as exc:
             # Keep Prometheus scrapeable even when storage-backed aggregates degrade.
             storage_available = False
@@ -237,6 +244,7 @@ def build_app(settings: Settings | None = None) -> FastAPI:
             workflow_action_run_rows = []
             integration_connection_rows = []
             integration_connection_check_rows = []
+            integration_reconciliation_rows = []
             log_json(
                 metrics_logger,
                 "metrics.storage_unavailable",
@@ -258,6 +266,7 @@ def build_app(settings: Settings | None = None) -> FastAPI:
                 workflow_action_run_rows=workflow_action_run_rows,
                 integration_connection_rows=integration_connection_rows,
                 integration_connection_check_rows=integration_connection_check_rows,
+                integration_reconciliation_rows=integration_reconciliation_rows,
                 storage_available=storage_available,
             ),
             media_type="text/plain; version=0.0.4; charset=utf-8",
@@ -606,6 +615,52 @@ def build_app(settings: Settings | None = None) -> FastAPI:
             tenant_id=tenant_id,
             status_filter=status_filter,
             adapter_key=adapter_key,
+            limit=limit,
+        )
+
+    @api.post(
+        "/tenants/{tenant_id}/integration-reconciliations",
+        response_model=IntegrationReconciliationRead,
+        status_code=201,
+        tags=["integrations"],
+    )
+    async def create_integration_reconciliation_endpoint(
+        tenant_id: str,
+        payload: IntegrationReconciliationCreate,
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> IntegrationReconciliation:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.TENANT_WRITE)
+        return await create_integration_reconciliation(
+            session,
+            tenant_id=tenant_id,
+            payload=payload,
+            actor=actor,
+        )
+
+    @api.get(
+        "/tenants/{tenant_id}/integration-reconciliations",
+        response_model=list[IntegrationReconciliationRead],
+        tags=["integrations"],
+    )
+    async def list_integration_reconciliations_endpoint(
+        tenant_id: str,
+        status_filter: str | None = Query(default=None, alias="status"),
+        adapter_key: str | None = Query(default=None),
+        outbox_event_id: str | None = Query(default=None),
+        limit: int = Query(default=50, ge=1, le=100),
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> list[IntegrationReconciliation]:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.TENANT_READ)
+        return await list_integration_reconciliations(
+            session,
+            tenant_id=tenant_id,
+            status_filter=status_filter,
+            adapter_key=adapter_key,
+            outbox_event_id=outbox_event_id,
             limit=limit,
         )
 

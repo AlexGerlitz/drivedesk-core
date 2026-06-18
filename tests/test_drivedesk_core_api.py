@@ -28,6 +28,7 @@ from drivedesk_api.db import (
     BusinessRecord,
     IntegrationConnection,
     IntegrationConnectionCheck,
+    IntegrationReconciliation,
     OutboxEvent,
     PlatformAdmin,
     User,
@@ -2056,6 +2057,268 @@ def test_integration_connection_health_checks(
     assert "Health file import profile" not in metrics_response.text
     assert connection["id"] not in metrics_response.text
     assert "not-returned" not in metrics_response.text
+
+
+def test_integration_reconciliation_evidence_flow(
+    api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, session_factory = api_client
+    owner_headers = {"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"}
+    manager_headers = {"X-Actor-Id": "manager_1", "X-Actor-Role": "manager"}
+
+    tenant_response = client.post(
+        "/tenants",
+        json={"slug": "integration-reconcile", "name": "Integration Reconcile"},
+        headers=owner_headers,
+    )
+    assert tenant_response.status_code == 201
+    tenant_id = tenant_response.json()["id"]
+
+    export_response = client.post(
+        f"/tenants/{tenant_id}/integration-exports/accounting",
+        json={
+            "export_batch_id": "batch_reconcile_001",
+            "documents": [
+                {
+                    "document_id": "doc_match_001",
+                    "document_type": "invoice",
+                    "amount_cents": 120000,
+                    "currency": "RUB",
+                    "counterparty_ref": "counterparty_match_1",
+                },
+                {
+                    "document_id": "doc_match_002",
+                    "document_type": "receipt",
+                    "amount_cents": 50000,
+                    "currency": "RUB",
+                    "counterparty_ref": "counterparty_match_2",
+                },
+                {"document_id": "doc_rejected", "document_type": "invoice"},
+            ],
+        },
+        headers=owner_headers,
+    )
+    assert export_response.status_code == 202
+    export_event_id = export_response.json()["id"]
+
+    processed = asyncio.run(process_outbox_once(session_factory=session_factory))
+    assert processed >= 1
+
+    outbox_response = client.get(
+        f"/tenants/{tenant_id}/outbox-events",
+        headers=owner_headers,
+    )
+    assert outbox_response.status_code == 200
+    accounting_event = next(event for event in outbox_response.json() if event["id"] == export_event_id)
+    result = json.loads(accounting_event["result_json"])
+    assert accounting_event["status"] == "processed"
+    assert result["status"] == "partial_success"
+    assert result["records_received"] == 3
+    assert result["records_accepted"] == 2
+    assert result["records_rejected"] == 1
+
+    manager_create_response = client.post(
+        f"/tenants/{tenant_id}/integration-reconciliations",
+        json={
+            "outbox_event_id": export_event_id,
+            "provider_status": "partial_success",
+            "provider_reference": result["external_ref"],
+            "records_received": 3,
+            "records_accepted": 2,
+            "records_rejected": 1,
+        },
+        headers=manager_headers,
+    )
+    assert manager_create_response.status_code == 403
+    assert manager_create_response.json()["detail"] == "permission required: tenant:write"
+
+    matched_response = client.post(
+        f"/tenants/{tenant_id}/integration-reconciliations",
+        json={
+            "outbox_event_id": export_event_id,
+            "provider_status": "partial_success",
+            "provider_reference": result["external_ref"],
+            "records_received": 3,
+            "records_accepted": 2,
+            "records_rejected": 1,
+            "note": "operator checked provider dashboard",
+        },
+        headers=owner_headers,
+    )
+    assert matched_response.status_code == 201
+    matched = matched_response.json()
+    assert matched["status"] == "matched"
+    assert matched["adapter_key"] == "accounting.export.mock"
+    assert matched["operation_key"] == "accounting_export_execute"
+    assert matched["summary"] == "Provider evidence matches outbox result evidence."
+    assert json.loads(matched["diff_json"]) == {}
+    matched_expected = json.loads(matched["expected_json"])
+    matched_actual = json.loads(matched["actual_json"])
+    assert matched_expected["records_accepted"] == 2
+    assert matched_actual["provider_reference"] == result["external_ref"]
+    serialized_match = json.dumps(matched, ensure_ascii=False)
+    assert "doc_match_001" not in serialized_match
+    assert "doc_match_002" not in serialized_match
+    assert "counterparty_match" not in serialized_match
+    assert "documents" not in serialized_match
+
+    mismatched_response = client.post(
+        f"/tenants/{tenant_id}/integration-reconciliations",
+        json={
+            "outbox_event_id": export_event_id,
+            "provider_status": "partial_success",
+            "provider_reference": result["external_ref"],
+            "records_received": 3,
+            "records_accepted": 1,
+            "records_rejected": 2,
+        },
+        headers=owner_headers,
+    )
+    assert mismatched_response.status_code == 201
+    mismatched = mismatched_response.json()
+    assert mismatched["status"] == "mismatched"
+    diff = json.loads(mismatched["diff_json"])
+    assert diff["records_accepted"] == {"expected": 2, "actual": 1}
+    assert diff["records_rejected"] == {"expected": 1, "actual": 2}
+
+    pending_response = client.post(
+        f"/tenants/{tenant_id}/integration-exports/accounting",
+        json={
+            "export_batch_id": "batch_reconcile_pending",
+            "documents": [
+                {
+                    "document_id": "doc_pending",
+                    "document_type": "invoice",
+                    "amount_cents": 1000,
+                    "currency": "RUB",
+                    "counterparty_ref": "counterparty_pending",
+                }
+            ],
+        },
+        headers=owner_headers,
+    )
+    assert pending_response.status_code == 202
+    pending_event_id = pending_response.json()["id"]
+    pending_reconciliation_response = client.post(
+        f"/tenants/{tenant_id}/integration-reconciliations",
+        json={
+            "outbox_event_id": pending_event_id,
+            "provider_status": "pending",
+            "records_received": 0,
+            "records_accepted": 0,
+            "records_rejected": 0,
+        },
+        headers=owner_headers,
+    )
+    assert pending_reconciliation_response.status_code == 201
+    assert pending_reconciliation_response.json()["status"] == "pending"
+
+    permanent_response = client.post(
+        f"/tenants/{tenant_id}/integration-exports/accounting",
+        json={
+            "export_batch_id": "batch_reconcile_dead",
+            "simulate_failure": "permanent",
+            "documents": [
+                {
+                    "document_id": "doc_dead",
+                    "document_type": "invoice",
+                    "amount_cents": 1000,
+                    "currency": "RUB",
+                    "counterparty_ref": "counterparty_dead",
+                }
+            ],
+        },
+        headers=owner_headers,
+    )
+    assert permanent_response.status_code == 202
+    permanent_event_id = permanent_response.json()["id"]
+    processed = asyncio.run(process_outbox_once(session_factory=session_factory))
+    assert processed >= 1
+
+    blocked_reconciliation_response = client.post(
+        f"/tenants/{tenant_id}/integration-reconciliations",
+        json={
+            "outbox_event_id": permanent_event_id,
+            "provider_status": "failed",
+            "records_received": 0,
+            "records_accepted": 0,
+            "records_rejected": 1,
+        },
+        headers=owner_headers,
+    )
+    assert blocked_reconciliation_response.status_code == 201
+    assert blocked_reconciliation_response.json()["status"] == "blocked"
+
+    mismatched_list_response = client.get(
+        f"/tenants/{tenant_id}/integration-reconciliations?status=mismatched",
+        headers=manager_headers,
+    )
+    assert mismatched_list_response.status_code == 200
+    mismatched_items = mismatched_list_response.json()
+    assert len(mismatched_items) == 1
+    assert mismatched_items[0]["id"] == mismatched["id"]
+
+    outbox_filtered_response = client.get(
+        f"/tenants/{tenant_id}/integration-reconciliations?outbox_event_id={export_event_id}",
+        headers=manager_headers,
+    )
+    assert outbox_filtered_response.status_code == 200
+    assert {item["status"] for item in outbox_filtered_response.json()} == {"matched", "mismatched"}
+
+    invalid_filter_response = client.get(
+        f"/tenants/{tenant_id}/integration-reconciliations?status=processed",
+        headers=owner_headers,
+    )
+    assert invalid_filter_response.status_code == 400
+    assert invalid_filter_response.json()["detail"] == "status must be matched, mismatched, pending, or blocked"
+
+    missing_outbox_response = client.post(
+        f"/tenants/{tenant_id}/integration-reconciliations",
+        json={
+            "outbox_event_id": "missing-outbox-event",
+            "provider_status": "success",
+        },
+        headers=owner_headers,
+    )
+    assert missing_outbox_response.status_code == 404
+    assert missing_outbox_response.json()["detail"] == "outbox event not found"
+
+    async def reconciliation_state() -> tuple[list[IntegrationReconciliation], list[str]]:
+        async with session_factory() as session:
+            reconciliation_result = await session.execute(
+                select(IntegrationReconciliation).order_by(IntegrationReconciliation.created_at)
+            )
+            audit_result = await session.execute(
+                select(AuditEvent.event_type)
+                .where(AuditEvent.tenant_id == tenant_id)
+                .order_by(AuditEvent.created_at)
+            )
+            return list(reconciliation_result.scalars().all()), list(audit_result.scalars().all())
+
+    reconciliations, audit_events = asyncio.run(reconciliation_state())
+    assert [item.status for item in reconciliations] == ["matched", "mismatched", "pending", "blocked"]
+    assert Counter(audit_events)["integration.reconciliation.recorded"] == 4
+
+    metrics_response = client.get("/metrics")
+    assert metrics_response.status_code == 200
+    assert (
+        'drivedesk_integration_reconciliations{adapter_key="accounting.export.mock",status="matched"} 1'
+        in metrics_response.text
+    )
+    assert (
+        'drivedesk_integration_reconciliations{adapter_key="accounting.export.mock",status="mismatched"} 1'
+        in metrics_response.text
+    )
+    assert (
+        'drivedesk_integration_reconciliations{adapter_key="accounting.export.mock",status="pending"} 1'
+        in metrics_response.text
+    )
+    assert (
+        'drivedesk_integration_reconciliations{adapter_key="accounting.export.mock",status="blocked"} 1'
+        in metrics_response.text
+    )
+    assert "batch_reconcile_001" not in metrics_response.text
+    assert export_event_id not in metrics_response.text
 
 
 def test_file_import_adapter_retry_and_dead_letter(

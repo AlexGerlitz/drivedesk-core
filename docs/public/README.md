@@ -29,6 +29,7 @@ credentials.
 - `INTEGRATION_OPERATION_CONTRACTS.md` - operation-level adapter contracts.
 - `INTEGRATION_ACCOUNTING_EXPORT.md` - executable outbound accounting export adapter.
 - `INTEGRATION_CONNECTION_DIAGNOSTICS.md` - safe connection health-checks and metrics.
+- `INTEGRATION_RECONCILIATION.md` - safe provider evidence comparison and diff.
 - `INTEGRATION_OPERATOR_REVIEW.md` - safe operator queue for failed integration jobs.
 - `INTEGRATION_CONNECTIONS.md` - tenant-owned adapter profiles and mapping.
 - `INTEGRATION_ADAPTERS.md` - adapter contract, outbox, retry, and dead-letter overview.
@@ -52,6 +53,8 @@ The public repository export also generates:
   outbound accounting export contract in the exported API.
 - `POST /tenants/{tenant_id}/integration-connections/{connection_id}/health-checks` -
   public-safe connection diagnostics contract in the exported API.
+- `POST /tenants/{tenant_id}/integration-reconciliations` - public-safe
+  provider evidence reconciliation contract in the exported API.
 - `GET /tenants/{tenant_id}/integration-operator-review` - public-safe
   integration failure review contract in the exported API.
 - `workflow`, `timeline`, and `domainEvents` - synthetic workflow contract in
@@ -98,14 +101,15 @@ https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 21. Read the integration operation contracts overview.
 22. Read the accounting export adapter overview.
 23. Read the integration connection diagnostics overview.
-24. Read the integration operator review overview.
-25. Read the integration connections overview.
-26. Read the integration adapters overview.
-27. Read the integration observability overview.
-28. Read the outbox recovery overview.
-29. Read the case study.
-30. Check CI and public demo health workflow results.
-31. Run the public smoke checks locally.
+24. Read the integration reconciliation overview.
+25. Read the integration operator review overview.
+26. Read the integration connections overview.
+27. Read the integration adapters overview.
+28. Read the integration observability overview.
+29. Read the outbox recovery overview.
+30. Read the case study.
+31. Check CI and public demo health workflow results.
+32. Run the public smoke checks locally.
 
 ## Human Explanation
 

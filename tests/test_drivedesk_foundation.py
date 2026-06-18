@@ -390,6 +390,10 @@ def test_api_metrics_endpoint(api_client: TestClient) -> None:
         response.text
     )
     assert "# TYPE drivedesk_integration_connection_checks gauge" in response.text
+    assert "# HELP drivedesk_integration_reconciliations Integration reconciliation results by adapter and status." in (
+        response.text
+    )
+    assert "# TYPE drivedesk_integration_reconciliations gauge" in response.text
 
 
 def test_api_metrics_endpoint_degrades_without_database_schema() -> None:
@@ -418,6 +422,9 @@ def test_api_metrics_endpoint_degrades_without_database_schema() -> None:
     assert "# HELP drivedesk_workflow_action_runs Workflow action runs by action type and status." in response.text
     assert "# HELP drivedesk_integration_connections Integration connections by adapter and status." in response.text
     assert "# HELP drivedesk_integration_connection_checks Integration connection health checks by adapter and status." in (
+        response.text
+    )
+    assert "# HELP drivedesk_integration_reconciliations Integration reconciliation results by adapter and status." in (
         response.text
     )
 

@@ -146,6 +146,22 @@ class IntegrationConnectionCheck(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), index=True)
 
 
+class IntegrationReconciliation(Base):
+    __tablename__ = "dd_integration_reconciliations"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(36), index=True)
+    outbox_event_id: Mapped[str] = mapped_column(String(36), index=True)
+    adapter_key: Mapped[str] = mapped_column(String(128), index=True)
+    operation_key: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
+    status: Mapped[str] = mapped_column(String(32), index=True)
+    summary: Mapped[str] = mapped_column(String(255))
+    expected_json: Mapped[str] = mapped_column(Text, default="{}")
+    actual_json: Mapped[str] = mapped_column(Text, default="{}")
+    diff_json: Mapped[str] = mapped_column(Text, default="{}")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), index=True)
+
+
 class BusinessRecord(Base):
     __tablename__ = "dd_business_records"
 

@@ -271,6 +271,17 @@ def build_integration_connection_check_metrics_lines(check_rows: list[dict[str, 
     return lines
 
 
+def build_integration_reconciliation_metrics_lines(reconciliation_rows: list[dict[str, object]]) -> list[str]:
+    lines = [
+        "# HELP drivedesk_integration_reconciliations Integration reconciliation results by adapter and status.",
+        "# TYPE drivedesk_integration_reconciliations gauge",
+    ]
+    for row in reconciliation_rows:
+        labels = prometheus_labels({"adapter_key": row["adapter_key"], "status": row["status"]})
+        lines.append(f"drivedesk_integration_reconciliations{labels} {row['reconciliation_count']}")
+    return lines
+
+
 def build_readiness_metrics_lines(settings: Settings) -> list[str]:
     dependencies = {
         "database_url_configured": bool(settings.database_url),
@@ -308,6 +319,7 @@ def build_metrics_text(
     workflow_action_run_rows: list[dict[str, object]] | None = None,
     integration_connection_rows: list[dict[str, object]] | None = None,
     integration_connection_check_rows: list[dict[str, object]] | None = None,
+    integration_reconciliation_rows: list[dict[str, object]] | None = None,
     storage_available: bool = True,
 ) -> str:
     labels = prometheus_labels(
@@ -343,6 +355,7 @@ def build_metrics_text(
     lines.extend(build_workflow_action_run_metrics_lines(workflow_action_run_rows or []))
     lines.extend(build_integration_connection_metrics_lines(integration_connection_rows or []))
     lines.extend(build_integration_connection_check_metrics_lines(integration_connection_check_rows or []))
+    lines.extend(build_integration_reconciliation_metrics_lines(integration_reconciliation_rows or []))
     lines.append("")
     return "\n".join(lines)
 

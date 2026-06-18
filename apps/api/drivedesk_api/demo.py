@@ -264,6 +264,13 @@ def build_public_demo_payload() -> dict[str, Any]:
                 "detail": "last adapter sample",
                 "metric": "drivedesk_integration_adapter_duration_milliseconds",
             },
+            {
+                "label": "Reconciliation",
+                "value": "1 match",
+                "state": "matched",
+                "detail": "provider evidence verified",
+                "metric": "drivedesk_integration_reconciliations",
+            },
         ],
         "integrationReadiness": [
             {
@@ -285,6 +292,11 @@ def build_public_demo_payload() -> dict[str, Any]:
                 "name": "Connection diagnostics",
                 "state": "active",
                 "progress": 45,
+            },
+            {
+                "name": "Reconciliation evidence",
+                "state": "active",
+                "progress": 40,
             },
             {
                 "name": "Public demo runtime",

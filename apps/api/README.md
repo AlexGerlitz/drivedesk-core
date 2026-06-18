@@ -50,6 +50,8 @@ Core endpoints:
 - `GET /integration-adapters`.
 - `POST /tenants/{tenant_id}/integration-connections`.
 - `GET /tenants/{tenant_id}/integration-connections`.
+- `POST /tenants/{tenant_id}/integration-reconciliations`.
+- `GET /tenants/{tenant_id}/integration-reconciliations`.
 - `POST /tenants/{tenant_id}/integration-mapping-preview`.
 - `POST /tenants/{tenant_id}/integration-imports/file`.
 - `GET /demo/public`.
@@ -134,6 +136,11 @@ Integration endpoints:
   values, and supported scopes before storing the profile.
 - `GET /tenants/{tenant_id}/integration-connections` lists tenant-owned adapter
   profiles.
+- `POST /tenants/{tenant_id}/integration-reconciliations` records safe
+  provider evidence for an outbox event and compares it with DriveDesk result
+  evidence.
+- `GET /tenants/{tenant_id}/integration-reconciliations` lists safe
+  reconciliation outcomes filtered by status, adapter key, or outbox event.
 - `POST /tenants/{tenant_id}/integration-mapping-preview` previews mapping
   transforms and accepted/rejected rows without creating outbox work.
   Stored connection previews require `file_import:preview`.

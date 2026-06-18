@@ -249,6 +249,32 @@ class IntegrationConnectionHealthRead(BaseModel):
     latest_details: dict[str, Any] = Field(default_factory=dict)
 
 
+class IntegrationReconciliationCreate(BaseModel):
+    outbox_event_id: str = Field(min_length=1, max_length=36)
+    provider_status: Literal["success", "partial_success", "failed", "pending"]
+    provider_reference: str | None = Field(default=None, min_length=1, max_length=128)
+    records_received: int | None = Field(default=None, ge=0)
+    records_accepted: int | None = Field(default=None, ge=0)
+    records_rejected: int | None = Field(default=None, ge=0)
+    note: str | None = Field(default=None, min_length=2, max_length=255)
+
+
+class IntegrationReconciliationRead(BaseModel):
+    id: str
+    tenant_id: str
+    outbox_event_id: str
+    adapter_key: str
+    operation_key: str | None = None
+    status: Literal["matched", "mismatched", "pending", "blocked"]
+    summary: str
+    expected_json: str
+    actual_json: str
+    diff_json: str
+    created_at: datetime | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class IntegrationMappingPreviewCreate(BaseModel):
     adapter_key: str = Field(default="file.import.fake", min_length=2, max_length=128, pattern=r"^[a-z0-9][a-z0-9_.-]*$")
     integration_connection_id: str | None = Field(default=None, min_length=1, max_length=36)

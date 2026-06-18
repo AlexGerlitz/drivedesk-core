@@ -552,6 +552,34 @@ Public docs:
 - `docs/public/INTEGRATION_CONNECTION_DIAGNOSTICS.md`;
 - `docs/adr/0040-integration-connection-diagnostics.md`.
 
+## Sprint 4N Integration Reconciliation Evidence
+
+Sprint 4N adds safe reconciliation records for adapter-backed outbox jobs.
+
+New endpoints:
+
+- `POST /tenants/{tenant_id}/integration-reconciliations`;
+- `GET /tenants/{tenant_id}/integration-reconciliations`.
+
+Why this matters:
+
+- operators can compare DriveDesk outbox result evidence with provider-side
+  evidence after a job runs;
+- processed jobs become `matched` or `mismatched`;
+- pending/retry jobs become `pending`;
+- dead-letter jobs become `blocked`;
+- reconciliation stores only safe provider status, reference, counts, expected
+  evidence, and aggregate diff;
+- raw documents, imported rows, names, phones, payment metadata, tokens, and
+  provider response bodies stay out of reconciliation storage;
+- each reconciliation writes `integration.reconciliation.recorded`;
+- Prometheus exposes `drivedesk_integration_reconciliations`.
+
+Public docs:
+
+- `docs/public/INTEGRATION_RECONCILIATION.md`;
+- `docs/adr/0041-integration-reconciliation-evidence.md`.
+
 ## Local Commands
 
 Run the API without Docker:

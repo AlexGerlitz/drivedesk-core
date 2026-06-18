@@ -130,12 +130,14 @@ assert {event["event"] for event in demo["domainEvents"]} >= {
     "contract.generated",
     "student.sync.requested",
 }
-assert len(demo["integrationHealth"]) >= 4, demo
+assert len(demo["integrationHealth"]) >= 5, demo
 assert {item["state"] for item in demo["integrationHealth"]} >= {
     "processed",
     "retry",
     "dead_letter",
+    "matched",
 }
+assert any(item["metric"] == "drivedesk_integration_reconciliations" for item in demo["integrationHealth"]), demo
 assert {adapter["key"] for adapter in demo["adapters"]} >= {
     "accounting.export.mock",
     "file.import.fake",
@@ -223,6 +225,7 @@ assert "# HELP drivedesk_workflow_action_runs Workflow action runs by action typ
 assert "# HELP drivedesk_integration_connections Integration connections by adapter and status." in metrics, metrics
 assert "# HELP drivedesk_integration_connection_checks Integration connection health checks by adapter and status." in metrics, metrics
 assert "# HELP drivedesk_integration_connection_check_duration_milliseconds Average integration connection check duration." in metrics, metrics
+assert "# HELP drivedesk_integration_reconciliations Integration reconciliation results by adapter and status." in metrics, metrics
 assert "user_email" not in metrics, metrics
 assert "token_id" not in metrics, metrics
 assert "token_hash" not in metrics, metrics
@@ -242,6 +245,7 @@ assert "/tenants/{tenant_id}/outbox-events/{event_id}/retry" in openapi["paths"]
 assert "/tenants/{tenant_id}/integration-connections" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/integration-connections/{connection_id}/health" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/integration-connections/{connection_id}/health-checks" in openapi["paths"], openapi["paths"].keys()
+assert "/tenants/{tenant_id}/integration-reconciliations" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/integration-mapping-preview" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/integration-operator-review" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/integration-exports/accounting" in openapi["paths"], openapi["paths"].keys()
@@ -259,6 +263,7 @@ if openapi_file.exists():
     assert "/tenants/{tenant_id}/integration-connections" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/integration-connections/{connection_id}/health" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/integration-connections/{connection_id}/health-checks" in generated["paths"], generated["paths"].keys()
+    assert "/tenants/{tenant_id}/integration-reconciliations" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/integration-mapping-preview" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/integration-operator-review" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/integration-exports/accounting" in generated["paths"], generated["paths"].keys()

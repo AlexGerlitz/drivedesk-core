@@ -105,6 +105,16 @@ POST /tenants/{tenant_id}/outbox-events/{event_id}/retry
 
 That retry request writes `outbox_event.retry_requested` to the audit log.
 
+Successful or partially successful jobs can then be checked through
+reconciliation:
+
+```text
+POST /tenants/{tenant_id}/integration-reconciliations
+```
+
+That path records whether safe provider-side evidence matches the outbox result
+without storing raw provider responses.
+
 ## Human Explanation
 
 This is the difference between a background job system and an operable

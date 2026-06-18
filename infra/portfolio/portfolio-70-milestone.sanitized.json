@@ -1,0 +1,195 @@
+{
+  "schema_version": 1,
+  "check": "public_portfolio_70_milestone",
+  "milestone": "devops_platform_portfolio_70",
+  "snapshot_date": "2026-06-18",
+  "target": {
+    "objective": "DriveDesk DevOps/platform portfolio milestone",
+    "current_milestone_percent": 70,
+    "portfolio_scope": "devops_platform_engineering",
+    "commercial_saas_ready": false,
+    "public_claim": "70 percent DevOps/platform portfolio milestone reached"
+  },
+  "completion_model": {
+    "total_points_required": 70,
+    "points_recorded": 70,
+    "minimum_groups_required": 7,
+    "all_required_groups_complete": true,
+    "verification_mode": "public_safe_evidence_plus_executable_gates"
+  },
+  "evidence_groups": [
+    {
+      "id": "core_platform_foundation",
+      "points": 10,
+      "status": "complete",
+      "human_value": "Shows that DriveDesk is a real modular platform foundation, not only scripts and diagrams.",
+      "evidence": [
+        "apps/api/README.md",
+        "docs/DRIVEDESK_CORE.md",
+        "docs/public/SYSTEM_DESIGN.md",
+        "tests/test_drivedesk_foundation.py",
+        "tests/test_drivedesk_core_api.py"
+      ],
+      "checks": [
+        "python -m pytest -q",
+        "bash scripts/ci_smoke.sh"
+      ]
+    },
+    {
+      "id": "public_reviewer_surface",
+      "points": 10,
+      "status": "complete",
+      "human_value": "Gives an external reviewer a safe demo, OpenAPI schema, generated clients, and a guided reading path.",
+      "evidence": [
+        "docs/public/README.md",
+        "docs/public/PORTFOLIO_CASE_STUDY.md",
+        "docs/public/API_BACKED_DEMO.md",
+        "apps/admin/public-demo/index.html",
+        "sdk/generated/public-demo/openapi-client-manifest.json"
+      ],
+      "checks": [
+        "bash scripts/check_public_demo_api.sh",
+        "bash scripts/check_public_demo_sdk.sh",
+        "bash scripts/public_repo_release_gate.sh"
+      ]
+    },
+    {
+      "id": "ci_release_safety",
+      "points": 10,
+      "status": "complete",
+      "human_value": "Shows how changes are checked, promoted, blocked, rolled back, and monitored by scheduled validation.",
+      "evidence": [
+        ".github/workflows/ci.yml",
+        ".github/workflows/scheduled-validation.yml",
+        "docs/public/RELEASE_ROLLBACK_EVIDENCE.md",
+        "docs/public/SLO_CANARY_GATE_EVIDENCE.md",
+        "docs/public/STAGED_PROMOTION_EVIDENCE.md",
+        "docs/public/PRIVATE_INFRA_SCHEDULED_VALIDATION.md",
+        "docs/public/PRIVATE_INFRA_SCHEDULED_ALERTING.md"
+      ],
+      "checks": [
+        "bash scripts/check_public_release_rollback.sh",
+        "bash scripts/check_public_slo_canary_gate.sh",
+        "bash scripts/check_public_staged_promotion.sh",
+        "bash scripts/check_public_private_infra_scheduled_validation.sh",
+        "bash scripts/check_public_private_infra_scheduled_alerting.sh"
+      ]
+    },
+    {
+      "id": "iac_packaging_gitops",
+      "points": 10,
+      "status": "complete",
+      "human_value": "Shows the path from local containers to Kubernetes packaging, infrastructure plans, and Git-owned desired state.",
+      "evidence": [
+        "infra/docker/docker-compose.foundation.yml",
+        "infra/helm/drivedesk-core/Chart.yaml",
+        "infra/opentofu/public/main.tf",
+        "infra/gitops/argocd/app-staging.yaml",
+        "docs/public/HELM_CHART.md",
+        "docs/public/OPENTOFU_PLAN_EVIDENCE.md",
+        "docs/public/GITOPS_DELIVERY.md"
+      ],
+      "checks": [
+        "bash scripts/check_public_helm_render.sh",
+        "bash scripts/check_public_opentofu_plan.sh",
+        "bash scripts/check_public_gitops_layout.sh"
+      ]
+    },
+    {
+      "id": "observability_sre",
+      "points": 10,
+      "status": "complete",
+      "human_value": "Shows that the platform has health, metrics, logs, alert names, runbooks, and evidence instead of blind deploys.",
+      "evidence": [
+        "docs/public/SANITIZED_EVIDENCE.md",
+        "docs/public/AUTH_OBSERVABILITY.md",
+        "docs/public/INTEGRATION_OBSERVABILITY.md",
+        "docs/public/SLO_CANARY_GATE_EVIDENCE.md",
+        "docs/public/PRIVATE_INFRA_VALIDATION.md",
+        "docs/public/PRIVATE_INFRA_SCHEDULED_ALERTING.md"
+      ],
+      "checks": [
+        "bash scripts/check_public_private_infra_validation.sh",
+        "bash scripts/check_public_private_infra_scheduled_alerting.sh"
+      ]
+    },
+    {
+      "id": "security_data_boundary",
+      "points": 10,
+      "status": "complete",
+      "human_value": "Shows public/private separation, redacted evidence, secret scanning, tenant isolation, auth audit, and data-residency thinking.",
+      "evidence": [
+        "docs/public/TENANT_ISOLATION.md",
+        "docs/public/AUTH_FOUNDATION.md",
+        "docs/public/AUTH_OBSERVABILITY.md",
+        "docs/public/SESSION_REVOCATION.md",
+        "docs/public/SANITIZED_EVIDENCE.md",
+        "docs/public/PRIVATE_INFRA_VALIDATION.md"
+      ],
+      "checks": [
+        "bash scripts/check_public_private_infra_validation.sh",
+        "bash scripts/check_public_private_infra_scheduled_alerting.sh"
+      ]
+    },
+    {
+      "id": "recovery_drift_operations",
+      "points": 10,
+      "status": "complete",
+      "human_value": "Shows backup/restore, drift detection, remediation planning, reviewed execution, and post-remediation recheck.",
+      "evidence": [
+        "docs/public/BACKUP_RESTORE_EVIDENCE.md",
+        "docs/public/INFRA_STATE_DRIFT_EVIDENCE.md",
+        "docs/public/PRIVATE_INFRA_REMEDIATION.md",
+        "docs/public/PRIVATE_INFRA_REMEDIATION_EXECUTION.md",
+        "docs/public/PRIVATE_INFRA_POST_REMEDIATION_DRIFT_REFRESH.md"
+      ],
+      "checks": [
+        "bash scripts/check_public_backup_restore.sh",
+        "bash scripts/check_public_infra_state_drift.sh",
+        "bash scripts/check_public_private_infra_remediation.sh",
+        "bash scripts/check_public_private_infra_remediation_execution.sh",
+        "bash scripts/check_public_private_infra_post_remediation_drift_refresh.sh"
+      ]
+    }
+  ],
+  "verification_chain": {
+    "private_smoke": "bash scripts/ci_smoke.sh",
+    "public_release_gate": "bash scripts/public_repo_release_gate.sh",
+    "milestone_check": "bash scripts/check_public_portfolio_70_milestone.sh",
+    "public_export_boundary": "scripts/export_public_repo.sh",
+    "public_repo": "AlexGerlitz/drivedesk-core"
+  },
+  "public_boundary": {
+    "public_safe": true,
+    "sanitized_evidence_only": true,
+    "synthetic_demo_data_only": true,
+    "no_customer_data": true,
+    "no_private_hosts": true,
+    "no_raw_logs": true,
+    "no_runtime_secret_material": true
+  },
+  "remaining_to_100": [
+    "real customer workflows and product UX",
+    "mobile applications",
+    "real provider integrations",
+    "live production cluster operation",
+    "paid SaaS onboarding and billing",
+    "broader security and compliance review",
+    "longer production incident history"
+  ],
+  "decision": {
+    "event_type": "portfolio.milestone_70.reached",
+    "milestone_reached": true,
+    "claim": "70 percent DevOps/platform portfolio milestone reached",
+    "production_commercial_saas_ready": false,
+    "next_goal": "move from portfolio milestone to production-grade product maturity"
+  },
+  "redaction": {
+    "hostnames_included": false,
+    "addresses_included": false,
+    "credentials_included": false,
+    "raw_logs_included": false,
+    "request_bodies_included": false,
+    "production_data_included": false
+  }
+}

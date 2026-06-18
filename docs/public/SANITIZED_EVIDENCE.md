@@ -96,6 +96,12 @@ Private infrastructure scheduled alerting source file:
 docs/public/evidence/private-infra-scheduled-alerting.sanitized.json
 ```
 
+Portfolio 70 percent milestone source file:
+
+```text
+docs/public/evidence/portfolio-70-milestone.sanitized.json
+```
+
 GitOps layout validation source file:
 
 ```text
@@ -204,6 +210,10 @@ Verified signals:
 - the scheduled workflow rechecks post-remediation drift refresh and the public
   secret boundary;
 - `infra.scheduled_validation.healthy` evidence is recorded.
+- the public 70 percent DevOps/platform milestone evidence records seven
+  complete evidence groups, 70 recorded points, public-safe boundaries, and
+  remaining work before commercial SaaS completeness;
+- `portfolio.milestone_70.reached` evidence is recorded.
 - the public GitOps delivery foundation contains Argo CD project, application,
   environment, and promotion metadata;
 - Argo CD applications reference the Helm chart path;
@@ -263,6 +273,8 @@ The public version keeps only the operational shape and health results.
   executable public validation.
 - Private infrastructure scheduled validation is checked through an executable
   public validation and a scheduled GitHub Actions workflow.
+- The 70 percent DevOps/platform milestone is checked through an executable
+  public validation.
 - GitOps desired-state delivery is checked through an executable public
   validation.
 - GitOps image promotion and drift detection are checked through an executable

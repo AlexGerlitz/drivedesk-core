@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-18T09:08:26Z
+Generated at: 2026-06-18T09:32:35Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -191,6 +191,11 @@ Copied public-safe areas:
 - public private infrastructure scheduled alerting check: workflow_failure_handler_present
 - public private infrastructure scheduled alerting event: infra.scheduled_validation.alerting.ready
 - public private infrastructure scheduled alerting ADR: 0060-public-safe-private-infra-scheduled-alerting
+- public portfolio 70 milestone doc
+- public portfolio 70 milestone script: scripts/check_public_portfolio_70_milestone.sh
+- public portfolio 70 milestone evidence snapshot: docs/public/evidence/portfolio-70-milestone.sanitized.json
+- public portfolio 70 milestone event: portfolio.milestone_70.reached
+- public portfolio 70 milestone ADR: 0061-public-safe-portfolio-70-milestone
 - public GitOps delivery foundation doc
 - public GitOps path: infra/gitops
 - public GitOps validation script: scripts/check_public_gitops_layout.sh

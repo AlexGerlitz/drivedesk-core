@@ -29,6 +29,7 @@ Implemented baseline:
 - public-safe post-remediation drift refresh evidence for the exported Core surface.
 - public-safe recurring scheduled validation evidence for the exported Core surface.
 - public-safe scheduled validation alerting evidence for the exported Core surface.
+- public-safe 70 percent DevOps/platform milestone evidence for the exported Core surface.
 - public-safe GitOps delivery foundation and Argo CD layout validation for the exported Core surface.
 - public-safe GitOps image promotion and drift detection for the exported Core surface.
 - public-safe GitOps drift remediation planning for the exported Core surface.
@@ -79,6 +80,9 @@ What this gives us:
 - scheduled validation alerting evidence records what happens when the
   scheduled loop is missed or fails: GitHub Actions failure artifact, operator
   review route, runbook keys, and blocked promotion.
+- the 70 percent milestone evidence turns the broad DevOps work into a
+  checkable reviewer story: seven complete groups, public-safe evidence, and an
+  honest boundary that this is not yet a finished commercial SaaS.
 - GitOps desired-state delivery connects the Helm chart to build, staging,
   canary, and production promotion flow without exposing a live cluster.
 - image promotion and drift evidence shows the difference between desired state

@@ -118,6 +118,15 @@ The check validates missed-run, failed-run, and secret-boundary alert signals,
 the GitHub Actions failure artifact, runbook keys, notification routes, and no
 external notification secrets.
 
+Public-safe 70 percent DevOps/platform milestone:
+
+```bash
+bash scripts/check_public_portfolio_70_milestone.sh
+```
+
+The check validates the 70-point portfolio milestone, public-safe evidence
+groups, reviewer surface, gates, remaining product work, and redaction boundary.
+
 Core endpoints:
 
 - `POST /auth/login`;

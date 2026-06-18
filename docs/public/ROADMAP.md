@@ -71,6 +71,8 @@ operations, or commercial details.
   dispatch fallback, missed-run guard, and clean sample runs.
 - Public-safe scheduled validation alerting evidence with missed-run,
   failed-run, secret-boundary signals, runbook keys, and failure artifact route.
+- Public-safe 70 percent DevOps/platform milestone evidence with seven complete
+  evidence groups and an executable milestone check.
 - Public-safe GitOps delivery foundation with Argo CD layout validation.
 - Public-safe GitOps image promotion and drift detection evidence.
 - Public-safe GitOps drift remediation evidence with approval and rollback context.

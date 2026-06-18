@@ -1,7 +1,7 @@
 // Generated from DriveDesk Core OpenAPI. Do not edit by hand.
 export const PUBLIC_DEMO_PATH: "/demo/public";
 export const OPERATION_ID: "public_demo_demo_public_get";
-export const REQUIRED_FIELDS: Array<"schemaVersion" | "generatedAt" | "dataSource" | "apiContract" | "tenant" | "health" | "metrics" | "workQueue" | "members" | "auditEvents" | "outbox" | "adapters" | "integrationJobs" | "integrationHealth" | "integrationReadiness" | "recoveryEvidence" | "alertRouting" | "incidentResponse" | "engineeringProof" | "workflow" | "workflowScenarios" | "timeline" | "domainEvents">;
+export const REQUIRED_FIELDS: Array<"schemaVersion" | "generatedAt" | "dataSource" | "apiContract" | "tenant" | "health" | "metrics" | "workQueue" | "members" | "auditEvents" | "outbox" | "adapters" | "adapterScenarios" | "integrationJobs" | "integrationHealth" | "integrationReadiness" | "recoveryEvidence" | "alertRouting" | "incidentResponse" | "engineeringProof" | "workflow" | "workflowScenarios" | "timeline" | "domainEvents">;
 
 export interface PublicDemoPayload {
   schemaVersion: 1;
@@ -16,6 +16,20 @@ export interface PublicDemoPayload {
   auditEvents: Array<Record<string, string>>;
   outbox: Array<Record<string, unknown>>;
   adapters: Array<Record<string, string>>;
+  adapterScenarios: Array<{
+    id: string;
+    title: string;
+    adapter: "file.import.fake" | "accounting.export.mock" | string;
+    operation: string;
+    phase: "preview" | "execute" | "retry" | "operator_review";
+    endpoint: string;
+    requiredScope: string;
+    status: string;
+    detail: string;
+    inputs: string[];
+    outputs: string[];
+    evidence: string;
+  }>;
   integrationJobs: Array<Record<string, unknown>>;
   integrationHealth: Array<Record<string, string>>;
   integrationReadiness: Array<Record<string, unknown>>;

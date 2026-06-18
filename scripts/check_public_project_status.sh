@@ -68,6 +68,7 @@ for token in [
     "Business workflow",
     "reusable workflow scenarios",
     "Integration hub",
+    "operation scenarios",
     "Recovery and release safety",
     "GitOps and IaC",
     "Evidence boundary",

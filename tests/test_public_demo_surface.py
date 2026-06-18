@@ -47,6 +47,7 @@ def test_public_demo_html_links_static_assets() -> None:
     assert 'id="workflowTimelineRows"' in html
     assert 'id="domainEventRows"' in html
     assert 'id="integrationHealthRows"' in html
+    assert 'id="adapterScenarioRows"' in html
     assert 'id="adapterRows"' in html
     assert 'id="syncJobRows"' in html
     assert 'id="outboxRows"' in html
@@ -152,6 +153,46 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
     assert accounting_operations["accounting_export_execute"]["endpoint"] == (
         "POST /tenants/{tenant_id}/integration-exports/accounting"
     )
+    assert len(payload["adapterScenarios"]) >= 4
+    adapter_scenario_by_id = {scenario["id"]: scenario for scenario in payload["adapterScenarios"]}
+    assert set(adapter_scenario_by_id) >= {
+        "adapter-file-import-preview",
+        "adapter-file-import-execute",
+        "adapter-accounting-export-retry",
+        "adapter-dead-letter-review",
+    }
+    assert {scenario["phase"] for scenario in payload["adapterScenarios"]} >= {
+        "preview",
+        "execute",
+        "retry",
+        "operator_review",
+    }
+    assert {scenario["adapter"] for scenario in payload["adapterScenarios"]} >= {
+        "file.import.fake",
+        "accounting.export.mock",
+    }
+    assert {scenario["requiredScope"] for scenario in payload["adapterScenarios"]} >= {
+        "file_import:preview",
+        "file_import:execute",
+        "accounting:export",
+    }
+    assert {
+        output
+        for scenario in payload["adapterScenarios"]
+        for output in scenario["outputs"]
+    } >= {
+        "mapping_preview",
+        "outbox_event",
+        "adapter_job",
+        "retry_scheduled",
+        "review_card",
+        "manual_retry_endpoint",
+    }
+    assert adapter_scenario_by_id["adapter-file-import-preview"]["endpoint"] == (
+        "POST /tenants/{tenant_id}/integration-mapping-preview"
+    )
+    assert adapter_scenario_by_id["adapter-accounting-export-retry"]["status"] == "retry"
+    assert adapter_scenario_by_id["adapter-dead-letter-review"]["status"] == "dead_letter"
     assert len(payload["integrationJobs"]) >= 3
     assert len(payload["integrationHealth"]) >= 6
     assert any(item["name"] == "Connection diagnostics" for item in payload["integrationReadiness"])
@@ -265,6 +306,7 @@ def test_public_demo_can_load_api_backed_data_with_static_fallback() -> None:
     assert "fillWorkflowScenarios" in script
     assert "fillWorkflowTimeline" in script
     assert "fillDomainEvents" in script
+    assert "fillAdapterScenarios" in script
     assert "fillRecoveryEvidence" in script
     assert "fillAlertRouting" in script
     assert "fillIncidentResponse" in script
@@ -273,6 +315,7 @@ def test_public_demo_can_load_api_backed_data_with_static_fallback() -> None:
     assert "incidentResponse" in script
     assert "engineeringProof" in script
     assert "workflowScenarios" in script
+    assert "adapterScenarios" in script
     assert "recoveryEvidence" in script
     assert "demoApi" in script
     assert "data-demo-api-path" not in script

@@ -1241,6 +1241,25 @@ def test_public_demo_endpoint_is_read_only_synthetic_contract(
     }
     assert len(payload["metrics"]) >= 4
     assert len(payload["workQueue"]) >= 4
+    assert len(payload["adapterScenarios"]) >= 4
+    adapter_scenario_by_id = {scenario["id"]: scenario for scenario in payload["adapterScenarios"]}
+    assert set(adapter_scenario_by_id) >= {
+        "adapter-file-import-preview",
+        "adapter-file-import-execute",
+        "adapter-accounting-export-retry",
+        "adapter-dead-letter-review",
+    }
+    assert {scenario["phase"] for scenario in payload["adapterScenarios"]} >= {
+        "preview",
+        "execute",
+        "retry",
+        "operator_review",
+    }
+    assert {scenario["requiredScope"] for scenario in payload["adapterScenarios"]} >= {
+        "file_import:preview",
+        "file_import:execute",
+        "accounting:export",
+    }
     assert len(payload["integrationJobs"]) >= 3
     assert len(payload["integrationHealth"]) >= 4
     assert {route["name"] for route in payload["alertRouting"]["routes"]} >= {

@@ -62,6 +62,21 @@ The outbound export operation uses:
 This proves that inbound imports and outbound exports can use the same
 operation-contract model.
 
+## Scenario Coverage
+
+`GET /demo/public` exposes adapter operation scenarios that map the contracts to
+operator-visible behavior:
+
+| Phase | Contract | Expected behavior |
+| --- | --- | --- |
+| `preview` | `file_import_preview` | Validate mapping and sample records without creating an outbox event. |
+| `execute` | `file_import_execute` | Queue an idempotent outbox event and record audit evidence. |
+| `retry` | `accounting_export_execute` | Keep a temporary provider failure retryable and visible. |
+| `operator_review` | `file_import_execute` | Create a review card for dead-letter work with runbook context. |
+
+The generated SDK validates these scenarios so clients can rely on the same
+integration lifecycle shape.
+
 ## Why This Matters
 
 Structured operation contracts keep the Integration Hub explicit:

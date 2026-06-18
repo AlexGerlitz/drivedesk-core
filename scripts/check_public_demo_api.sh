@@ -250,6 +250,46 @@ assert any(adapter.get("connectionProfileSupported") for adapter in demo["adapte
 assert any(adapter.get("requiredMappingKeys") for adapter in demo["adapters"]), demo
 assert any(adapter.get("supportedConnectionScopes") for adapter in demo["adapters"]), demo
 assert any(adapter.get("operationContracts") for adapter in demo["adapters"]), demo
+assert len(demo["adapterScenarios"]) >= 4, demo
+adapter_scenario_by_id = {scenario["id"]: scenario for scenario in demo["adapterScenarios"]}
+assert set(adapter_scenario_by_id) >= {
+    "adapter-file-import-preview",
+    "adapter-file-import-execute",
+    "adapter-accounting-export-retry",
+    "adapter-dead-letter-review",
+}, demo
+assert {scenario["phase"] for scenario in demo["adapterScenarios"]} >= {
+    "preview",
+    "execute",
+    "retry",
+    "operator_review",
+}, demo
+assert {scenario["adapter"] for scenario in demo["adapterScenarios"]} >= {
+    "file.import.fake",
+    "accounting.export.mock",
+}, demo
+assert {scenario["requiredScope"] for scenario in demo["adapterScenarios"]} >= {
+    "file_import:preview",
+    "file_import:execute",
+    "accounting:export",
+}, demo
+assert {
+    output
+    for scenario in demo["adapterScenarios"]
+    for output in scenario["outputs"]
+} >= {
+    "mapping_preview",
+    "outbox_event",
+    "adapter_job",
+    "retry_scheduled",
+    "review_card",
+    "manual_retry_endpoint",
+}, demo
+assert adapter_scenario_by_id["adapter-file-import-preview"]["endpoint"] == (
+    "POST /tenants/{tenant_id}/integration-mapping-preview"
+), demo
+assert adapter_scenario_by_id["adapter-accounting-export-retry"]["status"] == "retry", demo
+assert adapter_scenario_by_id["adapter-dead-letter-review"]["status"] == "dead_letter", demo
 adapter_catalog = {adapter["key"]: adapter for adapter in adapters}
 assert set(adapter_catalog) == {"accounting.export.mock", "file.import.fake", "internal.noop"}, adapters
 runbook_catalog = {runbook["key"]: runbook for runbook in runbooks}

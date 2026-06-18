@@ -49,6 +49,7 @@
         Array.isArray(payload.workflowScenarios) &&
         Array.isArray(payload.timeline) &&
         Array.isArray(payload.domainEvents) &&
+        Array.isArray(payload.adapterScenarios) &&
         Array.isArray(payload.integrationJobs) &&
         Array.isArray(payload.integrationHealth) &&
         Array.isArray(payload.recoveryEvidence) &&
@@ -220,6 +221,49 @@
       );
 
       row.append(top, key, contract, meta, mapping, scopes, operations);
+      rows.appendChild(row);
+    });
+  }
+
+  function fillAdapterScenarios() {
+    var rows = document.getElementById("adapterScenarioRows");
+    clear(rows);
+    data.adapterScenarios.forEach(function (scenario) {
+      var row = document.createElement("article");
+      row.className = "event-row adapter-scenario-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var name = document.createElement("strong");
+      name.appendChild(text(scenario.title));
+      top.append(name, chip(scenario.status, statusTone(scenario.status)));
+
+      var operation = document.createElement("code");
+      operation.appendChild(text(scenario.adapter + " / " + scenario.operation));
+
+      var endpoint = document.createElement("span");
+      endpoint.className = "muted";
+      endpoint.appendChild(text(scenario.phase + " - " + scenario.endpoint));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(scenario.requiredScope + " - " + scenario.detail));
+
+      var io = document.createElement("span");
+      io.className = "muted";
+      io.appendChild(
+        text(
+          "inputs: " +
+            (scenario.inputs || []).join(", ") +
+            " / outputs: " +
+            (scenario.outputs || []).join(", ")
+        )
+      );
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(scenario.evidence));
+
+      row.append(top, operation, endpoint, detail, io, evidence);
       rows.appendChild(row);
     });
   }
@@ -844,6 +888,7 @@
     fillDomainEvents();
     fillIntegrations();
     fillAdapterContracts();
+    fillAdapterScenarios();
     fillSyncJobs();
     fillIntegrationHealth();
     fillMembers();

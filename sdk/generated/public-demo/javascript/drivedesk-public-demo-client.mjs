@@ -16,6 +16,7 @@ export const REQUIRED_FIELDS = [
   "auditEvents",
   "outbox",
   "adapters",
+  "adapterScenarios",
   "integrationJobs",
   "integrationHealth",
   "integrationReadiness",
@@ -111,6 +112,43 @@ export function validatePublicDemoPayload(payload) {
   for (const requiredOutput of ["audit_event", "outbox_event", "task_record", "integration_job", "action_run"]) {
     if (!scenarioOutputs.has(requiredOutput)) {
       throw new Error(`workflowScenarios does not include required output: ${requiredOutput}`);
+    }
+  }
+
+  if (!Array.isArray(payload.adapterScenarios) || payload.adapterScenarios.length < 4) {
+    throw new Error("adapterScenarios is missing or too short");
+  }
+
+  const adapterScenarioIds = new Set(payload.adapterScenarios.map((scenario) => scenario?.id));
+  for (const requiredScenario of [
+    "adapter-file-import-preview",
+    "adapter-file-import-execute",
+    "adapter-accounting-export-retry",
+    "adapter-dead-letter-review",
+  ]) {
+    if (!adapterScenarioIds.has(requiredScenario)) {
+      throw new Error(`adapterScenarios does not include required scenario: ${requiredScenario}`);
+    }
+  }
+
+  const adapterPhases = new Set(payload.adapterScenarios.map((scenario) => scenario?.phase));
+  for (const requiredPhase of ["preview", "execute", "retry", "operator_review"]) {
+    if (!adapterPhases.has(requiredPhase)) {
+      throw new Error(`adapterScenarios does not include required phase: ${requiredPhase}`);
+    }
+  }
+
+  const adapterOutputs = new Set(payload.adapterScenarios.flatMap((scenario) => scenario?.outputs || []));
+  for (const requiredOutput of [
+    "mapping_preview",
+    "outbox_event",
+    "adapter_job",
+    "retry_scheduled",
+    "review_card",
+    "manual_retry_endpoint",
+  ]) {
+    if (!adapterOutputs.has(requiredOutput)) {
+      throw new Error(`adapterScenarios does not include required output: ${requiredOutput}`);
     }
   }
 

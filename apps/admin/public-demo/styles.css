@@ -353,6 +353,10 @@ h3 {
   margin-bottom: 18px;
 }
 
+.adapter-scenario-panel {
+  margin-bottom: 18px;
+}
+
 .dashboard-grid + .dashboard-grid {
   margin-top: 18px;
 }
@@ -457,6 +461,11 @@ td {
 }
 
 .workflow-scenario-row {
+  display: grid;
+  gap: 10px;
+}
+
+.adapter-scenario-row {
   display: grid;
   gap: 10px;
 }

@@ -117,6 +117,21 @@ The catalog is read-only. It does not store tenant data, connection names,
 mapping values from real tenants, provider payloads, or sensitive provider
 values.
 
+## Adapter Operation Scenarios
+
+The public demo includes `adapterScenarios` so the Integration Hub is visible as
+an operational lifecycle, not only as a catalog.
+
+| Scenario | Adapter | Operation | Phase | Scope | Evidence |
+| --- | --- | --- | --- | --- | --- |
+| File import mapping preview | `file.import.fake` | `file_import_preview` | `preview` | `file_import:preview` | `integration.mapping_preview.completed` |
+| File import execution | `file.import.fake` | `file_import_execute` | `execute` | `file_import:execute` | `integration.file_import.requested` |
+| Accounting export retry | `accounting.export.mock` | `accounting_export_execute` | `retry` | `accounting:export` | `integration.export.retry_scheduled` |
+| Dead-letter operator review | `file.import.fake` | `file_import_execute` | `operator_review` | `file_import:execute` | `integration.operator_review.created` |
+
+These scenarios make the adapter boundary reviewable through the same public
+demo API, generated SDK, static fallback, and release gate.
+
 ## Public Verification
 
 The public smoke test validates:
@@ -132,6 +147,8 @@ The public smoke test validates:
 - the file-import execute operation declares `integration.file_import.requested`;
 - the accounting export operation declares `accounting.export.requested`;
 - the accounting export operation declares `accounting:export`;
+- the public demo exposes adapter scenarios for preview, execute, retry, and
+  operator review;
 - the file-import descriptor exposes mapping transform and preview capabilities;
 - the file-import descriptor includes mapping and payload examples;
 - the public demo adapter cards include connection-profile metadata.

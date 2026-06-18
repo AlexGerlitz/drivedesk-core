@@ -129,6 +129,47 @@ def validate_public_demo_payload(payload: dict[str, Any]) -> None:
     if not required_outputs.issubset(scenario_outputs):
         raise ValueError(f"workflowScenarios does not include required outputs: {{sorted(required_outputs - scenario_outputs)}}")
 
+    adapter_scenarios = payload.get("adapterScenarios")
+    if not isinstance(adapter_scenarios, list) or len(adapter_scenarios) < 4:
+        raise ValueError("adapterScenarios is missing or too short")
+
+    adapter_scenario_ids = {{scenario.get("id") for scenario in adapter_scenarios if isinstance(scenario, dict)}}
+    required_adapter_scenarios = {{
+        "adapter-file-import-preview",
+        "adapter-file-import-execute",
+        "adapter-accounting-export-retry",
+        "adapter-dead-letter-review",
+    }}
+    if not required_adapter_scenarios.issubset(adapter_scenario_ids):
+        raise ValueError(
+            "adapterScenarios does not include required scenarios: "
+            f"{{sorted(required_adapter_scenarios - adapter_scenario_ids)}}"
+        )
+
+    adapter_phases = {{scenario.get("phase") for scenario in adapter_scenarios if isinstance(scenario, dict)}}
+    required_adapter_phases = {{"preview", "execute", "retry", "operator_review"}}
+    if not required_adapter_phases.issubset(adapter_phases):
+        raise ValueError(f"adapterScenarios does not include required phases: {{sorted(required_adapter_phases - adapter_phases)}}")
+
+    adapter_outputs = {{
+        output
+        for scenario in adapter_scenarios
+        if isinstance(scenario, dict)
+        for output in scenario.get("outputs", [])
+    }}
+    required_adapter_outputs = {{
+        "mapping_preview",
+        "outbox_event",
+        "adapter_job",
+        "retry_scheduled",
+        "review_card",
+        "manual_retry_endpoint",
+    }}
+    if not required_adapter_outputs.issubset(adapter_outputs):
+        raise ValueError(
+            f"adapterScenarios does not include required outputs: {{sorted(required_adapter_outputs - adapter_outputs)}}"
+        )
+
     proof = payload.get("engineeringProof") or {{}}
     if proof.get("milestone") != "engineering_70":
         raise ValueError(f"unexpected engineeringProof.milestone: {{proof.get('milestone')}}")
@@ -290,6 +331,43 @@ export function validatePublicDemoPayload(payload) {{
     }}
   }}
 
+  if (!Array.isArray(payload.adapterScenarios) || payload.adapterScenarios.length < 4) {{
+    throw new Error("adapterScenarios is missing or too short");
+  }}
+
+  const adapterScenarioIds = new Set(payload.adapterScenarios.map((scenario) => scenario?.id));
+  for (const requiredScenario of [
+    "adapter-file-import-preview",
+    "adapter-file-import-execute",
+    "adapter-accounting-export-retry",
+    "adapter-dead-letter-review",
+  ]) {{
+    if (!adapterScenarioIds.has(requiredScenario)) {{
+      throw new Error(`adapterScenarios does not include required scenario: ${{requiredScenario}}`);
+    }}
+  }}
+
+  const adapterPhases = new Set(payload.adapterScenarios.map((scenario) => scenario?.phase));
+  for (const requiredPhase of ["preview", "execute", "retry", "operator_review"]) {{
+    if (!adapterPhases.has(requiredPhase)) {{
+      throw new Error(`adapterScenarios does not include required phase: ${{requiredPhase}}`);
+    }}
+  }}
+
+  const adapterOutputs = new Set(payload.adapterScenarios.flatMap((scenario) => scenario?.outputs || []));
+  for (const requiredOutput of [
+    "mapping_preview",
+    "outbox_event",
+    "adapter_job",
+    "retry_scheduled",
+    "review_card",
+    "manual_retry_endpoint",
+  ]) {{
+    if (!adapterOutputs.has(requiredOutput)) {{
+      throw new Error(`adapterScenarios does not include required output: ${{requiredOutput}}`);
+    }}
+  }}
+
   if (payload.engineeringProof?.milestone !== "engineering_70") {{
     throw new Error(`unexpected engineeringProof.milestone: ${{payload.engineeringProof?.milestone}}`);
   }}
@@ -386,6 +464,20 @@ export interface PublicDemoPayload {{
   auditEvents: Array<Record<string, string>>;
   outbox: Array<Record<string, unknown>>;
   adapters: Array<Record<string, string>>;
+  adapterScenarios: Array<{{
+    id: string;
+    title: string;
+    adapter: "file.import.fake" | "accounting.export.mock" | string;
+    operation: string;
+    phase: "preview" | "execute" | "retry" | "operator_review";
+    endpoint: string;
+    requiredScope: string;
+    status: string;
+    detail: string;
+    inputs: string[];
+    outputs: string[];
+    evidence: string;
+  }}>;
   integrationJobs: Array<Record<string, unknown>>;
   integrationHealth: Array<Record<string, string>>;
   integrationReadiness: Array<Record<string, unknown>>;

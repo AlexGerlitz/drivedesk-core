@@ -2111,6 +2111,14 @@
       },
       "PublicDemoRead": {
         "properties": {
+          "adapterScenarios": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Adapterscenarios",
+            "type": "array"
+          },
           "adapters": {
             "items": {
               "additionalProperties": true,
@@ -2295,6 +2303,7 @@
           "auditEvents",
           "outbox",
           "adapters",
+          "adapterScenarios",
           "integrationJobs",
           "integrationHealth",
           "integrationReadiness",

@@ -23,6 +23,7 @@
     "auditEvents",
     "outbox",
     "adapters",
+    "adapterScenarios",
     "integrationJobs",
     "integrationHealth",
     "integrationReadiness",

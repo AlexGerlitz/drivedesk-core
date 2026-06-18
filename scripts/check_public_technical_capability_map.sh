@@ -65,6 +65,7 @@ for token in [
     "Business records and workflow automation",
     "reusable workflow scenarios",
     "Integration adapter model",
+    "operation scenarios",
     "Recovery drills",
     "Observability proof",
     "Alert routing",

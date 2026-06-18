@@ -34,6 +34,7 @@ surface for the Core concepts that already exist in the backend:
 - audit events;
 - outbox events;
 - integration adapters;
+- adapter operation scenarios;
 - retry and dead-letter sync jobs;
 - integration health metrics;
 - alert routing, escalation, and runbook bindings;

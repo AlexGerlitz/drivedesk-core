@@ -22,6 +22,7 @@ REQUIRED_FIELDS = [
   "auditEvents",
   "outbox",
   "adapters",
+  "adapterScenarios",
   "integrationJobs",
   "integrationHealth",
   "integrationReadiness",
@@ -110,6 +111,47 @@ def validate_public_demo_payload(payload: dict[str, Any]) -> None:
     required_outputs = {"audit_event", "outbox_event", "task_record", "integration_job", "action_run"}
     if not required_outputs.issubset(scenario_outputs):
         raise ValueError(f"workflowScenarios does not include required outputs: {sorted(required_outputs - scenario_outputs)}")
+
+    adapter_scenarios = payload.get("adapterScenarios")
+    if not isinstance(adapter_scenarios, list) or len(adapter_scenarios) < 4:
+        raise ValueError("adapterScenarios is missing or too short")
+
+    adapter_scenario_ids = {scenario.get("id") for scenario in adapter_scenarios if isinstance(scenario, dict)}
+    required_adapter_scenarios = {
+        "adapter-file-import-preview",
+        "adapter-file-import-execute",
+        "adapter-accounting-export-retry",
+        "adapter-dead-letter-review",
+    }
+    if not required_adapter_scenarios.issubset(adapter_scenario_ids):
+        raise ValueError(
+            "adapterScenarios does not include required scenarios: "
+            f"{sorted(required_adapter_scenarios - adapter_scenario_ids)}"
+        )
+
+    adapter_phases = {scenario.get("phase") for scenario in adapter_scenarios if isinstance(scenario, dict)}
+    required_adapter_phases = {"preview", "execute", "retry", "operator_review"}
+    if not required_adapter_phases.issubset(adapter_phases):
+        raise ValueError(f"adapterScenarios does not include required phases: {sorted(required_adapter_phases - adapter_phases)}")
+
+    adapter_outputs = {
+        output
+        for scenario in adapter_scenarios
+        if isinstance(scenario, dict)
+        for output in scenario.get("outputs", [])
+    }
+    required_adapter_outputs = {
+        "mapping_preview",
+        "outbox_event",
+        "adapter_job",
+        "retry_scheduled",
+        "review_card",
+        "manual_retry_endpoint",
+    }
+    if not required_adapter_outputs.issubset(adapter_outputs):
+        raise ValueError(
+            f"adapterScenarios does not include required outputs: {sorted(required_adapter_outputs - adapter_outputs)}"
+        )
 
     proof = payload.get("engineeringProof") or {}
     if proof.get("milestone") != "engineering_70":

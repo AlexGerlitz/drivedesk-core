@@ -75,6 +75,8 @@ Implemented foundation:
   comparison, drift detection, and plan-only response.
 - public-safe private staging runtime rollout evidence with deploy, health,
   observability, sanitized evidence, and rollback-review boundaries.
+- public-safe private infrastructure validation evidence with read-only
+  staging/control-plane validation before apply, restart, or remediation.
 - public-safe GitOps image promotion/drift evidence with candidate tag,
   rollback tag, desired state, observed state, and synthetic `OutOfSync`.
 - public-safe GitOps drift remediation evidence with plan-only reconcile,
@@ -204,6 +206,9 @@ code change -> CI -> deploy -> health check -> evidence -> runbook-backed operat
 - Runtime rollout evidence now links private staging deployment, runtime health,
   observability gates, sanitized evidence, and rollback review without exposing
   private runtime details.
+- Private infrastructure validation now records a read-only
+  staging/control-plane check that references OpenTofu, drift, runtime rollout,
+  GitOps, and sanitized staging evidence before any mutation is allowed.
 - GitOps delivery foundation now connects the Helm chart to Argo CD-style
   build, staging, canary, and production desired state.
 - GitOps image automation now records the image digest, SBOM, Trivy scan

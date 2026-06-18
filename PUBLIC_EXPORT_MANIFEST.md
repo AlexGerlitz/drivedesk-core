@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-18T06:34:17Z
+Generated at: 2026-06-18T06:55:14Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -14,6 +14,7 @@ Copied public-safe areas:
 - infra/gitops
 - infra/opentofu
 - infra/runtime-rollout
+- infra/state-validation
 - examples
 - tests/test_drivedesk_foundation.py
 - tests/test_drivedesk_core_api.py
@@ -144,6 +145,14 @@ Copied public-safe areas:
 - public runtime rollout check: observability_stage_recorded
 - public runtime rollout event: runtime.rollout.evidence_collected
 - public runtime rollout ADR: 0054-public-safe-private-runtime-rollout-evidence
+- public private infrastructure validation doc
+- public private infrastructure validation path: infra/state-validation
+- public private infrastructure validation script: scripts/check_public_private_infra_validation.sh
+- public private infrastructure validation evidence snapshot: docs/public/evidence/private-infra-validation.sanitized.json
+- public private infrastructure validation check: read_only_collector_recorded
+- public private infrastructure validation check: no_runtime_mutation_recorded
+- public private infrastructure validation event: infra.private_state.validated
+- public private infrastructure validation ADR: 0055-public-safe-private-infra-validation
 - public GitOps delivery foundation doc
 - public GitOps path: infra/gitops
 - public GitOps validation script: scripts/check_public_gitops_layout.sh

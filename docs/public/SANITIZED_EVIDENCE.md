@@ -60,6 +60,12 @@ Runtime rollout validation source file:
 docs/public/evidence/runtime-rollout.sanitized.json
 ```
 
+Private infrastructure validation source file:
+
+```text
+docs/public/evidence/private-infra-validation.sanitized.json
+```
+
 GitOps layout validation source file:
 
 ```text
@@ -139,6 +145,12 @@ Verified signals:
   sanitized summary;
 - loopback-only runtime boundaries are recorded;
 - rollback remains an operator-reviewed action.
+- the public private infrastructure validation evidence records a read-only
+  staging/control-plane validation boundary;
+- runtime health, observability, OpenTofu, runtime rollout, and GitOps
+  contracts are referenced by the validation evidence;
+- no runtime mutation, infrastructure apply, service restart, raw logs, request
+  bodies, private paths, or production data are included in public artifacts.
 - the public GitOps delivery foundation contains Argo CD project, application,
   environment, and promotion metadata;
 - Argo CD applications reference the Helm chart path;
@@ -188,6 +200,8 @@ The public version keeps only the operational shape and health results.
 - Infrastructure state drift is checked through an executable public
   validation.
 - Runtime rollout evidence is checked through an executable public validation.
+- Private infrastructure validation is checked through an executable public
+  validation.
 - GitOps desired-state delivery is checked through an executable public
   validation.
 - GitOps image promotion and drift detection are checked through an executable

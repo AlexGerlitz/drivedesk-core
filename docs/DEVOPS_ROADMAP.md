@@ -23,6 +23,7 @@ Implemented baseline:
 - public-safe OpenTofu plan evidence for the exported Core surface.
 - public-safe infrastructure state drift evidence for the exported Core surface.
 - public-safe private staging runtime rollout evidence for the exported Core surface.
+- public-safe private infrastructure validation evidence for the exported Core surface.
 - public-safe GitOps delivery foundation and Argo CD layout validation for the exported Core surface.
 - public-safe GitOps image promotion and drift detection for the exported Core surface.
 - public-safe GitOps drift remediation planning for the exported Core surface.
@@ -55,6 +56,9 @@ What this gives us:
   keeps remediation plan-only.
 - runtime rollout evidence connects private staging deploy, runtime health,
   observability, sanitized evidence, and rollback review boundaries.
+- private infrastructure validation evidence records a read-only
+  staging/control-plane validation boundary before apply, deploy, restart, or
+  remediation.
 - GitOps desired-state delivery connects the Helm chart to build, staging,
   canary, and production promotion flow without exposing a live cluster.
 - image promotion and drift evidence shows the difference between desired state
@@ -69,8 +73,8 @@ What this gives us:
 
 Recommended next DevOps tasks:
 
-1. Broaden generated client examples from the OpenAPI schema.
-2. Add private infrastructure state validation against the staging control plane.
+1. Add private infrastructure remediation planning after read-only validation.
+2. Broaden generated client examples from the OpenAPI schema.
 3. Add broader generated client examples from the OpenAPI schema.
 4. Add policy-as-code proposals only as text-only design notes unless the owner
    explicitly requests policy changes.

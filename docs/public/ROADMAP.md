@@ -58,6 +58,8 @@ operations, or commercial details.
   synthetic observed infrastructure state.
 - Public-safe private staging runtime rollout evidence with health,
   observability, sanitized evidence, and rollback review boundaries.
+- Public-safe private infrastructure validation evidence with read-only
+  staging/control-plane checks before any apply or remediation.
 - Public-safe GitOps delivery foundation with Argo CD layout validation.
 - Public-safe GitOps image promotion and drift detection evidence.
 - Public-safe GitOps drift remediation evidence with approval and rollback context.
@@ -70,7 +72,8 @@ operations, or commercial details.
   event, and outbox shape.
 - More public-safe evidence around local run, CI, OpenAPI, and demo health.
 - More adapter recovery examples with payload mapping and follow-up actions.
-- More deployment evidence around real private infrastructure state validation.
+- More deployment evidence around real private infrastructure remediation
+  planning after validation.
 - Broader generated client SDK examples from the OpenAPI schema.
 
 ## Later

@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "validation_model": "private_control_plane_state_validation",
+  "data_profile": "sanitized_private_staging_summary",
+  "environment": {
+    "name": "private_staging",
+    "public_route": false,
+    "production_data_touched": false
+  },
+  "collector": {
+    "mode": "read_only",
+    "mutates_runtime": false,
+    "restarts_services": false,
+    "applies_infrastructure": false,
+    "raw_output_retention": "private_only",
+    "sanitized_public_output": true,
+    "queries": [
+      "git_revision",
+      "runtime_health",
+      "loopback_http_health",
+      "observability_targets",
+      "gitops_manifest_presence",
+      "opentofu_contract_presence"
+    ]
+  },
+  "source_contracts": [
+    "infra/opentofu/public/plan-summary.sanitized.json",
+    "infra/opentofu/state/drift-summary.sanitized.json",
+    "infra/runtime-rollout/private-staging-rollout.sanitized.json",
+    "docs/public/evidence/gitops-layout.sanitized.json",
+    "docs/public/evidence/de-staging-evidence.sanitized.json"
+  ],
+  "components": [
+    "api",
+    "worker",
+    "postgresql",
+    "redis",
+    "prometheus",
+    "loki",
+    "alloy",
+    "alertmanager",
+    "grafana",
+    "gitops_manifests",
+    "opentofu_contract"
+  ],
+  "boundaries": {
+    "loopback_only": true,
+    "no_public_endpoints": true,
+    "no_raw_logs": true,
+    "no_request_bodies": true,
+    "no_credentials": true,
+    "no_private_paths": true,
+    "no_addresses": true,
+    "no_production_data": true
+  },
+  "rollback": {
+    "operator_review_required": true,
+    "automatic_public_apply": false
+  },
+  "decision": {
+    "event_type": "infra.private_state.validation_recorded",
+    "recommended_action": "keep_read_only_validation_before_any_apply",
+    "operator_review_required": true,
+    "automatic_apply": false,
+    "production_data_touched": false
+  }
+}

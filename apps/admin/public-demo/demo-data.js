@@ -438,6 +438,18 @@ window.DRIVEDESK_DEMO_DATA = {
       "state": "success",
       "detail": "public evidence records no public runtime route",
       "evidence": "loopback_boundary_recorded"
+    },
+    {
+      "name": "Private infra validation",
+      "state": "success",
+      "detail": "read-only staging/control-plane validation recorded before changes",
+      "evidence": "infra.private_state.validated"
+    },
+    {
+      "name": "No runtime mutation",
+      "state": "success",
+      "detail": "validation evidence records no apply, restart, or runtime mutation",
+      "evidence": "no_runtime_mutation_recorded"
     }
   ],
   "workflow": {

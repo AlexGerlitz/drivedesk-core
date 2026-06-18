@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "check": "public_private_infra_validation",
+  "data_profile": "sanitized_private_staging_summary",
+  "validation_model": "private_control_plane_state_validation",
+  "source": {
+    "validation_contract": "infra/state-validation/private-infra-validation.sanitized.json",
+    "staging_evidence": "docs/public/evidence/de-staging-evidence.sanitized.json",
+    "opentofu_plan": "infra/opentofu/public/plan-summary.sanitized.json",
+    "infra_state_drift": "infra/opentofu/state/drift-summary.sanitized.json",
+    "runtime_rollout": "docs/public/evidence/runtime-rollout.sanitized.json",
+    "gitops_layout": "docs/public/evidence/gitops-layout.sanitized.json"
+  },
+  "environment": {
+    "name": "private_staging",
+    "public_route": false,
+    "production_data_touched": false
+  },
+  "components": [
+    "api",
+    "worker",
+    "postgresql",
+    "redis",
+    "prometheus",
+    "loki",
+    "alloy",
+    "alertmanager",
+    "grafana",
+    "gitops_manifests",
+    "opentofu_contract"
+  ],
+  "checks": {
+    "validation_contract_present": true,
+    "read_only_collector_recorded": true,
+    "no_runtime_mutation_recorded": true,
+    "source_contracts_referenced": true,
+    "staging_evidence_referenced": true,
+    "runtime_components_validated": true,
+    "observability_state_validated": true,
+    "opentofu_contract_referenced": true,
+    "gitops_contract_referenced": true,
+    "runtime_rollout_referenced": true,
+    "loopback_boundary_recorded": true,
+    "public_route_disabled": true,
+    "redaction_boundary_recorded": true,
+    "operator_review_required": true,
+    "private_markers_absent": true,
+    "production_data_touched": false
+  },
+  "decision": {
+    "event_type": "infra.private_state.validated",
+    "recommended_action": "continue_with_reviewed_plan_before_apply",
+    "automatic_public_apply": false,
+    "operator_review_required": true,
+    "production_data_touched": false
+  },
+  "redaction": {
+    "paths_included": false,
+    "hostnames_included": false,
+    "addresses_included": false,
+    "credentials_included": false,
+    "raw_logs_included": false,
+    "request_bodies_included": false,
+    "production_data_included": false
+  }
+}

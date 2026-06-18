@@ -85,13 +85,14 @@ It includes:
 37. Read `docs/public/OPENTOFU_PLAN_EVIDENCE.md`.
 38. Read `docs/public/INFRA_STATE_DRIFT_EVIDENCE.md`.
 39. Read `docs/public/RUNTIME_ROLLOUT_EVIDENCE.md`.
-40. Read `docs/public/GITOPS_DELIVERY.md`.
-41. Read `docs/public/GITOPS_PROMOTION_DRIFT.md`.
-42. Read `docs/public/GITOPS_DRIFT_REMEDIATION.md`.
-43. Read `docs/public/GITOPS_IMAGE_AUTOMATION.md`.
-44. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
-45. Check `.github/workflows/ci.yml`.
-46. Run `bash scripts/ci_smoke_public.sh` locally.
+40. Read `docs/public/PRIVATE_INFRA_VALIDATION.md`.
+41. Read `docs/public/GITOPS_DELIVERY.md`.
+42. Read `docs/public/GITOPS_PROMOTION_DRIFT.md`.
+43. Read `docs/public/GITOPS_DRIFT_REMEDIATION.md`.
+44. Read `docs/public/GITOPS_IMAGE_AUTOMATION.md`.
+45. Read `docs/public/PORTFOLIO_CASE_STUDY.md`.
+46. Check `.github/workflows/ci.yml`.
+47. Run `bash scripts/ci_smoke_public.sh` locally.
 
 ## What To Review First
 
@@ -135,6 +136,7 @@ It includes:
 - `docs/public/OPENTOFU_PLAN_EVIDENCE.md` - public-safe OpenTofu plan evidence.
 - `docs/public/INFRA_STATE_DRIFT_EVIDENCE.md` - public-safe infrastructure state drift evidence.
 - `docs/public/RUNTIME_ROLLOUT_EVIDENCE.md` - public-safe private staging runtime rollout evidence.
+- `docs/public/PRIVATE_INFRA_VALIDATION.md` - public-safe private infrastructure validation evidence.
 - `docs/public/ARCHITECTURE_DIAGRAMS.md` - architecture diagrams.
 - `docs/public/SANITIZED_EVIDENCE.md` - sanitized staging evidence.
 - `docs/public/PUBLIC_DEMO_PLAN.md` - future public demo plan.
@@ -182,6 +184,7 @@ It includes:
 - `scripts/check_public_opentofu_plan.sh` - public-safe OpenTofu plan validation.
 - `scripts/check_public_infra_state_drift.sh` - public-safe infrastructure state drift validation.
 - `scripts/check_public_runtime_rollout.sh` - public-safe private staging runtime rollout validation.
+- `scripts/check_public_private_infra_validation.sh` - public-safe private infrastructure validation.
 - `scripts/check_public_gitops_layout.sh` - public-safe GitOps layout validation.
 - `scripts/check_public_gitops_image_automation.sh` - public-safe GitOps image automation validation.
 - `scripts/check_public_gitops_promotion_drift.sh` - public-safe GitOps promotion and drift validation.
@@ -219,6 +222,7 @@ bash scripts/check_public_helm_render.sh
 bash scripts/check_public_opentofu_plan.sh
 bash scripts/check_public_infra_state_drift.sh
 bash scripts/check_public_runtime_rollout.sh
+bash scripts/check_public_private_infra_validation.sh
 bash scripts/check_public_gitops_layout.sh
 bash scripts/check_public_gitops_image_automation.sh
 bash scripts/check_public_gitops_promotion_drift.sh
@@ -247,6 +251,7 @@ bash scripts/check_public_helm_render.sh
 bash scripts/check_public_opentofu_plan.sh
 bash scripts/check_public_infra_state_drift.sh
 bash scripts/check_public_runtime_rollout.sh
+bash scripts/check_public_private_infra_validation.sh
 bash scripts/check_public_gitops_layout.sh
 bash scripts/check_public_gitops_image_automation.sh
 bash scripts/check_public_gitops_promotion_drift.sh

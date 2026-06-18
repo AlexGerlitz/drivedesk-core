@@ -57,6 +57,16 @@ The check validates private staging rollout stages, runtime health gates,
 observability gates, sanitized evidence, loopback-only boundary, and no
 production data exposure.
 
+Public-safe private infrastructure validation:
+
+```bash
+bash scripts/check_public_private_infra_validation.sh
+```
+
+The check validates a read-only private staging/control-plane validation
+boundary, OpenTofu/GitOps/runtime rollout references, sanitized evidence, and no
+runtime mutation.
+
 Core endpoints:
 
 - `POST /auth/login`;

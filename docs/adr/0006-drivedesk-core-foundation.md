@@ -42,3 +42,5 @@ tenant/audit database tables, Docker Compose, and CI smoke checks.
 - The runtime rollout evidence layer connects private staging deploy, health,
   observability, and sanitized evidence gates without exposing private runtime
   details.
+- The private infrastructure validation layer records a read-only validation
+  boundary before any apply, deploy, restart, or remediation decision.

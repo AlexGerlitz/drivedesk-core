@@ -36,6 +36,7 @@ infra/helm     Kubernetes packaging foundation
 infra/gitops   Argo CD GitOps delivery foundation
 infra/opentofu public-safe IaC plan and state drift evidence
 infra/runtime-rollout public-safe private staging rollout evidence
+infra/state-validation public-safe private infrastructure validation evidence
 docs           architecture notes and ADRs
 tests          API and foundation tests
 ```

@@ -7,7 +7,7 @@ implementation surface, evidence, and verifier commands.
 
 | Capability | Implementation surface | Evidence | Verifier |
 | --- | --- | --- | --- |
-| Public review entrypoint | GitHub Pages root `index.html` and static demo shell | `docs/public/ENGINEERING_REVIEW_GUIDE.md`, `docs/public/ENGINEERING_PROOF.md` | `bash scripts/check_public_pages_entrypoint.sh` |
+| Public review entrypoint | GitHub Pages root `index.html`, reviewer quickstart, and static demo shell | `docs/public/REVIEWER_QUICKSTART.md`, `docs/public/ENGINEERING_REVIEW_GUIDE.md`, `docs/public/ENGINEERING_PROOF.md` | `bash scripts/check_public_pages_entrypoint.sh && bash scripts/check_public_reviewer_quickstart.sh` |
 | Project status | Current public-safe state, limits, next work, and validation commands | `docs/public/PROJECT_STATUS.md`, `docs/public/ROADMAP.md` | `bash scripts/check_public_project_status.sh` |
 | Read-only API contract | FastAPI `GET /demo/public` and generated `docs/openapi.json` | `docs/public/API_BACKED_DEMO.md`, `examples/curl/demo-public.sh` | `bash scripts/check_public_demo_api.sh` |
 | Generated client SDK | Python, JavaScript, and TypeScript demo clients plus typed adapter operation plans | `docs/public/CLIENT_SDK.md`, `sdk/generated/public-demo/`, `examples/python/demo_adapter_operation_plan.py`, `examples/js/demo-adapter-operation-plan.mjs` | `bash scripts/check_public_demo_sdk.sh` |
@@ -27,17 +27,19 @@ implementation surface, evidence, and verifier commands.
 
 ## Review Order
 
-1. Open the GitHub Pages root review hub.
-2. Open the live demo and switch to the Operations, Incidents, and Proof tabs.
-3. Read `docs/public/PROJECT_STATUS.md`.
-4. Inspect `docs/openapi.json` and `GET /demo/public`.
-5. Run `bash scripts/ci_smoke_public.sh`.
-6. Run `bash scripts/check_public_project_status.sh`.
-7. Run `bash scripts/check_public_technical_capability_map.sh`.
-8. Run `bash scripts/check_public_evidence_index.sh`.
-9. Run `bash scripts/check_public_observability_proof.sh`.
-10. Run `bash scripts/check_public_alert_routing.sh`.
-11. Run the capability-specific verifier from the table above.
+1. Open `docs/public/REVIEWER_QUICKSTART.md`.
+2. Open the GitHub Pages root review hub.
+3. Open the live demo and switch to the Operations, Incidents, and Proof tabs.
+4. Read `docs/public/PROJECT_STATUS.md`.
+5. Inspect `docs/openapi.json` and `GET /demo/public`.
+6. Run `bash scripts/ci_smoke_public.sh`.
+7. Run `bash scripts/check_public_reviewer_quickstart.sh`.
+8. Run `bash scripts/check_public_project_status.sh`.
+9. Run `bash scripts/check_public_technical_capability_map.sh`.
+10. Run `bash scripts/check_public_evidence_index.sh`.
+11. Run `bash scripts/check_public_observability_proof.sh`.
+12. Run `bash scripts/check_public_alert_routing.sh`.
+13. Run the capability-specific verifier from the table above.
 
 ## Boundary
 

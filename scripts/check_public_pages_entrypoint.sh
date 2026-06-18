@@ -64,6 +64,7 @@ if is_public_export:
         "docs/public/SANITIZED_EVIDENCE.md",
         "docs/public/PLATFORM_MATURITY_70.md",
         "docs/public/ENGINEERING_REVIEW_GUIDE.md",
+        "docs/public/REVIEWER_QUICKSTART.md",
         "docs/public/PROJECT_STATUS.md",
         "docs/public/TECHNICAL_CAPABILITY_MAP.md",
         "docs/public/OBSERVABILITY_PROOF.md",
@@ -85,6 +86,7 @@ if is_public_export:
         "docs/public/SANITIZED_EVIDENCE.md",
         "docs/public/PLATFORM_MATURITY_70.md",
         "docs/public/ENGINEERING_REVIEW_GUIDE.md",
+        "docs/public/REVIEWER_QUICKSTART.md",
         "docs/public/PROJECT_STATUS.md",
         "docs/public/TECHNICAL_CAPABILITY_MAP.md",
         "docs/public/OBSERVABILITY_PROOF.md",
@@ -115,16 +117,21 @@ else:
     require('cat > "$EXPORT_DIR/index.html"' in export_script, "export script does not generate root index.html")
     require("PUBLIC_ROOT_URL" in export_script, "export script missing public root URL")
     require("check_public_pages_entrypoint.sh" in export_script, "export script missing Pages entrypoint check")
+    require("REVIEWER_QUICKSTART.md" in export_script, "export script missing reviewer quickstart")
 
     if private_smoke_path.is_file():
+        require("check_public_reviewer_quickstart.sh" in read(private_smoke_path), "private smoke missing reviewer quickstart check")
         require("check_public_pages_entrypoint.sh" in read(private_smoke_path), "private smoke missing Pages entrypoint check")
 
     if release_gate_path.is_file():
         gate_text = read(release_gate_path)
         require('"index.html"' in gate_text, "release gate missing root index.html requirement")
+        require("REVIEWER_QUICKSTART.md" in gate_text, "release gate missing reviewer quickstart")
+        require("check_public_reviewer_quickstart.sh" in gate_text, "release gate missing reviewer quickstart check")
         require("check_public_pages_entrypoint.sh" in gate_text, "release gate missing Pages entrypoint check")
 
 if public_smoke_path.is_file():
+    require("check_public_reviewer_quickstart.sh" in read(public_smoke_path), "public smoke missing reviewer quickstart check")
     require("check_public_pages_entrypoint.sh" in read(public_smoke_path), "public smoke missing Pages entrypoint check")
 
 if errors:

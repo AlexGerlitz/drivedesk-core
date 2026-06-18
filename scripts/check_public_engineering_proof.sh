@@ -100,6 +100,7 @@ for name, command in expected_gates.items():
     require(bool(gate.get("evidence")), f"{name} evidence missing")
 
 expected_evidence_paths = {
+    "docs/public/REVIEWER_QUICKSTART.md",
     "docs/public/PLATFORM_MATURITY_70.md",
     "docs/public/SANITIZED_EVIDENCE.md",
     "docs/public/SYSTEM_DESIGN.md",
@@ -205,6 +206,7 @@ for token in [
     "Release safety",
     "GitOps and IaC",
     "adapter operation plan helpers",
+    "docs/public/REVIEWER_QUICKSTART.md",
 ]:
     require(token in proof_doc, f"ENGINEERING_PROOF.md missing {token}")
 

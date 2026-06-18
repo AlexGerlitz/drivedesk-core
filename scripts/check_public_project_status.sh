@@ -62,6 +62,8 @@ for token in [
     "Next Engineering Work",
     "Verification",
     "Public entrypoint",
+    "REVIEWER_QUICKSTART.md",
+    "bash scripts/check_public_reviewer_quickstart.sh",
     "API contract",
     "Client SDK",
     "typed adapter operation helpers",
@@ -106,6 +108,7 @@ for token in [
     require(token in text, f"project status missing {token}")
 
 target_paths = [
+    "docs/public/REVIEWER_QUICKSTART.md",
     "docs/public/ENGINEERING_REVIEW_GUIDE.md",
     "docs/public/API_BACKED_DEMO.md",
     "docs/public/CLIENT_SDK.md",
@@ -145,6 +148,7 @@ for doc_path, label in [
     (roadmap_path, "roadmap"),
 ]:
     require("PROJECT_STATUS.md" in read(doc_path), f"{label} missing PROJECT_STATUS.md")
+    require("REVIEWER_QUICKSTART.md" in read(doc_path), f"{label} missing REVIEWER_QUICKSTART.md")
 
 is_public_export = (root / "PUBLIC_EXPORT_MANIFEST.md").is_file()
 if is_public_export:
@@ -156,7 +160,13 @@ if is_public_export:
     ]:
         require((root / path).is_file(), f"public export target missing: {path}")
     require("PROJECT_STATUS.md" in read(root_readme_path), "public README missing project status")
+    require("REVIEWER_QUICKSTART.md" in read(root_readme_path), "public README missing reviewer quickstart")
     require("PROJECT_STATUS.md" in read(index_path), "public Pages root missing project status")
+    require("REVIEWER_QUICKSTART.md" in read(index_path), "public Pages root missing reviewer quickstart")
+    require(
+        "check_public_reviewer_quickstart.sh" in read(public_smoke_path),
+        "public smoke missing reviewer quickstart check",
+    )
     require(
         "check_public_project_status.sh" in read(public_smoke_path),
         "public smoke missing project status check",
@@ -164,13 +174,26 @@ if is_public_export:
 else:
     export_script = read(export_script_path)
     require("PROJECT_STATUS.md" in export_script, "export script missing project status")
+    require("REVIEWER_QUICKSTART.md" in export_script, "export script missing reviewer quickstart")
+    require(
+        'copy_path "scripts/check_public_reviewer_quickstart.sh"' in export_script,
+        "export script missing reviewer quickstart check copy",
+    )
     require(
         'copy_path "scripts/check_public_project_status.sh"' in export_script,
         "export script missing project status check copy",
     )
     require(
+        "check_public_reviewer_quickstart.sh" in read(private_smoke_path),
+        "private smoke missing reviewer quickstart check",
+    )
+    require(
         "check_public_project_status.sh" in read(private_smoke_path),
         "private smoke missing project status check",
+    )
+    require(
+        "check_public_reviewer_quickstart.sh" in read(release_gate_path),
+        "release gate missing reviewer quickstart check",
     )
     require(
         "check_public_project_status.sh" in read(release_gate_path),
@@ -178,6 +201,10 @@ else:
     )
 
 if public_smoke_path.is_file():
+    require(
+        "check_public_reviewer_quickstart.sh" in read(public_smoke_path),
+        "public smoke missing reviewer quickstart check",
+    )
     require(
         "check_public_project_status.sh" in read(public_smoke_path),
         "public smoke missing project status check",

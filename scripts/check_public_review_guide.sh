@@ -53,8 +53,10 @@ guide = read(guide_path)
 
 for token in [
     "Engineering Review Guide",
+    "docs/public/REVIEWER_QUICKSTART.md",
     "Live demo Operations, Incidents, and Proof tabs",
     "bash scripts/ci_smoke_public.sh",
+    "bash scripts/check_public_reviewer_quickstart.sh",
     "bash scripts/check_public_review_guide.sh",
     "bash scripts/check_public_project_status.sh",
     "bash scripts/check_public_technical_capability_map.sh",
@@ -87,6 +89,10 @@ for token in [
     require(token in guide, f"review guide missing {token}")
 
 require(
+    "REVIEWER_QUICKSTART.md" in read(public_docs_readme_path),
+    "docs/public README missing REVIEWER_QUICKSTART.md",
+)
+require(
     "ENGINEERING_REVIEW_GUIDE.md" in read(public_docs_readme_path),
     "docs/public README missing ENGINEERING_REVIEW_GUIDE.md",
 )
@@ -114,22 +120,28 @@ require(
 is_public_export = (root / "PUBLIC_EXPORT_MANIFEST.md").is_file()
 if is_public_export and root_readme_path.is_file():
     root_readme = read(root_readme_path)
+    require("REVIEWER_QUICKSTART.md" in root_readme, "root README missing reviewer quickstart link")
     require("ENGINEERING_REVIEW_GUIDE.md" in root_readme, "root README missing review guide link")
     require("Fast Review" in root_readme, "root README missing Fast Review section")
 
 if export_script_path.is_file():
     export_script = read(export_script_path)
+    require("REVIEWER_QUICKSTART.md" in export_script, "export script missing reviewer quickstart")
     require("ENGINEERING_REVIEW_GUIDE.md" in export_script, "export script missing review guide")
     require("check_public_review_guide.sh" in export_script, "export script missing review guide check")
 
 if source_smoke_path.is_file():
+    require("check_public_reviewer_quickstart.sh" in read(source_smoke_path), "source smoke missing reviewer quickstart check")
     require("check_public_review_guide.sh" in read(source_smoke_path), "source smoke missing review guide check")
 
 if public_smoke_path.is_file():
+    require("check_public_reviewer_quickstart.sh" in read(public_smoke_path), "public smoke missing reviewer quickstart check")
     require("check_public_review_guide.sh" in read(public_smoke_path), "public smoke missing review guide check")
 
 if public_gate_path.is_file():
     gate_text = read(public_gate_path)
+    require("REVIEWER_QUICKSTART.md" in gate_text, "release gate missing reviewer quickstart doc")
+    require("check_public_reviewer_quickstart.sh" in gate_text, "release gate missing reviewer quickstart check")
     require("ENGINEERING_REVIEW_GUIDE.md" in gate_text, "release gate missing review guide doc")
     require("check_public_review_guide.sh" in gate_text, "release gate missing review guide check")
 

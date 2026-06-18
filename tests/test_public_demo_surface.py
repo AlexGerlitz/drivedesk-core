@@ -257,6 +257,7 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
     gate_by_name = {gate["name"]: gate for gate in payload["engineeringProof"]["gates"]}
     assert gate_by_name["Core smoke"]["command"] == "bash scripts/ci_smoke_public.sh"
     assert {item["kind"] for item in payload["engineeringProof"]["evidence"]} >= {"doc", "sdk"}
+    assert any(item["path"] == "docs/public/REVIEWER_QUICKSTART.md" for item in payload["engineeringProof"]["evidence"])
     assert any(item["path"] == "sdk/generated/public-demo/" for item in payload["engineeringProof"]["evidence"])
     assert {item["evidence"] for item in payload["recoveryEvidence"]} >= {
         "backup_sha256_recorded",

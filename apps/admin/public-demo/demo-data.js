@@ -965,6 +965,12 @@ window.DRIVEDESK_DEMO_DATA = {
     ],
     "evidence": [
       {
+        "title": "Reviewer quickstart",
+        "kind": "doc",
+        "path": "docs/public/REVIEWER_QUICKSTART.md",
+        "summary": "Timeboxed 5-minute, 15-minute, and 45-minute external review path"
+      },
+      {
         "title": "Milestone contract",
         "kind": "doc",
         "path": "docs/public/PLATFORM_MATURITY_70.md",

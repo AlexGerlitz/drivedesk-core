@@ -214,6 +214,10 @@ assert {gate["name"] for gate in demo["engineeringProof"]["gates"]} >= {
     "GitOps and IaC",
 }, demo
 assert {item["kind"] for item in demo["engineeringProof"]["evidence"]} >= {"doc", "sdk"}, demo
+assert any(
+    item["path"] == "docs/public/REVIEWER_QUICKSTART.md"
+    for item in demo["engineeringProof"]["evidence"]
+), demo
 assert {item["state"] for item in demo["integrationHealth"]} >= {
     "processed",
     "retry",

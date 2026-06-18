@@ -57,6 +57,7 @@ for token in [
     "Technical Capability Map",
     "Capability Matrix",
     "Public review entrypoint",
+    "REVIEWER_QUICKSTART.md",
     "Project status",
     "Read-only API contract",
     "Generated client SDK",
@@ -91,6 +92,7 @@ for token in [
     "PUBLIC_EXPORT_MANIFEST.md",
     "docs/public/evidence/*.sanitized.json",
     "bash scripts/ci_smoke_public.sh",
+    "bash scripts/check_public_reviewer_quickstart.sh",
     "bash scripts/check_public_project_status.sh",
     "bash scripts/check_public_pages_entrypoint.sh",
     "bash scripts/check_public_observability_proof.sh",
@@ -114,6 +116,7 @@ for token in [
     require(token in text, f"technical capability map missing {token}")
 
 target_paths = [
+    "docs/public/REVIEWER_QUICKSTART.md",
     "docs/public/ENGINEERING_REVIEW_GUIDE.md",
     "docs/public/PROJECT_STATUS.md",
     "docs/public/ENGINEERING_PROOF.md",
@@ -155,6 +158,8 @@ for path in target_paths:
 
 require("TECHNICAL_CAPABILITY_MAP.md" in read(docs_readme_path), "docs/public README missing capability map")
 require("TECHNICAL_CAPABILITY_MAP.md" in read(review_guide_path), "review guide missing capability map")
+require("REVIEWER_QUICKSTART.md" in read(docs_readme_path), "docs/public README missing reviewer quickstart")
+require("REVIEWER_QUICKSTART.md" in read(review_guide_path), "review guide missing reviewer quickstart")
 
 is_public_export = (root / "PUBLIC_EXPORT_MANIFEST.md").is_file()
 if is_public_export:
@@ -166,7 +171,13 @@ if is_public_export:
     ]:
         require((root / path).is_file(), f"public export target missing: {path}")
     require("TECHNICAL_CAPABILITY_MAP.md" in read(root_readme_path), "public README missing capability map")
+    require("REVIEWER_QUICKSTART.md" in read(root_readme_path), "public README missing reviewer quickstart")
     require("TECHNICAL_CAPABILITY_MAP.md" in read(index_path), "public Pages root missing capability map")
+    require("REVIEWER_QUICKSTART.md" in read(index_path), "public Pages root missing reviewer quickstart")
+    require(
+        "check_public_reviewer_quickstart.sh" in read(public_smoke_path),
+        "public smoke missing reviewer quickstart check",
+    )
     require(
         "check_public_technical_capability_map.sh" in read(public_smoke_path),
         "public smoke missing capability map check",
@@ -174,13 +185,26 @@ if is_public_export:
 else:
     export_script = read(export_script_path)
     require("TECHNICAL_CAPABILITY_MAP.md" in export_script, "export script missing capability map")
+    require("REVIEWER_QUICKSTART.md" in export_script, "export script missing reviewer quickstart")
+    require(
+        'copy_path "scripts/check_public_reviewer_quickstart.sh"' in export_script,
+        "export script missing reviewer quickstart check copy",
+    )
     require(
         'copy_path "scripts/check_public_technical_capability_map.sh"' in export_script,
         "export script missing capability map check copy",
     )
     require(
+        "check_public_reviewer_quickstart.sh" in read(private_smoke_path),
+        "private smoke missing reviewer quickstart check",
+    )
+    require(
         "check_public_technical_capability_map.sh" in read(private_smoke_path),
         "private smoke missing capability map check",
+    )
+    require(
+        "check_public_reviewer_quickstart.sh" in read(release_gate_path),
+        "release gate missing reviewer quickstart check",
     )
     require(
         "check_public_technical_capability_map.sh" in read(release_gate_path),
@@ -188,6 +212,10 @@ else:
     )
 
 if public_smoke_path.is_file():
+    require(
+        "check_public_reviewer_quickstart.sh" in read(public_smoke_path),
+        "public smoke missing reviewer quickstart check",
+    )
     require(
         "check_public_technical_capability_map.sh" in read(public_smoke_path),
         "public smoke missing capability map check",

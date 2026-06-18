@@ -168,6 +168,8 @@ for token in [
     "docs/public/evidence/public-evidence-index.sanitized.json",
     "bash scripts/check_public_evidence_index.sh",
     "Indexed Capability Groups",
+    "docs/public/REVIEWER_QUICKSTART.md",
+    "bash scripts/check_public_reviewer_quickstart.sh",
     "Boundary",
     "Verification",
 ]:
@@ -183,6 +185,7 @@ for path in [
 ]:
     text = read(path)
     require("EVIDENCE_INDEX.md" in text, f"{path.relative_to(root)} missing EVIDENCE_INDEX.md")
+    require("REVIEWER_QUICKSTART.md" in text, f"{path.relative_to(root)} missing REVIEWER_QUICKSTART.md")
     require(
         "public-evidence-index.sanitized.json" in text,
         f"{path.relative_to(root)} missing public evidence JSON reference",
@@ -190,16 +193,26 @@ for path in [
 
 if is_public_export:
     require("EVIDENCE_INDEX.md" in read(root_readme_path), "public README missing evidence index")
+    require("REVIEWER_QUICKSTART.md" in read(root_readme_path), "public README missing reviewer quickstart")
     require("EVIDENCE_INDEX.md" in read(index_html_path), "public Pages root missing evidence index")
+    require("REVIEWER_QUICKSTART.md" in read(index_html_path), "public Pages root missing reviewer quickstart")
+    require("check_public_reviewer_quickstart.sh" in public_smoke, "public smoke missing reviewer quickstart check")
     require("check_public_evidence_index.sh" in public_smoke, "public smoke missing evidence index check")
 else:
     require("EVIDENCE_INDEX.md" in export_script, "export script missing evidence index doc")
+    require("REVIEWER_QUICKSTART.md" in export_script, "export script missing reviewer quickstart")
+    require(
+        'copy_path "scripts/check_public_reviewer_quickstart.sh"' in export_script,
+        "export script missing reviewer quickstart checker copy",
+    )
     require(
         'copy_path "scripts/check_public_evidence_index.sh"' in export_script,
         "export script missing evidence index checker copy",
     )
     require("check_public_evidence_index.sh" in private_smoke, "private smoke missing evidence index check")
+    require("check_public_reviewer_quickstart.sh" in private_smoke, "private smoke missing reviewer quickstart check")
     require("check_public_evidence_index.sh" in release_gate, "release gate missing evidence index check")
+    require("check_public_reviewer_quickstart.sh" in release_gate, "release gate missing reviewer quickstart check")
 
 if release_gate_path.is_file():
     require("docs/public/EVIDENCE_INDEX.md" in release_gate, "release gate missing evidence index required file")

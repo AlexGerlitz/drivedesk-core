@@ -6,6 +6,12 @@ internal paths, credentials, and raw logs.
 
 ## Evidence Snapshot
 
+Recommended public review entrypoint:
+
+```text
+docs/public/REVIEWER_QUICKSTART.md
+```
+
 Source file:
 
 ```text

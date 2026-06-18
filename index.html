@@ -375,6 +375,7 @@
       <div class="brand">DriveDesk Core</div>
       <nav class="topnav" aria-label="Review links">
         <a class="button primary" href="apps/admin/public-demo/">Open Demo</a>
+        <a class="button" href="docs/public/REVIEWER_QUICKSTART.md">Quickstart</a>
         <a class="button" href="docs/public/ENGINEERING_REVIEW_GUIDE.md">Review Guide</a>
         <a class="button" href="docs/public/PROJECT_STATUS.md">Status</a>
         <a class="button" href="docs/public/TECHNICAL_CAPABILITY_MAP.md">Capability Map</a>
@@ -399,6 +400,7 @@
           </p>
           <div class="action-row">
             <a class="button primary" href="apps/admin/public-demo/">Open Demo</a>
+            <a class="button" href="docs/public/REVIEWER_QUICKSTART.md">Quickstart</a>
             <a class="button" href="docs/public/ENGINEERING_REVIEW_GUIDE.md">Read Review Guide</a>
             <a class="button" href="docs/public/PROJECT_STATUS.md">Project Status</a>
             <a class="button" href="docs/public/TECHNICAL_CAPABILITY_MAP.md">Capability Map</a>
@@ -528,12 +530,13 @@
         <section>
           <h2>Verification path</h2>
           <p>
-            Start with the review guide, then run the public smoke path. The same
+            Start with the quickstart, then run the public smoke path. The same
             commands are used by CI and the public release gate.
           </p>
         </section>
         <pre><code>bash scripts/ci_smoke_public.sh
 bash scripts/check_public_pages_entrypoint.sh
+bash scripts/check_public_reviewer_quickstart.sh
 bash scripts/check_public_project_status.sh
 bash scripts/check_public_technical_capability_map.sh
 bash scripts/check_public_evidence_index.sh

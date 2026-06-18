@@ -5,6 +5,7 @@ describes the platform work without exposing private infrastructure, customer
 operations, or commercial details.
 
 Current status snapshot: `docs/public/PROJECT_STATUS.md`.
+Fast external review path: `docs/public/REVIEWER_QUICKSTART.md`.
 
 ## Now
 

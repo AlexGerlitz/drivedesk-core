@@ -8,22 +8,24 @@ prove the current engineering surface.
 
 | Step | What to inspect | Proof |
 | --- | --- | --- |
-| 1 | Live demo Operations, Incidents, and Proof tabs | `alertRouting`, `incidentResponse`, and `engineeringProof` payloads |
-| 2 | Root CI badge | `bash scripts/ci_smoke_public.sh` |
-| 3 | Project status | `docs/public/PROJECT_STATUS.md` |
-| 4 | Proof contract | `bash scripts/check_public_engineering_proof.sh` |
-| 5 | API contract | `docs/openapi.json` and `GET /demo/public` |
-| 6 | Capability map | `docs/public/TECHNICAL_CAPABILITY_MAP.md` |
-| 7 | Evidence index | `docs/public/EVIDENCE_INDEX.md`, `docs/public/evidence/public-evidence-index.sanitized.json` |
-| 8 | Observability proof | `docs/public/OBSERVABILITY_PROOF.md` |
-| 9 | Alert routing | Operations tab and `docs/public/ALERT_ROUTING_EVIDENCE.md` |
-| 10 | Recovery and release safety | backup/restore, rollback, canary, staged promotion checks |
-| 11 | Infrastructure story | Helm, GitOps, OpenTofu, drift, and sanitized runtime evidence |
+| 1 | Reviewer quickstart | `docs/public/REVIEWER_QUICKSTART.md` |
+| 2 | Live demo Operations, Incidents, and Proof tabs | `alertRouting`, `incidentResponse`, and `engineeringProof` payloads |
+| 3 | Root CI badge | `bash scripts/ci_smoke_public.sh` |
+| 4 | Project status | `docs/public/PROJECT_STATUS.md` |
+| 5 | Proof contract | `bash scripts/check_public_engineering_proof.sh` |
+| 6 | API contract | `docs/openapi.json` and `GET /demo/public` |
+| 7 | Capability map | `docs/public/TECHNICAL_CAPABILITY_MAP.md` |
+| 8 | Evidence index | `docs/public/EVIDENCE_INDEX.md`, `docs/public/evidence/public-evidence-index.sanitized.json` |
+| 9 | Observability proof | `docs/public/OBSERVABILITY_PROOF.md` |
+| 10 | Alert routing | Operations tab and `docs/public/ALERT_ROUTING_EVIDENCE.md` |
+| 11 | Recovery and release safety | backup/restore, rollback, canary, staged promotion checks |
+| 12 | Infrastructure story | Helm, GitOps, OpenTofu, drift, and sanitized runtime evidence |
 
 ## Review Commands
 
 ```bash
 bash scripts/ci_smoke_public.sh
+bash scripts/check_public_reviewer_quickstart.sh
 bash scripts/check_public_review_guide.sh
 bash scripts/check_public_project_status.sh
 bash scripts/check_public_technical_capability_map.sh
@@ -45,6 +47,7 @@ bash scripts/check_public_opentofu_plan.sh
 
 | Area | Evidence |
 | --- | --- |
+| Reviewer quickstart | `docs/public/REVIEWER_QUICKSTART.md` |
 | System design | `docs/public/SYSTEM_DESIGN.md` |
 | Project status | `docs/public/PROJECT_STATUS.md` |
 | Public proof contract | `docs/public/ENGINEERING_PROOF.md` |

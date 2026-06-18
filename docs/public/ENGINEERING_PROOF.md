@@ -40,6 +40,7 @@ Required fields:
 
 | Artifact | Purpose |
 | --- | --- |
+| `docs/public/REVIEWER_QUICKSTART.md` | Short 5-minute, 15-minute, and 45-minute external review path |
 | `docs/public/PLATFORM_MATURITY_70.md` | Milestone contract and evidence groups |
 | `docs/public/SANITIZED_EVIDENCE.md` | Sanitized runtime, recovery, release, GitOps, and boundary evidence |
 | `docs/public/EVIDENCE_INDEX.md` | Public capability-to-evidence index contract |

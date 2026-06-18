@@ -49,7 +49,13 @@ It includes:
 
 ## Fast Review
 
-Start with `docs/public/ENGINEERING_REVIEW_GUIDE.md`.
+Start with `docs/public/REVIEWER_QUICKSTART.md`.
+
+It gives a 5-minute pass, 15-minute verification path, and 45-minute deep
+check for the public review surface.
+
+Use `docs/public/ENGINEERING_REVIEW_GUIDE.md` when you need the expanded
+review path.
 
 It maps the live demo, public CI, proof contract, OpenAPI, generated SDK,
 recovery drills, release gates, GitOps, OpenTofu, and public/private boundary
@@ -75,18 +81,20 @@ incident queue, mitigation, recovery, and resolution evidence path.
 
 ## Verification Path
 
-1. Open the live demo and switch to the Operations, Incidents, and Proof tabs.
-2. Inspect `docs/openapi.json`.
-3. Run `bash scripts/ci_smoke_public.sh`.
-4. Run `bash scripts/check_public_engineering_proof.sh`.
-5. Run `bash scripts/check_public_demo_api.sh`.
-6. Run one generated client example from `examples/`.
-7. Review `docs/public/PROJECT_STATUS.md`, `docs/public/TECHNICAL_CAPABILITY_MAP.md`, `docs/public/EVIDENCE_INDEX.md`, `docs/public/OBSERVABILITY_PROOF.md`, `docs/public/ALERT_ROUTING_EVIDENCE.md`, `docs/public/INCIDENT_RESPONSE_DEMO.md`, `docs/public/ENGINEERING_PROOF.md`, `docs/public/PLATFORM_MATURITY_70.md`, and `docs/public/SANITIZED_EVIDENCE.md`.
-8. Review `docs/public/SYSTEM_DESIGN.md`, `docs/public/GITOPS_DELIVERY.md`, and the recovery evidence docs.
+1. Start with `docs/public/REVIEWER_QUICKSTART.md`.
+2. Open the live demo and switch to the Operations, Incidents, and Proof tabs.
+3. Inspect `docs/openapi.json`.
+4. Run `bash scripts/ci_smoke_public.sh`.
+5. Run `bash scripts/check_public_engineering_proof.sh`.
+6. Run `bash scripts/check_public_demo_api.sh`.
+7. Run one generated client example from `examples/`.
+8. Review `docs/public/PROJECT_STATUS.md`, `docs/public/TECHNICAL_CAPABILITY_MAP.md`, `docs/public/EVIDENCE_INDEX.md`, `docs/public/OBSERVABILITY_PROOF.md`, `docs/public/ALERT_ROUTING_EVIDENCE.md`, `docs/public/INCIDENT_RESPONSE_DEMO.md`, `docs/public/ENGINEERING_PROOF.md`, `docs/public/PLATFORM_MATURITY_70.md`, and `docs/public/SANITIZED_EVIDENCE.md`.
+9. Review `docs/public/SYSTEM_DESIGN.md`, `docs/public/GITOPS_DELIVERY.md`, and the recovery evidence docs.
 
 ## What To Review First
 
 - `docs/public/ENGINEERING_CASE_STUDY.md` - engineering case study.
+- `docs/public/REVIEWER_QUICKSTART.md` - shortest external review path with 5-minute, 15-minute, and 45-minute verification tracks.
 - `docs/public/ENGINEERING_REVIEW_GUIDE.md` - short review path for demo, CI, API, recovery, GitOps, and IaC evidence.
 - `docs/public/PROJECT_STATUS.md` - current public-safe engineering status, limits, and next work.
 - `docs/public/TECHNICAL_CAPABILITY_MAP.md` - capability-to-evidence map with verifier commands.
@@ -199,6 +207,7 @@ incident queue, mitigation, recovery, and resolution evidence path.
 - `scripts/check_public_private_infra_scheduled_validation.sh` - public-safe recurring scheduled validation.
 - `scripts/check_public_private_infra_scheduled_alerting.sh` - public-safe scheduled validation alerting.
 - `scripts/check_public_platform_maturity_70.sh` - public-safe 70 percent milestone validation.
+- `scripts/check_public_reviewer_quickstart.sh` - public-safe reviewer quickstart validation.
 - `scripts/check_public_review_guide.sh` - public-safe short review path validation.
 - `scripts/check_public_observability_proof.sh` - public-safe observability proof validation.
 - `scripts/check_public_alert_routing.sh` - public-safe alert routing validation.
@@ -249,6 +258,7 @@ bash scripts/check_public_private_infra_post_remediation_drift_refresh.sh
 bash scripts/check_public_private_infra_scheduled_validation.sh
 bash scripts/check_public_private_infra_scheduled_alerting.sh
 bash scripts/check_public_platform_maturity_70.sh
+bash scripts/check_public_reviewer_quickstart.sh
 bash scripts/check_public_review_guide.sh
 bash scripts/check_public_pages_entrypoint.sh
 bash scripts/check_public_project_status.sh
@@ -294,6 +304,7 @@ bash scripts/check_public_private_infra_post_remediation_drift_refresh.sh
 bash scripts/check_public_private_infra_scheduled_validation.sh
 bash scripts/check_public_private_infra_scheduled_alerting.sh
 bash scripts/check_public_platform_maturity_70.sh
+bash scripts/check_public_reviewer_quickstart.sh
 bash scripts/check_public_review_guide.sh
 bash scripts/check_public_pages_entrypoint.sh
 bash scripts/check_public_project_status.sh

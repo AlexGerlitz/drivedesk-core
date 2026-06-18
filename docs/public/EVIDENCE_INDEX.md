@@ -32,7 +32,7 @@ parsing Markdown by hand.
 
 | Capability group | Primary doc | Verifier |
 | --- | --- | --- |
-| Public engineering entrypoint | `docs/public/ENGINEERING_REVIEW_GUIDE.md` | `bash scripts/check_public_pages_entrypoint.sh` |
+| Public engineering entrypoint | `docs/public/REVIEWER_QUICKSTART.md` | `bash scripts/check_public_reviewer_quickstart.sh` |
 | API and SDK | `docs/public/API_BACKED_DEMO.md` | `bash scripts/check_public_demo_api.sh` |
 | Core domain | `docs/public/SYSTEM_DESIGN.md` | `bash scripts/ci_smoke_public.sh` |
 | Integration hub | `docs/public/INTEGRATION_ADAPTER_CATALOG.md` | `bash scripts/check_public_demo_api.sh` |

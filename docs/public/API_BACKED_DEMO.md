@@ -16,10 +16,10 @@ GET /demo/public
 
 The endpoint returns the same product-shaped fake data used by the public demo
 shell: tenant, health, metrics, work queue, workflow stages, timeline entries,
-domain events, members, audit events, outbox events, adapter contracts, sync
-jobs, Integration Health, alert routing, incident response, recovery evidence,
-and the `engineeringProof` contract rendered by the Operations, Incidents, and
-Proof tabs.
+workflow scenarios, domain events, members, audit events, outbox events, adapter
+contracts, sync jobs, Integration Health, alert routing, incident response,
+recovery evidence, and the `engineeringProof` contract rendered by the
+Operations, Incidents, and Proof tabs.
 
 ## Runtime Modes
 
@@ -86,6 +86,9 @@ synthetic path:
 lead -> student -> contract -> audit -> outbox -> integration sync
 ```
 
+It also exposes reusable `workflowScenarios` so the demo can show automation as
+trigger -> action type -> outputs -> evidence instead of only a single timeline.
+
 The generated SDK is documented in `CLIENT_SDK.md`. It demonstrates that the
 exported OpenAPI schema can produce working Python, JavaScript, and TypeScript
 client artifacts.
@@ -105,5 +108,5 @@ The endpoint is read-only and fake-data only:
 This is the first public frontend/backend contract. The static demo works
 without infrastructure, and the same UI can be pointed at the FastAPI endpoint
 to verify that the backend owns the demo payload shape: workflow, timeline,
-domain events, audit, outbox data, alert routing, incident response, recovery
-evidence, and engineering proof gates.
+workflow scenarios, domain events, audit, outbox data, alert routing, incident
+response, recovery evidence, and engineering proof gates.

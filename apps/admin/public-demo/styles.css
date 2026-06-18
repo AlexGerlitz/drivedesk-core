@@ -349,6 +349,10 @@ h3 {
   margin-top: 18px;
 }
 
+.workflow-scenario-panel {
+  margin-bottom: 18px;
+}
+
 .dashboard-grid + .dashboard-grid {
   margin-top: 18px;
 }
@@ -450,6 +454,11 @@ td {
 .timeline li {
   display: grid;
   gap: 6px;
+}
+
+.workflow-scenario-row {
+  display: grid;
+  gap: 10px;
 }
 
 .timeline time {

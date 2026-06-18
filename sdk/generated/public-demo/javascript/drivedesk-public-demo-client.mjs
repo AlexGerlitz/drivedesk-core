@@ -24,6 +24,7 @@ export const REQUIRED_FIELDS = [
   "incidentResponse",
   "engineeringProof",
   "workflow",
+  "workflowScenarios",
   "timeline",
   "domainEvents"
 ];
@@ -86,6 +87,31 @@ export function validatePublicDemoPayload(payload) {
 
   if (!Array.isArray(payload.workflow?.stages) || payload.workflow.stages.length < 5) {
     throw new Error("workflow.stages is missing or too short");
+  }
+
+  if (!Array.isArray(payload.workflowScenarios) || payload.workflowScenarios.length < 3) {
+    throw new Error("workflowScenarios is missing or too short");
+  }
+
+  const scenarioIds = new Set(payload.workflowScenarios.map((scenario) => scenario?.id));
+  for (const requiredScenario of ["scenario-contract-approval-sync", "scenario-signature-task", "scenario-accounting-export"]) {
+    if (!scenarioIds.has(requiredScenario)) {
+      throw new Error(`workflowScenarios does not include required scenario: ${requiredScenario}`);
+    }
+  }
+
+  const actionTypes = new Set(payload.workflowScenarios.map((scenario) => scenario?.actionType));
+  for (const requiredAction of ["emit_outbox_event", "create_task_record", "request_adapter_sync"]) {
+    if (!actionTypes.has(requiredAction)) {
+      throw new Error(`workflowScenarios does not include required action: ${requiredAction}`);
+    }
+  }
+
+  const scenarioOutputs = new Set(payload.workflowScenarios.flatMap((scenario) => scenario?.outputs || []));
+  for (const requiredOutput of ["audit_event", "outbox_event", "task_record", "integration_job", "action_run"]) {
+    if (!scenarioOutputs.has(requiredOutput)) {
+      throw new Error(`workflowScenarios does not include required output: ${requiredOutput}`);
+    }
   }
 
   if (payload.engineeringProof?.milestone !== "engineering_70") {

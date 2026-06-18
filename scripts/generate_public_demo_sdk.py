@@ -105,6 +105,30 @@ def validate_public_demo_payload(payload: dict[str, Any]) -> None:
     if not isinstance(stages, list) or len(stages) < 5:
         raise ValueError("workflow.stages is missing or too short")
 
+    workflow_scenarios = payload.get("workflowScenarios")
+    if not isinstance(workflow_scenarios, list) or len(workflow_scenarios) < 3:
+        raise ValueError("workflowScenarios is missing or too short")
+
+    scenario_ids = {{scenario.get("id") for scenario in workflow_scenarios if isinstance(scenario, dict)}}
+    required_scenarios = {{"scenario-contract-approval-sync", "scenario-signature-task", "scenario-accounting-export"}}
+    if not required_scenarios.issubset(scenario_ids):
+        raise ValueError(f"workflowScenarios does not include required scenarios: {{sorted(required_scenarios - scenario_ids)}}")
+
+    action_types = {{scenario.get("actionType") for scenario in workflow_scenarios if isinstance(scenario, dict)}}
+    required_actions = {{"emit_outbox_event", "create_task_record", "request_adapter_sync"}}
+    if not required_actions.issubset(action_types):
+        raise ValueError(f"workflowScenarios does not include required actions: {{sorted(required_actions - action_types)}}")
+
+    scenario_outputs = {{
+        output
+        for scenario in workflow_scenarios
+        if isinstance(scenario, dict)
+        for output in scenario.get("outputs", [])
+    }}
+    required_outputs = {{"audit_event", "outbox_event", "task_record", "integration_job", "action_run"}}
+    if not required_outputs.issubset(scenario_outputs):
+        raise ValueError(f"workflowScenarios does not include required outputs: {{sorted(required_outputs - scenario_outputs)}}")
+
     proof = payload.get("engineeringProof") or {{}}
     if proof.get("milestone") != "engineering_70":
         raise ValueError(f"unexpected engineeringProof.milestone: {{proof.get('milestone')}}")
@@ -241,6 +265,31 @@ export function validatePublicDemoPayload(payload) {{
     throw new Error("workflow.stages is missing or too short");
   }}
 
+  if (!Array.isArray(payload.workflowScenarios) || payload.workflowScenarios.length < 3) {{
+    throw new Error("workflowScenarios is missing or too short");
+  }}
+
+  const scenarioIds = new Set(payload.workflowScenarios.map((scenario) => scenario?.id));
+  for (const requiredScenario of ["scenario-contract-approval-sync", "scenario-signature-task", "scenario-accounting-export"]) {{
+    if (!scenarioIds.has(requiredScenario)) {{
+      throw new Error(`workflowScenarios does not include required scenario: ${{requiredScenario}}`);
+    }}
+  }}
+
+  const actionTypes = new Set(payload.workflowScenarios.map((scenario) => scenario?.actionType));
+  for (const requiredAction of ["emit_outbox_event", "create_task_record", "request_adapter_sync"]) {{
+    if (!actionTypes.has(requiredAction)) {{
+      throw new Error(`workflowScenarios does not include required action: ${{requiredAction}}`);
+    }}
+  }}
+
+  const scenarioOutputs = new Set(payload.workflowScenarios.flatMap((scenario) => scenario?.outputs || []));
+  for (const requiredOutput of ["audit_event", "outbox_event", "task_record", "integration_job", "action_run"]) {{
+    if (!scenarioOutputs.has(requiredOutput)) {{
+      throw new Error(`workflowScenarios does not include required output: ${{requiredOutput}}`);
+    }}
+  }}
+
   if (payload.engineeringProof?.milestone !== "engineering_70") {{
     throw new Error(`unexpected engineeringProof.milestone: ${{payload.engineeringProof?.milestone}}`);
   }}
@@ -368,6 +417,17 @@ export interface PublicDemoPayload {{
     stages: Array<Record<string, string>>;
     [key: string]: unknown;
   }};
+  workflowScenarios: Array<{{
+    id: string;
+    title: string;
+    trigger: string;
+    actionType: "emit_outbox_event" | "create_task_record" | "request_adapter_sync";
+    owner: string;
+    status: string;
+    detail: string;
+    outputs: string[];
+    evidence: string;
+  }}>;
   timeline: Array<Record<string, string>>;
   domainEvents: Array<Record<string, string>>;
 }}

@@ -43,6 +43,7 @@ def test_public_demo_html_links_static_assets() -> None:
     assert 'data-view="incidents"' in html
     assert 'data-view="proof"' in html
     assert 'id="workflowStageRows"' in html
+    assert 'id="workflowScenarioRows"' in html
     assert 'id="workflowTimelineRows"' in html
     assert 'id="domainEventRows"' in html
     assert 'id="integrationHealthRows"' in html
@@ -76,6 +77,34 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
     assert payload["workflow"]["id"] == "wf-demo-lead-to-student"
     assert payload["workflow"]["currentStage"] == "student_sync"
     assert len(payload["workflow"]["stages"]) >= 5
+    assert len(payload["workflowScenarios"]) >= 3
+    scenario_by_id = {scenario["id"]: scenario for scenario in payload["workflowScenarios"]}
+    assert set(scenario_by_id) >= {
+        "scenario-contract-approval-sync",
+        "scenario-signature-task",
+        "scenario-accounting-export",
+    }
+    assert {scenario["actionType"] for scenario in payload["workflowScenarios"]} >= {
+        "emit_outbox_event",
+        "create_task_record",
+        "request_adapter_sync",
+    }
+    assert {
+        output
+        for scenario in payload["workflowScenarios"]
+        for output in scenario["outputs"]
+    } >= {
+        "audit_event",
+        "outbox_event",
+        "task_record",
+        "integration_job",
+        "action_run",
+    }
+    assert scenario_by_id["scenario-contract-approval-sync"]["trigger"] == (
+        "business_record.status_changed contract:draft->approved"
+    )
+    assert scenario_by_id["scenario-signature-task"]["evidence"] == "workflow.task_record.created"
+    assert scenario_by_id["scenario-accounting-export"]["status"] == "pending"
     assert len(payload["timeline"]) >= 5
     assert len(payload["domainEvents"]) >= 4
     assert {event["event"] for event in payload["domainEvents"]} >= {
@@ -233,6 +262,7 @@ def test_public_demo_can_load_api_backed_data_with_static_fallback() -> None:
     assert "operationContracts" in script
     assert "operations: " in script
     assert "fillWorkflow" in script
+    assert "fillWorkflowScenarios" in script
     assert "fillWorkflowTimeline" in script
     assert "fillDomainEvents" in script
     assert "fillRecoveryEvidence" in script
@@ -242,6 +272,7 @@ def test_public_demo_can_load_api_backed_data_with_static_fallback() -> None:
     assert "alertRouting" in script
     assert "incidentResponse" in script
     assert "engineeringProof" in script
+    assert "workflowScenarios" in script
     assert "recoveryEvidence" in script
     assert "demoApi" in script
     assert "data-demo-api-path" not in script

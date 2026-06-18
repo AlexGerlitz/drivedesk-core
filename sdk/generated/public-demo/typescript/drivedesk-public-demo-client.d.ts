@@ -1,7 +1,7 @@
 // Generated from DriveDesk Core OpenAPI. Do not edit by hand.
 export const PUBLIC_DEMO_PATH: "/demo/public";
 export const OPERATION_ID: "public_demo_demo_public_get";
-export const REQUIRED_FIELDS: Array<"schemaVersion" | "generatedAt" | "dataSource" | "apiContract" | "tenant" | "health" | "metrics" | "workQueue" | "members" | "auditEvents" | "outbox" | "adapters" | "integrationJobs" | "integrationHealth" | "integrationReadiness" | "recoveryEvidence" | "alertRouting" | "incidentResponse" | "engineeringProof" | "workflow" | "timeline" | "domainEvents">;
+export const REQUIRED_FIELDS: Array<"schemaVersion" | "generatedAt" | "dataSource" | "apiContract" | "tenant" | "health" | "metrics" | "workQueue" | "members" | "auditEvents" | "outbox" | "adapters" | "integrationJobs" | "integrationHealth" | "integrationReadiness" | "recoveryEvidence" | "alertRouting" | "incidentResponse" | "engineeringProof" | "workflow" | "workflowScenarios" | "timeline" | "domainEvents">;
 
 export interface PublicDemoPayload {
   schemaVersion: 1;
@@ -47,6 +47,17 @@ export interface PublicDemoPayload {
     stages: Array<Record<string, string>>;
     [key: string]: unknown;
   };
+  workflowScenarios: Array<{
+    id: string;
+    title: string;
+    trigger: string;
+    actionType: "emit_outbox_event" | "create_task_record" | "request_adapter_sync";
+    owner: string;
+    status: string;
+    detail: string;
+    outputs: string[];
+    evidence: string;
+  }>;
   timeline: Array<Record<string, string>>;
   domainEvents: Array<Record<string, string>>;
 }

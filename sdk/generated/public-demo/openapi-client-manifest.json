@@ -31,6 +31,7 @@
     "incidentResponse",
     "engineeringProof",
     "workflow",
+    "workflowScenarios",
     "timeline",
     "domainEvents"
   ],

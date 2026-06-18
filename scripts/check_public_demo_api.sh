@@ -123,6 +123,34 @@ assert demo["workflow"]["id"] == "wf-demo-lead-to-student", demo
 assert demo["workflow"]["currentStage"] == "student_sync", demo
 assert len(demo["workflow"]["stages"]) >= 5, demo
 assert {stage["state"] for stage in demo["workflow"]["stages"]} >= {"done", "current"}, demo
+assert len(demo["workflowScenarios"]) >= 3, demo
+scenario_by_id = {scenario["id"]: scenario for scenario in demo["workflowScenarios"]}
+assert set(scenario_by_id) >= {
+    "scenario-contract-approval-sync",
+    "scenario-signature-task",
+    "scenario-accounting-export",
+}, demo
+assert {scenario["actionType"] for scenario in demo["workflowScenarios"]} >= {
+    "emit_outbox_event",
+    "create_task_record",
+    "request_adapter_sync",
+}, demo
+assert {
+    output
+    for scenario in demo["workflowScenarios"]
+    for output in scenario["outputs"]
+} >= {
+    "audit_event",
+    "outbox_event",
+    "task_record",
+    "integration_job",
+    "action_run",
+}, demo
+assert scenario_by_id["scenario-contract-approval-sync"]["trigger"] == (
+    "business_record.status_changed contract:draft->approved"
+), demo
+assert scenario_by_id["scenario-signature-task"]["evidence"] == "workflow.task_record.created", demo
+assert scenario_by_id["scenario-accounting-export"]["status"] == "pending", demo
 assert len(demo["timeline"]) >= 5, demo
 assert len(demo["domainEvents"]) >= 4, demo
 assert {event["event"] for event in demo["domainEvents"]} >= {

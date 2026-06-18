@@ -2272,6 +2272,14 @@
             "additionalProperties": true,
             "title": "Workflow",
             "type": "object"
+          },
+          "workflowScenarios": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Workflowscenarios",
+            "type": "array"
           }
         },
         "required": [
@@ -2295,6 +2303,7 @@
           "incidentResponse",
           "engineeringProof",
           "workflow",
+          "workflowScenarios",
           "timeline",
           "domainEvents"
         ],

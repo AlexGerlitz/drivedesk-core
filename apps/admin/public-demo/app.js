@@ -46,6 +46,7 @@
         Array.isArray(payload.workQueue) &&
         payload.workflow &&
         Array.isArray(payload.workflow.stages) &&
+        Array.isArray(payload.workflowScenarios) &&
         Array.isArray(payload.timeline) &&
         Array.isArray(payload.domainEvents) &&
         Array.isArray(payload.integrationJobs) &&
@@ -346,6 +347,38 @@
       var code = document.createElement("code");
       code.appendChild(text(event.event));
       row.append(time, title, detail, code);
+      rows.appendChild(row);
+    });
+  }
+
+  function fillWorkflowScenarios() {
+    var rows = document.getElementById("workflowScenarioRows");
+    clear(rows);
+    data.workflowScenarios.forEach(function (scenario) {
+      var row = document.createElement("article");
+      row.className = "event-row workflow-scenario-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var name = document.createElement("strong");
+      name.appendChild(text(scenario.title));
+      top.append(name, chip(scenario.status, statusTone(scenario.status)));
+
+      var trigger = document.createElement("code");
+      trigger.appendChild(text(scenario.trigger));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(scenario.owner + " - " + scenario.actionType + " - " + scenario.detail));
+
+      var outputs = document.createElement("span");
+      outputs.className = "muted";
+      outputs.appendChild(text("outputs: " + (scenario.outputs || []).join(", ")));
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(scenario.evidence));
+
+      row.append(top, trigger, detail, outputs, evidence);
       rows.appendChild(row);
     });
   }
@@ -806,6 +839,7 @@
     fillMetricGrid();
     fillWorkQueue();
     fillWorkflow();
+    fillWorkflowScenarios();
     fillWorkflowTimeline();
     fillDomainEvents();
     fillIntegrations();

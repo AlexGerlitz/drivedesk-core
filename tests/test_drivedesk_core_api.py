@@ -2280,6 +2280,40 @@ def test_connector_fixture_replay_demo_endpoint_exposes_same_public_contract(
     }
 
 
+def test_connector_certification_demo_endpoint_exposes_same_public_contract(
+    api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, _ = api_client
+
+    public_response = client.get("/demo/public")
+    certification_response = client.get("/demo/connector-certification")
+
+    assert certification_response.status_code == 200
+    assert certification_response.headers["access-control-allow-origin"] == "*"
+    assert certification_response.headers["cache-control"] == "public, max-age=60"
+    certification_payload = certification_response.json()
+    assert certification_payload == public_response.json()["connectorCertification"]
+    assert certification_payload["status"] == "validated"
+    assert certification_payload["command"] == "GET /demo/connector-certification"
+    assert certification_payload["certificationLevel"] == "public_contract_certified"
+    assert certification_payload["adapterCount"] >= 3
+    assert certification_payload["privateReadyCount"] >= 2
+    providers = {item["adapterKey"]: item for item in certification_payload["providerProfiles"]}
+    assert {"crm.bitrix24.mock", "accounting.export.mock", "file.import.fake"}.issubset(providers)
+    assert providers["crm.bitrix24.mock"]["serverSecretBoundary"] is True
+    assert providers["crm.bitrix24.mock"]["readyForPrivateConnector"] is True
+    assert {item["gate"] for item in certification_payload["certificationGates"]} == {
+        "no_real_provider_call",
+        "no_secret_value",
+        "no_raw_payload",
+        "idempotent_execution",
+        "operator_review",
+    }
+    assert {item["externalMutation"] for item in certification_payload["certificationGates"]} == {
+        False
+    }
+
+
 def test_business_scenario_replay_demo_endpoint_exposes_same_public_contract(
     api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
 ) -> None:

@@ -21,6 +21,9 @@ operationId: public_demo_demo_public_get
 GET /demo/connector-fixture-replay
 operationId: connector_fixture_replay_demo_demo_connector_fixture_replay_get
 
+GET /demo/connector-certification
+operationId: connector_certification_demo_demo_connector_certification_get
+
 GET /demo/business-notification-channels
 operationId: business_notification_channels_demo_demo_business_notification_channels_get
 
@@ -57,6 +60,10 @@ Adapter operation helpers:
 - `DriveDeskPublicDemoClient.get_adapter_operation_plan`
 - `DriveDeskPublicDemoClient.getConnectorFixtureReplay`
 - `DriveDeskPublicDemoClient.get_connector_fixture_replay`
+- `DriveDeskPublicDemoClient.getConnectorCertification`
+- `DriveDeskPublicDemoClient.get_connector_certification`
+- `connector_certification` manifest entry for
+  `GET /demo/connector-certification`
 - `business_notification_channels` manifest entry for
   `GET /demo/business-notification-channels`
 - `business_context_assistant` manifest entry for
@@ -79,6 +86,10 @@ operator-review flows. They do not mutate the public demo.
 Connector fixture replay helpers validate the public-safe replay evidence as a
 standalone API contract: fixture groups, redaction outcomes, boundaries, and
 review docs.
+
+Connector certification helpers validate the public-safe provider-readiness
+workbench: provider profiles, certification stages, gates, implementation path,
+data boundaries, and review docs.
 
 Business scenario replay helpers validate the Business OS scenario contract:
 source systems, normalized facts, recommended actions, automation boundaries,

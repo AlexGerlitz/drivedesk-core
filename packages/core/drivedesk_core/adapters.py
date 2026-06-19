@@ -1407,6 +1407,261 @@ def build_adapter_execution_timeline(
     }
 
 
+def build_connector_certification_workbench() -> dict[str, object]:
+    descriptors = [resolve_adapter(key).descriptor for key in sorted(ADAPTERS)]
+    provider_rows: list[dict[str, object]] = []
+    for descriptor in descriptors:
+        auth_profile = descriptor.auth_profile
+        operations = list(descriptor.operation_contracts)
+        has_runtime_contract = bool(operations)
+        has_secret_boundary = (
+            auth_profile.get("credential_placement") == "server_secret_store"
+            and auth_profile.get("public_demo_requires_secret") is False
+        )
+        has_operation_scope = any(operation.required_connection_scope for operation in operations)
+        has_idempotency = all(operation.idempotency_keys for operation in operations) if operations else False
+        has_recovery_path = any(
+            operation.retryable or operation.dead_letter or operation.operator_review
+            for operation in operations
+        )
+        private_ready = (
+            descriptor.connection_profile_supported
+            and has_runtime_contract
+            and has_secret_boundary
+            and has_operation_scope
+            and has_idempotency
+        )
+        provider_rows.append(
+            {
+                "adapter_key": descriptor.key,
+                "name": descriptor.name,
+                "category": descriptor.category,
+                "direction": descriptor.direction,
+                "status": "private_ready" if private_ready else "contract_ready",
+                "operation_count": len(operations),
+                "capability_count": len(descriptor.capabilities),
+                "connection_profile_supported": descriptor.connection_profile_supported,
+                "server_secret_boundary": has_secret_boundary,
+                "requires_real_provider_secret": bool(
+                    auth_profile.get("real_provider_requires_secret")
+                ),
+                "public_demo_requires_secret": bool(
+                    auth_profile.get("public_demo_requires_secret")
+                ),
+                "scope_boundary": has_operation_scope,
+                "idempotency_boundary": has_idempotency,
+                "recovery_boundary": has_recovery_path,
+                "public_safe": True,
+                "ready_for_private_connector": private_ready,
+                "evidence": "connector_certification.provider_profile_checked",
+            }
+        )
+
+    certified = [row for row in provider_rows if row["ready_for_private_connector"]]
+    return {
+        "status": "validated",
+        "certification_level": "public_contract_certified",
+        "adapter_count": len(provider_rows),
+        "private_ready_count": len(certified),
+        "summary": [
+            {
+                "label": "Adapters checked",
+                "value": str(len(provider_rows)),
+                "detail": "runtime catalog providers",
+                "tone": "blue",
+            },
+            {
+                "label": "Private-ready",
+                "value": str(len(certified)),
+                "detail": "profile, scope, secret boundary, idempotency",
+                "tone": "green",
+            },
+            {
+                "label": "Provider calls",
+                "value": "0",
+                "detail": "certification is public-safe and offline",
+                "tone": "amber",
+            },
+            {
+                "label": "Evidence",
+                "value": "linked",
+                "detail": "docs, fixtures, runtime, execution",
+                "tone": "violet",
+            },
+        ],
+        "provider_profiles": provider_rows,
+        "certification_stages": [
+            {
+                "stage": "provider_profile",
+                "status": "passed",
+                "detail": "Adapter identity, category, direction, connection profile, and auth mode are declared.",
+                "evidence": "connector_certification.provider_profile_checked",
+            },
+            {
+                "stage": "capability_manifest",
+                "status": "passed",
+                "detail": "Capabilities, failure modes, mapping requirements, and operation contracts are visible.",
+                "evidence": "connector_certification.capability_manifest_checked",
+            },
+            {
+                "stage": "auth_boundary",
+                "status": "clean",
+                "detail": "Public demo returns secret reference names and boundary metadata, never secret values.",
+                "evidence": "server_secret_store",
+            },
+            {
+                "stage": "fixture_replay",
+                "status": "validated",
+                "detail": "Synthetic fixtures cover happy path, redaction, validation, retry, dead-letter, and reconciliation.",
+                "evidence": "bash scripts/check_public_connector_fixture_replay.sh",
+            },
+            {
+                "stage": "runtime_preview",
+                "status": "validated",
+                "detail": "Operation contracts resolve into scope preflight, outbox, worker, reconciliation, and incidents.",
+                "evidence": "adapter_runtime.previewed",
+            },
+            {
+                "stage": "execution_timeline",
+                "status": "validated",
+                "detail": "Run ledger, provider-call block, retry policy, and operator closure are represented.",
+                "evidence": "integration_execution.run_ledger_prepared",
+            },
+            {
+                "stage": "release_gate",
+                "status": "enforced",
+                "detail": "Public export, smoke, OpenAPI, SDK, and Pages checks must include this contract.",
+                "evidence": "bash scripts/public_repo_release_gate.sh",
+            },
+        ],
+        "certification_gates": [
+            {
+                "gate": "no_real_provider_call",
+                "status": "closed",
+                "detail": "Public certification does not call Bitrix, bank, accounting, email, Telegram, or payment APIs.",
+                "external_mutation": False,
+                "evidence": "provider_call_enabled=false",
+            },
+            {
+                "gate": "no_secret_value",
+                "status": "clean",
+                "detail": "Only secret reference names are exposed in generated contracts.",
+                "external_mutation": False,
+                "evidence": "server_secret_store",
+            },
+            {
+                "gate": "no_raw_payload",
+                "status": "clean",
+                "detail": "Raw provider payloads and request bodies stay outside the public payload.",
+                "external_mutation": False,
+                "evidence": "raw_payload_returned=false",
+            },
+            {
+                "gate": "idempotent_execution",
+                "status": "required",
+                "detail": "Provider-changing operations must declare idempotency keys before private rollout.",
+                "external_mutation": False,
+                "evidence": "operation_contracts.idempotency_keys",
+            },
+            {
+                "gate": "operator_review",
+                "status": "armed",
+                "detail": "Retry, dead-letter, and reconciliation mismatches route to operator review.",
+                "external_mutation": False,
+                "evidence": "integration.operator_review.created",
+            },
+        ],
+        "implementation_path": [
+            {
+                "step": "add_private_provider_client",
+                "status": "next_private_step",
+                "detail": "Implement the real provider client behind server-side secrets and the existing adapter interface.",
+                "evidence": "private_connector_only",
+            },
+            {
+                "step": "bind_connection_profile",
+                "status": "next_private_step",
+                "detail": "Attach tenant-scoped connection profile, scopes, mappings, rate limits, and retry policy.",
+                "evidence": "IntegrationConnection",
+            },
+            {
+                "step": "run_fixture_replay",
+                "status": "required",
+                "detail": "Replay public-safe fixtures plus private sandbox fixtures before enabling provider writes.",
+                "evidence": "connector_fixture_replay",
+            },
+            {
+                "step": "enable_dry_run",
+                "status": "required",
+                "detail": "Run provider API calls in dry-run or read-only mode with audit and redaction evidence.",
+                "evidence": "adapter_runtime.previewed",
+            },
+            {
+                "step": "unlock_commit_request",
+                "status": "requires_approval",
+                "detail": "Allow write-mode execution only after approval, idempotency, observability, and rollback review.",
+                "evidence": "business_approval_gateway.previewed",
+            },
+        ],
+        "data_boundaries": [
+            {
+                "name": "public_demo_data",
+                "status": "synthetic_only",
+                "contains_pii": False,
+                "raw_payload_included": False,
+                "external_mutation": False,
+                "detail": "Workbench payload is generated from adapter metadata and synthetic evidence.",
+            },
+            {
+                "name": "browser_boundary",
+                "status": "clean",
+                "contains_pii": False,
+                "raw_payload_included": False,
+                "external_mutation": False,
+                "detail": "Browser receives certification state, not provider tokens or raw provider responses.",
+            },
+            {
+                "name": "private_connector_boundary",
+                "status": "separate",
+                "contains_pii": False,
+                "raw_payload_included": False,
+                "external_mutation": False,
+                "detail": "Real provider clients and secrets belong only in the private connector runtime.",
+            },
+        ],
+        "api": {
+            "standalone": "GET /demo/connector-certification",
+            "catalog": "GET /integration-adapters",
+            "publicDemo": "GET /demo/public",
+            "fixtureReplay": "GET /demo/connector-fixture-replay",
+            "runtime": "GET /demo/integration-runtime",
+            "execution": "GET /demo/integration-execution",
+        },
+        "docs": [
+            {
+                "label": "Connector certification",
+                "path": "docs/public/CONNECTOR_CERTIFICATION.md",
+                "check": "bash scripts/check_public_connector_certification.sh",
+            },
+            {
+                "label": "Connector fixture replay",
+                "path": "docs/public/CONNECTOR_FIXTURE_REPLAY.md",
+                "check": "bash scripts/check_public_connector_fixture_replay.sh",
+            },
+            {
+                "label": "Integration runtime",
+                "path": "docs/public/INTEGRATION_RUNTIME.md",
+                "check": "bash scripts/check_public_integration_runtime.sh",
+            },
+            {
+                "label": "Integration execution",
+                "path": "docs/public/INTEGRATION_EXECUTION.md",
+                "check": "bash scripts/check_public_integration_execution.sh",
+            },
+        ],
+    }
+
+
 def execute_adapter(adapter_key: str | None, payload: dict[str, object]) -> AdapterResult:
     adapter = resolve_adapter(adapter_key)
     return adapter.execute(payload)

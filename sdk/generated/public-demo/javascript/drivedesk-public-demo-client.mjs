@@ -3,9 +3,11 @@ import { pathToFileURL } from "node:url";
 
 export const PUBLIC_DEMO_PATH = "/demo/public";
 export const CONNECTOR_REPLAY_PATH = "/demo/connector-fixture-replay";
+export const CONNECTOR_CERTIFICATION_PATH = "/demo/connector-certification";
 export const BUSINESS_SCENARIO_REPLAY_PATH = "/demo/business-scenario-replay";
 export const OPERATION_ID = "public_demo_demo_public_get";
 export const CONNECTOR_REPLAY_OPERATION_ID = "connector_fixture_replay_demo_demo_connector_fixture_replay_get";
+export const CONNECTOR_CERTIFICATION_OPERATION_ID = "connector_certification_demo_demo_connector_certification_get";
 export const BUSINESS_SCENARIO_REPLAY_OPERATION_ID = "business_scenario_replay_demo_demo_business_scenario_replay_get";
 export const REQUIRED_FIELDS = [
   "schemaVersion",
@@ -22,6 +24,7 @@ export const REQUIRED_FIELDS = [
   "adapters",
   "adapterScenarios",
   "adapterStudio",
+  "connectorCertification",
   "integrationRuntime",
   "integrationExecution",
   "connectorFixtureReplay",
@@ -54,6 +57,21 @@ export const CONNECTOR_REPLAY_REQUIRED_FIELDS = [
   "summary",
   "outcomes",
   "boundaries",
+  "docs"
+];
+export const CONNECTOR_CERTIFICATION_REQUIRED_FIELDS = [
+  "status",
+  "command",
+  "certificationLevel",
+  "adapterCount",
+  "privateReadyCount",
+  "summary",
+  "providerProfiles",
+  "certificationStages",
+  "certificationGates",
+  "implementationPath",
+  "dataBoundaries",
+  "api",
   "docs"
 ];
 export const BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS = [
@@ -103,6 +121,22 @@ export class DriveDeskPublicDemoClient {
 
     const payload = await response.json();
     validateConnectorFixtureReplayPayload(payload);
+    return payload;
+  }
+
+  async getConnectorCertification() {
+    const response = await this.fetchImpl(`${this.baseUrl}${CONNECTOR_CERTIFICATION_PATH}`, {
+      headers: {
+        Accept: "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`GET ${CONNECTOR_CERTIFICATION_PATH} failed: ${response.status}`);
+    }
+
+    const payload = await response.json();
+    validateConnectorCertificationPayload(payload);
     return payload;
   }
 
@@ -350,6 +384,52 @@ export function validateConnectorFixtureReplayPayload(payload) {
   }
 }
 
+export function validateConnectorCertificationPayload(payload) {
+  const missing = CONNECTOR_CERTIFICATION_REQUIRED_FIELDS.filter((field) => !(field in (payload || {})));
+  if (missing.length > 0) {
+    throw new Error(`missing connector certification fields: ${missing.join(", ")}`);
+  }
+
+  if (payload.status !== "validated") {
+    throw new Error(`unexpected connector certification status: ${payload.status}`);
+  }
+
+  if (payload.command !== `GET ${CONNECTOR_CERTIFICATION_PATH}`) {
+    throw new Error(`unexpected connector certification command: ${payload.command}`);
+  }
+
+  if (payload.certificationLevel !== "public_contract_certified") {
+    throw new Error(`unexpected connector certification level: ${payload.certificationLevel}`);
+  }
+
+  if (!Array.isArray(payload.providerProfiles) || payload.providerProfiles.length < 3) {
+    throw new Error("connector certification provider profiles are missing or too short");
+  }
+
+  const providerKeys = new Set(payload.providerProfiles.map((item) => item?.adapterKey));
+  for (const requiredKey of ["crm.bitrix24.mock", "accounting.export.mock", "file.import.fake"]) {
+    if (!providerKeys.has(requiredKey)) {
+      throw new Error(`connector certification provider key missing: ${requiredKey}`);
+    }
+  }
+
+  if (!Array.isArray(payload.certificationStages) || payload.certificationStages.length < 6) {
+    throw new Error("connector certification stages are missing or too short");
+  }
+
+  if (!Array.isArray(payload.certificationGates) || payload.certificationGates.length < 5) {
+    throw new Error("connector certification gates are missing or too short");
+  }
+
+  if (payload.certificationGates.some((item) => item?.externalMutation !== false)) {
+    throw new Error("connector certification gates must not mutate external providers");
+  }
+
+  if (!Array.isArray(payload.dataBoundaries) || payload.dataBoundaries.length < 3) {
+    throw new Error("connector certification data boundaries are missing or too short");
+  }
+}
+
 export function validateBusinessScenarioReplayPayload(payload) {
   const missing = BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS.filter((field) => !(field in payload));
   if (missing.length > 0) {
@@ -535,6 +615,11 @@ export function validatePublicDemoPayload(payload) {
   }
   validateConnectorFixtureReplayPayload(payload.connectorFixtureReplay);
 
+  if (!payload.connectorCertification || typeof payload.connectorCertification !== "object") {
+    throw new Error("connectorCertification is missing");
+  }
+  validateConnectorCertificationPayload(payload.connectorCertification);
+
   if (!payload.businessScenarioReplay || typeof payload.businessScenarioReplay !== "object") {
     throw new Error("businessScenarioReplay is missing");
   }
@@ -599,6 +684,7 @@ async function main() {
   const client = new DriveDeskPublicDemoClient(baseUrl);
   const payload = await client.getPublicDemo();
   const connectorReplay = await client.getConnectorFixtureReplay();
+  const connectorCertification = await client.getConnectorCertification();
   const businessScenarioReplay = await client.getBusinessScenarioReplay();
   const adapterPlan = buildAdapterOperationPlan(payload, "adapter-file-import-preview");
   console.log(
@@ -608,9 +694,11 @@ async function main() {
     `workflow=${payload.workflow.currentStage}`,
     `adapterPlan=${adapterPlan.phase}`,
     `connectorReplay=${connectorReplay.status}`,
+    `connectorCertification=${connectorCertification.certificationLevel}`,
     `businessScenarioReplay=${businessScenarioReplay.status}`,
     `operation=${OPERATION_ID}`,
     `connectorOperation=${CONNECTOR_REPLAY_OPERATION_ID}`,
+    `connectorCertificationOperation=${CONNECTOR_CERTIFICATION_OPERATION_ID}`,
     `businessScenarioOperation=${BUSINESS_SCENARIO_REPLAY_OPERATION_ID}`,
   );
 }

@@ -9,9 +9,11 @@ from typing import Any
 
 PUBLIC_DEMO_PATH = "/demo/public"
 CONNECTOR_REPLAY_PATH = "/demo/connector-fixture-replay"
+CONNECTOR_CERTIFICATION_PATH = "/demo/connector-certification"
 BUSINESS_SCENARIO_REPLAY_PATH = "/demo/business-scenario-replay"
 OPERATION_ID = "public_demo_demo_public_get"
 CONNECTOR_REPLAY_OPERATION_ID = "connector_fixture_replay_demo_demo_connector_fixture_replay_get"
+CONNECTOR_CERTIFICATION_OPERATION_ID = "connector_certification_demo_demo_connector_certification_get"
 BUSINESS_SCENARIO_REPLAY_OPERATION_ID = "business_scenario_replay_demo_demo_business_scenario_replay_get"
 REQUIRED_FIELDS = [
   "schemaVersion",
@@ -28,6 +30,7 @@ REQUIRED_FIELDS = [
   "adapters",
   "adapterScenarios",
   "adapterStudio",
+  "connectorCertification",
   "integrationRuntime",
   "integrationExecution",
   "connectorFixtureReplay",
@@ -62,6 +65,21 @@ CONNECTOR_REPLAY_REQUIRED_FIELDS = [
   "boundaries",
   "docs"
 ]
+CONNECTOR_CERTIFICATION_REQUIRED_FIELDS = [
+  "status",
+  "command",
+  "certificationLevel",
+  "adapterCount",
+  "privateReadyCount",
+  "summary",
+  "providerProfiles",
+  "certificationStages",
+  "certificationGates",
+  "implementationPath",
+  "dataBoundaries",
+  "api",
+  "docs"
+]
 BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS = [
   "status",
   "command",
@@ -87,6 +105,11 @@ class DriveDeskPublicDemoClient:
     def get_connector_fixture_replay(self) -> dict[str, Any]:
         payload = self._get_json(CONNECTOR_REPLAY_PATH)
         validate_connector_fixture_replay_payload(payload)
+        return payload
+
+    def get_connector_certification(self) -> dict[str, Any]:
+        payload = self._get_json(CONNECTOR_CERTIFICATION_PATH)
+        validate_connector_certification_payload(payload)
         return payload
 
     def get_business_scenario_replay(self) -> dict[str, Any]:
@@ -315,6 +338,47 @@ def validate_connector_fixture_replay_payload(payload: dict[str, Any]) -> None:
         raise ValueError("connector replay docs are missing or too short")
 
 
+def validate_connector_certification_payload(payload: dict[str, Any]) -> None:
+    missing = [field for field in CONNECTOR_CERTIFICATION_REQUIRED_FIELDS if field not in payload]
+    if missing:
+        raise ValueError(f"missing connector certification fields: {', '.join(missing)}")
+
+    if payload.get("status") != "validated":
+        raise ValueError(f"unexpected connector certification status: {payload.get('status')}")
+
+    if payload.get("command") != f"GET {CONNECTOR_CERTIFICATION_PATH}":
+        raise ValueError(f"unexpected connector certification command: {payload.get('command')}")
+
+    if payload.get("certificationLevel") != "public_contract_certified":
+        raise ValueError(
+            f"unexpected connector certification level: {payload.get('certificationLevel')}"
+        )
+
+    profiles = payload.get("providerProfiles")
+    if not isinstance(profiles, list) or len(profiles) < 3:
+        raise ValueError("connector certification provider profiles are missing or too short")
+
+    provider_keys = {item.get("adapterKey") for item in profiles if isinstance(item, dict)}
+    required_keys = {"crm.bitrix24.mock", "accounting.export.mock", "file.import.fake"}
+    if not required_keys.issubset(provider_keys):
+        raise ValueError(f"connector certification provider keys missing: {sorted(required_keys - provider_keys)}")
+
+    stages = payload.get("certificationStages")
+    if not isinstance(stages, list) or len(stages) < 6:
+        raise ValueError("connector certification stages are missing or too short")
+
+    gates = payload.get("certificationGates")
+    if not isinstance(gates, list) or len(gates) < 5:
+        raise ValueError("connector certification gates are missing or too short")
+
+    if any(item.get("externalMutation") is not False for item in gates if isinstance(item, dict)):
+        raise ValueError("connector certification gate must not mutate external providers")
+
+    boundaries = payload.get("dataBoundaries")
+    if not isinstance(boundaries, list) or len(boundaries) < 3:
+        raise ValueError("connector certification data boundaries are missing or too short")
+
+
 def validate_business_scenario_replay_payload(payload: dict[str, Any]) -> None:
     missing = [field for field in BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS if field not in payload]
     if missing:
@@ -507,6 +571,11 @@ def validate_public_demo_payload(payload: dict[str, Any]) -> None:
         raise ValueError("connectorFixtureReplay is missing")
     validate_connector_fixture_replay_payload(connector_replay)
 
+    connector_certification = payload.get("connectorCertification")
+    if not isinstance(connector_certification, dict):
+        raise ValueError("connectorCertification is missing")
+    validate_connector_certification_payload(connector_certification)
+
     business_scenario_replay = payload.get("businessScenarioReplay")
     if not isinstance(business_scenario_replay, dict):
         raise ValueError("businessScenarioReplay is missing")
@@ -566,6 +635,7 @@ def main() -> None:
     client = DriveDeskPublicDemoClient(args.base_url)
     payload = client.get_public_demo()
     connector_replay = client.get_connector_fixture_replay()
+    connector_certification = client.get_connector_certification()
     business_scenario_replay = client.get_business_scenario_replay()
     adapter_plan = build_adapter_operation_plan(payload, "adapter-file-import-preview")
     print(
@@ -575,9 +645,11 @@ def main() -> None:
         f"workflow={payload['workflow']['currentStage']}",
         f"adapterPlan={adapter_plan['phase']}",
         f"connectorReplay={connector_replay['status']}",
+        f"connectorCertification={connector_certification['certificationLevel']}",
         f"businessScenarioReplay={business_scenario_replay['status']}",
         f"operation={OPERATION_ID}",
         f"connectorOperation={CONNECTOR_REPLAY_OPERATION_ID}",
+        f"connectorCertificationOperation={CONNECTOR_CERTIFICATION_OPERATION_ID}",
         f"businessScenarioOperation={BUSINESS_SCENARIO_REPLAY_OPERATION_ID}",
     )
 

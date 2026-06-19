@@ -113,6 +113,7 @@ from drivedesk_api.schemas import (
     BusinessTaskHandoffPreviewRead,
     BusinessWorkbenchContextPreviewCreate,
     BusinessWorkbenchContextPreviewRead,
+    ConnectorCertificationRead,
     ConnectorFixtureReplayRead,
     FileImportCreate,
     IntegrationConnectionCheckCreate,
@@ -312,6 +313,20 @@ def build_app(settings: Settings | None = None) -> FastAPI:
     async def integration_execution_demo() -> JSONResponse:
         return JSONResponse(
             build_public_demo_payload()["integrationExecution"],
+            headers={
+                "Access-Control-Allow-Origin": "*",
+                "Cache-Control": "public, max-age=60",
+            },
+        )
+
+    @api.get(
+        "/demo/connector-certification",
+        response_model=ConnectorCertificationRead,
+        tags=["demo"],
+    )
+    async def connector_certification_demo() -> JSONResponse:
+        return JSONResponse(
+            build_public_demo_payload()["connectorCertification"],
             headers={
                 "Access-Control-Allow-Origin": "*",
                 "Cache-Control": "public, max-age=60",

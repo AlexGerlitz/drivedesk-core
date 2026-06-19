@@ -2,7 +2,12 @@ from __future__ import annotations
 
 from typing import Any
 
-from drivedesk_core import build_adapter_execution_timeline, build_adapter_runtime_plan, list_adapter_descriptors
+from drivedesk_core import (
+    build_adapter_execution_timeline,
+    build_adapter_runtime_plan,
+    build_connector_certification_workbench,
+    list_adapter_descriptors,
+)
 
 
 def _public_operation_contracts(descriptor: dict[str, Any]) -> list[dict[str, Any]]:
@@ -388,6 +393,77 @@ def _public_integration_execution() -> dict[str, Any]:
                 "check": "bash scripts/check_public_demo_api.sh",
             },
         ],
+    }
+
+
+def _public_connector_certification() -> dict[str, Any]:
+    workbench = build_connector_certification_workbench()
+    provider_profiles = [
+        {
+            "adapterKey": item["adapter_key"],
+            "name": item["name"],
+            "category": item["category"],
+            "direction": item["direction"],
+            "status": item["status"],
+            "operationCount": item["operation_count"],
+            "capabilityCount": item["capability_count"],
+            "connectionProfileSupported": item["connection_profile_supported"],
+            "serverSecretBoundary": item["server_secret_boundary"],
+            "requiresRealProviderSecret": item["requires_real_provider_secret"],
+            "publicDemoRequiresSecret": item["public_demo_requires_secret"],
+            "scopeBoundary": item["scope_boundary"],
+            "idempotencyBoundary": item["idempotency_boundary"],
+            "recoveryBoundary": item["recovery_boundary"],
+            "publicSafe": item["public_safe"],
+            "readyForPrivateConnector": item["ready_for_private_connector"],
+            "evidence": item["evidence"],
+        }
+        for item in workbench["provider_profiles"]
+    ]
+    certification_gates = [
+        {
+            "gate": item["gate"],
+            "status": item["status"],
+            "detail": item["detail"],
+            "externalMutation": item["external_mutation"],
+            "evidence": item["evidence"],
+        }
+        for item in workbench["certification_gates"]
+    ]
+    implementation_path = [
+        {
+            "step": item["step"],
+            "status": item["status"],
+            "detail": item["detail"],
+            "evidence": item["evidence"],
+        }
+        for item in workbench["implementation_path"]
+    ]
+    data_boundaries = [
+        {
+            "name": item["name"],
+            "status": item["status"],
+            "containsPii": item["contains_pii"],
+            "rawPayloadIncluded": item["raw_payload_included"],
+            "externalMutation": item["external_mutation"],
+            "detail": item["detail"],
+        }
+        for item in workbench["data_boundaries"]
+    ]
+    return {
+        "status": workbench["status"],
+        "command": "GET /demo/connector-certification",
+        "certificationLevel": workbench["certification_level"],
+        "adapterCount": workbench["adapter_count"],
+        "privateReadyCount": workbench["private_ready_count"],
+        "summary": workbench["summary"],
+        "providerProfiles": provider_profiles,
+        "certificationStages": workbench["certification_stages"],
+        "certificationGates": certification_gates,
+        "implementationPath": implementation_path,
+        "dataBoundaries": data_boundaries,
+        "api": workbench["api"],
+        "docs": workbench["docs"],
     }
 
 
@@ -836,6 +912,7 @@ def build_public_demo_payload() -> dict[str, Any]:
                 },
             ],
         },
+        "connectorCertification": _public_connector_certification(),
         "integrationRuntime": _public_integration_runtime(),
         "integrationExecution": _public_integration_execution(),
         "connectorFixtureReplay": {

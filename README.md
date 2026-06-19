@@ -30,7 +30,7 @@ It includes:
 - runtime adapter catalog for executable adapter metadata;
 - synthetic lead-to-student workflow in the public demo payload;
 - public Business OS tour connecting business event -> workflow -> adapter -> incident -> proof;
-- public connector certification path for provider profiles, capability manifests, contract fixtures, runtime readiness, and release proof;
+- public connector certification path and workbench for provider profiles, capability manifests, contract fixtures, runtime readiness, gates, implementation path, and release proof;
 - public connector fixture replay for synthetic happy-path, redaction, invalid-payload, retry, dead-letter, and reconciliation cases;
 - generated OpenAPI client SDK example for the public demo API;
 - public-safe synthetic backup/restore drill with sanitized evidence;
@@ -66,7 +66,7 @@ It includes:
 | --- | --- |
 | Runtime | FastAPI demo API, background-worker contract, Postgres-shaped repositories, Redis/outbox job model, and `GET /metrics`. |
 | Product core | Tenants, RBAC, audit log, outbox recovery, business records, lifecycle policies, workflow rules, tasks, and documents. |
-| Integration hub | Adapter catalog, connector certification, connector fixture replay, Adapter Studio, connection scopes, mapping validation, mapping transform preview, operation contracts, diagnostics, reconciliation, and operator review. |
+| Integration hub | Adapter catalog, connector certification workbench, connector fixture replay, Adapter Studio, connection scopes, mapping validation, mapping transform preview, operation contracts, diagnostics, reconciliation, and operator review. |
 | Operations | Prometheus-style metrics, structured logs, Alertmanager-style routing, incident response, backup/restore, rollback, SLO canary, and staged promotion evidence. |
 | Delivery | Docker Compose, Helm chart, GitOps manifests, OpenTofu plan evidence, CI gates, Pages health check, and public/private export gate. |
 
@@ -210,6 +210,8 @@ incident queue, mitigation, recovery, and resolution evidence path.
 - `apps/admin/public-demo/index.html` - static synthetic product demo shell.
 - `docs/openapi.json` - generated FastAPI OpenAPI schema.
 - `GET /demo/public` - read-only synthetic demo payload in the exported API.
+- `GET /demo/connector-certification` - standalone public-safe provider
+  readiness contract for connector certification stages, gates, and boundaries.
 - `GET /demo/connector-fixture-replay` - standalone public-safe replay contract
   for connector fixture groups, redaction outcomes, and boundaries.
 - `GET /demo/business-intake-pipeline` - standalone public-safe intake pipeline

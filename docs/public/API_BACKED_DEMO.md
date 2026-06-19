@@ -12,6 +12,7 @@ DriveDesk now exposes:
 
 ```text
 GET /demo/public
+GET /demo/connector-certification
 GET /demo/connector-fixture-replay
 GET /demo/business-intake-pipeline
 GET /demo/business-task-handoff
@@ -28,14 +29,20 @@ GET /demo/business-scenario-replay
 the public demo shell: tenant, health, metrics, work queue, workflow stages,
 timeline entries, workflow scenarios, domain events, members, audit events,
 outbox events, adapter contracts, adapter operation scenarios, Adapter Studio,
-sync jobs, Integration Health, alert routing, incident response,
+connector certification, sync jobs, Integration Health, alert routing, incident response,
 `businessControlTower` data, `businessIntakePipeline`,
 `businessTaskHandoff`, `businessNotificationChannels`,
 `businessContextAssistant`, `businessActionExecution`,
 `businessApprovalGateway`, `integrationRuntime`, `integrationExecution`,
 `businessScenarioReplay`, recovery evidence,
-`connectorFixtureReplay`, and the `engineeringProof` contract rendered by the
+`connectorCertification`, `connectorFixtureReplay`, and the `engineeringProof` contract rendered by the
 Control Tower, Integrations, Operations, Incidents, and Proof tabs.
+
+`GET /demo/connector-certification` returns the same
+`connectorCertification` contract as a standalone endpoint. It is useful when a
+reviewer wants to inspect provider-readiness directly: provider profiles,
+certification stages, safety gates, implementation path, data boundaries, and
+linked verifier docs.
 
 `GET /demo/connector-fixture-replay` returns the same `connectorFixtureReplay`
 contract as a standalone endpoint. It is useful when a reviewer wants to inspect
@@ -112,6 +119,7 @@ risk detection -> role context -> approval-aware action plan.
 | --- | --- |
 | Static fallback | GitHub Pages loads `demo-data.js` and works without a backend. |
 | API-backed | The demo shell loads JSON from `GET /demo/public` when `?demoApi=...` is provided. |
+| Connector certification API | Smoke checks can load `GET /demo/connector-certification` directly. |
 | Replay API | The generated SDK and smoke checks can load `GET /demo/connector-fixture-replay` directly. |
 | Intake Pipeline API | Smoke checks can load `GET /demo/business-intake-pipeline` directly. |
 | Task Handoff API | Smoke checks can load `GET /demo/business-task-handoff` directly. |

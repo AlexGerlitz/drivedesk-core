@@ -85,6 +85,13 @@
         Array.isArray(payload.adapterStudio.boundaries) &&
         Array.isArray(payload.adapterStudio.diagnostics) &&
         Array.isArray(payload.adapterStudio.docs) &&
+        payload.connectorCertification &&
+        Array.isArray(payload.connectorCertification.summary) &&
+        Array.isArray(payload.connectorCertification.providerProfiles) &&
+        Array.isArray(payload.connectorCertification.certificationStages) &&
+        Array.isArray(payload.connectorCertification.certificationGates) &&
+        Array.isArray(payload.connectorCertification.implementationPath) &&
+        Array.isArray(payload.connectorCertification.dataBoundaries) &&
         payload.integrationRuntime &&
         Array.isArray(payload.integrationRuntime.summary) &&
         Array.isArray(payload.integrationRuntime.runtimeSteps) &&
@@ -606,6 +613,178 @@
 
       row.append(top, path, check);
       docRows.appendChild(row);
+    });
+  }
+
+  function fillConnectorCertification() {
+    var certification = data.connectorCertification;
+
+    var summaryRows = document.getElementById("connectorCertificationSummaryRows");
+    clear(summaryRows);
+    certification.summary.forEach(function (item) {
+      var card = document.createElement("article");
+      card.className = "metric-card";
+      card.dataset.tone = item.tone || "blue";
+
+      var label = document.createElement("span");
+      label.className = "muted";
+      label.appendChild(text(item.label));
+
+      var value = document.createElement("strong");
+      value.appendChild(text(item.value));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      card.append(label, value, detail);
+      summaryRows.appendChild(card);
+    });
+
+    var providerRows = document.getElementById("connectorCertificationProviderRows");
+    clear(providerRows);
+    certification.providerProfiles.forEach(function (profile) {
+      var row = document.createElement("article");
+      row.className = "event-row connector-certification-provider-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var name = document.createElement("strong");
+      name.appendChild(text(profile.name));
+      top.append(name, chip(profile.status, statusTone(profile.status)));
+
+      var key = document.createElement("code");
+      key.appendChild(text(profile.adapterKey));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          profile.category +
+            " / " +
+            profile.direction +
+            " - operations " +
+            profile.operationCount +
+            " - capabilities " +
+            profile.capabilityCount
+        )
+      );
+
+      var boundary = document.createElement("span");
+      boundary.className = "muted";
+      boundary.appendChild(
+        text(
+          "secret boundary " +
+            String(profile.serverSecretBoundary) +
+            " - idempotency " +
+            String(profile.idempotencyBoundary) +
+            " - recovery " +
+            String(profile.recoveryBoundary)
+        )
+      );
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(profile.evidence));
+
+      row.append(top, key, detail, boundary, evidence);
+      providerRows.appendChild(row);
+    });
+
+    var stageRows = document.getElementById("connectorCertificationStageRows");
+    clear(stageRows);
+    certification.certificationStages.forEach(function (stage) {
+      var row = document.createElement("article");
+      row.className = "event-row connector-certification-stage-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(stage.stage));
+      top.append(title, chip(stage.status, statusTone(stage.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(stage.detail));
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(stage.evidence));
+
+      row.append(top, detail, evidence);
+      stageRows.appendChild(row);
+    });
+
+    var gateRows = document.getElementById("connectorCertificationGateRows");
+    clear(gateRows);
+    certification.certificationGates.forEach(function (gate) {
+      var row = document.createElement("article");
+      row.className = "event-row connector-certification-gate-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(gate.gate));
+      top.append(title, chip(gate.status, statusTone(gate.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(gate.detail));
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(gate.evidence));
+
+      row.append(top, detail, evidence);
+      gateRows.appendChild(row);
+    });
+
+    var pathRows = document.getElementById("connectorCertificationPathRows");
+    clear(pathRows);
+    certification.implementationPath.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row connector-certification-path-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var step = document.createElement("strong");
+      step.appendChild(text(item.step));
+      top.append(step, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(item.evidence));
+
+      row.append(top, detail, evidence);
+      pathRows.appendChild(row);
+    });
+
+    var boundaryRows = document.getElementById("connectorCertificationBoundaryRows");
+    clear(boundaryRows);
+    certification.dataBoundaries.forEach(function (boundary) {
+      var row = document.createElement("article");
+      row.className = "event-row connector-certification-boundary-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var name = document.createElement("strong");
+      name.appendChild(text(boundary.name));
+      top.append(name, chip(boundary.status, statusTone(boundary.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          boundary.detail +
+            " - PII " +
+            String(boundary.containsPii) +
+            " - raw payload " +
+            String(boundary.rawPayloadIncluded)
+        )
+      );
+
+      row.append(top, detail);
+      boundaryRows.appendChild(row);
     });
   }
 
@@ -3468,11 +3647,11 @@
 
   function statusTone(status) {
     if (
-      ["done", "ready", "online", "validated", "processed", "previewed", "green", "active", "success", "observed", "matched", "mapped", "resolved", "passed", "routed", "approved", "executed", "paid", "available", "detected", "satisfied", "clean", "confirmed", "closed"].indexOf(status) >= 0
+      ["done", "ready", "online", "validated", "processed", "previewed", "green", "active", "success", "observed", "matched", "mapped", "resolved", "passed", "routed", "approved", "executed", "paid", "available", "detected", "satisfied", "clean", "confirmed", "closed", "private_ready", "contract_ready", "enforced"].indexOf(status) >= 0
     ) {
       return "green";
     }
-    if (["blocked", "waiting", "pending", "retry", "partial_success", "current", "open", "acknowledged", "warning", "attention", "review_required", "mitigating", "fired", "proposed", "suggested", "invoice_sent", "not_exported", "waiting_for_repair", "requires_channel_config", "requires_private_secret", "requires_private_provider", "requires_private_endpoint", "documented", "not_needed", "preview_only", "needs_cross_check", "action_required", "approval_required", "draft_only", "would_create", "would_enqueue", "required"].indexOf(status) >= 0) {
+    if (["blocked", "waiting", "pending", "retry", "partial_success", "current", "open", "acknowledged", "warning", "attention", "review_required", "mitigating", "fired", "proposed", "suggested", "invoice_sent", "not_exported", "waiting_for_repair", "requires_channel_config", "requires_private_secret", "requires_private_provider", "requires_private_endpoint", "documented", "not_needed", "preview_only", "needs_cross_check", "action_required", "approval_required", "draft_only", "would_create", "would_enqueue", "required", "next_private_step", "requires_approval", "separate", "synthetic_only"].indexOf(status) >= 0) {
       return "amber";
     }
     if (["high", "dead_letter", "critical"].indexOf(status) >= 0) {
@@ -3524,6 +3703,7 @@
     fillAdapterContracts();
     fillAdapterScenarios();
     fillAdapterStudio();
+    fillConnectorCertification();
     fillIntegrationRuntime();
     fillIntegrationExecution();
     fillConnectorFixtureReplay();

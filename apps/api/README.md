@@ -15,6 +15,8 @@ Demo endpoints:
 
 - `GET /demo/public` returns a read-only synthetic payload for the public demo
   shell.
+- `GET /demo/connector-certification` returns the same connector certification
+  workbench proof as a standalone synthetic contract for SDK and external checks.
 - `GET /demo/connector-fixture-replay` returns the same connector replay proof
   as a standalone synthetic contract for SDK and external checks.
 - `GET /demo/business-intake-pipeline` returns the same business intake

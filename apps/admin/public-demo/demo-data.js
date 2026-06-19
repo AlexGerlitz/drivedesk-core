@@ -3134,6 +3134,286 @@ window.DRIVEDESK_DEMO_DATA = {
       }
     ]
   },
+  "connectorCertification": {
+    "adapterCount": 4,
+    "api": {
+      "catalog": "GET /integration-adapters",
+      "execution": "GET /demo/integration-execution",
+      "fixtureReplay": "GET /demo/connector-fixture-replay",
+      "publicDemo": "GET /demo/public",
+      "runtime": "GET /demo/integration-runtime",
+      "standalone": "GET /demo/connector-certification"
+    },
+    "certificationGates": [
+      {
+        "detail": "Public certification does not call Bitrix, bank, accounting, email, Telegram, or payment APIs.",
+        "evidence": "provider_call_enabled=false",
+        "externalMutation": false,
+        "gate": "no_real_provider_call",
+        "status": "closed"
+      },
+      {
+        "detail": "Only secret reference names are exposed in generated contracts.",
+        "evidence": "server_secret_store",
+        "externalMutation": false,
+        "gate": "no_secret_value",
+        "status": "clean"
+      },
+      {
+        "detail": "Raw provider payloads and request bodies stay outside the public payload.",
+        "evidence": "raw_payload_returned=false",
+        "externalMutation": false,
+        "gate": "no_raw_payload",
+        "status": "clean"
+      },
+      {
+        "detail": "Provider-changing operations must declare idempotency keys before private rollout.",
+        "evidence": "operation_contracts.idempotency_keys",
+        "externalMutation": false,
+        "gate": "idempotent_execution",
+        "status": "required"
+      },
+      {
+        "detail": "Retry, dead-letter, and reconciliation mismatches route to operator review.",
+        "evidence": "integration.operator_review.created",
+        "externalMutation": false,
+        "gate": "operator_review",
+        "status": "armed"
+      }
+    ],
+    "certificationLevel": "public_contract_certified",
+    "certificationStages": [
+      {
+        "detail": "Adapter identity, category, direction, connection profile, and auth mode are declared.",
+        "evidence": "connector_certification.provider_profile_checked",
+        "stage": "provider_profile",
+        "status": "passed"
+      },
+      {
+        "detail": "Capabilities, failure modes, mapping requirements, and operation contracts are visible.",
+        "evidence": "connector_certification.capability_manifest_checked",
+        "stage": "capability_manifest",
+        "status": "passed"
+      },
+      {
+        "detail": "Public demo returns secret reference names and boundary metadata, never secret values.",
+        "evidence": "server_secret_store",
+        "stage": "auth_boundary",
+        "status": "clean"
+      },
+      {
+        "detail": "Synthetic fixtures cover happy path, redaction, validation, retry, dead-letter, and reconciliation.",
+        "evidence": "bash scripts/check_public_connector_fixture_replay.sh",
+        "stage": "fixture_replay",
+        "status": "validated"
+      },
+      {
+        "detail": "Operation contracts resolve into scope preflight, outbox, worker, reconciliation, and incidents.",
+        "evidence": "adapter_runtime.previewed",
+        "stage": "runtime_preview",
+        "status": "validated"
+      },
+      {
+        "detail": "Run ledger, provider-call block, retry policy, and operator closure are represented.",
+        "evidence": "integration_execution.run_ledger_prepared",
+        "stage": "execution_timeline",
+        "status": "validated"
+      },
+      {
+        "detail": "Public export, smoke, OpenAPI, SDK, and Pages checks must include this contract.",
+        "evidence": "bash scripts/public_repo_release_gate.sh",
+        "stage": "release_gate",
+        "status": "enforced"
+      }
+    ],
+    "command": "GET /demo/connector-certification",
+    "dataBoundaries": [
+      {
+        "containsPii": false,
+        "detail": "Workbench payload is generated from adapter metadata and synthetic evidence.",
+        "externalMutation": false,
+        "name": "public_demo_data",
+        "rawPayloadIncluded": false,
+        "status": "synthetic_only"
+      },
+      {
+        "containsPii": false,
+        "detail": "Browser receives certification state, not provider tokens or raw provider responses.",
+        "externalMutation": false,
+        "name": "browser_boundary",
+        "rawPayloadIncluded": false,
+        "status": "clean"
+      },
+      {
+        "containsPii": false,
+        "detail": "Real provider clients and secrets belong only in the private connector runtime.",
+        "externalMutation": false,
+        "name": "private_connector_boundary",
+        "rawPayloadIncluded": false,
+        "status": "separate"
+      }
+    ],
+    "docs": [
+      {
+        "check": "bash scripts/check_public_connector_certification.sh",
+        "label": "Connector certification",
+        "path": "docs/public/CONNECTOR_CERTIFICATION.md"
+      },
+      {
+        "check": "bash scripts/check_public_connector_fixture_replay.sh",
+        "label": "Connector fixture replay",
+        "path": "docs/public/CONNECTOR_FIXTURE_REPLAY.md"
+      },
+      {
+        "check": "bash scripts/check_public_integration_runtime.sh",
+        "label": "Integration runtime",
+        "path": "docs/public/INTEGRATION_RUNTIME.md"
+      },
+      {
+        "check": "bash scripts/check_public_integration_execution.sh",
+        "label": "Integration execution",
+        "path": "docs/public/INTEGRATION_EXECUTION.md"
+      }
+    ],
+    "implementationPath": [
+      {
+        "detail": "Implement the real provider client behind server-side secrets and the existing adapter interface.",
+        "evidence": "private_connector_only",
+        "status": "next_private_step",
+        "step": "add_private_provider_client"
+      },
+      {
+        "detail": "Attach tenant-scoped connection profile, scopes, mappings, rate limits, and retry policy.",
+        "evidence": "IntegrationConnection",
+        "status": "next_private_step",
+        "step": "bind_connection_profile"
+      },
+      {
+        "detail": "Replay public-safe fixtures plus private sandbox fixtures before enabling provider writes.",
+        "evidence": "connector_fixture_replay",
+        "status": "required",
+        "step": "run_fixture_replay"
+      },
+      {
+        "detail": "Run provider API calls in dry-run or read-only mode with audit and redaction evidence.",
+        "evidence": "adapter_runtime.previewed",
+        "status": "required",
+        "step": "enable_dry_run"
+      },
+      {
+        "detail": "Allow write-mode execution only after approval, idempotency, observability, and rollback review.",
+        "evidence": "business_approval_gateway.previewed",
+        "status": "requires_approval",
+        "step": "unlock_commit_request"
+      }
+    ],
+    "privateReadyCount": 2,
+    "providerProfiles": [
+      {
+        "adapterKey": "accounting.export.mock",
+        "capabilityCount": 5,
+        "category": "accounting_export",
+        "connectionProfileSupported": true,
+        "direction": "outbound",
+        "evidence": "connector_certification.provider_profile_checked",
+        "idempotencyBoundary": true,
+        "name": "Mock Accounting Export",
+        "operationCount": 1,
+        "publicDemoRequiresSecret": false,
+        "publicSafe": true,
+        "readyForPrivateConnector": true,
+        "recoveryBoundary": true,
+        "requiresRealProviderSecret": true,
+        "scopeBoundary": true,
+        "serverSecretBoundary": true,
+        "status": "private_ready"
+      },
+      {
+        "adapterKey": "crm.bitrix24.mock",
+        "capabilityCount": 8,
+        "category": "crm",
+        "connectionProfileSupported": true,
+        "direction": "inbound",
+        "evidence": "connector_certification.provider_profile_checked",
+        "idempotencyBoundary": true,
+        "name": "Mock Bitrix24 CRM Intake",
+        "operationCount": 2,
+        "publicDemoRequiresSecret": false,
+        "publicSafe": true,
+        "readyForPrivateConnector": true,
+        "recoveryBoundary": true,
+        "requiresRealProviderSecret": true,
+        "scopeBoundary": true,
+        "serverSecretBoundary": true,
+        "status": "private_ready"
+      },
+      {
+        "adapterKey": "file.import.fake",
+        "capabilityCount": 7,
+        "category": "file_import",
+        "connectionProfileSupported": true,
+        "direction": "inbound",
+        "evidence": "connector_certification.provider_profile_checked",
+        "idempotencyBoundary": true,
+        "name": "Synthetic File Import",
+        "operationCount": 2,
+        "publicDemoRequiresSecret": false,
+        "publicSafe": true,
+        "readyForPrivateConnector": false,
+        "recoveryBoundary": true,
+        "requiresRealProviderSecret": false,
+        "scopeBoundary": true,
+        "serverSecretBoundary": false,
+        "status": "contract_ready"
+      },
+      {
+        "adapterKey": "internal.noop",
+        "capabilityCount": 2,
+        "category": "internal",
+        "connectionProfileSupported": false,
+        "direction": "internal",
+        "evidence": "connector_certification.provider_profile_checked",
+        "idempotencyBoundary": true,
+        "name": "Internal Noop",
+        "operationCount": 1,
+        "publicDemoRequiresSecret": false,
+        "publicSafe": true,
+        "readyForPrivateConnector": false,
+        "recoveryBoundary": false,
+        "requiresRealProviderSecret": false,
+        "scopeBoundary": false,
+        "serverSecretBoundary": false,
+        "status": "contract_ready"
+      }
+    ],
+    "status": "validated",
+    "summary": [
+      {
+        "detail": "runtime catalog providers",
+        "label": "Adapters checked",
+        "tone": "blue",
+        "value": "4"
+      },
+      {
+        "detail": "profile, scope, secret boundary, idempotency",
+        "label": "Private-ready",
+        "tone": "green",
+        "value": "2"
+      },
+      {
+        "detail": "certification is public-safe and offline",
+        "label": "Provider calls",
+        "tone": "amber",
+        "value": "0"
+      },
+      {
+        "detail": "docs, fixtures, runtime, execution",
+        "label": "Evidence",
+        "tone": "violet",
+        "value": "linked"
+      }
+    ]
+  },
   "connectorFixtureReplay": {
     "boundaries": [
       {

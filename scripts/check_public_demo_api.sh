@@ -107,6 +107,9 @@ else:
 health, _ = get_json("/health")
 ready, _ = get_json("/ready")
 demo, demo_headers = get_json("/demo/public")
+connector_certification_endpoint, connector_certification_headers = get_json(
+    "/demo/connector-certification"
+)
 connector_replay_endpoint, connector_replay_headers = get_json("/demo/connector-fixture-replay")
 business_intake_endpoint, business_intake_headers = get_json("/demo/business-intake-pipeline")
 business_task_handoff_endpoint, business_task_handoff_headers = get_json("/demo/business-task-handoff")
@@ -610,6 +613,72 @@ assert {item["path"] for item in adapter_studio["docs"]} >= {
     "docs/public/ADAPTER_DEVELOPER_GUIDE.md",
     "docs/public/CLIENT_SDK.md",
     "docs/public/PROVIDER_CONNECTOR_GUIDE.md",
+}, demo
+connector_certification = demo["connectorCertification"]
+assert connector_certification_endpoint == connector_certification, connector_certification_endpoint
+assert connector_certification_headers["access-control-allow-origin"] == "*", connector_certification_headers
+assert connector_certification_headers["cache-control"] == "public, max-age=60", connector_certification_headers
+assert connector_certification["status"] == "validated", demo
+assert connector_certification["command"] == "GET /demo/connector-certification", demo
+assert connector_certification["certificationLevel"] == "public_contract_certified", demo
+assert connector_certification["adapterCount"] >= 3, demo
+assert connector_certification["privateReadyCount"] >= 2, demo
+assert {item["label"] for item in connector_certification["summary"]} >= {
+    "Adapters checked",
+    "Private-ready",
+    "Provider calls",
+    "Evidence",
+}, demo
+provider_profiles = {item["adapterKey"]: item for item in connector_certification["providerProfiles"]}
+assert {"crm.bitrix24.mock", "accounting.export.mock", "file.import.fake"}.issubset(
+    provider_profiles
+), demo
+assert provider_profiles["crm.bitrix24.mock"]["serverSecretBoundary"] is True, demo
+assert provider_profiles["crm.bitrix24.mock"]["readyForPrivateConnector"] is True, demo
+assert provider_profiles["accounting.export.mock"]["readyForPrivateConnector"] is True, demo
+assert {item["stage"] for item in connector_certification["certificationStages"]} >= {
+    "provider_profile",
+    "capability_manifest",
+    "auth_boundary",
+    "fixture_replay",
+    "runtime_preview",
+    "execution_timeline",
+    "release_gate",
+}, demo
+assert {item["gate"] for item in connector_certification["certificationGates"]} == {
+    "no_real_provider_call",
+    "no_secret_value",
+    "no_raw_payload",
+    "idempotent_execution",
+    "operator_review",
+}, demo
+assert {item["externalMutation"] for item in connector_certification["certificationGates"]} == {
+    False
+}, demo
+assert {item["step"] for item in connector_certification["implementationPath"]} >= {
+    "add_private_provider_client",
+    "bind_connection_profile",
+    "run_fixture_replay",
+    "enable_dry_run",
+    "unlock_commit_request",
+}, demo
+assert {item["name"] for item in connector_certification["dataBoundaries"]} == {
+    "public_demo_data",
+    "browser_boundary",
+    "private_connector_boundary",
+}, demo
+assert {item["containsPii"] for item in connector_certification["dataBoundaries"]} == {
+    False
+}, demo
+assert {item["rawPayloadIncluded"] for item in connector_certification["dataBoundaries"]} == {
+    False
+}, demo
+assert connector_certification["api"]["standalone"] == "GET /demo/connector-certification", demo
+assert {item["path"] for item in connector_certification["docs"]} >= {
+    "docs/public/CONNECTOR_CERTIFICATION.md",
+    "docs/public/CONNECTOR_FIXTURE_REPLAY.md",
+    "docs/public/INTEGRATION_RUNTIME.md",
+    "docs/public/INTEGRATION_EXECUTION.md",
 }, demo
 connector_replay = demo["connectorFixtureReplay"]
 assert connector_replay_endpoint == connector_replay, connector_replay_endpoint
@@ -1433,6 +1502,7 @@ assert "/tenants/{tenant_id}/integration-exports/accounting" in openapi["paths"]
 assert "/integration-adapters" in openapi["paths"], openapi["paths"].keys()
 assert "/integration-runbooks" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/public" in openapi["paths"], openapi["paths"].keys()
+assert "/demo/connector-certification" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/connector-fixture-replay" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/business-intake-pipeline" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/business-task-handoff" in openapi["paths"], openapi["paths"].keys()
@@ -1461,6 +1531,7 @@ assert "/health" in openapi["paths"], openapi["paths"].keys()
 if openapi_file.exists():
     generated = json.loads(openapi_file.read_text(encoding="utf-8"))
     assert "/demo/public" in generated["paths"], generated["paths"].keys()
+    assert "/demo/connector-certification" in generated["paths"], generated["paths"].keys()
     assert "/demo/connector-fixture-replay" in generated["paths"], generated["paths"].keys()
     assert "/demo/business-intake-pipeline" in generated["paths"], generated["paths"].keys()
     assert "/demo/business-task-handoff" in generated["paths"], generated["paths"].keys()

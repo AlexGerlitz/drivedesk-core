@@ -109,6 +109,12 @@ def test_public_demo_html_links_static_assets() -> None:
     assert 'id="adapterStudioBoundaryRows"' in html
     assert 'id="adapterStudioDiagnosticRows"' in html
     assert 'id="adapterStudioDocRows"' in html
+    assert 'id="connectorCertificationSummaryRows"' in html
+    assert 'id="connectorCertificationProviderRows"' in html
+    assert 'id="connectorCertificationStageRows"' in html
+    assert 'id="connectorCertificationGateRows"' in html
+    assert 'id="connectorCertificationPathRows"' in html
+    assert 'id="connectorCertificationBoundaryRows"' in html
     assert 'id="connectorReplaySummaryRows"' in html
     assert 'id="connectorReplayOutcomeRows"' in html
     assert 'id="connectorReplayBoundaryRows"' in html
@@ -561,6 +567,44 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
         "docs/public/ADAPTER_DEVELOPER_GUIDE.md",
         "docs/public/CLIENT_SDK.md",
         "docs/public/PROVIDER_CONNECTOR_GUIDE.md",
+    }
+    connector_certification = payload["connectorCertification"]
+    assert connector_certification["status"] == "validated"
+    assert connector_certification["command"] == "GET /demo/connector-certification"
+    assert connector_certification["certificationLevel"] == "public_contract_certified"
+    assert connector_certification["adapterCount"] >= 3
+    assert connector_certification["privateReadyCount"] >= 2
+    provider_profiles = {
+        item["adapterKey"]: item for item in connector_certification["providerProfiles"]
+    }
+    assert {"crm.bitrix24.mock", "accounting.export.mock", "file.import.fake"}.issubset(
+        provider_profiles
+    )
+    assert provider_profiles["crm.bitrix24.mock"]["serverSecretBoundary"] is True
+    assert provider_profiles["crm.bitrix24.mock"]["readyForPrivateConnector"] is True
+    assert {item["stage"] for item in connector_certification["certificationStages"]} >= {
+        "provider_profile",
+        "capability_manifest",
+        "auth_boundary",
+        "fixture_replay",
+        "runtime_preview",
+        "execution_timeline",
+        "release_gate",
+    }
+    assert {item["gate"] for item in connector_certification["certificationGates"]} == {
+        "no_real_provider_call",
+        "no_secret_value",
+        "no_raw_payload",
+        "idempotent_execution",
+        "operator_review",
+    }
+    assert {item["externalMutation"] for item in connector_certification["certificationGates"]} == {
+        False
+    }
+    assert {item["name"] for item in connector_certification["dataBoundaries"]} == {
+        "public_demo_data",
+        "browser_boundary",
+        "private_connector_boundary",
     }
     connector_replay = payload["connectorFixtureReplay"]
     assert connector_replay["status"] == "validated"
@@ -1195,6 +1239,11 @@ def test_public_demo_can_load_api_backed_data_with_static_fallback() -> None:
     assert "public secret" in script
     assert "Array.isArray(payload.adapters)" in script
     assert "Array.isArray(payload.adapterStudio.summary)" in script
+    assert "Array.isArray(payload.connectorCertification.summary)" in script
+    assert "Array.isArray(payload.connectorCertification.providerProfiles)" in script
+    assert "fillConnectorCertification" in script
+    assert "connectorCertificationProviderRows" in script
+    assert "connectorCertificationGateRows" in script
     assert "Array.isArray(payload.connectorFixtureReplay.summary)" in script
     assert "fillConnectorFixtureReplay" in script
     assert "connectorReplayOutcomeRows" in script

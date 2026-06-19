@@ -143,6 +143,26 @@
       "docs"
     ]
   },
+  "connector_certification": {
+    "method": "GET",
+    "operation_id": "connector_certification_demo_demo_connector_certification_get",
+    "path": "/demo/connector-certification",
+    "required_fields": [
+      "status",
+      "command",
+      "certificationLevel",
+      "adapterCount",
+      "privateReadyCount",
+      "summary",
+      "providerProfiles",
+      "certificationStages",
+      "certificationGates",
+      "implementationPath",
+      "dataBoundaries",
+      "api",
+      "docs"
+    ]
+  },
   "connector_replay": {
     "method": "GET",
     "operation_id": "connector_fixture_replay_demo_demo_connector_fixture_replay_get",
@@ -229,6 +249,7 @@
     "adapters",
     "adapterScenarios",
     "adapterStudio",
+    "connectorCertification",
     "integrationRuntime",
     "integrationExecution",
     "connectorFixtureReplay",

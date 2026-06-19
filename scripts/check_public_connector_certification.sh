@@ -43,6 +43,16 @@ adapter_catalog_path = root / "docs/public/INTEGRATION_ADAPTER_CATALOG.md"
 operation_contracts_path = root / "docs/public/INTEGRATION_OPERATION_CONTRACTS.md"
 platform_tour_path = root / "docs/public/PLATFORM_TOUR.md"
 api_demo_path = root / "docs/public/API_BACKED_DEMO.md"
+demo_api_path = root / "apps/api/drivedesk_api/demo.py"
+schemas_path = root / "apps/api/drivedesk_api/schemas.py"
+main_path = root / "apps/api/drivedesk_api/main.py"
+demo_app_path = root / "apps/admin/public-demo/app.js"
+demo_html_path = root / "apps/admin/public-demo/index.html"
+openapi_path = root / "docs/openapi.json"
+sdk_manifest_path = root / "sdk/generated/public-demo/openapi-client-manifest.json"
+sdk_python_path = root / "sdk/generated/public-demo/python/drivedesk_public_demo_client.py"
+sdk_javascript_path = root / "sdk/generated/public-demo/javascript/drivedesk-public-demo-client.mjs"
+sdk_typescript_path = root / "sdk/generated/public-demo/typescript/drivedesk-public-demo-client.d.ts"
 root_readme_path = root / "README.md"
 index_html_path = root / "index.html"
 private_smoke_path = root / "scripts/ci_smoke.sh"
@@ -114,6 +124,90 @@ require(payload.get("status") == "validated", "connector evidence status is not 
 require(payload.get("data_profile") == "synthetic_demo_data", "connector evidence data profile is not synthetic")
 require(payload.get("public_doc") == "docs/public/CONNECTOR_CERTIFICATION.md", "connector evidence public doc mismatch")
 require(payload.get("verifier") == "bash scripts/check_public_connector_certification.sh", "connector evidence verifier mismatch")
+
+sys.path.insert(0, str(root / "apps/api"))
+sys.path.insert(0, str(root / "apps/worker"))
+sys.path.insert(0, str(root / "packages/core"))
+from drivedesk_api.demo import build_public_demo_payload
+from drivedesk_api.main import build_app
+
+demo_payload = build_public_demo_payload()
+certification = demo_payload.get("connectorCertification", {})
+require(isinstance(certification, dict), "public demo missing connectorCertification")
+require(certification.get("status") == "validated", "connectorCertification status mismatch")
+require(
+    certification.get("command") == "GET /demo/connector-certification",
+    "connectorCertification command mismatch",
+)
+require(
+    certification.get("certificationLevel") == "public_contract_certified",
+    "connectorCertification level mismatch",
+)
+require(certification.get("adapterCount", 0) >= 3, "connectorCertification adapter count too low")
+require(certification.get("privateReadyCount", 0) >= 2, "connectorCertification private-ready count too low")
+provider_profiles = {
+    item.get("adapterKey"): item
+    for item in certification.get("providerProfiles", [])
+    if isinstance(item, dict)
+}
+for adapter_key in ["crm.bitrix24.mock", "accounting.export.mock", "file.import.fake"]:
+    require(adapter_key in provider_profiles, f"connectorCertification missing provider profile: {adapter_key}")
+require(
+    provider_profiles.get("crm.bitrix24.mock", {}).get("readyForPrivateConnector") is True,
+    "CRM connector profile should be private-ready",
+)
+require(
+    provider_profiles.get("accounting.export.mock", {}).get("readyForPrivateConnector") is True,
+    "accounting connector profile should be private-ready",
+)
+require(
+    {item.get("stage") for item in certification.get("certificationStages", []) if isinstance(item, dict)}
+    >= {
+        "provider_profile",
+        "capability_manifest",
+        "auth_boundary",
+        "fixture_replay",
+        "runtime_preview",
+        "execution_timeline",
+        "release_gate",
+    },
+    "connectorCertification stage set is incomplete",
+)
+require(
+    {item.get("gate") for item in certification.get("certificationGates", []) if isinstance(item, dict)}
+    == {
+        "no_real_provider_call",
+        "no_secret_value",
+        "no_raw_payload",
+        "idempotent_execution",
+        "operator_review",
+    },
+    "connectorCertification gate set mismatch",
+)
+require(
+    {item.get("externalMutation") for item in certification.get("certificationGates", []) if isinstance(item, dict)}
+    == {False},
+    "connectorCertification gates must not mutate external providers",
+)
+require(
+    {item.get("name") for item in certification.get("dataBoundaries", []) if isinstance(item, dict)}
+    == {"public_demo_data", "browser_boundary", "private_connector_boundary"},
+    "connectorCertification boundary set mismatch",
+)
+require(
+    certification.get("api", {}).get("standalone") == "GET /demo/connector-certification",
+    "connectorCertification standalone API mismatch",
+)
+
+openapi_live = build_app().openapi()
+require("/demo/connector-certification" in openapi_live.get("paths", {}), "live OpenAPI missing connector certification endpoint")
+required_fields = (
+    openapi_live.get("components", {})
+    .get("schemas", {})
+    .get("PublicDemoRead", {})
+    .get("required", [])
+)
+require("connectorCertification" in required_fields, "PublicDemoRead missing connectorCertification")
 
 redaction = payload.get("redaction", {})
 for key in [
@@ -222,6 +316,70 @@ for path, label in [
 ]:
     text = read(path)
     require("CONNECTOR_CERTIFICATION.md" in text, f"{label} missing connector certification link")
+
+for path, label, tokens in [
+    (
+        demo_api_path,
+        "demo API",
+        ["connectorCertification", "_public_connector_certification", "GET /demo/connector-certification"],
+    ),
+    (
+        schemas_path,
+        "schemas",
+        ["ConnectorCertificationRead", "connectorCertification"],
+    ),
+    (
+        main_path,
+        "main API",
+        ["/demo/connector-certification", "ConnectorCertificationRead"],
+    ),
+    (
+        demo_app_path,
+        "public demo app",
+        [
+            "connectorCertification",
+            "fillConnectorCertification",
+            "connectorCertificationProviderRows",
+        ],
+    ),
+    (
+        demo_html_path,
+        "public demo HTML",
+        [
+            "Connector Certification",
+            "connectorCertificationSummaryRows",
+            "connectorCertificationGateRows",
+        ],
+    ),
+    (
+        openapi_path,
+        "committed OpenAPI",
+        ["/demo/connector-certification", "ConnectorCertificationRead", "connectorCertification"],
+    ),
+    (
+        sdk_manifest_path,
+        "SDK manifest",
+        ["connector_certification", "/demo/connector-certification", "connectorCertification"],
+    ),
+    (
+        sdk_python_path,
+        "Python SDK",
+        ["get_connector_certification", "validate_connector_certification_payload"],
+    ),
+    (
+        sdk_javascript_path,
+        "JavaScript SDK",
+        ["getConnectorCertification", "validateConnectorCertificationPayload"],
+    ),
+    (
+        sdk_typescript_path,
+        "TypeScript SDK",
+        ["ConnectorCertificationPayload", "getConnectorCertification"],
+    ),
+]:
+    text = read(path)
+    for token in tokens:
+        require(token in text, f"{label} missing connector certification token: {token}")
 
 evidence_index_payload = json.loads(read(evidence_index_json_path) or "{}")
 entries = evidence_index_payload.get("entries", [])

@@ -11,6 +11,8 @@ PUBLIC_DEMO_PATH = "/demo/public"
 PUBLIC_DEMO_METHOD = "get"
 CONNECTOR_REPLAY_PATH = "/demo/connector-fixture-replay"
 CONNECTOR_REPLAY_METHOD = "get"
+CONNECTOR_CERTIFICATION_PATH = "/demo/connector-certification"
+CONNECTOR_CERTIFICATION_METHOD = "get"
 BUSINESS_INTAKE_PIPELINE_PATH = "/demo/business-intake-pipeline"
 BUSINESS_INTAKE_PIPELINE_METHOD = "get"
 BUSINESS_TASK_HANDOFF_PATH = "/demo/business-task-handoff"
@@ -49,6 +51,14 @@ def public_demo_operation(schema: dict[str, Any]) -> dict[str, Any]:
 
 def connector_replay_operation(schema: dict[str, Any]) -> dict[str, Any]:
     return required_operation(schema, CONNECTOR_REPLAY_PATH, CONNECTOR_REPLAY_METHOD)
+
+
+def connector_certification_operation(schema: dict[str, Any]) -> dict[str, Any]:
+    return required_operation(
+        schema,
+        CONNECTOR_CERTIFICATION_PATH,
+        CONNECTOR_CERTIFICATION_METHOD,
+    )
 
 
 def business_intake_pipeline_operation(schema: dict[str, Any]) -> dict[str, Any]:
@@ -140,6 +150,16 @@ def connector_replay_required_fields(schema: dict[str, Any]) -> list[str]:
     required = connector_replay.get("required", [])
     if not isinstance(required, list) or not required:
         raise SystemExit("OpenAPI schema does not contain ConnectorFixtureReplayRead.required")
+    return [str(item) for item in required]
+
+
+def connector_certification_required_fields(schema: dict[str, Any]) -> list[str]:
+    components = schema.get("components", {})
+    schemas = components.get("schemas", {})
+    certification = schemas.get("ConnectorCertificationRead", {})
+    required = certification.get("required", [])
+    if not isinstance(required, list) or not required:
+        raise SystemExit("OpenAPI schema does not contain ConnectorCertificationRead.required")
     return [str(item) for item in required]
 
 
@@ -245,11 +265,17 @@ def render_python_client(
     required_fields: list[str],
     connector_operation_id: str,
     connector_required_fields: list[str],
+    connector_certification_operation_id: str,
+    connector_certification_required_fields: list[str],
     business_scenario_operation_id: str,
     business_scenario_required_fields: list[str],
 ) -> str:
     required_json = json.dumps(required_fields, indent=2)
     connector_required_json = json.dumps(connector_required_fields, indent=2)
+    connector_certification_required_json = json.dumps(
+        connector_certification_required_fields,
+        indent=2,
+    )
     business_scenario_required_json = json.dumps(business_scenario_required_fields, indent=2)
     return f'''#!/usr/bin/env python3
 from __future__ import annotations
@@ -262,12 +288,15 @@ from typing import Any
 
 PUBLIC_DEMO_PATH = "{PUBLIC_DEMO_PATH}"
 CONNECTOR_REPLAY_PATH = "{CONNECTOR_REPLAY_PATH}"
+CONNECTOR_CERTIFICATION_PATH = "{CONNECTOR_CERTIFICATION_PATH}"
 BUSINESS_SCENARIO_REPLAY_PATH = "{BUSINESS_SCENARIO_REPLAY_PATH}"
 OPERATION_ID = "{operation_id}"
 CONNECTOR_REPLAY_OPERATION_ID = "{connector_operation_id}"
+CONNECTOR_CERTIFICATION_OPERATION_ID = "{connector_certification_operation_id}"
 BUSINESS_SCENARIO_REPLAY_OPERATION_ID = "{business_scenario_operation_id}"
 REQUIRED_FIELDS = {required_json}
 CONNECTOR_REPLAY_REQUIRED_FIELDS = {connector_required_json}
+CONNECTOR_CERTIFICATION_REQUIRED_FIELDS = {connector_certification_required_json}
 BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS = {business_scenario_required_json}
 
 
@@ -286,6 +315,11 @@ class DriveDeskPublicDemoClient:
     def get_connector_fixture_replay(self) -> dict[str, Any]:
         payload = self._get_json(CONNECTOR_REPLAY_PATH)
         validate_connector_fixture_replay_payload(payload)
+        return payload
+
+    def get_connector_certification(self) -> dict[str, Any]:
+        payload = self._get_json(CONNECTOR_CERTIFICATION_PATH)
+        validate_connector_certification_payload(payload)
         return payload
 
     def get_business_scenario_replay(self) -> dict[str, Any]:
@@ -514,6 +548,47 @@ def validate_connector_fixture_replay_payload(payload: dict[str, Any]) -> None:
         raise ValueError("connector replay docs are missing or too short")
 
 
+def validate_connector_certification_payload(payload: dict[str, Any]) -> None:
+    missing = [field for field in CONNECTOR_CERTIFICATION_REQUIRED_FIELDS if field not in payload]
+    if missing:
+        raise ValueError(f"missing connector certification fields: {{', '.join(missing)}}")
+
+    if payload.get("status") != "validated":
+        raise ValueError(f"unexpected connector certification status: {{payload.get('status')}}")
+
+    if payload.get("command") != f"GET {{CONNECTOR_CERTIFICATION_PATH}}":
+        raise ValueError(f"unexpected connector certification command: {{payload.get('command')}}")
+
+    if payload.get("certificationLevel") != "public_contract_certified":
+        raise ValueError(
+            f"unexpected connector certification level: {{payload.get('certificationLevel')}}"
+        )
+
+    profiles = payload.get("providerProfiles")
+    if not isinstance(profiles, list) or len(profiles) < 3:
+        raise ValueError("connector certification provider profiles are missing or too short")
+
+    provider_keys = {{item.get("adapterKey") for item in profiles if isinstance(item, dict)}}
+    required_keys = {{"crm.bitrix24.mock", "accounting.export.mock", "file.import.fake"}}
+    if not required_keys.issubset(provider_keys):
+        raise ValueError(f"connector certification provider keys missing: {{sorted(required_keys - provider_keys)}}")
+
+    stages = payload.get("certificationStages")
+    if not isinstance(stages, list) or len(stages) < 6:
+        raise ValueError("connector certification stages are missing or too short")
+
+    gates = payload.get("certificationGates")
+    if not isinstance(gates, list) or len(gates) < 5:
+        raise ValueError("connector certification gates are missing or too short")
+
+    if any(item.get("externalMutation") is not False for item in gates if isinstance(item, dict)):
+        raise ValueError("connector certification gate must not mutate external providers")
+
+    boundaries = payload.get("dataBoundaries")
+    if not isinstance(boundaries, list) or len(boundaries) < 3:
+        raise ValueError("connector certification data boundaries are missing or too short")
+
+
 def validate_business_scenario_replay_payload(payload: dict[str, Any]) -> None:
     missing = [field for field in BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS if field not in payload]
     if missing:
@@ -706,6 +781,11 @@ def validate_public_demo_payload(payload: dict[str, Any]) -> None:
         raise ValueError("connectorFixtureReplay is missing")
     validate_connector_fixture_replay_payload(connector_replay)
 
+    connector_certification = payload.get("connectorCertification")
+    if not isinstance(connector_certification, dict):
+        raise ValueError("connectorCertification is missing")
+    validate_connector_certification_payload(connector_certification)
+
     business_scenario_replay = payload.get("businessScenarioReplay")
     if not isinstance(business_scenario_replay, dict):
         raise ValueError("businessScenarioReplay is missing")
@@ -765,6 +845,7 @@ def main() -> None:
     client = DriveDeskPublicDemoClient(args.base_url)
     payload = client.get_public_demo()
     connector_replay = client.get_connector_fixture_replay()
+    connector_certification = client.get_connector_certification()
     business_scenario_replay = client.get_business_scenario_replay()
     adapter_plan = build_adapter_operation_plan(payload, "adapter-file-import-preview")
     print(
@@ -774,9 +855,11 @@ def main() -> None:
         f"workflow={{payload['workflow']['currentStage']}}",
         f"adapterPlan={{adapter_plan['phase']}}",
         f"connectorReplay={{connector_replay['status']}}",
+        f"connectorCertification={{connector_certification['certificationLevel']}}",
         f"businessScenarioReplay={{business_scenario_replay['status']}}",
         f"operation={{OPERATION_ID}}",
         f"connectorOperation={{CONNECTOR_REPLAY_OPERATION_ID}}",
+        f"connectorCertificationOperation={{CONNECTOR_CERTIFICATION_OPERATION_ID}}",
         f"businessScenarioOperation={{BUSINESS_SCENARIO_REPLAY_OPERATION_ID}}",
     )
 
@@ -791,23 +874,32 @@ def render_javascript_client(
     required_fields: list[str],
     connector_operation_id: str,
     connector_required_fields: list[str],
+    connector_certification_operation_id: str,
+    connector_certification_required_fields: list[str],
     business_scenario_operation_id: str,
     business_scenario_required_fields: list[str],
 ) -> str:
     required_json = json.dumps(required_fields, indent=2)
     connector_required_json = json.dumps(connector_required_fields, indent=2)
+    connector_certification_required_json = json.dumps(
+        connector_certification_required_fields,
+        indent=2,
+    )
     business_scenario_required_json = json.dumps(business_scenario_required_fields, indent=2)
     return f'''#!/usr/bin/env node
 import {{ pathToFileURL }} from "node:url";
 
 export const PUBLIC_DEMO_PATH = "{PUBLIC_DEMO_PATH}";
 export const CONNECTOR_REPLAY_PATH = "{CONNECTOR_REPLAY_PATH}";
+export const CONNECTOR_CERTIFICATION_PATH = "{CONNECTOR_CERTIFICATION_PATH}";
 export const BUSINESS_SCENARIO_REPLAY_PATH = "{BUSINESS_SCENARIO_REPLAY_PATH}";
 export const OPERATION_ID = "{operation_id}";
 export const CONNECTOR_REPLAY_OPERATION_ID = "{connector_operation_id}";
+export const CONNECTOR_CERTIFICATION_OPERATION_ID = "{connector_certification_operation_id}";
 export const BUSINESS_SCENARIO_REPLAY_OPERATION_ID = "{business_scenario_operation_id}";
 export const REQUIRED_FIELDS = {required_json};
 export const CONNECTOR_REPLAY_REQUIRED_FIELDS = {connector_required_json};
+export const CONNECTOR_CERTIFICATION_REQUIRED_FIELDS = {connector_certification_required_json};
 export const BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS = {business_scenario_required_json};
 
 export class DriveDeskPublicDemoClient {{
@@ -848,6 +940,22 @@ export class DriveDeskPublicDemoClient {{
 
     const payload = await response.json();
     validateConnectorFixtureReplayPayload(payload);
+    return payload;
+  }}
+
+  async getConnectorCertification() {{
+    const response = await this.fetchImpl(`${{this.baseUrl}}${{CONNECTOR_CERTIFICATION_PATH}}`, {{
+      headers: {{
+        Accept: "application/json",
+      }},
+    }});
+
+    if (!response.ok) {{
+      throw new Error(`GET ${{CONNECTOR_CERTIFICATION_PATH}} failed: ${{response.status}}`);
+    }}
+
+    const payload = await response.json();
+    validateConnectorCertificationPayload(payload);
     return payload;
   }}
 
@@ -1095,6 +1203,52 @@ export function validateConnectorFixtureReplayPayload(payload) {{
   }}
 }}
 
+export function validateConnectorCertificationPayload(payload) {{
+  const missing = CONNECTOR_CERTIFICATION_REQUIRED_FIELDS.filter((field) => !(field in (payload || {{}})));
+  if (missing.length > 0) {{
+    throw new Error(`missing connector certification fields: ${{missing.join(", ")}}`);
+  }}
+
+  if (payload.status !== "validated") {{
+    throw new Error(`unexpected connector certification status: ${{payload.status}}`);
+  }}
+
+  if (payload.command !== `GET ${{CONNECTOR_CERTIFICATION_PATH}}`) {{
+    throw new Error(`unexpected connector certification command: ${{payload.command}}`);
+  }}
+
+  if (payload.certificationLevel !== "public_contract_certified") {{
+    throw new Error(`unexpected connector certification level: ${{payload.certificationLevel}}`);
+  }}
+
+  if (!Array.isArray(payload.providerProfiles) || payload.providerProfiles.length < 3) {{
+    throw new Error("connector certification provider profiles are missing or too short");
+  }}
+
+  const providerKeys = new Set(payload.providerProfiles.map((item) => item?.adapterKey));
+  for (const requiredKey of ["crm.bitrix24.mock", "accounting.export.mock", "file.import.fake"]) {{
+    if (!providerKeys.has(requiredKey)) {{
+      throw new Error(`connector certification provider key missing: ${{requiredKey}}`);
+    }}
+  }}
+
+  if (!Array.isArray(payload.certificationStages) || payload.certificationStages.length < 6) {{
+    throw new Error("connector certification stages are missing or too short");
+  }}
+
+  if (!Array.isArray(payload.certificationGates) || payload.certificationGates.length < 5) {{
+    throw new Error("connector certification gates are missing or too short");
+  }}
+
+  if (payload.certificationGates.some((item) => item?.externalMutation !== false)) {{
+    throw new Error("connector certification gates must not mutate external providers");
+  }}
+
+  if (!Array.isArray(payload.dataBoundaries) || payload.dataBoundaries.length < 3) {{
+    throw new Error("connector certification data boundaries are missing or too short");
+  }}
+}}
+
 export function validateBusinessScenarioReplayPayload(payload) {{
   const missing = BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS.filter((field) => !(field in payload));
   if (missing.length > 0) {{
@@ -1280,6 +1434,11 @@ export function validatePublicDemoPayload(payload) {{
   }}
   validateConnectorFixtureReplayPayload(payload.connectorFixtureReplay);
 
+  if (!payload.connectorCertification || typeof payload.connectorCertification !== "object") {{
+    throw new Error("connectorCertification is missing");
+  }}
+  validateConnectorCertificationPayload(payload.connectorCertification);
+
   if (!payload.businessScenarioReplay || typeof payload.businessScenarioReplay !== "object") {{
     throw new Error("businessScenarioReplay is missing");
   }}
@@ -1344,6 +1503,7 @@ async function main() {{
   const client = new DriveDeskPublicDemoClient(baseUrl);
   const payload = await client.getPublicDemo();
   const connectorReplay = await client.getConnectorFixtureReplay();
+  const connectorCertification = await client.getConnectorCertification();
   const businessScenarioReplay = await client.getBusinessScenarioReplay();
   const adapterPlan = buildAdapterOperationPlan(payload, "adapter-file-import-preview");
   console.log(
@@ -1353,9 +1513,11 @@ async function main() {{
     `workflow=${{payload.workflow.currentStage}}`,
     `adapterPlan=${{adapterPlan.phase}}`,
     `connectorReplay=${{connectorReplay.status}}`,
+    `connectorCertification=${{connectorCertification.certificationLevel}}`,
     `businessScenarioReplay=${{businessScenarioReplay.status}}`,
     `operation=${{OPERATION_ID}}`,
     `connectorOperation=${{CONNECTOR_REPLAY_OPERATION_ID}}`,
+    `connectorCertificationOperation=${{CONNECTOR_CERTIFICATION_OPERATION_ID}}`,
     `businessScenarioOperation=${{BUSINESS_SCENARIO_REPLAY_OPERATION_ID}}`,
   );
 }}
@@ -1374,23 +1536,31 @@ def render_typescript_defs(
     required_fields: list[str],
     connector_operation_id: str,
     connector_required_fields: list[str],
+    connector_certification_operation_id: str,
+    connector_certification_required_fields: list[str],
     business_scenario_operation_id: str,
     business_scenario_required_fields: list[str],
 ) -> str:
     required_union = " | ".join(f'"{field}"' for field in required_fields)
     connector_required_union = " | ".join(f'"{field}"' for field in connector_required_fields)
+    connector_certification_required_union = " | ".join(
+        f'"{field}"' for field in connector_certification_required_fields
+    )
     business_scenario_required_union = " | ".join(
         f'"{field}"' for field in business_scenario_required_fields
     )
     return f'''// Generated from DriveDesk Core OpenAPI. Do not edit by hand.
 export const PUBLIC_DEMO_PATH: "{PUBLIC_DEMO_PATH}";
 export const CONNECTOR_REPLAY_PATH: "{CONNECTOR_REPLAY_PATH}";
+export const CONNECTOR_CERTIFICATION_PATH: "{CONNECTOR_CERTIFICATION_PATH}";
 export const BUSINESS_SCENARIO_REPLAY_PATH: "{BUSINESS_SCENARIO_REPLAY_PATH}";
 export const OPERATION_ID: "{operation_id}";
 export const CONNECTOR_REPLAY_OPERATION_ID: "{connector_operation_id}";
+export const CONNECTOR_CERTIFICATION_OPERATION_ID: "{connector_certification_operation_id}";
 export const BUSINESS_SCENARIO_REPLAY_OPERATION_ID: "{business_scenario_operation_id}";
 export const REQUIRED_FIELDS: Array<{required_union}>;
 export const CONNECTOR_REPLAY_REQUIRED_FIELDS: Array<{connector_required_union}>;
+export const CONNECTOR_CERTIFICATION_REQUIRED_FIELDS: Array<{connector_certification_required_union}>;
 export const BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS: Array<{business_scenario_required_union}>;
 
 export type AdapterScenarioPhase = "preview" | "execute" | "retry" | "operator_review";
@@ -1448,6 +1618,22 @@ export interface ConnectorFixtureReplayPayload {{
   docs: Array<Record<string, string>>;
 }}
 
+export interface ConnectorCertificationPayload {{
+  status: "validated";
+  command: string;
+  certificationLevel: "public_contract_certified";
+  adapterCount: number;
+  privateReadyCount: number;
+  summary: Array<Record<string, unknown>>;
+  providerProfiles: Array<Record<string, unknown>>;
+  certificationStages: Array<Record<string, unknown>>;
+  certificationGates: Array<Record<string, unknown>>;
+  implementationPath: Array<Record<string, unknown>>;
+  dataBoundaries: Array<Record<string, unknown>>;
+  api: Record<string, string>;
+  docs: Array<Record<string, string>>;
+}}
+
 export interface BusinessScenarioReplayPayload {{
   status: "validated";
   command: string;
@@ -1486,6 +1672,7 @@ export interface PublicDemoPayload {{
   adapters: Array<Record<string, string>>;
   adapterScenarios: AdapterScenario[];
   adapterStudio: Record<string, unknown>;
+  connectorCertification: ConnectorCertificationPayload;
   connectorFixtureReplay: ConnectorFixtureReplayPayload;
   integrationJobs: Array<Record<string, unknown>>;
   integrationHealth: Array<Record<string, string>>;
@@ -1538,6 +1725,7 @@ export class DriveDeskPublicDemoClient {{
   constructor(baseUrl?: string, options?: {{ fetchImpl?: typeof fetch }});
   getPublicDemo(): Promise<PublicDemoPayload>;
   getConnectorFixtureReplay(): Promise<ConnectorFixtureReplayPayload>;
+  getConnectorCertification(): Promise<ConnectorCertificationPayload>;
   getBusinessScenarioReplay(): Promise<BusinessScenarioReplayPayload>;
   getAdapterOperationPlan(
     scenarioId: string,
@@ -1553,6 +1741,7 @@ export function buildAdapterOperationPlan(
 ): AdapterOperationPlan;
 export function validatePublicDemoPayload(payload: PublicDemoPayload): void;
 export function validateConnectorFixtureReplayPayload(payload: ConnectorFixtureReplayPayload): void;
+export function validateConnectorCertificationPayload(payload: ConnectorCertificationPayload): void;
 export function validateBusinessScenarioReplayPayload(payload: BusinessScenarioReplayPayload): void;
 '''
 
@@ -1560,6 +1749,7 @@ export function validateBusinessScenarioReplayPayload(payload: BusinessScenarioR
 def render_readme(
     operation_id: str,
     connector_operation_id: str,
+    connector_certification_operation_id: str,
     business_notification_channels_operation_id: str,
     business_context_assistant_operation_id: str,
     business_action_execution_operation_id: str,
@@ -1590,6 +1780,9 @@ operationId: {operation_id}
 
 GET {CONNECTOR_REPLAY_PATH}
 operationId: {connector_operation_id}
+
+GET {CONNECTOR_CERTIFICATION_PATH}
+operationId: {connector_certification_operation_id}
 
 GET {BUSINESS_NOTIFICATION_CHANNELS_PATH}
 operationId: {business_notification_channels_operation_id}
@@ -1627,6 +1820,10 @@ Adapter operation helpers:
 - `DriveDeskPublicDemoClient.get_adapter_operation_plan`
 - `DriveDeskPublicDemoClient.getConnectorFixtureReplay`
 - `DriveDeskPublicDemoClient.get_connector_fixture_replay`
+- `DriveDeskPublicDemoClient.getConnectorCertification`
+- `DriveDeskPublicDemoClient.get_connector_certification`
+- `connector_certification` manifest entry for
+  `GET {CONNECTOR_CERTIFICATION_PATH}`
 - `business_notification_channels` manifest entry for
   `GET {BUSINESS_NOTIFICATION_CHANNELS_PATH}`
 - `business_context_assistant` manifest entry for
@@ -1649,6 +1846,10 @@ operator-review flows. They do not mutate the public demo.
 Connector fixture replay helpers validate the public-safe replay evidence as a
 standalone API contract: fixture groups, redaction outcomes, boundaries, and
 review docs.
+
+Connector certification helpers validate the public-safe provider-readiness
+workbench: provider profiles, certification stages, gates, implementation path,
+data boundaries, and review docs.
 
 Business scenario replay helpers validate the Business OS scenario contract:
 source systems, normalized facts, recommended actions, automation boundaries,
@@ -1690,6 +1891,8 @@ def render_manifest(
     required_fields: list[str],
     connector_operation_id: str,
     connector_required_fields: list[str],
+    connector_certification_operation_id: str,
+    connector_certification_required_fields: list[str],
     business_intake_operation_id: str,
     business_intake_required_fields: list[str],
     business_task_handoff_operation_id: str,
@@ -1720,6 +1923,12 @@ def render_manifest(
             "method": CONNECTOR_REPLAY_METHOD.upper(),
             "operation_id": connector_operation_id,
             "required_fields": connector_required_fields,
+        },
+        "connector_certification": {
+            "path": CONNECTOR_CERTIFICATION_PATH,
+            "method": CONNECTOR_CERTIFICATION_METHOD.upper(),
+            "operation_id": connector_certification_operation_id,
+            "required_fields": connector_certification_required_fields,
         },
         "business_intake_pipeline": {
             "path": BUSINESS_INTAKE_PIPELINE_PATH,
@@ -1808,6 +2017,11 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
         connector_operation.get("operationId") or "get_connector_fixture_replay"
     )
     connector_required_fields = connector_replay_required_fields(schema)
+    connector_certification_op = connector_certification_operation(schema)
+    connector_certification_operation_id = str(
+        connector_certification_op.get("operationId") or "get_connector_certification"
+    )
+    connector_certification_fields = connector_certification_required_fields(schema)
     business_intake_operation = business_intake_pipeline_operation(schema)
     business_intake_operation_id = str(
         business_intake_operation.get("operationId") or "get_business_intake_pipeline"
@@ -1863,6 +2077,7 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
         render_readme(
             operation_id,
             connector_operation_id,
+            connector_certification_operation_id,
             business_notification_channels_operation_id,
             business_context_assistant_operation_id,
             business_action_execution_operation_id,
@@ -1879,6 +2094,8 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
             required_fields,
             connector_operation_id,
             connector_required_fields,
+            connector_certification_operation_id,
+            connector_certification_fields,
             business_intake_operation_id,
             business_intake_required_fields,
             business_task_handoff_operation_id,
@@ -1906,6 +2123,8 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
             required_fields,
             connector_operation_id,
             connector_required_fields,
+            connector_certification_operation_id,
+            connector_certification_fields,
             business_scenario_operation_id,
             business_scenario_required_fields,
         ),
@@ -1917,6 +2136,8 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
             required_fields,
             connector_operation_id,
             connector_required_fields,
+            connector_certification_operation_id,
+            connector_certification_fields,
             business_scenario_operation_id,
             business_scenario_required_fields,
         ),
@@ -1928,6 +2149,8 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
             required_fields,
             connector_operation_id,
             connector_required_fields,
+            connector_certification_operation_id,
+            connector_certification_fields,
             business_scenario_operation_id,
             business_scenario_required_fields,
         ),

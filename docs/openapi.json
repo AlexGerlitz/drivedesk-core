@@ -3930,6 +3930,113 @@
         "title": "BusinessWorkbenchContextPreviewRead",
         "type": "object"
       },
+      "ConnectorCertificationRead": {
+        "properties": {
+          "adapterCount": {
+            "title": "Adaptercount",
+            "type": "integer"
+          },
+          "api": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Api",
+            "type": "object"
+          },
+          "certificationGates": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Certificationgates",
+            "type": "array"
+          },
+          "certificationLevel": {
+            "title": "Certificationlevel",
+            "type": "string"
+          },
+          "certificationStages": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Certificationstages",
+            "type": "array"
+          },
+          "command": {
+            "title": "Command",
+            "type": "string"
+          },
+          "dataBoundaries": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Databoundaries",
+            "type": "array"
+          },
+          "docs": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "title": "Docs",
+            "type": "array"
+          },
+          "implementationPath": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Implementationpath",
+            "type": "array"
+          },
+          "privateReadyCount": {
+            "title": "Privatereadycount",
+            "type": "integer"
+          },
+          "providerProfiles": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Providerprofiles",
+            "type": "array"
+          },
+          "status": {
+            "const": "validated",
+            "title": "Status",
+            "type": "string"
+          },
+          "summary": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Summary",
+            "type": "array"
+          }
+        },
+        "required": [
+          "status",
+          "command",
+          "certificationLevel",
+          "adapterCount",
+          "privateReadyCount",
+          "summary",
+          "providerProfiles",
+          "certificationStages",
+          "certificationGates",
+          "implementationPath",
+          "dataBoundaries",
+          "api",
+          "docs"
+        ],
+        "title": "ConnectorCertificationRead",
+        "type": "object"
+      },
       "ConnectorFixtureReplayRead": {
         "properties": {
           "boundaries": {
@@ -6130,6 +6237,11 @@
             "title": "Businesstaskhandoff",
             "type": "object"
           },
+          "connectorCertification": {
+            "additionalProperties": true,
+            "title": "Connectorcertification",
+            "type": "object"
+          },
           "connectorFixtureReplay": {
             "additionalProperties": true,
             "title": "Connectorfixturereplay",
@@ -6306,6 +6418,7 @@
           "adapters",
           "adapterScenarios",
           "adapterStudio",
+          "connectorCertification",
           "integrationRuntime",
           "integrationExecution",
           "connectorFixtureReplay",
@@ -7524,6 +7637,27 @@
           }
         },
         "summary": "Business Task Handoff Demo",
+        "tags": [
+          "demo"
+        ]
+      }
+    },
+    "/demo/connector-certification": {
+      "get": {
+        "operationId": "connector_certification_demo_demo_connector_certification_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectorCertificationRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Connector Certification Demo",
         "tags": [
           "demo"
         ]

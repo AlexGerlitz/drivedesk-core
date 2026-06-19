@@ -965,6 +965,22 @@ class ConnectorFixtureReplayRead(BaseModel):
     docs: list[dict[str, str]]
 
 
+class ConnectorCertificationRead(BaseModel):
+    status: Literal["validated"]
+    command: str
+    certificationLevel: str
+    adapterCount: int
+    privateReadyCount: int
+    summary: list[dict[str, Any]]
+    providerProfiles: list[dict[str, Any]]
+    certificationStages: list[dict[str, Any]]
+    certificationGates: list[dict[str, Any]]
+    implementationPath: list[dict[str, Any]]
+    dataBoundaries: list[dict[str, Any]]
+    api: dict[str, str]
+    docs: list[dict[str, str]]
+
+
 class BusinessScenarioReplayRead(BaseModel):
     status: Literal["validated"]
     command: str
@@ -1118,6 +1134,7 @@ class PublicDemoRead(BaseModel):
     adapters: list[dict[str, Any]]
     adapterScenarios: list[dict[str, Any]]
     adapterStudio: dict[str, Any]
+    connectorCertification: dict[str, Any]
     integrationRuntime: dict[str, Any]
     integrationExecution: dict[str, Any]
     connectorFixtureReplay: dict[str, Any]

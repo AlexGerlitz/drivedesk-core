@@ -140,6 +140,20 @@
         Array.isArray(payload.businessControlTower.exceptions) &&
         Array.isArray(payload.businessControlTower.repairActions) &&
         Array.isArray(payload.businessControlTower.flow) &&
+        payload.businessIntakePipeline &&
+        Array.isArray(payload.businessIntakePipeline.summary) &&
+        Array.isArray(payload.businessIntakePipeline.sourceSystems) &&
+        Array.isArray(payload.businessIntakePipeline.intakePreviews) &&
+        payload.businessIntakePipeline.workbench &&
+        Array.isArray(payload.businessIntakePipeline.workbench.contextCards) &&
+        payload.businessIntakePipeline.detections &&
+        Array.isArray(payload.businessIntakePipeline.detections.detectedExceptions) &&
+        Array.isArray(payload.businessIntakePipeline.detections.suggestedRepairActions) &&
+        payload.businessIntakePipeline.actionPlan &&
+        Array.isArray(payload.businessIntakePipeline.actionPlan.steps) &&
+        Array.isArray(payload.businessIntakePipeline.actionPlan.approvalGates) &&
+        payload.businessIntakePipeline.notifications &&
+        Array.isArray(payload.businessIntakePipeline.dataBoundaries) &&
         payload.businessScenarioReplay &&
         Array.isArray(payload.businessScenarioReplay.summary) &&
         Array.isArray(payload.businessScenarioReplay.scenarios) &&
@@ -1034,6 +1048,190 @@
 
       row.append(top, detail, evidence);
       runbookRows.appendChild(row);
+    });
+  }
+
+  function fillBusinessIntakePipeline() {
+    var pipeline = data.businessIntakePipeline;
+
+    var summaryRows = document.getElementById("businessIntakeSummaryRows");
+    clear(summaryRows);
+    pipeline.summary.forEach(function (item) {
+      var card = document.createElement("article");
+      card.className = "metric-card";
+      card.dataset.tone = item.tone || "blue";
+
+      var label = document.createElement("span");
+      label.className = "muted";
+      label.appendChild(text(item.label));
+
+      var value = document.createElement("strong");
+      value.appendChild(text(item.value));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      card.append(label, value, detail);
+      summaryRows.appendChild(card);
+    });
+
+    var intakeRows = document.getElementById("businessIntakeRows");
+    clear(intakeRows);
+    pipeline.intakePreviews.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(item.providerKey));
+      top.append(title, chip(item.state, statusTone(item.state)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          item.sourceType +
+            " - safe keys " +
+            Object.keys(item.safePayload || {}).join(", ") +
+            " - dropped " +
+            (item.droppedKeys || []).join(", ")
+        )
+      );
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(item.evidence));
+
+      row.append(top, detail, evidence);
+      intakeRows.appendChild(row);
+    });
+
+    var workbenchRows = document.getElementById("businessIntakeWorkbenchRows");
+    clear(workbenchRows);
+    pipeline.workbench.contextCards.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(item.title));
+      top.append(title, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          item.systemFamily +
+            " - " +
+            item.state +
+            " - PII " +
+            String(item.piiIncluded) +
+            " - external mutation " +
+            String(item.externalMutation)
+        )
+      );
+
+      row.append(top, detail);
+      workbenchRows.appendChild(row);
+    });
+
+    pipeline.workbench.suggestedActions.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var action = document.createElement("strong");
+      action.appendChild(text(item.action));
+      top.append(action, chip(item.status, statusTone(item.status)));
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(item.evidence));
+
+      row.append(top, evidence);
+      workbenchRows.appendChild(row);
+    });
+
+    var actionRows = document.getElementById("businessIntakeActionRows");
+    clear(actionRows);
+    (pipeline.detections.detectedExceptions || []).forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(item.exceptionType));
+      top.append(title, chip(item.severity, statusTone(item.severity)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.subject + " - would create " + item.wouldCreate));
+
+      row.append(top, detail);
+      actionRows.appendChild(row);
+    });
+
+    pipeline.actionPlan.steps.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var step = document.createElement("strong");
+      step.appendChild(text(item.step));
+      top.append(step, chip(item.status, statusTone(item.status)));
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(item.evidence));
+
+      row.append(top, evidence);
+      actionRows.appendChild(row);
+    });
+
+    pipeline.actionPlan.approvalGates.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var gate = document.createElement("strong");
+      gate.appendChild(text(item.gate));
+      top.append(gate, chip(item.status, statusTone(item.status)));
+
+      row.appendChild(top);
+      actionRows.appendChild(row);
+    });
+
+    var boundaryRows = document.getElementById("businessIntakeBoundaryRows");
+    clear(boundaryRows);
+    pipeline.dataBoundaries.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var name = document.createElement("strong");
+      name.appendChild(text(item.name));
+      top.append(name, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          "external fetch " +
+            String(Boolean(item.externalFetch)) +
+            " - external mutation " +
+            String(Boolean(item.externalMutation)) +
+            " - PII " +
+            String(Boolean(item.piiIncluded))
+        )
+      );
+
+      row.append(top, detail);
+      boundaryRows.appendChild(row);
     });
   }
 
@@ -2158,11 +2356,11 @@
 
   function statusTone(status) {
     if (
-      ["done", "ready", "online", "validated", "processed", "green", "active", "success", "observed", "matched", "mapped", "resolved", "passed", "routed", "approved", "executed", "paid", "available", "detected", "satisfied", "clean", "confirmed"].indexOf(status) >= 0
+      ["done", "ready", "online", "validated", "processed", "previewed", "green", "active", "success", "observed", "matched", "mapped", "resolved", "passed", "routed", "approved", "executed", "paid", "available", "detected", "satisfied", "clean", "confirmed", "closed"].indexOf(status) >= 0
     ) {
       return "green";
     }
-    if (["blocked", "waiting", "pending", "retry", "partial_success", "current", "open", "acknowledged", "warning", "attention", "review_required", "mitigating", "fired", "proposed", "suggested", "invoice_sent", "not_exported", "waiting_for_repair", "requires_channel_config", "preview_only", "needs_cross_check", "action_required"].indexOf(status) >= 0) {
+    if (["blocked", "waiting", "pending", "retry", "partial_success", "current", "open", "acknowledged", "warning", "attention", "review_required", "mitigating", "fired", "proposed", "suggested", "invoice_sent", "not_exported", "waiting_for_repair", "requires_channel_config", "preview_only", "needs_cross_check", "action_required", "approval_required", "draft_only"].indexOf(status) >= 0) {
       return "amber";
     }
     if (["high", "dead_letter", "critical"].indexOf(status) >= 0) {
@@ -2225,6 +2423,7 @@
     fillAlertRouting();
     fillIncidentResponse();
     fillBusinessControlTower();
+    fillBusinessIntakePipeline();
     fillBusinessScenarioReplay();
     fillEngineeringProof();
   }

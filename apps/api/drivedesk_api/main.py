@@ -81,6 +81,9 @@ from drivedesk_api.schemas import (
     BusinessExceptionCreate,
     BusinessExceptionRead,
     BusinessExceptionStatusChange,
+    BusinessIntakePipelineDemoRead,
+    BusinessIntakePipelinePreviewCreate,
+    BusinessIntakePipelinePreviewRead,
     BusinessNotificationPreviewCreate,
     BusinessNotificationPreviewRead,
     BusinessProviderIntakePreviewCreate,
@@ -180,6 +183,7 @@ from drivedesk_api.services import (
     preview_business_action_plan,
     preview_business_detections,
     preview_business_escalations,
+    preview_business_intake_pipeline,
     preview_business_notifications,
     preview_business_provider_intake,
     preview_business_workbench_context,
@@ -283,6 +287,20 @@ def build_app(settings: Settings | None = None) -> FastAPI:
     async def business_scenario_replay_demo() -> JSONResponse:
         return JSONResponse(
             build_public_demo_payload()["businessScenarioReplay"],
+            headers={
+                "Access-Control-Allow-Origin": "*",
+                "Cache-Control": "public, max-age=60",
+            },
+        )
+
+    @api.get(
+        "/demo/business-intake-pipeline",
+        response_model=BusinessIntakePipelineDemoRead,
+        tags=["demo"],
+    )
+    async def business_intake_pipeline_demo() -> JSONResponse:
+        return JSONResponse(
+            build_public_demo_payload()["businessIntakePipeline"],
             headers={
                 "Access-Control-Allow-Origin": "*",
                 "Cache-Control": "public, max-age=60",
@@ -1014,6 +1032,21 @@ def build_app(settings: Settings | None = None) -> FastAPI:
         await ensure_tenant_exists(session, tenant_id)
         require_tenant_permission(actor, tenant_id, Permission.BUSINESS_RECORD_READ)
         return await preview_business_provider_intake(session, tenant_id=tenant_id, payload=payload)
+
+    @api.post(
+        "/tenants/{tenant_id}/business-intake-pipeline/preview",
+        response_model=BusinessIntakePipelinePreviewRead,
+        tags=["business-control"],
+    )
+    async def preview_business_intake_pipeline_endpoint(
+        tenant_id: str,
+        payload: BusinessIntakePipelinePreviewCreate,
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> dict[str, object]:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.BUSINESS_RECORD_READ)
+        return await preview_business_intake_pipeline(session, tenant_id=tenant_id, payload=payload)
 
     @api.post(
         "/tenants/{tenant_id}/business-workbench-context/preview",

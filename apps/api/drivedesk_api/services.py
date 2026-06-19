@@ -36,6 +36,7 @@ from drivedesk_api.schemas import (
     BusinessBriefingPreviewCreate,
     BusinessDetectionPreviewCreate,
     BusinessEscalationPreviewCreate,
+    BusinessIntakePipelinePreviewCreate,
     BusinessNotificationPreviewCreate,
     BusinessProviderIntakePreviewCreate,
     BusinessWorkbenchContextPreviewCreate,
@@ -2177,6 +2178,444 @@ async def preview_business_provider_intake(
             "observations": "POST /tenants/{tenant_id}/business-state/observations",
             "workbench_context": "POST /tenants/{tenant_id}/business-workbench-context/preview",
             "detections": "POST /tenants/{tenant_id}/business-detections/preview",
+        },
+    }
+
+
+def _pipeline_card_from_intake(preview: dict[str, object]) -> dict[str, object]:
+    normalized = preview.get("normalized_observation")
+    if not isinstance(normalized, dict):
+        normalized = {}
+    safe_payload = preview.get("safe_payload")
+    if not isinstance(safe_payload, dict):
+        safe_payload = {}
+    system_key = str(preview.get("provider_key") or normalized.get("system_key") or "unknown.provider")
+    family = _observation_family(system_key)
+    state = str(normalized.get("state") or "received")
+    subject_type = str(preview.get("subject_type") or normalized.get("subject_type") or "subject")
+    subject_id = str(preview.get("subject_id") or normalized.get("subject_id") or "unknown")
+    status = "available"
+    if family == "bank" and state in BANK_PAID_STATES:
+        status = "confirmed"
+    elif family == "accounting" and state in ACCOUNTING_NOT_EXPORTED_STATES:
+        status = "action_required"
+    elif family == "crm" and state in CRM_WAITING_PAYMENT_STATES:
+        status = "needs_cross_check"
+    return {
+        "card_id": f"{family}.{subject_type}.{subject_id}.{state}",
+        "title": {
+            "crm": "CRM signal",
+            "bank": "Bank signal",
+            "accounting": "Accounting signal",
+        }.get(family, "External signal"),
+        "system_key": system_key,
+        "system_family": family,
+        "source_type": preview.get("source_type"),
+        "subject_type": subject_type,
+        "subject_id": subject_id,
+        "subject": _subject_label(subject_type, subject_id),
+        "state": state,
+        "status": status,
+        "safe_facts": [
+            {"key": key, "value": str(safe_payload[key])}
+            for key in sorted(safe_payload.keys())
+        ],
+        "payload_keys": list(preview.get("payload_keys") or []),
+        "dropped_keys": list(preview.get("dropped_keys") or []),
+        "raw_payload_included": False,
+        "pii_included": False,
+        "external_fetch": False,
+        "external_mutation": False,
+        "evidence": "business_provider_intake.previewed",
+    }
+
+
+def _pipeline_detect_from_cards(cards: list[dict[str, object]]) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
+    grouped: dict[tuple[str, str], dict[str, dict[str, object]]] = {}
+    for card in cards:
+        subject_key = (str(card["subject_type"]), str(card["subject_id"]))
+        family = str(card["system_family"])
+        if family == "other":
+            continue
+        grouped.setdefault(subject_key, {})[family] = card
+
+    detected: list[dict[str, object]] = []
+    repairs: list[dict[str, object]] = []
+    for (subject_type, subject_id), family_cards in grouped.items():
+        crm = family_cards.get("crm")
+        bank = family_cards.get("bank")
+        accounting = family_cards.get("accounting")
+        if not crm or not bank or not accounting:
+            continue
+        if (
+            str(crm.get("state")) in CRM_WAITING_PAYMENT_STATES
+            and str(bank.get("state")) in BANK_PAID_STATES
+            and str(accounting.get("state")) in ACCOUNTING_NOT_EXPORTED_STATES
+        ):
+            subject = _subject_label(subject_type, subject_id)
+            evidence = [
+                {
+                    "system_key": str(card["system_key"]),
+                    "system_family": str(card["system_family"]),
+                    "state": str(card["state"]),
+                    "status": str(card["status"]),
+                    "event": "business_provider_intake.previewed",
+                }
+                for card in [crm, bank, accounting]
+            ]
+            detected.append(
+                {
+                    "exception_type": "crm_payment_mismatch",
+                    "severity": "warning",
+                    "status": "detected",
+                    "subject_type": subject_type,
+                    "subject_id": subject_id,
+                    "subject": subject,
+                    "title": "Payment signal needs CRM and accounting follow-up",
+                    "summary": (
+                        "Pipeline preview sees bank payment evidence while CRM is still waiting "
+                        "for payment and accounting export is pending."
+                    ),
+                    "confidence": "high",
+                    "would_create": "BusinessException",
+                    "external_mutation": False,
+                    "evidence": evidence,
+                }
+            )
+            repairs.append(
+                {
+                    "action_type": "sync_status",
+                    "safety_level": "medium",
+                    "requires_approval": True,
+                    "status": "suggested",
+                    "subject_type": subject_type,
+                    "subject_id": subject_id,
+                    "summary": "Review payment evidence, sync CRM status after approval, then unblock accounting export.",
+                    "would_create": "RepairAction",
+                    "external_mutation": False,
+                    "approval_gate": "operator_approval_required",
+                }
+            )
+    return detected, repairs
+
+
+def _pipeline_action_plan(
+    *,
+    role: str,
+    intake_previews: list[dict[str, object]],
+    cards: list[dict[str, object]],
+    detected_exceptions: list[dict[str, object]],
+    suggested_repairs: list[dict[str, object]],
+) -> dict[str, object]:
+    steps: list[dict[str, object]] = [
+        {
+            "step": "normalize_provider_events",
+            "status": "previewed",
+            "summary": f"Normalize {len(intake_previews)} provider event(s) into safe business facts.",
+            "mode": "preview_only",
+            "external_mutation": False,
+            "evidence": "business_provider_intake.previewed",
+        },
+        {
+            "step": "open_role_workbench",
+            "status": "ready" if cards else "empty",
+            "summary": f"Render {len(cards)} context card(s) for {role}.",
+            "mode": "operator_review",
+            "external_mutation": False,
+            "evidence": "business_workbench_context.previewed",
+        },
+    ]
+    if detected_exceptions:
+        steps.append(
+            {
+                "step": "review_detected_exceptions",
+                "status": "action_required",
+                "summary": f"Review {len(detected_exceptions)} detected exception candidate(s).",
+                "mode": "operator_review",
+                "external_mutation": False,
+                "evidence": "business_detection.previewed",
+            }
+        )
+    if suggested_repairs:
+        steps.append(
+            {
+                "step": "prepare_approval_gated_repair",
+                "status": "approval_required",
+                "summary": f"Prepare {len(suggested_repairs)} repair action(s) behind approval gates.",
+                "mode": "approval_required",
+                "external_mutation": False,
+                "evidence": "business_action_plan.previewed",
+            }
+        )
+
+    return {
+        "plan_kind": "exception_resolution",
+        "role": role,
+        "risk_level": "attention" if detected_exceptions or suggested_repairs else "normal",
+        "summary": (
+            f"Pipeline action plan: {len(steps)} step(s), "
+            f"{len(suggested_repairs)} approval-gated repair candidate(s)."
+        ),
+        "lanes": [
+            {"lane": "intake", "count": len(intake_previews), "status": "previewed"},
+            {"lane": "context", "count": len(cards), "status": "ready" if cards else "empty"},
+            {
+                "lane": "exceptions",
+                "count": len(detected_exceptions),
+                "status": "action_required" if detected_exceptions else "clear",
+            },
+            {
+                "lane": "repair",
+                "count": len(suggested_repairs),
+                "status": "approval_required" if suggested_repairs else "not_requested",
+            },
+        ],
+        "steps": steps,
+        "automation_candidates": [
+            {
+                "candidate": "record_normalized_observations",
+                "safe_to_auto_run": True,
+                "boundary": "internal_record_only",
+                "external_mutation": False,
+            },
+            {
+                "candidate": "create_business_exception",
+                "safe_to_auto_run": bool(detected_exceptions),
+                "boundary": "internal_record_only",
+                "external_mutation": False,
+            },
+            {
+                "candidate": "send_external_notification",
+                "safe_to_auto_run": False,
+                "boundary": "requires_operator_approval",
+                "external_mutation": False,
+            },
+        ],
+        "approval_gates": [
+            {
+                "gate": "external_write_gate",
+                "status": "closed",
+                "detail": "Provider writes remain disabled in pipeline preview.",
+            },
+            {
+                "gate": "notification_delivery_gate",
+                "status": "approval_required",
+                "detail": "Notification output is draft-only until an operator approves delivery.",
+            },
+        ],
+        "api": {
+            "preview": "POST /tenants/{tenant_id}/business-intake-pipeline/preview",
+            "action_plan": "POST /tenants/{tenant_id}/business-action-plans/preview",
+            "repair": "POST /tenants/{tenant_id}/business-exceptions/{business_exception_id}/repair-actions",
+        },
+    }
+
+
+def _pipeline_notification_preview(
+    *,
+    role: str,
+    detected_exceptions: list[dict[str, object]],
+    suggested_repairs: list[dict[str, object]],
+) -> dict[str, object]:
+    risk_level = "attention" if detected_exceptions or suggested_repairs else "normal"
+    return {
+        "notification_kind": "action_plan_updates",
+        "role": role,
+        "risk_level": risk_level,
+        "summary": (
+            f"Draft-only notification preview for {role}: "
+            f"{len(detected_exceptions)} exception candidate(s), {len(suggested_repairs)} repair candidate(s)."
+        ),
+        "channels": [
+            {"channel": "in_app", "status": "draft_ready", "external_delivery": False},
+            {"channel": "telegram", "status": "approval_required", "external_delivery": False},
+            {"channel": "email", "status": "approval_required", "external_delivery": False},
+        ],
+        "drafts": [
+            {
+                "audience": role,
+                "title": "Business intake pipeline needs review",
+                "body": (
+                    "DriveDesk detected cross-system context that should be reviewed "
+                    "before any provider write or customer notification."
+                ),
+                "contains_pii": False,
+                "external_delivery": False,
+                "evidence": "business_notification.previewed",
+            }
+        ],
+        "approval_gates": [
+            {
+                "gate": "operator_delivery_approval",
+                "status": "required",
+                "detail": "Preview creates message drafts only; no external notification is sent.",
+            }
+        ],
+        "api": {
+            "preview": "POST /tenants/{tenant_id}/business-notifications/preview",
+            "pipeline": "POST /tenants/{tenant_id}/business-intake-pipeline/preview",
+        },
+    }
+
+
+async def preview_business_intake_pipeline(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    payload: BusinessIntakePipelinePreviewCreate,
+) -> dict[str, object]:
+    await ensure_tenant_exists(session, tenant_id)
+    intake_previews = [
+        await preview_business_provider_intake(session, tenant_id=tenant_id, payload=event)
+        for event in payload.events
+    ]
+    cards = [_pipeline_card_from_intake(preview) for preview in intake_previews]
+    detected_exceptions, suggested_repairs = _pipeline_detect_from_cards(cards)
+    source_systems = sorted({str(card["system_key"]) for card in cards})
+    role = payload.role
+    workbench_context = {
+        "context_kind": "role_assist",
+        "role": role,
+        "risk_level": "attention" if detected_exceptions else "normal",
+        "summary": (
+            f"Pipeline workbench for {role}: {len(cards)} context card(s) "
+            f"from {len(source_systems)} source system(s)."
+        ),
+        "source_systems": source_systems,
+        "context_cards": cards,
+        "suggested_actions": [
+            {
+                "action": "review_pipeline_detection",
+                "status": "action_required" if detected_exceptions else "available",
+                "summary": "Review safe cross-system facts before persisting exceptions or repair actions.",
+                "external_mutation": False,
+                "requires_approval": False,
+                "evidence": "business_workbench_context.previewed",
+            },
+            {
+                "action": "open_action_plan_preview",
+                "status": "ready",
+                "summary": "Turn the current pipeline context into ordered operator work.",
+                "external_mutation": False,
+                "requires_approval": False,
+                "evidence": "business_action_plan.previewed",
+            },
+        ],
+        "data_boundaries": [
+            {
+                "name": "pipeline_preview_only",
+                "status": "preview_only",
+                "external_fetch": False,
+                "external_mutation": False,
+                "detail": "The pipeline reads request payloads, returns safe facts, and performs no persistence.",
+            },
+            {
+                "name": "raw_payload_redaction",
+                "status": "clean",
+                "raw_payload_included": False,
+                "detail": "Raw provider payloads are not returned; only safe facts and dropped key names are visible.",
+            },
+        ],
+        "api": {
+            "preview": "POST /tenants/{tenant_id}/business-intake-pipeline/preview",
+            "workbench_context": "POST /tenants/{tenant_id}/business-workbench-context/preview",
+        },
+    }
+    action_plan = _pipeline_action_plan(
+        role=role,
+        intake_previews=intake_previews,
+        cards=cards,
+        detected_exceptions=detected_exceptions,
+        suggested_repairs=suggested_repairs,
+    )
+    notification_preview = (
+        _pipeline_notification_preview(
+            role=role,
+            detected_exceptions=detected_exceptions,
+            suggested_repairs=suggested_repairs,
+        )
+        if payload.include_notification_drafts
+        else {}
+    )
+    summary = (
+        f"Business intake pipeline preview processed {len(intake_previews)} event(s), "
+        f"built {len(cards)} context card(s), detected {len(detected_exceptions)} exception candidate(s), "
+        f"and proposed {len(suggested_repairs)} approval-gated repair candidate(s)."
+    )
+    return {
+        "tenant_id": tenant_id,
+        "role": role,
+        "generated_at": datetime.now(UTC),
+        "status": "previewed",
+        "summary": summary,
+        "source_systems": source_systems,
+        "intake_previews": intake_previews,
+        "workbench_context": workbench_context,
+        "detections": {
+            "rule_set": "payment_reconciliation",
+            "status": "detected" if detected_exceptions else "clear",
+            "summary": (
+                f"Pipeline detector found {len(detected_exceptions)} exception candidate(s) "
+                f"from {len(cards)} context card(s)."
+            ),
+            "detected_exceptions": detected_exceptions,
+            "suggested_repair_actions": suggested_repairs,
+            "external_mutation": False,
+            "api": {
+                "preview": "POST /tenants/{tenant_id}/business-detections/preview",
+                "pipeline": "POST /tenants/{tenant_id}/business-intake-pipeline/preview",
+            },
+        },
+        "action_plan": action_plan,
+        "notification_preview": notification_preview,
+        "data_boundaries": [
+            {
+                "name": "no_external_calls",
+                "status": "clean",
+                "external_fetch": False,
+                "external_mutation": False,
+                "detail": "Pipeline preview does not call Bitrix24, bank, accounting, Telegram, email, or any provider API.",
+            },
+            {
+                "name": "no_persistence",
+                "status": "preview_only",
+                "detail": "Pipeline preview does not create observations, exceptions, repair actions, outbox jobs, or notifications.",
+            },
+            {
+                "name": "secret_and_pii_boundary",
+                "status": "clean",
+                "raw_payload_included": False,
+                "pii_included": False,
+                "requires_secret": False,
+                "detail": "Unsafe keys are dropped and raw payloads are not returned.",
+            },
+        ],
+        "evidence": [
+            {
+                "type": "pipeline",
+                "event": "business_intake_pipeline.previewed",
+                "source_system_count": len(source_systems),
+                "intake_count": len(intake_previews),
+                "detected_exception_count": len(detected_exceptions),
+                "repair_candidate_count": len(suggested_repairs),
+            },
+            *[
+                {
+                    "type": "provider_intake",
+                    "event": "business_provider_intake.previewed",
+                    "provider_key": str(preview.get("provider_key")),
+                    "dropped_key_count": len(list(preview.get("dropped_keys") or [])),
+                }
+                for preview in intake_previews
+            ],
+        ],
+        "api": {
+            "preview": "POST /tenants/{tenant_id}/business-intake-pipeline/preview",
+            "provider_intake": "POST /tenants/{tenant_id}/business-provider-intake/preview",
+            "workbench_context": "POST /tenants/{tenant_id}/business-workbench-context/preview",
+            "detections": "POST /tenants/{tenant_id}/business-detections/preview",
+            "action_plan": "POST /tenants/{tenant_id}/business-action-plans/preview",
+            "notifications": "POST /tenants/{tenant_id}/business-notifications/preview",
         },
     }
 

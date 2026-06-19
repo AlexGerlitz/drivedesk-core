@@ -17,6 +17,8 @@ Demo endpoints:
   shell.
 - `GET /demo/connector-fixture-replay` returns the same connector replay proof
   as a standalone synthetic contract for SDK and external checks.
+- `GET /demo/business-intake-pipeline` returns the same business intake
+  pipeline proof as a standalone synthetic contract.
 - `GET /demo/business-scenario-replay` returns reusable Business OS scenario
   replay data as a standalone synthetic contract.
 

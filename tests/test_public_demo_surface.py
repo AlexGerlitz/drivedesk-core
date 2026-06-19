@@ -59,6 +59,11 @@ def test_public_demo_html_links_static_assets() -> None:
     assert 'id="controlTowerBriefingRows"' in html
     assert 'id="controlTowerBriefingActionRows"' in html
     assert 'id="controlTowerFlowRows"' in html
+    assert 'id="businessIntakeSummaryRows"' in html
+    assert 'id="businessIntakeRows"' in html
+    assert 'id="businessIntakeWorkbenchRows"' in html
+    assert 'id="businessIntakeActionRows"' in html
+    assert 'id="businessIntakeBoundaryRows"' in html
     assert 'id="controlTowerObservationRows"' in html
     assert 'id="controlTowerExceptionRows"' in html
     assert 'id="controlTowerRepairRows"' in html
@@ -556,6 +561,54 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
         "docs/public/CONNECTOR_FIXTURE_REPLAY.md",
         "docs/public/evidence/connector-fixture-replay.sanitized.json",
         "examples/connector-fixtures/replay-fixtures.sanitized.json",
+    }
+    intake_pipeline = payload["businessIntakePipeline"]
+    assert intake_pipeline["status"] == "previewed"
+    assert intake_pipeline["command"] == "POST /tenants/{tenant_id}/business-intake-pipeline/preview"
+    assert {item["label"] for item in intake_pipeline["summary"]} >= {
+        "Provider events",
+        "Dropped unsafe keys",
+        "Detected exceptions",
+        "External writes",
+    }
+    assert intake_pipeline["sourceSystems"] == [
+        "crm.bitrix24.mock",
+        "bank.statement.mock",
+        "accounting.export.mock",
+    ]
+    assert {item["providerKey"] for item in intake_pipeline["intakePreviews"]} == {
+        "crm.bitrix24.mock",
+        "bank.statement.mock",
+        "accounting.export.mock",
+    }
+    assert {"access_token", "full_name", "phone"} <= set(intake_pipeline["intakePreviews"][0]["droppedKeys"])
+    assert {item["systemFamily"] for item in intake_pipeline["workbench"]["contextCards"]} == {
+        "accounting",
+        "bank",
+        "crm",
+    }
+    assert {item["rawPayloadIncluded"] for item in intake_pipeline["workbench"]["contextCards"]} == {False}
+    assert {item["piiIncluded"] for item in intake_pipeline["workbench"]["contextCards"]} == {False}
+    assert {item["externalMutation"] for item in intake_pipeline["workbench"]["contextCards"]} == {False}
+    assert intake_pipeline["detections"]["status"] == "detected"
+    assert intake_pipeline["detections"]["detectedExceptions"][0]["exceptionType"] == "crm_payment_mismatch"
+    assert intake_pipeline["detections"]["suggestedRepairActions"][0]["requiresApproval"] is True
+    assert {item["externalMutation"] for item in intake_pipeline["actionPlan"]["steps"]} == {False}
+    assert {item["gate"] for item in intake_pipeline["actionPlan"]["approvalGates"]} == {
+        "external_write_gate",
+        "notification_delivery_gate",
+    }
+    assert intake_pipeline["notifications"]["externalDelivery"] is False
+    assert intake_pipeline["notifications"]["containsPii"] is False
+    assert {item["name"] for item in intake_pipeline["dataBoundaries"]} == {
+        "no_external_calls",
+        "no_persistence",
+        "secret_and_pii_boundary",
+    }
+    assert {item["path"] for item in intake_pipeline["docs"]} >= {
+        "docs/public/BUSINESS_INTAKE_PIPELINE.md",
+        "docs/public/BUSINESS_CONTROL_TOWER.md",
+        "docs/public/API_BACKED_DEMO.md",
     }
     business_scenario_replay = payload["businessScenarioReplay"]
     assert business_scenario_replay["status"] == "validated"

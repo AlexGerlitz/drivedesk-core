@@ -11,6 +11,8 @@ PUBLIC_DEMO_PATH = "/demo/public"
 PUBLIC_DEMO_METHOD = "get"
 CONNECTOR_REPLAY_PATH = "/demo/connector-fixture-replay"
 CONNECTOR_REPLAY_METHOD = "get"
+BUSINESS_INTAKE_PIPELINE_PATH = "/demo/business-intake-pipeline"
+BUSINESS_INTAKE_PIPELINE_METHOD = "get"
 BUSINESS_SCENARIO_REPLAY_PATH = "/demo/business-scenario-replay"
 BUSINESS_SCENARIO_REPLAY_METHOD = "get"
 
@@ -33,6 +35,14 @@ def public_demo_operation(schema: dict[str, Any]) -> dict[str, Any]:
 
 def connector_replay_operation(schema: dict[str, Any]) -> dict[str, Any]:
     return required_operation(schema, CONNECTOR_REPLAY_PATH, CONNECTOR_REPLAY_METHOD)
+
+
+def business_intake_pipeline_operation(schema: dict[str, Any]) -> dict[str, Any]:
+    return required_operation(
+        schema,
+        BUSINESS_INTAKE_PIPELINE_PATH,
+        BUSINESS_INTAKE_PIPELINE_METHOD,
+    )
 
 
 def business_scenario_replay_operation(schema: dict[str, Any]) -> dict[str, Any]:
@@ -60,6 +70,16 @@ def connector_replay_required_fields(schema: dict[str, Any]) -> list[str]:
     required = connector_replay.get("required", [])
     if not isinstance(required, list) or not required:
         raise SystemExit("OpenAPI schema does not contain ConnectorFixtureReplayRead.required")
+    return [str(item) for item in required]
+
+
+def business_intake_pipeline_required_fields(schema: dict[str, Any]) -> list[str]:
+    components = schema.get("components", {})
+    schemas = components.get("schemas", {})
+    replay = schemas.get("BusinessIntakePipelineDemoRead", {})
+    required = replay.get("required", [])
+    if not isinstance(required, list) or not required:
+        raise SystemExit("OpenAPI schema does not contain BusinessIntakePipelineDemoRead.required")
     return [str(item) for item in required]
 
 
@@ -1467,6 +1487,8 @@ def render_manifest(
     required_fields: list[str],
     connector_operation_id: str,
     connector_required_fields: list[str],
+    business_intake_operation_id: str,
+    business_intake_required_fields: list[str],
     business_scenario_operation_id: str,
     business_scenario_required_fields: list[str],
 ) -> str:
@@ -1481,6 +1503,12 @@ def render_manifest(
             "method": CONNECTOR_REPLAY_METHOD.upper(),
             "operation_id": connector_operation_id,
             "required_fields": connector_required_fields,
+        },
+        "business_intake_pipeline": {
+            "path": BUSINESS_INTAKE_PIPELINE_PATH,
+            "method": BUSINESS_INTAKE_PIPELINE_METHOD.upper(),
+            "operation_id": business_intake_operation_id,
+            "required_fields": business_intake_required_fields,
         },
         "business_scenario_replay": {
             "path": BUSINESS_SCENARIO_REPLAY_PATH,
@@ -1521,6 +1549,11 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
         connector_operation.get("operationId") or "get_connector_fixture_replay"
     )
     connector_required_fields = connector_replay_required_fields(schema)
+    business_intake_operation = business_intake_pipeline_operation(schema)
+    business_intake_operation_id = str(
+        business_intake_operation.get("operationId") or "get_business_intake_pipeline"
+    )
+    business_intake_required_fields = business_intake_pipeline_required_fields(schema)
     business_scenario_operation = business_scenario_replay_operation(schema)
     business_scenario_operation_id = str(
         business_scenario_operation.get("operationId") or "get_business_scenario_replay"
@@ -1542,6 +1575,8 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
             required_fields,
             connector_operation_id,
             connector_required_fields,
+            business_intake_operation_id,
+            business_intake_required_fields,
             business_scenario_operation_id,
             business_scenario_required_fields,
         ),

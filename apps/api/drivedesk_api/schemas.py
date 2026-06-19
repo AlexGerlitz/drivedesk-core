@@ -633,6 +633,29 @@ class BusinessProviderIntakePreviewRead(BaseModel):
     api: dict[str, str] = Field(default_factory=dict)
 
 
+class BusinessIntakePipelinePreviewCreate(BaseModel):
+    role: BusinessBriefingRole = "operator"
+    events: list[BusinessProviderIntakePreviewCreate] = Field(min_length=1, max_length=8)
+    include_notification_drafts: bool = True
+
+
+class BusinessIntakePipelinePreviewRead(BaseModel):
+    tenant_id: str
+    role: BusinessBriefingRole
+    generated_at: datetime
+    status: Literal["previewed"]
+    summary: str
+    source_systems: list[str] = Field(default_factory=list)
+    intake_previews: list[dict[str, Any]] = Field(default_factory=list)
+    workbench_context: dict[str, Any] = Field(default_factory=dict)
+    detections: dict[str, Any] = Field(default_factory=dict)
+    action_plan: dict[str, Any] = Field(default_factory=dict)
+    notification_preview: dict[str, Any] = Field(default_factory=dict)
+    data_boundaries: list[dict[str, Any]] = Field(default_factory=list)
+    evidence: list[dict[str, Any]] = Field(default_factory=list)
+    api: dict[str, str] = Field(default_factory=dict)
+
+
 class BusinessWorkbenchContextPreviewCreate(BaseModel):
     context_kind: BusinessWorkbenchContextKind = "role_assist"
     role: BusinessBriefingRole = "operator"
@@ -763,6 +786,21 @@ class BusinessScenarioReplayRead(BaseModel):
     docs: list[dict[str, str]]
 
 
+class BusinessIntakePipelineDemoRead(BaseModel):
+    status: Literal["previewed"]
+    command: str
+    summary: list[dict[str, Any]]
+    sourceSystems: list[str]
+    intakePreviews: list[dict[str, Any]]
+    workbench: dict[str, Any]
+    detections: dict[str, Any]
+    actionPlan: dict[str, Any]
+    notifications: dict[str, Any]
+    dataBoundaries: list[dict[str, Any]]
+    api: dict[str, str]
+    docs: list[dict[str, str]]
+
+
 class PublicDemoRead(BaseModel):
     schemaVersion: int
     generatedAt: str
@@ -779,6 +817,7 @@ class PublicDemoRead(BaseModel):
     adapterScenarios: list[dict[str, Any]]
     adapterStudio: dict[str, Any]
     connectorFixtureReplay: dict[str, Any]
+    businessIntakePipeline: dict[str, Any]
     integrationJobs: list[dict[str, Any]]
     integrationHealth: list[dict[str, str]]
     integrationReadiness: list[dict[str, Any]]

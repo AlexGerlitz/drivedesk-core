@@ -29,6 +29,7 @@ REQUIRED_FIELDS = [
   "adapterScenarios",
   "adapterStudio",
   "connectorFixtureReplay",
+  "businessIntakePipeline",
   "integrationJobs",
   "integrationHealth",
   "integrationReadiness",

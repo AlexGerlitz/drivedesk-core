@@ -108,6 +108,7 @@ health, _ = get_json("/health")
 ready, _ = get_json("/ready")
 demo, demo_headers = get_json("/demo/public")
 connector_replay_endpoint, connector_replay_headers = get_json("/demo/connector-fixture-replay")
+business_intake_endpoint, business_intake_headers = get_json("/demo/business-intake-pipeline")
 business_scenario_endpoint, business_scenario_headers = get_json("/demo/business-scenario-replay")
 adapters, _ = get_json("/integration-adapters")
 runbooks, _ = get_json("/integration-runbooks")
@@ -633,6 +634,74 @@ assert {item["path"] for item in connector_replay["docs"]} >= {
     "docs/public/evidence/connector-fixture-replay.sanitized.json",
     "examples/connector-fixtures/replay-fixtures.sanitized.json",
 }, demo
+business_intake = demo["businessIntakePipeline"]
+assert business_intake_endpoint == business_intake, business_intake_endpoint
+assert business_intake_headers["access-control-allow-origin"] == "*", business_intake_headers
+assert business_intake_headers["cache-control"] == "public, max-age=60", business_intake_headers
+assert business_intake["status"] == "previewed", demo
+assert business_intake["command"] == "POST /tenants/{tenant_id}/business-intake-pipeline/preview", demo
+assert {item["label"] for item in business_intake["summary"]} >= {
+    "Provider events",
+    "Dropped unsafe keys",
+    "Detected exceptions",
+    "External writes",
+}, demo
+assert set(business_intake["sourceSystems"]) == {
+    "crm.bitrix24.mock",
+    "bank.statement.mock",
+    "accounting.export.mock",
+}, demo
+intake_by_provider = {item["providerKey"]: item for item in business_intake["intakePreviews"]}
+assert set(intake_by_provider) == {
+    "crm.bitrix24.mock",
+    "bank.statement.mock",
+    "accounting.export.mock",
+}, demo
+assert set(intake_by_provider["crm.bitrix24.mock"]["droppedKeys"]) >= {
+    "access_token",
+    "full_name",
+    "phone",
+}, demo
+assert set(intake_by_provider["bank.statement.mock"]["droppedKeys"]) >= {"payer_phone"}, demo
+assert set(intake_by_provider["accounting.export.mock"]["droppedKeys"]) >= {"session_secret"}, demo
+assert {card["systemFamily"] for card in business_intake["workbench"]["contextCards"]} == {
+    "crm",
+    "bank",
+    "accounting",
+}, demo
+assert {card["rawPayloadIncluded"] for card in business_intake["workbench"]["contextCards"]} == {False}, demo
+assert {card["piiIncluded"] for card in business_intake["workbench"]["contextCards"]} == {False}, demo
+assert {card["externalMutation"] for card in business_intake["workbench"]["contextCards"]} == {False}, demo
+assert business_intake["detections"]["status"] == "detected", demo
+assert {
+    item["exceptionType"] for item in business_intake["detections"]["detectedExceptions"]
+} >= {"crm_payment_mismatch"}, demo
+assert {
+    item["requiresApproval"] for item in business_intake["detections"]["suggestedRepairActions"]
+} == {True}, demo
+assert {step["step"] for step in business_intake["actionPlan"]["steps"]} >= {
+    "normalize_provider_events",
+    "open_role_workbench",
+    "review_detected_exceptions",
+    "prepare_approval_gated_repair",
+}, demo
+assert {gate["gate"] for gate in business_intake["actionPlan"]["approvalGates"]} >= {
+    "external_write_gate",
+    "notification_delivery_gate",
+}, demo
+assert business_intake["notifications"]["status"] == "draft_only", demo
+assert business_intake["notifications"]["externalDelivery"] is False, demo
+assert business_intake["notifications"]["containsPii"] is False, demo
+assert {item["name"] for item in business_intake["dataBoundaries"]} == {
+    "no_external_calls",
+    "no_persistence",
+    "secret_and_pii_boundary",
+}, demo
+assert {item["path"] for item in business_intake["docs"]} >= {
+    "docs/public/BUSINESS_INTAKE_PIPELINE.md",
+    "docs/public/BUSINESS_CONTROL_TOWER.md",
+    "docs/public/API_BACKED_DEMO.md",
+}, demo
 business_scenario_replay = demo["businessScenarioReplay"]
 assert business_scenario_endpoint == business_scenario_replay, business_scenario_endpoint
 assert business_scenario_headers["access-control-allow-origin"] == "*", business_scenario_headers
@@ -803,14 +872,18 @@ assert "/integration-adapters" in openapi["paths"], openapi["paths"].keys()
 assert "/integration-runbooks" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/public" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/connector-fixture-replay" in openapi["paths"], openapi["paths"].keys()
+assert "/demo/business-intake-pipeline" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/business-scenario-replay" in openapi["paths"], openapi["paths"].keys()
+assert "/tenants/{tenant_id}/business-intake-pipeline/preview" in openapi["paths"], openapi["paths"].keys()
 assert "/health" in openapi["paths"], openapi["paths"].keys()
 
 if openapi_file.exists():
     generated = json.loads(openapi_file.read_text(encoding="utf-8"))
     assert "/demo/public" in generated["paths"], generated["paths"].keys()
     assert "/demo/connector-fixture-replay" in generated["paths"], generated["paths"].keys()
+    assert "/demo/business-intake-pipeline" in generated["paths"], generated["paths"].keys()
     assert "/demo/business-scenario-replay" in generated["paths"], generated["paths"].keys()
+    assert "/tenants/{tenant_id}/business-intake-pipeline/preview" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-action-plans/preview" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-notifications/preview" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/workflow-action-runs" in generated["paths"], generated["paths"].keys()

@@ -657,6 +657,168 @@ def test_business_control_tower_exception_and_repair_flow(
         "POST /tenants/{tenant_id}/business-workbench-context/preview"
     )
 
+    async def count_control_tower_rows() -> tuple[int, int, int, int]:
+        async with session_factory() as session:
+            observations_count = len(
+                (
+                    await session.execute(
+                        select(BusinessStateObservation).where(BusinessStateObservation.tenant_id == tenant_id)
+                    )
+                )
+                .scalars()
+                .all()
+            )
+            exceptions_count = len(
+                (
+                    await session.execute(
+                        select(BusinessException).where(BusinessException.tenant_id == tenant_id)
+                    )
+                )
+                .scalars()
+                .all()
+            )
+            repairs_count = len(
+                (
+                    await session.execute(
+                        select(RepairAction).where(RepairAction.tenant_id == tenant_id)
+                    )
+                )
+                .scalars()
+                .all()
+            )
+            outbox_count = len(
+                (await session.execute(select(OutboxEvent).where(OutboxEvent.tenant_id == tenant_id)))
+                .scalars()
+                .all()
+            )
+            return observations_count, exceptions_count, repairs_count, outbox_count
+
+    pipeline_preview_baseline = asyncio.run(count_control_tower_rows())
+
+    pipeline_response = client.post(
+        f"/tenants/{tenant_id}/business-intake-pipeline/preview",
+        json={
+            "role": "accountant",
+            "events": [
+                {
+                    "provider_key": "crm.bitrix24.mock",
+                    "source_type": "crm_deal",
+                    "subject_type": "deal",
+                    "subject_id": "DEAL-2026-001",
+                    "external_ref": "crm-deal-001",
+                    "provider_payload": {
+                        "stage": "invoice_sent",
+                        "amount": 1500,
+                        "owner_role": "sales",
+                        "full_name": "Synthetic Customer",
+                        "phone": "+70000000000",
+                        "access_token": "never-return-this",
+                    },
+                },
+                {
+                    "provider_key": "bank.statement.mock",
+                    "source_type": "bank_payment",
+                    "subject_type": "deal",
+                    "subject_id": "DEAL-2026-001",
+                    "external_ref": "bank-payment-001",
+                    "provider_payload": {
+                        "status": "captured",
+                        "amount": 1500,
+                        "matched_by": "payment_reference",
+                        "payer_phone": "+70000000000",
+                    },
+                },
+                {
+                    "provider_key": "accounting.export.mock",
+                    "source_type": "accounting_export",
+                    "subject_type": "deal",
+                    "subject_id": "DEAL-2026-001",
+                    "external_ref": "accounting-export-001",
+                    "provider_payload": {
+                        "export_status": "not_exported",
+                        "export_batch_id": "batch-001",
+                        "reason": "waiting_for_crm_status",
+                        "session_secret": "never-return-this",
+                    },
+                },
+            ],
+        },
+        headers=owner_headers,
+    )
+    assert pipeline_response.status_code == 200
+    pipeline = pipeline_response.json()
+    assert pipeline["status"] == "previewed"
+    assert pipeline["role"] == "accountant"
+    assert pipeline["source_systems"] == [
+        "accounting.export.mock",
+        "bank.statement.mock",
+        "crm.bitrix24.mock",
+    ]
+    assert "processed 3 event" in pipeline["summary"]
+    assert len(pipeline["intake_previews"]) == 3
+    assert {item["provider_key"] for item in pipeline["intake_previews"]} == {
+        "crm.bitrix24.mock",
+        "bank.statement.mock",
+        "accounting.export.mock",
+    }
+    serialized_pipeline = json.dumps(pipeline, ensure_ascii=False, sort_keys=True).lower()
+    for leaked in ["never-return-this", "+70000000000", "synthetic customer"]:
+        assert leaked not in serialized_pipeline
+    assert {"access_token", "full_name", "phone"} <= set(pipeline["intake_previews"][0]["dropped_keys"])
+    assert "payer_phone" in pipeline["intake_previews"][1]["dropped_keys"]
+    assert "session_secret" in pipeline["intake_previews"][2]["dropped_keys"]
+    assert {item["system_family"] for item in pipeline["workbench_context"]["context_cards"]} == {
+        "accounting",
+        "bank",
+        "crm",
+    }
+    assert {item["raw_payload_included"] for item in pipeline["workbench_context"]["context_cards"]} == {False}
+    assert {item["pii_included"] for item in pipeline["workbench_context"]["context_cards"]} == {False}
+    assert {item["external_fetch"] for item in pipeline["workbench_context"]["context_cards"]} == {False}
+    assert {item["external_mutation"] for item in pipeline["workbench_context"]["context_cards"]} == {False}
+    assert pipeline["detections"]["status"] == "detected"
+    assert len(pipeline["detections"]["detected_exceptions"]) == 1
+    assert pipeline["detections"]["detected_exceptions"][0]["exception_type"] == "crm_payment_mismatch"
+    assert pipeline["detections"]["suggested_repair_actions"][0]["requires_approval"] is True
+    assert pipeline["detections"]["suggested_repair_actions"][0]["external_mutation"] is False
+    assert [item["lane"] for item in pipeline["action_plan"]["lanes"]] == [
+        "intake",
+        "context",
+        "exceptions",
+        "repair",
+    ]
+    assert {item["step"] for item in pipeline["action_plan"]["steps"]} >= {
+        "normalize_provider_events",
+        "open_role_workbench",
+        "review_detected_exceptions",
+        "prepare_approval_gated_repair",
+    }
+    assert {item["external_mutation"] for item in pipeline["action_plan"]["steps"]} == {False}
+    assert {item["gate"] for item in pipeline["action_plan"]["approval_gates"]} == {
+        "external_write_gate",
+        "notification_delivery_gate",
+    }
+    assert any(
+        item["candidate"] == "send_external_notification" and item["safe_to_auto_run"] is False
+        for item in pipeline["action_plan"]["automation_candidates"]
+    )
+    assert pipeline["notification_preview"]["summary"].startswith("Draft-only notification preview")
+    assert {item["external_delivery"] for item in pipeline["notification_preview"]["channels"]} == {False}
+    assert {item["external_delivery"] for item in pipeline["notification_preview"]["drafts"]} == {False}
+    assert {item["name"] for item in pipeline["data_boundaries"]} == {
+        "no_external_calls",
+        "no_persistence",
+        "secret_and_pii_boundary",
+    }
+    assert {item.get("external_mutation") for item in pipeline["data_boundaries"] if "external_mutation" in item} == {
+        False
+    }
+    assert pipeline["evidence"][0]["event"] == "business_intake_pipeline.previewed"
+    assert pipeline["api"]["preview"] == "POST /tenants/{tenant_id}/business-intake-pipeline/preview"
+    assert pipeline["api"]["provider_intake"] == "POST /tenants/{tenant_id}/business-provider-intake/preview"
+
+    assert asyncio.run(count_control_tower_rows()) == pipeline_preview_baseline
+
     observation_payloads = [
         {
             "system_key": "crm.bitrix24.mock",
@@ -1998,6 +2160,44 @@ def test_business_scenario_replay_demo_endpoint_exposes_same_public_contract(
     assert any(
         item["path"] == "docs/public/BUSINESS_SCENARIO_REPLAY.md"
         for item in replay_payload["docs"]
+    )
+
+
+def test_business_intake_pipeline_demo_endpoint_exposes_same_public_contract(
+    api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, _ = api_client
+
+    public_response = client.get("/demo/public")
+    pipeline_response = client.get("/demo/business-intake-pipeline")
+
+    assert pipeline_response.status_code == 200
+    assert pipeline_response.headers["access-control-allow-origin"] == "*"
+    assert pipeline_response.headers["cache-control"] == "public, max-age=60"
+    pipeline_payload = pipeline_response.json()
+    assert pipeline_payload == public_response.json()["businessIntakePipeline"]
+    assert pipeline_payload["status"] == "previewed"
+    assert pipeline_payload["command"] == "POST /tenants/{tenant_id}/business-intake-pipeline/preview"
+    assert pipeline_payload["sourceSystems"] == [
+        "crm.bitrix24.mock",
+        "bank.statement.mock",
+        "accounting.export.mock",
+    ]
+    assert {item["providerKey"] for item in pipeline_payload["intakePreviews"]} == {
+        "crm.bitrix24.mock",
+        "bank.statement.mock",
+        "accounting.export.mock",
+    }
+    assert pipeline_payload["detections"]["status"] == "detected"
+    assert pipeline_payload["detections"]["detectedExceptions"][0]["exceptionType"] == "crm_payment_mismatch"
+    assert {item["name"] for item in pipeline_payload["dataBoundaries"]} == {
+        "no_external_calls",
+        "no_persistence",
+        "secret_and_pii_boundary",
+    }
+    assert any(
+        item["path"] == "docs/public/BUSINESS_INTAKE_PIPELINE.md"
+        for item in pipeline_payload["docs"]
     )
 
 

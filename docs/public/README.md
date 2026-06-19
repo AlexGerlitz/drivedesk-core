@@ -33,6 +33,10 @@ infrastructure, production history, customer data, or operational credentials.
 - `BUSINESS_CONTROL_TOWER.md` - provider intake preview, cross-system
   observations, business exceptions, approval-gated repair actions, and control
   tower metrics.
+- `BUSINESS_INTAKE_PIPELINE.md` - preview-only provider signal pipeline from
+  CRM/bank/accounting events to safe facts, role workbench, detection,
+  approval-gated action plan, and draft notifications via the
+  `businessIntakePipeline` contract.
 - `BUSINESS_SCENARIO_REPLAY.md` - reusable Business OS replay paths for
   CRM/bank/accounting mismatch, support SLA risk, and procurement delay risk via
   the `businessScenarioReplay` contract.
@@ -151,6 +155,8 @@ The public repository export also generates:
 - `GET /demo/public` - read-only synthetic demo payload in the exported API.
 - `GET /demo/connector-fixture-replay` - standalone public-safe replay contract
   for connector fixture groups, redaction outcomes, and boundaries.
+- `GET /demo/business-intake-pipeline` - standalone public-safe intake pipeline
+  contract for `businessIntakePipeline`.
 - `incidentResponse` - public-safe incident response contract in the demo
   payload and Incidents tab.
 - `businessControlTower` - public-safe control tower contract for CRM, bank,

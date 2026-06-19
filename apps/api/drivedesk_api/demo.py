@@ -1794,6 +1794,236 @@ def build_public_demo_payload() -> dict[str, Any]:
                 "drivedesk_repair_actions",
             ],
         },
+        "businessIntakePipeline": {
+            "status": "previewed",
+            "command": "POST /tenants/{tenant_id}/business-intake-pipeline/preview",
+            "summary": [
+                {
+                    "label": "Provider events",
+                    "value": "3",
+                    "detail": "CRM, bank, and accounting signals in one preview",
+                    "tone": "blue",
+                },
+                {
+                    "label": "Dropped unsafe keys",
+                    "value": "5",
+                    "detail": "PII and credential markers are removed",
+                    "tone": "green",
+                },
+                {
+                    "label": "Detected exceptions",
+                    "value": "1",
+                    "detail": "payment mismatch candidate",
+                    "tone": "amber",
+                },
+                {
+                    "label": "External writes",
+                    "value": "0",
+                    "detail": "preview-only pipeline",
+                    "tone": "violet",
+                },
+            ],
+            "sourceSystems": [
+                "crm.bitrix24.mock",
+                "bank.statement.mock",
+                "accounting.export.mock",
+            ],
+            "intakePreviews": [
+                {
+                    "providerKey": "crm.bitrix24.mock",
+                    "sourceType": "crm_deal",
+                    "state": "invoice_sent",
+                    "safePayload": {
+                        "amount_bucket": "1000-2000",
+                        "owner_role": "sales",
+                        "source_state": "invoice_sent",
+                    },
+                    "droppedKeys": ["access_token", "full_name", "phone"],
+                    "evidence": "business_provider_intake.previewed",
+                },
+                {
+                    "providerKey": "bank.statement.mock",
+                    "sourceType": "bank_payment",
+                    "state": "paid",
+                    "safePayload": {
+                        "amount_bucket": "1000-2000",
+                        "matched_by": "payment_reference",
+                        "source_state": "captured",
+                    },
+                    "droppedKeys": ["payer_phone"],
+                    "evidence": "business_provider_intake.previewed",
+                },
+                {
+                    "providerKey": "accounting.export.mock",
+                    "sourceType": "accounting_export",
+                    "state": "not_exported",
+                    "safePayload": {
+                        "export_batch_id": "batch-001",
+                        "reason": "waiting_for_crm_status",
+                        "source_state": "not_exported",
+                    },
+                    "droppedKeys": ["session_secret"],
+                    "evidence": "business_provider_intake.previewed",
+                },
+            ],
+            "workbench": {
+                "role": "accountant",
+                "riskLevel": "attention",
+                "contextCards": [
+                    {
+                        "title": "CRM signal",
+                        "systemFamily": "crm",
+                        "state": "invoice_sent",
+                        "status": "needs_cross_check",
+                        "rawPayloadIncluded": False,
+                        "piiIncluded": False,
+                        "externalMutation": False,
+                    },
+                    {
+                        "title": "Bank signal",
+                        "systemFamily": "bank",
+                        "state": "paid",
+                        "status": "confirmed",
+                        "rawPayloadIncluded": False,
+                        "piiIncluded": False,
+                        "externalMutation": False,
+                    },
+                    {
+                        "title": "Accounting signal",
+                        "systemFamily": "accounting",
+                        "state": "not_exported",
+                        "status": "action_required",
+                        "rawPayloadIncluded": False,
+                        "piiIncluded": False,
+                        "externalMutation": False,
+                    },
+                ],
+                "suggestedActions": [
+                    {
+                        "action": "review_pipeline_detection",
+                        "status": "action_required",
+                        "externalMutation": False,
+                        "evidence": "business_workbench_context.previewed",
+                    },
+                    {
+                        "action": "open_action_plan_preview",
+                        "status": "ready",
+                        "externalMutation": False,
+                        "evidence": "business_action_plan.previewed",
+                    },
+                ],
+            },
+            "detections": {
+                "status": "detected",
+                "ruleSet": "payment_reconciliation",
+                "detectedExceptions": [
+                    {
+                        "exceptionType": "crm_payment_mismatch",
+                        "severity": "warning",
+                        "subject": "deal:DEAL-2026-001",
+                        "wouldCreate": "BusinessException",
+                        "externalMutation": False,
+                    }
+                ],
+                "suggestedRepairActions": [
+                    {
+                        "actionType": "sync_status",
+                        "status": "suggested",
+                        "requiresApproval": True,
+                        "externalMutation": False,
+                        "wouldCreate": "RepairAction",
+                    }
+                ],
+            },
+            "actionPlan": {
+                "riskLevel": "attention",
+                "steps": [
+                    {
+                        "step": "normalize_provider_events",
+                        "status": "previewed",
+                        "externalMutation": False,
+                        "evidence": "business_provider_intake.previewed",
+                    },
+                    {
+                        "step": "open_role_workbench",
+                        "status": "ready",
+                        "externalMutation": False,
+                        "evidence": "business_workbench_context.previewed",
+                    },
+                    {
+                        "step": "review_detected_exceptions",
+                        "status": "action_required",
+                        "externalMutation": False,
+                        "evidence": "business_detection.previewed",
+                    },
+                    {
+                        "step": "prepare_approval_gated_repair",
+                        "status": "approval_required",
+                        "externalMutation": False,
+                        "evidence": "business_action_plan.previewed",
+                    },
+                ],
+                "approvalGates": [
+                    {
+                        "gate": "external_write_gate",
+                        "status": "closed",
+                    },
+                    {
+                        "gate": "notification_delivery_gate",
+                        "status": "approval_required",
+                    },
+                ],
+            },
+            "notifications": {
+                "status": "draft_only",
+                "channels": ["in_app", "telegram", "email"],
+                "externalDelivery": False,
+                "containsPii": False,
+                "evidence": "business_notification.previewed",
+            },
+            "dataBoundaries": [
+                {
+                    "name": "no_external_calls",
+                    "status": "clean",
+                    "externalFetch": False,
+                    "externalMutation": False,
+                },
+                {
+                    "name": "no_persistence",
+                    "status": "preview_only",
+                    "externalMutation": False,
+                },
+                {
+                    "name": "secret_and_pii_boundary",
+                    "status": "clean",
+                    "rawPayloadIncluded": False,
+                    "piiIncluded": False,
+                    "requiresSecret": False,
+                },
+            ],
+            "api": {
+                "preview": "POST /tenants/{tenant_id}/business-intake-pipeline/preview",
+                "providerIntake": "POST /tenants/{tenant_id}/business-provider-intake/preview",
+                "workbenchContext": "POST /tenants/{tenant_id}/business-workbench-context/preview",
+                "detections": "POST /tenants/{tenant_id}/business-detections/preview",
+                "actionPlan": "POST /tenants/{tenant_id}/business-action-plans/preview",
+                "notifications": "POST /tenants/{tenant_id}/business-notifications/preview",
+            },
+            "docs": [
+                {
+                    "label": "Business Intake Pipeline",
+                    "path": "docs/public/BUSINESS_INTAKE_PIPELINE.md",
+                },
+                {
+                    "label": "Business Control Tower",
+                    "path": "docs/public/BUSINESS_CONTROL_TOWER.md",
+                },
+                {
+                    "label": "API-backed Demo",
+                    "path": "docs/public/API_BACKED_DEMO.md",
+                },
+            ],
+        },
         "businessScenarioReplay": {
             "status": "validated",
             "command": "bash scripts/check_public_business_scenario_replay.sh",

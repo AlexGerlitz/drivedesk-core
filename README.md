@@ -212,6 +212,8 @@ incident queue, mitigation, recovery, and resolution evidence path.
 - `GET /demo/public` - read-only synthetic demo payload in the exported API.
 - `GET /demo/connector-fixture-replay` - standalone public-safe replay contract
   for connector fixture groups, redaction outcomes, and boundaries.
+- `GET /demo/business-intake-pipeline` - standalone public-safe intake pipeline
+  contract for provider signal previews, boundaries, and action planning.
 - `GET /integration-adapters` - runtime adapter catalog endpoint.
 - `POST /tenants/{tenant_id}/integration-mapping-preview` - read-only mapping transform preview.
 - `file_import:preview` and `file_import:execute` - public-safe connection scope examples.
@@ -294,6 +296,7 @@ Health:
 curl http://localhost:8080/health
 curl http://localhost:8080/demo/public
 curl http://localhost:8080/demo/connector-fixture-replay
+curl http://localhost:8080/demo/business-intake-pipeline
 curl http://localhost:8080/demo/business-scenario-replay
 ```
 

@@ -13,6 +13,7 @@ DriveDesk now exposes:
 ```text
 GET /demo/public
 GET /demo/connector-fixture-replay
+GET /demo/business-intake-pipeline
 GET /demo/business-scenario-replay
 ```
 
@@ -21,7 +22,8 @@ the public demo shell: tenant, health, metrics, work queue, workflow stages,
 timeline entries, workflow scenarios, domain events, members, audit events,
 outbox events, adapter contracts, adapter operation scenarios, Adapter Studio,
 sync jobs, Integration Health, alert routing, incident response,
-`businessControlTower` data, `businessScenarioReplay`, recovery evidence,
+`businessControlTower` data, `businessIntakePipeline`,
+`businessScenarioReplay`, recovery evidence,
 `connectorFixtureReplay`, and the `engineeringProof` contract rendered by the
 Control Tower, Integrations, Operations, Incidents, and Proof tabs.
 
@@ -29,6 +31,11 @@ Control Tower, Integrations, Operations, Incidents, and Proof tabs.
 contract as a standalone endpoint. It is useful when a reviewer wants to inspect
 only the integration replay proof: fixture groups, redaction outcomes,
 read-only boundaries, evidence paths, and docs.
+
+`GET /demo/business-intake-pipeline` returns the same
+`businessIntakePipeline` contract as a standalone endpoint. It is useful for
+checking the active preview loop directly: provider event -> safe payload ->
+role workbench -> detection -> action plan -> notification draft.
 
 `GET /demo/business-scenario-replay` returns the same
 `businessScenarioReplay` contract as a standalone endpoint. It is useful for
@@ -42,6 +49,7 @@ risk detection -> role context -> approval-aware action plan.
 | Static fallback | GitHub Pages loads `demo-data.js` and works without a backend. |
 | API-backed | The demo shell loads JSON from `GET /demo/public` when `?demoApi=...` is provided. |
 | Replay API | The generated SDK and smoke checks can load `GET /demo/connector-fixture-replay` directly. |
+| Intake Pipeline API | Smoke checks can load `GET /demo/business-intake-pipeline` directly. |
 | Scenario Replay API | Smoke checks can load `GET /demo/business-scenario-replay` directly. |
 
 Example local API-backed run:
@@ -82,7 +90,8 @@ bash scripts/check_public_demo_sdk.sh
 `check_public_demo_api.sh` starts a temporary local API when no
 `DRIVEDESK_DEMO_BASE_URL` is provided. It checks `/health`, `/ready`,
 `/demo/public`, `/demo/connector-fixture-replay`,
-`/demo/business-scenario-replay`, `/openapi.json`, the generated
+`/demo/business-intake-pipeline`, `/demo/business-scenario-replay`,
+`/openapi.json`, the generated
 `docs/openapi.json` when present, alert routes, alert-to-runbook bindings,
 connector certification references in `CONNECTOR_CERTIFICATION.md`, connector
 fixture replay references in `CONNECTOR_FIXTURE_REPLAY.md`, business scenario
@@ -105,6 +114,12 @@ CRM observation + bank observation + accounting observation
   -> approval
   -> dry-run repair evidence
 ```
+
+The `businessIntakePipeline` payload is documented in
+`BUSINESS_INTAKE_PIPELINE.md`. It shows the preview-only path from synthetic
+CRM, bank, and accounting provider events to safe payloads, accountant
+workbench cards, `crm_payment_mismatch` detection, approval-gated repair
+planning, and draft-only notifications.
 
 The `businessScenarioReplay` payload is documented in
 `BUSINESS_SCENARIO_REPLAY.md`. It shows three reusable Business OS paths:

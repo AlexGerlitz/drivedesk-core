@@ -1288,6 +1288,238 @@
         "title": "BusinessExceptionStatusChange",
         "type": "object"
       },
+      "BusinessIntakePipelineDemoRead": {
+        "properties": {
+          "actionPlan": {
+            "additionalProperties": true,
+            "title": "Actionplan",
+            "type": "object"
+          },
+          "api": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Api",
+            "type": "object"
+          },
+          "command": {
+            "title": "Command",
+            "type": "string"
+          },
+          "dataBoundaries": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Databoundaries",
+            "type": "array"
+          },
+          "detections": {
+            "additionalProperties": true,
+            "title": "Detections",
+            "type": "object"
+          },
+          "docs": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "title": "Docs",
+            "type": "array"
+          },
+          "intakePreviews": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Intakepreviews",
+            "type": "array"
+          },
+          "notifications": {
+            "additionalProperties": true,
+            "title": "Notifications",
+            "type": "object"
+          },
+          "sourceSystems": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Sourcesystems",
+            "type": "array"
+          },
+          "status": {
+            "const": "previewed",
+            "title": "Status",
+            "type": "string"
+          },
+          "summary": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Summary",
+            "type": "array"
+          },
+          "workbench": {
+            "additionalProperties": true,
+            "title": "Workbench",
+            "type": "object"
+          }
+        },
+        "required": [
+          "status",
+          "command",
+          "summary",
+          "sourceSystems",
+          "intakePreviews",
+          "workbench",
+          "detections",
+          "actionPlan",
+          "notifications",
+          "dataBoundaries",
+          "api",
+          "docs"
+        ],
+        "title": "BusinessIntakePipelineDemoRead",
+        "type": "object"
+      },
+      "BusinessIntakePipelinePreviewCreate": {
+        "properties": {
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/BusinessProviderIntakePreviewCreate"
+            },
+            "maxItems": 8,
+            "minItems": 1,
+            "title": "Events",
+            "type": "array"
+          },
+          "include_notification_drafts": {
+            "default": true,
+            "title": "Include Notification Drafts",
+            "type": "boolean"
+          },
+          "role": {
+            "default": "operator",
+            "enum": [
+              "operator",
+              "accountant",
+              "manager",
+              "owner",
+              "support"
+            ],
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "events"
+        ],
+        "title": "BusinessIntakePipelinePreviewCreate",
+        "type": "object"
+      },
+      "BusinessIntakePipelinePreviewRead": {
+        "properties": {
+          "action_plan": {
+            "additionalProperties": true,
+            "title": "Action Plan",
+            "type": "object"
+          },
+          "api": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Api",
+            "type": "object"
+          },
+          "data_boundaries": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Data Boundaries",
+            "type": "array"
+          },
+          "detections": {
+            "additionalProperties": true,
+            "title": "Detections",
+            "type": "object"
+          },
+          "evidence": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "intake_previews": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Intake Previews",
+            "type": "array"
+          },
+          "notification_preview": {
+            "additionalProperties": true,
+            "title": "Notification Preview",
+            "type": "object"
+          },
+          "role": {
+            "enum": [
+              "operator",
+              "accountant",
+              "manager",
+              "owner",
+              "support"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "source_systems": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Source Systems",
+            "type": "array"
+          },
+          "status": {
+            "const": "previewed",
+            "title": "Status",
+            "type": "string"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "workbench_context": {
+            "additionalProperties": true,
+            "title": "Workbench Context",
+            "type": "object"
+          }
+        },
+        "required": [
+          "tenant_id",
+          "role",
+          "generated_at",
+          "status",
+          "summary"
+        ],
+        "title": "BusinessIntakePipelinePreviewRead",
+        "type": "object"
+      },
       "BusinessNotificationPreviewCreate": {
         "properties": {
           "channels": {
@@ -3884,6 +4116,11 @@
             "title": "Businesscontroltower",
             "type": "object"
           },
+          "businessIntakePipeline": {
+            "additionalProperties": true,
+            "title": "Businessintakepipeline",
+            "type": "object"
+          },
           "businessScenarioReplay": {
             "additionalProperties": true,
             "title": "Businessscenarioreplay",
@@ -4056,6 +4293,7 @@
           "adapterScenarios",
           "adapterStudio",
           "connectorFixtureReplay",
+          "businessIntakePipeline",
           "integrationJobs",
           "integrationHealth",
           "integrationReadiness",
@@ -5120,6 +5358,27 @@
         "summary": "List Business Record Lifecycle Policies Endpoint",
         "tags": [
           "business-records"
+        ]
+      }
+    },
+    "/demo/business-intake-pipeline": {
+      "get": {
+        "operationId": "business_intake_pipeline_demo_demo_business_intake_pipeline_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessIntakePipelineDemoRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Business Intake Pipeline Demo",
+        "tags": [
+          "demo"
         ]
       }
     },
@@ -6495,6 +6754,94 @@
           }
         },
         "summary": "Change Business Exception Status Endpoint",
+        "tags": [
+          "business-control"
+        ]
+      }
+    },
+    "/tenants/{tenant_id}/business-intake-pipeline/preview": {
+      "post": {
+        "operationId": "preview_business_intake_pipeline_endpoint_tenants__tenant_id__business_intake_pipeline_preview_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tenant_id",
+            "required": true,
+            "schema": {
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "X-Actor-Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Role",
+            "required": false,
+            "schema": {
+              "default": "viewer",
+              "title": "X-Actor-Role",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessIntakePipelinePreviewCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessIntakePipelinePreviewRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Preview Business Intake Pipeline Endpoint",
         "tags": [
           "business-control"
         ]

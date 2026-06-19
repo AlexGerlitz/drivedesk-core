@@ -20,6 +20,7 @@
         <nav class="nav-tabs" aria-label="Demo sections">
           <button class="nav-tab is-active" type="button" data-view="overview">Overview</button>
           <button class="nav-tab" type="button" data-view="workflow">Workflow</button>
+          <button class="nav-tab" type="button" data-view="control">Control Tower</button>
           <button class="nav-tab" type="button" data-view="work">Work</button>
           <button class="nav-tab" type="button" data-view="integrations">Integrations</button>
           <button class="nav-tab" type="button" data-view="system">System</button>
@@ -113,6 +114,39 @@
                 <span class="muted">Event stream</span>
               </div>
               <div class="event-list" id="domainEventRows"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="view-control" aria-labelledby="controlTowerTitle">
+          <div class="section-heading">
+            <h2 id="controlTowerTitle">Business Control Tower</h2>
+            <span class="muted">Observe, detect, repair</span>
+          </div>
+          <div class="proof-summary-grid" id="controlTowerSummaryRows"></div>
+          <section class="panel">
+            <div class="panel-header">
+              <h3>Control Flow</h3>
+              <span class="muted">Observation to repair evidence</span>
+            </div>
+            <div class="event-list" id="controlTowerFlowRows"></div>
+          </section>
+          <div class="dashboard-grid">
+            <section class="panel">
+              <div class="panel-header">
+                <h3>State Observations</h3>
+                <span class="muted">Connected systems</span>
+              </div>
+              <div class="event-list" id="controlTowerObservationRows"></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Exceptions And Repair</h3>
+                <span class="muted">Impact, approval, dry-run</span>
+              </div>
+              <div class="event-list" id="controlTowerExceptionRows"></div>
+              <div class="event-list" id="controlTowerRepairRows"></div>
             </section>
           </div>
         </section>

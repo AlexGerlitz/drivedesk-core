@@ -25,13 +25,16 @@ from drivedesk_api.db import (
     AuditEvent,
     AuthAttempt,
     Base,
+    BusinessException,
     BusinessRecord,
+    BusinessStateObservation,
     IntegrationConnection,
     IntegrationConnectionCheck,
     IntegrationIncident,
     IntegrationReconciliation,
     OutboxEvent,
     PlatformAdmin,
+    RepairAction,
     User,
     WorkflowActionRun,
     WorkflowRule,
@@ -577,6 +580,264 @@ def test_business_record_foundation_is_tenant_scoped_and_audited(
     adapter_payload = json.loads(next(payload for _, event, _, payload in outbox_rows if event == "workflow.contract_sync.requested"))
     assert adapter_payload["rule_id"] == adapter_sync_rule["id"]
     assert adapter_payload["payload"] == {"target": "accounting"}
+
+
+def test_business_control_tower_exception_and_repair_flow(
+    api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, session_factory = api_client
+    owner_headers = {"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"}
+
+    tenant_response = client.post(
+        "/tenants",
+        json={"slug": "control-tower", "name": "Control Tower"},
+        headers=owner_headers,
+    )
+    assert tenant_response.status_code == 201
+    tenant_id = tenant_response.json()["id"]
+
+    observation_payloads = [
+        {
+            "system_key": "crm.bitrix24.mock",
+            "subject_type": "deal",
+            "subject_id": "DEAL-2026-001",
+            "external_ref": "crm-deal-001",
+            "state": "invoice_sent",
+            "payload": {"amount_bucket": "1000-2000", "owner_role": "sales"},
+        },
+        {
+            "system_key": "bank.statement.mock",
+            "subject_type": "deal",
+            "subject_id": "DEAL-2026-001",
+            "external_ref": "bank-payment-001",
+            "state": "paid",
+            "payload": {"amount_bucket": "1000-2000", "matched_by": "payment_reference"},
+        },
+        {
+            "system_key": "accounting.export.mock",
+            "subject_type": "deal",
+            "subject_id": "DEAL-2026-001",
+            "external_ref": "accounting-export-001",
+            "state": "not_exported",
+            "payload": {"export_batch_id": "batch-001", "reason": "waiting_for_crm_status"},
+        },
+    ]
+    observation_ids: list[str] = []
+    for payload in observation_payloads:
+        response = client.post(
+            f"/tenants/{tenant_id}/business-state/observations",
+            json=payload,
+            headers=owner_headers,
+        )
+        assert response.status_code == 201
+        body = response.json()
+        assert body["tenant_id"] == tenant_id
+        assert body["system_key"] == payload["system_key"]
+        assert body["subject_id"] == "DEAL-2026-001"
+        observation_ids.append(body["id"])
+
+    observations_response = client.get(
+        f"/tenants/{tenant_id}/business-state/observations?subject_id=DEAL-2026-001",
+        headers=owner_headers,
+    )
+    assert observations_response.status_code == 200
+    assert {item["system_key"] for item in observations_response.json()} == {
+        "crm.bitrix24.mock",
+        "bank.statement.mock",
+        "accounting.export.mock",
+    }
+
+    business_exception_response = client.post(
+        f"/tenants/{tenant_id}/business-exceptions",
+        json={
+            "exception_type": "crm_payment_mismatch",
+            "severity": "warning",
+            "subject_type": "deal",
+            "subject_id": "DEAL-2026-001",
+            "title": "Payment received but CRM and accounting lag behind",
+            "summary": "Bank shows a paid deal while CRM is still invoice_sent and accounting is not_exported.",
+            "impact": {
+                "cash_state": "received",
+                "operational_risk": "manual follow-up required",
+                "customer_visible": False,
+            },
+            "evidence": {"detector": "synthetic_business_rule"},
+            "observation_ids": observation_ids,
+        },
+        headers=owner_headers,
+    )
+    assert business_exception_response.status_code == 201
+    business_exception = business_exception_response.json()
+    assert business_exception["exception_type"] == "crm_payment_mismatch"
+    assert business_exception["status"] == "open"
+    assert business_exception["severity"] == "warning"
+    exception_evidence = json.loads(business_exception["evidence_json"])
+    assert set(exception_evidence["observation_ids"]) == set(observation_ids)
+    assert {item["system_key"] for item in exception_evidence["observations"]} == {
+        "crm.bitrix24.mock",
+        "bank.statement.mock",
+        "accounting.export.mock",
+    }
+
+    repair_response = client.post(
+        f"/tenants/{tenant_id}/business-exceptions/{business_exception['id']}/repair-actions",
+        json={
+            "action_type": "sync_status",
+            "safety_level": "medium",
+            "requires_approval": True,
+            "payload": {
+                "target_adapter_key": "crm.bitrix24.mock",
+                "desired_state": "paid",
+                "source_evidence": "bank.statement.mock",
+            },
+        },
+        headers=owner_headers,
+    )
+    assert repair_response.status_code == 201
+    repair_action = repair_response.json()
+    assert repair_action["status"] == "proposed"
+    assert repair_action["requires_approval"] is True
+    assert repair_action["safety_level"] == "medium"
+
+    blocked_execute_response = client.post(
+        f"/tenants/{tenant_id}/repair-actions/{repair_action['id']}/execute",
+        json={"mode": "dry_run"},
+        headers=owner_headers,
+    )
+    assert blocked_execute_response.status_code == 409
+    assert blocked_execute_response.json()["detail"] == "repair action approval required"
+
+    approved_response = client.post(
+        f"/tenants/{tenant_id}/repair-actions/{repair_action['id']}/approve",
+        headers=owner_headers,
+    )
+    assert approved_response.status_code == 200
+    assert approved_response.json()["status"] == "approved"
+
+    executed_response = client.post(
+        f"/tenants/{tenant_id}/repair-actions/{repair_action['id']}/execute",
+        json={"mode": "dry_run", "note": "public-safe repair drill"},
+        headers=owner_headers,
+    )
+    assert executed_response.status_code == 200
+    executed_repair_action = executed_response.json()
+    assert executed_repair_action["status"] == "executed"
+    repair_result = json.loads(executed_repair_action["result_json"])
+    assert repair_result["dry_run"] is True
+    assert repair_result["external_mutation"] is False
+    assert repair_result["queued_event_type"] == "repair_action.execution_requested"
+
+    repair_actions_response = client.get(
+        f"/tenants/{tenant_id}/repair-actions?business_exception_id={business_exception['id']}",
+        headers=owner_headers,
+    )
+    assert repair_actions_response.status_code == 200
+    assert [item["id"] for item in repair_actions_response.json()] == [repair_action["id"]]
+
+    acknowledged_response = client.post(
+        f"/tenants/{tenant_id}/business-exceptions/{business_exception['id']}/status",
+        json={"status": "acknowledged", "note": "operator reviewed repair evidence"},
+        headers=owner_headers,
+    )
+    assert acknowledged_response.status_code == 200
+    assert acknowledged_response.json()["status"] == "acknowledged"
+
+    metrics_response = client.get("/metrics")
+    assert metrics_response.status_code == 200
+    assert 'drivedesk_business_state_observations{state="paid",system_key="bank.statement.mock"} 1' in metrics_response.text
+    assert (
+        'drivedesk_business_exceptions{exception_type="crm_payment_mismatch",'
+        'severity="warning",status="acknowledged"} 1'
+    ) in metrics_response.text
+    assert 'drivedesk_repair_actions{action_type="sync_status",status="executed"} 1' in metrics_response.text
+    assert "DEAL-2026-001" not in metrics_response.text
+    assert "bank-payment-001" not in metrics_response.text
+
+    async def inspect_control_tower_state() -> tuple[
+        list[BusinessStateObservation],
+        list[BusinessException],
+        list[RepairAction],
+        list[str],
+        list[tuple[str, str, str]],
+    ]:
+        async with session_factory() as session:
+            observations_result = await session.execute(
+                select(BusinessStateObservation).where(BusinessStateObservation.tenant_id == tenant_id)
+            )
+            exceptions_result = await session.execute(
+                select(BusinessException).where(BusinessException.tenant_id == tenant_id)
+            )
+            repairs_result = await session.execute(select(RepairAction).where(RepairAction.tenant_id == tenant_id))
+            audit_result = await session.execute(
+                select(AuditEvent.event_type)
+                .where(
+                    AuditEvent.tenant_id == tenant_id,
+                    AuditEvent.event_type.in_(
+                        [
+                            "business_state.observation.recorded",
+                            "business_exception.created",
+                            "business_exception.status_changed",
+                            "repair_action.proposed",
+                            "repair_action.approved",
+                            "repair_action.executed",
+                        ]
+                    ),
+                )
+                .order_by(AuditEvent.created_at)
+            )
+            outbox_result = await session.execute(
+                select(OutboxEvent.event_type, OutboxEvent.adapter_key, OutboxEvent.payload_json)
+                .where(
+                    OutboxEvent.tenant_id == tenant_id,
+                    OutboxEvent.event_type.in_(
+                        [
+                            "business_state.observation.recorded",
+                            "business_exception.created",
+                            "repair_action.proposed",
+                            "repair_action.execution_requested",
+                        ]
+                    ),
+                )
+                .order_by(OutboxEvent.created_at)
+            )
+            return (
+                list(observations_result.scalars().all()),
+                list(exceptions_result.scalars().all()),
+                list(repairs_result.scalars().all()),
+                list(audit_result.scalars().all()),
+                [(row.event_type, row.adapter_key, row.payload_json) for row in outbox_result.all()],
+            )
+
+    observations, exceptions, repairs, audit_events, outbox_rows = asyncio.run(inspect_control_tower_state())
+    assert len(observations) == 3
+    assert len(exceptions) == 1
+    assert len(repairs) == 1
+    assert exceptions[0].status == "acknowledged"
+    assert repairs[0].status == "executed"
+    assert Counter(audit_events) == Counter(
+        {
+            "business_state.observation.recorded": 3,
+            "business_exception.created": 1,
+            "repair_action.proposed": 1,
+            "repair_action.approved": 1,
+            "repair_action.executed": 1,
+            "business_exception.status_changed": 1,
+        }
+    )
+    assert Counter(row[0] for row in outbox_rows) == Counter(
+        {
+            "business_state.observation.recorded": 3,
+            "business_exception.created": 1,
+            "repair_action.proposed": 1,
+            "repair_action.execution_requested": 1,
+        }
+    )
+    execution_payload = json.loads(
+        next(payload for event_type, _, payload in outbox_rows if event_type == "repair_action.execution_requested")
+    )
+    assert execution_payload["mode"] == "dry_run"
+    assert execution_payload["external_mutation"] is False
+    assert execution_payload["payload"]["target_adapter_key"] == "crm.bitrix24.mock"
 
 
 def test_identity_rbac_audit_and_outbox_flow(api_client: tuple[TestClient, async_sessionmaker[AsyncSession]]) -> None:

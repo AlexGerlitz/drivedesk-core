@@ -231,6 +231,37 @@ assert {item["evidence"] for item in demo["incidentResponse"]["resolutionEvidenc
     "INTEGRATION_INCIDENT_RUNBOOKS.md",
     "postcheck.gates.passed",
 }, demo
+control_tower = demo["businessControlTower"]
+assert {item["label"] for item in control_tower["summary"]} >= {
+    "Observed systems",
+    "Open exceptions",
+    "Repair actions",
+    "External writes",
+}, demo
+assert {observation["system"] for observation in control_tower["observations"]} >= {
+    "crm.bitrix24.mock",
+    "bank.statement.mock",
+    "accounting.export.mock",
+}, demo
+assert {business_exception["type"] for business_exception in control_tower["exceptions"]} == {
+    "crm_payment_mismatch"
+}, demo
+assert {repair_action["action"] for repair_action in control_tower["repairActions"]} == {"sync_status"}, demo
+assert {repair_action["externalMutation"] for repair_action in control_tower["repairActions"]} == {False}, demo
+assert {step["step"] for step in control_tower["flow"]} >= {
+    "observe",
+    "detect",
+    "propose",
+    "approve",
+    "execute",
+}, demo
+assert set(control_tower["metrics"]) >= {
+    "drivedesk_business_state_observations",
+    "drivedesk_business_exceptions",
+    "drivedesk_repair_actions",
+}, demo
+assert control_tower["api"]["observe"] == "POST /tenants/{tenant_id}/business-state/observations", demo
+assert control_tower["api"]["execute"] == "POST /tenants/{tenant_id}/repair-actions/{repair_action_id}/execute", demo
 assert demo["engineeringProof"]["milestone"] == "engineering_70", demo
 assert demo["engineeringProof"]["status"] == "validated", demo
 assert len(demo["engineeringProof"]["summary"]) >= 4, demo

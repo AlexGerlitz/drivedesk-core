@@ -12,7 +12,9 @@ from starlette.responses import Response
 
 from drivedesk_api.db import (
     AuditEvent,
+    BusinessException,
     BusinessRecord,
+    BusinessStateObservation,
     IntegrationConnection,
     IntegrationConnectionCheck,
     IntegrationIncident,
@@ -20,6 +22,7 @@ from drivedesk_api.db import (
     Membership,
     OutboxEvent,
     PlatformAdmin,
+    RepairAction,
     Tenant,
     User,
     WorkflowActionRun,
@@ -67,6 +70,9 @@ from drivedesk_api.schemas import (
     AuditEventRead,
     AuthMeRead,
     AuthSessionRead,
+    BusinessExceptionCreate,
+    BusinessExceptionRead,
+    BusinessExceptionStatusChange,
     BusinessRecordCreate,
     BusinessRecordLifecyclePolicyRead,
     BusinessRecordLifecyclePreviewCreate,
@@ -74,6 +80,8 @@ from drivedesk_api.schemas import (
     BusinessRecordRead,
     BusinessRecordTransition,
     BusinessRecordType,
+    BusinessStateObservationCreate,
+    BusinessStateObservationRead,
     FileImportCreate,
     IntegrationConnectionCheckCreate,
     IntegrationConnectionCheckRead,
@@ -97,6 +105,9 @@ from drivedesk_api.schemas import (
     PlatformAdminCreate,
     PlatformAdminRead,
     PublicDemoRead,
+    RepairActionExecutionRequest,
+    RepairActionPropose,
+    RepairActionRead,
     TenantCreate,
     TenantRead,
     TokenRevocationRead,
@@ -107,17 +118,24 @@ from drivedesk_api.schemas import (
     WorkflowRuleRead,
 )
 from drivedesk_api.services import (
+    approve_repair_action,
+    change_business_exception_status,
     count_business_records_by_type_status,
+    count_business_exceptions_by_type_severity_status,
+    count_business_state_observations_by_system_state,
     count_integration_connection_checks_by_adapter_status,
     count_integration_connections_by_adapter_status,
     count_integration_incidents_by_adapter_severity_status,
     count_integration_reconciliations_by_adapter_status,
     count_outbox_by_status,
+    count_repair_actions_by_action_status,
     count_workflow_action_runs_by_action_status,
     count_workflow_rules_by_status_trigger_action,
     change_integration_incident_status,
     create_accounting_export_job,
+    create_business_exception,
     create_business_record,
+    create_business_state_observation,
     create_file_import_job,
     create_integration_incident,
     create_integration_connection,
@@ -128,17 +146,22 @@ from drivedesk_api.services import (
     create_user,
     create_workflow_rule,
     ensure_tenant_exists,
+    execute_repair_action,
     get_integration_connection_health,
+    list_business_exceptions,
     list_business_records,
+    list_business_state_observations,
     list_integration_connection_checks,
     list_integration_connections,
     list_integration_incidents,
     list_integration_operator_review,
     list_integration_reconciliations,
     list_platform_admins,
+    list_repair_actions,
     list_workflow_action_runs,
     list_workflow_rules,
     preview_integration_mapping,
+    propose_repair_action,
     retry_outbox_event,
     run_integration_connection_check,
     summarize_integration_outbox,
@@ -242,6 +265,9 @@ def build_app(settings: Settings | None = None) -> FastAPI:
             business_record_rows = await count_business_records_by_type_status(session)
             workflow_rule_rows = await count_workflow_rules_by_status_trigger_action(session)
             workflow_action_run_rows = await count_workflow_action_runs_by_action_status(session)
+            business_state_observation_rows = await count_business_state_observations_by_system_state(session)
+            business_exception_rows = await count_business_exceptions_by_type_severity_status(session)
+            repair_action_rows = await count_repair_actions_by_action_status(session)
             integration_connection_rows = await count_integration_connections_by_adapter_status(session)
             integration_connection_check_rows = await count_integration_connection_checks_by_adapter_status(session)
             integration_reconciliation_rows = await count_integration_reconciliations_by_adapter_status(session)
@@ -257,6 +283,9 @@ def build_app(settings: Settings | None = None) -> FastAPI:
             business_record_rows = []
             workflow_rule_rows = []
             workflow_action_run_rows = []
+            business_state_observation_rows = []
+            business_exception_rows = []
+            repair_action_rows = []
             integration_connection_rows = []
             integration_connection_check_rows = []
             integration_reconciliation_rows = []
@@ -280,6 +309,9 @@ def build_app(settings: Settings | None = None) -> FastAPI:
                 business_record_rows=business_record_rows,
                 workflow_rule_rows=workflow_rule_rows,
                 workflow_action_run_rows=workflow_action_run_rows,
+                business_state_observation_rows=business_state_observation_rows,
+                business_exception_rows=business_exception_rows,
+                repair_action_rows=repair_action_rows,
                 integration_connection_rows=integration_connection_rows,
                 integration_connection_check_rows=integration_connection_check_rows,
                 integration_reconciliation_rows=integration_reconciliation_rows,
@@ -913,6 +945,208 @@ def build_app(settings: Settings | None = None) -> FastAPI:
             session,
             tenant_id=tenant_id,
             record_id=record_id,
+            payload=payload,
+            actor=actor,
+        )
+
+    @api.post(
+        "/tenants/{tenant_id}/business-state/observations",
+        response_model=BusinessStateObservationRead,
+        status_code=201,
+        tags=["business-control"],
+    )
+    async def create_business_state_observation_endpoint(
+        tenant_id: str,
+        payload: BusinessStateObservationCreate,
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> BusinessStateObservation:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.BUSINESS_RECORD_WRITE)
+        return await create_business_state_observation(
+            session,
+            tenant_id=tenant_id,
+            payload=payload,
+            actor=actor,
+        )
+
+    @api.get(
+        "/tenants/{tenant_id}/business-state/observations",
+        response_model=list[BusinessStateObservationRead],
+        tags=["business-control"],
+    )
+    async def list_business_state_observations_endpoint(
+        tenant_id: str,
+        system_key: str | None = Query(default=None),
+        subject_type: str | None = Query(default=None),
+        subject_id: str | None = Query(default=None),
+        limit: int = Query(default=50, ge=1, le=100),
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> list[BusinessStateObservation]:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.BUSINESS_RECORD_READ)
+        return await list_business_state_observations(
+            session,
+            tenant_id=tenant_id,
+            system_key=system_key,
+            subject_type=subject_type,
+            subject_id=subject_id,
+            limit=limit,
+        )
+
+    @api.post(
+        "/tenants/{tenant_id}/business-exceptions",
+        response_model=BusinessExceptionRead,
+        status_code=201,
+        tags=["business-control"],
+    )
+    async def create_business_exception_endpoint(
+        tenant_id: str,
+        payload: BusinessExceptionCreate,
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> BusinessException:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.BUSINESS_RECORD_WRITE)
+        return await create_business_exception(
+            session,
+            tenant_id=tenant_id,
+            payload=payload,
+            actor=actor,
+        )
+
+    @api.get(
+        "/tenants/{tenant_id}/business-exceptions",
+        response_model=list[BusinessExceptionRead],
+        tags=["business-control"],
+    )
+    async def list_business_exceptions_endpoint(
+        tenant_id: str,
+        status_filter: str | None = Query(default=None, alias="status"),
+        severity: str | None = Query(default=None),
+        exception_type: str | None = Query(default=None),
+        limit: int = Query(default=50, ge=1, le=100),
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> list[BusinessException]:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.BUSINESS_RECORD_READ)
+        return await list_business_exceptions(
+            session,
+            tenant_id=tenant_id,
+            status_filter=status_filter,
+            severity=severity,
+            exception_type=exception_type,
+            limit=limit,
+        )
+
+    @api.post(
+        "/tenants/{tenant_id}/business-exceptions/{business_exception_id}/status",
+        response_model=BusinessExceptionRead,
+        tags=["business-control"],
+    )
+    async def change_business_exception_status_endpoint(
+        tenant_id: str,
+        business_exception_id: str,
+        payload: BusinessExceptionStatusChange,
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> BusinessException:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.BUSINESS_RECORD_WRITE)
+        return await change_business_exception_status(
+            session,
+            tenant_id=tenant_id,
+            business_exception_id=business_exception_id,
+            payload=payload,
+            actor=actor,
+        )
+
+    @api.post(
+        "/tenants/{tenant_id}/business-exceptions/{business_exception_id}/repair-actions",
+        response_model=RepairActionRead,
+        status_code=201,
+        tags=["business-control"],
+    )
+    async def propose_repair_action_endpoint(
+        tenant_id: str,
+        business_exception_id: str,
+        payload: RepairActionPropose,
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> RepairAction:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.BUSINESS_RECORD_WRITE)
+        return await propose_repair_action(
+            session,
+            tenant_id=tenant_id,
+            business_exception_id=business_exception_id,
+            payload=payload,
+            actor=actor,
+        )
+
+    @api.get(
+        "/tenants/{tenant_id}/repair-actions",
+        response_model=list[RepairActionRead],
+        tags=["business-control"],
+    )
+    async def list_repair_actions_endpoint(
+        tenant_id: str,
+        business_exception_id: str | None = Query(default=None),
+        status_filter: str | None = Query(default=None, alias="status"),
+        limit: int = Query(default=50, ge=1, le=100),
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> list[RepairAction]:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.BUSINESS_RECORD_READ)
+        return await list_repair_actions(
+            session,
+            tenant_id=tenant_id,
+            business_exception_id=business_exception_id,
+            status_filter=status_filter,
+            limit=limit,
+        )
+
+    @api.post(
+        "/tenants/{tenant_id}/repair-actions/{repair_action_id}/approve",
+        response_model=RepairActionRead,
+        tags=["business-control"],
+    )
+    async def approve_repair_action_endpoint(
+        tenant_id: str,
+        repair_action_id: str,
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> RepairAction:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.BUSINESS_RECORD_WRITE)
+        return await approve_repair_action(
+            session,
+            tenant_id=tenant_id,
+            repair_action_id=repair_action_id,
+            actor=actor,
+        )
+
+    @api.post(
+        "/tenants/{tenant_id}/repair-actions/{repair_action_id}/execute",
+        response_model=RepairActionRead,
+        tags=["business-control"],
+    )
+    async def execute_repair_action_endpoint(
+        tenant_id: str,
+        repair_action_id: str,
+        payload: RepairActionExecutionRequest,
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> RepairAction:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.BUSINESS_RECORD_WRITE)
+        return await execute_repair_action(
+            session,
+            tenant_id=tenant_id,
+            repair_action_id=repair_action_id,
             payload=payload,
             actor=actor,
         )

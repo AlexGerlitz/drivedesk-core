@@ -36,6 +36,7 @@ parsing Markdown by hand.
 | Quick verification path | `docs/public/REVIEWER_QUICKSTART.md` | `bash scripts/check_public_reviewer_quickstart.sh` |
 | API and SDK | `docs/public/API_BACKED_DEMO.md` | `bash scripts/check_public_demo_api.sh` |
 | Core domain | `docs/public/SYSTEM_DESIGN.md` | `bash scripts/ci_smoke_public.sh` |
+| Business control tower | `docs/public/BUSINESS_CONTROL_TOWER.md` | `bash scripts/check_public_business_control_tower.sh` |
 | Integration hub | `docs/public/INTEGRATION_ADAPTER_CATALOG.md` | `bash scripts/check_public_demo_api.sh` |
 | Observability | `docs/public/OBSERVABILITY_PROOF.md` | `bash scripts/check_public_observability_proof.sh` |
 | Alert routing | `docs/public/ALERT_ROUTING_EVIDENCE.md` | `bash scripts/check_public_alert_routing.sh` |
@@ -57,6 +58,7 @@ state.
 
 ```bash
 bash scripts/check_public_evidence_index.sh
+bash scripts/check_public_business_control_tower.sh
 ```
 
 The check validates that:

@@ -67,6 +67,12 @@
         Array.isArray(payload.incidentResponse.timeline) &&
         Array.isArray(payload.incidentResponse.recoveryActions) &&
         Array.isArray(payload.incidentResponse.resolutionEvidence) &&
+        payload.businessControlTower &&
+        Array.isArray(payload.businessControlTower.summary) &&
+        Array.isArray(payload.businessControlTower.observations) &&
+        Array.isArray(payload.businessControlTower.exceptions) &&
+        Array.isArray(payload.businessControlTower.repairActions) &&
+        Array.isArray(payload.businessControlTower.flow) &&
         payload.engineeringProof &&
         Array.isArray(payload.engineeringProof.summary) &&
         Array.isArray(payload.engineeringProof.gates) &&
@@ -865,13 +871,139 @@
     });
   }
 
+  function fillBusinessControlTower() {
+    var controlTower = data.businessControlTower;
+
+    var summaryRows = document.getElementById("controlTowerSummaryRows");
+    clear(summaryRows);
+    controlTower.summary.forEach(function (item) {
+      var card = document.createElement("article");
+      card.className = "metric-card";
+      card.dataset.tone = item.tone || "blue";
+
+      var label = document.createElement("span");
+      label.className = "muted";
+      label.appendChild(text(item.label));
+
+      var value = document.createElement("strong");
+      value.appendChild(text(item.value));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      card.append(label, value, detail);
+      summaryRows.appendChild(card);
+    });
+
+    var flowRows = document.getElementById("controlTowerFlowRows");
+    clear(flowRows);
+    controlTower.flow.forEach(function (step) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(step.step));
+      top.append(title, chip(step.state, statusTone(step.state)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(step.owner + " - " + step.detail));
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(step.evidence));
+
+      row.append(top, detail, evidence);
+      flowRows.appendChild(row);
+    });
+
+    var observationRows = document.getElementById("controlTowerObservationRows");
+    clear(observationRows);
+    controlTower.observations.forEach(function (observation) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var system = document.createElement("strong");
+      system.appendChild(text(observation.system));
+      top.append(system, chip(observation.state, statusTone(observation.state)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(observation.subject + " - " + observation.observedAt));
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(observation.evidence));
+
+      row.append(top, detail, evidence);
+      observationRows.appendChild(row);
+    });
+
+    var exceptionRows = document.getElementById("controlTowerExceptionRows");
+    clear(exceptionRows);
+    controlTower.exceptions.forEach(function (businessException) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(businessException.type));
+      top.append(title, chip(businessException.status, statusTone(businessException.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(businessException.subject + " - " + businessException.impact));
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(businessException.evidence));
+
+      row.append(top, detail, evidence);
+      exceptionRows.appendChild(row);
+    });
+
+    var repairRows = document.getElementById("controlTowerRepairRows");
+    clear(repairRows);
+    controlTower.repairActions.forEach(function (repairAction) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var action = document.createElement("strong");
+      action.appendChild(text(repairAction.action));
+      top.append(action, chip(repairAction.status, statusTone(repairAction.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          repairAction.mode +
+            " - safety " +
+            repairAction.safety +
+            " - external mutation " +
+            String(repairAction.externalMutation)
+        )
+      );
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(repairAction.evidence));
+
+      row.append(top, detail, evidence);
+      repairRows.appendChild(row);
+    });
+  }
+
   function statusTone(status) {
     if (
-      ["done", "ready", "online", "validated", "processed", "green", "active", "success", "observed", "matched", "resolved", "passed", "routed"].indexOf(status) >= 0
+      ["done", "ready", "online", "validated", "processed", "green", "active", "success", "observed", "matched", "resolved", "passed", "routed", "approved", "executed", "paid"].indexOf(status) >= 0
     ) {
       return "green";
     }
-    if (["blocked", "waiting", "pending", "retry", "partial_success", "current", "open", "acknowledged", "warning", "mitigating", "fired"].indexOf(status) >= 0) {
+    if (["blocked", "waiting", "pending", "retry", "partial_success", "current", "open", "acknowledged", "warning", "mitigating", "fired", "proposed", "invoice_sent", "not_exported"].indexOf(status) >= 0) {
       return "amber";
     }
     if (["high", "dead_letter", "critical"].indexOf(status) >= 0) {
@@ -931,6 +1063,7 @@
     fillRecoveryEvidence();
     fillAlertRouting();
     fillIncidentResponse();
+    fillBusinessControlTower();
     fillEngineeringProof();
   }
 

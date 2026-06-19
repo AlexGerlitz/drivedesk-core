@@ -39,6 +39,7 @@ def test_public_demo_html_links_static_assets() -> None:
     assert 'id="metricGrid"' in html
     assert 'id="workQueueRows"' in html
     assert 'data-view="workflow"' in html
+    assert 'data-view="control"' in html
     assert 'data-view="operations"' in html
     assert 'data-view="incidents"' in html
     assert 'data-view="proof"' in html
@@ -48,6 +49,11 @@ def test_public_demo_html_links_static_assets() -> None:
     assert 'id="endToEndScenarioMeta"' in html
     assert 'id="workflowTimelineRows"' in html
     assert 'id="domainEventRows"' in html
+    assert 'id="controlTowerSummaryRows"' in html
+    assert 'id="controlTowerFlowRows"' in html
+    assert 'id="controlTowerObservationRows"' in html
+    assert 'id="controlTowerExceptionRows"' in html
+    assert 'id="controlTowerRepairRows"' in html
     assert 'id="integrationHealthRows"' in html
     assert 'id="adapterScenarioRows"' in html
     assert 'id="adapterRows"' in html
@@ -136,6 +142,37 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
         "postcheck.gates.passed",
         "docs/public/ENGINEERING_PROOF.md",
     }
+    control_tower = payload["businessControlTower"]
+    assert {item["label"] for item in control_tower["summary"]} >= {
+        "Observed systems",
+        "Open exceptions",
+        "Repair actions",
+        "External writes",
+    }
+    assert {observation["system"] for observation in control_tower["observations"]} >= {
+        "crm.bitrix24.mock",
+        "bank.statement.mock",
+        "accounting.export.mock",
+    }
+    assert {business_exception["type"] for business_exception in control_tower["exceptions"]} == {
+        "crm_payment_mismatch"
+    }
+    assert {repair_action["action"] for repair_action in control_tower["repairActions"]} == {"sync_status"}
+    assert {repair_action["externalMutation"] for repair_action in control_tower["repairActions"]} == {False}
+    assert {step["step"] for step in control_tower["flow"]} >= {
+        "observe",
+        "detect",
+        "propose",
+        "approve",
+        "execute",
+    }
+    assert set(control_tower["metrics"]) >= {
+        "drivedesk_business_state_observations",
+        "drivedesk_business_exceptions",
+        "drivedesk_repair_actions",
+    }
+    assert control_tower["api"]["observe"] == "POST /tenants/{tenant_id}/business-state/observations"
+    assert control_tower["api"]["execute"] == "POST /tenants/{tenant_id}/repair-actions/{repair_action_id}/execute"
     assert len(payload["timeline"]) >= 5
     assert len(payload["domainEvents"]) >= 4
     assert {event["event"] for event in payload["domainEvents"]} >= {

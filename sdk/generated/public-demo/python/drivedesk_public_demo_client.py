@@ -29,6 +29,7 @@ REQUIRED_FIELDS = [
   "recoveryEvidence",
   "alertRouting",
   "incidentResponse",
+  "businessControlTower",
   "engineeringProof",
   "workflow",
   "workflowScenarios",

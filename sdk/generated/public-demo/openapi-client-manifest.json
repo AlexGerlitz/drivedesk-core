@@ -43,6 +43,7 @@
     "recoveryEvidence",
     "alertRouting",
     "incidentResponse",
+    "businessControlTower",
     "engineeringProof",
     "workflow",
     "workflowScenarios",

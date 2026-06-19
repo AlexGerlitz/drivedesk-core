@@ -35,7 +35,7 @@ window.DRIVEDESK_DEMO_DATA = {
     },
     {
       "label": "OpenAPI paths",
-      "value": "24",
+      "value": "41",
       "detail": "generated contract",
       "tone": "violet"
     },
@@ -741,6 +741,132 @@ window.DRIVEDESK_DEMO_DATA = {
         "detail": "Resolution requires postcheck evidence",
         "evidence": "postcheck.gates.passed"
       }
+    ]
+  },
+  "businessControlTower": {
+    "summary": [
+      {
+        "label": "Observed systems",
+        "value": "3",
+        "detail": "crm, bank, accounting",
+        "tone": "blue"
+      },
+      {
+        "label": "Open exceptions",
+        "value": "1",
+        "detail": "payment state mismatch",
+        "tone": "amber"
+      },
+      {
+        "label": "Repair actions",
+        "value": "1",
+        "detail": "approval-gated dry-run",
+        "tone": "green"
+      },
+      {
+        "label": "External writes",
+        "value": "0",
+        "detail": "public-safe execution",
+        "tone": "violet"
+      }
+    ],
+    "observations": [
+      {
+        "id": "obs-crm-deal",
+        "system": "crm.bitrix24.mock",
+        "subject": "deal:DEAL-2026-001",
+        "state": "invoice_sent",
+        "observedAt": "2026-06-19T06:05:00Z",
+        "evidence": "business_state.observation.recorded"
+      },
+      {
+        "id": "obs-bank-payment",
+        "system": "bank.statement.mock",
+        "subject": "deal:DEAL-2026-001",
+        "state": "paid",
+        "observedAt": "2026-06-19T06:06:00Z",
+        "evidence": "business_state.observation.recorded"
+      },
+      {
+        "id": "obs-accounting-export",
+        "system": "accounting.export.mock",
+        "subject": "deal:DEAL-2026-001",
+        "state": "not_exported",
+        "observedAt": "2026-06-19T06:07:00Z",
+        "evidence": "business_state.observation.recorded"
+      }
+    ],
+    "exceptions": [
+      {
+        "id": "bex-payment-crm-mismatch",
+        "type": "crm_payment_mismatch",
+        "severity": "warning",
+        "status": "open",
+        "subject": "deal:DEAL-2026-001",
+        "impact": "cash received but CRM and accounting are not aligned",
+        "evidence": "business_exception.created"
+      }
+    ],
+    "repairActions": [
+      {
+        "id": "repair-sync-crm-payment",
+        "action": "sync_status",
+        "status": "approved",
+        "safety": "medium",
+        "mode": "dry_run",
+        "requiresApproval": true,
+        "externalMutation": false,
+        "evidence": "repair_action.executed"
+      }
+    ],
+    "flow": [
+      {
+        "step": "observe",
+        "owner": "adapter",
+        "state": "done",
+        "detail": "CRM, bank, and accounting states are normalized into one subject.",
+        "evidence": "business_state.observation.recorded"
+      },
+      {
+        "step": "detect",
+        "owner": "control_tower",
+        "state": "done",
+        "detail": "Payment state mismatch becomes a business exception with impact.",
+        "evidence": "business_exception.created"
+      },
+      {
+        "step": "propose",
+        "owner": "repair_engine",
+        "state": "done",
+        "detail": "Repair action is proposed without direct external mutation.",
+        "evidence": "repair_action.proposed"
+      },
+      {
+        "step": "approve",
+        "owner": "operator",
+        "state": "done",
+        "detail": "Human approval is recorded before execution.",
+        "evidence": "repair_action.approved"
+      },
+      {
+        "step": "execute",
+        "owner": "outbox",
+        "state": "done",
+        "detail": "Dry-run execution queues a repair event and records result evidence.",
+        "evidence": "repair_action.execution_requested"
+      }
+    ],
+    "api": {
+      "observe": "POST /tenants/{tenant_id}/business-state/observations",
+      "exceptions": "POST /tenants/{tenant_id}/business-exceptions",
+      "repair": "POST /tenants/{tenant_id}/business-exceptions/{business_exception_id}/repair-actions",
+      "approve": "POST /tenants/{tenant_id}/repair-actions/{repair_action_id}/approve",
+      "execute": "POST /tenants/{tenant_id}/repair-actions/{repair_action_id}/execute"
+    },
+    "metrics": [
+      "drivedesk_business_state_observations",
+      "drivedesk_business_exceptions",
+      "drivedesk_repair_actions"
     ]
   },
   "recoveryEvidence": [

@@ -13,7 +13,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from drivedesk_api.auth import hash_credential
 from drivedesk_api.db import (
     AuditEvent,
+    BusinessException,
     BusinessRecord,
+    BusinessStateObservation,
     IntegrationConnection,
     IntegrationConnectionCheck,
     IntegrationIncident,
@@ -21,6 +23,7 @@ from drivedesk_api.db import (
     Membership,
     OutboxEvent,
     PlatformAdmin,
+    RepairAction,
     Tenant,
     User,
     WorkflowActionRun,
@@ -29,9 +32,12 @@ from drivedesk_api.db import (
 from drivedesk_api.rbac import ActorContext
 from drivedesk_api.schemas import (
     AccountingExportCreate,
+    BusinessExceptionCreate,
+    BusinessExceptionStatusChange,
     BusinessRecordCreate,
     BusinessRecordTransition,
     BusinessRecordType,
+    BusinessStateObservationCreate,
     FileImportCreate,
     IntegrationConnectionCheckCreate,
     IntegrationConnectionCreate,
@@ -42,6 +48,8 @@ from drivedesk_api.schemas import (
     MembershipCreate,
     OutboxEventRetryRequest,
     PlatformAdminCreate,
+    RepairActionExecutionRequest,
+    RepairActionPropose,
     TenantCreate,
     UserCreate,
     WorkflowRuleCreate,
@@ -727,6 +735,487 @@ async def create_accounting_export_job(
     return event
 
 
+async def create_business_state_observation(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    payload: BusinessStateObservationCreate,
+    actor: ActorContext,
+) -> BusinessStateObservation:
+    await ensure_tenant_exists(session, tenant_id)
+    observed_at = payload.observed_at or datetime.now(UTC)
+    observation = BusinessStateObservation(
+        id=new_id(),
+        tenant_id=tenant_id,
+        system_key=payload.system_key,
+        subject_type=payload.subject_type,
+        subject_id=payload.subject_id,
+        external_ref=payload.external_ref,
+        state=payload.state,
+        observed_at=observed_at,
+        payload_json=json.dumps(payload.payload, ensure_ascii=False, sort_keys=True),
+    )
+    session.add(observation)
+    await write_audit(
+        session,
+        tenant_id=tenant_id,
+        actor=actor,
+        event_type="business_state.observation.recorded",
+        entity_type="business_state_observation",
+        entity_id=observation.id,
+        summary=f"Business state observed from {observation.system_key}: {observation.state}",
+        metadata={
+            "observation_id": observation.id,
+            "system_key": observation.system_key,
+            "subject_type": observation.subject_type,
+            "subject_id": observation.subject_id,
+            "external_ref": observation.external_ref,
+            "state": observation.state,
+            "payload_keys": sorted(payload.payload.keys()),
+        },
+    )
+    await enqueue_outbox(
+        session,
+        tenant_id=tenant_id,
+        event_type="business_state.observation.recorded",
+        adapter_key="internal.business_state",
+        payload={
+            "observation_id": observation.id,
+            "system_key": observation.system_key,
+            "subject_type": observation.subject_type,
+            "subject_id": observation.subject_id,
+            "state": observation.state,
+        },
+    )
+    await commit_or_conflict(session, "business state observation already exists")
+    return observation
+
+
+async def list_business_state_observations(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    system_key: str | None = None,
+    subject_type: str | None = None,
+    subject_id: str | None = None,
+    limit: int = 50,
+) -> list[BusinessStateObservation]:
+    await ensure_tenant_exists(session, tenant_id)
+    query = (
+        select(BusinessStateObservation)
+        .where(BusinessStateObservation.tenant_id == tenant_id)
+        .order_by(BusinessStateObservation.observed_at.desc(), BusinessStateObservation.created_at.desc())
+        .limit(limit)
+    )
+    if system_key:
+        query = query.where(BusinessStateObservation.system_key == system_key)
+    if subject_type:
+        query = query.where(BusinessStateObservation.subject_type == subject_type)
+    if subject_id:
+        query = query.where(BusinessStateObservation.subject_id == subject_id)
+    result = await session.execute(query)
+    return list(result.scalars().all())
+
+
+async def _load_business_state_observations(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    observation_ids: list[str],
+) -> list[BusinessStateObservation]:
+    if not observation_ids:
+        return []
+    result = await session.execute(
+        select(BusinessStateObservation).where(
+            BusinessStateObservation.tenant_id == tenant_id,
+            BusinessStateObservation.id.in_(observation_ids),
+        )
+    )
+    observations = list(result.scalars().all())
+    if len(observations) != len(set(observation_ids)):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="business state observation not found")
+    return observations
+
+
+async def create_business_exception(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    payload: BusinessExceptionCreate,
+    actor: ActorContext,
+) -> BusinessException:
+    await ensure_tenant_exists(session, tenant_id)
+    observations = await _load_business_state_observations(
+        session,
+        tenant_id=tenant_id,
+        observation_ids=payload.observation_ids,
+    )
+    observation_evidence = [
+        {
+            "observation_id": observation.id,
+            "system_key": observation.system_key,
+            "state": observation.state,
+            "subject_type": observation.subject_type,
+            "subject_id": observation.subject_id,
+            "observed_at": observation.observed_at.isoformat(),
+        }
+        for observation in observations
+    ]
+    evidence = {
+        **payload.evidence,
+        "observation_ids": payload.observation_ids,
+        "observations": observation_evidence,
+    }
+    business_exception = BusinessException(
+        id=new_id(),
+        tenant_id=tenant_id,
+        exception_type=payload.exception_type,
+        severity=payload.severity,
+        status="open",
+        subject_type=payload.subject_type,
+        subject_id=payload.subject_id,
+        title=payload.title,
+        summary=payload.summary,
+        impact_json=json.dumps(payload.impact, ensure_ascii=False, sort_keys=True),
+        evidence_json=json.dumps(evidence, ensure_ascii=False, sort_keys=True),
+        detected_at=datetime.now(UTC),
+    )
+    session.add(business_exception)
+    await write_audit(
+        session,
+        tenant_id=tenant_id,
+        actor=actor,
+        event_type="business_exception.created",
+        entity_type="business_exception",
+        entity_id=business_exception.id,
+        summary=f"Business exception created: {business_exception.exception_type}",
+        metadata={
+            "business_exception_id": business_exception.id,
+            "exception_type": business_exception.exception_type,
+            "severity": business_exception.severity,
+            "subject_type": business_exception.subject_type,
+            "subject_id": business_exception.subject_id,
+            "observation_count": len(observations),
+            "impact_keys": sorted(payload.impact.keys()),
+        },
+    )
+    await enqueue_outbox(
+        session,
+        tenant_id=tenant_id,
+        event_type="business_exception.created",
+        adapter_key="internal.business_exception",
+        payload={
+            "business_exception_id": business_exception.id,
+            "exception_type": business_exception.exception_type,
+            "severity": business_exception.severity,
+            "status": business_exception.status,
+            "subject_type": business_exception.subject_type,
+            "subject_id": business_exception.subject_id,
+        },
+    )
+    await commit_or_conflict(session, "business exception already exists")
+    return business_exception
+
+
+async def list_business_exceptions(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    status_filter: str | None = None,
+    severity: str | None = None,
+    exception_type: str | None = None,
+    limit: int = 50,
+) -> list[BusinessException]:
+    await ensure_tenant_exists(session, tenant_id)
+    query = (
+        select(BusinessException)
+        .where(BusinessException.tenant_id == tenant_id)
+        .order_by(BusinessException.detected_at.desc(), BusinessException.created_at.desc())
+        .limit(limit)
+    )
+    if status_filter:
+        query = query.where(BusinessException.status == status_filter)
+    if severity:
+        query = query.where(BusinessException.severity == severity)
+    if exception_type:
+        query = query.where(BusinessException.exception_type == exception_type)
+    result = await session.execute(query)
+    return list(result.scalars().all())
+
+
+async def _tenant_business_exception(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    business_exception_id: str,
+) -> BusinessException:
+    await ensure_tenant_exists(session, tenant_id)
+    business_exception = await session.get(BusinessException, business_exception_id)
+    if not business_exception or business_exception.tenant_id != tenant_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="business exception not found")
+    return business_exception
+
+
+async def change_business_exception_status(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    business_exception_id: str,
+    payload: BusinessExceptionStatusChange,
+    actor: ActorContext,
+) -> BusinessException:
+    business_exception = await _tenant_business_exception(
+        session,
+        tenant_id=tenant_id,
+        business_exception_id=business_exception_id,
+    )
+    if business_exception.status == "resolved":
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="business exception already resolved")
+    previous_status = business_exception.status
+    changed_at = datetime.now(UTC)
+    business_exception.status = payload.status
+    business_exception.updated_at = changed_at
+    if payload.status == "resolved":
+        business_exception.resolved_at = changed_at
+    await write_audit(
+        session,
+        tenant_id=tenant_id,
+        actor=actor,
+        event_type="business_exception.status_changed",
+        entity_type="business_exception",
+        entity_id=business_exception.id,
+        summary=f"Business exception status changed: {previous_status} -> {business_exception.status}",
+        metadata={
+            "business_exception_id": business_exception.id,
+            "previous_status": previous_status,
+            "new_status": business_exception.status,
+            "note": payload.note,
+        },
+    )
+    await commit_or_conflict(session, "business exception status change failed")
+    return business_exception
+
+
+def _default_repair_summary(business_exception: BusinessException, action_type: str) -> str:
+    if action_type == "sync_status":
+        return f"Synchronize {business_exception.subject_type} state after verified cross-system evidence."
+    if action_type == "create_task":
+        return f"Create an operator task for {business_exception.subject_type} exception review."
+    if action_type == "notify_owner":
+        return f"Notify the accountable owner about {business_exception.exception_type}."
+    return f"Prepare {action_type} repair for {business_exception.exception_type}."
+
+
+async def propose_repair_action(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    business_exception_id: str,
+    payload: RepairActionPropose,
+    actor: ActorContext,
+) -> RepairAction:
+    business_exception = await _tenant_business_exception(
+        session,
+        tenant_id=tenant_id,
+        business_exception_id=business_exception_id,
+    )
+    if business_exception.status == "resolved":
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="business exception already resolved")
+    repair_payload = {
+        "business_exception_id": business_exception.id,
+        "exception_type": business_exception.exception_type,
+        "subject_type": business_exception.subject_type,
+        "subject_id": business_exception.subject_id,
+        "target_adapter_key": "internal.repair_engine",
+        "external_mutation": False,
+        **payload.payload,
+    }
+    repair_action = RepairAction(
+        id=new_id(),
+        tenant_id=tenant_id,
+        business_exception_id=business_exception.id,
+        action_type=payload.action_type,
+        safety_level=payload.safety_level,
+        requires_approval=1 if payload.requires_approval else 0,
+        status="proposed",
+        summary=payload.summary or _default_repair_summary(business_exception, payload.action_type),
+        payload_json=json.dumps(repair_payload, ensure_ascii=False, sort_keys=True),
+        result_json=json.dumps({}, ensure_ascii=False, sort_keys=True),
+    )
+    session.add(repair_action)
+    await write_audit(
+        session,
+        tenant_id=tenant_id,
+        actor=actor,
+        event_type="repair_action.proposed",
+        entity_type="repair_action",
+        entity_id=repair_action.id,
+        summary=f"Repair action proposed: {repair_action.action_type}",
+        metadata={
+            "repair_action_id": repair_action.id,
+            "business_exception_id": business_exception.id,
+            "action_type": repair_action.action_type,
+            "safety_level": repair_action.safety_level,
+            "requires_approval": bool(repair_action.requires_approval),
+        },
+    )
+    await enqueue_outbox(
+        session,
+        tenant_id=tenant_id,
+        event_type="repair_action.proposed",
+        adapter_key="internal.repair_engine",
+        payload={
+            "repair_action_id": repair_action.id,
+            "business_exception_id": business_exception.id,
+            "action_type": repair_action.action_type,
+            "status": repair_action.status,
+        },
+    )
+    await commit_or_conflict(session, "repair action already exists")
+    return repair_action
+
+
+async def list_repair_actions(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    business_exception_id: str | None = None,
+    status_filter: str | None = None,
+    limit: int = 50,
+) -> list[RepairAction]:
+    await ensure_tenant_exists(session, tenant_id)
+    query = (
+        select(RepairAction)
+        .where(RepairAction.tenant_id == tenant_id)
+        .order_by(RepairAction.created_at.desc())
+        .limit(limit)
+    )
+    if business_exception_id:
+        query = query.where(RepairAction.business_exception_id == business_exception_id)
+    if status_filter:
+        query = query.where(RepairAction.status == status_filter)
+    result = await session.execute(query)
+    return list(result.scalars().all())
+
+
+async def _tenant_repair_action(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    repair_action_id: str,
+) -> RepairAction:
+    await ensure_tenant_exists(session, tenant_id)
+    repair_action = await session.get(RepairAction, repair_action_id)
+    if not repair_action or repair_action.tenant_id != tenant_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="repair action not found")
+    return repair_action
+
+
+async def approve_repair_action(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    repair_action_id: str,
+    actor: ActorContext,
+) -> RepairAction:
+    repair_action = await _tenant_repair_action(session, tenant_id=tenant_id, repair_action_id=repair_action_id)
+    if repair_action.status not in {"proposed", "approved"}:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="repair action cannot be approved")
+    approved_at = datetime.now(UTC)
+    repair_action.status = "approved"
+    repair_action.updated_at = approved_at
+    repair_action.approved_at = repair_action.approved_at or approved_at
+    await write_audit(
+        session,
+        tenant_id=tenant_id,
+        actor=actor,
+        event_type="repair_action.approved",
+        entity_type="repair_action",
+        entity_id=repair_action.id,
+        summary=f"Repair action approved: {repair_action.action_type}",
+        metadata={
+            "repair_action_id": repair_action.id,
+            "business_exception_id": repair_action.business_exception_id,
+            "action_type": repair_action.action_type,
+        },
+    )
+    await commit_or_conflict(session, "repair action approval failed")
+    return repair_action
+
+
+async def execute_repair_action(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    repair_action_id: str,
+    payload: RepairActionExecutionRequest,
+    actor: ActorContext,
+) -> RepairAction:
+    repair_action = await _tenant_repair_action(session, tenant_id=tenant_id, repair_action_id=repair_action_id)
+    if repair_action.requires_approval and repair_action.status != "approved":
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="repair action approval required")
+    if repair_action.status == "executed":
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="repair action already executed")
+
+    try:
+        action_payload = json.loads(repair_action.payload_json or "{}")
+    except json.JSONDecodeError:
+        action_payload = {"payload_valid": False}
+    if not isinstance(action_payload, dict):
+        action_payload = {"payload_valid": False}
+
+    execution_payload = {
+        "repair_action_id": repair_action.id,
+        "business_exception_id": repair_action.business_exception_id,
+        "action_type": repair_action.action_type,
+        "mode": payload.mode,
+        "dry_run": payload.mode == "dry_run",
+        "external_mutation": False,
+        "note": payload.note,
+        "payload": action_payload,
+    }
+    outbox = await enqueue_outbox(
+        session,
+        tenant_id=tenant_id,
+        event_type="repair_action.execution_requested",
+        adapter_key=str(action_payload.get("target_adapter_key") or "internal.repair_engine"),
+        payload=execution_payload,
+    )
+    executed_at = datetime.now(UTC)
+    repair_action.status = "executed"
+    repair_action.updated_at = executed_at
+    repair_action.executed_at = executed_at
+    repair_action.result_json = json.dumps(
+        {
+            "mode": payload.mode,
+            "dry_run": payload.mode == "dry_run",
+            "external_mutation": False,
+            "outbox_event_id": outbox.id,
+            "queued_event_type": outbox.event_type,
+        },
+        ensure_ascii=False,
+        sort_keys=True,
+    )
+    await write_audit(
+        session,
+        tenant_id=tenant_id,
+        actor=actor,
+        event_type="repair_action.executed",
+        entity_type="repair_action",
+        entity_id=repair_action.id,
+        summary=f"Repair action executed: {repair_action.action_type}",
+        metadata={
+            "repair_action_id": repair_action.id,
+            "business_exception_id": repair_action.business_exception_id,
+            "action_type": repair_action.action_type,
+            "mode": payload.mode,
+            "outbox_event_id": outbox.id,
+        },
+    )
+    await commit_or_conflict(session, "repair action execution failed")
+    return repair_action
+
+
 async def create_business_record(
     session: AsyncSession,
     *,
@@ -1278,6 +1767,62 @@ async def count_workflow_action_runs_by_action_status(session: AsyncSession) -> 
             "action_type": row.action_type,
             "status": row.status,
             "run_count": int(row.run_count or 0),
+        }
+        for row in result.all()
+    ]
+
+
+async def count_business_state_observations_by_system_state(session: AsyncSession) -> list[dict[str, object]]:
+    result = await session.execute(
+        select(
+            BusinessStateObservation.system_key,
+            BusinessStateObservation.state,
+            func.count().label("observation_count"),
+        ).group_by(BusinessStateObservation.system_key, BusinessStateObservation.state)
+    )
+    return [
+        {
+            "system_key": row.system_key,
+            "state": row.state,
+            "observation_count": int(row.observation_count or 0),
+        }
+        for row in result.all()
+    ]
+
+
+async def count_business_exceptions_by_type_severity_status(session: AsyncSession) -> list[dict[str, object]]:
+    result = await session.execute(
+        select(
+            BusinessException.exception_type,
+            BusinessException.severity,
+            BusinessException.status,
+            func.count().label("exception_count"),
+        ).group_by(BusinessException.exception_type, BusinessException.severity, BusinessException.status)
+    )
+    return [
+        {
+            "exception_type": row.exception_type,
+            "severity": row.severity,
+            "status": row.status,
+            "exception_count": int(row.exception_count or 0),
+        }
+        for row in result.all()
+    ]
+
+
+async def count_repair_actions_by_action_status(session: AsyncSession) -> list[dict[str, object]]:
+    result = await session.execute(
+        select(
+            RepairAction.action_type,
+            RepairAction.status,
+            func.count().label("repair_action_count"),
+        ).group_by(RepairAction.action_type, RepairAction.status)
+    )
+    return [
+        {
+            "action_type": row.action_type,
+            "status": row.status,
+            "repair_action_count": int(row.repair_action_count or 0),
         }
         for row in result.all()
     ]

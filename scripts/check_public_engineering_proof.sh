@@ -84,6 +84,10 @@ require(
     static_payload.get("endToEndScenario") == api_payload.get("endToEndScenario"),
     "static and API endToEndScenario payloads differ",
 )
+require(
+    static_payload.get("businessControlTower") == api_payload.get("businessControlTower"),
+    "static and API businessControlTower payloads differ",
+)
 require(static_proof.get("milestone") == "engineering_70", "engineeringProof milestone mismatch")
 require(static_proof.get("status") == "validated", "engineeringProof status mismatch")
 require(len(static_proof.get("summary", [])) >= 4, "engineeringProof summary too short")

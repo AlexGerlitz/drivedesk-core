@@ -235,6 +235,45 @@ def build_workflow_action_run_metrics_lines(workflow_action_run_rows: list[dict[
     return lines
 
 
+def build_business_state_observation_metrics_lines(observation_rows: list[dict[str, object]]) -> list[str]:
+    lines = [
+        "# HELP drivedesk_business_state_observations Business state observations by source system and state.",
+        "# TYPE drivedesk_business_state_observations gauge",
+    ]
+    for row in observation_rows:
+        labels = prometheus_labels({"system_key": row["system_key"], "state": row["state"]})
+        lines.append(f"drivedesk_business_state_observations{labels} {row['observation_count']}")
+    return lines
+
+
+def build_business_exception_metrics_lines(exception_rows: list[dict[str, object]]) -> list[str]:
+    lines = [
+        "# HELP drivedesk_business_exceptions Business exceptions by type, severity, and status.",
+        "# TYPE drivedesk_business_exceptions gauge",
+    ]
+    for row in exception_rows:
+        labels = prometheus_labels(
+            {
+                "exception_type": row["exception_type"],
+                "severity": row["severity"],
+                "status": row["status"],
+            }
+        )
+        lines.append(f"drivedesk_business_exceptions{labels} {row['exception_count']}")
+    return lines
+
+
+def build_repair_action_metrics_lines(repair_action_rows: list[dict[str, object]]) -> list[str]:
+    lines = [
+        "# HELP drivedesk_repair_actions Repair actions by action type and status.",
+        "# TYPE drivedesk_repair_actions gauge",
+    ]
+    for row in repair_action_rows:
+        labels = prometheus_labels({"action_type": row["action_type"], "status": row["status"]})
+        lines.append(f"drivedesk_repair_actions{labels} {row['repair_action_count']}")
+    return lines
+
+
 def build_integration_connection_metrics_lines(integration_connection_rows: list[dict[str, object]]) -> list[str]:
     lines = [
         "# HELP drivedesk_integration_connections Integration connections by adapter and status.",
@@ -330,6 +369,9 @@ def build_metrics_text(
     business_record_rows: list[dict[str, object]] | None = None,
     workflow_rule_rows: list[dict[str, object]] | None = None,
     workflow_action_run_rows: list[dict[str, object]] | None = None,
+    business_state_observation_rows: list[dict[str, object]] | None = None,
+    business_exception_rows: list[dict[str, object]] | None = None,
+    repair_action_rows: list[dict[str, object]] | None = None,
     integration_connection_rows: list[dict[str, object]] | None = None,
     integration_connection_check_rows: list[dict[str, object]] | None = None,
     integration_reconciliation_rows: list[dict[str, object]] | None = None,
@@ -367,6 +409,9 @@ def build_metrics_text(
     lines.extend(build_business_record_metrics_lines(business_record_rows or []))
     lines.extend(build_workflow_rule_metrics_lines(workflow_rule_rows or []))
     lines.extend(build_workflow_action_run_metrics_lines(workflow_action_run_rows or []))
+    lines.extend(build_business_state_observation_metrics_lines(business_state_observation_rows or []))
+    lines.extend(build_business_exception_metrics_lines(business_exception_rows or []))
+    lines.extend(build_repair_action_metrics_lines(repair_action_rows or []))
     lines.extend(build_integration_connection_metrics_lines(integration_connection_rows or []))
     lines.extend(build_integration_connection_check_metrics_lines(integration_connection_check_rows or []))
     lines.extend(build_integration_reconciliation_metrics_lines(integration_reconciliation_rows or []))

@@ -77,6 +77,26 @@
       "boundary": "tenant-scoped public contracts without private records"
     },
     {
+      "capability_id": "business-control-tower",
+      "title": "Business operations control tower",
+      "status": "validated",
+      "public_doc": "docs/public/BUSINESS_CONTROL_TOWER.md",
+      "evidence_files": [
+        "apps/admin/public-demo/index.html",
+        "apps/admin/public-demo/demo-data.js",
+        "docs/public/API_BACKED_DEMO.md"
+      ],
+      "verifiers": [
+        "bash scripts/check_public_business_control_tower.sh",
+        "bash scripts/check_public_demo_api.sh"
+      ],
+      "public_urls": [
+        "apps/admin/public-demo/",
+        "docs/public/BUSINESS_CONTROL_TOWER.md"
+      ],
+      "boundary": "synthetic CRM, bank, accounting, exception, and repair evidence only"
+    },
+    {
       "capability_id": "integration-hub",
       "title": "Integration adapter hub",
       "status": "validated",

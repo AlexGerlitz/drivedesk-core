@@ -27,6 +27,8 @@ infrastructure, production history, customer data, or operational credentials.
   and outbox overview.
 - `WORKFLOW_RULES.md` - tenant-owned automation rules, audit, outbox, and metrics.
 - `WORKFLOW_ACTION_RUNS.md` - workflow execution history, links, and metrics.
+- `BUSINESS_CONTROL_TOWER.md` - cross-system observations, business exceptions,
+  approval-gated repair actions, and control tower metrics.
 - `AUTH_FOUNDATION.md` - credential auth, bearer token, and RBAC overview.
 - `AUTH_OBSERVABILITY.md` - aggregate auth metrics, alert names, and runbook shape.
 - `SESSION_REVOCATION.md` - admin-triggered tenant/platform session revocation.
@@ -127,6 +129,8 @@ The public repository export also generates:
 - `GET /demo/public` - read-only synthetic demo payload in the exported API.
 - `incidentResponse` - public-safe incident response contract in the demo
   payload and Incidents tab.
+- `businessControlTower` - public-safe control tower contract for CRM, bank,
+  accounting, business exception, and repair-action flow.
 - `GET /business-record-lifecycle-policies` - public-safe lifecycle policy catalog.
 - `POST /tenants/{tenant_id}/integration-exports/accounting` - public-safe
   outbound accounting export contract in the exported API.
@@ -142,6 +146,8 @@ The public repository export also generates:
   the public demo payload.
 - `scripts/run_public_demo_local.sh` - one-command local API run.
 - `scripts/check_public_demo_api.sh` - local API contract and client-example smoke.
+- `scripts/check_public_business_control_tower.sh` - public-safe business
+  control tower contract validation.
 - `scripts/check_public_backup_restore.sh` - public-safe synthetic recovery drill.
 - `scripts/check_public_release_rollback.sh` - public-safe release rollback drill.
 - `scripts/check_public_slo_canary_gate.sh` - public-safe SLO canary gate drill.
@@ -197,7 +203,7 @@ https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 7. Run `bash scripts/check_public_engineering_proof.sh`.
 8. Run `bash scripts/check_public_demo_api.sh`.
 9. Run one generated client example from `examples/`.
-10. Review `PROJECT_STATUS.md`, `TECHNICAL_CAPABILITY_MAP.md`, `EVIDENCE_INDEX.md`, `OBSERVABILITY_PROOF.md`, `ALERT_ROUTING_EVIDENCE.md`, `INCIDENT_RESPONSE_DEMO.md`, `ENGINEERING_PROOF.md`, `PLATFORM_MATURITY_70.md`, and `SANITIZED_EVIDENCE.md`.
+10. Review `PROJECT_STATUS.md`, `TECHNICAL_CAPABILITY_MAP.md`, `EVIDENCE_INDEX.md`, `BUSINESS_CONTROL_TOWER.md`, `OBSERVABILITY_PROOF.md`, `ALERT_ROUTING_EVIDENCE.md`, `INCIDENT_RESPONSE_DEMO.md`, `ENGINEERING_PROOF.md`, `PLATFORM_MATURITY_70.md`, and `SANITIZED_EVIDENCE.md`.
 11. Review `SYSTEM_DESIGN.md`, `GITOPS_DELIVERY.md`, and the recovery evidence docs.
 
 ## Engineering Summary

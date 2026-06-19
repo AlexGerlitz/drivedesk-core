@@ -11,6 +11,11 @@ BusinessRecordType = Literal["contract", "payment", "lesson", "task", "document"
 WorkflowRuleTrigger = Literal["business_record.status_changed"]
 WorkflowRuleActionType = Literal["emit_outbox_event", "create_task_record", "request_adapter_sync"]
 IntegrationConnectionStatus = Literal["active", "disabled"]
+BusinessExceptionSeverity = Literal["info", "warning", "critical"]
+BusinessExceptionStatus = Literal["open", "acknowledged", "resolved"]
+RepairActionStatus = Literal["proposed", "approved", "executed"]
+RepairActionSafetyLevel = Literal["low", "medium", "high"]
+RepairActionExecutionMode = Literal["dry_run", "commit_request"]
 
 
 class AdapterContractRead(BaseModel):
@@ -391,6 +396,100 @@ class BusinessRecordRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class BusinessStateObservationCreate(BaseModel):
+    system_key: str = Field(min_length=2, max_length=128, pattern=r"^[a-z0-9][a-z0-9_.-]*$")
+    subject_type: str = Field(min_length=2, max_length=64, pattern=r"^[a-z0-9][a-z0-9_-]*$")
+    subject_id: str = Field(min_length=1, max_length=128)
+    external_ref: str | None = Field(default=None, min_length=1, max_length=128)
+    state: str = Field(min_length=2, max_length=64, pattern=r"^[a-z0-9][a-z0-9_-]*$")
+    observed_at: datetime | None = None
+    payload: dict[str, Any] = Field(default_factory=dict)
+
+
+class BusinessStateObservationRead(BaseModel):
+    id: str
+    tenant_id: str
+    system_key: str
+    subject_type: str
+    subject_id: str
+    external_ref: str | None = None
+    state: str
+    observed_at: datetime
+    payload_json: str
+    created_at: datetime | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class BusinessExceptionCreate(BaseModel):
+    exception_type: str = Field(min_length=2, max_length=128, pattern=r"^[a-z0-9][a-z0-9_.-]*$")
+    severity: BusinessExceptionSeverity = "warning"
+    subject_type: str = Field(min_length=2, max_length=64, pattern=r"^[a-z0-9][a-z0-9_-]*$")
+    subject_id: str = Field(min_length=1, max_length=128)
+    title: str = Field(min_length=2, max_length=255)
+    summary: str = Field(min_length=2, max_length=2000)
+    impact: dict[str, Any] = Field(default_factory=dict)
+    evidence: dict[str, Any] = Field(default_factory=dict)
+    observation_ids: list[str] = Field(default_factory=list, max_length=20)
+
+
+class BusinessExceptionStatusChange(BaseModel):
+    status: Literal["acknowledged", "resolved"]
+    note: str | None = Field(default=None, min_length=2, max_length=255)
+
+
+class BusinessExceptionRead(BaseModel):
+    id: str
+    tenant_id: str
+    exception_type: str
+    severity: BusinessExceptionSeverity
+    status: BusinessExceptionStatus
+    subject_type: str
+    subject_id: str
+    title: str
+    summary: str
+    impact_json: str
+    evidence_json: str
+    detected_at: datetime
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+    resolved_at: datetime | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class RepairActionPropose(BaseModel):
+    action_type: str = Field(default="sync_status", min_length=2, max_length=128, pattern=r"^[a-z0-9][a-z0-9_.-]*$")
+    safety_level: RepairActionSafetyLevel = "medium"
+    requires_approval: bool = True
+    summary: str | None = Field(default=None, min_length=2, max_length=2000)
+    payload: dict[str, Any] = Field(default_factory=dict)
+
+
+class RepairActionExecutionRequest(BaseModel):
+    mode: RepairActionExecutionMode = "dry_run"
+    note: str | None = Field(default=None, min_length=2, max_length=255)
+
+
+class RepairActionRead(BaseModel):
+    id: str
+    tenant_id: str
+    business_exception_id: str
+    action_type: str
+    safety_level: RepairActionSafetyLevel
+    requires_approval: bool
+    status: RepairActionStatus
+    summary: str
+    payload_json: str
+    result_json: str
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+    approved_at: datetime | None = None
+    executed_at: datetime | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class WorkflowRuleCreate(BaseModel):
     name: str = Field(min_length=2, max_length=120)
     trigger_event_type: WorkflowRuleTrigger = "business_record.status_changed"
@@ -471,6 +570,7 @@ class PublicDemoRead(BaseModel):
     recoveryEvidence: list[dict[str, str]]
     alertRouting: dict[str, Any]
     incidentResponse: dict[str, Any]
+    businessControlTower: dict[str, Any]
     engineeringProof: dict[str, Any]
     workflow: dict[str, Any]
     workflowScenarios: list[dict[str, Any]]

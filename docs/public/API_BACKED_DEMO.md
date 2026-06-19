@@ -18,8 +18,9 @@ The endpoint returns the same product-shaped synthetic demo data used by the pub
 shell: tenant, health, metrics, work queue, workflow stages, timeline entries,
 workflow scenarios, domain events, members, audit events, outbox events, adapter
 contracts, adapter operation scenarios, sync jobs, Integration Health, alert
-routing, incident response, recovery evidence, and the `engineeringProof`
-contract rendered by the Operations, Incidents, and Proof tabs.
+routing, incident response, business control tower data, recovery evidence, and
+the `engineeringProof` contract rendered by the Operations, Incidents, and Proof
+tabs.
 
 ## Runtime Modes
 
@@ -44,6 +45,7 @@ Contract smoke:
 
 ```bash
 bash scripts/check_public_demo_api.sh
+bash scripts/check_public_business_control_tower.sh
 ```
 
 Client examples:
@@ -67,6 +69,17 @@ bash scripts/check_public_demo_sdk.sh
 `/demo/public`, `/openapi.json`, the generated `docs/openapi.json` when
 present, alert routes, alert-to-runbook bindings, and then runs the curl,
 Python, and JavaScript examples against the same API.
+
+The business control tower payload is documented in
+`BUSINESS_CONTROL_TOWER.md`. It shows the synthetic path:
+
+```text
+CRM observation + bank observation + accounting observation
+  -> business exception
+  -> repair action proposal
+  -> approval
+  -> dry-run repair evidence
+```
 
 The incident response payload is documented in `INCIDENT_RESPONSE_DEMO.md`. It
 shows the synthetic path:
@@ -117,5 +130,5 @@ This is the first public frontend/backend contract. The static demo works
 without infrastructure, and the same UI can be pointed at the FastAPI endpoint
 to verify that the backend owns the demo payload shape: workflow, timeline,
 workflow scenarios, domain events, audit, outbox data, alert routing, incident
-response, adapter operation scenarios, recovery evidence, and engineering proof
-gates.
+response, business control tower data, adapter operation scenarios, recovery
+evidence, and engineering proof gates.

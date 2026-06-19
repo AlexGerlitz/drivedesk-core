@@ -45,6 +45,7 @@ Primary artifacts:
 | Demo API | `docs/public/API_BACKED_DEMO.md`, `docs/openapi.json`, `GET /demo/public` |
 | SDK | `docs/public/CLIENT_SDK.md`, `sdk/generated/public-demo/` |
 | Workflow | `docs/public/WORKFLOW_DEMO.md`, `endToEndScenario` |
+| Connector replay | `docs/public/CONNECTOR_FIXTURE_REPLAY.md`, `examples/connector-fixtures/replay-fixtures.sanitized.json` |
 | Observability | `docs/public/OBSERVABILITY_PROOF.md` |
 | Alert routing | `docs/public/ALERT_ROUTING_EVIDENCE.md` |
 | Incident response | `docs/public/INCIDENT_RESPONSE_DEMO.md` |
@@ -61,6 +62,7 @@ bash scripts/check_public_platform_tour.sh
 bash scripts/check_public_pages_entrypoint.sh
 bash scripts/check_public_demo_api.sh
 bash scripts/check_public_engineering_proof.sh
+bash scripts/check_public_connector_fixture_replay.sh
 bash scripts/ci_smoke_public.sh
 ```
 

@@ -24,6 +24,9 @@ The public version uses synthetic fixtures and sanitized evidence only. It does
 not include real provider secrets, tenant endpoints, raw provider payloads,
 customer data, browser tokens, or live external calls.
 
+The fixture replay layer is documented in `CONNECTOR_FIXTURE_REPLAY.md`. It
+turns the `contract_fixtures` stage into a repeatable public-safe replay check.
+
 ## Goal
 
 DriveDesk should be able to connect to many systems without creating one-off
@@ -135,6 +138,9 @@ Required fixture groups:
 | `dead_letter_provider_failure` | Creates operator review for non-retryable or exhausted work. |
 | `reconciliation_mismatch` | Shows how provider evidence differs from DriveDesk evidence. |
 
+The replay contract for these groups lives in `CONNECTOR_FIXTURE_REPLAY.md` and
+the public fixture file `examples/connector-fixtures/replay-fixtures.sanitized.json`.
+
 The public fixture result must prove these flags:
 
 ```text
@@ -205,6 +211,7 @@ A connector is runtime-ready only when it is wired to these DriveDesk surfaces:
 
 ```bash
 bash scripts/check_public_connector_certification.sh
+bash scripts/check_public_connector_fixture_replay.sh
 bash scripts/check_public_provider_connector_guide.sh
 bash scripts/check_public_adapter_developer_guide.sh
 bash scripts/check_public_evidence_index.sh

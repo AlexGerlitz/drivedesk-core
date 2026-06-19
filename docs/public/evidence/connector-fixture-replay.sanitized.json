@@ -1,0 +1,178 @@
+{
+  "schema_version": 1,
+  "artifact_id": "drivedesk-core-connector-fixture-replay",
+  "status": "validated",
+  "data_profile": "synthetic_demo_data",
+  "generated_from": "public_safe_fixture_replay",
+  "public_doc": "docs/public/CONNECTOR_FIXTURE_REPLAY.md",
+  "fixture_file": "examples/connector-fixtures/replay-fixtures.sanitized.json",
+  "certification_doc": "docs/public/CONNECTOR_CERTIFICATION.md",
+  "verifier": "bash scripts/check_public_connector_fixture_replay.sh",
+  "redaction": {
+    "addresses_included": false,
+    "credentials_included": false,
+    "hostnames_included": false,
+    "paths_included": false,
+    "production_data_included": false,
+    "raw_logs_included": false,
+    "request_bodies_included": false
+  },
+  "replay_stages": [
+    "load_fixture",
+    "validate_contract",
+    "normalize_safe_payload",
+    "redact_sensitive_fields",
+    "classify_outcome",
+    "route_followup",
+    "record_sanitized_evidence"
+  ],
+  "fixture_groups": [
+    {
+      "group": "happy_path_preview",
+      "provider_key": "crm.demo.mock",
+      "provider_class": "crm",
+      "stage": "preview",
+      "input_profile": "synthetic_crm_deal_reference",
+      "operation_contract": "crm_deal_intake_preview",
+      "expected_result": {
+        "safe_payload_present": true,
+        "normalized_fields": [
+          "external_reference",
+          "amount_bucket",
+          "status",
+          "source_system",
+          "occurred_at"
+        ],
+        "raw_payload_returned": false,
+        "credentials_returned": false,
+        "external_call_made": false,
+        "public_demo_persistence": false
+      }
+    },
+    {
+      "group": "sensitive_payload_redaction",
+      "provider_key": "crm.demo.mock",
+      "provider_class": "crm",
+      "stage": "redaction",
+      "input_profile": "synthetic_payload_with_sensitive_key_names",
+      "operation_contract": "crm_deal_intake_preview",
+      "expected_result": {
+        "redaction_evidence_present": true,
+        "dropped_keys": [
+          "access_token",
+          "refresh_token",
+          "full_name",
+          "phone",
+          "email",
+          "address",
+          "raw_request_body"
+        ],
+        "safe_payload_present": true,
+        "raw_payload_returned": false,
+        "credentials_returned": false,
+        "external_call_made": false,
+        "public_demo_persistence": false
+      }
+    },
+    {
+      "group": "invalid_payload",
+      "provider_key": "crm.demo.mock",
+      "provider_class": "crm",
+      "stage": "validation",
+      "input_profile": "synthetic_missing_required_fields",
+      "operation_contract": "crm_deal_intake_preview",
+      "expected_result": {
+        "validation_errors": [
+          "missing_external_reference",
+          "unsupported_status"
+        ],
+        "outbox_event_created": false,
+        "safe_payload_present": true,
+        "raw_payload_returned": false,
+        "credentials_returned": false,
+        "external_call_made": false,
+        "public_demo_persistence": false
+      }
+    },
+    {
+      "group": "retryable_provider_failure",
+      "provider_key": "bank.statement.mock",
+      "provider_class": "bank",
+      "stage": "retry",
+      "input_profile": "synthetic_temporary_provider_failure",
+      "operation_contract": "bank_statement_pull_execute",
+      "expected_result": {
+        "retryable": true,
+        "dead_letter": false,
+        "incident_created": false,
+        "next_state": "retry_scheduled",
+        "safe_payload_present": true,
+        "raw_payload_returned": false,
+        "credentials_returned": false,
+        "external_call_made": false,
+        "public_demo_persistence": false
+      }
+    },
+    {
+      "group": "dead_letter_provider_failure",
+      "provider_key": "accounting.export.mock",
+      "provider_class": "accounting_or_erp",
+      "stage": "dead_letter",
+      "input_profile": "synthetic_terminal_provider_failure",
+      "operation_contract": "accounting_export_execute",
+      "expected_result": {
+        "retryable": false,
+        "dead_letter": true,
+        "operator_review": true,
+        "event_type": "integration.operator_review.created",
+        "incident_table": "drivedesk_integration_incidents",
+        "safe_payload_present": true,
+        "raw_payload_returned": false,
+        "credentials_returned": false,
+        "external_call_made": false,
+        "public_demo_persistence": false
+      }
+    },
+    {
+      "group": "reconciliation_mismatch",
+      "provider_key": "accounting.export.mock",
+      "provider_class": "accounting_or_erp",
+      "stage": "reconciliation",
+      "input_profile": "synthetic_provider_vs_drivedesk_mismatch",
+      "operation_contract": "accounting_export_reconcile",
+      "expected_result": {
+        "reconciliation_table": "drivedesk_integration_reconciliations",
+        "status": "mismatch",
+        "provider_evidence": "safe_reference_only",
+        "drivedesk_evidence": "aggregate_reference_only",
+        "operator_review": true,
+        "safe_payload_present": true,
+        "raw_payload_returned": false,
+        "credentials_returned": false,
+        "external_call_made": false,
+        "public_demo_persistence": false
+      }
+    }
+  ],
+  "release_proof": {
+    "docs": [
+      "docs/public/CONNECTOR_FIXTURE_REPLAY.md",
+      "docs/public/CONNECTOR_CERTIFICATION.md",
+      "docs/public/PROVIDER_CONNECTOR_GUIDE.md",
+      "docs/public/ADAPTER_DEVELOPER_GUIDE.md"
+    ],
+    "verifiers": [
+      "bash scripts/check_public_connector_fixture_replay.sh",
+      "bash scripts/check_public_connector_certification.sh",
+      "bash scripts/check_public_evidence_index.sh"
+    ],
+    "boundaries": [
+      "synthetic_demo_data",
+      "safe_payload_only",
+      "no_raw_provider_payload",
+      "no_provider_credentials",
+      "no_external_provider_call",
+      "no_public_demo_persistence"
+    ]
+  }
+}

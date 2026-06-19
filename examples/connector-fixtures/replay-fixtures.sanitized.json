@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "fixture_set_id": "drivedesk-core-connector-fixture-replay-fixtures",
+  "data_profile": "synthetic_demo_data",
+  "public_doc": "docs/public/CONNECTOR_FIXTURE_REPLAY.md",
+  "expected_replay_command": "bash scripts/check_public_connector_fixture_replay.sh",
+  "fixtures": [
+    {
+      "group": "happy_path_preview",
+      "provider_key": "crm.demo.mock",
+      "provider_class": "crm",
+      "stage": "preview",
+      "input_profile": "synthetic_crm_deal_reference",
+      "expected_result": {
+        "safe_payload_present": true,
+        "normalized_fields": [
+          "external_reference",
+          "amount_bucket",
+          "status",
+          "source_system",
+          "occurred_at"
+        ],
+        "raw_payload_returned": false,
+        "credentials_returned": false,
+        "external_call_made": false,
+        "public_demo_persistence": false
+      }
+    },
+    {
+      "group": "sensitive_payload_redaction",
+      "provider_key": "crm.demo.mock",
+      "provider_class": "crm",
+      "stage": "redaction",
+      "input_profile": "synthetic_payload_with_sensitive_key_names",
+      "expected_result": {
+        "redaction_evidence_present": true,
+        "dropped_keys": [
+          "access_token",
+          "refresh_token",
+          "full_name",
+          "phone",
+          "email",
+          "address",
+          "raw_request_body"
+        ],
+        "safe_payload_present": true,
+        "raw_payload_returned": false,
+        "credentials_returned": false,
+        "external_call_made": false,
+        "public_demo_persistence": false
+      }
+    },
+    {
+      "group": "invalid_payload",
+      "provider_key": "crm.demo.mock",
+      "provider_class": "crm",
+      "stage": "validation",
+      "input_profile": "synthetic_missing_required_fields",
+      "expected_result": {
+        "validation_errors": [
+          "missing_external_reference",
+          "unsupported_status"
+        ],
+        "outbox_event_created": false,
+        "safe_payload_present": true,
+        "raw_payload_returned": false,
+        "credentials_returned": false,
+        "external_call_made": false,
+        "public_demo_persistence": false
+      }
+    },
+    {
+      "group": "retryable_provider_failure",
+      "provider_key": "bank.statement.mock",
+      "provider_class": "bank",
+      "stage": "retry",
+      "input_profile": "synthetic_temporary_provider_failure",
+      "expected_result": {
+        "retryable": true,
+        "dead_letter": false,
+        "incident_created": false,
+        "next_state": "retry_scheduled",
+        "safe_payload_present": true,
+        "raw_payload_returned": false,
+        "credentials_returned": false,
+        "external_call_made": false,
+        "public_demo_persistence": false
+      }
+    },
+    {
+      "group": "dead_letter_provider_failure",
+      "provider_key": "accounting.export.mock",
+      "provider_class": "accounting_or_erp",
+      "stage": "dead_letter",
+      "input_profile": "synthetic_terminal_provider_failure",
+      "expected_result": {
+        "retryable": false,
+        "dead_letter": true,
+        "operator_review": true,
+        "event_type": "integration.operator_review.created",
+        "incident_table": "drivedesk_integration_incidents",
+        "safe_payload_present": true,
+        "raw_payload_returned": false,
+        "credentials_returned": false,
+        "external_call_made": false,
+        "public_demo_persistence": false
+      }
+    },
+    {
+      "group": "reconciliation_mismatch",
+      "provider_key": "accounting.export.mock",
+      "provider_class": "accounting_or_erp",
+      "stage": "reconciliation",
+      "input_profile": "synthetic_provider_vs_drivedesk_mismatch",
+      "expected_result": {
+        "reconciliation_table": "drivedesk_integration_reconciliations",
+        "status": "mismatch",
+        "provider_evidence": "safe_reference_only",
+        "drivedesk_evidence": "aggregate_reference_only",
+        "operator_review": true,
+        "safe_payload_present": true,
+        "raw_payload_returned": false,
+        "credentials_returned": false,
+        "external_call_made": false,
+        "public_demo_persistence": false
+      }
+    }
+  ]
+}

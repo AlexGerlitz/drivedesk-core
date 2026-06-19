@@ -8,6 +8,9 @@ The certification path is `CONNECTOR_CERTIFICATION.md`. The companion
 implementation path is `ADAPTER_DEVELOPER_GUIDE.md`. Certification describes
 provider profile, capability manifest, contract fixtures, local gate, runtime
 readiness review, and release proof before private connector code is added.
+`CONNECTOR_FIXTURE_REPLAY.md` makes the fixture stage executable with synthetic
+happy-path, redaction, invalid-payload, retry, dead-letter, and reconciliation
+cases.
 
 ## Goal
 
@@ -160,6 +163,8 @@ The public demo proves the connector shape without real providers:
 - `CONNECTOR_CERTIFICATION.md` defines how a provider profile, capability
   manifest, contract fixtures, runtime readiness review, and release proof move
   a new system toward a private connector;
+- `CONNECTOR_FIXTURE_REPLAY.md` verifies synthetic fixture replay for
+  normalization, redaction, validation, retry, dead-letter, and reconciliation;
 - the Business Control Tower shows CRM provider intake, workbench context,
   detection, action planning, notification preview, and dry-run repair;
 - `check_public_demo_api.sh` validates `/demo/public`,

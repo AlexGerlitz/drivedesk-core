@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-19T07:41:10Z
+Generated at: 2026-06-19T08:04:14Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -213,6 +213,12 @@ Copied public-safe areas:
 - public connector certification evidence snapshot: docs/public/evidence/connector-certification.sanitized.json
 - public connector certification ADR: 0074-public-safe-connector-certification
 - public connector certification links provider profiles, capability manifests, contract fixtures, runtime readiness, and release proof
+- public connector fixture replay doc
+- public connector fixture replay validation script: scripts/check_public_connector_fixture_replay.sh
+- public connector fixture replay evidence snapshot: docs/public/evidence/connector-fixture-replay.sanitized.json
+- public connector fixture replay fixture file: examples/connector-fixtures/replay-fixtures.sanitized.json
+- public connector fixture replay ADR: 0075-public-safe-connector-fixture-replay
+- public connector fixture replay links happy path, redaction, invalid payload, retry, dead-letter, and reconciliation behavior
 - public adapter developer guide doc
 - public adapter developer guide validation script: scripts/check_public_adapter_developer_guide.sh
 - public adapter developer guide links SDK operation plans, Bitrix-style CRM preview, worker-backed ingest, auth boundaries, outbox, retry, dead-letter, and operator review

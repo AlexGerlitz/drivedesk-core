@@ -31,6 +31,7 @@ It includes:
 - synthetic lead-to-student workflow in the public demo payload;
 - public Business OS tour connecting business event -> workflow -> adapter -> incident -> proof;
 - public connector certification path for provider profiles, capability manifests, contract fixtures, runtime readiness, and release proof;
+- public connector fixture replay for synthetic happy-path, redaction, invalid-payload, retry, dead-letter, and reconciliation cases;
 - generated OpenAPI client SDK example for the public demo API;
 - public-safe synthetic backup/restore drill with sanitized evidence;
 - public-safe synthetic release rollback drill with sanitized evidence;
@@ -65,7 +66,7 @@ It includes:
 | --- | --- |
 | Runtime | FastAPI demo API, background-worker contract, Postgres-shaped repositories, Redis/outbox job model, and `GET /metrics`. |
 | Product core | Tenants, RBAC, audit log, outbox recovery, business records, lifecycle policies, workflow rules, tasks, and documents. |
-| Integration hub | Adapter catalog, connector certification, Adapter Studio, connection scopes, mapping validation, mapping transform preview, operation contracts, diagnostics, reconciliation, and operator review. |
+| Integration hub | Adapter catalog, connector certification, connector fixture replay, Adapter Studio, connection scopes, mapping validation, mapping transform preview, operation contracts, diagnostics, reconciliation, and operator review. |
 | Operations | Prometheus-style metrics, structured logs, Alertmanager-style routing, incident response, backup/restore, rollback, SLO canary, and staged promotion evidence. |
 | Delivery | Docker Compose, Helm chart, GitOps manifests, OpenTofu plan evidence, CI gates, Pages health check, and public/private export gate. |
 
@@ -105,6 +106,10 @@ Use `docs/public/CONNECTOR_CERTIFICATION.md` when you need the provider-neutral
 path for turning CRM, bank, accounting, ERP, KKT, webhook, file, email,
 telephony, or custom API systems into DriveDesk connectors.
 
+Use `docs/public/CONNECTOR_FIXTURE_REPLAY.md` when you need the replayable
+synthetic fixture proof for happy path, redaction, invalid payload, retry,
+dead-letter, and reconciliation connector behavior.
+
 Use `docs/public/OBSERVABILITY_PROOF.md` when you need the public-safe
 metrics, structured logs, alert, runbook, and dashboard evidence path.
 
@@ -128,7 +133,7 @@ incident queue, mitigation, recovery, and resolution evidence path.
 10. Run `bash scripts/check_public_demo_api.sh`.
 11. Run one generated client example from `examples/`.
 12. Review `docs/public/PROJECT_STATUS.md`, `docs/public/TECHNICAL_CAPABILITY_MAP.md`, `docs/public/EVIDENCE_INDEX.md`, `docs/public/OBSERVABILITY_PROOF.md`, `docs/public/ALERT_ROUTING_EVIDENCE.md`, `docs/public/INCIDENT_RESPONSE_DEMO.md`, `docs/public/ENGINEERING_PROOF.md`, `docs/public/PLATFORM_MATURITY_70.md`, and `docs/public/SANITIZED_EVIDENCE.md`.
-13. Review `docs/public/SYSTEM_DESIGN.md`, `docs/public/PROVIDER_CONNECTOR_GUIDE.md`, `docs/public/CONNECTOR_CERTIFICATION.md`, `docs/public/ADAPTER_DEVELOPER_GUIDE.md`, `docs/public/GITOPS_DELIVERY.md`, and the recovery evidence docs.
+13. Review `docs/public/SYSTEM_DESIGN.md`, `docs/public/PROVIDER_CONNECTOR_GUIDE.md`, `docs/public/CONNECTOR_CERTIFICATION.md`, `docs/public/CONNECTOR_FIXTURE_REPLAY.md`, `docs/public/ADAPTER_DEVELOPER_GUIDE.md`, `docs/public/GITOPS_DELIVERY.md`, and the recovery evidence docs.
 
 ## Full Artifact Reference
 
@@ -160,6 +165,7 @@ incident queue, mitigation, recovery, and resolution evidence path.
 - `docs/public/CLIENT_SDK.md` - generated OpenAPI client SDK example.
 - `docs/public/PROVIDER_CONNECTOR_GUIDE.md` - public-safe connector path for future authenticated providers.
 - `docs/public/CONNECTOR_CERTIFICATION.md` - public-safe certification path for provider profile, capability manifest, contract fixtures, runtime readiness, and release proof.
+- `docs/public/CONNECTOR_FIXTURE_REPLAY.md` - public-safe fixture replay path for happy path, redaction, invalid payload, retry, dead-letter, and reconciliation.
 - `docs/public/ADAPTER_DEVELOPER_GUIDE.md` - public-safe adapter developer path from generated SDK operation plans to private connector implementation.
 - `docs/public/INTEGRATION_ADAPTER_CATALOG.md` - runtime adapter metadata and discovery contract.
 - `docs/public/INTEGRATION_MAPPING_VALIDATION.md` - mapping validation against adapter requirements.
@@ -256,6 +262,7 @@ incident queue, mitigation, recovery, and resolution evidence path.
 - `scripts/check_public_review_guide.sh` - public-safe short verification path validation.
 - `scripts/check_public_provider_connector_guide.sh` - public-safe provider connector guide validation.
 - `scripts/check_public_connector_certification.sh` - public-safe connector certification path validation.
+- `scripts/check_public_connector_fixture_replay.sh` - public-safe connector fixture replay validation.
 - `scripts/check_public_adapter_developer_guide.sh` - public-safe adapter developer guide and SDK operation-plan validation.
 - `scripts/check_public_observability_proof.sh` - public-safe observability proof validation.
 - `scripts/check_public_alert_routing.sh` - public-safe alert routing validation.
@@ -315,6 +322,7 @@ bash scripts/check_public_project_status.sh
 bash scripts/check_public_technical_capability_map.sh
 bash scripts/check_public_provider_connector_guide.sh
 bash scripts/check_public_connector_certification.sh
+bash scripts/check_public_connector_fixture_replay.sh
 bash scripts/check_public_adapter_developer_guide.sh
 bash scripts/check_public_evidence_index.sh
 bash scripts/check_public_observability_proof.sh
@@ -366,6 +374,7 @@ bash scripts/check_public_project_status.sh
 bash scripts/check_public_technical_capability_map.sh
 bash scripts/check_public_provider_connector_guide.sh
 bash scripts/check_public_connector_certification.sh
+bash scripts/check_public_connector_fixture_replay.sh
 bash scripts/check_public_adapter_developer_guide.sh
 bash scripts/check_public_evidence_index.sh
 bash scripts/check_public_observability_proof.sh

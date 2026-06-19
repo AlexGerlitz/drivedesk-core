@@ -7,6 +7,9 @@ Connector certification is defined in `CONNECTOR_CERTIFICATION.md`. Use it
 before this implementation guide when the provider profile, capability
 manifest, contract fixtures, local certification gate, runtime readiness
 review, and release proof have not been recorded yet.
+Fixture replay is defined in `CONNECTOR_FIXTURE_REPLAY.md`. Use it to prove
+normalization, redaction, invalid-payload, retry, dead-letter, and reconciliation
+behavior before a private provider client is added.
 
 It is public-safe on purpose: the steps use synthetic adapter scenarios,
 generated SDK operation plans, and documented credential boundaries. Real
@@ -137,6 +140,9 @@ Expected public-safe outputs:
 
 This proves the redaction and normalization contract before any private
 connector uses a real provider API.
+
+`CONNECTOR_FIXTURE_REPLAY.md` turns this section into an executable public-safe
+check backed by `examples/connector-fixtures/replay-fixtures.sanitized.json`.
 
 ## 4. Implement Execution Through Outbox
 

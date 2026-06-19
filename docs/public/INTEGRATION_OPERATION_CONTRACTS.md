@@ -120,3 +120,7 @@ also expose provider profile, capability manifest, contract fixtures, local
 certification gate, runtime readiness review, and release proof. The
 `operation_contracts` section from `GET /integration-adapters` is the bridge
 between those certification artifacts and runtime behavior.
+
+`CONNECTOR_FIXTURE_REPLAY.md` uses the same operation contracts to replay
+synthetic happy-path, redaction, invalid-payload, retry, dead-letter, and
+reconciliation fixtures before private provider execution exists.

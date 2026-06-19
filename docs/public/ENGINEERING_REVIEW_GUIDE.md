@@ -20,8 +20,9 @@ prove the current engineering surface.
 | 10 | Evidence index | `docs/public/EVIDENCE_INDEX.md`, `docs/public/evidence/public-evidence-index.sanitized.json` |
 | 11 | Observability proof | `docs/public/OBSERVABILITY_PROOF.md` |
 | 12 | Alert routing | Operations tab and `docs/public/ALERT_ROUTING_EVIDENCE.md` |
-| 13 | Recovery and release safety | backup/restore, rollback, canary, staged promotion checks |
-| 14 | Infrastructure story | Helm, GitOps, OpenTofu, drift, and sanitized runtime evidence |
+| 13 | Connector fixture replay | `docs/public/CONNECTOR_FIXTURE_REPLAY.md` and `bash scripts/check_public_connector_fixture_replay.sh` |
+| 14 | Recovery and release safety | backup/restore, rollback, canary, staged promotion checks |
+| 15 | Infrastructure story | Helm, GitOps, OpenTofu, drift, and sanitized runtime evidence |
 
 ## Review Commands
 
@@ -37,6 +38,7 @@ bash scripts/check_public_evidence_index.sh
 bash scripts/check_public_observability_proof.sh
 bash scripts/check_public_alert_routing.sh
 bash scripts/check_public_engineering_proof.sh
+bash scripts/check_public_connector_fixture_replay.sh
 bash scripts/check_public_demo_api.sh
 bash scripts/check_public_demo_sdk.sh
 bash scripts/check_public_backup_restore.sh
@@ -68,6 +70,7 @@ bash scripts/check_public_opentofu_plan.sh
 | Release safety | `docs/public/RELEASE_ROLLBACK_EVIDENCE.md`, `docs/public/SLO_CANARY_GATE_EVIDENCE.md`, `docs/public/STAGED_PROMOTION_EVIDENCE.md` |
 | GitOps and IaC | `docs/public/GITOPS_DELIVERY.md`, `docs/public/OPENTOFU_PLAN_EVIDENCE.md`, `docs/public/INFRA_STATE_DRIFT_EVIDENCE.md` |
 | API and SDK | `docs/public/API_BACKED_DEMO.md`, `docs/public/CLIENT_SDK.md`, `sdk/generated/public-demo/` |
+| Connector fixture replay | `docs/public/CONNECTOR_FIXTURE_REPLAY.md`, `docs/public/evidence/connector-fixture-replay.sanitized.json`, `examples/connector-fixtures/replay-fixtures.sanitized.json` |
 
 ## Boundary
 

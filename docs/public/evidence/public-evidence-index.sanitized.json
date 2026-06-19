@@ -143,6 +143,8 @@
       "public_doc": "docs/public/CONNECTOR_CERTIFICATION.md",
       "evidence_files": [
         "docs/public/evidence/connector-certification.sanitized.json",
+        "docs/public/CONNECTOR_FIXTURE_REPLAY.md",
+        "docs/public/evidence/connector-fixture-replay.sanitized.json",
         "docs/public/PROVIDER_CONNECTOR_GUIDE.md",
         "docs/public/ADAPTER_DEVELOPER_GUIDE.md",
         "docs/public/INTEGRATION_ADAPTER_CATALOG.md",
@@ -150,6 +152,7 @@
       ],
       "verifiers": [
         "bash scripts/check_public_connector_certification.sh",
+        "bash scripts/check_public_connector_fixture_replay.sh",
         "bash scripts/check_public_provider_connector_guide.sh",
         "bash scripts/check_public_adapter_developer_guide.sh"
       ],
@@ -158,6 +161,30 @@
         "docs/public/evidence/connector-certification.sanitized.json"
       ],
       "boundary": "provider profiles, manifests, fixtures, runtime readiness, and release proof on synthetic public-safe data only"
+    },
+    {
+      "capability_id": "connector-fixture-replay",
+      "title": "Connector fixture replay",
+      "status": "validated",
+      "public_doc": "docs/public/CONNECTOR_FIXTURE_REPLAY.md",
+      "evidence_files": [
+        "docs/public/evidence/connector-fixture-replay.sanitized.json",
+        "examples/connector-fixtures/replay-fixtures.sanitized.json",
+        "docs/public/CONNECTOR_CERTIFICATION.md",
+        "docs/public/PROVIDER_CONNECTOR_GUIDE.md",
+        "docs/public/ADAPTER_DEVELOPER_GUIDE.md"
+      ],
+      "verifiers": [
+        "bash scripts/check_public_connector_fixture_replay.sh",
+        "bash scripts/check_public_connector_certification.sh",
+        "bash scripts/check_public_evidence_index.sh"
+      ],
+      "public_urls": [
+        "docs/public/CONNECTOR_FIXTURE_REPLAY.md",
+        "docs/public/evidence/connector-fixture-replay.sanitized.json",
+        "examples/connector-fixtures/replay-fixtures.sanitized.json"
+      ],
+      "boundary": "synthetic fixture descriptors and sanitized replay outcomes only; no raw provider payloads, credentials, external calls, or public persistence"
     },
     {
       "capability_id": "observability",

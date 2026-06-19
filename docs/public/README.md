@@ -47,6 +47,9 @@ infrastructure, production history, customer data, or operational credentials.
 - `CONNECTOR_CERTIFICATION.md` - provider-neutral certification path for CRM,
   bank, accounting, ERP, KKT, webhook, file, email, telephony, and custom API
   connectors.
+- `CONNECTOR_FIXTURE_REPLAY.md` - public-safe replay contract for synthetic
+  connector fixtures: happy path, redaction, invalid payload, retry,
+  dead-letter, and reconciliation.
 - `ADAPTER_DEVELOPER_GUIDE.md` - public-safe developer path from SDK adapter
   operation plans to future private provider implementations.
 - `INTEGRATION_ADAPTER_CATALOG.md` - runtime adapter metadata and discovery contract.
@@ -132,6 +135,8 @@ infrastructure, production history, customer data, or operational credentials.
   routing evidence snapshot.
 - `evidence/connector-certification.sanitized.json` - machine-readable
   public-safe connector certification evidence snapshot.
+- `evidence/connector-fixture-replay.sanitized.json` - machine-readable
+  public-safe connector fixture replay evidence snapshot.
 - `evidence/public-evidence-index.sanitized.json` - machine-readable public
   evidence index.
 - `assets/drivedesk-core-demo-overview.png` - public demo screenshot.
@@ -241,7 +246,7 @@ https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 8. Run `bash scripts/check_public_demo_api.sh`.
 9. Run one generated client example from `examples/`.
 10. Review `PROJECT_STATUS.md`, `TECHNICAL_CAPABILITY_MAP.md`, `EVIDENCE_INDEX.md`, `BUSINESS_CONTROL_TOWER.md`, `OBSERVABILITY_PROOF.md`, `ALERT_ROUTING_EVIDENCE.md`, `INCIDENT_RESPONSE_DEMO.md`, `ENGINEERING_PROOF.md`, `PLATFORM_MATURITY_70.md`, and `SANITIZED_EVIDENCE.md`.
-11. Review `SYSTEM_DESIGN.md`, `CONNECTOR_CERTIFICATION.md`, `GITOPS_DELIVERY.md`, and the recovery evidence docs.
+11. Review `SYSTEM_DESIGN.md`, `CONNECTOR_CERTIFICATION.md`, `CONNECTOR_FIXTURE_REPLAY.md`, `GITOPS_DELIVERY.md`, and the recovery evidence docs.
 
 ## Engineering Summary
 

@@ -145,6 +145,12 @@ release proof. That path keeps future CRM, bank, accounting, ERP, KKT, webhook,
 file, email, telephony, and custom API connectors aligned before private
 provider code is added.
 
+The connector fixture replay path is documented in
+`CONNECTOR_FIXTURE_REPLAY.md`: synthetic fixtures -> contract validation ->
+normalization -> redaction -> retry/dead-letter classification ->
+reconciliation evidence. It proves the `contract_fixtures` stage without real
+provider calls.
+
 ## Relationship To Connection Profiles
 
 The flow is:

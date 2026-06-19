@@ -6,12 +6,14 @@ export const CONNECTOR_REPLAY_PATH = "/demo/connector-fixture-replay";
 export const CONNECTOR_CERTIFICATION_PATH = "/demo/connector-certification";
 export const PROVIDER_ONBOARDING_PATH = "/demo/provider-onboarding";
 export const INTEGRATION_REPAIR_PATH = "/demo/integration-repair";
+export const OBSERVABILITY_DASHBOARD_PATH = "/demo/observability-dashboard";
 export const BUSINESS_SCENARIO_REPLAY_PATH = "/demo/business-scenario-replay";
 export const OPERATION_ID = "public_demo_demo_public_get";
 export const CONNECTOR_REPLAY_OPERATION_ID = "connector_fixture_replay_demo_demo_connector_fixture_replay_get";
 export const CONNECTOR_CERTIFICATION_OPERATION_ID = "connector_certification_demo_demo_connector_certification_get";
 export const PROVIDER_ONBOARDING_OPERATION_ID = "provider_onboarding_demo_demo_provider_onboarding_get";
 export const INTEGRATION_REPAIR_OPERATION_ID = "integration_repair_demo_demo_integration_repair_get";
+export const OBSERVABILITY_DASHBOARD_OPERATION_ID = "observability_dashboard_demo_demo_observability_dashboard_get";
 export const BUSINESS_SCENARIO_REPLAY_OPERATION_ID = "business_scenario_replay_demo_demo_business_scenario_replay_get";
 export const REQUIRED_FIELDS = [
   "schemaVersion",
@@ -33,6 +35,7 @@ export const REQUIRED_FIELDS = [
   "integrationRuntime",
   "integrationExecution",
   "integrationRepair",
+  "observabilityDashboard",
   "connectorFixtureReplay",
   "businessIntakePipeline",
   "businessTaskHandoff",
@@ -111,6 +114,19 @@ export const INTEGRATION_REPAIR_REQUIRED_FIELDS = [
   "impactAnalysis",
   "repairActions",
   "safeExecutionPlan",
+  "dataBoundaries",
+  "api",
+  "docs"
+];
+export const OBSERVABILITY_DASHBOARD_REQUIRED_FIELDS = [
+  "status",
+  "command",
+  "dashboardLevel",
+  "summary",
+  "dashboardGroups",
+  "panelCatalog",
+  "queryExamples",
+  "alertLinks",
   "dataBoundaries",
   "api",
   "docs"
@@ -210,6 +226,22 @@ export class DriveDeskPublicDemoClient {
 
     const payload = await response.json();
     validateIntegrationRepairPayload(payload);
+    return payload;
+  }
+
+  async getObservabilityDashboard() {
+    const response = await this.fetchImpl(`${this.baseUrl}${OBSERVABILITY_DASHBOARD_PATH}`, {
+      headers: {
+        Accept: "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`GET ${OBSERVABILITY_DASHBOARD_PATH} failed: ${response.status}`);
+    }
+
+    const payload = await response.json();
+    validateObservabilityDashboardPayload(payload);
     return payload;
   }
 
@@ -616,6 +648,83 @@ export function validateIntegrationRepairPayload(payload) {
   }
 }
 
+export function validateObservabilityDashboardPayload(payload) {
+  const missing = OBSERVABILITY_DASHBOARD_REQUIRED_FIELDS.filter((field) => !(field in (payload || {})));
+  if (missing.length > 0) {
+    throw new Error(`missing observability dashboard fields: ${missing.join(", ")}`);
+  }
+
+  if (payload.status !== "validated") {
+    throw new Error(`unexpected observability dashboard status: ${payload.status}`);
+  }
+
+  if (payload.command !== `GET ${OBSERVABILITY_DASHBOARD_PATH}`) {
+    throw new Error(`unexpected observability dashboard command: ${payload.command}`);
+  }
+
+  if (payload.dashboardLevel !== "dashboard_contract_ready") {
+    throw new Error(`unexpected observability dashboard level: ${payload.dashboardLevel}`);
+  }
+
+  for (const key of ["summary", "dashboardGroups", "panelCatalog", "queryExamples", "alertLinks", "dataBoundaries"]) {
+    if (!Array.isArray(payload[key]) || payload[key].length === 0) {
+      throw new Error(`observability dashboard ${key} is missing or empty`);
+    }
+  }
+
+  const groupKeys = new Set(payload.dashboardGroups.map((item) => item?.key));
+  for (const groupKey of ["api_runtime", "integration_health", "business_workflow", "security_auth"]) {
+    if (!groupKeys.has(groupKey)) {
+      throw new Error(`observability dashboard group is missing: ${groupKey}`);
+    }
+  }
+
+  const panelKeys = new Set(payload.panelCatalog.map((item) => item?.key));
+  for (const panelKey of [
+    "request_rate",
+    "latency_p95",
+    "error_ratio",
+    "outbox_backlog",
+    "dead_letters",
+    "structured_logs",
+  ]) {
+    if (!panelKeys.has(panelKey)) {
+      throw new Error(`observability dashboard panel is missing: ${panelKey}`);
+    }
+  }
+
+  const datasources = new Set(payload.panelCatalog.map((item) => item?.datasource));
+  for (const datasource of ["prometheus", "loki"]) {
+    if (!datasources.has(datasource)) {
+      throw new Error(`observability dashboard datasource is missing: ${datasource}`);
+    }
+  }
+
+  const forbiddenLabels = new Set(["email", "user_id", "tenant_id", "token", "phone", "name", "payload", "request_body"]);
+  for (const panel of payload.panelCatalog) {
+    const labels = new Set(panel?.safeLabels || []);
+    for (const label of labels) {
+      if (forbiddenLabels.has(label)) {
+        throw new Error(`unsafe observability dashboard label: ${label}`);
+      }
+    }
+    if (!panel?.alertLink) {
+      throw new Error(`observability dashboard panel missing alert link: ${panel?.key}`);
+    }
+  }
+
+  if (
+    payload.dataBoundaries.some(
+      (item) =>
+        item?.containsPii !== false ||
+        item?.rawPayloadIncluded !== false ||
+        item?.privateTelemetryIncluded !== false,
+    )
+  ) {
+    throw new Error("observability dashboard boundaries must stay public-safe");
+  }
+}
+
 export function validateBusinessScenarioReplayPayload(payload) {
   const missing = BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS.filter((field) => !(field in payload));
   if (missing.length > 0) {
@@ -816,6 +925,11 @@ export function validatePublicDemoPayload(payload) {
   }
   validateIntegrationRepairPayload(payload.integrationRepair);
 
+  if (!payload.observabilityDashboard || typeof payload.observabilityDashboard !== "object") {
+    throw new Error("observabilityDashboard is missing");
+  }
+  validateObservabilityDashboardPayload(payload.observabilityDashboard);
+
   if (!payload.businessScenarioReplay || typeof payload.businessScenarioReplay !== "object") {
     throw new Error("businessScenarioReplay is missing");
   }
@@ -883,6 +997,7 @@ async function main() {
   const connectorCertification = await client.getConnectorCertification();
   const providerOnboarding = await client.getProviderOnboarding();
   const integrationRepair = await client.getIntegrationRepair();
+  const observabilityDashboard = await client.getObservabilityDashboard();
   const businessScenarioReplay = await client.getBusinessScenarioReplay();
   const adapterPlan = buildAdapterOperationPlan(payload, "adapter-file-import-preview");
   console.log(
@@ -895,12 +1010,14 @@ async function main() {
     `connectorCertification=${connectorCertification.certificationLevel}`,
     `providerOnboarding=${providerOnboarding.onboardingLevel}`,
     `integrationRepair=${integrationRepair.repairLevel}`,
+    `observabilityDashboard=${observabilityDashboard.dashboardLevel}`,
     `businessScenarioReplay=${businessScenarioReplay.status}`,
     `operation=${OPERATION_ID}`,
     `connectorOperation=${CONNECTOR_REPLAY_OPERATION_ID}`,
     `connectorCertificationOperation=${CONNECTOR_CERTIFICATION_OPERATION_ID}`,
     `providerOnboardingOperation=${PROVIDER_ONBOARDING_OPERATION_ID}`,
     `integrationRepairOperation=${INTEGRATION_REPAIR_OPERATION_ID}`,
+    `observabilityDashboardOperation=${OBSERVABILITY_DASHBOARD_OPERATION_ID}`,
     `businessScenarioOperation=${BUSINESS_SCENARIO_REPLAY_OPERATION_ID}`,
   );
 }

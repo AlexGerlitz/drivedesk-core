@@ -130,6 +130,7 @@ from drivedesk_api.schemas import (
     IntegrationRepairDemoRead,
     IntegrationRepairPreviewCreate,
     IntegrationRepairPreviewRead,
+    ObservabilityDashboardDemoRead,
     IntegrationMappingPreviewCreate,
     IntegrationMappingPreviewRead,
     IntegrationOperatorReviewItemRead,
@@ -332,6 +333,20 @@ def build_app(settings: Settings | None = None) -> FastAPI:
     async def integration_repair_demo() -> JSONResponse:
         return JSONResponse(
             build_public_demo_payload()["integrationRepair"],
+            headers={
+                "Access-Control-Allow-Origin": "*",
+                "Cache-Control": "public, max-age=60",
+            },
+        )
+
+    @api.get(
+        "/demo/observability-dashboard",
+        response_model=ObservabilityDashboardDemoRead,
+        tags=["demo"],
+    )
+    async def observability_dashboard_demo() -> JSONResponse:
+        return JSONResponse(
+            build_public_demo_payload()["observabilityDashboard"],
             headers={
                 "Access-Control-Allow-Origin": "*",
                 "Cache-Control": "public, max-age=60",

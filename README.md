@@ -5,20 +5,7 @@
 DriveDesk Core is a modular monolith backend foundation for a business
 operations platform.
 
-First read: this is proof for remote backend/platform and integration work where
-business workflows need tenant boundaries, RBAC, audit, outbox recovery,
-operator review, connector contracts, public demos, CI, release evidence, and
-runbooks instead of a thin prototype.
-
-Fast review route:
-
-| Need | Open | What it proves |
-| --- | --- | --- |
-| Live product surface | [public engineering reference](https://alexgerlitz.github.io/drivedesk-core/) and [public demo](https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/) | Browser-visible operations platform, workflow, adapter, incident, and proof surfaces on synthetic data. |
-| Technical review path | `docs/public/SYSTEM_REVIEW_PATH.md` | How the public root, demo, API, SDK, operations evidence, release safety, GitOps, OpenTofu, and evidence index fit together. |
-| Verification command | `bash scripts/ci_smoke_public.sh` | Public smoke path covering docs, demo contract, OpenAPI, SDK examples, workbenches, and release evidence. |
-
-Implemented surface includes:
+It includes:
 
 - FastAPI API;
 - PostgreSQL migrations with Alembic;
@@ -156,7 +143,7 @@ incident queue, mitigation, recovery, and resolution evidence path.
 9. Run `bash scripts/check_public_engineering_proof.sh`.
 10. Run `bash scripts/check_public_demo_api.sh`.
 11. Run one generated client example from `examples/`.
-12. Review `docs/public/PROJECT_STATUS.md`, `docs/public/TECHNICAL_CAPABILITY_MAP.md`, `docs/public/EVIDENCE_INDEX.md`, `docs/public/OBSERVABILITY_PROOF.md`, `docs/public/ALERT_ROUTING_EVIDENCE.md`, `docs/public/INCIDENT_RESPONSE_DEMO.md`, `docs/public/ENGINEERING_PROOF.md`, `docs/public/PLATFORM_MATURITY_70.md`, and `docs/public/SANITIZED_EVIDENCE.md`.
+12. Review `docs/public/PROJECT_STATUS.md`, `docs/public/TECHNICAL_CAPABILITY_MAP.md`, `docs/public/EVIDENCE_INDEX.md`, `docs/public/OBSERVABILITY_PROOF.md`, `docs/public/OBSERVABILITY_DASHBOARD.md`, `docs/public/ALERT_ROUTING_EVIDENCE.md`, `docs/public/INCIDENT_RESPONSE_DEMO.md`, `docs/public/ENGINEERING_PROOF.md`, `docs/public/PLATFORM_MATURITY_70.md`, and `docs/public/SANITIZED_EVIDENCE.md`.
 13. Review `docs/public/SYSTEM_DESIGN.md`, `docs/public/PROVIDER_CONNECTOR_GUIDE.md`, `docs/public/CONNECTOR_CERTIFICATION.md`, `docs/public/PROVIDER_ONBOARDING.md`, `docs/public/INTEGRATION_REPAIR.md`, `docs/public/CONNECTOR_FIXTURE_REPLAY.md`, `docs/public/ADAPTER_DEVELOPER_GUIDE.md`, `docs/public/GITOPS_DELIVERY.md`, and the recovery evidence docs.
 
 ## Full Artifact Reference
@@ -170,6 +157,7 @@ incident queue, mitigation, recovery, and resolution evidence path.
 - `docs/public/TECHNICAL_CAPABILITY_MAP.md` - capability-to-evidence map with verifier commands.
 - `docs/public/EVIDENCE_INDEX.md` - machine-readable capability-to-evidence index contract.
 - `docs/public/OBSERVABILITY_PROOF.md` - public-safe metrics, logs, alerts, and dashboard evidence.
+- `docs/public/OBSERVABILITY_DASHBOARD.md` - public-safe Grafana-style dashboard groups, panel queries, alert links, runbooks, and redaction boundaries.
 - `docs/public/ALERT_ROUTING_EVIDENCE.md` - public-safe alert routing, dedupe, escalation, and silence evidence.
 - `docs/public/INCIDENT_RESPONSE_DEMO.md` - public-safe incident queue,
   mitigation, recovery, and resolution evidence.
@@ -227,6 +215,7 @@ incident queue, mitigation, recovery, and resolution evidence path.
 - `docs/public/PRIVATE_INFRA_SCHEDULED_ALERTING.md` - public-safe scheduled validation alerting evidence.
 - `docs/public/PLATFORM_MATURITY_70.md` - public-safe 70 percent DevOps/platform milestone.
 - `docs/public/OBSERVABILITY_PROOF.md` - public-safe observability proof.
+- `docs/public/OBSERVABILITY_DASHBOARD.md` - public-safe observability dashboard contract.
 - `docs/public/ALERT_ROUTING_EVIDENCE.md` - public-safe alert routing proof.
 - `docs/public/INCIDENT_RESPONSE_DEMO.md` - public-safe incident response proof.
 - `docs/public/ARCHITECTURE_DIAGRAMS.md` - architecture diagrams.
@@ -306,6 +295,7 @@ incident queue, mitigation, recovery, and resolution evidence path.
 - `scripts/check_public_connector_fixture_replay.sh` - public-safe connector fixture replay validation.
 - `scripts/check_public_adapter_developer_guide.sh` - public-safe adapter developer guide and SDK operation-plan validation.
 - `scripts/check_public_observability_proof.sh` - public-safe observability proof validation.
+- `scripts/check_public_observability_dashboard.sh` - public-safe observability dashboard validation.
 - `scripts/check_public_alert_routing.sh` - public-safe alert routing validation.
 - `scripts/check_public_engineering_proof.sh` - public-safe proof tab and evidence contract validation.
 - `scripts/check_public_gitops_layout.sh` - public-safe GitOps layout validation.
@@ -390,6 +380,7 @@ bash scripts/check_public_connector_fixture_replay.sh
 bash scripts/check_public_adapter_developer_guide.sh
 bash scripts/check_public_evidence_index.sh
 bash scripts/check_public_observability_proof.sh
+bash scripts/check_public_observability_dashboard.sh
 bash scripts/check_public_alert_routing.sh
 bash scripts/check_public_engineering_proof.sh
 bash scripts/check_public_gitops_layout.sh
@@ -443,6 +434,7 @@ bash scripts/check_public_connector_fixture_replay.sh
 bash scripts/check_public_adapter_developer_guide.sh
 bash scripts/check_public_evidence_index.sh
 bash scripts/check_public_observability_proof.sh
+bash scripts/check_public_observability_dashboard.sh
 bash scripts/check_public_alert_routing.sh
 bash scripts/check_public_engineering_proof.sh
 bash scripts/check_public_gitops_layout.sh

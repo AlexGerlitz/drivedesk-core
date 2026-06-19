@@ -6217,6 +6217,103 @@
         "title": "MembershipRead",
         "type": "object"
       },
+      "ObservabilityDashboardDemoRead": {
+        "properties": {
+          "alertLinks": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Alertlinks",
+            "type": "array"
+          },
+          "api": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Api",
+            "type": "object"
+          },
+          "command": {
+            "title": "Command",
+            "type": "string"
+          },
+          "dashboardGroups": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Dashboardgroups",
+            "type": "array"
+          },
+          "dashboardLevel": {
+            "title": "Dashboardlevel",
+            "type": "string"
+          },
+          "dataBoundaries": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Databoundaries",
+            "type": "array"
+          },
+          "docs": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "title": "Docs",
+            "type": "array"
+          },
+          "panelCatalog": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Panelcatalog",
+            "type": "array"
+          },
+          "queryExamples": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Queryexamples",
+            "type": "array"
+          },
+          "status": {
+            "const": "validated",
+            "title": "Status",
+            "type": "string"
+          },
+          "summary": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Summary",
+            "type": "array"
+          }
+        },
+        "required": [
+          "status",
+          "command",
+          "dashboardLevel",
+          "summary",
+          "dashboardGroups",
+          "panelCatalog",
+          "queryExamples",
+          "alertLinks",
+          "dataBoundaries",
+          "api",
+          "docs"
+        ],
+        "title": "ObservabilityDashboardDemoRead",
+        "type": "object"
+      },
       "OutboxEventRead": {
         "properties": {
           "adapter_key": {
@@ -6749,6 +6846,11 @@
             "title": "Metrics",
             "type": "array"
           },
+          "observabilityDashboard": {
+            "additionalProperties": true,
+            "title": "Observabilitydashboard",
+            "type": "object"
+          },
           "outbox": {
             "items": {
               "additionalProperties": true,
@@ -6835,6 +6937,7 @@
           "integrationRuntime",
           "integrationExecution",
           "integrationRepair",
+          "observabilityDashboard",
           "connectorFixtureReplay",
           "businessIntakePipeline",
           "businessTaskHandoff",
@@ -8156,6 +8259,27 @@
           }
         },
         "summary": "Integration Runtime Demo",
+        "tags": [
+          "demo"
+        ]
+      }
+    },
+    "/demo/observability-dashboard": {
+      "get": {
+        "operationId": "observability_dashboard_demo_demo_observability_dashboard_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ObservabilityDashboardDemoRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Observability Dashboard Demo",
         "tags": [
           "demo"
         ]

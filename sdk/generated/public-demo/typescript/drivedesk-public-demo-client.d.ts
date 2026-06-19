@@ -4,18 +4,21 @@ export const CONNECTOR_REPLAY_PATH: "/demo/connector-fixture-replay";
 export const CONNECTOR_CERTIFICATION_PATH: "/demo/connector-certification";
 export const PROVIDER_ONBOARDING_PATH: "/demo/provider-onboarding";
 export const INTEGRATION_REPAIR_PATH: "/demo/integration-repair";
+export const OBSERVABILITY_DASHBOARD_PATH: "/demo/observability-dashboard";
 export const BUSINESS_SCENARIO_REPLAY_PATH: "/demo/business-scenario-replay";
 export const OPERATION_ID: "public_demo_demo_public_get";
 export const CONNECTOR_REPLAY_OPERATION_ID: "connector_fixture_replay_demo_demo_connector_fixture_replay_get";
 export const CONNECTOR_CERTIFICATION_OPERATION_ID: "connector_certification_demo_demo_connector_certification_get";
 export const PROVIDER_ONBOARDING_OPERATION_ID: "provider_onboarding_demo_demo_provider_onboarding_get";
 export const INTEGRATION_REPAIR_OPERATION_ID: "integration_repair_demo_demo_integration_repair_get";
+export const OBSERVABILITY_DASHBOARD_OPERATION_ID: "observability_dashboard_demo_demo_observability_dashboard_get";
 export const BUSINESS_SCENARIO_REPLAY_OPERATION_ID: "business_scenario_replay_demo_demo_business_scenario_replay_get";
-export const REQUIRED_FIELDS: Array<"schemaVersion" | "generatedAt" | "dataSource" | "apiContract" | "tenant" | "health" | "metrics" | "workQueue" | "members" | "auditEvents" | "outbox" | "adapters" | "adapterScenarios" | "adapterStudio" | "connectorCertification" | "providerOnboarding" | "integrationRuntime" | "integrationExecution" | "integrationRepair" | "connectorFixtureReplay" | "businessIntakePipeline" | "businessTaskHandoff" | "businessNotificationChannels" | "businessContextAssistant" | "businessActionExecution" | "businessApprovalGateway" | "integrationJobs" | "integrationHealth" | "integrationReadiness" | "recoveryEvidence" | "alertRouting" | "incidentResponse" | "businessControlTower" | "businessScenarioReplay" | "engineeringProof" | "workflow" | "workflowScenarios" | "endToEndScenario" | "timeline" | "domainEvents">;
+export const REQUIRED_FIELDS: Array<"schemaVersion" | "generatedAt" | "dataSource" | "apiContract" | "tenant" | "health" | "metrics" | "workQueue" | "members" | "auditEvents" | "outbox" | "adapters" | "adapterScenarios" | "adapterStudio" | "connectorCertification" | "providerOnboarding" | "integrationRuntime" | "integrationExecution" | "integrationRepair" | "observabilityDashboard" | "connectorFixtureReplay" | "businessIntakePipeline" | "businessTaskHandoff" | "businessNotificationChannels" | "businessContextAssistant" | "businessActionExecution" | "businessApprovalGateway" | "integrationJobs" | "integrationHealth" | "integrationReadiness" | "recoveryEvidence" | "alertRouting" | "incidentResponse" | "businessControlTower" | "businessScenarioReplay" | "engineeringProof" | "workflow" | "workflowScenarios" | "endToEndScenario" | "timeline" | "domainEvents">;
 export const CONNECTOR_REPLAY_REQUIRED_FIELDS: Array<"status" | "command" | "fixtureFile" | "evidenceFile" | "summary" | "outcomes" | "boundaries" | "docs">;
 export const CONNECTOR_CERTIFICATION_REQUIRED_FIELDS: Array<"status" | "command" | "certificationLevel" | "adapterCount" | "privateReadyCount" | "summary" | "providerProfiles" | "certificationStages" | "certificationGates" | "implementationPath" | "dataBoundaries" | "api" | "docs">;
 export const PROVIDER_ONBOARDING_REQUIRED_FIELDS: Array<"status" | "command" | "onboardingLevel" | "providerKey" | "providerName" | "providerCategory" | "summary" | "providerProfile" | "onboardingStages" | "mappingPreview" | "preflightChecks" | "sandboxContract" | "rolloutPlan" | "dataBoundaries" | "api" | "docs">;
 export const INTEGRATION_REPAIR_REQUIRED_FIELDS: Array<"status" | "command" | "repairLevel" | "incidentCount" | "criticalCount" | "safeActionCount" | "summary" | "incidentMatrix" | "repairRunbooks" | "impactAnalysis" | "repairActions" | "safeExecutionPlan" | "dataBoundaries" | "api" | "docs">;
+export const OBSERVABILITY_DASHBOARD_REQUIRED_FIELDS: Array<"status" | "command" | "dashboardLevel" | "summary" | "dashboardGroups" | "panelCatalog" | "queryExamples" | "alertLinks" | "dataBoundaries" | "api" | "docs">;
 export const BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS: Array<"status" | "command" | "summary" | "scenarios" | "flow" | "docs">;
 
 export type AdapterScenarioPhase = "preview" | "execute" | "retry" | "operator_review";
@@ -126,6 +129,20 @@ export interface IntegrationRepairPayload {
   docs: Array<Record<string, string>>;
 }
 
+export interface ObservabilityDashboardPayload {
+  status: "validated";
+  command: string;
+  dashboardLevel: "dashboard_contract_ready";
+  summary: Array<Record<string, unknown>>;
+  dashboardGroups: Array<Record<string, unknown>>;
+  panelCatalog: Array<Record<string, unknown>>;
+  queryExamples: Array<Record<string, unknown>>;
+  alertLinks: Array<Record<string, unknown>>;
+  dataBoundaries: Array<Record<string, unknown>>;
+  api: Record<string, string>;
+  docs: Array<Record<string, string>>;
+}
+
 export interface BusinessScenarioReplayPayload {
   status: "validated";
   command: string;
@@ -167,6 +184,7 @@ export interface PublicDemoPayload {
   connectorCertification: ConnectorCertificationPayload;
   providerOnboarding: ProviderOnboardingPayload;
   integrationRepair: IntegrationRepairPayload;
+  observabilityDashboard: ObservabilityDashboardPayload;
   connectorFixtureReplay: ConnectorFixtureReplayPayload;
   integrationJobs: Array<Record<string, unknown>>;
   integrationHealth: Array<Record<string, string>>;
@@ -222,6 +240,7 @@ export class DriveDeskPublicDemoClient {
   getConnectorCertification(): Promise<ConnectorCertificationPayload>;
   getProviderOnboarding(): Promise<ProviderOnboardingPayload>;
   getIntegrationRepair(): Promise<IntegrationRepairPayload>;
+  getObservabilityDashboard(): Promise<ObservabilityDashboardPayload>;
   getBusinessScenarioReplay(): Promise<BusinessScenarioReplayPayload>;
   getAdapterOperationPlan(
     scenarioId: string,
@@ -240,4 +259,5 @@ export function validateConnectorFixtureReplayPayload(payload: ConnectorFixtureR
 export function validateConnectorCertificationPayload(payload: ConnectorCertificationPayload): void;
 export function validateProviderOnboardingPayload(payload: ProviderOnboardingPayload): void;
 export function validateIntegrationRepairPayload(payload: IntegrationRepairPayload): void;
+export function validateObservabilityDashboardPayload(payload: ObservabilityDashboardPayload): void;
 export function validateBusinessScenarioReplayPayload(payload: BusinessScenarioReplayPayload): void;

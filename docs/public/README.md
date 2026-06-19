@@ -20,6 +20,7 @@ infrastructure, production history, customer data, or operational credentials.
 - `EVIDENCE_INDEX.md` - human-readable public evidence index contract.
 - `ENGINEERING_PROOF.md` - proof tab payload, gates, evidence, and verifier contract.
 - `OBSERVABILITY_PROOF.md` - public-safe metrics, logs, alerts, and dashboard evidence.
+- `OBSERVABILITY_DASHBOARD.md` - public-safe Grafana-style dashboard groups, panel queries, alert links, and redaction boundaries.
 - `ALERT_ROUTING_EVIDENCE.md` - public-safe alert routing, dedupe, escalation, and silence evidence.
 - `INCIDENT_RESPONSE_DEMO.md` - public-safe incident queue, recovery actions,
   and resolution evidence in the demo.
@@ -306,6 +307,7 @@ The public repository export also generates:
 - `scripts/check_public_integration_repair.sh` - public-safe integration repair
   workbench validation.
 - `scripts/check_public_observability_proof.sh` - public-safe observability proof validation.
+- `scripts/check_public_observability_dashboard.sh` - public-safe observability dashboard validation.
 - `scripts/check_public_alert_routing.sh` - public-safe alert routing validation.
 - `scripts/check_public_engineering_proof.sh` - public-safe proof tab and evidence contract validation.
 - `scripts/check_public_evidence_index.sh` - public-safe evidence index validation.
@@ -341,7 +343,7 @@ https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 7. Run `bash scripts/check_public_engineering_proof.sh`.
 8. Run `bash scripts/check_public_demo_api.sh`.
 9. Run one generated client example from `examples/`.
-10. Review `PROJECT_STATUS.md`, `TECHNICAL_CAPABILITY_MAP.md`, `EVIDENCE_INDEX.md`, `BUSINESS_CONTROL_TOWER.md`, `OBSERVABILITY_PROOF.md`, `ALERT_ROUTING_EVIDENCE.md`, `INCIDENT_RESPONSE_DEMO.md`, `ENGINEERING_PROOF.md`, `PLATFORM_MATURITY_70.md`, and `SANITIZED_EVIDENCE.md`.
+10. Review `PROJECT_STATUS.md`, `TECHNICAL_CAPABILITY_MAP.md`, `EVIDENCE_INDEX.md`, `BUSINESS_CONTROL_TOWER.md`, `OBSERVABILITY_PROOF.md`, `OBSERVABILITY_DASHBOARD.md`, `ALERT_ROUTING_EVIDENCE.md`, `INCIDENT_RESPONSE_DEMO.md`, `ENGINEERING_PROOF.md`, `PLATFORM_MATURITY_70.md`, and `SANITIZED_EVIDENCE.md`.
 11. Review `SYSTEM_DESIGN.md`, `CONNECTOR_CERTIFICATION.md`, `CONNECTOR_FIXTURE_REPLAY.md`, `GITOPS_DELIVERY.md`, and the recovery evidence docs.
 
 ## Engineering Summary

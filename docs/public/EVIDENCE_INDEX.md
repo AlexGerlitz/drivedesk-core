@@ -43,6 +43,7 @@ parsing Markdown by hand.
 | Connector fixture replay | `docs/public/CONNECTOR_FIXTURE_REPLAY.md` | `bash scripts/check_public_connector_fixture_replay.sh` |
 | Integration repair | `docs/public/INTEGRATION_REPAIR.md` | `bash scripts/check_public_integration_repair.sh` |
 | Observability | `docs/public/OBSERVABILITY_PROOF.md` | `bash scripts/check_public_observability_proof.sh` |
+| Observability dashboard | `docs/public/OBSERVABILITY_DASHBOARD.md` | `bash scripts/check_public_observability_dashboard.sh` |
 | Alert routing | `docs/public/ALERT_ROUTING_EVIDENCE.md` | `bash scripts/check_public_alert_routing.sh` |
 | Incident response | `docs/public/INCIDENT_RESPONSE_DEMO.md` | `bash scripts/check_public_engineering_proof.sh` |
 | Release safety | `docs/public/RELEASE_ROLLBACK_EVIDENCE.md` | `bash scripts/check_public_release_rollback.sh` |
@@ -64,6 +65,7 @@ state.
 bash scripts/check_public_evidence_index.sh
 bash scripts/check_public_connector_fixture_replay.sh
 bash scripts/check_public_business_control_tower.sh
+bash scripts/check_public_observability_dashboard.sh
 ```
 
 The check validates that:

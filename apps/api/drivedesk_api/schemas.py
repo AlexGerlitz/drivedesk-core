@@ -1187,6 +1187,20 @@ class IntegrationRepairPreviewRead(BaseModel):
     api: dict[str, str] = Field(default_factory=dict)
 
 
+class ObservabilityDashboardDemoRead(BaseModel):
+    status: Literal["validated"]
+    command: str
+    dashboardLevel: str
+    summary: list[dict[str, Any]]
+    dashboardGroups: list[dict[str, Any]]
+    panelCatalog: list[dict[str, Any]]
+    queryExamples: list[dict[str, Any]]
+    alertLinks: list[dict[str, Any]]
+    dataBoundaries: list[dict[str, Any]]
+    api: dict[str, str]
+    docs: list[dict[str, str]]
+
+
 class PublicDemoRead(BaseModel):
     schemaVersion: int
     generatedAt: str
@@ -1207,6 +1221,7 @@ class PublicDemoRead(BaseModel):
     integrationRuntime: dict[str, Any]
     integrationExecution: dict[str, Any]
     integrationRepair: dict[str, Any]
+    observabilityDashboard: dict[str, Any]
     connectorFixtureReplay: dict[str, Any]
     businessIntakePipeline: dict[str, Any]
     businessTaskHandoff: dict[str, Any]

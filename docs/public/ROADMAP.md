@@ -107,6 +107,11 @@ Fast external verification path: `docs/public/REVIEWER_QUICKSTART.md`.
 - Public-safe observability proof (`docs/public/OBSERVABILITY_PROOF.md`)
   connecting metrics, structured logs, alerts, runbooks, dashboards, and
   sanitized evidence.
+- Public-safe observability dashboard (`docs/public/OBSERVABILITY_DASHBOARD.md`,
+  `GET /demo/observability-dashboard`) connecting Grafana-style dashboard
+  groups, Prometheus/Loki panel queries, alert links, runbooks, and data
+  boundaries to public demo evidence via
+  `bash scripts/check_public_observability_dashboard.sh`.
 - Public-safe alert routing evidence (`docs/public/ALERT_ROUTING_EVIDENCE.md`)
   connecting Alertmanager-style routes, receivers, dedupe keys, escalation,
   silences, runbooks, and sanitized evidence.
@@ -197,7 +202,6 @@ Fast external verification path: `docs/public/REVIEWER_QUICKSTART.md`.
 
 - Richer workflow automation examples with notification, approval, and mapping actions.
 - Integration adapter SDK examples.
-- Richer public observability examples with synthetic dashboard evidence.
 - Deeper admin frontend shell.
 
 ## Engineering Summary

@@ -1,0 +1,146 @@
+{
+  "schema_version": 1,
+  "check": "public_observability_dashboard",
+  "dashboard_model": "grafana_style_dashboard_contract",
+  "data_profile": "synthetic_demo_data",
+  "summary": {
+    "purpose": "prove public-safe dashboard contracts for API, integration, workflow, and security operations",
+    "dashboard_backend": "grafana-compatible",
+    "metrics_backend": "prometheus-compatible",
+    "logs_backend": "loki-compatible",
+    "alerting_backend": "alertmanager-compatible"
+  },
+  "dashboard_groups": [
+    {
+      "key": "api_runtime",
+      "title": "API runtime health",
+      "owner_role": "platform_operator",
+      "slo": "99.5% API availability and p95 latency under 400ms",
+      "panels": [
+        "request_rate",
+        "latency_p95",
+        "error_ratio"
+      ],
+      "runbook": "docs/public/RUNTIME_ROLLOUT_EVIDENCE.md"
+    },
+    {
+      "key": "integration_health",
+      "title": "Integration health",
+      "owner_role": "integration_operator",
+      "slo": "No unreviewed dead-letter jobs older than one business hour",
+      "panels": [
+        "outbox_backlog",
+        "retry_rate",
+        "dead_letters"
+      ],
+      "runbook": "docs/public/INTEGRATION_REPAIR.md"
+    },
+    {
+      "key": "business_workflow",
+      "title": "Business workflow health",
+      "owner_role": "operations_owner",
+      "slo": "Workflow action queue is reviewed before SLA breach",
+      "panels": [
+        "workflow_action_runs",
+        "business_exceptions",
+        "approval_queue"
+      ],
+      "runbook": "docs/public/BUSINESS_CONTROL_TOWER.md"
+    },
+    {
+      "key": "security_auth",
+      "title": "Security and auth health",
+      "owner_role": "security_operator",
+      "slo": "Auth failure spikes are triaged before account lockout noise spreads",
+      "panels": [
+        "auth_attempts",
+        "session_revocations",
+        "audit_events"
+      ],
+      "runbook": "docs/public/AUTH_OBSERVABILITY.md"
+    }
+  ],
+  "panel_catalog": [
+    {
+      "key": "request_rate",
+      "datasource": "prometheus",
+      "query": "sum by (route, status) (rate(drivedesk_http_requests_total[5m]))",
+      "safe_labels": [
+        "route",
+        "status"
+      ],
+      "alert_link": "DriveDeskApiTargetDown"
+    },
+    {
+      "key": "latency_p95",
+      "datasource": "prometheus",
+      "query": "histogram_quantile(0.95, sum by (le, route) (rate(drivedesk_http_request_duration_seconds_bucket[5m])))",
+      "safe_labels": [
+        "le",
+        "route"
+      ],
+      "alert_link": "DriveDeskApiHighLatencyP95"
+    },
+    {
+      "key": "error_ratio",
+      "datasource": "prometheus",
+      "query": "sum(rate(drivedesk_http_requests_total{status=~\"5..\"}[5m])) / sum(rate(drivedesk_http_requests_total[5m]))",
+      "safe_labels": [
+        "status"
+      ],
+      "alert_link": "DriveDeskApiHighErrorRatio"
+    },
+    {
+      "key": "outbox_backlog",
+      "datasource": "prometheus",
+      "query": "sum by (status, adapter_key) (drivedesk_outbox_events)",
+      "safe_labels": [
+        "status",
+        "adapter_key"
+      ],
+      "alert_link": "DriveDeskIntegrationRetries"
+    },
+    {
+      "key": "dead_letters",
+      "datasource": "prometheus",
+      "query": "sum by (adapter_key) (drivedesk_outbox_events{status=\"dead_letter\"})",
+      "safe_labels": [
+        "adapter_key",
+        "status"
+      ],
+      "alert_link": "DriveDeskIntegrationDeadLetters"
+    },
+    {
+      "key": "structured_logs",
+      "datasource": "loki",
+      "query": "sum by (service, event_type) (count_over_time({app=\"drivedesk\"} | json [5m]))",
+      "safe_labels": [
+        "service",
+        "event_type"
+      ],
+      "alert_link": "DriveDeskNoRecentLogs"
+    }
+  ],
+  "checks": {
+    "dashboard_groups_present": true,
+    "panel_catalog_present": true,
+    "prometheus_queries_present": true,
+    "loki_queries_present": true,
+    "alerts_link_to_runbooks": true,
+    "safe_labels_only": true,
+    "public_demo_payload_present": true,
+    "openapi_path_present": true,
+    "public_docs_linked": true,
+    "private_markers_absent": true,
+    "production_data_touched": false
+  },
+  "redaction": {
+    "paths_included": false,
+    "hostnames_included": false,
+    "addresses_included": false,
+    "credentials_included": false,
+    "raw_logs_included": false,
+    "request_bodies_included": false,
+    "production_data_included": false
+  }
+}

@@ -33,6 +33,8 @@ INTEGRATION_EXECUTION_PATH = "/demo/integration-execution"
 INTEGRATION_EXECUTION_METHOD = "get"
 INTEGRATION_REPAIR_PATH = "/demo/integration-repair"
 INTEGRATION_REPAIR_METHOD = "get"
+OBSERVABILITY_DASHBOARD_PATH = "/demo/observability-dashboard"
+OBSERVABILITY_DASHBOARD_METHOD = "get"
 BUSINESS_SCENARIO_REPLAY_PATH = "/demo/business-scenario-replay"
 BUSINESS_SCENARIO_REPLAY_METHOD = "get"
 
@@ -142,6 +144,14 @@ def integration_repair_operation(schema: dict[str, Any]) -> dict[str, Any]:
         schema,
         INTEGRATION_REPAIR_PATH,
         INTEGRATION_REPAIR_METHOD,
+    )
+
+
+def observability_dashboard_operation(schema: dict[str, Any]) -> dict[str, Any]:
+    return required_operation(
+        schema,
+        OBSERVABILITY_DASHBOARD_PATH,
+        OBSERVABILITY_DASHBOARD_METHOD,
     )
 
 
@@ -285,6 +295,16 @@ def integration_repair_required_fields(schema: dict[str, Any]) -> list[str]:
     return [str(item) for item in required]
 
 
+def observability_dashboard_required_fields(schema: dict[str, Any]) -> list[str]:
+    components = schema.get("components", {})
+    schemas = components.get("schemas", {})
+    dashboard = schemas.get("ObservabilityDashboardDemoRead", {})
+    required = dashboard.get("required", [])
+    if not isinstance(required, list) or not required:
+        raise SystemExit("OpenAPI schema does not contain ObservabilityDashboardDemoRead.required")
+    return [str(item) for item in required]
+
+
 def business_scenario_replay_required_fields(schema: dict[str, Any]) -> list[str]:
     components = schema.get("components", {})
     schemas = components.get("schemas", {})
@@ -311,6 +331,8 @@ def render_python_client(
     provider_onboarding_required_fields: list[str],
     integration_repair_operation_id: str,
     integration_repair_required_fields: list[str],
+    observability_dashboard_operation_id: str,
+    observability_dashboard_required_fields: list[str],
     business_scenario_operation_id: str,
     business_scenario_required_fields: list[str],
 ) -> str:
@@ -328,6 +350,10 @@ def render_python_client(
         integration_repair_required_fields,
         indent=2,
     )
+    observability_dashboard_required_json = json.dumps(
+        observability_dashboard_required_fields,
+        indent=2,
+    )
     business_scenario_required_json = json.dumps(business_scenario_required_fields, indent=2)
     return f'''#!/usr/bin/env python3
 from __future__ import annotations
@@ -343,18 +369,21 @@ CONNECTOR_REPLAY_PATH = "{CONNECTOR_REPLAY_PATH}"
 CONNECTOR_CERTIFICATION_PATH = "{CONNECTOR_CERTIFICATION_PATH}"
 PROVIDER_ONBOARDING_PATH = "{PROVIDER_ONBOARDING_PATH}"
 INTEGRATION_REPAIR_PATH = "{INTEGRATION_REPAIR_PATH}"
+OBSERVABILITY_DASHBOARD_PATH = "{OBSERVABILITY_DASHBOARD_PATH}"
 BUSINESS_SCENARIO_REPLAY_PATH = "{BUSINESS_SCENARIO_REPLAY_PATH}"
 OPERATION_ID = "{operation_id}"
 CONNECTOR_REPLAY_OPERATION_ID = "{connector_operation_id}"
 CONNECTOR_CERTIFICATION_OPERATION_ID = "{connector_certification_operation_id}"
 PROVIDER_ONBOARDING_OPERATION_ID = "{provider_onboarding_operation_id}"
 INTEGRATION_REPAIR_OPERATION_ID = "{integration_repair_operation_id}"
+OBSERVABILITY_DASHBOARD_OPERATION_ID = "{observability_dashboard_operation_id}"
 BUSINESS_SCENARIO_REPLAY_OPERATION_ID = "{business_scenario_operation_id}"
 REQUIRED_FIELDS = {required_json}
 CONNECTOR_REPLAY_REQUIRED_FIELDS = {connector_required_json}
 CONNECTOR_CERTIFICATION_REQUIRED_FIELDS = {connector_certification_required_json}
 PROVIDER_ONBOARDING_REQUIRED_FIELDS = {provider_onboarding_required_json}
 INTEGRATION_REPAIR_REQUIRED_FIELDS = {integration_repair_required_json}
+OBSERVABILITY_DASHBOARD_REQUIRED_FIELDS = {observability_dashboard_required_json}
 BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS = {business_scenario_required_json}
 
 
@@ -388,6 +417,11 @@ class DriveDeskPublicDemoClient:
     def get_integration_repair(self) -> dict[str, Any]:
         payload = self._get_json(INTEGRATION_REPAIR_PATH)
         validate_integration_repair_payload(payload)
+        return payload
+
+    def get_observability_dashboard(self) -> dict[str, Any]:
+        payload = self._get_json(OBSERVABILITY_DASHBOARD_PATH)
+        validate_observability_dashboard_payload(payload)
         return payload
 
     def get_business_scenario_replay(self) -> dict[str, Any]:
@@ -777,6 +811,68 @@ def validate_integration_repair_payload(payload: dict[str, Any]) -> None:
             raise ValueError("integration repair boundaries must stay public-safe")
 
 
+def validate_observability_dashboard_payload(payload: dict[str, Any]) -> None:
+    missing = [field for field in OBSERVABILITY_DASHBOARD_REQUIRED_FIELDS if field not in payload]
+    if missing:
+        raise ValueError(f"missing observability dashboard fields: {{', '.join(missing)}}")
+
+    if payload.get("status") != "validated":
+        raise ValueError(f"unexpected observability dashboard status: {{payload.get('status')}}")
+
+    if payload.get("command") != f"GET {{OBSERVABILITY_DASHBOARD_PATH}}":
+        raise ValueError(
+            f"unexpected observability dashboard command: {{payload.get('command')}}"
+        )
+
+    if payload.get("dashboardLevel") != "dashboard_contract_ready":
+        raise ValueError(
+            f"unexpected observability dashboard level: {{payload.get('dashboardLevel')}}"
+        )
+
+    for key in ("summary", "dashboardGroups", "panelCatalog", "queryExamples", "alertLinks", "dataBoundaries"):
+        value = payload.get(key)
+        if not isinstance(value, list) or not value:
+            raise ValueError(f"observability dashboard {{key}} is missing or empty")
+
+    group_keys = {{item.get("key") for item in payload.get("dashboardGroups", []) if isinstance(item, dict)}}
+    required_groups = {{"api_runtime", "integration_health", "business_workflow", "security_auth"}}
+    if not required_groups.issubset(group_keys):
+        raise ValueError(
+            f"observability dashboard groups missing: {{sorted(required_groups - group_keys)}}"
+        )
+
+    panel_keys = {{item.get("key") for item in payload.get("panelCatalog", []) if isinstance(item, dict)}}
+    required_panels = {{"request_rate", "latency_p95", "error_ratio", "outbox_backlog", "dead_letters", "structured_logs"}}
+    if not required_panels.issubset(panel_keys):
+        raise ValueError(
+            f"observability dashboard panels missing: {{sorted(required_panels - panel_keys)}}"
+        )
+
+    datasources = {{item.get("datasource") for item in payload.get("panelCatalog", []) if isinstance(item, dict)}}
+    if not {{"prometheus", "loki"}}.issubset(datasources):
+        raise ValueError(f"observability dashboard datasources missing: {{sorted(datasources)}}")
+
+    forbidden_labels = {{"email", "user_id", "tenant_id", "token", "phone", "name", "payload", "request_body"}}
+    for panel in payload.get("panelCatalog", []):
+        if not isinstance(panel, dict):
+            raise ValueError("observability dashboard panel must be an object")
+        labels = set(panel.get("safeLabels", []))
+        if not labels.isdisjoint(forbidden_labels):
+            raise ValueError(f"unsafe observability dashboard labels: {{sorted(labels & forbidden_labels)}}")
+        if not panel.get("alertLink"):
+            raise ValueError(f"observability dashboard panel missing alert link: {{panel.get('key')}}")
+
+    for boundary in payload.get("dataBoundaries", []):
+        if not isinstance(boundary, dict):
+            raise ValueError("observability dashboard boundary must be an object")
+        if (
+            boundary.get("containsPii") is not False
+            or boundary.get("rawPayloadIncluded") is not False
+            or boundary.get("privateTelemetryIncluded") is not False
+        ):
+            raise ValueError("observability dashboard boundaries must stay public-safe")
+
+
 def validate_business_scenario_replay_payload(payload: dict[str, Any]) -> None:
     missing = [field for field in BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS if field not in payload]
     if missing:
@@ -984,6 +1080,11 @@ def validate_public_demo_payload(payload: dict[str, Any]) -> None:
         raise ValueError("integrationRepair is missing")
     validate_integration_repair_payload(integration_repair)
 
+    observability_dashboard = payload.get("observabilityDashboard")
+    if not isinstance(observability_dashboard, dict):
+        raise ValueError("observabilityDashboard is missing")
+    validate_observability_dashboard_payload(observability_dashboard)
+
     business_scenario_replay = payload.get("businessScenarioReplay")
     if not isinstance(business_scenario_replay, dict):
         raise ValueError("businessScenarioReplay is missing")
@@ -1046,6 +1147,7 @@ def main() -> None:
     connector_certification = client.get_connector_certification()
     provider_onboarding = client.get_provider_onboarding()
     integration_repair = client.get_integration_repair()
+    observability_dashboard = client.get_observability_dashboard()
     business_scenario_replay = client.get_business_scenario_replay()
     adapter_plan = build_adapter_operation_plan(payload, "adapter-file-import-preview")
     print(
@@ -1058,12 +1160,14 @@ def main() -> None:
         f"connectorCertification={{connector_certification['certificationLevel']}}",
         f"providerOnboarding={{provider_onboarding['onboardingLevel']}}",
         f"integrationRepair={{integration_repair['repairLevel']}}",
+        f"observabilityDashboard={{observability_dashboard['dashboardLevel']}}",
         f"businessScenarioReplay={{business_scenario_replay['status']}}",
         f"operation={{OPERATION_ID}}",
         f"connectorOperation={{CONNECTOR_REPLAY_OPERATION_ID}}",
         f"connectorCertificationOperation={{CONNECTOR_CERTIFICATION_OPERATION_ID}}",
         f"providerOnboardingOperation={{PROVIDER_ONBOARDING_OPERATION_ID}}",
         f"integrationRepairOperation={{INTEGRATION_REPAIR_OPERATION_ID}}",
+        f"observabilityDashboardOperation={{OBSERVABILITY_DASHBOARD_OPERATION_ID}}",
         f"businessScenarioOperation={{BUSINESS_SCENARIO_REPLAY_OPERATION_ID}}",
     )
 
@@ -1084,6 +1188,8 @@ def render_javascript_client(
     provider_onboarding_required_fields: list[str],
     integration_repair_operation_id: str,
     integration_repair_required_fields: list[str],
+    observability_dashboard_operation_id: str,
+    observability_dashboard_required_fields: list[str],
     business_scenario_operation_id: str,
     business_scenario_required_fields: list[str],
 ) -> str:
@@ -1101,6 +1207,10 @@ def render_javascript_client(
         integration_repair_required_fields,
         indent=2,
     )
+    observability_dashboard_required_json = json.dumps(
+        observability_dashboard_required_fields,
+        indent=2,
+    )
     business_scenario_required_json = json.dumps(business_scenario_required_fields, indent=2)
     return f'''#!/usr/bin/env node
 import {{ pathToFileURL }} from "node:url";
@@ -1110,18 +1220,21 @@ export const CONNECTOR_REPLAY_PATH = "{CONNECTOR_REPLAY_PATH}";
 export const CONNECTOR_CERTIFICATION_PATH = "{CONNECTOR_CERTIFICATION_PATH}";
 export const PROVIDER_ONBOARDING_PATH = "{PROVIDER_ONBOARDING_PATH}";
 export const INTEGRATION_REPAIR_PATH = "{INTEGRATION_REPAIR_PATH}";
+export const OBSERVABILITY_DASHBOARD_PATH = "{OBSERVABILITY_DASHBOARD_PATH}";
 export const BUSINESS_SCENARIO_REPLAY_PATH = "{BUSINESS_SCENARIO_REPLAY_PATH}";
 export const OPERATION_ID = "{operation_id}";
 export const CONNECTOR_REPLAY_OPERATION_ID = "{connector_operation_id}";
 export const CONNECTOR_CERTIFICATION_OPERATION_ID = "{connector_certification_operation_id}";
 export const PROVIDER_ONBOARDING_OPERATION_ID = "{provider_onboarding_operation_id}";
 export const INTEGRATION_REPAIR_OPERATION_ID = "{integration_repair_operation_id}";
+export const OBSERVABILITY_DASHBOARD_OPERATION_ID = "{observability_dashboard_operation_id}";
 export const BUSINESS_SCENARIO_REPLAY_OPERATION_ID = "{business_scenario_operation_id}";
 export const REQUIRED_FIELDS = {required_json};
 export const CONNECTOR_REPLAY_REQUIRED_FIELDS = {connector_required_json};
 export const CONNECTOR_CERTIFICATION_REQUIRED_FIELDS = {connector_certification_required_json};
 export const PROVIDER_ONBOARDING_REQUIRED_FIELDS = {provider_onboarding_required_json};
 export const INTEGRATION_REPAIR_REQUIRED_FIELDS = {integration_repair_required_json};
+export const OBSERVABILITY_DASHBOARD_REQUIRED_FIELDS = {observability_dashboard_required_json};
 export const BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS = {business_scenario_required_json};
 
 export class DriveDeskPublicDemoClient {{
@@ -1210,6 +1323,22 @@ export class DriveDeskPublicDemoClient {{
 
     const payload = await response.json();
     validateIntegrationRepairPayload(payload);
+    return payload;
+  }}
+
+  async getObservabilityDashboard() {{
+    const response = await this.fetchImpl(`${{this.baseUrl}}${{OBSERVABILITY_DASHBOARD_PATH}}`, {{
+      headers: {{
+        Accept: "application/json",
+      }},
+    }});
+
+    if (!response.ok) {{
+      throw new Error(`GET ${{OBSERVABILITY_DASHBOARD_PATH}} failed: ${{response.status}}`);
+    }}
+
+    const payload = await response.json();
+    validateObservabilityDashboardPayload(payload);
     return payload;
   }}
 
@@ -1616,6 +1745,83 @@ export function validateIntegrationRepairPayload(payload) {{
   }}
 }}
 
+export function validateObservabilityDashboardPayload(payload) {{
+  const missing = OBSERVABILITY_DASHBOARD_REQUIRED_FIELDS.filter((field) => !(field in (payload || {{}})));
+  if (missing.length > 0) {{
+    throw new Error(`missing observability dashboard fields: ${{missing.join(", ")}}`);
+  }}
+
+  if (payload.status !== "validated") {{
+    throw new Error(`unexpected observability dashboard status: ${{payload.status}}`);
+  }}
+
+  if (payload.command !== `GET ${{OBSERVABILITY_DASHBOARD_PATH}}`) {{
+    throw new Error(`unexpected observability dashboard command: ${{payload.command}}`);
+  }}
+
+  if (payload.dashboardLevel !== "dashboard_contract_ready") {{
+    throw new Error(`unexpected observability dashboard level: ${{payload.dashboardLevel}}`);
+  }}
+
+  for (const key of ["summary", "dashboardGroups", "panelCatalog", "queryExamples", "alertLinks", "dataBoundaries"]) {{
+    if (!Array.isArray(payload[key]) || payload[key].length === 0) {{
+      throw new Error(`observability dashboard ${{key}} is missing or empty`);
+    }}
+  }}
+
+  const groupKeys = new Set(payload.dashboardGroups.map((item) => item?.key));
+  for (const groupKey of ["api_runtime", "integration_health", "business_workflow", "security_auth"]) {{
+    if (!groupKeys.has(groupKey)) {{
+      throw new Error(`observability dashboard group is missing: ${{groupKey}}`);
+    }}
+  }}
+
+  const panelKeys = new Set(payload.panelCatalog.map((item) => item?.key));
+  for (const panelKey of [
+    "request_rate",
+    "latency_p95",
+    "error_ratio",
+    "outbox_backlog",
+    "dead_letters",
+    "structured_logs",
+  ]) {{
+    if (!panelKeys.has(panelKey)) {{
+      throw new Error(`observability dashboard panel is missing: ${{panelKey}}`);
+    }}
+  }}
+
+  const datasources = new Set(payload.panelCatalog.map((item) => item?.datasource));
+  for (const datasource of ["prometheus", "loki"]) {{
+    if (!datasources.has(datasource)) {{
+      throw new Error(`observability dashboard datasource is missing: ${{datasource}}`);
+    }}
+  }}
+
+  const forbiddenLabels = new Set(["email", "user_id", "tenant_id", "token", "phone", "name", "payload", "request_body"]);
+  for (const panel of payload.panelCatalog) {{
+    const labels = new Set(panel?.safeLabels || []);
+    for (const label of labels) {{
+      if (forbiddenLabels.has(label)) {{
+        throw new Error(`unsafe observability dashboard label: ${{label}}`);
+      }}
+    }}
+    if (!panel?.alertLink) {{
+      throw new Error(`observability dashboard panel missing alert link: ${{panel?.key}}`);
+    }}
+  }}
+
+  if (
+    payload.dataBoundaries.some(
+      (item) =>
+        item?.containsPii !== false ||
+        item?.rawPayloadIncluded !== false ||
+        item?.privateTelemetryIncluded !== false,
+    )
+  ) {{
+    throw new Error("observability dashboard boundaries must stay public-safe");
+  }}
+}}
+
 export function validateBusinessScenarioReplayPayload(payload) {{
   const missing = BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS.filter((field) => !(field in payload));
   if (missing.length > 0) {{
@@ -1816,6 +2022,11 @@ export function validatePublicDemoPayload(payload) {{
   }}
   validateIntegrationRepairPayload(payload.integrationRepair);
 
+  if (!payload.observabilityDashboard || typeof payload.observabilityDashboard !== "object") {{
+    throw new Error("observabilityDashboard is missing");
+  }}
+  validateObservabilityDashboardPayload(payload.observabilityDashboard);
+
   if (!payload.businessScenarioReplay || typeof payload.businessScenarioReplay !== "object") {{
     throw new Error("businessScenarioReplay is missing");
   }}
@@ -1883,6 +2094,7 @@ async function main() {{
   const connectorCertification = await client.getConnectorCertification();
   const providerOnboarding = await client.getProviderOnboarding();
   const integrationRepair = await client.getIntegrationRepair();
+  const observabilityDashboard = await client.getObservabilityDashboard();
   const businessScenarioReplay = await client.getBusinessScenarioReplay();
   const adapterPlan = buildAdapterOperationPlan(payload, "adapter-file-import-preview");
   console.log(
@@ -1895,12 +2107,14 @@ async function main() {{
     `connectorCertification=${{connectorCertification.certificationLevel}}`,
     `providerOnboarding=${{providerOnboarding.onboardingLevel}}`,
     `integrationRepair=${{integrationRepair.repairLevel}}`,
+    `observabilityDashboard=${{observabilityDashboard.dashboardLevel}}`,
     `businessScenarioReplay=${{businessScenarioReplay.status}}`,
     `operation=${{OPERATION_ID}}`,
     `connectorOperation=${{CONNECTOR_REPLAY_OPERATION_ID}}`,
     `connectorCertificationOperation=${{CONNECTOR_CERTIFICATION_OPERATION_ID}}`,
     `providerOnboardingOperation=${{PROVIDER_ONBOARDING_OPERATION_ID}}`,
     `integrationRepairOperation=${{INTEGRATION_REPAIR_OPERATION_ID}}`,
+    `observabilityDashboardOperation=${{OBSERVABILITY_DASHBOARD_OPERATION_ID}}`,
     `businessScenarioOperation=${{BUSINESS_SCENARIO_REPLAY_OPERATION_ID}}`,
   );
 }}
@@ -1925,6 +2139,8 @@ def render_typescript_defs(
     provider_onboarding_required_fields: list[str],
     integration_repair_operation_id: str,
     integration_repair_required_fields: list[str],
+    observability_dashboard_operation_id: str,
+    observability_dashboard_required_fields: list[str],
     business_scenario_operation_id: str,
     business_scenario_required_fields: list[str],
 ) -> str:
@@ -1939,6 +2155,9 @@ def render_typescript_defs(
     integration_repair_required_union = " | ".join(
         f'"{field}"' for field in integration_repair_required_fields
     )
+    observability_dashboard_required_union = " | ".join(
+        f'"{field}"' for field in observability_dashboard_required_fields
+    )
     business_scenario_required_union = " | ".join(
         f'"{field}"' for field in business_scenario_required_fields
     )
@@ -1948,18 +2167,21 @@ export const CONNECTOR_REPLAY_PATH: "{CONNECTOR_REPLAY_PATH}";
 export const CONNECTOR_CERTIFICATION_PATH: "{CONNECTOR_CERTIFICATION_PATH}";
 export const PROVIDER_ONBOARDING_PATH: "{PROVIDER_ONBOARDING_PATH}";
 export const INTEGRATION_REPAIR_PATH: "{INTEGRATION_REPAIR_PATH}";
+export const OBSERVABILITY_DASHBOARD_PATH: "{OBSERVABILITY_DASHBOARD_PATH}";
 export const BUSINESS_SCENARIO_REPLAY_PATH: "{BUSINESS_SCENARIO_REPLAY_PATH}";
 export const OPERATION_ID: "{operation_id}";
 export const CONNECTOR_REPLAY_OPERATION_ID: "{connector_operation_id}";
 export const CONNECTOR_CERTIFICATION_OPERATION_ID: "{connector_certification_operation_id}";
 export const PROVIDER_ONBOARDING_OPERATION_ID: "{provider_onboarding_operation_id}";
 export const INTEGRATION_REPAIR_OPERATION_ID: "{integration_repair_operation_id}";
+export const OBSERVABILITY_DASHBOARD_OPERATION_ID: "{observability_dashboard_operation_id}";
 export const BUSINESS_SCENARIO_REPLAY_OPERATION_ID: "{business_scenario_operation_id}";
 export const REQUIRED_FIELDS: Array<{required_union}>;
 export const CONNECTOR_REPLAY_REQUIRED_FIELDS: Array<{connector_required_union}>;
 export const CONNECTOR_CERTIFICATION_REQUIRED_FIELDS: Array<{connector_certification_required_union}>;
 export const PROVIDER_ONBOARDING_REQUIRED_FIELDS: Array<{provider_onboarding_required_union}>;
 export const INTEGRATION_REPAIR_REQUIRED_FIELDS: Array<{integration_repair_required_union}>;
+export const OBSERVABILITY_DASHBOARD_REQUIRED_FIELDS: Array<{observability_dashboard_required_union}>;
 export const BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS: Array<{business_scenario_required_union}>;
 
 export type AdapterScenarioPhase = "preview" | "execute" | "retry" | "operator_review";
@@ -2070,6 +2292,20 @@ export interface IntegrationRepairPayload {{
   docs: Array<Record<string, string>>;
 }}
 
+export interface ObservabilityDashboardPayload {{
+  status: "validated";
+  command: string;
+  dashboardLevel: "dashboard_contract_ready";
+  summary: Array<Record<string, unknown>>;
+  dashboardGroups: Array<Record<string, unknown>>;
+  panelCatalog: Array<Record<string, unknown>>;
+  queryExamples: Array<Record<string, unknown>>;
+  alertLinks: Array<Record<string, unknown>>;
+  dataBoundaries: Array<Record<string, unknown>>;
+  api: Record<string, string>;
+  docs: Array<Record<string, string>>;
+}}
+
 export interface BusinessScenarioReplayPayload {{
   status: "validated";
   command: string;
@@ -2111,6 +2347,7 @@ export interface PublicDemoPayload {{
   connectorCertification: ConnectorCertificationPayload;
   providerOnboarding: ProviderOnboardingPayload;
   integrationRepair: IntegrationRepairPayload;
+  observabilityDashboard: ObservabilityDashboardPayload;
   connectorFixtureReplay: ConnectorFixtureReplayPayload;
   integrationJobs: Array<Record<string, unknown>>;
   integrationHealth: Array<Record<string, string>>;
@@ -2166,6 +2403,7 @@ export class DriveDeskPublicDemoClient {{
   getConnectorCertification(): Promise<ConnectorCertificationPayload>;
   getProviderOnboarding(): Promise<ProviderOnboardingPayload>;
   getIntegrationRepair(): Promise<IntegrationRepairPayload>;
+  getObservabilityDashboard(): Promise<ObservabilityDashboardPayload>;
   getBusinessScenarioReplay(): Promise<BusinessScenarioReplayPayload>;
   getAdapterOperationPlan(
     scenarioId: string,
@@ -2184,6 +2422,7 @@ export function validateConnectorFixtureReplayPayload(payload: ConnectorFixtureR
 export function validateConnectorCertificationPayload(payload: ConnectorCertificationPayload): void;
 export function validateProviderOnboardingPayload(payload: ProviderOnboardingPayload): void;
 export function validateIntegrationRepairPayload(payload: IntegrationRepairPayload): void;
+export function validateObservabilityDashboardPayload(payload: ObservabilityDashboardPayload): void;
 export function validateBusinessScenarioReplayPayload(payload: BusinessScenarioReplayPayload): void;
 '''
 
@@ -2200,6 +2439,7 @@ def render_readme(
     integration_runtime_operation_id: str,
     integration_execution_operation_id: str,
     integration_repair_operation_id: str,
+    observability_dashboard_operation_id: str,
     business_scenario_operation_id: str,
 ) -> str:
     return f'''# Generated Public Demo SDK
@@ -2252,6 +2492,9 @@ operationId: {integration_execution_operation_id}
 GET {INTEGRATION_REPAIR_PATH}
 operationId: {integration_repair_operation_id}
 
+GET {OBSERVABILITY_DASHBOARD_PATH}
+operationId: {observability_dashboard_operation_id}
+
 GET {BUSINESS_SCENARIO_REPLAY_PATH}
 operationId: {business_scenario_operation_id}
 ```
@@ -2294,6 +2537,10 @@ Adapter operation helpers:
   `GET {INTEGRATION_REPAIR_PATH}`
 - `DriveDeskPublicDemoClient.getIntegrationRepair`
 - `DriveDeskPublicDemoClient.get_integration_repair`
+- `observability_dashboard` manifest entry for
+  `GET {OBSERVABILITY_DASHBOARD_PATH}`
+- `DriveDeskPublicDemoClient.getObservabilityDashboard`
+- `DriveDeskPublicDemoClient.get_observability_dashboard`
 - `DriveDeskPublicDemoClient.getBusinessScenarioReplay`
 - `DriveDeskPublicDemoClient.get_business_scenario_replay`
 
@@ -2347,6 +2594,10 @@ incident classification, business impact, runbook attachment, safe diagnostic
 actions, approval boundaries, postcheck steps, and no provider calls in the
 public demo.
 
+Observability dashboard metadata validates the public-safe dashboard contract:
+Grafana-style dashboard groups, Prometheus and Loki panel queries, safe label
+sets, alert links, runbook references, and no raw private telemetry.
+
 Engineering summary: this is the public-safe integration proof. DriveDesk
 publishes an OpenAPI contract and generates a small SDK from it instead of
 relying on hand-written request examples only.
@@ -2380,6 +2631,8 @@ def render_manifest(
     integration_execution_required_fields: list[str],
     integration_repair_operation_id: str,
     integration_repair_required_fields: list[str],
+    observability_dashboard_operation_id: str,
+    observability_dashboard_required_fields: list[str],
     business_scenario_operation_id: str,
     business_scenario_required_fields: list[str],
 ) -> str:
@@ -2461,6 +2714,13 @@ def render_manifest(
             "operation_id": integration_repair_operation_id,
             "schema": "IntegrationRepairDemoRead",
             "required_fields": integration_repair_required_fields,
+        },
+        "observability_dashboard": {
+            "path": OBSERVABILITY_DASHBOARD_PATH,
+            "method": OBSERVABILITY_DASHBOARD_METHOD.upper(),
+            "operation_id": observability_dashboard_operation_id,
+            "schema": "ObservabilityDashboardDemoRead",
+            "required_fields": observability_dashboard_required_fields,
         },
         "business_scenario_replay": {
             "path": BUSINESS_SCENARIO_REPLAY_PATH,
@@ -2560,6 +2820,11 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
         integration_repair_op.get("operationId") or "get_integration_repair"
     )
     integration_repair_fields = integration_repair_required_fields(schema)
+    observability_dashboard_op = observability_dashboard_operation(schema)
+    observability_dashboard_operation_id = str(
+        observability_dashboard_op.get("operationId") or "get_observability_dashboard"
+    )
+    observability_dashboard_fields = observability_dashboard_required_fields(schema)
     business_scenario_operation = business_scenario_replay_operation(schema)
     business_scenario_operation_id = str(
         business_scenario_operation.get("operationId") or "get_business_scenario_replay"
@@ -2580,6 +2845,7 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
             integration_runtime_operation_id,
             integration_execution_operation_id,
             integration_repair_operation_id,
+            observability_dashboard_operation_id,
             business_scenario_operation_id,
         ),
     )
@@ -2612,6 +2878,8 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
             integration_execution_fields,
             integration_repair_operation_id,
             integration_repair_fields,
+            observability_dashboard_operation_id,
+            observability_dashboard_fields,
             business_scenario_operation_id,
             business_scenario_required_fields,
         ),
@@ -2629,6 +2897,8 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
             provider_onboarding_fields,
             integration_repair_operation_id,
             integration_repair_fields,
+            observability_dashboard_operation_id,
+            observability_dashboard_fields,
             business_scenario_operation_id,
             business_scenario_required_fields,
         ),
@@ -2646,6 +2916,8 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
             provider_onboarding_fields,
             integration_repair_operation_id,
             integration_repair_fields,
+            observability_dashboard_operation_id,
+            observability_dashboard_fields,
             business_scenario_operation_id,
             business_scenario_required_fields,
         ),
@@ -2663,6 +2935,8 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
             provider_onboarding_fields,
             integration_repair_operation_id,
             integration_repair_fields,
+            observability_dashboard_operation_id,
+            observability_dashboard_fields,
             business_scenario_operation_id,
             business_scenario_required_fields,
         ),

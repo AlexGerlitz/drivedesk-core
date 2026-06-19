@@ -12,12 +12,14 @@ CONNECTOR_REPLAY_PATH = "/demo/connector-fixture-replay"
 CONNECTOR_CERTIFICATION_PATH = "/demo/connector-certification"
 PROVIDER_ONBOARDING_PATH = "/demo/provider-onboarding"
 INTEGRATION_REPAIR_PATH = "/demo/integration-repair"
+OBSERVABILITY_DASHBOARD_PATH = "/demo/observability-dashboard"
 BUSINESS_SCENARIO_REPLAY_PATH = "/demo/business-scenario-replay"
 OPERATION_ID = "public_demo_demo_public_get"
 CONNECTOR_REPLAY_OPERATION_ID = "connector_fixture_replay_demo_demo_connector_fixture_replay_get"
 CONNECTOR_CERTIFICATION_OPERATION_ID = "connector_certification_demo_demo_connector_certification_get"
 PROVIDER_ONBOARDING_OPERATION_ID = "provider_onboarding_demo_demo_provider_onboarding_get"
 INTEGRATION_REPAIR_OPERATION_ID = "integration_repair_demo_demo_integration_repair_get"
+OBSERVABILITY_DASHBOARD_OPERATION_ID = "observability_dashboard_demo_demo_observability_dashboard_get"
 BUSINESS_SCENARIO_REPLAY_OPERATION_ID = "business_scenario_replay_demo_demo_business_scenario_replay_get"
 REQUIRED_FIELDS = [
   "schemaVersion",
@@ -39,6 +41,7 @@ REQUIRED_FIELDS = [
   "integrationRuntime",
   "integrationExecution",
   "integrationRepair",
+  "observabilityDashboard",
   "connectorFixtureReplay",
   "businessIntakePipeline",
   "businessTaskHandoff",
@@ -121,6 +124,19 @@ INTEGRATION_REPAIR_REQUIRED_FIELDS = [
   "api",
   "docs"
 ]
+OBSERVABILITY_DASHBOARD_REQUIRED_FIELDS = [
+  "status",
+  "command",
+  "dashboardLevel",
+  "summary",
+  "dashboardGroups",
+  "panelCatalog",
+  "queryExamples",
+  "alertLinks",
+  "dataBoundaries",
+  "api",
+  "docs"
+]
 BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS = [
   "status",
   "command",
@@ -161,6 +177,11 @@ class DriveDeskPublicDemoClient:
     def get_integration_repair(self) -> dict[str, Any]:
         payload = self._get_json(INTEGRATION_REPAIR_PATH)
         validate_integration_repair_payload(payload)
+        return payload
+
+    def get_observability_dashboard(self) -> dict[str, Any]:
+        payload = self._get_json(OBSERVABILITY_DASHBOARD_PATH)
+        validate_observability_dashboard_payload(payload)
         return payload
 
     def get_business_scenario_replay(self) -> dict[str, Any]:
@@ -550,6 +571,68 @@ def validate_integration_repair_payload(payload: dict[str, Any]) -> None:
             raise ValueError("integration repair boundaries must stay public-safe")
 
 
+def validate_observability_dashboard_payload(payload: dict[str, Any]) -> None:
+    missing = [field for field in OBSERVABILITY_DASHBOARD_REQUIRED_FIELDS if field not in payload]
+    if missing:
+        raise ValueError(f"missing observability dashboard fields: {', '.join(missing)}")
+
+    if payload.get("status") != "validated":
+        raise ValueError(f"unexpected observability dashboard status: {payload.get('status')}")
+
+    if payload.get("command") != f"GET {OBSERVABILITY_DASHBOARD_PATH}":
+        raise ValueError(
+            f"unexpected observability dashboard command: {payload.get('command')}"
+        )
+
+    if payload.get("dashboardLevel") != "dashboard_contract_ready":
+        raise ValueError(
+            f"unexpected observability dashboard level: {payload.get('dashboardLevel')}"
+        )
+
+    for key in ("summary", "dashboardGroups", "panelCatalog", "queryExamples", "alertLinks", "dataBoundaries"):
+        value = payload.get(key)
+        if not isinstance(value, list) or not value:
+            raise ValueError(f"observability dashboard {key} is missing or empty")
+
+    group_keys = {item.get("key") for item in payload.get("dashboardGroups", []) if isinstance(item, dict)}
+    required_groups = {"api_runtime", "integration_health", "business_workflow", "security_auth"}
+    if not required_groups.issubset(group_keys):
+        raise ValueError(
+            f"observability dashboard groups missing: {sorted(required_groups - group_keys)}"
+        )
+
+    panel_keys = {item.get("key") for item in payload.get("panelCatalog", []) if isinstance(item, dict)}
+    required_panels = {"request_rate", "latency_p95", "error_ratio", "outbox_backlog", "dead_letters", "structured_logs"}
+    if not required_panels.issubset(panel_keys):
+        raise ValueError(
+            f"observability dashboard panels missing: {sorted(required_panels - panel_keys)}"
+        )
+
+    datasources = {item.get("datasource") for item in payload.get("panelCatalog", []) if isinstance(item, dict)}
+    if not {"prometheus", "loki"}.issubset(datasources):
+        raise ValueError(f"observability dashboard datasources missing: {sorted(datasources)}")
+
+    forbidden_labels = {"email", "user_id", "tenant_id", "token", "phone", "name", "payload", "request_body"}
+    for panel in payload.get("panelCatalog", []):
+        if not isinstance(panel, dict):
+            raise ValueError("observability dashboard panel must be an object")
+        labels = set(panel.get("safeLabels", []))
+        if not labels.isdisjoint(forbidden_labels):
+            raise ValueError(f"unsafe observability dashboard labels: {sorted(labels & forbidden_labels)}")
+        if not panel.get("alertLink"):
+            raise ValueError(f"observability dashboard panel missing alert link: {panel.get('key')}")
+
+    for boundary in payload.get("dataBoundaries", []):
+        if not isinstance(boundary, dict):
+            raise ValueError("observability dashboard boundary must be an object")
+        if (
+            boundary.get("containsPii") is not False
+            or boundary.get("rawPayloadIncluded") is not False
+            or boundary.get("privateTelemetryIncluded") is not False
+        ):
+            raise ValueError("observability dashboard boundaries must stay public-safe")
+
+
 def validate_business_scenario_replay_payload(payload: dict[str, Any]) -> None:
     missing = [field for field in BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS if field not in payload]
     if missing:
@@ -757,6 +840,11 @@ def validate_public_demo_payload(payload: dict[str, Any]) -> None:
         raise ValueError("integrationRepair is missing")
     validate_integration_repair_payload(integration_repair)
 
+    observability_dashboard = payload.get("observabilityDashboard")
+    if not isinstance(observability_dashboard, dict):
+        raise ValueError("observabilityDashboard is missing")
+    validate_observability_dashboard_payload(observability_dashboard)
+
     business_scenario_replay = payload.get("businessScenarioReplay")
     if not isinstance(business_scenario_replay, dict):
         raise ValueError("businessScenarioReplay is missing")
@@ -819,6 +907,7 @@ def main() -> None:
     connector_certification = client.get_connector_certification()
     provider_onboarding = client.get_provider_onboarding()
     integration_repair = client.get_integration_repair()
+    observability_dashboard = client.get_observability_dashboard()
     business_scenario_replay = client.get_business_scenario_replay()
     adapter_plan = build_adapter_operation_plan(payload, "adapter-file-import-preview")
     print(
@@ -831,12 +920,14 @@ def main() -> None:
         f"connectorCertification={connector_certification['certificationLevel']}",
         f"providerOnboarding={provider_onboarding['onboardingLevel']}",
         f"integrationRepair={integration_repair['repairLevel']}",
+        f"observabilityDashboard={observability_dashboard['dashboardLevel']}",
         f"businessScenarioReplay={business_scenario_replay['status']}",
         f"operation={OPERATION_ID}",
         f"connectorOperation={CONNECTOR_REPLAY_OPERATION_ID}",
         f"connectorCertificationOperation={CONNECTOR_CERTIFICATION_OPERATION_ID}",
         f"providerOnboardingOperation={PROVIDER_ONBOARDING_OPERATION_ID}",
         f"integrationRepairOperation={INTEGRATION_REPAIR_OPERATION_ID}",
+        f"observabilityDashboardOperation={OBSERVABILITY_DASHBOARD_OPERATION_ID}",
         f"businessScenarioOperation={BUSINESS_SCENARIO_REPLAY_OPERATION_ID}",
     )
 

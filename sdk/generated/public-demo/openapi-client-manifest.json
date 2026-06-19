@@ -255,6 +255,25 @@
     ]
   },
   "method": "GET",
+  "observability_dashboard": {
+    "method": "GET",
+    "operation_id": "observability_dashboard_demo_demo_observability_dashboard_get",
+    "path": "/demo/observability-dashboard",
+    "required_fields": [
+      "status",
+      "command",
+      "dashboardLevel",
+      "summary",
+      "dashboardGroups",
+      "panelCatalog",
+      "queryExamples",
+      "alertLinks",
+      "dataBoundaries",
+      "api",
+      "docs"
+    ],
+    "schema": "ObservabilityDashboardDemoRead"
+  },
   "operation_id": "public_demo_demo_public_get",
   "path": "/demo/public",
   "provider_onboarding": {
@@ -300,6 +319,7 @@
     "integrationRuntime",
     "integrationExecution",
     "integrationRepair",
+    "observabilityDashboard",
     "connectorFixtureReplay",
     "businessIntakePipeline",
     "businessTaskHandoff",

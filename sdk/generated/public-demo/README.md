@@ -48,6 +48,9 @@ operationId: integration_execution_demo_demo_integration_execution_get
 GET /demo/integration-repair
 operationId: integration_repair_demo_demo_integration_repair_get
 
+GET /demo/observability-dashboard
+operationId: observability_dashboard_demo_demo_observability_dashboard_get
+
 GET /demo/business-scenario-replay
 operationId: business_scenario_replay_demo_demo_business_scenario_replay_get
 ```
@@ -90,6 +93,10 @@ Adapter operation helpers:
   `GET /demo/integration-repair`
 - `DriveDeskPublicDemoClient.getIntegrationRepair`
 - `DriveDeskPublicDemoClient.get_integration_repair`
+- `observability_dashboard` manifest entry for
+  `GET /demo/observability-dashboard`
+- `DriveDeskPublicDemoClient.getObservabilityDashboard`
+- `DriveDeskPublicDemoClient.get_observability_dashboard`
 - `DriveDeskPublicDemoClient.getBusinessScenarioReplay`
 - `DriveDeskPublicDemoClient.get_business_scenario_replay`
 
@@ -142,6 +149,10 @@ Integration repair metadata validates the public-safe repair workbench:
 incident classification, business impact, runbook attachment, safe diagnostic
 actions, approval boundaries, postcheck steps, and no provider calls in the
 public demo.
+
+Observability dashboard metadata validates the public-safe dashboard contract:
+Grafana-style dashboard groups, Prometheus and Loki panel queries, safe label
+sets, alert links, runbook references, and no raw private telemetry.
 
 Engineering summary: this is the public-safe integration proof. DriveDesk
 publishes an OpenAPI contract and generates a small SDK from it instead of

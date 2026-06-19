@@ -228,6 +228,28 @@
       "boundary": "aggregate public-safe signals with no raw logs"
     },
     {
+      "capability_id": "observability-dashboard",
+      "title": "Observability dashboard contracts",
+      "status": "validated",
+      "public_doc": "docs/public/OBSERVABILITY_DASHBOARD.md",
+      "evidence_files": [
+        "docs/public/evidence/observability-dashboard.sanitized.json",
+        "infra/observability/observability-dashboard.sanitized.json",
+        "apps/admin/public-demo/index.html",
+        "apps/admin/public-demo/demo-data.js"
+      ],
+      "verifiers": [
+        "bash scripts/check_public_observability_dashboard.sh",
+        "bash scripts/check_public_demo_api.sh"
+      ],
+      "public_urls": [
+        "docs/public/OBSERVABILITY_DASHBOARD.md",
+        "docs/public/evidence/observability-dashboard.sanitized.json",
+        "apps/admin/public-demo/"
+      ],
+      "boundary": "Grafana-style groups, Prometheus/Loki query shapes, alert links, and runbook references on synthetic public-safe data only"
+    },
+    {
       "capability_id": "alert-routing",
       "title": "Alert routing and escalation",
       "status": "validated",

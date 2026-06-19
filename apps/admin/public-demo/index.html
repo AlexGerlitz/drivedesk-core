@@ -479,6 +479,34 @@
             <span class="muted">Alert routing and runbooks</span>
           </div>
           <div class="proof-summary-grid" id="alertRoutingSummaryRows"></div>
+          <div class="proof-summary-grid" id="observabilityDashboardSummaryRows"></div>
+          <div class="dashboard-grid">
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Dashboard Contracts</h3>
+                <span class="muted">Grafana-style groups</span>
+              </div>
+              <div class="event-list" id="observabilityDashboardGroupRows"></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Panel Catalog</h3>
+                <span class="muted">Prometheus and Loki</span>
+              </div>
+              <div class="event-list" id="observabilityDashboardPanelRows"></div>
+            </section>
+          </div>
+
+          <section class="panel">
+            <div class="panel-header">
+              <h3>Safe Queries</h3>
+              <span class="muted">No raw payloads or PII</span>
+            </div>
+            <div class="event-list" id="observabilityDashboardQueryRows"></div>
+            <div class="event-list compact-list" id="observabilityDashboardBoundaryRows"></div>
+          </section>
+
           <div class="dashboard-grid">
             <section class="panel">
               <div class="panel-header">

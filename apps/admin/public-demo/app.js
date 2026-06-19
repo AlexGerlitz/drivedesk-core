@@ -126,6 +126,13 @@
         Array.isArray(payload.integrationRepair.repairActions) &&
         Array.isArray(payload.integrationRepair.safeExecutionPlan) &&
         Array.isArray(payload.integrationRepair.dataBoundaries) &&
+        payload.observabilityDashboard &&
+        Array.isArray(payload.observabilityDashboard.summary) &&
+        Array.isArray(payload.observabilityDashboard.dashboardGroups) &&
+        Array.isArray(payload.observabilityDashboard.panelCatalog) &&
+        Array.isArray(payload.observabilityDashboard.queryExamples) &&
+        Array.isArray(payload.observabilityDashboard.alertLinks) &&
+        Array.isArray(payload.observabilityDashboard.dataBoundaries) &&
         payload.connectorFixtureReplay &&
         Array.isArray(payload.connectorFixtureReplay.summary) &&
         Array.isArray(payload.connectorFixtureReplay.outcomes) &&
@@ -1857,6 +1864,141 @@
 
       row.append(top, detail, evidence);
       rows.appendChild(row);
+    });
+  }
+
+  function fillObservabilityDashboard() {
+    var dashboard = data.observabilityDashboard;
+
+    var summaryRows = document.getElementById("observabilityDashboardSummaryRows");
+    clear(summaryRows);
+    dashboard.summary.forEach(function (item) {
+      var card = document.createElement("article");
+      card.className = "metric-card";
+      card.dataset.tone = item.tone || "blue";
+
+      var label = document.createElement("span");
+      label.className = "muted";
+      label.appendChild(text(item.label));
+
+      var value = document.createElement("strong");
+      value.appendChild(text(item.value));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      card.append(label, value, detail);
+      summaryRows.appendChild(card);
+    });
+
+    var groupRows = document.getElementById("observabilityDashboardGroupRows");
+    clear(groupRows);
+    dashboard.dashboardGroups.forEach(function (group) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(group.title));
+      top.append(title, chip(group.ownerRole, "blue"));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(group.slo + " - panels " + (group.panels || []).join(", "))
+      );
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(group.evidence));
+
+      row.append(top, detail, evidence);
+      groupRows.appendChild(row);
+    });
+
+    var panelRows = document.getElementById("observabilityDashboardPanelRows");
+    clear(panelRows);
+    dashboard.panelCatalog.forEach(function (panel) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(panel.title));
+      top.append(title, chip(panel.datasource, "green"));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text("labels " + (panel.safeLabels || []).join(", ") + " - alert " + panel.alertLink)
+      );
+
+      var query = document.createElement("code");
+      query.appendChild(text(panel.query));
+
+      row.append(top, detail, query);
+      panelRows.appendChild(row);
+    });
+
+    var queryRows = document.getElementById("observabilityDashboardQueryRows");
+    clear(queryRows);
+    dashboard.queryExamples.forEach(function (queryExample) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var name = document.createElement("strong");
+      name.appendChild(text(queryExample.name));
+      top.append(name, chip(queryExample.tool, "blue"));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          "raw payload " +
+            String(Boolean(queryExample.containsRawPayload)) +
+            " - PII " +
+            String(Boolean(queryExample.containsPii))
+        )
+      );
+
+      var query = document.createElement("code");
+      query.appendChild(text(queryExample.query));
+
+      row.append(top, detail, query);
+      queryRows.appendChild(row);
+    });
+
+    var boundaryRows = document.getElementById("observabilityDashboardBoundaryRows");
+    clear(boundaryRows);
+    dashboard.dataBoundaries.forEach(function (boundary) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var name = document.createElement("strong");
+      name.appendChild(text(boundary.name));
+      top.append(name, chip(boundary.status, statusTone(boundary.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          "PII " +
+            String(Boolean(boundary.containsPii)) +
+            " - raw payload " +
+            String(Boolean(boundary.rawPayloadIncluded)) +
+            " - private telemetry " +
+            String(Boolean(boundary.privateTelemetryIncluded))
+        )
+      );
+
+      row.append(top, detail);
+      boundaryRows.appendChild(row);
     });
   }
 
@@ -4090,6 +4232,7 @@
     fillOutbox();
     fillHealth();
     fillRecoveryEvidence();
+    fillObservabilityDashboard();
     fillAlertRouting();
     fillIncidentResponse();
     fillBusinessControlTower();

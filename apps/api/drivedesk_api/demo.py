@@ -497,6 +497,224 @@ def _public_integration_repair() -> dict[str, Any]:
     return workbench
 
 
+def _public_observability_dashboard() -> dict[str, Any]:
+    return {
+        "status": "validated",
+        "command": "GET /demo/observability-dashboard",
+        "dashboardLevel": "dashboard_contract_ready",
+        "summary": [
+            {
+                "label": "Dashboard groups",
+                "value": "4",
+                "detail": "API, integration, business workflow, and security views",
+                "tone": "blue",
+            },
+            {
+                "label": "Panel contracts",
+                "value": "12",
+                "detail": "Prometheus, Loki, alert, and runbook-backed panels",
+                "tone": "green",
+            },
+            {
+                "label": "Private telemetry",
+                "value": "0",
+                "detail": "No raw logs, hostnames, addresses, secrets, or customer data",
+                "tone": "green",
+            },
+        ],
+        "dashboardGroups": [
+            {
+                "key": "api_runtime",
+                "title": "API runtime health",
+                "ownerRole": "platform_operator",
+                "slo": "99.5% API availability and p95 latency under 400ms",
+                "panels": ["request_rate", "latency_p95", "error_ratio"],
+                "runbook": "docs/public/RUNTIME_ROLLOUT_EVIDENCE.md",
+                "evidence": "observability_dashboard.api_runtime",
+            },
+            {
+                "key": "integration_health",
+                "title": "Integration health",
+                "ownerRole": "integration_operator",
+                "slo": "No unreviewed dead-letter jobs older than one business hour",
+                "panels": ["outbox_backlog", "retry_rate", "dead_letters"],
+                "runbook": "docs/public/INTEGRATION_REPAIR.md",
+                "evidence": "observability_dashboard.integration_health",
+            },
+            {
+                "key": "business_workflow",
+                "title": "Business workflow health",
+                "ownerRole": "operations_owner",
+                "slo": "Workflow action queue is reviewed before SLA breach",
+                "panels": ["workflow_action_runs", "business_exceptions", "approval_queue"],
+                "runbook": "docs/public/BUSINESS_CONTROL_TOWER.md",
+                "evidence": "observability_dashboard.business_workflow",
+            },
+            {
+                "key": "security_auth",
+                "title": "Security and auth health",
+                "ownerRole": "security_operator",
+                "slo": "Auth failure spikes are triaged before account lockout noise spreads",
+                "panels": ["auth_attempts", "session_revocations", "audit_events"],
+                "runbook": "docs/public/AUTH_OBSERVABILITY.md",
+                "evidence": "observability_dashboard.security_auth",
+            },
+        ],
+        "panelCatalog": [
+            {
+                "key": "request_rate",
+                "title": "Request rate by normalized route",
+                "datasource": "prometheus",
+                "query": "sum by (route, status) (rate(drivedesk_http_requests_total[5m]))",
+                "safeLabels": ["route", "status"],
+                "alertLink": "DriveDeskApiTargetDown",
+                "evidence": "observability_dashboard.panel.request_rate",
+            },
+            {
+                "key": "latency_p95",
+                "title": "API p95 latency",
+                "datasource": "prometheus",
+                "query": "histogram_quantile(0.95, sum by (le, route) (rate(drivedesk_http_request_duration_seconds_bucket[5m])))",
+                "safeLabels": ["le", "route"],
+                "alertLink": "DriveDeskApiHighLatencyP95",
+                "evidence": "observability_dashboard.panel.latency_p95",
+            },
+            {
+                "key": "error_ratio",
+                "title": "5xx error ratio",
+                "datasource": "prometheus",
+                "query": "sum(rate(drivedesk_http_requests_total{status=~\"5..\"}[5m])) / sum(rate(drivedesk_http_requests_total[5m]))",
+                "safeLabels": ["status"],
+                "alertLink": "DriveDeskApiHighErrorRatio",
+                "evidence": "observability_dashboard.panel.error_ratio",
+            },
+            {
+                "key": "outbox_backlog",
+                "title": "Outbox backlog by status",
+                "datasource": "prometheus",
+                "query": "sum by (status, adapter_key) (drivedesk_outbox_events)",
+                "safeLabels": ["status", "adapter_key"],
+                "alertLink": "DriveDeskIntegrationRetries",
+                "evidence": "observability_dashboard.panel.outbox_backlog",
+            },
+            {
+                "key": "dead_letters",
+                "title": "Dead-lettered integration jobs",
+                "datasource": "prometheus",
+                "query": "sum by (adapter_key) (drivedesk_outbox_events{status=\"dead_letter\"})",
+                "safeLabels": ["adapter_key", "status"],
+                "alertLink": "DriveDeskIntegrationDeadLetters",
+                "evidence": "observability_dashboard.panel.dead_letters",
+            },
+            {
+                "key": "structured_logs",
+                "title": "Structured logs by service",
+                "datasource": "loki",
+                "query": "sum by (service, event_type) (count_over_time({app=\"drivedesk\"} | json [5m]))",
+                "safeLabels": ["service", "event_type"],
+                "alertLink": "DriveDeskNoRecentLogs",
+                "evidence": "observability_dashboard.panel.structured_logs",
+            },
+        ],
+        "queryExamples": [
+            {
+                "name": "API latency burn check",
+                "tool": "Prometheus",
+                "query": "histogram_quantile(0.95, sum by (le) (rate(drivedesk_http_request_duration_seconds_bucket[5m])))",
+                "containsRawPayload": False,
+                "containsPii": False,
+                "evidence": "observability_dashboard.query.latency",
+            },
+            {
+                "name": "Integration dead-letter scan",
+                "tool": "Prometheus",
+                "query": "sum by (adapter_key) (drivedesk_outbox_events{status=\"dead_letter\"})",
+                "containsRawPayload": False,
+                "containsPii": False,
+                "evidence": "observability_dashboard.query.dead_letters",
+            },
+            {
+                "name": "Safe structured log scan",
+                "tool": "Loki",
+                "query": "{app=\"drivedesk\"} | json | event_type=\"adapter.completed\"",
+                "containsRawPayload": False,
+                "containsPii": False,
+                "evidence": "observability_dashboard.query.logs",
+            },
+        ],
+        "alertLinks": [
+            {
+                "alert": "DriveDeskApiTargetDown",
+                "severity": "critical",
+                "panel": "request_rate",
+                "runbook": "docs/public/RUNTIME_ROLLOUT_EVIDENCE.md",
+                "evidence": "observability_dashboard.alert.api_down",
+            },
+            {
+                "alert": "DriveDeskIntegrationDeadLetters",
+                "severity": "critical",
+                "panel": "dead_letters",
+                "runbook": "docs/public/INTEGRATION_REPAIR.md",
+                "evidence": "observability_dashboard.alert.dead_letters",
+            },
+            {
+                "alert": "DriveDeskNoRecentLogs",
+                "severity": "warning",
+                "panel": "structured_logs",
+                "runbook": "docs/public/OBSERVABILITY_PROOF.md",
+                "evidence": "observability_dashboard.alert.no_logs",
+            },
+        ],
+        "dataBoundaries": [
+            {
+                "name": "raw_logs",
+                "status": "blocked_from_public_evidence",
+                "containsPii": False,
+                "rawPayloadIncluded": False,
+                "privateTelemetryIncluded": False,
+                "evidence": "observability_dashboard.boundary.raw_logs",
+            },
+            {
+                "name": "labels",
+                "status": "aggregate_only",
+                "containsPii": False,
+                "rawPayloadIncluded": False,
+                "privateTelemetryIncluded": False,
+                "evidence": "observability_dashboard.boundary.labels",
+            },
+            {
+                "name": "screenshots",
+                "status": "synthetic_only",
+                "containsPii": False,
+                "rawPayloadIncluded": False,
+                "privateTelemetryIncluded": False,
+                "evidence": "observability_dashboard.boundary.screenshots",
+            },
+        ],
+        "api": {
+            "standalone": "GET /demo/observability-dashboard",
+            "publicDemo": "GET /demo/public",
+        },
+        "docs": [
+            {
+                "label": "Observability dashboard",
+                "path": "docs/public/OBSERVABILITY_DASHBOARD.md",
+                "check": "bash scripts/check_public_observability_dashboard.sh",
+            },
+            {
+                "label": "Observability proof",
+                "path": "docs/public/OBSERVABILITY_PROOF.md",
+                "check": "bash scripts/check_public_observability_proof.sh",
+            },
+            {
+                "label": "Alert routing",
+                "path": "docs/public/ALERT_ROUTING_EVIDENCE.md",
+                "check": "bash scripts/check_public_alert_routing.sh",
+            },
+        ],
+    }
+
+
 def build_public_demo_payload() -> dict[str, Any]:
     return {
         "schemaVersion": 1,
@@ -947,6 +1165,7 @@ def build_public_demo_payload() -> dict[str, Any]:
         "integrationRuntime": _public_integration_runtime(),
         "integrationExecution": _public_integration_execution(),
         "integrationRepair": _public_integration_repair(),
+        "observabilityDashboard": _public_observability_dashboard(),
         "connectorFixtureReplay": {
             "status": "validated",
             "command": "bash scripts/check_public_connector_fixture_replay.sh",

@@ -129,6 +129,9 @@ business_approval_gateway_endpoint, business_approval_gateway_headers = get_json
 integration_runtime_endpoint, integration_runtime_headers = get_json("/demo/integration-runtime")
 integration_execution_endpoint, integration_execution_headers = get_json("/demo/integration-execution")
 integration_repair_endpoint, integration_repair_headers = get_json("/demo/integration-repair")
+observability_dashboard_endpoint, observability_dashboard_headers = get_json(
+    "/demo/observability-dashboard"
+)
 business_scenario_endpoint, business_scenario_headers = get_json("/demo/business-scenario-replay")
 adapters, _ = get_json("/integration-adapters")
 runbooks, _ = get_json("/integration-runbooks")
@@ -1484,6 +1487,62 @@ assert {item["path"] for item in integration_repair["docs"]} >= {
     "docs/public/INTEGRATION_EXECUTION.md",
 }, demo
 
+observability_dashboard = demo["observabilityDashboard"]
+assert observability_dashboard_endpoint == observability_dashboard, observability_dashboard_endpoint
+assert observability_dashboard_headers["access-control-allow-origin"] == "*", (
+    observability_dashboard_headers
+)
+assert observability_dashboard_headers["cache-control"] == "public, max-age=60", (
+    observability_dashboard_headers
+)
+assert observability_dashboard["status"] == "validated", demo
+assert observability_dashboard["command"] == "GET /demo/observability-dashboard", demo
+assert observability_dashboard["dashboardLevel"] == "dashboard_contract_ready", demo
+assert {item["label"] for item in observability_dashboard["summary"]} >= {
+    "Dashboard groups",
+    "Panel contracts",
+    "Private telemetry",
+}, demo
+assert {item["key"] for item in observability_dashboard["dashboardGroups"]} >= {
+    "api_runtime",
+    "integration_health",
+    "business_workflow",
+    "security_auth",
+}, demo
+assert {item["key"] for item in observability_dashboard["panelCatalog"]} >= {
+    "request_rate",
+    "latency_p95",
+    "error_ratio",
+    "outbox_backlog",
+    "dead_letters",
+    "structured_logs",
+}, demo
+assert {"prometheus", "loki"}.issubset(
+    {item["datasource"] for item in observability_dashboard["panelCatalog"]}
+), demo
+for panel in observability_dashboard["panelCatalog"]:
+    assert set(panel["safeLabels"]).isdisjoint(
+        {"email", "user_id", "tenant_id", "token", "phone", "name", "payload", "request_body"}
+    ), panel
+    assert panel["alertLink"], panel
+assert {item["tool"] for item in observability_dashboard["queryExamples"]} >= {
+    "Prometheus",
+    "Loki",
+}, demo
+for query in observability_dashboard["queryExamples"]:
+    assert query["containsRawPayload"] is False, query
+    assert query["containsPii"] is False, query
+for boundary in observability_dashboard["dataBoundaries"]:
+    assert boundary["containsPii"] is False, boundary
+    assert boundary["rawPayloadIncluded"] is False, boundary
+    assert boundary["privateTelemetryIncluded"] is False, boundary
+assert observability_dashboard["api"]["standalone"] == "GET /demo/observability-dashboard", demo
+assert {item["path"] for item in observability_dashboard["docs"]} >= {
+    "docs/public/OBSERVABILITY_DASHBOARD.md",
+    "docs/public/OBSERVABILITY_PROOF.md",
+    "docs/public/ALERT_ROUTING_EVIDENCE.md",
+}, demo
+
 business_scenario_replay = demo["businessScenarioReplay"]
 assert business_scenario_endpoint == business_scenario_replay, business_scenario_endpoint
 assert business_scenario_headers["access-control-allow-origin"] == "*", business_scenario_headers
@@ -1665,6 +1724,7 @@ assert "/demo/business-approval-gateway" in openapi["paths"], openapi["paths"].k
 assert "/demo/integration-runtime" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/integration-execution" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/integration-repair" in openapi["paths"], openapi["paths"].keys()
+assert "/demo/observability-dashboard" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/integration-repairs/preview" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/business-scenario-replay" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/business-intake-pipeline/preview" in openapi["paths"], openapi["paths"].keys()
@@ -1697,6 +1757,7 @@ if openapi_file.exists():
     assert "/demo/integration-runtime" in generated["paths"], generated["paths"].keys()
     assert "/demo/integration-execution" in generated["paths"], generated["paths"].keys()
     assert "/demo/integration-repair" in generated["paths"], generated["paths"].keys()
+    assert "/demo/observability-dashboard" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/integration-repairs/preview" in generated["paths"], generated["paths"].keys()
     assert "/demo/business-scenario-replay" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-intake-pipeline/preview" in generated["paths"], generated["paths"].keys()

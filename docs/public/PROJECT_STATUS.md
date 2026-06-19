@@ -32,6 +32,7 @@ work so the repository can be verified without private operational context.
 | Capability map | Each visible capability is linked to implementation surface, evidence, and verifier command. | `docs/public/TECHNICAL_CAPABILITY_MAP.md` | `bash scripts/check_public_technical_capability_map.sh` |
 | Evidence index | Public capability groups are indexed as machine-readable docs, evidence files, verifier commands, public URLs, and boundary notes. | `docs/public/EVIDENCE_INDEX.md`, `docs/public/evidence/public-evidence-index.sanitized.json` | `bash scripts/check_public_evidence_index.sh` |
 | Observability proof | Metrics, structured logs, alerts, runbooks, and dashboard panels are represented with public-safe synthetic evidence. | `docs/public/OBSERVABILITY_PROOF.md`, `docs/public/evidence/observability-proof.sanitized.json` | `bash scripts/check_public_observability_proof.sh` |
+| Observability dashboard | Grafana-style dashboard groups, Prometheus/Loki panel queries, alert links, runbook links, and redaction boundaries are represented in the public demo and evidence. | `docs/public/OBSERVABILITY_DASHBOARD.md`, `GET /demo/observability-dashboard`, `GET /demo/public` `observabilityDashboard`, `docs/public/evidence/observability-dashboard.sanitized.json` | `bash scripts/check_public_observability_dashboard.sh && bash scripts/check_public_demo_api.sh` |
 | Alert routing | Alertmanager-style routes, receivers, dedupe keys, escalation, silences, and runbook bindings are represented in evidence and the demo Operations tab. | `apps/admin/public-demo/index.html`, `docs/public/ALERT_ROUTING_EVIDENCE.md`, `docs/public/evidence/alert-routing.sanitized.json` | `bash scripts/check_public_alert_routing.sh && bash scripts/check_public_demo_api.sh` |
 | Incident response | Runbook-backed incidents, owners, mitigation, recovery timeline, and resolution evidence are represented in the demo Incidents tab. | `apps/admin/public-demo/index.html`, `docs/public/INCIDENT_RESPONSE_DEMO.md`, `docs/public/INTEGRATION_INCIDENT_RUNBOOKS.md` | `bash scripts/check_public_demo_api.sh && bash scripts/check_public_engineering_proof.sh` |
 
@@ -53,11 +54,9 @@ Longer public-safe direction lives in `docs/public/ROADMAP.md`.
 
 1. Add more real-provider notification adapter evidence on top of the
    public-safe channel matrix without exposing private secrets.
-2. Expand the public observability proof into richer synthetic dashboard
-   examples.
-3. Deepen the admin frontend shell around the existing API and public demo
+2. Deepen the admin frontend shell around the existing API and public demo
    contract.
-4. Keep public and private repositories separated through the export gate and
+3. Keep public and private repositories separated through the export gate and
    secret boundary checks.
 
 ## Verification
@@ -71,6 +70,7 @@ bash scripts/check_public_project_status.sh
 bash scripts/check_public_technical_capability_map.sh
 bash scripts/check_public_evidence_index.sh
 bash scripts/check_public_observability_proof.sh
+bash scripts/check_public_observability_dashboard.sh
 bash scripts/check_public_alert_routing.sh
 bash scripts/check_public_engineering_proof.sh
 bash scripts/check_public_demo_api.sh

@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-19T17:13:56Z
+Generated at: 2026-06-19T17:48:22Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -238,6 +238,11 @@ Copied public-safe areas:
 - public observability proof evidence snapshot: docs/public/evidence/observability-proof.sanitized.json
 - public observability proof source snapshot: infra/observability/observability-proof.sanitized.json
 - public observability proof ADR: 0062-public-safe-observability-proof
+- public observability dashboard doc
+- public observability dashboard validation script: scripts/check_public_observability_dashboard.sh
+- public observability dashboard evidence snapshot: docs/public/evidence/observability-dashboard.sanitized.json
+- public observability dashboard source snapshot: infra/observability/observability-dashboard.sanitized.json
+- public observability dashboard ADR: 0076-public-safe-observability-dashboard
 - public alert routing evidence doc
 - public alert routing evidence check: public_alert_routing_evidence
 - public alert routing validation script: scripts/check_public_alert_routing.sh

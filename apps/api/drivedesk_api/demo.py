@@ -2943,6 +2943,197 @@ def build_public_demo_payload() -> dict[str, Any]:
                 },
             ],
         },
+        "businessApprovalGateway": {
+            "status": "previewed",
+            "command": "POST /tenants/{tenant_id}/business-approval-gateway/preview",
+            "summary": [
+                {
+                    "label": "Approval requests",
+                    "value": "1",
+                    "detail": "provider-changing commit candidate",
+                    "tone": "amber",
+                },
+                {
+                    "label": "Policy checks",
+                    "value": "4",
+                    "detail": "RBAC, dual control, idempotency, write lock",
+                    "tone": "green",
+                },
+                {
+                    "label": "Commit unlocks",
+                    "value": "1",
+                    "detail": "blocked until approved",
+                    "tone": "blue",
+                },
+                {
+                    "label": "Provider writes",
+                    "value": "0",
+                    "detail": "approval preview unlocks nothing",
+                    "tone": "violet",
+                },
+            ],
+            "role": "accountant",
+            "subject": "deal:DEAL-2026-001",
+            "approvalRequests": [
+                {
+                    "approvalKey": "approval.preview.001",
+                    "action": "queue_accounting_export_after_review",
+                    "status": "approval_required",
+                    "requesterRole": "accountant",
+                    "approverRole": "owner",
+                    "subject": "deal:DEAL-2026-001",
+                    "idempotencyKey": (
+                        "business-approval-gateway:deal:DEAL-2026-001:"
+                        "queue_accounting_export_after_review:001"
+                    ),
+                    "sourceIdempotencyKey": (
+                        "business-action-execution:deal:DEAL-2026-001:"
+                        "queue_accounting_export_after_review:002"
+                    ),
+                    "requiresDualControl": True,
+                    "commitWouldMutateProvider": True,
+                    "externalMutation": False,
+                    "containsPii": False,
+                    "rawPayloadIncluded": False,
+                    "evidence": "business_approval_gateway.previewed",
+                },
+            ],
+            "policyChecks": [
+                {
+                    "check": "rbac_approver_role",
+                    "status": "passed",
+                    "detail": "Approver role is allowed to review provider-changing commits.",
+                    "externalMutation": False,
+                    "evidence": "business_approval_gateway.previewed",
+                },
+                {
+                    "check": "dual_control_required",
+                    "status": "required",
+                    "detail": "Requester and approver stay separated before commit unlock.",
+                    "externalMutation": False,
+                    "evidence": "business_approval_gateway.previewed",
+                },
+                {
+                    "check": "idempotency_preserved",
+                    "status": "passed",
+                    "detail": "Approval request keeps source and approval idempotency keys.",
+                    "externalMutation": False,
+                    "evidence": "business_approval_gateway.previewed",
+                },
+                {
+                    "check": "provider_write_closed_until_approval",
+                    "status": "closed",
+                    "detail": "Provider write stays locked until approval is recorded.",
+                    "externalMutation": False,
+                    "evidence": "business_approval_gateway.previewed",
+                },
+            ],
+            "approverRouting": [
+                {
+                    "route": "owner_or_accountant_review",
+                    "status": "ready",
+                    "queue": "approval.review",
+                    "ownerRole": "owner",
+                    "slaMinutes": 120,
+                    "notificationChannel": "in_app",
+                    "externalDelivery": False,
+                    "evidence": "business_approval_gateway.previewed",
+                },
+                {
+                    "route": "escalate_if_sla_missed",
+                    "status": "armed",
+                    "queue": "approval.escalation",
+                    "ownerRole": "owner",
+                    "slaMinutes": 240,
+                    "notificationChannel": "in_app",
+                    "externalDelivery": False,
+                    "evidence": "business_approval_gateway.previewed",
+                },
+            ],
+            "commitUnlocks": [
+                {
+                    "unlockKey": "commit.unlock.001",
+                    "action": "queue_accounting_export_after_review",
+                    "status": "blocked_until_approved",
+                    "wouldRecord": "WorkflowActionRun",
+                    "wouldEnqueueEvent": "business.action.approval_granted",
+                    "outboxReady": True,
+                    "providerWriteUnlocked": False,
+                    "externalMutation": False,
+                    "rollbackAttached": True,
+                    "evidence": "business_approval_gateway.previewed",
+                },
+            ],
+            "auditTrail": [
+                {
+                    "event": "business_approval.requested",
+                    "status": "would_record",
+                    "actorRole": "accountant",
+                    "subject": "deal:DEAL-2026-001",
+                    "externalMutation": False,
+                    "evidence": "business_approval_gateway.previewed",
+                },
+                {
+                    "event": "business_approval.policy_checked",
+                    "status": "would_record",
+                    "actorRole": "system",
+                    "subject": "deal:DEAL-2026-001",
+                    "externalMutation": False,
+                    "evidence": "business_approval_gateway.previewed",
+                },
+                {
+                    "event": "business_approval.commit_unlocked",
+                    "status": "blocked_until_approved",
+                    "actorRole": "owner",
+                    "subject": "deal:DEAL-2026-001",
+                    "externalMutation": False,
+                    "evidence": "business_approval_gateway.previewed",
+                },
+            ],
+            "dataBoundaries": [
+                {
+                    "name": "preview_only_no_approval_record",
+                    "status": "preview_only",
+                    "externalMutation": False,
+                },
+                {
+                    "name": "provider_write_locked",
+                    "status": "closed",
+                    "externalMutation": False,
+                },
+                {
+                    "name": "rbac_dual_control",
+                    "status": "enforced",
+                    "externalMutation": False,
+                },
+                {
+                    "name": "safe_approval_payload",
+                    "status": "clean",
+                    "containsPii": False,
+                    "rawPayloadIncluded": False,
+                },
+            ],
+            "api": {
+                "standalone": "GET /demo/business-approval-gateway",
+                "preview": "POST /tenants/{tenant_id}/business-approval-gateway/preview",
+                "actionExecution": "POST /tenants/{tenant_id}/business-action-executions/preview",
+                "taskHandoff": "POST /tenants/{tenant_id}/business-task-handoffs/preview",
+            },
+            "docs": [
+                {
+                    "label": "Business Approval Gateway",
+                    "path": "docs/public/BUSINESS_APPROVAL_GATEWAY.md",
+                },
+                {
+                    "label": "Business Action Execution",
+                    "path": "docs/public/BUSINESS_ACTION_EXECUTION.md",
+                },
+                {
+                    "label": "Business Task Handoff",
+                    "path": "docs/public/BUSINESS_TASK_HANDOFF.md",
+                },
+            ],
+        },
         "businessScenarioReplay": {
             "status": "validated",
             "command": "bash scripts/check_public_business_scenario_replay.sh",

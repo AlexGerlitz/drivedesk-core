@@ -119,6 +119,9 @@ business_context_assistant_endpoint, business_context_assistant_headers = get_js
 business_action_execution_endpoint, business_action_execution_headers = get_json(
     "/demo/business-action-execution"
 )
+business_approval_gateway_endpoint, business_approval_gateway_headers = get_json(
+    "/demo/business-approval-gateway"
+)
 business_scenario_endpoint, business_scenario_headers = get_json("/demo/business-scenario-replay")
 adapters, _ = get_json("/integration-adapters")
 runbooks, _ = get_json("/integration-runbooks")
@@ -1002,6 +1005,111 @@ assert {item["path"] for item in business_action_execution["docs"]} >= {
     "docs/public/BUSINESS_TASK_HANDOFF.md",
     "docs/public/BUSINESS_CONTEXT_ASSISTANT.md",
 }, demo
+business_approval_gateway = demo["businessApprovalGateway"]
+assert business_approval_gateway_endpoint == business_approval_gateway, business_approval_gateway_endpoint
+assert (
+    business_approval_gateway_headers["access-control-allow-origin"] == "*"
+), business_approval_gateway_headers
+assert (
+    business_approval_gateway_headers["cache-control"] == "public, max-age=60"
+), business_approval_gateway_headers
+assert business_approval_gateway["status"] == "previewed", demo
+assert (
+    business_approval_gateway["command"]
+    == "POST /tenants/{tenant_id}/business-approval-gateway/preview"
+), demo
+assert {item["label"] for item in business_approval_gateway["summary"]} >= {
+    "Approval requests",
+    "Policy checks",
+    "Commit unlocks",
+    "Provider writes",
+}, demo
+assert business_approval_gateway["role"] == "accountant", demo
+assert business_approval_gateway["subject"] == "deal:DEAL-2026-001", demo
+assert {item["action"] for item in business_approval_gateway["approvalRequests"]} == {
+    "queue_accounting_export_after_review",
+}, demo
+assert {item["status"] for item in business_approval_gateway["approvalRequests"]} == {
+    "approval_required"
+}, demo
+assert {item["requesterRole"] for item in business_approval_gateway["approvalRequests"]} == {
+    "accountant"
+}, demo
+assert {item["approverRole"] for item in business_approval_gateway["approvalRequests"]} == {
+    "owner"
+}, demo
+assert {item["requiresDualControl"] for item in business_approval_gateway["approvalRequests"]} == {
+    True
+}, demo
+assert {item["commitWouldMutateProvider"] for item in business_approval_gateway["approvalRequests"]} == {
+    True
+}, demo
+assert {item["externalMutation"] for item in business_approval_gateway["approvalRequests"]} == {
+    False
+}, demo
+assert {item["containsPii"] for item in business_approval_gateway["approvalRequests"]} == {False}, demo
+assert {item["rawPayloadIncluded"] for item in business_approval_gateway["approvalRequests"]} == {
+    False
+}, demo
+assert all(
+    str(item["idempotencyKey"]).startswith("business-approval-gateway:")
+    for item in business_approval_gateway["approvalRequests"]
+), demo
+assert all(
+    str(item["sourceIdempotencyKey"]).startswith("business-action-execution:")
+    for item in business_approval_gateway["approvalRequests"]
+), demo
+assert {item["check"] for item in business_approval_gateway["policyChecks"]} == {
+    "rbac_approver_role",
+    "dual_control_required",
+    "idempotency_preserved",
+    "provider_write_closed_until_approval",
+}, demo
+assert {item["externalMutation"] for item in business_approval_gateway["policyChecks"]} == {
+    False
+}, demo
+assert {item["route"] for item in business_approval_gateway["approverRouting"]} == {
+    "owner_or_accountant_review",
+    "escalate_if_sla_missed",
+}, demo
+assert {item["externalDelivery"] for item in business_approval_gateway["approverRouting"]} == {
+    False
+}, demo
+assert {item["wouldRecord"] for item in business_approval_gateway["commitUnlocks"]} == {
+    "WorkflowActionRun"
+}, demo
+assert {item["wouldEnqueueEvent"] for item in business_approval_gateway["commitUnlocks"]} == {
+    "business.action.approval_granted"
+}, demo
+assert {item["providerWriteUnlocked"] for item in business_approval_gateway["commitUnlocks"]} == {
+    False
+}, demo
+assert {item["outboxReady"] for item in business_approval_gateway["commitUnlocks"]} == {True}, demo
+assert {item["rollbackAttached"] for item in business_approval_gateway["commitUnlocks"]} == {
+    True
+}, demo
+assert {item["event"] for item in business_approval_gateway["auditTrail"]} == {
+    "business_approval.requested",
+    "business_approval.policy_checked",
+    "business_approval.commit_unlocked",
+}, demo
+assert {item["name"] for item in business_approval_gateway["dataBoundaries"]} == {
+    "preview_only_no_approval_record",
+    "provider_write_locked",
+    "rbac_dual_control",
+    "safe_approval_payload",
+}, demo
+assert (
+    business_approval_gateway["api"]["standalone"] == "GET /demo/business-approval-gateway"
+), demo
+assert business_approval_gateway["api"]["preview"] == (
+    "POST /tenants/{tenant_id}/business-approval-gateway/preview"
+), demo
+assert {item["path"] for item in business_approval_gateway["docs"]} >= {
+    "docs/public/BUSINESS_APPROVAL_GATEWAY.md",
+    "docs/public/BUSINESS_ACTION_EXECUTION.md",
+    "docs/public/BUSINESS_TASK_HANDOFF.md",
+}, demo
 business_scenario_replay = demo["businessScenarioReplay"]
 assert business_scenario_endpoint == business_scenario_replay, business_scenario_endpoint
 assert business_scenario_headers["access-control-allow-origin"] == "*", business_scenario_headers
@@ -1177,6 +1285,7 @@ assert "/demo/business-task-handoff" in openapi["paths"], openapi["paths"].keys(
 assert "/demo/business-notification-channels" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/business-context-assistant" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/business-action-execution" in openapi["paths"], openapi["paths"].keys()
+assert "/demo/business-approval-gateway" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/business-scenario-replay" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/business-intake-pipeline/preview" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/business-task-handoffs/preview" in openapi["paths"], openapi["paths"].keys()
@@ -1185,6 +1294,9 @@ assert (
 ), openapi["paths"].keys()
 assert (
     "/tenants/{tenant_id}/business-action-executions/preview" in openapi["paths"]
+), openapi["paths"].keys()
+assert (
+    "/tenants/{tenant_id}/business-approval-gateway/preview" in openapi["paths"]
 ), openapi["paths"].keys()
 assert "/health" in openapi["paths"], openapi["paths"].keys()
 
@@ -1197,6 +1309,7 @@ if openapi_file.exists():
     assert "/demo/business-notification-channels" in generated["paths"], generated["paths"].keys()
     assert "/demo/business-context-assistant" in generated["paths"], generated["paths"].keys()
     assert "/demo/business-action-execution" in generated["paths"], generated["paths"].keys()
+    assert "/demo/business-approval-gateway" in generated["paths"], generated["paths"].keys()
     assert "/demo/business-scenario-replay" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-intake-pipeline/preview" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-task-handoffs/preview" in generated["paths"], generated["paths"].keys()
@@ -1205,6 +1318,9 @@ if openapi_file.exists():
     ), generated["paths"].keys()
     assert (
         "/tenants/{tenant_id}/business-action-executions/preview" in generated["paths"]
+    ), generated["paths"].keys()
+    assert (
+        "/tenants/{tenant_id}/business-approval-gateway/preview" in generated["paths"]
     ), generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-action-plans/preview" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-notifications/preview" in generated["paths"], generated["paths"].keys()

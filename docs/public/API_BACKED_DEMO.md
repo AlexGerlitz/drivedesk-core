@@ -18,6 +18,7 @@ GET /demo/business-task-handoff
 GET /demo/business-notification-channels
 GET /demo/business-context-assistant
 GET /demo/business-action-execution
+GET /demo/business-approval-gateway
 GET /demo/business-scenario-replay
 ```
 
@@ -29,7 +30,7 @@ sync jobs, Integration Health, alert routing, incident response,
 `businessControlTower` data, `businessIntakePipeline`,
 `businessTaskHandoff`, `businessNotificationChannels`,
 `businessContextAssistant`, `businessActionExecution`,
-`businessScenarioReplay`, recovery evidence,
+`businessApprovalGateway`, `businessScenarioReplay`, recovery evidence,
 `connectorFixtureReplay`, and the `engineeringProof` contract rendered by the
 Control Tower, Integrations, Operations, Incidents, and Proof tabs.
 
@@ -69,6 +70,16 @@ writes.
 The public review page for this contract is
 `docs/public/BUSINESS_ACTION_EXECUTION.md`.
 
+`GET /demo/business-approval-gateway` returns the same
+`businessApprovalGateway` contract as a standalone endpoint. It is useful for
+checking the approval-readiness loop directly:
+`POST /tenants/{tenant_id}/business-approval-gateway/preview` -> approval
+requests -> policy checks -> approver routing -> blocked commit unlocks -> no
+provider writes.
+
+The public review page for this contract is
+`docs/public/BUSINESS_APPROVAL_GATEWAY.md`.
+
 `GET /demo/business-scenario-replay` returns the same
 `businessScenarioReplay` contract as a standalone endpoint. It is useful for
 checking the Business OS loop directly: external signal -> normalized facts ->
@@ -86,6 +97,7 @@ risk detection -> role context -> approval-aware action plan.
 | Notification Channel API | Smoke checks can load `GET /demo/business-notification-channels` directly. |
 | Business Context Assistant API | Smoke checks can load `GET /demo/business-context-assistant` directly. |
 | Business Action Execution API | Smoke checks can load `GET /demo/business-action-execution` directly. |
+| Business Approval Gateway API | Smoke checks can load `GET /demo/business-approval-gateway` directly. |
 | Scenario Replay API | Smoke checks can load `GET /demo/business-scenario-replay` directly. |
 
 Example local API-backed run:
@@ -128,14 +140,15 @@ bash scripts/check_public_demo_sdk.sh
 `/demo/public`, `/demo/connector-fixture-replay`,
 `/demo/business-intake-pipeline`, `/demo/business-task-handoff`,
 `/demo/business-notification-channels`, `/demo/business-context-assistant`,
-`/demo/business-action-execution`,
+`/demo/business-action-execution`, `/demo/business-approval-gateway`,
 `/demo/business-scenario-replay`,
 `/openapi.json`, the generated
 `docs/openapi.json` when present, alert routes, alert-to-runbook bindings,
 connector certification references in `CONNECTOR_CERTIFICATION.md`, connector
 fixture replay references in `CONNECTOR_FIXTURE_REPLAY.md`, business scenario
-replay references in `BUSINESS_SCENARIO_REPLAY.md`, and then runs the curl,
-Python, and JavaScript examples against the same API.
+replay references in `BUSINESS_SCENARIO_REPLAY.md`, approval gateway references
+in `BUSINESS_APPROVAL_GATEWAY.md`, and then runs the curl, Python, and
+JavaScript examples against the same API.
 
 The `connectorFixtureReplay` payload is the API-backed form of
 `CONNECTOR_FIXTURE_REPLAY.md`: it exposes the synthetic fixture groups, replay

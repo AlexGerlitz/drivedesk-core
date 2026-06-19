@@ -34,6 +34,26 @@
       "docs"
     ]
   },
+  "business_approval_gateway": {
+    "method": "GET",
+    "operation_id": "business_approval_gateway_demo_demo_business_approval_gateway_get",
+    "path": "/demo/business-approval-gateway",
+    "required_fields": [
+      "status",
+      "command",
+      "summary",
+      "role",
+      "subject",
+      "approvalRequests",
+      "policyChecks",
+      "approverRouting",
+      "commitUnlocks",
+      "auditTrail",
+      "dataBoundaries",
+      "api",
+      "docs"
+    ]
+  },
   "business_context_assistant": {
     "method": "GET",
     "operation_id": "business_context_assistant_demo_demo_business_context_assistant_get",
@@ -170,6 +190,7 @@
     "businessNotificationChannels",
     "businessContextAssistant",
     "businessActionExecution",
+    "businessApprovalGateway",
     "integrationJobs",
     "integrationHealth",
     "integrationReadiness",

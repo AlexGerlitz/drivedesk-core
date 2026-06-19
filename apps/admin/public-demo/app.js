@@ -182,6 +182,14 @@
         Array.isArray(payload.businessActionExecution.dryRunResults) &&
         Array.isArray(payload.businessActionExecution.approvalGates) &&
         Array.isArray(payload.businessActionExecution.dataBoundaries) &&
+        payload.businessApprovalGateway &&
+        Array.isArray(payload.businessApprovalGateway.summary) &&
+        Array.isArray(payload.businessApprovalGateway.approvalRequests) &&
+        Array.isArray(payload.businessApprovalGateway.policyChecks) &&
+        Array.isArray(payload.businessApprovalGateway.approverRouting) &&
+        Array.isArray(payload.businessApprovalGateway.commitUnlocks) &&
+        Array.isArray(payload.businessApprovalGateway.auditTrail) &&
+        Array.isArray(payload.businessApprovalGateway.dataBoundaries) &&
         payload.businessScenarioReplay &&
         Array.isArray(payload.businessScenarioReplay.summary) &&
         Array.isArray(payload.businessScenarioReplay.scenarios) &&
@@ -1872,6 +1880,150 @@
     });
   }
 
+  function fillBusinessApprovalGateway() {
+    var gateway = data.businessApprovalGateway;
+
+    var summaryRows = document.getElementById("businessApprovalGatewaySummaryRows");
+    clear(summaryRows);
+    gateway.summary.forEach(function (item) {
+      var card = document.createElement("article");
+      card.className = "metric-card";
+      card.dataset.tone = item.tone || "blue";
+
+      var label = document.createElement("span");
+      label.className = "muted";
+      label.appendChild(text(item.label));
+
+      var value = document.createElement("strong");
+      value.appendChild(text(item.value));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      card.append(label, value, detail);
+      summaryRows.appendChild(card);
+    });
+
+    var requestRows = document.getElementById("businessApprovalGatewayRequestRows");
+    clear(requestRows);
+    gateway.approvalRequests.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var action = document.createElement("strong");
+      action.appendChild(text(item.action));
+      top.append(action, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          item.requesterRole +
+            " -> " +
+            item.approverRole +
+            " - dual control " +
+            String(item.requiresDualControl) +
+            " - provider commit " +
+            String(item.commitWouldMutateProvider)
+        )
+      );
+
+      var key = document.createElement("code");
+      key.appendChild(text(item.idempotencyKey));
+
+      row.append(top, detail, key);
+      requestRows.appendChild(row);
+    });
+
+    var policyRows = document.getElementById("businessApprovalGatewayPolicyRows");
+    clear(policyRows);
+    gateway.policyChecks.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var check = document.createElement("strong");
+      check.appendChild(text(item.check));
+      top.append(check, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(item.evidence));
+
+      row.append(top, detail, evidence);
+      policyRows.appendChild(row);
+    });
+
+    var unlockRows = document.getElementById("businessApprovalGatewayUnlockRows");
+    clear(unlockRows);
+    gateway.commitUnlocks.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var unlock = document.createElement("strong");
+      unlock.appendChild(text(item.unlockKey));
+      top.append(unlock, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          item.action +
+            " - " +
+            item.wouldRecord +
+            " - " +
+            item.wouldEnqueueEvent +
+            " - provider write unlocked " +
+            String(item.providerWriteUnlocked)
+        )
+      );
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(item.evidence));
+
+      row.append(top, detail, evidence);
+      unlockRows.appendChild(row);
+    });
+
+    var boundaryRows = document.getElementById("businessApprovalGatewayBoundaryRows");
+    clear(boundaryRows);
+    gateway.dataBoundaries.concat(gateway.auditTrail).forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var name = document.createElement("strong");
+      name.appendChild(text(item.name || item.event));
+      top.append(name, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          "external mutation " +
+            String(Boolean(item.externalMutation)) +
+            " - PII " +
+            String(Boolean(item.containsPii)) +
+            " - raw payload " +
+            String(Boolean(item.rawPayloadIncluded))
+        )
+      );
+
+      row.append(top, detail);
+      boundaryRows.appendChild(row);
+    });
+  }
+
   function fillBusinessScenarioReplay() {
     var replay = data.businessScenarioReplay;
 
@@ -3065,6 +3217,7 @@
     fillBusinessNotificationChannels();
     fillBusinessContextAssistant();
     fillBusinessActionExecution();
+    fillBusinessApprovalGateway();
     fillBusinessScenarioReplay();
     fillEngineeringProof();
   }

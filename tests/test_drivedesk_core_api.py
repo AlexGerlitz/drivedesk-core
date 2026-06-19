@@ -2580,6 +2580,78 @@ def test_business_action_execution_demo_endpoint_exposes_same_public_contract(
     )
 
 
+def test_business_approval_gateway_demo_endpoint_exposes_same_public_contract(
+    api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, _ = api_client
+
+    public_response = client.get("/demo/public")
+    gateway_response = client.get("/demo/business-approval-gateway")
+
+    assert gateway_response.status_code == 200
+    assert gateway_response.headers["access-control-allow-origin"] == "*"
+    assert gateway_response.headers["cache-control"] == "public, max-age=60"
+    gateway_payload = gateway_response.json()
+    assert gateway_payload == public_response.json()["businessApprovalGateway"]
+    assert gateway_payload["status"] == "previewed"
+    assert (
+        gateway_payload["command"]
+        == "POST /tenants/{tenant_id}/business-approval-gateway/preview"
+    )
+    assert gateway_payload["role"] == "accountant"
+    assert gateway_payload["subject"] == "deal:DEAL-2026-001"
+    assert {item["action"] for item in gateway_payload["approvalRequests"]} == {
+        "queue_accounting_export_after_review",
+    }
+    assert {item["requesterRole"] for item in gateway_payload["approvalRequests"]} == {
+        "accountant"
+    }
+    assert {item["approverRole"] for item in gateway_payload["approvalRequests"]} == {
+        "owner"
+    }
+    assert {item["requiresDualControl"] for item in gateway_payload["approvalRequests"]} == {
+        True
+    }
+    assert {
+        item["commitWouldMutateProvider"] for item in gateway_payload["approvalRequests"]
+    } == {True}
+    assert {item["externalMutation"] for item in gateway_payload["approvalRequests"]} == {
+        False
+    }
+    assert {item["check"] for item in gateway_payload["policyChecks"]} == {
+        "rbac_approver_role",
+        "dual_control_required",
+        "idempotency_preserved",
+        "provider_write_closed_until_approval",
+    }
+    assert {item["route"] for item in gateway_payload["approverRouting"]} == {
+        "owner_or_accountant_review",
+        "escalate_if_sla_missed",
+    }
+    assert {item["wouldRecord"] for item in gateway_payload["commitUnlocks"]} == {
+        "WorkflowActionRun"
+    }
+    assert {item["providerWriteUnlocked"] for item in gateway_payload["commitUnlocks"]} == {
+        False
+    }
+    assert {item["event"] for item in gateway_payload["auditTrail"]} == {
+        "business_approval.requested",
+        "business_approval.policy_checked",
+        "business_approval.commit_unlocked",
+    }
+    assert {item["name"] for item in gateway_payload["dataBoundaries"]} == {
+        "preview_only_no_approval_record",
+        "provider_write_locked",
+        "rbac_dual_control",
+        "safe_approval_payload",
+    }
+    assert gateway_payload["api"]["standalone"] == "GET /demo/business-approval-gateway"
+    assert any(
+        item["path"] == "docs/public/BUSINESS_APPROVAL_GATEWAY.md"
+        for item in gateway_payload["docs"]
+    )
+
+
 def test_file_import_adapter_success_flow(api_client: tuple[TestClient, async_sessionmaker[AsyncSession]]) -> None:
     client, session_factory = api_client
     owner_headers = {"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"}

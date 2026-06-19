@@ -918,6 +918,339 @@
         "title": "BusinessActionPlanPreviewRead",
         "type": "object"
       },
+      "BusinessApprovalGatewayDemoRead": {
+        "properties": {
+          "api": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Api",
+            "type": "object"
+          },
+          "approvalRequests": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Approvalrequests",
+            "type": "array"
+          },
+          "approverRouting": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Approverrouting",
+            "type": "array"
+          },
+          "auditTrail": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Audittrail",
+            "type": "array"
+          },
+          "command": {
+            "title": "Command",
+            "type": "string"
+          },
+          "commitUnlocks": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Commitunlocks",
+            "type": "array"
+          },
+          "dataBoundaries": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Databoundaries",
+            "type": "array"
+          },
+          "docs": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "title": "Docs",
+            "type": "array"
+          },
+          "policyChecks": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Policychecks",
+            "type": "array"
+          },
+          "role": {
+            "title": "Role",
+            "type": "string"
+          },
+          "status": {
+            "const": "previewed",
+            "title": "Status",
+            "type": "string"
+          },
+          "subject": {
+            "title": "Subject",
+            "type": "string"
+          },
+          "summary": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Summary",
+            "type": "array"
+          }
+        },
+        "required": [
+          "status",
+          "command",
+          "summary",
+          "role",
+          "subject",
+          "approvalRequests",
+          "policyChecks",
+          "approverRouting",
+          "commitUnlocks",
+          "auditTrail",
+          "dataBoundaries",
+          "api",
+          "docs"
+        ],
+        "title": "BusinessApprovalGatewayDemoRead",
+        "type": "object"
+      },
+      "BusinessApprovalGatewayPreviewCreate": {
+        "properties": {
+          "approval_kind": {
+            "const": "execution_approval_gateway",
+            "default": "execution_approval_gateway",
+            "title": "Approval Kind",
+            "type": "string"
+          },
+          "approver_role": {
+            "default": "owner",
+            "enum": [
+              "operator",
+              "accountant",
+              "manager",
+              "owner",
+              "support"
+            ],
+            "title": "Approver Role",
+            "type": "string"
+          },
+          "execution_plan": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "maxItems": 10,
+            "title": "Execution Plan",
+            "type": "array"
+          },
+          "include_dual_control": {
+            "default": true,
+            "title": "Include Dual Control",
+            "type": "boolean"
+          },
+          "requester_role": {
+            "default": "operator",
+            "enum": [
+              "operator",
+              "accountant",
+              "manager",
+              "owner",
+              "support"
+            ],
+            "title": "Requester Role",
+            "type": "string"
+          },
+          "role": {
+            "default": "operator",
+            "enum": [
+              "operator",
+              "accountant",
+              "manager",
+              "owner",
+              "support"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "subject_id": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Id"
+          },
+          "subject_type": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 2,
+                "pattern": "^[a-z0-9][a-z0-9_-]*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Type"
+          }
+        },
+        "title": "BusinessApprovalGatewayPreviewCreate",
+        "type": "object"
+      },
+      "BusinessApprovalGatewayPreviewRead": {
+        "properties": {
+          "api": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Api",
+            "type": "object"
+          },
+          "approval_kind": {
+            "const": "execution_approval_gateway",
+            "title": "Approval Kind",
+            "type": "string"
+          },
+          "approval_requests": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Approval Requests",
+            "type": "array"
+          },
+          "approver_routing": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Approver Routing",
+            "type": "array"
+          },
+          "audit_trail": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Audit Trail",
+            "type": "array"
+          },
+          "commit_unlocks": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Commit Unlocks",
+            "type": "array"
+          },
+          "data_boundaries": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Data Boundaries",
+            "type": "array"
+          },
+          "evidence": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "policy_checks": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Policy Checks",
+            "type": "array"
+          },
+          "role": {
+            "enum": [
+              "operator",
+              "accountant",
+              "manager",
+              "owner",
+              "support"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "status": {
+            "const": "previewed",
+            "title": "Status",
+            "type": "string"
+          },
+          "subject_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Id"
+          },
+          "subject_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Type"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tenant_id",
+          "approval_kind",
+          "role",
+          "generated_at",
+          "status",
+          "summary"
+        ],
+        "title": "BusinessApprovalGatewayPreviewRead",
+        "type": "object"
+      },
       "BusinessBriefingPreviewCreate": {
         "properties": {
           "include_resolved": {
@@ -5136,6 +5469,11 @@
             "title": "Businessactionexecution",
             "type": "object"
           },
+          "businessApprovalGateway": {
+            "additionalProperties": true,
+            "title": "Businessapprovalgateway",
+            "type": "object"
+          },
           "businessContextAssistant": {
             "additionalProperties": true,
             "title": "Businesscontextassistant",
@@ -5338,6 +5676,7 @@
           "businessNotificationChannels",
           "businessContextAssistant",
           "businessActionExecution",
+          "businessApprovalGateway",
           "integrationJobs",
           "integrationHealth",
           "integrationReadiness",
@@ -6426,6 +6765,27 @@
         ]
       }
     },
+    "/demo/business-approval-gateway": {
+      "get": {
+        "operationId": "business_approval_gateway_demo_demo_business_approval_gateway_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessApprovalGatewayDemoRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Business Approval Gateway Demo",
+        "tags": [
+          "demo"
+        ]
+      }
+    },
     "/demo/business-context-assistant": {
       "get": {
         "operationId": "business_context_assistant_demo_demo_business_context_assistant_get",
@@ -7284,6 +7644,94 @@
           }
         },
         "summary": "Preview Business Action Plan Endpoint",
+        "tags": [
+          "business-control"
+        ]
+      }
+    },
+    "/tenants/{tenant_id}/business-approval-gateway/preview": {
+      "post": {
+        "operationId": "preview_business_approval_gateway_endpoint_tenants__tenant_id__business_approval_gateway_preview_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tenant_id",
+            "required": true,
+            "schema": {
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "X-Actor-Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Role",
+            "required": false,
+            "schema": {
+              "default": "viewer",
+              "title": "X-Actor-Role",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessApprovalGatewayPreviewCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessApprovalGatewayPreviewRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Preview Business Approval Gateway Endpoint",
         "tags": [
           "business-control"
         ]

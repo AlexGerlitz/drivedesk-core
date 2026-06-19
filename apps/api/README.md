@@ -25,6 +25,10 @@ Demo endpoints:
   channel matrix proof as a standalone synthetic contract.
 - `GET /demo/business-context-assistant` returns the same Business Context
   Assistant proof as a standalone synthetic contract.
+- `GET /demo/business-action-execution` returns the same action execution proof
+  as a standalone synthetic contract.
+- `GET /demo/business-approval-gateway` returns the same approval gateway proof
+  as a standalone synthetic contract.
 - `GET /demo/business-scenario-replay` returns reusable Business OS scenario
   replay data as a standalone synthetic contract.
 

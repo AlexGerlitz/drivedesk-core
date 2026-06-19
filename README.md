@@ -308,6 +308,7 @@ curl http://localhost:8080/demo/business-task-handoff
 curl http://localhost:8080/demo/business-notification-channels
 curl http://localhost:8080/demo/business-context-assistant
 curl http://localhost:8080/demo/business-action-execution
+curl http://localhost:8080/demo/business-approval-gateway
 curl http://localhost:8080/demo/business-scenario-replay
 ```
 
@@ -320,6 +321,7 @@ bash scripts/check_public_business_task_handoff.sh
 bash scripts/check_public_business_notification_channels.sh
 bash scripts/check_public_business_context_assistant.sh
 bash scripts/check_public_business_action_execution.sh
+bash scripts/check_public_business_approval_gateway.sh
 bash scripts/check_public_backup_restore.sh
 bash scripts/check_public_release_rollback.sh
 bash scripts/check_public_slo_canary_gate.sh

@@ -125,6 +125,11 @@ Fast external verification path: `docs/public/REVIEWER_QUICKSTART.md`.
   turning suggested actions into idempotent dry-run candidates, preflight
   checks, approval gates, rollback notes, and safe no-provider-write boundaries
   through `POST /tenants/{tenant_id}/business-action-executions/preview`.
+- Business approval gateway (`docs/public/BUSINESS_APPROVAL_GATEWAY.md`,
+  `GET /demo/business-approval-gateway`, `businessApprovalGateway`) for
+  turning provider-changing execution candidates into approval requests, policy
+  checks, approver routing, blocked commit unlocks, and audit trail evidence
+  through `POST /tenants/{tenant_id}/business-approval-gateway/preview`.
 - Public-safe provider connector guide (`docs/public/PROVIDER_CONNECTOR_GUIDE.md`)
   for feeding future authenticated
   Bitrix24-style CRM, bank, accounting, and file-provider facts through the

@@ -952,6 +952,191 @@ window.DRIVEDESK_DEMO_DATA = {
       }
     ]
   },
+  "businessApprovalGateway": {
+    "api": {
+      "actionExecution": "POST /tenants/{tenant_id}/business-action-executions/preview",
+      "preview": "POST /tenants/{tenant_id}/business-approval-gateway/preview",
+      "standalone": "GET /demo/business-approval-gateway",
+      "taskHandoff": "POST /tenants/{tenant_id}/business-task-handoffs/preview"
+    },
+    "approvalRequests": [
+      {
+        "action": "queue_accounting_export_after_review",
+        "approvalKey": "approval.preview.001",
+        "approverRole": "owner",
+        "commitWouldMutateProvider": true,
+        "containsPii": false,
+        "evidence": "business_approval_gateway.previewed",
+        "externalMutation": false,
+        "idempotencyKey": "business-approval-gateway:deal:DEAL-2026-001:queue_accounting_export_after_review:001",
+        "rawPayloadIncluded": false,
+        "requesterRole": "accountant",
+        "requiresDualControl": true,
+        "sourceIdempotencyKey": "business-action-execution:deal:DEAL-2026-001:queue_accounting_export_after_review:002",
+        "status": "approval_required",
+        "subject": "deal:DEAL-2026-001"
+      }
+    ],
+    "approverRouting": [
+      {
+        "evidence": "business_approval_gateway.previewed",
+        "externalDelivery": false,
+        "notificationChannel": "in_app",
+        "ownerRole": "owner",
+        "queue": "approval.review",
+        "route": "owner_or_accountant_review",
+        "slaMinutes": 120,
+        "status": "ready"
+      },
+      {
+        "evidence": "business_approval_gateway.previewed",
+        "externalDelivery": false,
+        "notificationChannel": "in_app",
+        "ownerRole": "owner",
+        "queue": "approval.escalation",
+        "route": "escalate_if_sla_missed",
+        "slaMinutes": 240,
+        "status": "armed"
+      }
+    ],
+    "auditTrail": [
+      {
+        "actorRole": "accountant",
+        "event": "business_approval.requested",
+        "evidence": "business_approval_gateway.previewed",
+        "externalMutation": false,
+        "status": "would_record",
+        "subject": "deal:DEAL-2026-001"
+      },
+      {
+        "actorRole": "system",
+        "event": "business_approval.policy_checked",
+        "evidence": "business_approval_gateway.previewed",
+        "externalMutation": false,
+        "status": "would_record",
+        "subject": "deal:DEAL-2026-001"
+      },
+      {
+        "actorRole": "owner",
+        "event": "business_approval.commit_unlocked",
+        "evidence": "business_approval_gateway.previewed",
+        "externalMutation": false,
+        "status": "blocked_until_approved",
+        "subject": "deal:DEAL-2026-001"
+      }
+    ],
+    "command": "POST /tenants/{tenant_id}/business-approval-gateway/preview",
+    "commitUnlocks": [
+      {
+        "action": "queue_accounting_export_after_review",
+        "evidence": "business_approval_gateway.previewed",
+        "externalMutation": false,
+        "outboxReady": true,
+        "providerWriteUnlocked": false,
+        "rollbackAttached": true,
+        "status": "blocked_until_approved",
+        "unlockKey": "commit.unlock.001",
+        "wouldEnqueueEvent": "business.action.approval_granted",
+        "wouldRecord": "WorkflowActionRun"
+      }
+    ],
+    "dataBoundaries": [
+      {
+        "externalMutation": false,
+        "name": "preview_only_no_approval_record",
+        "status": "preview_only"
+      },
+      {
+        "externalMutation": false,
+        "name": "provider_write_locked",
+        "status": "closed"
+      },
+      {
+        "externalMutation": false,
+        "name": "rbac_dual_control",
+        "status": "enforced"
+      },
+      {
+        "containsPii": false,
+        "name": "safe_approval_payload",
+        "rawPayloadIncluded": false,
+        "status": "clean"
+      }
+    ],
+    "docs": [
+      {
+        "label": "Business Approval Gateway",
+        "path": "docs/public/BUSINESS_APPROVAL_GATEWAY.md"
+      },
+      {
+        "label": "Business Action Execution",
+        "path": "docs/public/BUSINESS_ACTION_EXECUTION.md"
+      },
+      {
+        "label": "Business Task Handoff",
+        "path": "docs/public/BUSINESS_TASK_HANDOFF.md"
+      }
+    ],
+    "policyChecks": [
+      {
+        "check": "rbac_approver_role",
+        "detail": "Approver role is allowed to review provider-changing commits.",
+        "evidence": "business_approval_gateway.previewed",
+        "externalMutation": false,
+        "status": "passed"
+      },
+      {
+        "check": "dual_control_required",
+        "detail": "Requester and approver stay separated before commit unlock.",
+        "evidence": "business_approval_gateway.previewed",
+        "externalMutation": false,
+        "status": "required"
+      },
+      {
+        "check": "idempotency_preserved",
+        "detail": "Approval request keeps source and approval idempotency keys.",
+        "evidence": "business_approval_gateway.previewed",
+        "externalMutation": false,
+        "status": "passed"
+      },
+      {
+        "check": "provider_write_closed_until_approval",
+        "detail": "Provider write stays locked until approval is recorded.",
+        "evidence": "business_approval_gateway.previewed",
+        "externalMutation": false,
+        "status": "closed"
+      }
+    ],
+    "role": "accountant",
+    "status": "previewed",
+    "subject": "deal:DEAL-2026-001",
+    "summary": [
+      {
+        "detail": "provider-changing commit candidate",
+        "label": "Approval requests",
+        "tone": "amber",
+        "value": "1"
+      },
+      {
+        "detail": "RBAC, dual control, idempotency, write lock",
+        "label": "Policy checks",
+        "tone": "green",
+        "value": "4"
+      },
+      {
+        "detail": "blocked until approved",
+        "label": "Commit unlocks",
+        "tone": "blue",
+        "value": "1"
+      },
+      {
+        "detail": "approval preview unlocks nothing",
+        "label": "Provider writes",
+        "tone": "violet",
+        "value": "0"
+      }
+    ]
+  },
   "businessContextAssistant": {
     "api": {
       "actionPlan": "POST /tenants/{tenant_id}/business-action-plans/preview",

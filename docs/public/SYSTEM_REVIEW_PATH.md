@@ -42,7 +42,7 @@ Primary artifacts:
 | --- | --- |
 | Platform tour | `docs/public/PLATFORM_TOUR.md` |
 | Architecture | `docs/public/SYSTEM_DESIGN.md` |
-| Demo API | `docs/public/API_BACKED_DEMO.md`, `docs/openapi.json`, `GET /demo/public`, `GET /demo/connector-fixture-replay`, `GET /demo/business-intake-pipeline`, `GET /demo/business-task-handoff`, `GET /demo/business-notification-channels`, `GET /demo/business-context-assistant`, `GET /demo/business-action-execution`, `GET /demo/business-scenario-replay` |
+| Demo API | `docs/public/API_BACKED_DEMO.md`, `docs/openapi.json`, `GET /demo/public`, `GET /demo/connector-fixture-replay`, `GET /demo/business-intake-pipeline`, `GET /demo/business-task-handoff`, `GET /demo/business-notification-channels`, `GET /demo/business-context-assistant`, `GET /demo/business-action-execution`, `GET /demo/business-approval-gateway`, `GET /demo/business-scenario-replay` |
 | SDK | `docs/public/CLIENT_SDK.md`, `sdk/generated/public-demo/` |
 | Workflow | `docs/public/WORKFLOW_DEMO.md`, `endToEndScenario` |
 | Connector replay | `docs/public/CONNECTOR_FIXTURE_REPLAY.md`, `GET /demo/connector-fixture-replay`, `examples/connector-fixtures/replay-fixtures.sanitized.json` |
@@ -51,6 +51,7 @@ Primary artifacts:
 | Business notification channels | `docs/public/BUSINESS_NOTIFICATION_CHANNELS.md`, `GET /demo/business-notification-channels`, `businessNotificationChannels` |
 | Business Context Assistant | `docs/public/BUSINESS_CONTEXT_ASSISTANT.md`, `GET /demo/business-context-assistant`, `businessContextAssistant`, `POST /tenants/{tenant_id}/business-workbench-context/preview` |
 | Business action execution | `docs/public/BUSINESS_ACTION_EXECUTION.md`, `GET /demo/business-action-execution`, `businessActionExecution`, `POST /tenants/{tenant_id}/business-action-executions/preview` |
+| Business approval gateway | `docs/public/BUSINESS_APPROVAL_GATEWAY.md`, `GET /demo/business-approval-gateway`, `businessApprovalGateway`, `POST /tenants/{tenant_id}/business-approval-gateway/preview` |
 | Business scenario replay | `docs/public/BUSINESS_SCENARIO_REPLAY.md`, `GET /demo/business-scenario-replay`, `businessScenarioReplay` |
 | Observability | `docs/public/OBSERVABILITY_PROOF.md` |
 | Alert routing | `docs/public/ALERT_ROUTING_EVIDENCE.md` |

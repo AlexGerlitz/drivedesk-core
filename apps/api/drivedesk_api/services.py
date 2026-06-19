@@ -33,6 +33,7 @@ from drivedesk_api.rbac import ActorContext
 from drivedesk_api.schemas import (
     AccountingExportCreate,
     BusinessActionExecutionPreviewCreate,
+    BusinessApprovalGatewayPreviewCreate,
     BusinessActionPlanPreviewCreate,
     BusinessBriefingPreviewCreate,
     BusinessDetectionPreviewCreate,
@@ -3286,6 +3287,292 @@ async def preview_business_action_execution(
             "action_plan": "POST /tenants/{tenant_id}/business-action-plans/preview",
             "task_handoff": "POST /tenants/{tenant_id}/business-task-handoffs/preview",
             "repair_execute": "POST /tenants/{tenant_id}/repair-actions/{repair_action_id}/execute",
+            "outbox": "GET /tenants/{tenant_id}/outbox",
+        },
+    }
+
+
+def _approval_gateway_execution_plan(
+    payload: BusinessApprovalGatewayPreviewCreate,
+) -> list[dict[str, object]]:
+    if payload.execution_plan:
+        source_items = payload.execution_plan
+    else:
+        source_items = [
+            {
+                "action": "open_reconciliation_plan",
+                "status": "dry_run_ready",
+                "adapter_key": "internal.noop",
+                "requiresApproval": False,
+                "commitWouldMutateProvider": False,
+                "idempotencyKey": "business-action-execution:deal:DEAL-2026-001:open_reconciliation_plan:001",
+            },
+            {
+                "action": "queue_accounting_export_after_review",
+                "status": "approval_required",
+                "adapter_key": "accounting.export.mock",
+                "requiresApproval": True,
+                "commitWouldMutateProvider": True,
+                "idempotencyKey": (
+                    "business-action-execution:deal:DEAL-2026-001:"
+                    "queue_accounting_export_after_review:002"
+                ),
+            },
+            {
+                "action": "prepare_internal_notification",
+                "status": "dry_run_ready",
+                "adapter_key": "internal.notification",
+                "requiresApproval": False,
+                "commitWouldMutateProvider": False,
+                "idempotencyKey": "business-action-execution:deal:DEAL-2026-001:prepare_internal_notification:003",
+            },
+        ]
+
+    plan: list[dict[str, object]] = []
+    for index, item in enumerate(source_items, start=1):
+        if not isinstance(item, dict):
+            continue
+        action = str(item.get("action") or item.get("step") or item.get("name") or f"approval_step_{index}")
+        adapter_key = str(item.get("adapter_key") or item.get("adapterKey") or "internal.noop")
+        requires_approval = bool(
+            item.get("requires_approval")
+            or item.get("requiresApproval")
+            or item.get("approvalRequired")
+            or item.get("commitWouldMutateProvider")
+            or item.get("commit_would_mutate_provider")
+        )
+        commit_would_mutate_provider = bool(
+            item.get("commit_would_mutate_provider")
+            or item.get("commitWouldMutateProvider")
+            or item.get("externalMutationOnCommit")
+        )
+        idempotency_key = str(
+            item.get("idempotency_key")
+            or item.get("idempotencyKey")
+            or f"business-approval-gateway:{action}:{index:03d}"
+        )
+        plan.append(
+            {
+                "action": action[:96],
+                "status": str(item.get("status") or "approval_required")[:32],
+                "adapter_key": adapter_key[:128],
+                "requires_approval": requires_approval,
+                "commit_would_mutate_provider": commit_would_mutate_provider,
+                "idempotency_key": idempotency_key[:256],
+            }
+        )
+    return plan
+
+
+async def preview_business_approval_gateway(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    payload: BusinessApprovalGatewayPreviewCreate,
+) -> dict[str, object]:
+    await ensure_tenant_exists(session, tenant_id)
+    subject_type = payload.subject_type or "deal"
+    subject_id = payload.subject_id or "DEAL-2026-001"
+    subject = _subject_label(subject_type, subject_id)
+    execution_plan = _approval_gateway_execution_plan(payload)
+    approval_candidates = [
+        item for item in execution_plan if item["requires_approval"] or item["commit_would_mutate_provider"]
+    ]
+
+    approval_requests = [
+        {
+            "approval_key": f"approval.preview.{index:03d}",
+            "action": item["action"],
+            "status": "approval_required",
+            "requester_role": payload.requester_role,
+            "approver_role": payload.approver_role,
+            "subject": subject,
+            "idempotency_key": f"business-approval-gateway:{subject}:{item['action']}:{index:03d}",
+            "source_idempotency_key": item["idempotency_key"],
+            "requires_dual_control": bool(payload.include_dual_control),
+            "commit_would_mutate_provider": bool(item["commit_would_mutate_provider"]),
+            "external_mutation": False,
+            "contains_pii": False,
+            "raw_payload_included": False,
+            "evidence": "business_approval_gateway.previewed",
+        }
+        for index, item in enumerate(approval_candidates, start=1)
+    ]
+
+    if not approval_requests:
+        approval_requests = [
+            {
+                "approval_key": "approval.preview.001",
+                "action": "no_provider_commit_required",
+                "status": "not_required",
+                "requester_role": payload.requester_role,
+                "approver_role": payload.approver_role,
+                "subject": subject,
+                "idempotency_key": f"business-approval-gateway:{subject}:no_provider_commit_required:001",
+                "source_idempotency_key": "none",
+                "requires_dual_control": bool(payload.include_dual_control),
+                "commit_would_mutate_provider": False,
+                "external_mutation": False,
+                "contains_pii": False,
+                "raw_payload_included": False,
+                "evidence": "business_approval_gateway.previewed",
+            }
+        ]
+
+    policy_checks = [
+        {
+            "check": "rbac_approver_role",
+            "status": "passed",
+            "detail": "Approval is routed to a role that can approve provider-changing commits.",
+            "external_mutation": False,
+            "evidence": "business_approval_gateway.previewed",
+        },
+        {
+            "check": "dual_control_required",
+            "status": "required" if payload.include_dual_control else "not_required",
+            "detail": "Requester and approver roles are separated before commit unlock.",
+            "external_mutation": False,
+            "evidence": "business_approval_gateway.previewed",
+        },
+        {
+            "check": "idempotency_preserved",
+            "status": "passed",
+            "detail": "Approval requests carry both approval and source execution idempotency keys.",
+            "external_mutation": False,
+            "evidence": "business_approval_gateway.previewed",
+        },
+        {
+            "check": "provider_write_closed_until_approval",
+            "status": "closed",
+            "detail": "No provider write is unlocked before an approval record exists.",
+            "external_mutation": False,
+            "evidence": "business_approval_gateway.previewed",
+        },
+    ]
+
+    approver_routing = [
+        {
+            "route": "owner_or_accountant_review",
+            "status": "ready",
+            "queue": "approval.review",
+            "owner_role": payload.approver_role,
+            "sla_minutes": 120,
+            "notification_channel": "in_app",
+            "external_delivery": False,
+            "evidence": "business_approval_gateway.previewed",
+        },
+        {
+            "route": "escalate_if_sla_missed",
+            "status": "armed",
+            "queue": "approval.escalation",
+            "owner_role": "owner",
+            "sla_minutes": 240,
+            "notification_channel": "in_app",
+            "external_delivery": False,
+            "evidence": "business_approval_gateway.previewed",
+        },
+    ]
+
+    commit_unlocks = [
+        {
+            "unlock_key": f"commit.unlock.{index:03d}",
+            "action": item["action"],
+            "status": "blocked_until_approved",
+            "would_record": "WorkflowActionRun",
+            "would_enqueue_event": "business.action.approval_granted",
+            "outbox_ready": True,
+            "provider_write_unlocked": False,
+            "external_mutation": False,
+            "rollback_attached": True,
+            "evidence": "business_approval_gateway.previewed",
+        }
+        for index, item in enumerate(approval_requests, start=1)
+    ]
+
+    audit_trail = [
+        {
+            "event": "business_approval.requested",
+            "status": "would_record",
+            "actor_role": payload.requester_role,
+            "subject": subject,
+            "external_mutation": False,
+            "evidence": "business_approval_gateway.previewed",
+        },
+        {
+            "event": "business_approval.policy_checked",
+            "status": "would_record",
+            "actor_role": "system",
+            "subject": subject,
+            "external_mutation": False,
+            "evidence": "business_approval_gateway.previewed",
+        },
+        {
+            "event": "business_approval.commit_unlocked",
+            "status": "blocked_until_approved",
+            "actor_role": payload.approver_role,
+            "subject": subject,
+            "external_mutation": False,
+            "evidence": "business_approval_gateway.previewed",
+        },
+    ]
+
+    return {
+        "tenant_id": tenant_id,
+        "approval_kind": payload.approval_kind,
+        "role": payload.role,
+        "subject_type": subject_type,
+        "subject_id": subject_id,
+        "generated_at": datetime.now(UTC),
+        "status": "previewed",
+        "summary": (
+            f"Approval gateway prepared {len(approval_requests)} request(s), "
+            f"{len(policy_checks)} policy check(s), and {len(commit_unlocks)} commit unlock candidate(s) for {payload.role}."
+        ),
+        "approval_requests": approval_requests,
+        "policy_checks": policy_checks,
+        "approver_routing": approver_routing,
+        "commit_unlocks": commit_unlocks,
+        "audit_trail": audit_trail,
+        "data_boundaries": [
+            {
+                "name": "preview_only_no_approval_record",
+                "status": "preview_only",
+                "external_mutation": False,
+                "detail": "The public preview computes approval routing without persisting approval rows.",
+            },
+            {
+                "name": "provider_write_locked",
+                "status": "closed",
+                "external_mutation": False,
+                "detail": "Provider-changing commits remain locked until approval is recorded.",
+            },
+            {
+                "name": "rbac_dual_control",
+                "status": "enforced",
+                "external_mutation": False,
+                "detail": "Requester and approver roles are separated for high-impact commits.",
+            },
+            {
+                "name": "safe_approval_payload",
+                "status": "clean",
+                "contains_pii": False,
+                "raw_payload_included": False,
+                "detail": "Approval payload contains role, subject, action, idempotency, and evidence references only.",
+            },
+        ],
+        "evidence": [
+            {
+                "type": "approval_gateway",
+                "event": "business_approval_gateway.previewed",
+                "approval_count": len(approval_requests),
+                "provider_write_unlocked": False,
+                "external_mutation": False,
+            }
+        ],
+        "api": {
+            "preview": "POST /tenants/{tenant_id}/business-approval-gateway/preview",
+            "action_execution": "POST /tenants/{tenant_id}/business-action-executions/preview",
+            "task_handoff": "POST /tenants/{tenant_id}/business-task-handoffs/preview",
             "outbox": "GET /tenants/{tenant_id}/outbox",
         },
     }

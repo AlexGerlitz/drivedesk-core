@@ -15,12 +15,17 @@ It targets the read-only synthetic public demo endpoint:
 GET /demo/public
 GET /demo/connector-fixture-replay
 GET /demo/business-action-execution
+GET /demo/business-approval-gateway
 GET /demo/business-scenario-replay
 ```
 
 The action execution payload appears in the public contract as
 `businessActionExecution` and is documented in
 `docs/public/BUSINESS_ACTION_EXECUTION.md`.
+
+The approval gateway payload appears in the public contract as
+`businessApprovalGateway` and is documented in
+`docs/public/BUSINESS_APPROVAL_GATEWAY.md`.
 
 ## Generated Files
 
@@ -57,6 +62,7 @@ scripts/generate_public_demo_sdk.py
 It reads the OpenAPI schema, finds `GET /demo/public`,
 `GET /demo/connector-fixture-replay`,
 `GET /demo/business-action-execution`, and
+`GET /demo/business-approval-gateway`, and
 `GET /demo/business-scenario-replay`, extracts operation ids and required
 response fields, and writes small public-safe clients.
 

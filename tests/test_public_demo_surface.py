@@ -83,6 +83,11 @@ def test_public_demo_html_links_static_assets() -> None:
     assert 'id="businessActionExecutionPreflightRows"' in html
     assert 'id="businessActionExecutionDryRunRows"' in html
     assert 'id="businessActionExecutionBoundaryRows"' in html
+    assert 'id="businessApprovalGatewaySummaryRows"' in html
+    assert 'id="businessApprovalGatewayRequestRows"' in html
+    assert 'id="businessApprovalGatewayPolicyRows"' in html
+    assert 'id="businessApprovalGatewayUnlockRows"' in html
+    assert 'id="businessApprovalGatewayBoundaryRows"' in html
     assert 'id="controlTowerObservationRows"' in html
     assert 'id="controlTowerExceptionRows"' in html
     assert 'id="controlTowerRepairRows"' in html
@@ -861,6 +866,76 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
         "docs/public/BUSINESS_TASK_HANDOFF.md",
         "docs/public/BUSINESS_CONTEXT_ASSISTANT.md",
     }
+    approval_gateway = payload["businessApprovalGateway"]
+    assert approval_gateway["status"] == "previewed"
+    assert (
+        approval_gateway["command"]
+        == "POST /tenants/{tenant_id}/business-approval-gateway/preview"
+    )
+    assert {item["label"] for item in approval_gateway["summary"]} >= {
+        "Approval requests",
+        "Policy checks",
+        "Commit unlocks",
+        "Provider writes",
+    }
+    assert approval_gateway["role"] == "accountant"
+    assert approval_gateway["subject"] == "deal:DEAL-2026-001"
+    assert {item["action"] for item in approval_gateway["approvalRequests"]} == {
+        "queue_accounting_export_after_review",
+    }
+    assert {item["requiresDualControl"] for item in approval_gateway["approvalRequests"]} == {
+        True
+    }
+    assert {
+        item["commitWouldMutateProvider"] for item in approval_gateway["approvalRequests"]
+    } == {True}
+    assert {item["externalMutation"] for item in approval_gateway["approvalRequests"]} == {
+        False
+    }
+    assert all(
+        item["idempotencyKey"].startswith("business-approval-gateway:")
+        for item in approval_gateway["approvalRequests"]
+    )
+    assert all(
+        item["sourceIdempotencyKey"].startswith("business-action-execution:")
+        for item in approval_gateway["approvalRequests"]
+    )
+    assert {item["check"] for item in approval_gateway["policyChecks"]} == {
+        "rbac_approver_role",
+        "dual_control_required",
+        "idempotency_preserved",
+        "provider_write_closed_until_approval",
+    }
+    assert {item["route"] for item in approval_gateway["approverRouting"]} == {
+        "owner_or_accountant_review",
+        "escalate_if_sla_missed",
+    }
+    assert {item["wouldRecord"] for item in approval_gateway["commitUnlocks"]} == {
+        "WorkflowActionRun"
+    }
+    assert {item["providerWriteUnlocked"] for item in approval_gateway["commitUnlocks"]} == {
+        False
+    }
+    assert {item["event"] for item in approval_gateway["auditTrail"]} == {
+        "business_approval.requested",
+        "business_approval.policy_checked",
+        "business_approval.commit_unlocked",
+    }
+    assert {item["name"] for item in approval_gateway["dataBoundaries"]} == {
+        "preview_only_no_approval_record",
+        "provider_write_locked",
+        "rbac_dual_control",
+        "safe_approval_payload",
+    }
+    assert approval_gateway["api"]["standalone"] == "GET /demo/business-approval-gateway"
+    assert approval_gateway["api"]["preview"] == (
+        "POST /tenants/{tenant_id}/business-approval-gateway/preview"
+    )
+    assert {item["path"] for item in approval_gateway["docs"]} >= {
+        "docs/public/BUSINESS_APPROVAL_GATEWAY.md",
+        "docs/public/BUSINESS_ACTION_EXECUTION.md",
+        "docs/public/BUSINESS_TASK_HANDOFF.md",
+    }
     business_scenario_replay = payload["businessScenarioReplay"]
     assert business_scenario_replay["status"] == "validated"
     assert business_scenario_replay["command"] == "bash scripts/check_public_business_scenario_replay.sh"
@@ -1029,11 +1104,13 @@ def test_public_demo_can_load_api_backed_data_with_static_fallback() -> None:
     assert "fillEngineeringProof" in script
     assert "fillBusinessContextAssistant" in script
     assert "fillBusinessActionExecution" in script
+    assert "fillBusinessApprovalGateway" in script
     assert "alertRouting" in script
     assert "incidentResponse" in script
     assert "engineeringProof" in script
     assert "businessContextAssistant" in script
     assert "businessActionExecution" in script
+    assert "businessApprovalGateway" in script
     assert "workflowScenarios" in script
     assert "endToEndScenario" in script
     assert "adapterScenarios" in script
@@ -1103,6 +1180,7 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
             "/demo/business-notification-channels",
             "/demo/business-context-assistant",
             "/demo/business-action-execution",
+            "/demo/business-approval-gateway",
             "/demo/business-scenario-replay",
             "/openapi.json",
             "student_sync",
@@ -1221,12 +1299,14 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
             "/demo/business-notification-channels",
             "/demo/business-context-assistant",
             "/demo/business-action-execution",
+            "/demo/business-approval-gateway",
             "/demo/business-scenario-replay",
             "operationId",
             "ConnectorFixtureReplayRead",
             "BusinessNotificationChannelMatrixDemoRead",
             "BusinessContextAssistantDemoRead",
             "BusinessActionExecutionDemoRead",
+            "BusinessApprovalGatewayDemoRead",
             "BusinessScenarioReplayRead",
             "drivedesk_public_demo_client.py",
             "drivedesk-public-demo-client.mjs",
@@ -1238,6 +1318,14 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
             "idempotencyKey",
             "no_provider_write",
             "BUSINESS_ACTION_EXECUTION.md",
+        ],
+        "scripts/check_public_business_approval_gateway.sh": [
+            "/demo/business-approval-gateway",
+            "businessApprovalGateway",
+            "business_approval_gateway.previewed",
+            "providerWriteUnlocked",
+            "safe_approval_payload",
+            "BUSINESS_APPROVAL_GATEWAY.md",
         ],
         "examples/curl/demo-public.sh": ["/demo/public", "api.synthetic", "student_sync"],
         "examples/python/demo_public_client.py": ["/demo/public", "api.synthetic", "student_sync"],

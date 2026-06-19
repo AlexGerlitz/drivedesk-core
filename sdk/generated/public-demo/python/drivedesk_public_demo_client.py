@@ -34,6 +34,7 @@ REQUIRED_FIELDS = [
   "businessNotificationChannels",
   "businessContextAssistant",
   "businessActionExecution",
+  "businessApprovalGateway",
   "integrationJobs",
   "integrationHealth",
   "integrationReadiness",

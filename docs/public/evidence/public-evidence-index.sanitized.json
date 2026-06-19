@@ -39,6 +39,26 @@
       "boundary": "static public surface with synthetic data only"
     },
     {
+      "capability_id": "public-verification-matrix",
+      "title": "Public verification matrix",
+      "status": "validated",
+      "public_doc": "docs/public/PUBLIC_VERIFICATION_MATRIX.md",
+      "evidence_files": [
+        "docs/public/TECHNICAL_CAPABILITY_MAP.md",
+        "docs/public/EVIDENCE_INDEX.md",
+        "docs/public/evidence/public-evidence-index.sanitized.json"
+      ],
+      "verifiers": [
+        "bash scripts/check_public_verification_matrix.sh",
+        "bash scripts/check_public_evidence_index.sh"
+      ],
+      "public_urls": [
+        "docs/public/PUBLIC_VERIFICATION_MATRIX.md",
+        "docs/public/EVIDENCE_INDEX.md"
+      ],
+      "boundary": "public-safe claim-to-evidence checklist over synthetic data, sanitized evidence, and verifier commands only"
+    },
+    {
       "capability_id": "public-demo-health",
       "title": "Public demo health",
       "status": "validated",

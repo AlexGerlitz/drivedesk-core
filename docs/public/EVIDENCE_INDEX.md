@@ -37,6 +37,7 @@ parsing Markdown by hand.
 | OpenAPI drift | `docs/public/OPENAPI_DRIFT.md` | `bash scripts/check_public_openapi_drift.sh` |
 | Business OS tour | `docs/public/PLATFORM_TOUR.md` | `bash scripts/check_public_platform_tour.sh` |
 | Quick verification path | `docs/public/REVIEWER_QUICKSTART.md` | `bash scripts/check_public_reviewer_quickstart.sh` |
+| Public verification matrix | `docs/public/PUBLIC_VERIFICATION_MATRIX.md` | `bash scripts/check_public_verification_matrix.sh` |
 | API and SDK | `docs/public/API_BACKED_DEMO.md` | `bash scripts/check_public_demo_api.sh` |
 | Core domain | `docs/public/SYSTEM_DESIGN.md` | `bash scripts/ci_smoke_public.sh` |
 | Business control tower | `docs/public/BUSINESS_CONTROL_TOWER.md` | `bash scripts/check_public_business_control_tower.sh` |
@@ -72,6 +73,7 @@ bash scripts/check_public_observability_dashboard.sh
 bash scripts/check_public_notification_delivery.sh
 bash scripts/check_public_demo_health.sh
 bash scripts/check_public_openapi_drift.sh
+bash scripts/check_public_verification_matrix.sh
 ```
 
 Notification delivery is exposed through `GET /demo/notification-delivery` and
@@ -84,6 +86,10 @@ Public demo health is tracked through `docs/public/PUBLIC_DEMO_HEALTH.md`,
 OpenAPI drift is tracked through `docs/public/OPENAPI_DRIFT.md`,
 `docs/public/evidence/openapi-drift.sanitized.json`, and
 `bash scripts/check_public_openapi_drift.sh`.
+
+The public verification matrix is tracked through
+`docs/public/PUBLIC_VERIFICATION_MATRIX.md` and
+`bash scripts/check_public_verification_matrix.sh`.
 
 The check validates that:
 

@@ -60,6 +60,7 @@ It includes:
 | --- | --- | --- |
 | Fast system route | `docs/public/SYSTEM_REVIEW_PATH.md` | How the public root, demo, API, SDK, operations evidence, release safety, GitOps, OpenTofu, and evidence index fit together. |
 | Business OS tour | `docs/public/PLATFORM_TOUR.md` | How business events, Control Tower, Adapter Studio, incidents, and proof connect. |
+| Verification matrix | `docs/public/PUBLIC_VERIFICATION_MATRIX.md` | Which artifact and command proves each engineering claim. |
 | Live product surface | [public engineering reference](https://alexgerlitz.github.io/drivedesk-core/) and [public demo](https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/) | Browser-visible workflow, operations, incidents, and proof tabs on synthetic demo data. |
 | Current project state | `docs/public/PROJECT_STATUS.md` | What is implemented, what is intentionally public-safe, and what remains private. |
 | Verification commands | `bash scripts/ci_smoke_public.sh` | Public smoke path covering docs, demo contract, OpenAPI, SDK examples, and release evidence. |
@@ -96,6 +97,9 @@ verification path.
 It maps the live demo, public CI, proof contract, OpenAPI, generated SDK,
 recovery drills, release gates, GitOps, OpenTofu, and public/private boundary
 into one short verification path.
+
+Use `docs/public/PUBLIC_VERIFICATION_MATRIX.md` when you need a compact
+claim-to-evidence checklist with pass signals and verifier commands.
 
 Use `docs/public/PROJECT_STATUS.md` when you need the current engineering
 state, public-safe limits, and next work in one page.
@@ -149,8 +153,9 @@ incident queue, mitigation, recovery, and resolution evidence path.
 9. Run `bash scripts/check_public_engineering_proof.sh`.
 10. Run `bash scripts/check_public_demo_api.sh`.
 11. Run one generated client example from `examples/`.
-12. Review `docs/public/PROJECT_STATUS.md`, `docs/public/TECHNICAL_CAPABILITY_MAP.md`, `docs/public/EVIDENCE_INDEX.md`, `docs/public/PUBLIC_DEMO_HEALTH.md`, `docs/public/OPENAPI_DRIFT.md`, `docs/public/OBSERVABILITY_PROOF.md`, `docs/public/OBSERVABILITY_DASHBOARD.md`, `docs/public/NOTIFICATION_DELIVERY.md`, `docs/public/ALERT_ROUTING_EVIDENCE.md`, `docs/public/INCIDENT_RESPONSE_DEMO.md`, `docs/public/ENGINEERING_PROOF.md`, `docs/public/PLATFORM_MATURITY_70.md`, and `docs/public/SANITIZED_EVIDENCE.md`.
-13. Review `docs/public/SYSTEM_DESIGN.md`, `docs/public/PROVIDER_CONNECTOR_GUIDE.md`, `docs/public/CONNECTOR_CERTIFICATION.md`, `docs/public/PROVIDER_ONBOARDING.md`, `docs/public/INTEGRATION_REPAIR.md`, `docs/public/CONNECTOR_FIXTURE_REPLAY.md`, `docs/public/ADAPTER_DEVELOPER_GUIDE.md`, `docs/public/GITOPS_DELIVERY.md`, and the recovery evidence docs.
+12. Run `bash scripts/check_public_verification_matrix.sh`.
+13. Review `docs/public/PROJECT_STATUS.md`, `docs/public/TECHNICAL_CAPABILITY_MAP.md`, `docs/public/PUBLIC_VERIFICATION_MATRIX.md`, `docs/public/EVIDENCE_INDEX.md`, `docs/public/PUBLIC_DEMO_HEALTH.md`, `docs/public/OPENAPI_DRIFT.md`, `docs/public/OBSERVABILITY_PROOF.md`, `docs/public/OBSERVABILITY_DASHBOARD.md`, `docs/public/NOTIFICATION_DELIVERY.md`, `docs/public/ALERT_ROUTING_EVIDENCE.md`, `docs/public/INCIDENT_RESPONSE_DEMO.md`, `docs/public/ENGINEERING_PROOF.md`, `docs/public/PLATFORM_MATURITY_70.md`, and `docs/public/SANITIZED_EVIDENCE.md`.
+14. Review `docs/public/SYSTEM_DESIGN.md`, `docs/public/PROVIDER_CONNECTOR_GUIDE.md`, `docs/public/CONNECTOR_CERTIFICATION.md`, `docs/public/PROVIDER_ONBOARDING.md`, `docs/public/INTEGRATION_REPAIR.md`, `docs/public/CONNECTOR_FIXTURE_REPLAY.md`, `docs/public/ADAPTER_DEVELOPER_GUIDE.md`, `docs/public/GITOPS_DELIVERY.md`, and the recovery evidence docs.
 
 ## Full Artifact Reference
 
@@ -159,6 +164,7 @@ incident queue, mitigation, recovery, and resolution evidence path.
 - `docs/public/PLATFORM_TOUR.md` - Business OS tour across business events, Control Tower, Adapter Studio, incidents, proof, and verification gates.
 - `docs/public/REVIEWER_QUICKSTART.md` - shortest external verification path with 5-minute, 15-minute, and 45-minute verification tracks.
 - `docs/public/ENGINEERING_REVIEW_GUIDE.md` - short verification path for demo, CI, API, recovery, GitOps, and IaC evidence.
+- `docs/public/PUBLIC_VERIFICATION_MATRIX.md` - claim-to-evidence matrix with verifier commands and pass signals.
 - `docs/public/PROJECT_STATUS.md` - current public-safe engineering status, limits, and next work.
 - `docs/public/TECHNICAL_CAPABILITY_MAP.md` - capability-to-evidence map with verifier commands.
 - `docs/public/EVIDENCE_INDEX.md` - machine-readable capability-to-evidence index contract.
@@ -386,6 +392,7 @@ bash scripts/check_public_platform_maturity_70.sh
 bash scripts/check_public_system_review_path.sh
 bash scripts/check_public_platform_tour.sh
 bash scripts/check_public_reviewer_quickstart.sh
+bash scripts/check_public_verification_matrix.sh
 bash scripts/check_public_review_guide.sh
 bash scripts/check_public_pages_entrypoint.sh
 bash scripts/check_public_demo_health.sh
@@ -444,6 +451,7 @@ bash scripts/check_public_platform_maturity_70.sh
 bash scripts/check_public_system_review_path.sh
 bash scripts/check_public_platform_tour.sh
 bash scripts/check_public_reviewer_quickstart.sh
+bash scripts/check_public_verification_matrix.sh
 bash scripts/check_public_review_guide.sh
 bash scripts/check_public_pages_entrypoint.sh
 bash scripts/check_public_demo_health.sh

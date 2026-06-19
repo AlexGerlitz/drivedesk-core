@@ -15,6 +15,9 @@ infrastructure, production history, customer data, or operational credentials.
 - `REVIEWER_QUICKSTART.md` - shortest external verification path with 5-minute,
   15-minute, and 45-minute verification tracks.
 - `ENGINEERING_REVIEW_GUIDE.md` - short verification path for demo, CI, API, recovery, GitOps, and IaC evidence.
+- `PUBLIC_VERIFICATION_MATRIX.md` - compact claim-to-evidence verification
+  matrix with pass signals and verifier commands; checked by
+  `bash scripts/check_public_verification_matrix.sh`.
 - `PROJECT_STATUS.md` - current public-safe engineering status, limits, and next work.
 - `TECHNICAL_CAPABILITY_MAP.md` - capability-to-evidence map with verifier commands.
 - `EVIDENCE_INDEX.md` - human-readable public evidence index contract.

@@ -16,7 +16,8 @@ For the product route, open `docs/public/PLATFORM_TOUR.md`.
 | 4 | Public demo Workflow, Control Tower, Integrations, Operations, Incidents, and Proof tabs | The demo is not a static screenshot; it exposes an end-to-end workflow-to-proof path, operational contracts, incidents, and proof payloads. |
 | 5 | `docs/public/PROJECT_STATUS.md` | Current capability state, limits, and next work are explicit. |
 | 6 | `docs/public/TECHNICAL_CAPABILITY_MAP.md` | Each visible capability maps to implementation surface, evidence, and verifier commands. |
-| 7 | `docs/public/ENGINEERING_PROOF.md` | The proof tab, API payload, OpenAPI schema, SDK artifacts, and CI gates share one contract. |
+| 7 | `docs/public/PUBLIC_VERIFICATION_MATRIX.md` | Each engineering claim has an artifact, verifier command, and pass signal. |
+| 8 | `docs/public/ENGINEERING_PROOF.md` | The proof tab, API payload, OpenAPI schema, SDK artifacts, and CI gates share one contract. |
 
 Pass criteria: a technical reader can identify the current architecture, public demo,
 API contract, SDK surface, observability evidence, incident response evidence,
@@ -31,6 +32,7 @@ bash scripts/check_public_pages_entrypoint.sh
 bash scripts/check_public_system_review_path.sh
 bash scripts/check_public_platform_tour.sh
 bash scripts/check_public_reviewer_quickstart.sh
+bash scripts/check_public_verification_matrix.sh
 bash scripts/check_public_project_status.sh
 bash scripts/check_public_technical_capability_map.sh
 bash scripts/check_public_evidence_index.sh
@@ -92,4 +94,6 @@ include production data, credentials, private runtime addresses, raw logs,
 payment provider details, or private deployment state.
 
 For the longer route, continue with `docs/public/ENGINEERING_REVIEW_GUIDE.md`
-and `docs/public/EVIDENCE_INDEX.md`.
+and `docs/public/EVIDENCE_INDEX.md`. Use
+`docs/public/PUBLIC_VERIFICATION_MATRIX.md` when you need the shortest
+claim-to-evidence checklist.

@@ -11,20 +11,21 @@ prove the current engineering surface.
 | 1 | System review path | `docs/public/SYSTEM_REVIEW_PATH.md` |
 | 2 | Platform Tour | `docs/public/PLATFORM_TOUR.md` |
 | 3 | Verification quickstart | `docs/public/REVIEWER_QUICKSTART.md` |
-| 4 | Live demo Workflow, Control Tower, Integrations, Operations, Incidents, and Proof tabs | `businessControlTower`, `adapterStudio`, `endToEndScenario`, `alertRouting`, `incidentResponse`, and `engineeringProof` payloads |
-| 5 | Root CI badge | `bash scripts/ci_smoke_public.sh` |
-| 6 | Project status | `docs/public/PROJECT_STATUS.md` |
-| 7 | Proof contract | `bash scripts/check_public_engineering_proof.sh` |
-| 8 | API contract | `docs/openapi.json` and `GET /demo/public` |
-| 9 | Capability map | `docs/public/TECHNICAL_CAPABILITY_MAP.md` |
-| 10 | Evidence index | `docs/public/EVIDENCE_INDEX.md`, `docs/public/evidence/public-evidence-index.sanitized.json` |
-| 11 | Observability proof | `docs/public/OBSERVABILITY_PROOF.md` |
-| 12 | Observability dashboard | Operations tab and `docs/public/OBSERVABILITY_DASHBOARD.md` |
-| 13 | Notification delivery | Operations tab, `GET /demo/notification-delivery`, `notificationDelivery`, and `docs/public/NOTIFICATION_DELIVERY.md` |
-| 14 | Alert routing | Operations tab and `docs/public/ALERT_ROUTING_EVIDENCE.md` |
-| 15 | Connector fixture replay | `docs/public/CONNECTOR_FIXTURE_REPLAY.md` and `bash scripts/check_public_connector_fixture_replay.sh` |
-| 16 | Recovery and release safety | backup/restore, rollback, canary, staged promotion checks |
-| 17 | Infrastructure story | Helm, GitOps, OpenTofu, drift, and sanitized runtime evidence |
+| 4 | Verification matrix | `docs/public/PUBLIC_VERIFICATION_MATRIX.md` |
+| 5 | Live demo Workflow, Control Tower, Integrations, Operations, Incidents, and Proof tabs | `businessControlTower`, `adapterStudio`, `endToEndScenario`, `alertRouting`, `incidentResponse`, and `engineeringProof` payloads |
+| 6 | Root CI badge | `bash scripts/ci_smoke_public.sh` |
+| 7 | Project status | `docs/public/PROJECT_STATUS.md` |
+| 8 | Proof contract | `bash scripts/check_public_engineering_proof.sh` |
+| 9 | API contract | `docs/openapi.json` and `GET /demo/public` |
+| 10 | Capability map | `docs/public/TECHNICAL_CAPABILITY_MAP.md` |
+| 11 | Evidence index | `docs/public/EVIDENCE_INDEX.md`, `docs/public/evidence/public-evidence-index.sanitized.json` |
+| 12 | Observability proof | `docs/public/OBSERVABILITY_PROOF.md` |
+| 13 | Observability dashboard | Operations tab and `docs/public/OBSERVABILITY_DASHBOARD.md` |
+| 14 | Notification delivery | Operations tab, `GET /demo/notification-delivery`, `notificationDelivery`, and `docs/public/NOTIFICATION_DELIVERY.md` |
+| 15 | Alert routing | Operations tab and `docs/public/ALERT_ROUTING_EVIDENCE.md` |
+| 16 | Connector fixture replay | `docs/public/CONNECTOR_FIXTURE_REPLAY.md` and `bash scripts/check_public_connector_fixture_replay.sh` |
+| 17 | Recovery and release safety | backup/restore, rollback, canary, staged promotion checks |
+| 18 | Infrastructure story | Helm, GitOps, OpenTofu, drift, and sanitized runtime evidence |
 
 ## Review Commands
 
@@ -33,6 +34,7 @@ bash scripts/ci_smoke_public.sh
 bash scripts/check_public_system_review_path.sh
 bash scripts/check_public_platform_tour.sh
 bash scripts/check_public_reviewer_quickstart.sh
+bash scripts/check_public_verification_matrix.sh
 bash scripts/check_public_review_guide.sh
 bash scripts/check_public_project_status.sh
 bash scripts/check_public_technical_capability_map.sh
@@ -60,6 +62,7 @@ bash scripts/check_public_opentofu_plan.sh
 | System review path | `docs/public/SYSTEM_REVIEW_PATH.md` |
 | Business OS tour | `docs/public/PLATFORM_TOUR.md` |
 | Verification quickstart | `docs/public/REVIEWER_QUICKSTART.md` |
+| Verification matrix | `docs/public/PUBLIC_VERIFICATION_MATRIX.md` |
 | System design | `docs/public/SYSTEM_DESIGN.md` |
 | Project status | `docs/public/PROJECT_STATUS.md` |
 | Public proof contract | `docs/public/ENGINEERING_PROOF.md` |

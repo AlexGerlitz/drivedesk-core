@@ -116,6 +116,9 @@ business_notification_channels_endpoint, business_notification_channels_headers 
 business_context_assistant_endpoint, business_context_assistant_headers = get_json(
     "/demo/business-context-assistant"
 )
+business_action_execution_endpoint, business_action_execution_headers = get_json(
+    "/demo/business-action-execution"
+)
 business_scenario_endpoint, business_scenario_headers = get_json("/demo/business-scenario-replay")
 adapters, _ = get_json("/integration-adapters")
 runbooks, _ = get_json("/integration-runbooks")
@@ -925,6 +928,80 @@ assert {item["path"] for item in business_context_assistant["docs"]} >= {
     "docs/public/BUSINESS_CONTROL_TOWER.md",
     "docs/public/PROVIDER_CONNECTOR_GUIDE.md",
 }, demo
+business_action_execution = demo["businessActionExecution"]
+assert business_action_execution_endpoint == business_action_execution, business_action_execution_endpoint
+assert (
+    business_action_execution_headers["access-control-allow-origin"] == "*"
+), business_action_execution_headers
+assert (
+    business_action_execution_headers["cache-control"] == "public, max-age=60"
+), business_action_execution_headers
+assert business_action_execution["status"] == "previewed", demo
+assert (
+    business_action_execution["command"]
+    == "POST /tenants/{tenant_id}/business-action-executions/preview"
+), demo
+assert {item["label"] for item in business_action_execution["summary"]} >= {
+    "Execution plans",
+    "Preflight checks",
+    "Approval gates",
+    "External writes",
+}, demo
+assert business_action_execution["role"] == "accountant", demo
+assert business_action_execution["subject"] == "deal:DEAL-2026-001", demo
+assert {item["action"] for item in business_action_execution["executionPlan"]} == {
+    "open_reconciliation_plan",
+    "queue_accounting_export_after_review",
+    "prepare_internal_notification",
+}, demo
+assert {item["dryRun"] for item in business_action_execution["executionPlan"]} == {True}, demo
+assert {item["externalMutation"] for item in business_action_execution["executionPlan"]} == {False}, demo
+assert {item["containsPii"] for item in business_action_execution["executionPlan"]} == {False}, demo
+assert {item["rawPayloadIncluded"] for item in business_action_execution["executionPlan"]} == {False}, demo
+assert {item["safePayloadProfile"] for item in business_action_execution["executionPlan"]} == {
+    "role_subject_action_reference"
+}, demo
+assert any(
+    item["commitWouldMutateProvider"] is True
+    for item in business_action_execution["executionPlan"]
+), demo
+assert any(item["safeToAutoRun"] is False for item in business_action_execution["executionPlan"]), demo
+assert {item["check"] for item in business_action_execution["preflightChecks"]} == {
+    "safe_payload_profile",
+    "idempotency_key_ready",
+    "approval_gate_attached",
+    "connector_secret_boundary",
+}, demo
+assert {item["externalMutation"] for item in business_action_execution["preflightChecks"]} == {False}, demo
+assert {item["wouldRecord"] for item in business_action_execution["dryRunResults"]} == {
+    "WorkflowActionRun"
+}, demo
+assert {item["status"] for item in business_action_execution["dryRunResults"]} == {"would_enqueue"}, demo
+assert {item["externalMutation"] for item in business_action_execution["dryRunResults"]} == {False}, demo
+assert {item["gate"] for item in business_action_execution["approvalGates"]} == {
+    "operator_review_gate",
+    "external_write_gate",
+    "idempotent_outbox_gate",
+}, demo
+assert {item["step"] for item in business_action_execution["rollbackPlan"]} == {
+    "preview_has_no_rollback",
+    "commit_uses_outbox_recovery",
+}, demo
+assert {item["name"] for item in business_action_execution["dataBoundaries"]} == {
+    "dry_run_only",
+    "no_provider_write",
+    "safe_execution_payload",
+    "audit_and_outbox_contract",
+}, demo
+assert business_action_execution["api"]["standalone"] == "GET /demo/business-action-execution", demo
+assert business_action_execution["api"]["preview"] == (
+    "POST /tenants/{tenant_id}/business-action-executions/preview"
+), demo
+assert {item["path"] for item in business_action_execution["docs"]} >= {
+    "docs/public/BUSINESS_ACTION_EXECUTION.md",
+    "docs/public/BUSINESS_TASK_HANDOFF.md",
+    "docs/public/BUSINESS_CONTEXT_ASSISTANT.md",
+}, demo
 business_scenario_replay = demo["businessScenarioReplay"]
 assert business_scenario_endpoint == business_scenario_replay, business_scenario_endpoint
 assert business_scenario_headers["access-control-allow-origin"] == "*", business_scenario_headers
@@ -1099,11 +1176,15 @@ assert "/demo/business-intake-pipeline" in openapi["paths"], openapi["paths"].ke
 assert "/demo/business-task-handoff" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/business-notification-channels" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/business-context-assistant" in openapi["paths"], openapi["paths"].keys()
+assert "/demo/business-action-execution" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/business-scenario-replay" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/business-intake-pipeline/preview" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/business-task-handoffs/preview" in openapi["paths"], openapi["paths"].keys()
 assert (
     "/tenants/{tenant_id}/business-notification-channels/preview" in openapi["paths"]
+), openapi["paths"].keys()
+assert (
+    "/tenants/{tenant_id}/business-action-executions/preview" in openapi["paths"]
 ), openapi["paths"].keys()
 assert "/health" in openapi["paths"], openapi["paths"].keys()
 
@@ -1115,11 +1196,15 @@ if openapi_file.exists():
     assert "/demo/business-task-handoff" in generated["paths"], generated["paths"].keys()
     assert "/demo/business-notification-channels" in generated["paths"], generated["paths"].keys()
     assert "/demo/business-context-assistant" in generated["paths"], generated["paths"].keys()
+    assert "/demo/business-action-execution" in generated["paths"], generated["paths"].keys()
     assert "/demo/business-scenario-replay" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-intake-pipeline/preview" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-task-handoffs/preview" in generated["paths"], generated["paths"].keys()
     assert (
         "/tenants/{tenant_id}/business-notification-channels/preview" in generated["paths"]
+    ), generated["paths"].keys()
+    assert (
+        "/tenants/{tenant_id}/business-action-executions/preview" in generated["paths"]
     ), generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-action-plans/preview" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-notifications/preview" in generated["paths"], generated["paths"].keys()

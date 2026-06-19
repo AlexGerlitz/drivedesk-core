@@ -32,6 +32,7 @@ from drivedesk_api.db import (
 from drivedesk_api.rbac import ActorContext
 from drivedesk_api.schemas import (
     AccountingExportCreate,
+    BusinessActionExecutionPreviewCreate,
     BusinessActionPlanPreviewCreate,
     BusinessBriefingPreviewCreate,
     BusinessDetectionPreviewCreate,
@@ -3032,6 +3033,260 @@ async def preview_business_task_handoff(
             "action_plan": "POST /tenants/{tenant_id}/business-action-plans/preview",
             "workflow_rules": "POST /tenants/{tenant_id}/workflow-rules",
             "task_records": "POST /tenants/{tenant_id}/business-records",
+        },
+    }
+
+
+def _action_execution_steps(payload: BusinessActionExecutionPreviewCreate) -> list[dict[str, object]]:
+    if payload.action_steps:
+        source_steps = payload.action_steps
+    else:
+        source_steps = [
+            {
+                "action": "open_reconciliation_plan",
+                "status": "ready",
+                "adapter_key": "internal.noop",
+                "would_enqueue_event": "business.action.review_requested",
+                "requiresApproval": False,
+                "commitWouldMutateProvider": False,
+                "evidence": "business_action_plan.previewed",
+            },
+            {
+                "action": "queue_accounting_export_after_review",
+                "status": "approval_required",
+                "adapter_key": "accounting.export.mock",
+                "would_enqueue_event": "accounting.export.requested",
+                "requiresApproval": True,
+                "commitWouldMutateProvider": True,
+                "evidence": "accounting.export.requested",
+            },
+            {
+                "action": "prepare_internal_notification",
+                "status": "draft_only",
+                "adapter_key": "internal.notification",
+                "would_enqueue_event": "notification.delivery.requested",
+                "requiresApproval": False,
+                "commitWouldMutateProvider": False,
+                "evidence": "business_notification_channel_matrix.previewed",
+            },
+        ]
+
+    safe_steps: list[dict[str, object]] = []
+    for index, item in enumerate(source_steps, start=1):
+        if not isinstance(item, dict):
+            continue
+        action = str(item.get("action") or item.get("step") or item.get("name") or f"execution_step_{index}")
+        adapter_key = str(item.get("adapter_key") or item.get("adapterKey") or "internal.noop")
+        would_enqueue_event = str(
+            item.get("would_enqueue_event")
+            or item.get("wouldEnqueueEvent")
+            or item.get("event_type")
+            or item.get("eventType")
+            or "business.action.execution_requested"
+        )
+        requires_approval = bool(
+            item.get("requires_approval")
+            or item.get("requiresApproval")
+            or item.get("approvalRequired")
+        )
+        commit_would_mutate_provider = bool(
+            item.get("commit_would_mutate_provider")
+            or item.get("commitWouldMutateProvider")
+            or item.get("externalMutationOnCommit")
+        )
+        safe_steps.append(
+            {
+                "action": action[:96],
+                "status": str(item.get("status") or "ready")[:32],
+                "adapter_key": adapter_key[:128],
+                "would_enqueue_event": would_enqueue_event[:128],
+                "requires_approval": requires_approval,
+                "commit_would_mutate_provider": commit_would_mutate_provider,
+                "evidence": str(item.get("evidence") or "business_action_execution.previewed")[:128],
+            }
+        )
+    return safe_steps
+
+
+async def preview_business_action_execution(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    payload: BusinessActionExecutionPreviewCreate,
+) -> dict[str, object]:
+    await ensure_tenant_exists(session, tenant_id)
+    steps = _action_execution_steps(payload)
+    subject_type = payload.subject_type or "deal"
+    subject_id = payload.subject_id or "DEAL-2026-001"
+    subject = _subject_label(subject_type, subject_id)
+
+    execution_plan = [
+        {
+            "execution_key": f"execution.preview.{index:03d}",
+            "action": step["action"],
+            "status": "approval_required" if step["requires_approval"] else "dry_run_ready",
+            "mode": payload.execution_mode,
+            "adapter_key": step["adapter_key"],
+            "would_enqueue_event": step["would_enqueue_event"],
+            "idempotency_key": f"business-action-execution:{subject}:{step['action']}:{index:03d}",
+            "safe_payload_profile": "role_subject_action_reference",
+            "dry_run": True,
+            "safe_to_auto_run": bool(not step["requires_approval"] and not step["commit_would_mutate_provider"]),
+            "requires_approval": bool(step["requires_approval"]),
+            "commit_would_mutate_provider": bool(step["commit_would_mutate_provider"]),
+            "external_mutation": False,
+            "contains_pii": False,
+            "raw_payload_included": False,
+            "evidence": "business_action_execution.previewed",
+        }
+        for index, step in enumerate(steps, start=1)
+    ]
+
+    preflight_checks = [
+        {
+            "check": "safe_payload_profile",
+            "status": "passed",
+            "detail": "Execution preview contains role, subject key, action key, and evidence references only.",
+            "external_mutation": False,
+            "evidence": "business_action_execution.previewed",
+        },
+        {
+            "check": "idempotency_key_ready",
+            "status": "passed",
+            "detail": "Each execution candidate has a deterministic preview idempotency key.",
+            "external_mutation": False,
+            "evidence": "business_action_execution.previewed",
+        },
+        {
+            "check": "approval_gate_attached",
+            "status": "required" if any(item["requires_approval"] for item in execution_plan) else "passed",
+            "detail": "Provider-changing commits stay behind explicit operator approval.",
+            "external_mutation": False,
+            "evidence": "business_action_execution.previewed",
+        },
+        {
+            "check": "connector_secret_boundary",
+            "status": "clean",
+            "detail": "Preview does not require provider credentials or browser token storage.",
+            "external_mutation": False,
+            "requires_secret": False,
+            "browser_token_storage": False,
+            "evidence": "business_action_execution.previewed",
+        },
+    ] if payload.include_preflight else []
+
+    dry_run_results = [
+        {
+            "result_key": f"dry_run.{index:03d}",
+            "action": item["action"],
+            "status": "would_enqueue" if item["mode"] == "dry_run" else "would_request_approval",
+            "would_record": "WorkflowActionRun",
+            "would_enqueue_event": item["would_enqueue_event"],
+            "adapter_key": item["adapter_key"],
+            "external_mutation": False,
+            "contains_pii": False,
+            "raw_payload_included": False,
+            "evidence": "business_action_execution.previewed",
+        }
+        for index, item in enumerate(execution_plan, start=1)
+    ]
+
+    rollback_plan = [
+        {
+            "step": "preview_has_no_rollback",
+            "status": "not_needed",
+            "detail": "Dry-run preview writes nothing, so there is no external state to roll back.",
+            "external_mutation": False,
+        },
+        {
+            "step": "commit_uses_outbox_recovery",
+            "status": "documented",
+            "detail": "A future commit path should use outbox retry, dead-letter review, and audit evidence.",
+            "external_mutation": False,
+        },
+    ] if payload.include_rollback_plan else []
+
+    return {
+        "tenant_id": tenant_id,
+        "execution_kind": payload.execution_kind,
+        "role": payload.role,
+        "subject_type": subject_type,
+        "subject_id": subject_id,
+        "generated_at": datetime.now(UTC),
+        "status": "previewed",
+        "summary": (
+            f"Execution preview prepared {len(execution_plan)} dry-run candidate(s), "
+            f"{len(preflight_checks)} preflight check(s), and {len(rollback_plan)} rollback note(s) for {payload.role}."
+        ),
+        "execution_plan": execution_plan,
+        "preflight_checks": preflight_checks,
+        "dry_run_results": dry_run_results,
+        "approval_gates": [
+            {
+                "gate": "operator_review_gate",
+                "status": "required",
+                "requires_approval": True,
+                "external_mutation": False,
+                "detail": "The operator sees the full execution plan before commit.",
+            },
+            {
+                "gate": "external_write_gate",
+                "status": "closed",
+                "requires_approval": True,
+                "external_mutation": False,
+                "detail": "Public preview never sends provider writes.",
+            },
+            {
+                "gate": "idempotent_outbox_gate",
+                "status": "ready",
+                "requires_approval": False,
+                "external_mutation": False,
+                "detail": "Commit candidates carry idempotency keys before queueing.",
+            },
+        ],
+        "rollback_plan": rollback_plan,
+        "data_boundaries": [
+            {
+                "name": "dry_run_only",
+                "status": "preview_only",
+                "external_mutation": False,
+                "detail": "The preview computes the execution plan but does not persist it.",
+            },
+            {
+                "name": "no_provider_write",
+                "status": "closed",
+                "external_mutation": False,
+                "detail": "No CRM, bank, accounting, notification, or webhook provider is mutated.",
+            },
+            {
+                "name": "safe_execution_payload",
+                "status": "clean",
+                "contains_pii": False,
+                "raw_payload_included": False,
+                "detail": "Payloads use subject references and action keys only.",
+            },
+            {
+                "name": "audit_and_outbox_contract",
+                "status": "documented",
+                "external_mutation": False,
+                "detail": "A future commit path must record audit and outbox evidence before provider execution.",
+            },
+        ],
+        "evidence": [
+            {
+                "type": "action_execution",
+                "event": "business_action_execution.previewed",
+                "execution_count": len(execution_plan),
+                "dry_run": True,
+                "external_mutation": False,
+            }
+        ],
+        "api": {
+            "preview": "POST /tenants/{tenant_id}/business-action-executions/preview",
+            "action_plan": "POST /tenants/{tenant_id}/business-action-plans/preview",
+            "task_handoff": "POST /tenants/{tenant_id}/business-task-handoffs/preview",
+            "repair_execute": "POST /tenants/{tenant_id}/repair-actions/{repair_action_id}/execute",
+            "outbox": "GET /tenants/{tenant_id}/outbox",
         },
     }
 

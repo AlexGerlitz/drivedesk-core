@@ -175,6 +175,13 @@
         Array.isArray(payload.businessContextAssistant.insightRules) &&
         Array.isArray(payload.businessContextAssistant.suggestedActions) &&
         Array.isArray(payload.businessContextAssistant.dataBoundaries) &&
+        payload.businessActionExecution &&
+        Array.isArray(payload.businessActionExecution.summary) &&
+        Array.isArray(payload.businessActionExecution.executionPlan) &&
+        Array.isArray(payload.businessActionExecution.preflightChecks) &&
+        Array.isArray(payload.businessActionExecution.dryRunResults) &&
+        Array.isArray(payload.businessActionExecution.approvalGates) &&
+        Array.isArray(payload.businessActionExecution.dataBoundaries) &&
         payload.businessScenarioReplay &&
         Array.isArray(payload.businessScenarioReplay.summary) &&
         Array.isArray(payload.businessScenarioReplay.scenarios) &&
@@ -1729,6 +1736,142 @@
     });
   }
 
+  function fillBusinessActionExecution() {
+    var execution = data.businessActionExecution;
+
+    var summaryRows = document.getElementById("businessActionExecutionSummaryRows");
+    clear(summaryRows);
+    execution.summary.forEach(function (item) {
+      var card = document.createElement("article");
+      card.className = "metric-card";
+      card.dataset.tone = item.tone || "blue";
+
+      var label = document.createElement("span");
+      label.className = "muted";
+      label.appendChild(text(item.label));
+
+      var value = document.createElement("strong");
+      value.appendChild(text(item.value));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      card.append(label, value, detail);
+      summaryRows.appendChild(card);
+    });
+
+    var planRows = document.getElementById("businessActionExecutionPlanRows");
+    clear(planRows);
+    execution.executionPlan.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var action = document.createElement("strong");
+      action.appendChild(text(item.action));
+      top.append(action, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          item.adapterKey +
+            " - " +
+            item.wouldEnqueueEvent +
+            " - approval " +
+            String(item.requiresApproval) +
+            " - external mutation " +
+            String(item.externalMutation)
+        )
+      );
+
+      var key = document.createElement("code");
+      key.appendChild(text(item.idempotencyKey));
+
+      row.append(top, detail, key);
+      planRows.appendChild(row);
+    });
+
+    var preflightRows = document.getElementById("businessActionExecutionPreflightRows");
+    clear(preflightRows);
+    execution.preflightChecks.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var check = document.createElement("strong");
+      check.appendChild(text(item.check));
+      top.append(check, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(item.evidence));
+
+      row.append(top, detail, evidence);
+      preflightRows.appendChild(row);
+    });
+
+    var dryRunRows = document.getElementById("businessActionExecutionDryRunRows");
+    clear(dryRunRows);
+    execution.dryRunResults.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var result = document.createElement("strong");
+      result.appendChild(text(item.resultKey));
+      top.append(result, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(item.action + " - " + item.wouldRecord + " - " + item.wouldEnqueueEvent)
+      );
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(item.evidence));
+
+      row.append(top, detail, evidence);
+      dryRunRows.appendChild(row);
+    });
+
+    var boundaryRows = document.getElementById("businessActionExecutionBoundaryRows");
+    clear(boundaryRows);
+    execution.dataBoundaries.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var name = document.createElement("strong");
+      name.appendChild(text(item.name));
+      top.append(name, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          "external mutation " +
+            String(Boolean(item.externalMutation)) +
+            " - PII " +
+            String(Boolean(item.containsPii)) +
+            " - raw payload " +
+            String(Boolean(item.rawPayloadIncluded))
+        )
+      );
+
+      row.append(top, detail);
+      boundaryRows.appendChild(row);
+    });
+  }
+
   function fillBusinessScenarioReplay() {
     var replay = data.businessScenarioReplay;
 
@@ -2921,6 +3064,7 @@
     fillBusinessTaskHandoff();
     fillBusinessNotificationChannels();
     fillBusinessContextAssistant();
+    fillBusinessActionExecution();
     fillBusinessScenarioReplay();
     fillEngineeringProof();
   }

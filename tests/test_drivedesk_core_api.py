@@ -2514,6 +2514,72 @@ def test_business_context_assistant_demo_endpoint_exposes_same_public_contract(
     )
 
 
+def test_business_action_execution_demo_endpoint_exposes_same_public_contract(
+    api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, _ = api_client
+
+    public_response = client.get("/demo/public")
+    execution_response = client.get("/demo/business-action-execution")
+
+    assert execution_response.status_code == 200
+    assert execution_response.headers["access-control-allow-origin"] == "*"
+    assert execution_response.headers["cache-control"] == "public, max-age=60"
+    execution_payload = execution_response.json()
+    assert execution_payload == public_response.json()["businessActionExecution"]
+    assert execution_payload["status"] == "previewed"
+    assert (
+        execution_payload["command"]
+        == "POST /tenants/{tenant_id}/business-action-executions/preview"
+    )
+    assert execution_payload["role"] == "accountant"
+    assert execution_payload["subject"] == "deal:DEAL-2026-001"
+    assert {item["action"] for item in execution_payload["executionPlan"]} == {
+        "open_reconciliation_plan",
+        "queue_accounting_export_after_review",
+        "prepare_internal_notification",
+    }
+    assert {item["dryRun"] for item in execution_payload["executionPlan"]} == {True}
+    assert {item["externalMutation"] for item in execution_payload["executionPlan"]} == {
+        False
+    }
+    assert {item["containsPii"] for item in execution_payload["executionPlan"]} == {False}
+    assert {item["rawPayloadIncluded"] for item in execution_payload["executionPlan"]} == {
+        False
+    }
+    assert any(item["commitWouldMutateProvider"] for item in execution_payload["executionPlan"])
+    assert any(item["safeToAutoRun"] is False for item in execution_payload["executionPlan"])
+    assert {item["check"] for item in execution_payload["preflightChecks"]} == {
+        "safe_payload_profile",
+        "idempotency_key_ready",
+        "approval_gate_attached",
+        "connector_secret_boundary",
+    }
+    assert {item["wouldRecord"] for item in execution_payload["dryRunResults"]} == {
+        "WorkflowActionRun"
+    }
+    assert {item["gate"] for item in execution_payload["approvalGates"]} == {
+        "operator_review_gate",
+        "external_write_gate",
+        "idempotent_outbox_gate",
+    }
+    assert {item["step"] for item in execution_payload["rollbackPlan"]} == {
+        "preview_has_no_rollback",
+        "commit_uses_outbox_recovery",
+    }
+    assert {item["name"] for item in execution_payload["dataBoundaries"]} == {
+        "dry_run_only",
+        "no_provider_write",
+        "safe_execution_payload",
+        "audit_and_outbox_contract",
+    }
+    assert execution_payload["api"]["standalone"] == "GET /demo/business-action-execution"
+    assert any(
+        item["path"] == "docs/public/BUSINESS_ACTION_EXECUTION.md"
+        for item in execution_payload["docs"]
+    )
+
+
 def test_file_import_adapter_success_flow(api_client: tuple[TestClient, async_sessionmaker[AsyncSession]]) -> None:
     client, session_factory = api_client
     owner_headers = {"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"}

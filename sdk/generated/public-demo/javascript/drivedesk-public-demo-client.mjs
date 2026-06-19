@@ -27,6 +27,7 @@ export const REQUIRED_FIELDS = [
   "businessTaskHandoff",
   "businessNotificationChannels",
   "businessContextAssistant",
+  "businessActionExecution",
   "integrationJobs",
   "integrationHealth",
   "integrationReadiness",

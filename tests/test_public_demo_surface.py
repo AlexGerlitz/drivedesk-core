@@ -78,6 +78,11 @@ def test_public_demo_html_links_static_assets() -> None:
     assert 'id="businessContextRuleRows"' in html
     assert 'id="businessContextActionRows"' in html
     assert 'id="businessContextBoundaryRows"' in html
+    assert 'id="businessActionExecutionSummaryRows"' in html
+    assert 'id="businessActionExecutionPlanRows"' in html
+    assert 'id="businessActionExecutionPreflightRows"' in html
+    assert 'id="businessActionExecutionDryRunRows"' in html
+    assert 'id="businessActionExecutionBoundaryRows"' in html
     assert 'id="controlTowerObservationRows"' in html
     assert 'id="controlTowerExceptionRows"' in html
     assert 'id="controlTowerRepairRows"' in html
@@ -789,6 +794,73 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
         "docs/public/BUSINESS_CONTROL_TOWER.md",
         "docs/public/PROVIDER_CONNECTOR_GUIDE.md",
     }
+    action_execution = payload["businessActionExecution"]
+    assert action_execution["status"] == "previewed"
+    assert (
+        action_execution["command"]
+        == "POST /tenants/{tenant_id}/business-action-executions/preview"
+    )
+    assert {item["label"] for item in action_execution["summary"]} >= {
+        "Execution plans",
+        "Preflight checks",
+        "Approval gates",
+        "External writes",
+    }
+    assert action_execution["role"] == "accountant"
+    assert action_execution["subject"] == "deal:DEAL-2026-001"
+    assert {item["action"] for item in action_execution["executionPlan"]} == {
+        "open_reconciliation_plan",
+        "queue_accounting_export_after_review",
+        "prepare_internal_notification",
+    }
+    assert {item["dryRun"] for item in action_execution["executionPlan"]} == {True}
+    assert {item["externalMutation"] for item in action_execution["executionPlan"]} == {False}
+    assert {item["containsPii"] for item in action_execution["executionPlan"]} == {False}
+    assert {item["rawPayloadIncluded"] for item in action_execution["executionPlan"]} == {False}
+    assert {item["safePayloadProfile"] for item in action_execution["executionPlan"]} == {
+        "role_subject_action_reference"
+    }
+    assert all(
+        item["idempotencyKey"].startswith("business-action-execution:")
+        for item in action_execution["executionPlan"]
+    )
+    assert any(item["commitWouldMutateProvider"] for item in action_execution["executionPlan"])
+    assert any(item["safeToAutoRun"] is False for item in action_execution["executionPlan"])
+    assert {item["check"] for item in action_execution["preflightChecks"]} == {
+        "safe_payload_profile",
+        "idempotency_key_ready",
+        "approval_gate_attached",
+        "connector_secret_boundary",
+    }
+    assert {item["wouldRecord"] for item in action_execution["dryRunResults"]} == {
+        "WorkflowActionRun"
+    }
+    assert {item["status"] for item in action_execution["dryRunResults"]} == {"would_enqueue"}
+    assert {item["externalMutation"] for item in action_execution["dryRunResults"]} == {False}
+    assert {item["gate"] for item in action_execution["approvalGates"]} == {
+        "operator_review_gate",
+        "external_write_gate",
+        "idempotent_outbox_gate",
+    }
+    assert {item["step"] for item in action_execution["rollbackPlan"]} == {
+        "preview_has_no_rollback",
+        "commit_uses_outbox_recovery",
+    }
+    assert {item["name"] for item in action_execution["dataBoundaries"]} == {
+        "dry_run_only",
+        "no_provider_write",
+        "safe_execution_payload",
+        "audit_and_outbox_contract",
+    }
+    assert action_execution["api"]["standalone"] == "GET /demo/business-action-execution"
+    assert action_execution["api"]["preview"] == (
+        "POST /tenants/{tenant_id}/business-action-executions/preview"
+    )
+    assert {item["path"] for item in action_execution["docs"]} >= {
+        "docs/public/BUSINESS_ACTION_EXECUTION.md",
+        "docs/public/BUSINESS_TASK_HANDOFF.md",
+        "docs/public/BUSINESS_CONTEXT_ASSISTANT.md",
+    }
     business_scenario_replay = payload["businessScenarioReplay"]
     assert business_scenario_replay["status"] == "validated"
     assert business_scenario_replay["command"] == "bash scripts/check_public_business_scenario_replay.sh"
@@ -956,10 +1028,12 @@ def test_public_demo_can_load_api_backed_data_with_static_fallback() -> None:
     assert "fillIncidentResponse" in script
     assert "fillEngineeringProof" in script
     assert "fillBusinessContextAssistant" in script
+    assert "fillBusinessActionExecution" in script
     assert "alertRouting" in script
     assert "incidentResponse" in script
     assert "engineeringProof" in script
     assert "businessContextAssistant" in script
+    assert "businessActionExecution" in script
     assert "workflowScenarios" in script
     assert "endToEndScenario" in script
     assert "adapterScenarios" in script
@@ -980,6 +1054,7 @@ def test_public_demo_api_scripts_and_examples_exist() -> None:
         "scripts/check_public_demo_api.sh",
         "scripts/check_public_business_notification_channels.sh",
         "scripts/check_public_business_context_assistant.sh",
+        "scripts/check_public_business_action_execution.sh",
         "scripts/check_public_business_scenario_replay.sh",
         "scripts/check_public_engineering_proof.sh",
         "scripts/check_public_demo_sdk.sh",
@@ -1027,6 +1102,7 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
             "/demo/connector-fixture-replay",
             "/demo/business-notification-channels",
             "/demo/business-context-assistant",
+            "/demo/business-action-execution",
             "/demo/business-scenario-replay",
             "/openapi.json",
             "student_sync",
@@ -1144,14 +1220,24 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
             "/demo/connector-fixture-replay",
             "/demo/business-notification-channels",
             "/demo/business-context-assistant",
+            "/demo/business-action-execution",
             "/demo/business-scenario-replay",
             "operationId",
             "ConnectorFixtureReplayRead",
             "BusinessNotificationChannelMatrixDemoRead",
             "BusinessContextAssistantDemoRead",
+            "BusinessActionExecutionDemoRead",
             "BusinessScenarioReplayRead",
             "drivedesk_public_demo_client.py",
             "drivedesk-public-demo-client.mjs",
+        ],
+        "scripts/check_public_business_action_execution.sh": [
+            "/demo/business-action-execution",
+            "businessActionExecution",
+            "business_action_execution.previewed",
+            "idempotencyKey",
+            "no_provider_write",
+            "BUSINESS_ACTION_EXECUTION.md",
         ],
         "examples/curl/demo-public.sh": ["/demo/public", "api.synthetic", "student_sync"],
         "examples/python/demo_public_client.py": ["/demo/public", "api.synthetic", "student_sync"],

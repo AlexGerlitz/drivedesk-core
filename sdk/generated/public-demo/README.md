@@ -27,6 +27,9 @@ operationId: business_notification_channels_demo_demo_business_notification_chan
 GET /demo/business-context-assistant
 operationId: business_context_assistant_demo_demo_business_context_assistant_get
 
+GET /demo/business-action-execution
+operationId: business_action_execution_demo_demo_business_action_execution_get
+
 GET /demo/business-scenario-replay
 operationId: business_scenario_replay_demo_demo_business_scenario_replay_get
 ```
@@ -49,6 +52,8 @@ Adapter operation helpers:
   `GET /demo/business-notification-channels`
 - `business_context_assistant` manifest entry for
   `GET /demo/business-context-assistant`
+- `business_action_execution` manifest entry for
+  `GET /demo/business-action-execution`
 - `DriveDeskPublicDemoClient.getBusinessScenarioReplay`
 - `DriveDeskPublicDemoClient.get_business_scenario_replay`
 
@@ -71,6 +76,10 @@ external delivery.
 Business Context Assistant metadata validates the public-safe context surface:
 CRM, bank, accounting, and legal-reference facts become safe context cards,
 insight rules, and next actions through `businessContextAssistant`.
+
+Business action execution metadata validates the public-safe execution preview:
+idempotency keys, preflight checks, dry-run results, approval gates, rollback
+notes, and explicit no-provider-write boundaries.
 
 Engineering summary: this is the public-safe integration proof. DriveDesk
 publishes an OpenAPI contract and generates a small SDK from it instead of

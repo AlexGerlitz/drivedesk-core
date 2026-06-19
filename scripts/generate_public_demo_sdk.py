@@ -19,6 +19,8 @@ BUSINESS_NOTIFICATION_CHANNELS_PATH = "/demo/business-notification-channels"
 BUSINESS_NOTIFICATION_CHANNELS_METHOD = "get"
 BUSINESS_CONTEXT_ASSISTANT_PATH = "/demo/business-context-assistant"
 BUSINESS_CONTEXT_ASSISTANT_METHOD = "get"
+BUSINESS_ACTION_EXECUTION_PATH = "/demo/business-action-execution"
+BUSINESS_ACTION_EXECUTION_METHOD = "get"
 BUSINESS_SCENARIO_REPLAY_PATH = "/demo/business-scenario-replay"
 BUSINESS_SCENARIO_REPLAY_METHOD = "get"
 
@@ -72,6 +74,14 @@ def business_context_assistant_operation(schema: dict[str, Any]) -> dict[str, An
         schema,
         BUSINESS_CONTEXT_ASSISTANT_PATH,
         BUSINESS_CONTEXT_ASSISTANT_METHOD,
+    )
+
+
+def business_action_execution_operation(schema: dict[str, Any]) -> dict[str, Any]:
+    return required_operation(
+        schema,
+        BUSINESS_ACTION_EXECUTION_PATH,
+        BUSINESS_ACTION_EXECUTION_METHOD,
     )
 
 
@@ -142,6 +152,16 @@ def business_context_assistant_required_fields(schema: dict[str, Any]) -> list[s
     required = assistant.get("required", [])
     if not isinstance(required, list) or not required:
         raise SystemExit("OpenAPI schema does not contain BusinessContextAssistantDemoRead.required")
+    return [str(item) for item in required]
+
+
+def business_action_execution_required_fields(schema: dict[str, Any]) -> list[str]:
+    components = schema.get("components", {})
+    schemas = components.get("schemas", {})
+    execution = schemas.get("BusinessActionExecutionDemoRead", {})
+    required = execution.get("required", [])
+    if not isinstance(required, list) or not required:
+        raise SystemExit("OpenAPI schema does not contain BusinessActionExecutionDemoRead.required")
     return [str(item) for item in required]
 
 
@@ -1482,6 +1502,7 @@ def render_readme(
     connector_operation_id: str,
     business_notification_channels_operation_id: str,
     business_context_assistant_operation_id: str,
+    business_action_execution_operation_id: str,
     business_scenario_operation_id: str,
 ) -> str:
     return f'''# Generated Public Demo SDK
@@ -1513,6 +1534,9 @@ operationId: {business_notification_channels_operation_id}
 GET {BUSINESS_CONTEXT_ASSISTANT_PATH}
 operationId: {business_context_assistant_operation_id}
 
+GET {BUSINESS_ACTION_EXECUTION_PATH}
+operationId: {business_action_execution_operation_id}
+
 GET {BUSINESS_SCENARIO_REPLAY_PATH}
 operationId: {business_scenario_operation_id}
 ```
@@ -1535,6 +1559,8 @@ Adapter operation helpers:
   `GET {BUSINESS_NOTIFICATION_CHANNELS_PATH}`
 - `business_context_assistant` manifest entry for
   `GET {BUSINESS_CONTEXT_ASSISTANT_PATH}`
+- `business_action_execution` manifest entry for
+  `GET {BUSINESS_ACTION_EXECUTION_PATH}`
 - `DriveDeskPublicDemoClient.getBusinessScenarioReplay`
 - `DriveDeskPublicDemoClient.get_business_scenario_replay`
 
@@ -1558,6 +1584,10 @@ Business Context Assistant metadata validates the public-safe context surface:
 CRM, bank, accounting, and legal-reference facts become safe context cards,
 insight rules, and next actions through `businessContextAssistant`.
 
+Business action execution metadata validates the public-safe execution preview:
+idempotency keys, preflight checks, dry-run results, approval gates, rollback
+notes, and explicit no-provider-write boundaries.
+
 Engineering summary: this is the public-safe integration proof. DriveDesk
 publishes an OpenAPI contract and generates a small SDK from it instead of
 relying on hand-written request examples only.
@@ -1577,6 +1607,8 @@ def render_manifest(
     business_notification_channels_required_fields: list[str],
     business_context_assistant_operation_id: str,
     business_context_assistant_required_fields: list[str],
+    business_action_execution_operation_id: str,
+    business_action_execution_required_fields: list[str],
     business_scenario_operation_id: str,
     business_scenario_required_fields: list[str],
 ) -> str:
@@ -1615,6 +1647,12 @@ def render_manifest(
             "method": BUSINESS_CONTEXT_ASSISTANT_METHOD.upper(),
             "operation_id": business_context_assistant_operation_id,
             "required_fields": business_context_assistant_required_fields,
+        },
+        "business_action_execution": {
+            "path": BUSINESS_ACTION_EXECUTION_PATH,
+            "method": BUSINESS_ACTION_EXECUTION_METHOD.upper(),
+            "operation_id": business_action_execution_operation_id,
+            "required_fields": business_action_execution_required_fields,
         },
         "business_scenario_replay": {
             "path": BUSINESS_SCENARIO_REPLAY_PATH,
@@ -1677,6 +1715,12 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
         or "get_business_context_assistant"
     )
     business_context_assistant_fields = business_context_assistant_required_fields(schema)
+    business_action_execution_op = business_action_execution_operation(schema)
+    business_action_execution_operation_id = str(
+        business_action_execution_op.get("operationId")
+        or "get_business_action_execution"
+    )
+    business_action_execution_fields = business_action_execution_required_fields(schema)
     business_scenario_operation = business_scenario_replay_operation(schema)
     business_scenario_operation_id = str(
         business_scenario_operation.get("operationId") or "get_business_scenario_replay"
@@ -1690,6 +1734,7 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
             connector_operation_id,
             business_notification_channels_operation_id,
             business_context_assistant_operation_id,
+            business_action_execution_operation_id,
             business_scenario_operation_id,
         ),
     )
@@ -1708,6 +1753,8 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
             business_notification_channels_fields,
             business_context_assistant_operation_id,
             business_context_assistant_fields,
+            business_action_execution_operation_id,
+            business_action_execution_fields,
             business_scenario_operation_id,
             business_scenario_required_fields,
         ),

@@ -713,6 +713,245 @@ window.DRIVEDESK_DEMO_DATA = {
       "time": "09:22"
     }
   ],
+  "businessActionExecution": {
+    "api": {
+      "actionPlan": "POST /tenants/{tenant_id}/business-action-plans/preview",
+      "preview": "POST /tenants/{tenant_id}/business-action-executions/preview",
+      "repairExecute": "POST /tenants/{tenant_id}/repair-actions/{repair_action_id}/execute",
+      "standalone": "GET /demo/business-action-execution",
+      "taskHandoff": "POST /tenants/{tenant_id}/business-task-handoffs/preview"
+    },
+    "approvalGates": [
+      {
+        "evidence": "business_action_execution.previewed",
+        "externalMutation": false,
+        "gate": "operator_review_gate",
+        "requiresApproval": true,
+        "status": "required"
+      },
+      {
+        "evidence": "business_action_execution.previewed",
+        "externalMutation": false,
+        "gate": "external_write_gate",
+        "requiresApproval": true,
+        "status": "closed"
+      },
+      {
+        "evidence": "business_action_execution.previewed",
+        "externalMutation": false,
+        "gate": "idempotent_outbox_gate",
+        "requiresApproval": false,
+        "status": "ready"
+      }
+    ],
+    "command": "POST /tenants/{tenant_id}/business-action-executions/preview",
+    "dataBoundaries": [
+      {
+        "externalMutation": false,
+        "name": "dry_run_only",
+        "status": "preview_only"
+      },
+      {
+        "externalMutation": false,
+        "name": "no_provider_write",
+        "status": "closed"
+      },
+      {
+        "containsPii": false,
+        "name": "safe_execution_payload",
+        "rawPayloadIncluded": false,
+        "status": "clean"
+      },
+      {
+        "externalMutation": false,
+        "name": "audit_and_outbox_contract",
+        "status": "documented"
+      }
+    ],
+    "docs": [
+      {
+        "label": "Business Action Execution",
+        "path": "docs/public/BUSINESS_ACTION_EXECUTION.md"
+      },
+      {
+        "label": "Business Task Handoff",
+        "path": "docs/public/BUSINESS_TASK_HANDOFF.md"
+      },
+      {
+        "label": "Business Context Assistant",
+        "path": "docs/public/BUSINESS_CONTEXT_ASSISTANT.md"
+      }
+    ],
+    "dryRunResults": [
+      {
+        "action": "open_reconciliation_plan",
+        "adapterKey": "internal.noop",
+        "containsPii": false,
+        "evidence": "business_action_execution.previewed",
+        "externalMutation": false,
+        "rawPayloadIncluded": false,
+        "resultKey": "dry_run.001",
+        "status": "would_enqueue",
+        "wouldEnqueueEvent": "business.action.review_requested",
+        "wouldRecord": "WorkflowActionRun"
+      },
+      {
+        "action": "queue_accounting_export_after_review",
+        "adapterKey": "accounting.export.mock",
+        "containsPii": false,
+        "evidence": "business_action_execution.previewed",
+        "externalMutation": false,
+        "rawPayloadIncluded": false,
+        "resultKey": "dry_run.002",
+        "status": "would_enqueue",
+        "wouldEnqueueEvent": "accounting.export.requested",
+        "wouldRecord": "WorkflowActionRun"
+      },
+      {
+        "action": "prepare_internal_notification",
+        "adapterKey": "internal.notification",
+        "containsPii": false,
+        "evidence": "business_action_execution.previewed",
+        "externalMutation": false,
+        "rawPayloadIncluded": false,
+        "resultKey": "dry_run.003",
+        "status": "would_enqueue",
+        "wouldEnqueueEvent": "notification.delivery.requested",
+        "wouldRecord": "WorkflowActionRun"
+      }
+    ],
+    "executionPlan": [
+      {
+        "action": "open_reconciliation_plan",
+        "adapterKey": "internal.noop",
+        "commitWouldMutateProvider": false,
+        "containsPii": false,
+        "dryRun": true,
+        "evidence": "business_action_execution.previewed",
+        "executionKey": "execution.preview.001",
+        "externalMutation": false,
+        "idempotencyKey": "business-action-execution:deal:DEAL-2026-001:open_reconciliation_plan:001",
+        "mode": "dry_run",
+        "rawPayloadIncluded": false,
+        "requiresApproval": false,
+        "safePayloadProfile": "role_subject_action_reference",
+        "safeToAutoRun": true,
+        "status": "dry_run_ready",
+        "wouldEnqueueEvent": "business.action.review_requested"
+      },
+      {
+        "action": "queue_accounting_export_after_review",
+        "adapterKey": "accounting.export.mock",
+        "commitWouldMutateProvider": true,
+        "containsPii": false,
+        "dryRun": true,
+        "evidence": "business_action_execution.previewed",
+        "executionKey": "execution.preview.002",
+        "externalMutation": false,
+        "idempotencyKey": "business-action-execution:deal:DEAL-2026-001:queue_accounting_export_after_review:002",
+        "mode": "dry_run",
+        "rawPayloadIncluded": false,
+        "requiresApproval": true,
+        "safePayloadProfile": "role_subject_action_reference",
+        "safeToAutoRun": false,
+        "status": "approval_required",
+        "wouldEnqueueEvent": "accounting.export.requested"
+      },
+      {
+        "action": "prepare_internal_notification",
+        "adapterKey": "internal.notification",
+        "commitWouldMutateProvider": false,
+        "containsPii": false,
+        "dryRun": true,
+        "evidence": "business_action_execution.previewed",
+        "executionKey": "execution.preview.003",
+        "externalMutation": false,
+        "idempotencyKey": "business-action-execution:deal:DEAL-2026-001:prepare_internal_notification:003",
+        "mode": "dry_run",
+        "rawPayloadIncluded": false,
+        "requiresApproval": false,
+        "safePayloadProfile": "role_subject_action_reference",
+        "safeToAutoRun": true,
+        "status": "dry_run_ready",
+        "wouldEnqueueEvent": "notification.delivery.requested"
+      }
+    ],
+    "preflightChecks": [
+      {
+        "check": "safe_payload_profile",
+        "detail": "Only role, subject key, action key, and evidence references are included.",
+        "evidence": "business_action_execution.previewed",
+        "externalMutation": false,
+        "status": "passed"
+      },
+      {
+        "check": "idempotency_key_ready",
+        "detail": "Every execution candidate has a deterministic idempotency key.",
+        "evidence": "business_action_execution.previewed",
+        "externalMutation": false,
+        "status": "passed"
+      },
+      {
+        "check": "approval_gate_attached",
+        "detail": "Provider-changing commits stay behind operator approval.",
+        "evidence": "business_action_execution.previewed",
+        "externalMutation": false,
+        "status": "required"
+      },
+      {
+        "browserTokenStorage": false,
+        "check": "connector_secret_boundary",
+        "detail": "Preview does not require credentials or browser token storage.",
+        "evidence": "business_action_execution.previewed",
+        "externalMutation": false,
+        "requiresSecret": false,
+        "status": "clean"
+      }
+    ],
+    "role": "accountant",
+    "rollbackPlan": [
+      {
+        "detail": "Dry-run preview writes nothing and has no external state to roll back.",
+        "externalMutation": false,
+        "status": "not_needed",
+        "step": "preview_has_no_rollback"
+      },
+      {
+        "detail": "Future commit execution uses outbox retry, dead-letter review, and audit evidence.",
+        "externalMutation": false,
+        "status": "documented",
+        "step": "commit_uses_outbox_recovery"
+      }
+    ],
+    "status": "previewed",
+    "subject": "deal:DEAL-2026-001",
+    "summary": [
+      {
+        "detail": "review, accounting export, notification",
+        "label": "Execution plans",
+        "tone": "blue",
+        "value": "3"
+      },
+      {
+        "detail": "payload, idempotency, approval, secrets",
+        "label": "Preflight checks",
+        "tone": "green",
+        "value": "4"
+      },
+      {
+        "detail": "operator review and provider write boundaries",
+        "label": "Approval gates",
+        "tone": "amber",
+        "value": "3"
+      },
+      {
+        "detail": "dry-run preview sends nothing",
+        "label": "External writes",
+        "tone": "violet",
+        "value": "0"
+      }
+    ]
+  },
   "businessContextAssistant": {
     "api": {
       "actionPlan": "POST /tenants/{tenant_id}/business-action-plans/preview",

@@ -403,6 +403,329 @@
         "title": "AuthSessionRead",
         "type": "object"
       },
+      "BusinessActionExecutionDemoRead": {
+        "properties": {
+          "api": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Api",
+            "type": "object"
+          },
+          "approvalGates": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Approvalgates",
+            "type": "array"
+          },
+          "command": {
+            "title": "Command",
+            "type": "string"
+          },
+          "dataBoundaries": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Databoundaries",
+            "type": "array"
+          },
+          "docs": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "title": "Docs",
+            "type": "array"
+          },
+          "dryRunResults": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Dryrunresults",
+            "type": "array"
+          },
+          "executionPlan": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Executionplan",
+            "type": "array"
+          },
+          "preflightChecks": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Preflightchecks",
+            "type": "array"
+          },
+          "role": {
+            "title": "Role",
+            "type": "string"
+          },
+          "rollbackPlan": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Rollbackplan",
+            "type": "array"
+          },
+          "status": {
+            "const": "previewed",
+            "title": "Status",
+            "type": "string"
+          },
+          "subject": {
+            "title": "Subject",
+            "type": "string"
+          },
+          "summary": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Summary",
+            "type": "array"
+          }
+        },
+        "required": [
+          "status",
+          "command",
+          "summary",
+          "role",
+          "subject",
+          "executionPlan",
+          "preflightChecks",
+          "dryRunResults",
+          "approvalGates",
+          "rollbackPlan",
+          "dataBoundaries",
+          "api",
+          "docs"
+        ],
+        "title": "BusinessActionExecutionDemoRead",
+        "type": "object"
+      },
+      "BusinessActionExecutionPreviewCreate": {
+        "properties": {
+          "action_steps": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "maxItems": 10,
+            "title": "Action Steps",
+            "type": "array"
+          },
+          "execution_kind": {
+            "const": "action_plan_execution_preview",
+            "default": "action_plan_execution_preview",
+            "title": "Execution Kind",
+            "type": "string"
+          },
+          "execution_mode": {
+            "default": "dry_run",
+            "enum": [
+              "dry_run",
+              "approval_request"
+            ],
+            "title": "Execution Mode",
+            "type": "string"
+          },
+          "include_preflight": {
+            "default": true,
+            "title": "Include Preflight",
+            "type": "boolean"
+          },
+          "include_rollback_plan": {
+            "default": true,
+            "title": "Include Rollback Plan",
+            "type": "boolean"
+          },
+          "role": {
+            "default": "operator",
+            "enum": [
+              "operator",
+              "accountant",
+              "manager",
+              "owner",
+              "support"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "subject_id": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Id"
+          },
+          "subject_type": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 2,
+                "pattern": "^[a-z0-9][a-z0-9_-]*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Type"
+          }
+        },
+        "title": "BusinessActionExecutionPreviewCreate",
+        "type": "object"
+      },
+      "BusinessActionExecutionPreviewRead": {
+        "properties": {
+          "api": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Api",
+            "type": "object"
+          },
+          "approval_gates": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Approval Gates",
+            "type": "array"
+          },
+          "data_boundaries": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Data Boundaries",
+            "type": "array"
+          },
+          "dry_run_results": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Dry Run Results",
+            "type": "array"
+          },
+          "evidence": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "execution_kind": {
+            "const": "action_plan_execution_preview",
+            "title": "Execution Kind",
+            "type": "string"
+          },
+          "execution_plan": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Execution Plan",
+            "type": "array"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "preflight_checks": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Preflight Checks",
+            "type": "array"
+          },
+          "role": {
+            "enum": [
+              "operator",
+              "accountant",
+              "manager",
+              "owner",
+              "support"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "rollback_plan": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Rollback Plan",
+            "type": "array"
+          },
+          "status": {
+            "const": "previewed",
+            "title": "Status",
+            "type": "string"
+          },
+          "subject_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Id"
+          },
+          "subject_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Type"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tenant_id",
+          "execution_kind",
+          "role",
+          "generated_at",
+          "status",
+          "summary"
+        ],
+        "title": "BusinessActionExecutionPreviewRead",
+        "type": "object"
+      },
       "BusinessActionPlanPreviewCreate": {
         "properties": {
           "include_resolved": {
@@ -4808,6 +5131,11 @@
             "title": "Auditevents",
             "type": "array"
           },
+          "businessActionExecution": {
+            "additionalProperties": true,
+            "title": "Businessactionexecution",
+            "type": "object"
+          },
           "businessContextAssistant": {
             "additionalProperties": true,
             "title": "Businesscontextassistant",
@@ -5009,6 +5337,7 @@
           "businessTaskHandoff",
           "businessNotificationChannels",
           "businessContextAssistant",
+          "businessActionExecution",
           "integrationJobs",
           "integrationHealth",
           "integrationReadiness",
@@ -6076,6 +6405,27 @@
         ]
       }
     },
+    "/demo/business-action-execution": {
+      "get": {
+        "operationId": "business_action_execution_demo_demo_business_action_execution_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessActionExecutionDemoRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Business Action Execution Demo",
+        "tags": [
+          "demo"
+        ]
+      }
+    },
     "/demo/business-context-assistant": {
       "get": {
         "operationId": "business_context_assistant_demo_demo_business_context_assistant_get",
@@ -6761,6 +7111,94 @@
           }
         },
         "summary": "List Audit Events Endpoint"
+      }
+    },
+    "/tenants/{tenant_id}/business-action-executions/preview": {
+      "post": {
+        "operationId": "preview_business_action_execution_endpoint_tenants__tenant_id__business_action_executions_preview_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tenant_id",
+            "required": true,
+            "schema": {
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "X-Actor-Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Role",
+            "required": false,
+            "schema": {
+              "default": "viewer",
+              "title": "X-Actor-Role",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessActionExecutionPreviewCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessActionExecutionPreviewRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Preview Business Action Execution Endpoint",
+        "tags": [
+          "business-control"
+        ]
       }
     },
     "/tenants/{tenant_id}/business-action-plans/preview": {

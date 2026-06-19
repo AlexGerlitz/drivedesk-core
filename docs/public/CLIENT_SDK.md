@@ -14,8 +14,13 @@ It targets the read-only synthetic public demo endpoint:
 ```text
 GET /demo/public
 GET /demo/connector-fixture-replay
+GET /demo/business-action-execution
 GET /demo/business-scenario-replay
 ```
+
+The action execution payload appears in the public contract as
+`businessActionExecution` and is documented in
+`docs/public/BUSINESS_ACTION_EXECUTION.md`.
 
 ## Generated Files
 
@@ -50,7 +55,8 @@ scripts/generate_public_demo_sdk.py
 ```
 
 It reads the OpenAPI schema, finds `GET /demo/public`,
-`GET /demo/connector-fixture-replay`, and
+`GET /demo/connector-fixture-replay`,
+`GET /demo/business-action-execution`, and
 `GET /demo/business-scenario-replay`, extracts operation ids and required
 response fields, and writes small public-safe clients.
 
@@ -77,6 +83,7 @@ The SDK includes typed helpers around `adapterScenarios`:
 - `DriveDeskPublicDemoClient.getAdapterOperationPlan`.
 - `DriveDeskPublicDemoClient.get_connector_fixture_replay`;
 - `DriveDeskPublicDemoClient.getConnectorFixtureReplay`.
+- `business_action_execution` in `openapi-client-manifest.json`.
 - `DriveDeskPublicDemoClient.get_business_scenario_replay`;
 - `DriveDeskPublicDemoClient.getBusinessScenarioReplay`.
 

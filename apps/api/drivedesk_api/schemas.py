@@ -27,6 +27,7 @@ BusinessNotificationChannelMatrixKind = Literal["operator_channel_readiness"]
 BusinessProviderIntakeSource = Literal["crm_deal", "bank_payment", "accounting_export", "support_ticket"]
 BusinessWorkbenchContextKind = Literal["role_assist"]
 BusinessTaskHandoffKind = Literal["action_plan_task_handoff"]
+BusinessActionExecutionKind = Literal["action_plan_execution_preview"]
 
 
 class AdapterContractRead(BaseModel):
@@ -718,6 +719,36 @@ class BusinessTaskHandoffPreviewRead(BaseModel):
     api: dict[str, str] = Field(default_factory=dict)
 
 
+class BusinessActionExecutionPreviewCreate(BaseModel):
+    execution_kind: BusinessActionExecutionKind = "action_plan_execution_preview"
+    role: BusinessBriefingRole = "operator"
+    subject_type: str | None = Field(default=None, min_length=2, max_length=64, pattern=r"^[a-z0-9][a-z0-9_-]*$")
+    subject_id: str | None = Field(default=None, min_length=1, max_length=128)
+    action_steps: list[dict[str, Any]] = Field(default_factory=list, max_length=10)
+    execution_mode: Literal["dry_run", "approval_request"] = "dry_run"
+    include_preflight: bool = True
+    include_rollback_plan: bool = True
+
+
+class BusinessActionExecutionPreviewRead(BaseModel):
+    tenant_id: str
+    execution_kind: BusinessActionExecutionKind
+    role: BusinessBriefingRole
+    subject_type: str | None = None
+    subject_id: str | None = None
+    generated_at: datetime
+    status: Literal["previewed"]
+    summary: str
+    execution_plan: list[dict[str, Any]] = Field(default_factory=list)
+    preflight_checks: list[dict[str, Any]] = Field(default_factory=list)
+    dry_run_results: list[dict[str, Any]] = Field(default_factory=list)
+    approval_gates: list[dict[str, Any]] = Field(default_factory=list)
+    rollback_plan: list[dict[str, Any]] = Field(default_factory=list)
+    data_boundaries: list[dict[str, Any]] = Field(default_factory=list)
+    evidence: list[dict[str, Any]] = Field(default_factory=list)
+    api: dict[str, str] = Field(default_factory=dict)
+
+
 class BusinessWorkbenchContextPreviewCreate(BaseModel):
     context_kind: BusinessWorkbenchContextKind = "role_assist"
     role: BusinessBriefingRole = "operator"
@@ -908,6 +939,22 @@ class BusinessContextAssistantDemoRead(BaseModel):
     docs: list[dict[str, str]]
 
 
+class BusinessActionExecutionDemoRead(BaseModel):
+    status: Literal["previewed"]
+    command: str
+    summary: list[dict[str, Any]]
+    role: str
+    subject: str
+    executionPlan: list[dict[str, Any]]
+    preflightChecks: list[dict[str, Any]]
+    dryRunResults: list[dict[str, Any]]
+    approvalGates: list[dict[str, Any]]
+    rollbackPlan: list[dict[str, Any]]
+    dataBoundaries: list[dict[str, Any]]
+    api: dict[str, str]
+    docs: list[dict[str, str]]
+
+
 class PublicDemoRead(BaseModel):
     schemaVersion: int
     generatedAt: str
@@ -928,6 +975,7 @@ class PublicDemoRead(BaseModel):
     businessTaskHandoff: dict[str, Any]
     businessNotificationChannels: dict[str, Any]
     businessContextAssistant: dict[str, Any]
+    businessActionExecution: dict[str, Any]
     integrationJobs: list[dict[str, Any]]
     integrationHealth: list[dict[str, str]]
     integrationReadiness: list[dict[str, Any]]

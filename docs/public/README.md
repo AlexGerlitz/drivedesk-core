@@ -46,6 +46,9 @@ infrastructure, production history, customer data, or operational credentials.
 - `BUSINESS_CONTEXT_ASSISTANT.md` - preview-only Business Context Assistant
   for CRM, bank, accounting, and legal-reference facts via the
   `businessContextAssistant` contract.
+- `BUSINESS_ACTION_EXECUTION.md` - preview-only action execution plan with
+  idempotency keys, preflight checks, dry-run results, approval gates, and
+  rollback notes via the `businessActionExecution` contract.
 - `BUSINESS_SCENARIO_REPLAY.md` - reusable Business OS replay paths for
   CRM/bank/accounting mismatch, support SLA risk, and procurement delay risk via
   the `businessScenarioReplay` contract.
@@ -173,6 +176,9 @@ The public repository export also generates:
 - `GET /demo/business-context-assistant` - standalone public-safe context
   assistant contract for `businessContextAssistant`, backed by
   `POST /tenants/{tenant_id}/business-workbench-context/preview`.
+- `GET /demo/business-action-execution` - standalone public-safe execution
+  preview contract for `businessActionExecution`, backed by
+  `POST /tenants/{tenant_id}/business-action-executions/preview`.
 - `incidentResponse` - public-safe incident response contract in the demo
   payload and Incidents tab.
 - `businessControlTower` - public-safe control tower contract for CRM, bank,
@@ -225,6 +231,9 @@ The public repository export also generates:
 - `scripts/check_public_business_context_assistant.sh` - public-safe Business
   Context Assistant validation for `GET /demo/business-context-assistant` and
   `businessContextAssistant`.
+- `scripts/check_public_business_action_execution.sh` - public-safe action
+  execution validation for `GET /demo/business-action-execution` and
+  `businessActionExecution`.
 - `scripts/check_public_backup_restore.sh` - public-safe synthetic recovery drill.
 - `scripts/check_public_release_rollback.sh` - public-safe release rollback drill.
 - `scripts/check_public_slo_canary_gate.sh` - public-safe SLO canary gate drill.

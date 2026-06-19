@@ -68,6 +68,9 @@ from drivedesk_api.schemas import (
     AccountingExportCreate,
     AdapterContractRead,
     AuditEventRead,
+    BusinessActionExecutionDemoRead,
+    BusinessActionExecutionPreviewCreate,
+    BusinessActionExecutionPreviewRead,
     BusinessActionPlanPreviewCreate,
     BusinessActionPlanPreviewRead,
     AuthMeRead,
@@ -187,6 +190,7 @@ from drivedesk_api.services import (
     list_repair_actions,
     list_workflow_action_runs,
     list_workflow_rules,
+    preview_business_action_execution,
     preview_business_action_plan,
     preview_business_detections,
     preview_business_escalations,
@@ -352,6 +356,20 @@ def build_app(settings: Settings | None = None) -> FastAPI:
     async def business_context_assistant_demo() -> JSONResponse:
         return JSONResponse(
             build_public_demo_payload()["businessContextAssistant"],
+            headers={
+                "Access-Control-Allow-Origin": "*",
+                "Cache-Control": "public, max-age=60",
+            },
+        )
+
+    @api.get(
+        "/demo/business-action-execution",
+        response_model=BusinessActionExecutionDemoRead,
+        tags=["demo"],
+    )
+    async def business_action_execution_demo() -> JSONResponse:
+        return JSONResponse(
+            build_public_demo_payload()["businessActionExecution"],
             headers={
                 "Access-Control-Allow-Origin": "*",
                 "Cache-Control": "public, max-age=60",
@@ -1113,6 +1131,21 @@ def build_app(settings: Settings | None = None) -> FastAPI:
         await ensure_tenant_exists(session, tenant_id)
         require_tenant_permission(actor, tenant_id, Permission.BUSINESS_RECORD_READ)
         return await preview_business_task_handoff(session, tenant_id=tenant_id, payload=payload)
+
+    @api.post(
+        "/tenants/{tenant_id}/business-action-executions/preview",
+        response_model=BusinessActionExecutionPreviewRead,
+        tags=["business-control"],
+    )
+    async def preview_business_action_execution_endpoint(
+        tenant_id: str,
+        payload: BusinessActionExecutionPreviewCreate,
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> dict[str, object]:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.BUSINESS_RECORD_READ)
+        return await preview_business_action_execution(session, tenant_id=tenant_id, payload=payload)
 
     @api.post(
         "/tenants/{tenant_id}/business-notification-channels/preview",

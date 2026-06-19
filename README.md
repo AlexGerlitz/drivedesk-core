@@ -29,6 +29,7 @@ It includes:
 - synthetic file import adapter with retry and dead-letter state;
 - runtime adapter catalog for executable adapter metadata;
 - synthetic lead-to-student workflow in the public demo payload;
+- public Business OS tour connecting business event -> workflow -> adapter -> incident -> proof;
 - generated OpenAPI client SDK example for the public demo API;
 - public-safe synthetic backup/restore drill with sanitized evidence;
 - public-safe synthetic release rollback drill with sanitized evidence;
@@ -52,6 +53,7 @@ It includes:
 | Need | Open | What it proves |
 | --- | --- | --- |
 | Fast system route | `docs/public/SYSTEM_REVIEW_PATH.md` | How the public root, demo, API, SDK, operations evidence, release safety, GitOps, OpenTofu, and evidence index fit together. |
+| Business OS tour | `docs/public/PLATFORM_TOUR.md` | How business events, Control Tower, Adapter Studio, incidents, and proof connect. |
 | Live product surface | [public engineering reference](https://alexgerlitz.github.io/drivedesk-core/) and [public demo](https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/) | Browser-visible workflow, operations, incidents, and proof tabs on synthetic demo data. |
 | Current project state | `docs/public/PROJECT_STATUS.md` | What is implemented, what is intentionally public-safe, and what remains private. |
 | Verification commands | `bash scripts/ci_smoke_public.sh` | Public smoke path covering docs, demo contract, OpenAPI, SDK examples, and release evidence. |
@@ -62,16 +64,20 @@ It includes:
 | --- | --- |
 | Runtime | FastAPI demo API, background-worker contract, Postgres-shaped repositories, Redis/outbox job model, and `GET /metrics`. |
 | Product core | Tenants, RBAC, audit log, outbox recovery, business records, lifecycle policies, workflow rules, tasks, and documents. |
-| Integration hub | Adapter catalog, connection scopes, mapping validation, mapping transform preview, operation contracts, diagnostics, reconciliation, and operator review. |
+| Integration hub | Adapter catalog, Adapter Studio, connection scopes, mapping validation, mapping transform preview, operation contracts, diagnostics, reconciliation, and operator review. |
 | Operations | Prometheus-style metrics, structured logs, Alertmanager-style routing, incident response, backup/restore, rollback, SLO canary, and staged promotion evidence. |
 | Delivery | Docker Compose, Helm chart, GitOps manifests, OpenTofu plan evidence, CI gates, Pages health check, and public/private export gate. |
 
 ## Fast Review
 
-Start with `docs/public/SYSTEM_REVIEW_PATH.md`.
+Start with `docs/public/SYSTEM_REVIEW_PATH.md`, then open
+`docs/public/PLATFORM_TOUR.md`.
 
 It gives the compact route through the public root, demo, API, SDK, operations
 evidence, release safety, GitOps, OpenTofu, and evidence index.
+
+The Platform Tour gives the Business OS route through business event ->
+workflow -> adapter -> incident -> proof.
 
 Then continue with `docs/public/REVIEWER_QUICKSTART.md`.
 
@@ -106,21 +112,24 @@ incident queue, mitigation, recovery, and resolution evidence path.
 ## Verification Path
 
 1. Start with `docs/public/SYSTEM_REVIEW_PATH.md`.
-2. Continue with `docs/public/REVIEWER_QUICKSTART.md`.
-3. Open the live demo and switch to the Workflow, Operations, Incidents, and Proof tabs.
-4. Inspect `docs/openapi.json`.
-5. Run `bash scripts/check_public_system_review_path.sh`.
-6. Run `bash scripts/ci_smoke_public.sh`.
-7. Run `bash scripts/check_public_engineering_proof.sh`.
-8. Run `bash scripts/check_public_demo_api.sh`.
-9. Run one generated client example from `examples/`.
-10. Review `docs/public/PROJECT_STATUS.md`, `docs/public/TECHNICAL_CAPABILITY_MAP.md`, `docs/public/EVIDENCE_INDEX.md`, `docs/public/OBSERVABILITY_PROOF.md`, `docs/public/ALERT_ROUTING_EVIDENCE.md`, `docs/public/INCIDENT_RESPONSE_DEMO.md`, `docs/public/ENGINEERING_PROOF.md`, `docs/public/PLATFORM_MATURITY_70.md`, and `docs/public/SANITIZED_EVIDENCE.md`.
-11. Review `docs/public/SYSTEM_DESIGN.md`, `docs/public/PROVIDER_CONNECTOR_GUIDE.md`, `docs/public/ADAPTER_DEVELOPER_GUIDE.md`, `docs/public/GITOPS_DELIVERY.md`, and the recovery evidence docs.
+2. Open `docs/public/PLATFORM_TOUR.md`.
+3. Continue with `docs/public/REVIEWER_QUICKSTART.md`.
+4. Open the live demo and switch to the Workflow, Control Tower, Integrations, Operations, Incidents, and Proof tabs.
+5. Inspect `docs/openapi.json`.
+6. Run `bash scripts/check_public_system_review_path.sh`.
+7. Run `bash scripts/check_public_platform_tour.sh`.
+8. Run `bash scripts/ci_smoke_public.sh`.
+9. Run `bash scripts/check_public_engineering_proof.sh`.
+10. Run `bash scripts/check_public_demo_api.sh`.
+11. Run one generated client example from `examples/`.
+12. Review `docs/public/PROJECT_STATUS.md`, `docs/public/TECHNICAL_CAPABILITY_MAP.md`, `docs/public/EVIDENCE_INDEX.md`, `docs/public/OBSERVABILITY_PROOF.md`, `docs/public/ALERT_ROUTING_EVIDENCE.md`, `docs/public/INCIDENT_RESPONSE_DEMO.md`, `docs/public/ENGINEERING_PROOF.md`, `docs/public/PLATFORM_MATURITY_70.md`, and `docs/public/SANITIZED_EVIDENCE.md`.
+13. Review `docs/public/SYSTEM_DESIGN.md`, `docs/public/PROVIDER_CONNECTOR_GUIDE.md`, `docs/public/ADAPTER_DEVELOPER_GUIDE.md`, `docs/public/GITOPS_DELIVERY.md`, and the recovery evidence docs.
 
 ## Full Artifact Reference
 
 - `docs/public/ENGINEERING_CASE_STUDY.md` - engineering case study.
 - `docs/public/SYSTEM_REVIEW_PATH.md` - compact engineering route through the public root, demo, API, SDK, operations evidence, release safety, GitOps, OpenTofu, and evidence index.
+- `docs/public/PLATFORM_TOUR.md` - Business OS tour across business events, Control Tower, Adapter Studio, incidents, proof, and verification gates.
 - `docs/public/REVIEWER_QUICKSTART.md` - shortest external verification path with 5-minute, 15-minute, and 45-minute verification tracks.
 - `docs/public/ENGINEERING_REVIEW_GUIDE.md` - short verification path for demo, CI, API, recovery, GitOps, and IaC evidence.
 - `docs/public/PROJECT_STATUS.md` - current public-safe engineering status, limits, and next work.
@@ -291,6 +300,7 @@ bash scripts/check_public_private_infra_scheduled_validation.sh
 bash scripts/check_public_private_infra_scheduled_alerting.sh
 bash scripts/check_public_platform_maturity_70.sh
 bash scripts/check_public_system_review_path.sh
+bash scripts/check_public_platform_tour.sh
 bash scripts/check_public_reviewer_quickstart.sh
 bash scripts/check_public_review_guide.sh
 bash scripts/check_public_pages_entrypoint.sh
@@ -340,6 +350,7 @@ bash scripts/check_public_private_infra_scheduled_validation.sh
 bash scripts/check_public_private_infra_scheduled_alerting.sh
 bash scripts/check_public_platform_maturity_70.sh
 bash scripts/check_public_system_review_path.sh
+bash scripts/check_public_platform_tour.sh
 bash scripts/check_public_reviewer_quickstart.sh
 bash scripts/check_public_review_guide.sh
 bash scripts/check_public_pages_entrypoint.sh

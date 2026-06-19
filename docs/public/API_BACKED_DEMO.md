@@ -18,7 +18,7 @@ The endpoint returns the same product-shaped synthetic demo data used by the pub
 shell: tenant, health, metrics, work queue, workflow stages, timeline entries,
 workflow scenarios, domain events, members, audit events, outbox events, adapter
 contracts, adapter operation scenarios, Adapter Studio, sync jobs, Integration
-Health, alert routing, incident response, business control tower data, recovery
+Health, alert routing, incident response, `businessControlTower` data, recovery
 evidence, and the `engineeringProof` contract rendered by the Integrations,
 Operations, Incidents, and Proof tabs.
 

@@ -54,10 +54,15 @@ guide = read(guide_path)
 for token in [
     "Engineering Review Guide",
     "docs/public/SYSTEM_REVIEW_PATH.md",
+    "docs/public/PLATFORM_TOUR.md",
     "docs/public/REVIEWER_QUICKSTART.md",
-    "Live demo Workflow, Operations, Incidents, and Proof tabs",
+    "Live demo Workflow, Control Tower, Integrations, Operations, Incidents, and Proof tabs",
+    "Business OS tour",
+    "businessControlTower",
+    "adapterStudio",
     "bash scripts/ci_smoke_public.sh",
     "bash scripts/check_public_system_review_path.sh",
+    "bash scripts/check_public_platform_tour.sh",
     "bash scripts/check_public_reviewer_quickstart.sh",
     "bash scripts/check_public_review_guide.sh",
     "bash scripts/check_public_project_status.sh",
@@ -76,6 +81,7 @@ for token in [
     "docs/openapi.json",
     "GET /demo/public",
     "docs/public/SYSTEM_DESIGN.md",
+    "docs/public/PLATFORM_TOUR.md",
     "docs/public/PROJECT_STATUS.md",
     "docs/public/TECHNICAL_CAPABILITY_MAP.md",
     "docs/public/OBSERVABILITY_PROOF.md",
@@ -93,6 +99,10 @@ for token in [
 require(
     "SYSTEM_REVIEW_PATH.md" in read(public_docs_readme_path),
     "docs/public README missing SYSTEM_REVIEW_PATH.md",
+)
+require(
+    "PLATFORM_TOUR.md" in read(public_docs_readme_path),
+    "docs/public README missing PLATFORM_TOUR.md",
 )
 require(
     "REVIEWER_QUICKSTART.md" in read(public_docs_readme_path),
@@ -127,6 +137,7 @@ is_public_export = (root / "PUBLIC_EXPORT_MANIFEST.md").is_file()
 if is_public_export and root_readme_path.is_file():
     root_readme = read(root_readme_path)
     require("SYSTEM_REVIEW_PATH.md" in root_readme, "root README missing system review path link")
+    require("PLATFORM_TOUR.md" in root_readme, "root README missing platform tour link")
     require("REVIEWER_QUICKSTART.md" in root_readme, "root README missing reviewer quickstart link")
     require("ENGINEERING_REVIEW_GUIDE.md" in root_readme, "root README missing review guide link")
     require("Start Here" in root_readme, "root README missing Start Here section")
@@ -137,25 +148,31 @@ if is_public_export and root_readme_path.is_file():
 if export_script_path.is_file():
     export_script = read(export_script_path)
     require("SYSTEM_REVIEW_PATH.md" in export_script, "export script missing system review path")
+    require("PLATFORM_TOUR.md" in export_script, "export script missing platform tour")
     require("REVIEWER_QUICKSTART.md" in export_script, "export script missing reviewer quickstart")
     require("ENGINEERING_REVIEW_GUIDE.md" in export_script, "export script missing review guide")
     require("check_public_system_review_path.sh" in export_script, "export script missing system review path check")
+    require("check_public_platform_tour.sh" in export_script, "export script missing platform tour check")
     require("check_public_review_guide.sh" in export_script, "export script missing review guide check")
 
 if source_smoke_path.is_file():
     require("check_public_system_review_path.sh" in read(source_smoke_path), "source smoke missing system review path check")
+    require("check_public_platform_tour.sh" in read(source_smoke_path), "source smoke missing platform tour check")
     require("check_public_reviewer_quickstart.sh" in read(source_smoke_path), "source smoke missing reviewer quickstart check")
     require("check_public_review_guide.sh" in read(source_smoke_path), "source smoke missing review guide check")
 
 if public_smoke_path.is_file():
     require("check_public_system_review_path.sh" in read(public_smoke_path), "public smoke missing system review path check")
+    require("check_public_platform_tour.sh" in read(public_smoke_path), "public smoke missing platform tour check")
     require("check_public_reviewer_quickstart.sh" in read(public_smoke_path), "public smoke missing reviewer quickstart check")
     require("check_public_review_guide.sh" in read(public_smoke_path), "public smoke missing review guide check")
 
 if public_gate_path.is_file():
     gate_text = read(public_gate_path)
     require("SYSTEM_REVIEW_PATH.md" in gate_text, "release gate missing system review path doc")
+    require("PLATFORM_TOUR.md" in gate_text, "release gate missing platform tour doc")
     require("check_public_system_review_path.sh" in gate_text, "release gate missing system review path check")
+    require("check_public_platform_tour.sh" in gate_text, "release gate missing platform tour check")
     require("REVIEWER_QUICKSTART.md" in gate_text, "release gate missing reviewer quickstart doc")
     require("check_public_reviewer_quickstart.sh" in gate_text, "release gate missing reviewer quickstart check")
     require("ENGINEERING_REVIEW_GUIDE.md" in gate_text, "release gate missing review guide doc")
@@ -163,6 +180,7 @@ if public_gate_path.is_file():
 
 for path in [
     "docs/public/SYSTEM_REVIEW_PATH.md",
+    "docs/public/PLATFORM_TOUR.md",
     "docs/public/SYSTEM_DESIGN.md",
     "docs/public/PROJECT_STATUS.md",
     "docs/public/TECHNICAL_CAPABILITY_MAP.md",

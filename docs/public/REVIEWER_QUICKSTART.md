@@ -4,17 +4,19 @@ This is the shortest external verification path for DriveDesk Core. Use it when 
 want to verify the project shape before reading the full documentation set.
 
 For the compact system map, start with `docs/public/SYSTEM_REVIEW_PATH.md`.
+For the product route, open `docs/public/PLATFORM_TOUR.md`.
 
 ## 5-Minute Pass
 
 | Step | Inspect | What it proves |
 | --- | --- | --- |
 | 1 | `docs/public/SYSTEM_REVIEW_PATH.md` | The compact system path ties the public root, demo, API, SDK, operations evidence, release safety, GitOps, OpenTofu, and evidence index together. |
-| 2 | GitHub Pages engineering reference | The public entrypoint is published and wired to demo, CI, OpenAPI, docs, and evidence. |
-| 3 | Public demo Workflow, Operations, Incidents, and Proof tabs | The demo is not a static screenshot; it exposes an end-to-end workflow-to-proof path, operational contracts, incidents, and proof payloads. |
-| 4 | `docs/public/PROJECT_STATUS.md` | Current capability state, limits, and next work are explicit. |
-| 5 | `docs/public/TECHNICAL_CAPABILITY_MAP.md` | Each visible capability maps to implementation surface, evidence, and verifier commands. |
-| 6 | `docs/public/ENGINEERING_PROOF.md` | The proof tab, API payload, OpenAPI schema, SDK artifacts, and CI gates share one contract. |
+| 2 | `docs/public/PLATFORM_TOUR.md` | Business OS tour through business event -> workflow -> adapter -> incident -> proof. |
+| 3 | GitHub Pages engineering reference | The public entrypoint is published and wired to demo, CI, OpenAPI, docs, and evidence. |
+| 4 | Public demo Workflow, Control Tower, Integrations, Operations, Incidents, and Proof tabs | The demo is not a static screenshot; it exposes an end-to-end workflow-to-proof path, operational contracts, incidents, and proof payloads. |
+| 5 | `docs/public/PROJECT_STATUS.md` | Current capability state, limits, and next work are explicit. |
+| 6 | `docs/public/TECHNICAL_CAPABILITY_MAP.md` | Each visible capability maps to implementation surface, evidence, and verifier commands. |
+| 7 | `docs/public/ENGINEERING_PROOF.md` | The proof tab, API payload, OpenAPI schema, SDK artifacts, and CI gates share one contract. |
 
 Pass criteria: a technical reader can identify the current architecture, public demo,
 API contract, SDK surface, observability evidence, incident response evidence,
@@ -27,6 +29,7 @@ Run the fast public checks:
 ```bash
 bash scripts/check_public_pages_entrypoint.sh
 bash scripts/check_public_system_review_path.sh
+bash scripts/check_public_platform_tour.sh
 bash scripts/check_public_reviewer_quickstart.sh
 bash scripts/check_public_project_status.sh
 bash scripts/check_public_technical_capability_map.sh
@@ -73,7 +76,7 @@ Then inspect the operational evidence:
 Pass criteria: the repository proves a coherent engineering chain:
 
 ```text
-engineering reference -> demo -> API -> SDK -> workflow -> adapter -> observability -> incident -> release gate -> evidence
+engineering reference -> Business OS tour -> demo -> API -> SDK -> workflow -> adapter -> observability -> incident -> release gate -> evidence
 ```
 
 The fastest demo-specific chain is:

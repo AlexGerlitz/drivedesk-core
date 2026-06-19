@@ -62,6 +62,10 @@ for token in [
     "Next Engineering Work",
     "Verification",
     "Public entrypoint",
+    "Platform tour",
+    "Business event, Control Tower, workflow, Adapter Studio, outbox, incidents, and proof",
+    "PLATFORM_TOUR.md",
+    "bash scripts/check_public_platform_tour.sh",
     "SYSTEM_REVIEW_PATH.md",
     "bash scripts/check_public_system_review_path.sh",
     "REVIEWER_QUICKSTART.md",
@@ -118,6 +122,7 @@ for token in [
 
 target_paths = [
     "docs/public/SYSTEM_REVIEW_PATH.md",
+    "docs/public/PLATFORM_TOUR.md",
     "docs/public/REVIEWER_QUICKSTART.md",
     "docs/public/ENGINEERING_REVIEW_GUIDE.md",
     "docs/public/API_BACKED_DEMO.md",
@@ -161,6 +166,7 @@ for doc_path, label in [
 ]:
     require("PROJECT_STATUS.md" in read(doc_path), f"{label} missing PROJECT_STATUS.md")
     require("SYSTEM_REVIEW_PATH.md" in read(doc_path), f"{label} missing SYSTEM_REVIEW_PATH.md")
+    require("PLATFORM_TOUR.md" in read(doc_path), f"{label} missing PLATFORM_TOUR.md")
     require("REVIEWER_QUICKSTART.md" in read(doc_path), f"{label} missing REVIEWER_QUICKSTART.md")
 
 is_public_export = (root / "PUBLIC_EXPORT_MANIFEST.md").is_file()
@@ -174,13 +180,19 @@ if is_public_export:
         require((root / path).is_file(), f"public export target missing: {path}")
     require("PROJECT_STATUS.md" in read(root_readme_path), "public README missing project status")
     require("SYSTEM_REVIEW_PATH.md" in read(root_readme_path), "public README missing system review path")
+    require("PLATFORM_TOUR.md" in read(root_readme_path), "public README missing platform tour")
     require("REVIEWER_QUICKSTART.md" in read(root_readme_path), "public README missing reviewer quickstart")
     require("PROJECT_STATUS.md" in read(index_path), "public Pages root missing project status")
     require("SYSTEM_REVIEW_PATH.md" in read(index_path), "public Pages root missing system review path")
+    require("PLATFORM_TOUR.md" in read(index_path), "public Pages root missing platform tour")
     require("REVIEWER_QUICKSTART.md" in read(index_path), "public Pages root missing reviewer quickstart")
     require(
         "check_public_system_review_path.sh" in read(public_smoke_path),
         "public smoke missing system review path check",
+    )
+    require(
+        "check_public_platform_tour.sh" in read(public_smoke_path),
+        "public smoke missing platform tour check",
     )
     require(
         "check_public_reviewer_quickstart.sh" in read(public_smoke_path),
@@ -201,6 +213,7 @@ if is_public_export:
 else:
     export_script = read(export_script_path)
     require("SYSTEM_REVIEW_PATH.md" in export_script, "export script missing system review path")
+    require("PLATFORM_TOUR.md" in export_script, "export script missing platform tour")
     require("PROJECT_STATUS.md" in export_script, "export script missing project status")
     require("REVIEWER_QUICKSTART.md" in export_script, "export script missing reviewer quickstart")
     require("PROVIDER_CONNECTOR_GUIDE.md" in export_script, "export script missing provider connector guide")
@@ -208,6 +221,10 @@ else:
     require(
         'copy_path "scripts/check_public_system_review_path.sh"' in export_script,
         "export script missing system review path check copy",
+    )
+    require(
+        'copy_path "scripts/check_public_platform_tour.sh"' in export_script,
+        "export script missing platform tour check copy",
     )
     require(
         'copy_path "scripts/check_public_reviewer_quickstart.sh"' in export_script,

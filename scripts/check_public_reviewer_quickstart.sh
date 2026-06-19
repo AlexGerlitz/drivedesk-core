@@ -58,13 +58,16 @@ text = read(quickstart_path)
 for token in [
     "Verification Quickstart",
     "docs/public/SYSTEM_REVIEW_PATH.md",
+    "docs/public/PLATFORM_TOUR.md",
     "5-Minute Pass",
     "15-Minute Verification",
     "45-Minute Deep Check",
     "Pass criteria",
     "Boundary",
     "GitHub Pages engineering reference",
-    "Public demo Workflow, Operations, Incidents, and Proof tabs",
+    "Public demo Workflow, Control Tower, Integrations, Operations, Incidents, and Proof tabs",
+    "Business OS tour",
+    "business event -> workflow -> adapter -> incident -> proof",
     "end-to-end scenario",
     "approval -> notification -> adapter -> incident -> recovery -> proof",
     "docs/public/PROJECT_STATUS.md",
@@ -72,6 +75,7 @@ for token in [
     "docs/public/ENGINEERING_PROOF.md",
     "bash scripts/check_public_pages_entrypoint.sh",
     "bash scripts/check_public_system_review_path.sh",
+    "bash scripts/check_public_platform_tour.sh",
     "bash scripts/check_public_reviewer_quickstart.sh",
     "bash scripts/check_public_project_status.sh",
     "bash scripts/check_public_technical_capability_map.sh",
@@ -96,7 +100,7 @@ for token in [
     "docs/public/GITOPS_DELIVERY.md",
     "docs/public/OPENTOFU_PLAN_EVIDENCE.md",
     "docs/public/INFRA_STATE_DRIFT_EVIDENCE.md",
-    "engineering reference -> demo -> API -> SDK -> workflow -> adapter -> observability -> incident -> release gate -> evidence",
+    "engineering reference -> Business OS tour -> demo -> API -> SDK -> workflow -> adapter -> observability -> incident -> release gate -> evidence",
     "docs/public/ENGINEERING_REVIEW_GUIDE.md",
     "docs/public/EVIDENCE_INDEX.md",
 ]:
@@ -104,6 +108,7 @@ for token in [
 
 for path in [
     "docs/public/SYSTEM_REVIEW_PATH.md",
+    "docs/public/PLATFORM_TOUR.md",
     "docs/public/PROJECT_STATUS.md",
     "docs/public/TECHNICAL_CAPABILITY_MAP.md",
     "docs/public/ENGINEERING_PROOF.md",
@@ -134,6 +139,7 @@ for doc_path, label in [
     (capability_map_path, "technical capability map"),
 ]:
     require("SYSTEM_REVIEW_PATH.md" in read(doc_path), f"{label} missing SYSTEM_REVIEW_PATH.md")
+    require("PLATFORM_TOUR.md" in read(doc_path), f"{label} missing PLATFORM_TOUR.md")
     require("REVIEWER_QUICKSTART.md" in read(doc_path), f"{label} missing reviewer quickstart")
 
 is_public_export = (root / "PUBLIC_EXPORT_MANIFEST.md").is_file()
@@ -147,11 +153,17 @@ if is_public_export:
         require((root / path).is_file(), f"public export target missing: {path}")
     require("REVIEWER_QUICKSTART.md" in read(root_readme_path), "public README missing reviewer quickstart")
     require("SYSTEM_REVIEW_PATH.md" in read(root_readme_path), "public README missing system review path")
+    require("PLATFORM_TOUR.md" in read(root_readme_path), "public README missing platform tour")
     require("REVIEWER_QUICKSTART.md" in read(index_path), "public Pages root missing reviewer quickstart")
     require("SYSTEM_REVIEW_PATH.md" in read(index_path), "public Pages root missing system review path")
+    require("PLATFORM_TOUR.md" in read(index_path), "public Pages root missing platform tour")
     require(
         "check_public_system_review_path.sh" in read(public_smoke_path),
         "public smoke missing system review path check",
+    )
+    require(
+        "check_public_platform_tour.sh" in read(public_smoke_path),
+        "public smoke missing platform tour check",
     )
     require(
         "check_public_reviewer_quickstart.sh" in read(public_smoke_path),
@@ -160,10 +172,15 @@ if is_public_export:
 else:
     export_script = read(export_script_path)
     require("SYSTEM_REVIEW_PATH.md" in export_script, "export script missing system review path")
+    require("PLATFORM_TOUR.md" in export_script, "export script missing platform tour")
     require("REVIEWER_QUICKSTART.md" in export_script, "export script missing reviewer quickstart")
     require(
         'copy_path "scripts/check_public_system_review_path.sh"' in export_script,
         "export script missing system review path check copy",
+    )
+    require(
+        'copy_path "scripts/check_public_platform_tour.sh"' in export_script,
+        "export script missing platform tour check copy",
     )
     require(
         'copy_path "scripts/check_public_reviewer_quickstart.sh"' in export_script,
@@ -174,12 +191,20 @@ else:
         "private smoke missing system review path check",
     )
     require(
+        "check_public_platform_tour.sh" in read(private_smoke_path),
+        "private smoke missing platform tour check",
+    )
+    require(
         "check_public_reviewer_quickstart.sh" in read(private_smoke_path),
         "private smoke missing reviewer quickstart check",
     )
     require(
         "check_public_system_review_path.sh" in read(release_gate_path),
         "release gate missing system review path check",
+    )
+    require(
+        "check_public_platform_tour.sh" in read(release_gate_path),
+        "release gate missing platform tour check",
     )
     require(
         "check_public_reviewer_quickstart.sh" in read(release_gate_path),

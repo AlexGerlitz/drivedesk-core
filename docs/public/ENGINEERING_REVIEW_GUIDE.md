@@ -9,24 +9,26 @@ prove the current engineering surface.
 | Step | What to inspect | Proof |
 | --- | --- | --- |
 | 1 | System review path | `docs/public/SYSTEM_REVIEW_PATH.md` |
-| 2 | Verification quickstart | `docs/public/REVIEWER_QUICKSTART.md` |
-| 3 | Live demo Workflow, Operations, Incidents, and Proof tabs | `endToEndScenario`, `alertRouting`, `incidentResponse`, and `engineeringProof` payloads |
-| 4 | Root CI badge | `bash scripts/ci_smoke_public.sh` |
-| 5 | Project status | `docs/public/PROJECT_STATUS.md` |
-| 6 | Proof contract | `bash scripts/check_public_engineering_proof.sh` |
-| 7 | API contract | `docs/openapi.json` and `GET /demo/public` |
-| 8 | Capability map | `docs/public/TECHNICAL_CAPABILITY_MAP.md` |
-| 9 | Evidence index | `docs/public/EVIDENCE_INDEX.md`, `docs/public/evidence/public-evidence-index.sanitized.json` |
-| 10 | Observability proof | `docs/public/OBSERVABILITY_PROOF.md` |
-| 11 | Alert routing | Operations tab and `docs/public/ALERT_ROUTING_EVIDENCE.md` |
-| 12 | Recovery and release safety | backup/restore, rollback, canary, staged promotion checks |
-| 13 | Infrastructure story | Helm, GitOps, OpenTofu, drift, and sanitized runtime evidence |
+| 2 | Platform Tour | `docs/public/PLATFORM_TOUR.md` |
+| 3 | Verification quickstart | `docs/public/REVIEWER_QUICKSTART.md` |
+| 4 | Live demo Workflow, Control Tower, Integrations, Operations, Incidents, and Proof tabs | `businessControlTower`, `adapterStudio`, `endToEndScenario`, `alertRouting`, `incidentResponse`, and `engineeringProof` payloads |
+| 5 | Root CI badge | `bash scripts/ci_smoke_public.sh` |
+| 6 | Project status | `docs/public/PROJECT_STATUS.md` |
+| 7 | Proof contract | `bash scripts/check_public_engineering_proof.sh` |
+| 8 | API contract | `docs/openapi.json` and `GET /demo/public` |
+| 9 | Capability map | `docs/public/TECHNICAL_CAPABILITY_MAP.md` |
+| 10 | Evidence index | `docs/public/EVIDENCE_INDEX.md`, `docs/public/evidence/public-evidence-index.sanitized.json` |
+| 11 | Observability proof | `docs/public/OBSERVABILITY_PROOF.md` |
+| 12 | Alert routing | Operations tab and `docs/public/ALERT_ROUTING_EVIDENCE.md` |
+| 13 | Recovery and release safety | backup/restore, rollback, canary, staged promotion checks |
+| 14 | Infrastructure story | Helm, GitOps, OpenTofu, drift, and sanitized runtime evidence |
 
 ## Review Commands
 
 ```bash
 bash scripts/ci_smoke_public.sh
 bash scripts/check_public_system_review_path.sh
+bash scripts/check_public_platform_tour.sh
 bash scripts/check_public_reviewer_quickstart.sh
 bash scripts/check_public_review_guide.sh
 bash scripts/check_public_project_status.sh
@@ -50,6 +52,7 @@ bash scripts/check_public_opentofu_plan.sh
 | Area | Evidence |
 | --- | --- |
 | System review path | `docs/public/SYSTEM_REVIEW_PATH.md` |
+| Business OS tour | `docs/public/PLATFORM_TOUR.md` |
 | Verification quickstart | `docs/public/REVIEWER_QUICKSTART.md` |
 | System design | `docs/public/SYSTEM_DESIGN.md` |
 | Project status | `docs/public/PROJECT_STATUS.md` |

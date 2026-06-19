@@ -404,6 +404,7 @@
       <nav class="topnav" aria-label="Engineering links">
         <a class="button primary" href="apps/admin/public-demo/">Open Demo</a>
         <a class="button" href="docs/public/SYSTEM_REVIEW_PATH.md">System Path</a>
+        <a class="button" href="docs/public/PLATFORM_TOUR.md">Platform Tour</a>
         <a class="button" href="docs/public/REVIEWER_QUICKSTART.md">Quickstart</a>
         <a class="button" href="docs/public/ENGINEERING_REVIEW_GUIDE.md">Review Guide</a>
         <a class="button" href="docs/public/PROJECT_STATUS.md">Status</a>
@@ -421,17 +422,20 @@
           <p class="lead">
             Inspect the architecture, open the live operations demo, then verify
             the API contract, SDK artifacts, release gates, observability, GitOps,
-            OpenTofu plan evidence, and incident response trail.
+            OpenTofu plan evidence, Adapter Studio, Control Tower, and incident
+            response trail.
           </p>
           <div class="action-row">
             <a class="button primary" href="apps/admin/public-demo/">Open Demo</a>
             <a class="button" href="docs/public/SYSTEM_REVIEW_PATH.md">System Path</a>
+            <a class="button" href="docs/public/PLATFORM_TOUR.md">Platform Tour</a>
             <a class="button" href="docs/public/PROJECT_STATUS.md">Project Status</a>
             <a class="button" href="docs/public/TECHNICAL_CAPABILITY_MAP.md">Capability Map</a>
             <a class="button" href="docs/public/EVIDENCE_INDEX.md">Evidence Index</a>
           </div>
           <div class="status-strip" aria-label="Engineering status">
             <div class="status"><strong>Runtime</strong><span>API, worker, Postgres, Redis</span></div>
+            <div class="status"><strong>Platform</strong><span>Control Tower, adapters, proof</span></div>
             <div class="status"><strong>Delivery</strong><span>CI, Helm, GitOps, gates</span></div>
             <div class="status"><strong>Operations</strong><span>metrics, alerts, incidents</span></div>
           </div>
@@ -459,7 +463,7 @@
         </article>
         <article class="snapshot-card">
           <h2>Integration hub</h2>
-          <p>Adapter catalog, scopes, mapping preview, operation contracts, diagnostics, reconciliation, and operator review.</p>
+          <p>Adapter catalog, Adapter Studio, scopes, mapping preview, operation contracts, diagnostics, reconciliation, and operator review.</p>
         </article>
         <article class="snapshot-card">
           <h2>Operations</h2>
@@ -473,7 +477,7 @@
 
       <section class="evidence-heading" aria-labelledby="flowTitle">
         <h2 id="flowTitle">Verification Flow</h2>
-        <p>Follow the same path the release gate protects: system path, architecture, demo, API contract, then operational evidence.</p>
+        <p>Follow the same path the release gate protects: system path, Business OS tour, architecture, demo, API contract, then operational evidence.</p>
       </section>
 
       <section class="review-flow" aria-label="Verification flow">
@@ -485,24 +489,30 @@
         </article>
         <article class="flow-step">
           <span>2</span>
+          <h2>Business OS tour</h2>
+          <p>Trace business event -> workflow -> adapter -> incident -> proof across Control Tower, Adapter Studio, operations, and proof.</p>
+          <a href="docs/public/PLATFORM_TOUR.md">Open platform tour</a>
+        </article>
+        <article class="flow-step">
+          <span>3</span>
           <h2>Architecture</h2>
           <p>Start with the modular monolith, data boundary, adapter hub, and runtime shape.</p>
           <a href="docs/public/SYSTEM_DESIGN.md">Open system design</a>
         </article>
         <article class="flow-step">
-          <span>3</span>
+          <span>4</span>
           <h2>Live demo</h2>
-          <p>Use the Overview, Operations, Incidents, and Proof tabs with synthetic data.</p>
+          <p>Use the Overview, Workflow, Control Tower, Integrations, Operations, Incidents, and Proof tabs with synthetic data.</p>
           <a href="apps/admin/public-demo/">Open demo</a>
         </article>
         <article class="flow-step">
-          <span>4</span>
+          <span>5</span>
           <h2>API and SDK</h2>
           <p>Check the read-only demo endpoint, OpenAPI schema, and generated clients.</p>
           <a href="docs/public/API_BACKED_DEMO.md">Open API notes</a>
         </article>
         <article class="flow-step">
-          <span>5</span>
+          <span>6</span>
           <h2>Release evidence</h2>
           <p>Follow the gates for rollback, SLO canary, staged promotion, and drift handling.</p>
           <a href="docs/public/SANITIZED_EVIDENCE.md">Open evidence</a>
@@ -536,6 +546,11 @@
           <h2>System path</h2>
           <p>Compact engineering route through the public root, demo, API, SDK, operations evidence, release safety, GitOps, OpenTofu, and evidence index.</p>
           <a href="docs/public/SYSTEM_REVIEW_PATH.md">Open path</a>
+        </article>
+        <article class="card">
+          <h2>Business OS tour</h2>
+          <p>Shows the reviewer how business event -> workflow -> adapter -> incident -> proof moves through Control Tower and Adapter Studio.</p>
+          <a href="docs/public/PLATFORM_TOUR.md">Open tour</a>
         </article>
         <article class="card">
           <h2>Project status</h2>
@@ -600,6 +615,7 @@
         <pre><code>bash scripts/ci_smoke_public.sh
 bash scripts/check_public_pages_entrypoint.sh
 bash scripts/check_public_system_review_path.sh
+bash scripts/check_public_platform_tour.sh
 bash scripts/check_public_reviewer_quickstart.sh
 bash scripts/check_public_project_status.sh
 bash scripts/check_public_technical_capability_map.sh

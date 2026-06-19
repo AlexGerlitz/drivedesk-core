@@ -66,9 +66,11 @@ for token in [
     "Verification Commands",
     "What This Proves",
     "Boundary",
+    "docs/public/PLATFORM_TOUR.md",
+    "business event -> workflow -> adapter -> incident -> proof",
     "GitHub Pages engineering reference",
     "apps/admin/public-demo/",
-    "Workflow, Operations, Incidents, and Proof",
+    "Workflow, Control Tower, Integrations, Operations, Incidents, and Proof",
     "docs/public/PROJECT_STATUS.md",
     "docs/public/TECHNICAL_CAPABILITY_MAP.md",
     "docs/public/ENGINEERING_PROOF.md",
@@ -91,6 +93,7 @@ for token in [
     "approval -> notification -> adapter -> incident -> recovery -> proof",
     "architecture -> demo -> API -> SDK -> workflow -> observability -> incident -> release safety -> GitOps/IaC -> evidence index",
     "bash scripts/check_public_system_review_path.sh",
+    "bash scripts/check_public_platform_tour.sh",
     "bash scripts/check_public_pages_entrypoint.sh",
     "bash scripts/check_public_demo_api.sh",
     "bash scripts/check_public_engineering_proof.sh",
@@ -100,6 +103,7 @@ for token in [
 
 for target in [
     "docs/public/PROJECT_STATUS.md",
+    "docs/public/PLATFORM_TOUR.md",
     "docs/public/TECHNICAL_CAPABILITY_MAP.md",
     "docs/public/ENGINEERING_PROOF.md",
     "docs/public/EVIDENCE_INDEX.md",
@@ -127,6 +131,7 @@ for doc_path, label in [
 ]:
     doc = read(doc_path)
     require("SYSTEM_REVIEW_PATH.md" in doc, f"{label} missing SYSTEM_REVIEW_PATH.md")
+    require("PLATFORM_TOUR.md" in doc, f"{label} missing PLATFORM_TOUR.md")
 
 if evidence_json_path.is_file():
     payload = json.loads(read(evidence_json_path))
@@ -152,9 +157,14 @@ if is_public_export:
         "check_public_system_review_path.sh" in read(public_smoke_path),
         "public smoke missing system review path check",
     )
+    require(
+        "check_public_platform_tour.sh" in read(public_smoke_path),
+        "public smoke missing platform tour check",
+    )
 else:
     export_script = read(export_script_path)
     require("SYSTEM_REVIEW_PATH.md" in export_script, "export script missing system review path")
+    require("PLATFORM_TOUR.md" in export_script, "export script missing platform tour")
     require(
         'copy_path "scripts/check_public_system_review_path.sh"' in export_script,
         "export script missing system review checker copy",
@@ -164,14 +174,26 @@ else:
         "private smoke missing system review path check",
     )
     require(
+        "check_public_platform_tour.sh" in read(private_smoke_path),
+        "private smoke missing platform tour check",
+    )
+    require(
         "check_public_system_review_path.sh" in read(release_gate_path),
         "release gate missing system review path check",
+    )
+    require(
+        "check_public_platform_tour.sh" in read(release_gate_path),
+        "release gate missing platform tour check",
     )
 
 if public_smoke_path.is_file():
     require(
         "check_public_system_review_path.sh" in read(public_smoke_path),
         "public smoke missing system review path check",
+    )
+    require(
+        "check_public_platform_tour.sh" in read(public_smoke_path),
+        "public smoke missing platform tour check",
     )
 
 private_patterns = [

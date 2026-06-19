@@ -7,6 +7,8 @@ infrastructure, production history, customer data, or operational credentials.
 ## Documents
 
 - `ENGINEERING_CASE_STUDY.md` - engineering case study and current system shape.
+- `PLATFORM_TOUR.md` - DriveDesk Platform Tour connecting business events,
+  Control Tower, Adapter Studio, incidents, proof, and verification gates.
 - `SYSTEM_REVIEW_PATH.md` - compact engineering route through the public root,
   demo, API, SDK, operations evidence, release safety, GitOps, OpenTofu, and
   evidence index.

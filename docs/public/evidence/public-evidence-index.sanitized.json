@@ -39,6 +39,27 @@
       "boundary": "static public surface with synthetic data only"
     },
     {
+      "capability_id": "business-os-tour",
+      "title": "Business OS tour",
+      "status": "validated",
+      "public_doc": "docs/public/PLATFORM_TOUR.md",
+      "evidence_files": [
+        "apps/admin/public-demo/index.html",
+        "apps/admin/public-demo/demo-data.js",
+        "docs/public/API_BACKED_DEMO.md",
+        "docs/public/TECHNICAL_CAPABILITY_MAP.md"
+      ],
+      "verifiers": [
+        "bash scripts/check_public_platform_tour.sh",
+        "bash scripts/check_public_demo_api.sh"
+      ],
+      "public_urls": [
+        "docs/public/PLATFORM_TOUR.md",
+        "apps/admin/public-demo/"
+      ],
+      "boundary": "business event, workflow, adapter, incident, and proof route on synthetic public data only"
+    },
+    {
       "capability_id": "api-and-sdk",
       "title": "Read-only API contract and generated SDK",
       "status": "validated",

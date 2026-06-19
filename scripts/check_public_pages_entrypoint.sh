@@ -62,6 +62,7 @@ if is_public_export:
         "Evidence Matrix",
         "apps/admin/public-demo/",
         "docs/public/SYSTEM_REVIEW_PATH.md",
+        "docs/public/PLATFORM_TOUR.md",
         "docs/public/SYSTEM_DESIGN.md",
         "docs/public/API_BACKED_DEMO.md",
         "docs/public/SANITIZED_EVIDENCE.md",
@@ -79,13 +80,19 @@ if is_public_export:
         "bash scripts/ci_smoke_public.sh",
         "bash scripts/check_public_pages_entrypoint.sh",
         "bash scripts/check_public_system_review_path.sh",
+        "bash scripts/check_public_platform_tour.sh",
         "bash scripts/check_public_engineering_proof.sh",
+        "Business OS tour",
+        "Adapter Studio",
+        "Control Tower",
+        "business event -> workflow -> adapter -> incident -> proof",
     ]:
         require(token in html, f"public Pages index missing {token}")
 
     for path in [
         "apps/admin/public-demo/index.html",
         "docs/public/SYSTEM_REVIEW_PATH.md",
+        "docs/public/PLATFORM_TOUR.md",
         "docs/public/SYSTEM_DESIGN.md",
         "docs/public/API_BACKED_DEMO.md",
         "docs/public/SANITIZED_EVIDENCE.md",
@@ -123,10 +130,12 @@ else:
     require("PUBLIC_ROOT_URL" in export_script, "export script missing public root URL")
     require("check_public_pages_entrypoint.sh" in export_script, "export script missing Pages entrypoint check")
     require("SYSTEM_REVIEW_PATH.md" in export_script, "export script missing system review path")
+    require("PLATFORM_TOUR.md" in export_script, "export script missing platform tour")
     require("REVIEWER_QUICKSTART.md" in export_script, "export script missing reviewer quickstart")
 
     if private_smoke_path.is_file():
         require("check_public_system_review_path.sh" in read(private_smoke_path), "private smoke missing system review path check")
+        require("check_public_platform_tour.sh" in read(private_smoke_path), "private smoke missing platform tour check")
         require("check_public_reviewer_quickstart.sh" in read(private_smoke_path), "private smoke missing reviewer quickstart check")
         require("check_public_pages_entrypoint.sh" in read(private_smoke_path), "private smoke missing Pages entrypoint check")
 
@@ -134,13 +143,16 @@ else:
         gate_text = read(release_gate_path)
         require('"index.html"' in gate_text, "release gate missing root index.html requirement")
         require("SYSTEM_REVIEW_PATH.md" in gate_text, "release gate missing system review path")
+        require("PLATFORM_TOUR.md" in gate_text, "release gate missing platform tour")
         require("check_public_system_review_path.sh" in gate_text, "release gate missing system review path check")
+        require("check_public_platform_tour.sh" in gate_text, "release gate missing platform tour check")
         require("REVIEWER_QUICKSTART.md" in gate_text, "release gate missing reviewer quickstart")
         require("check_public_reviewer_quickstart.sh" in gate_text, "release gate missing reviewer quickstart check")
         require("check_public_pages_entrypoint.sh" in gate_text, "release gate missing Pages entrypoint check")
 
 if public_smoke_path.is_file():
     require("check_public_system_review_path.sh" in read(public_smoke_path), "public smoke missing system review path check")
+    require("check_public_platform_tour.sh" in read(public_smoke_path), "public smoke missing platform tour check")
     require("check_public_reviewer_quickstart.sh" in read(public_smoke_path), "public smoke missing reviewer quickstart check")
     require("check_public_pages_entrypoint.sh" in read(public_smoke_path), "public smoke missing Pages entrypoint check")
 

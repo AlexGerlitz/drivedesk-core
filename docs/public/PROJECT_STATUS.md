@@ -9,6 +9,7 @@ work so the repository can be verified without private operational context.
 | Area | Current state | Evidence | Verification |
 | --- | --- | --- | --- |
 | Public entrypoint | GitHub Pages engineering reference, compact system review path, and quickstart are generated from the private export pipeline. | `index.html`, `docs/public/SYSTEM_REVIEW_PATH.md`, `docs/public/REVIEWER_QUICKSTART.md`, `docs/public/ENGINEERING_REVIEW_GUIDE.md` | `bash scripts/check_public_pages_entrypoint.sh && bash scripts/check_public_system_review_path.sh && bash scripts/check_public_reviewer_quickstart.sh` |
+| Platform tour | Business event, Control Tower, workflow, Adapter Studio, outbox, incidents, and proof are connected into one product path. | `docs/public/PLATFORM_TOUR.md`, `apps/admin/public-demo/index.html`, `GET /demo/public` | `bash scripts/check_public_platform_tour.sh && bash scripts/check_public_demo_api.sh` |
 | API contract | Read-only synthetic demo API and generated OpenAPI schema are present. | `docs/openapi.json`, `GET /demo/public`, `docs/public/API_BACKED_DEMO.md` | `bash scripts/check_public_demo_api.sh` |
 | Client SDK | Python, JavaScript, and TypeScript demo clients are generated from OpenAPI, including typed file-import and Bitrix-style CRM adapter operation helpers plus the Adapter Studio workbench contract. | `docs/public/CLIENT_SDK.md`, `docs/public/ADAPTER_DEVELOPER_GUIDE.md`, `sdk/generated/public-demo/`, `examples/python/demo_adapter_operation_plan.py`, `examples/js/demo-adapter-operation-plan.mjs` | `bash scripts/check_public_demo_sdk.sh && bash scripts/check_public_adapter_developer_guide.sh` |
 | Auth and tenant boundary | Public-safe auth, RBAC, platform-admin, and tenant-isolation contracts are documented and tested. | `docs/public/AUTH_FOUNDATION.md`, `docs/public/TENANT_ISOLATION.md`, `docs/public/PLATFORM_ADMIN.md` | `bash scripts/ci_smoke_public.sh` |
@@ -54,6 +55,7 @@ Longer public-safe direction lives in `docs/public/ROADMAP.md`.
 ```bash
 bash scripts/ci_smoke_public.sh
 bash scripts/check_public_system_review_path.sh
+bash scripts/check_public_platform_tour.sh
 bash scripts/check_public_reviewer_quickstart.sh
 bash scripts/check_public_project_status.sh
 bash scripts/check_public_technical_capability_map.sh

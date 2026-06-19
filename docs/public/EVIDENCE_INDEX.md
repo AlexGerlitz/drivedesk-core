@@ -33,6 +33,7 @@ parsing Markdown by hand.
 | Capability group | Primary doc | Verifier |
 | --- | --- | --- |
 | Public engineering entrypoint | `docs/public/SYSTEM_REVIEW_PATH.md` | `bash scripts/check_public_system_review_path.sh` |
+| Business OS tour | `docs/public/PLATFORM_TOUR.md` | `bash scripts/check_public_platform_tour.sh` |
 | Quick verification path | `docs/public/REVIEWER_QUICKSTART.md` | `bash scripts/check_public_reviewer_quickstart.sh` |
 | API and SDK | `docs/public/API_BACKED_DEMO.md` | `bash scripts/check_public_demo_api.sh` |
 | Core domain | `docs/public/SYSTEM_DESIGN.md` | `bash scripts/ci_smoke_public.sh` |

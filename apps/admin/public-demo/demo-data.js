@@ -2426,6 +2426,302 @@ window.DRIVEDESK_DEMO_DATA = {
       }
     ]
   },
+  "businessNotificationChannels": {
+    "status": "previewed",
+    "command": "POST /tenants/{tenant_id}/business-notification-channels/preview",
+    "summary": [
+      {
+        "label": "Channels",
+        "value": "5",
+        "detail": "in-app, Telegram, email, SMS, webhook",
+        "tone": "blue"
+      },
+      {
+        "label": "Internal ready",
+        "value": "1",
+        "detail": "in-app can stay inside DriveDesk",
+        "tone": "green"
+      },
+      {
+        "label": "Draft-only external",
+        "value": "4",
+        "detail": "private connector setup required",
+        "tone": "amber"
+      },
+      {
+        "label": "External deliveries",
+        "value": "0",
+        "detail": "public preview sends nothing",
+        "tone": "violet"
+      }
+    ],
+    "role": "accountant",
+    "subject": "deal:DEAL-2026-001",
+    "channels": [
+      {
+        "channel": "in_app",
+        "status": "ready",
+        "configured": true,
+        "recipientRole": "accountant",
+        "subject": "deal:DEAL-2026-001",
+        "destinationProfile": "internal_user_inbox",
+        "sendMode": "internal_preview",
+        "readiness": "usable_for_internal_work",
+        "externalDelivery": false,
+        "requiresSecret": false,
+        "requiresPrivateConnector": false,
+        "externalProviderMutation": false,
+        "containsPii": false,
+        "rawPayloadIncluded": false,
+        "safePayloadProfile": "role_subject_action_reference",
+        "evidence": "business_notification_channel_matrix.previewed"
+      },
+      {
+        "channel": "telegram",
+        "status": "requires_private_secret",
+        "configured": false,
+        "recipientRole": "accountant",
+        "subject": "deal:DEAL-2026-001",
+        "destinationProfile": "telegram_bot_chat",
+        "sendMode": "draft_only",
+        "readiness": "private_connector_needed",
+        "externalDelivery": false,
+        "requiresSecret": true,
+        "requiresPrivateConnector": true,
+        "externalProviderMutation": false,
+        "containsPii": false,
+        "rawPayloadIncluded": false,
+        "safePayloadProfile": "role_subject_action_reference",
+        "evidence": "business_notification_channel_matrix.previewed"
+      },
+      {
+        "channel": "email",
+        "status": "requires_private_secret",
+        "configured": false,
+        "recipientRole": "accountant",
+        "subject": "deal:DEAL-2026-001",
+        "destinationProfile": "smtp_or_provider_template",
+        "sendMode": "draft_only",
+        "readiness": "private_connector_needed",
+        "externalDelivery": false,
+        "requiresSecret": true,
+        "requiresPrivateConnector": true,
+        "externalProviderMutation": false,
+        "containsPii": false,
+        "rawPayloadIncluded": false,
+        "safePayloadProfile": "role_subject_action_reference",
+        "evidence": "business_notification_channel_matrix.previewed"
+      },
+      {
+        "channel": "sms",
+        "status": "requires_private_provider",
+        "configured": false,
+        "recipientRole": "accountant",
+        "subject": "deal:DEAL-2026-001",
+        "destinationProfile": "sms_provider_template",
+        "sendMode": "draft_only",
+        "readiness": "provider_contract_needed",
+        "externalDelivery": false,
+        "requiresSecret": true,
+        "requiresPrivateConnector": true,
+        "externalProviderMutation": false,
+        "containsPii": false,
+        "rawPayloadIncluded": false,
+        "safePayloadProfile": "role_subject_action_reference",
+        "evidence": "business_notification_channel_matrix.previewed"
+      },
+      {
+        "channel": "webhook",
+        "status": "requires_private_endpoint",
+        "configured": false,
+        "recipientRole": "accountant",
+        "subject": "deal:DEAL-2026-001",
+        "destinationProfile": "signed_webhook_endpoint",
+        "sendMode": "draft_only",
+        "readiness": "endpoint_and_signing_key_needed",
+        "externalDelivery": false,
+        "requiresSecret": true,
+        "requiresPrivateConnector": true,
+        "externalProviderMutation": false,
+        "containsPii": false,
+        "rawPayloadIncluded": false,
+        "safePayloadProfile": "role_subject_action_reference",
+        "evidence": "business_notification_channel_matrix.previewed"
+      }
+    ],
+    "routingRules": [
+      {
+        "rule": "prefer_internal_in_app",
+        "status": "ready",
+        "channel": "in_app",
+        "detail": "Internal work notifications can be represented without external delivery.",
+        "evidence": "business_notification_channel_matrix.previewed"
+      },
+      {
+        "rule": "external_channels_require_private_connector",
+        "status": "required",
+        "channelCount": 4,
+        "detail": "External delivery stays behind private connector and secret setup.",
+        "evidence": "business_notification_channel_matrix.previewed"
+      },
+      {
+        "rule": "safe_payload_only",
+        "status": "clean",
+        "payloadProfile": "role_subject_action_reference",
+        "detail": "Drafts use role, subject key, action reference, and evidence labels only.",
+        "evidence": "business_notification_channel_matrix.previewed"
+      }
+    ],
+    "deliveryDrafts": [
+      {
+        "draftId": "channel_matrix.in_app.accountant",
+        "channel": "in_app",
+        "recipientRole": "accountant",
+        "subject": "deal:DEAL-2026-001",
+        "title": "DriveDesk action update",
+        "body": "deal:DEAL-2026-001 has an operator action ready for accountant.",
+        "status": "ready",
+        "sendMode": "internal_preview",
+        "wouldEnqueueEvent": "notification.delivery.requested",
+        "safePayloadProfile": "role_subject_action_reference",
+        "externalDelivery": false,
+        "requiresSecret": false,
+        "containsPii": false,
+        "rawPayloadIncluded": false,
+        "evidence": "business_notification_channel_matrix.previewed"
+      },
+      {
+        "draftId": "channel_matrix.telegram.accountant",
+        "channel": "telegram",
+        "recipientRole": "accountant",
+        "subject": "deal:DEAL-2026-001",
+        "title": "DriveDesk action update",
+        "body": "deal:DEAL-2026-001 has an operator action ready for accountant.",
+        "status": "draft_only",
+        "sendMode": "draft_only",
+        "wouldEnqueueEvent": "notification.delivery.requested",
+        "safePayloadProfile": "role_subject_action_reference",
+        "externalDelivery": false,
+        "requiresSecret": true,
+        "containsPii": false,
+        "rawPayloadIncluded": false,
+        "evidence": "business_notification_channel_matrix.previewed"
+      },
+      {
+        "draftId": "channel_matrix.email.accountant",
+        "channel": "email",
+        "recipientRole": "accountant",
+        "subject": "deal:DEAL-2026-001",
+        "title": "DriveDesk action update",
+        "body": "deal:DEAL-2026-001 has an operator action ready for accountant.",
+        "status": "draft_only",
+        "sendMode": "draft_only",
+        "wouldEnqueueEvent": "notification.delivery.requested",
+        "safePayloadProfile": "role_subject_action_reference",
+        "externalDelivery": false,
+        "requiresSecret": true,
+        "containsPii": false,
+        "rawPayloadIncluded": false,
+        "evidence": "business_notification_channel_matrix.previewed"
+      },
+      {
+        "draftId": "channel_matrix.sms.accountant",
+        "channel": "sms",
+        "recipientRole": "accountant",
+        "subject": "deal:DEAL-2026-001",
+        "title": "DriveDesk action update",
+        "body": "deal:DEAL-2026-001 has an operator action ready for accountant.",
+        "status": "draft_only",
+        "sendMode": "draft_only",
+        "wouldEnqueueEvent": "notification.delivery.requested",
+        "safePayloadProfile": "role_subject_action_reference",
+        "externalDelivery": false,
+        "requiresSecret": true,
+        "containsPii": false,
+        "rawPayloadIncluded": false,
+        "evidence": "business_notification_channel_matrix.previewed"
+      },
+      {
+        "draftId": "channel_matrix.webhook.accountant",
+        "channel": "webhook",
+        "recipientRole": "accountant",
+        "subject": "deal:DEAL-2026-001",
+        "title": "DriveDesk action update",
+        "body": "deal:DEAL-2026-001 has an operator action ready for accountant.",
+        "status": "draft_only",
+        "sendMode": "draft_only",
+        "wouldEnqueueEvent": "notification.delivery.requested",
+        "safePayloadProfile": "role_subject_action_reference",
+        "externalDelivery": false,
+        "requiresSecret": true,
+        "containsPii": false,
+        "rawPayloadIncluded": false,
+        "evidence": "business_notification_channel_matrix.previewed"
+      }
+    ],
+    "approvalGates": [
+      {
+        "gate": "notification_content_review",
+        "status": "ready",
+        "requiresApproval": false,
+        "externalDelivery": false,
+        "evidence": "business_notification_channel_matrix.previewed"
+      },
+      {
+        "gate": "private_channel_secret_setup",
+        "status": "required",
+        "requiresApproval": true,
+        "externalDelivery": false,
+        "evidence": "business_notification_channel_matrix.previewed"
+      },
+      {
+        "gate": "external_delivery_gate",
+        "status": "closed",
+        "requiresApproval": true,
+        "externalDelivery": false,
+        "evidence": "business_notification_channel_matrix.previewed"
+      }
+    ],
+    "dataBoundaries": [
+      {
+        "name": "preview_only_no_delivery",
+        "status": "preview_only",
+        "externalDelivery": false,
+        "externalProviderMutation": false
+      },
+      {
+        "name": "server_secret_store_boundary",
+        "status": "documented",
+        "requiresSecret": true,
+        "browserTokenStorage": false
+      },
+      {
+        "name": "safe_notification_payload",
+        "status": "clean",
+        "containsPii": false,
+        "rawPayloadIncluded": false
+      }
+    ],
+    "api": {
+      "preview": "POST /tenants/{tenant_id}/business-notification-channels/preview",
+      "notifications": "POST /tenants/{tenant_id}/business-notifications/preview",
+      "taskHandoff": "POST /tenants/{tenant_id}/business-task-handoffs/preview"
+    },
+    "docs": [
+      {
+        "label": "Business Notification Channels",
+        "path": "docs/public/BUSINESS_NOTIFICATION_CHANNELS.md"
+      },
+      {
+        "label": "Business Task Handoff",
+        "path": "docs/public/BUSINESS_TASK_HANDOFF.md"
+      },
+      {
+        "label": "API-backed Demo",
+        "path": "docs/public/API_BACKED_DEMO.md"
+      }
+    ]
+  },
   "businessScenarioReplay": {
     "status": "validated",
     "command": "bash scripts/check_public_business_scenario_replay.sh",

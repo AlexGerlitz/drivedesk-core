@@ -21,6 +21,8 @@ Demo endpoints:
   pipeline proof as a standalone synthetic contract.
 - `GET /demo/business-task-handoff` returns the same business task handoff
   proof as a standalone synthetic contract.
+- `GET /demo/business-notification-channels` returns the same notification
+  channel matrix proof as a standalone synthetic contract.
 - `GET /demo/business-scenario-replay` returns reusable Business OS scenario
   replay data as a standalone synthetic contract.
 

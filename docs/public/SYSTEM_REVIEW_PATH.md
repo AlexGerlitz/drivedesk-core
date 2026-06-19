@@ -42,12 +42,13 @@ Primary artifacts:
 | --- | --- |
 | Platform tour | `docs/public/PLATFORM_TOUR.md` |
 | Architecture | `docs/public/SYSTEM_DESIGN.md` |
-| Demo API | `docs/public/API_BACKED_DEMO.md`, `docs/openapi.json`, `GET /demo/public`, `GET /demo/connector-fixture-replay`, `GET /demo/business-intake-pipeline`, `GET /demo/business-task-handoff`, `GET /demo/business-scenario-replay` |
+| Demo API | `docs/public/API_BACKED_DEMO.md`, `docs/openapi.json`, `GET /demo/public`, `GET /demo/connector-fixture-replay`, `GET /demo/business-intake-pipeline`, `GET /demo/business-task-handoff`, `GET /demo/business-notification-channels`, `GET /demo/business-scenario-replay` |
 | SDK | `docs/public/CLIENT_SDK.md`, `sdk/generated/public-demo/` |
 | Workflow | `docs/public/WORKFLOW_DEMO.md`, `endToEndScenario` |
 | Connector replay | `docs/public/CONNECTOR_FIXTURE_REPLAY.md`, `GET /demo/connector-fixture-replay`, `examples/connector-fixtures/replay-fixtures.sanitized.json` |
 | Business intake pipeline | `docs/public/BUSINESS_INTAKE_PIPELINE.md`, `GET /demo/business-intake-pipeline`, `businessIntakePipeline` |
 | Business task handoff | `docs/public/BUSINESS_TASK_HANDOFF.md`, `GET /demo/business-task-handoff`, `businessTaskHandoff` |
+| Business notification channels | `docs/public/BUSINESS_NOTIFICATION_CHANNELS.md`, `GET /demo/business-notification-channels`, `businessNotificationChannels` |
 | Business scenario replay | `docs/public/BUSINESS_SCENARIO_REPLAY.md`, `GET /demo/business-scenario-replay`, `businessScenarioReplay` |
 | Observability | `docs/public/OBSERVABILITY_PROOF.md` |
 | Alert routing | `docs/public/ALERT_ROUTING_EVIDENCE.md` |
@@ -66,6 +67,7 @@ bash scripts/check_public_pages_entrypoint.sh
 bash scripts/check_public_demo_api.sh
 bash scripts/check_public_business_intake_pipeline.sh
 bash scripts/check_public_business_task_handoff.sh
+bash scripts/check_public_business_notification_channels.sh
 bash scripts/check_public_business_scenario_replay.sh
 bash scripts/check_public_engineering_proof.sh
 bash scripts/check_public_connector_fixture_replay.sh

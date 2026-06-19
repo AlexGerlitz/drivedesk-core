@@ -26,6 +26,7 @@ bash scripts/check_public_demo_api.sh
 bash scripts/check_public_business_control_tower.sh
 bash scripts/check_public_business_intake_pipeline.sh
 bash scripts/check_public_business_task_handoff.sh
+bash scripts/check_public_business_notification_channels.sh
 bash scripts/check_public_business_scenario_replay.sh
 bash scripts/check_public_demo_sdk.sh
 bash scripts/check_public_backup_restore.sh

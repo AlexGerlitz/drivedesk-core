@@ -14,8 +14,8 @@ The tour is public-safe: it uses synthetic data and sanitized evidence only.
 | Step | Product surface | What happens | Evidence |
 | --- | --- | --- | --- |
 | 1 | Business signal | A synthetic lead, contract, payment, task, or external provider fact enters the platform. | `businessControlTower.providerIntake`, `workflowScenarios` |
-| 2 | Workbench context | The operator gets role-specific context, risk level, source-system cards, suggested actions, the provider-event intake pipeline, task handoff preview, and reusable scenario replay. | `businessControlTower.workbenchContext`, `businessIntakePipeline`, `businessTaskHandoff`, `businessScenarioReplay`, `BUSINESS_INTAKE_PIPELINE.md`, `BUSINESS_TASK_HANDOFF.md`, `BUSINESS_SCENARIO_REPLAY.md`, `GET /demo/business-intake-pipeline`, `GET /demo/business-task-handoff`, `GET /demo/business-scenario-replay` |
-| 3 | Workflow action | Business rules create audit events, internal task cards, outbox candidates, or adapter-sync requests. | `workflowScenarios`, `workflow.action_run.created`, `businessTaskHandoff` |
+| 2 | Workbench context | The operator gets role-specific context, risk level, source-system cards, suggested actions, the provider-event intake pipeline, task handoff preview, notification channel matrix, and reusable scenario replay. | `businessControlTower.workbenchContext`, `businessIntakePipeline`, `businessTaskHandoff`, `businessNotificationChannels`, `businessScenarioReplay`, `BUSINESS_INTAKE_PIPELINE.md`, `BUSINESS_TASK_HANDOFF.md`, `BUSINESS_NOTIFICATION_CHANNELS.md`, `BUSINESS_SCENARIO_REPLAY.md`, `GET /demo/business-intake-pipeline`, `GET /demo/business-task-handoff`, `GET /demo/business-notification-channels`, `GET /demo/business-scenario-replay` |
+| 3 | Workflow action | Business rules create audit events, internal task cards, notification channel drafts, outbox candidates, or adapter-sync requests. | `workflowScenarios`, `workflow.action_run.created`, `businessTaskHandoff`, `businessNotificationChannels` |
 | 4 | Adapter Studio | Runtime catalog, connector certification, fixture replay, standalone replay API, and generated SDK operation plans show how an external provider is connected without exposing secrets. | `adapterStudio`, `connectorFixtureReplay`, `GET /demo/connector-fixture-replay`, `CONNECTOR_CERTIFICATION.md`, `CONNECTOR_FIXTURE_REPLAY.md`, `sdk/generated/public-demo/` |
 | 5 | Async execution | Accepted work moves through outbox and worker-backed contracts with retry and idempotency boundaries. | `outbox`, `integrationJobs`, `worker:drivedesk_worker.main.process_pending_outbox` |
 | 6 | Operations response | Metrics, alert routing, incidents, runbooks, and operator review make failures visible and recoverable. | `alertRouting`, `incidentResponse`, `drivedesk_integration_incidents` |
@@ -29,7 +29,7 @@ Use the public demo in this order:
 2. `Workflow` - automation scenarios and end-to-end chain.
 3. `Control Tower` - provider intake, workbench context, detection, escalation,
    action plan, notification preview, role briefing, Business Intake Pipeline,
-   Business Task Handoff, and Business Scenario Replay.
+   Business Task Handoff, Notification Channels, and Business Scenario Replay.
 4. `Integrations` - Adapter Studio, connector certification, fixture replay,
    adapter contracts, operation scenarios, sync jobs, and health.
 5. `Operations` - alert routing and recovery evidence.
@@ -60,6 +60,7 @@ bash scripts/check_public_demo_sdk.sh
 bash scripts/check_public_business_control_tower.sh
 bash scripts/check_public_business_intake_pipeline.sh
 bash scripts/check_public_business_task_handoff.sh
+bash scripts/check_public_business_notification_channels.sh
 bash scripts/check_public_business_scenario_replay.sh
 bash scripts/check_public_engineering_proof.sh
 ```

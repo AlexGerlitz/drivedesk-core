@@ -84,6 +84,9 @@ from drivedesk_api.schemas import (
     BusinessIntakePipelineDemoRead,
     BusinessIntakePipelinePreviewCreate,
     BusinessIntakePipelinePreviewRead,
+    BusinessNotificationChannelMatrixDemoRead,
+    BusinessNotificationChannelMatrixPreviewCreate,
+    BusinessNotificationChannelMatrixPreviewRead,
     BusinessNotificationPreviewCreate,
     BusinessNotificationPreviewRead,
     BusinessProviderIntakePreviewCreate,
@@ -187,6 +190,7 @@ from drivedesk_api.services import (
     preview_business_detections,
     preview_business_escalations,
     preview_business_intake_pipeline,
+    preview_business_notification_channel_matrix,
     preview_business_notifications,
     preview_business_provider_intake,
     preview_business_task_handoff,
@@ -319,6 +323,20 @@ def build_app(settings: Settings | None = None) -> FastAPI:
     async def business_task_handoff_demo() -> JSONResponse:
         return JSONResponse(
             build_public_demo_payload()["businessTaskHandoff"],
+            headers={
+                "Access-Control-Allow-Origin": "*",
+                "Cache-Control": "public, max-age=60",
+            },
+        )
+
+    @api.get(
+        "/demo/business-notification-channels",
+        response_model=BusinessNotificationChannelMatrixDemoRead,
+        tags=["demo"],
+    )
+    async def business_notification_channels_demo() -> JSONResponse:
+        return JSONResponse(
+            build_public_demo_payload()["businessNotificationChannels"],
             headers={
                 "Access-Control-Allow-Origin": "*",
                 "Cache-Control": "public, max-age=60",
@@ -1080,6 +1098,25 @@ def build_app(settings: Settings | None = None) -> FastAPI:
         await ensure_tenant_exists(session, tenant_id)
         require_tenant_permission(actor, tenant_id, Permission.BUSINESS_RECORD_READ)
         return await preview_business_task_handoff(session, tenant_id=tenant_id, payload=payload)
+
+    @api.post(
+        "/tenants/{tenant_id}/business-notification-channels/preview",
+        response_model=BusinessNotificationChannelMatrixPreviewRead,
+        tags=["business-control"],
+    )
+    async def preview_business_notification_channel_matrix_endpoint(
+        tenant_id: str,
+        payload: BusinessNotificationChannelMatrixPreviewCreate,
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> dict[str, object]:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.BUSINESS_RECORD_READ)
+        return await preview_business_notification_channel_matrix(
+            session,
+            tenant_id=tenant_id,
+            payload=payload,
+        )
 
     @api.post(
         "/tenants/{tenant_id}/business-workbench-context/preview",

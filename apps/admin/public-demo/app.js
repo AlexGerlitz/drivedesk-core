@@ -161,6 +161,13 @@
         Array.isArray(payload.businessTaskHandoff.notificationDrafts) &&
         Array.isArray(payload.businessTaskHandoff.approvalGates) &&
         Array.isArray(payload.businessTaskHandoff.dataBoundaries) &&
+        payload.businessNotificationChannels &&
+        Array.isArray(payload.businessNotificationChannels.summary) &&
+        Array.isArray(payload.businessNotificationChannels.channels) &&
+        Array.isArray(payload.businessNotificationChannels.routingRules) &&
+        Array.isArray(payload.businessNotificationChannels.deliveryDrafts) &&
+        Array.isArray(payload.businessNotificationChannels.approvalGates) &&
+        Array.isArray(payload.businessNotificationChannels.dataBoundaries) &&
         payload.businessScenarioReplay &&
         Array.isArray(payload.businessScenarioReplay.summary) &&
         Array.isArray(payload.businessScenarioReplay.scenarios) &&
@@ -1414,6 +1421,163 @@
     });
   }
 
+  function fillBusinessNotificationChannels() {
+    var matrix = data.businessNotificationChannels;
+
+    var summaryRows = document.getElementById("businessNotificationSummaryRows");
+    clear(summaryRows);
+    matrix.summary.forEach(function (item) {
+      var card = document.createElement("article");
+      card.className = "metric-card";
+      card.dataset.tone = item.tone || "blue";
+
+      var label = document.createElement("span");
+      label.className = "muted";
+      label.appendChild(text(item.label));
+
+      var value = document.createElement("strong");
+      value.appendChild(text(item.value));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      card.append(label, value, detail);
+      summaryRows.appendChild(card);
+    });
+
+    var channelRows = document.getElementById("businessNotificationChannelRows");
+    clear(channelRows);
+    matrix.channels.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var channel = document.createElement("strong");
+      channel.appendChild(text(item.channel));
+      top.append(channel, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          item.destinationProfile +
+            " - " +
+            item.sendMode +
+            " - secret " +
+            String(item.requiresSecret) +
+            " - external delivery " +
+            String(item.externalDelivery)
+        )
+      );
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(item.evidence));
+
+      row.append(top, detail, evidence);
+      channelRows.appendChild(row);
+    });
+
+    matrix.routingRules.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var rule = document.createElement("strong");
+      rule.appendChild(text(item.rule));
+      top.append(rule, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      row.append(top, detail);
+      channelRows.appendChild(row);
+    });
+
+    var draftRows = document.getElementById("businessNotificationDraftRows");
+    clear(draftRows);
+    matrix.deliveryDrafts.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(item.channel + " draft"));
+      top.append(title, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          item.safePayloadProfile +
+            " - " +
+            item.wouldEnqueueEvent +
+            " - PII " +
+            String(item.containsPii)
+        )
+      );
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(item.evidence));
+
+      row.append(top, detail, evidence);
+      draftRows.appendChild(row);
+    });
+
+    matrix.approvalGates.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var gate = document.createElement("strong");
+      gate.appendChild(text(item.gate));
+      top.append(gate, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text("approval " + String(item.requiresApproval) + " - external delivery " + String(item.externalDelivery))
+      );
+
+      row.append(top, detail);
+      draftRows.appendChild(row);
+    });
+
+    var boundaryRows = document.getElementById("businessNotificationBoundaryRows");
+    clear(boundaryRows);
+    matrix.dataBoundaries.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var name = document.createElement("strong");
+      name.appendChild(text(item.name));
+      top.append(name, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          "external delivery " +
+            String(Boolean(item.externalDelivery)) +
+            " - secret " +
+            String(Boolean(item.requiresSecret)) +
+            " - raw payload " +
+            String(Boolean(item.rawPayloadIncluded))
+        )
+      );
+
+      row.append(top, detail);
+      boundaryRows.appendChild(row);
+    });
+  }
+
   function fillBusinessScenarioReplay() {
     var replay = data.businessScenarioReplay;
 
@@ -2539,7 +2703,7 @@
     ) {
       return "green";
     }
-    if (["blocked", "waiting", "pending", "retry", "partial_success", "current", "open", "acknowledged", "warning", "attention", "review_required", "mitigating", "fired", "proposed", "suggested", "invoice_sent", "not_exported", "waiting_for_repair", "requires_channel_config", "preview_only", "needs_cross_check", "action_required", "approval_required", "draft_only", "would_create", "would_enqueue", "required"].indexOf(status) >= 0) {
+    if (["blocked", "waiting", "pending", "retry", "partial_success", "current", "open", "acknowledged", "warning", "attention", "review_required", "mitigating", "fired", "proposed", "suggested", "invoice_sent", "not_exported", "waiting_for_repair", "requires_channel_config", "requires_private_secret", "requires_private_provider", "requires_private_endpoint", "documented", "not_needed", "preview_only", "needs_cross_check", "action_required", "approval_required", "draft_only", "would_create", "would_enqueue", "required"].indexOf(status) >= 0) {
       return "amber";
     }
     if (["high", "dead_letter", "critical"].indexOf(status) >= 0) {
@@ -2604,6 +2768,7 @@
     fillBusinessControlTower();
     fillBusinessIntakePipeline();
     fillBusinessTaskHandoff();
+    fillBusinessNotificationChannels();
     fillBusinessScenarioReplay();
     fillEngineeringProof();
   }

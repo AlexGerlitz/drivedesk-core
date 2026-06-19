@@ -37,6 +37,7 @@ from drivedesk_api.schemas import (
     BusinessDetectionPreviewCreate,
     BusinessEscalationPreviewCreate,
     BusinessIntakePipelinePreviewCreate,
+    BusinessNotificationChannelMatrixPreviewCreate,
     BusinessNotificationPreviewCreate,
     BusinessProviderIntakePreviewCreate,
     BusinessTaskHandoffPreviewCreate,
@@ -1961,6 +1962,221 @@ async def preview_business_notifications(
             "preview": "POST /tenants/{tenant_id}/business-notifications/preview",
             "action_plan": "POST /tenants/{tenant_id}/business-action-plans/preview",
             "briefing": "POST /tenants/{tenant_id}/business-briefings/preview",
+        },
+    }
+
+
+def _notification_matrix_channel_state(
+    channel: str,
+    *,
+    role: str,
+    subject: str,
+) -> dict[str, object]:
+    profiles: dict[str, dict[str, object]] = {
+        "in_app": {
+            "status": "ready",
+            "configured": True,
+            "destination_profile": "internal_user_inbox",
+            "requires_secret": False,
+            "requires_private_connector": False,
+            "send_mode": "internal_preview",
+            "readiness": "usable_for_internal_work",
+        },
+        "telegram": {
+            "status": "requires_private_secret",
+            "configured": False,
+            "destination_profile": "telegram_bot_chat",
+            "requires_secret": True,
+            "requires_private_connector": True,
+            "send_mode": "draft_only",
+            "readiness": "private_connector_needed",
+        },
+        "email": {
+            "status": "requires_private_secret",
+            "configured": False,
+            "destination_profile": "smtp_or_provider_template",
+            "requires_secret": True,
+            "requires_private_connector": True,
+            "send_mode": "draft_only",
+            "readiness": "private_connector_needed",
+        },
+        "sms": {
+            "status": "requires_private_provider",
+            "configured": False,
+            "destination_profile": "sms_provider_template",
+            "requires_secret": True,
+            "requires_private_connector": True,
+            "send_mode": "draft_only",
+            "readiness": "provider_contract_needed",
+        },
+        "webhook": {
+            "status": "requires_private_endpoint",
+            "configured": False,
+            "destination_profile": "signed_webhook_endpoint",
+            "requires_secret": True,
+            "requires_private_connector": True,
+            "send_mode": "draft_only",
+            "readiness": "endpoint_and_signing_key_needed",
+        },
+    }
+    profile = profiles.get(channel, profiles["in_app"])
+    return {
+        "channel": channel,
+        "status": profile["status"],
+        "configured": profile["configured"],
+        "recipient_role": role,
+        "subject": subject,
+        "destination_profile": profile["destination_profile"],
+        "send_mode": profile["send_mode"],
+        "readiness": profile["readiness"],
+        "external_delivery": False,
+        "requires_secret": profile["requires_secret"],
+        "requires_private_connector": profile["requires_private_connector"],
+        "external_provider_mutation": False,
+        "contains_pii": False,
+        "raw_payload_included": False,
+        "safe_payload_profile": "role_subject_action_reference",
+        "evidence": "business_notification_channel_matrix.previewed",
+    }
+
+
+async def preview_business_notification_channel_matrix(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    payload: BusinessNotificationChannelMatrixPreviewCreate,
+) -> dict[str, object]:
+    await ensure_tenant_exists(session, tenant_id)
+    subject_type = payload.subject_type or "deal"
+    subject_id = payload.subject_id or "DEAL-2026-001"
+    subject = _subject_label(subject_type, subject_id)
+    requested_channels = list(dict.fromkeys(payload.channels))
+    channels = [
+        _notification_matrix_channel_state(channel, role=payload.role, subject=subject)
+        for channel in requested_channels
+    ]
+    ready_internal = [item for item in channels if item["status"] == "ready"]
+    private_required = [item for item in channels if bool(item["requires_private_connector"])]
+    delivery_drafts = [
+        {
+            "draft_id": f"channel_matrix.{channel['channel']}.{payload.role}",
+            "channel": channel["channel"],
+            "recipient_role": payload.role,
+            "subject": subject,
+            "title": "DriveDesk action update",
+            "body": f"{subject} has an operator action ready for {payload.role}.",
+            "status": "ready" if channel["status"] == "ready" else "draft_only",
+            "send_mode": channel["send_mode"],
+            "would_enqueue_event": "notification.delivery.requested",
+            "safe_payload_profile": "role_subject_action_reference",
+            "external_delivery": False,
+            "requires_secret": bool(channel["requires_secret"]),
+            "contains_pii": False,
+            "raw_payload_included": False,
+            "evidence": "business_notification_channel_matrix.previewed",
+        }
+        for channel in channels
+    ] if payload.include_delivery_drafts else []
+
+    return {
+        "tenant_id": tenant_id,
+        "matrix_kind": payload.matrix_kind,
+        "role": payload.role,
+        "subject_type": subject_type,
+        "subject_id": subject_id,
+        "generated_at": datetime.now(UTC),
+        "status": "previewed",
+        "summary": (
+            f"Notification channel matrix preview evaluated {len(channels)} channel(s), "
+            f"found {len(ready_internal)} internal-ready channel(s), and kept "
+            f"{len(private_required)} private connector channel(s) in draft-only mode."
+        ),
+        "channels": channels,
+        "routing_rules": [
+            {
+                "rule": "prefer_internal_in_app",
+                "status": "ready" if ready_internal else "empty",
+                "channel": "in_app",
+                "detail": "Internal work notifications can be represented without external delivery.",
+                "evidence": "business_notification_channel_matrix.previewed",
+            },
+            {
+                "rule": "external_channels_require_private_connector",
+                "status": "required" if private_required else "not_needed",
+                "channel_count": len(private_required),
+                "detail": "Telegram, email, SMS, and webhook delivery stay behind private connector and secret setup.",
+                "evidence": "business_notification_channel_matrix.previewed",
+            },
+            {
+                "rule": "safe_payload_only",
+                "status": "clean",
+                "payload_profile": "role_subject_action_reference",
+                "detail": "Channel drafts use role, subject key, title, action reference, and evidence labels only.",
+                "evidence": "business_notification_channel_matrix.previewed",
+            },
+        ],
+        "delivery_drafts": delivery_drafts,
+        "approval_gates": [
+            {
+                "gate": "notification_content_review",
+                "status": "ready",
+                "requires_approval": False,
+                "external_delivery": False,
+                "evidence": "business_notification_channel_matrix.previewed",
+            },
+            {
+                "gate": "private_channel_secret_setup",
+                "status": "required" if private_required else "not_needed",
+                "requires_approval": True,
+                "external_delivery": False,
+                "evidence": "business_notification_channel_matrix.previewed",
+            },
+            {
+                "gate": "external_delivery_gate",
+                "status": "closed",
+                "requires_approval": True,
+                "external_delivery": False,
+                "evidence": "business_notification_channel_matrix.previewed",
+            },
+        ],
+        "data_boundaries": [
+            {
+                "name": "preview_only_no_delivery",
+                "status": "preview_only",
+                "external_delivery": False,
+                "external_provider_mutation": False,
+                "detail": "The channel matrix does not enqueue outbox rows or call Telegram, email, SMS, webhook, CRM, or bank APIs.",
+            },
+            {
+                "name": "server_secret_store_boundary",
+                "status": "documented",
+                "requires_secret": True,
+                "browser_token_storage": False,
+                "detail": "External channel credentials belong to private server-side connector configuration, not the public demo.",
+            },
+            {
+                "name": "safe_notification_payload",
+                "status": "clean",
+                "contains_pii": False,
+                "raw_payload_included": False,
+                "detail": "Drafts expose only role, subject key, action summary, channel, and evidence labels.",
+            },
+        ],
+        "evidence": [
+            {
+                "type": "notification_channel_matrix",
+                "event": "business_notification_channel_matrix.previewed",
+                "channel_count": len(channels),
+                "ready_internal_count": len(ready_internal),
+                "private_connector_required_count": len(private_required),
+                "delivery_draft_count": len(delivery_drafts),
+            }
+        ],
+        "api": {
+            "preview": "POST /tenants/{tenant_id}/business-notification-channels/preview",
+            "notifications": "POST /tenants/{tenant_id}/business-notifications/preview",
+            "task_handoff": "POST /tenants/{tenant_id}/business-task-handoffs/preview",
+            "provider_connector_guide": "docs/public/PROVIDER_CONNECTOR_GUIDE.md",
         },
     }
 

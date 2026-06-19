@@ -15,6 +15,7 @@ GET /demo/public
 GET /demo/connector-fixture-replay
 GET /demo/business-intake-pipeline
 GET /demo/business-task-handoff
+GET /demo/business-notification-channels
 GET /demo/business-scenario-replay
 ```
 
@@ -24,7 +25,8 @@ timeline entries, workflow scenarios, domain events, members, audit events,
 outbox events, adapter contracts, adapter operation scenarios, Adapter Studio,
 sync jobs, Integration Health, alert routing, incident response,
 `businessControlTower` data, `businessIntakePipeline`,
-`businessTaskHandoff`, `businessScenarioReplay`, recovery evidence,
+`businessTaskHandoff`, `businessNotificationChannels`,
+`businessScenarioReplay`, recovery evidence,
 `connectorFixtureReplay`, and the `engineeringProof` contract rendered by the
 Control Tower, Integrations, Operations, Incidents, and Proof tabs.
 
@@ -43,6 +45,11 @@ contract as a standalone endpoint. It is useful for checking the operator
 handoff loop directly: action plan -> internal task cards -> internal outbox
 candidates -> draft in-app notifications.
 
+`GET /demo/business-notification-channels` returns the same
+`businessNotificationChannels` contract as a standalone endpoint. It is useful
+for checking the notification readiness loop directly: internal action -> safe
+drafts -> channel gates -> no external delivery.
+
 `GET /demo/business-scenario-replay` returns the same
 `businessScenarioReplay` contract as a standalone endpoint. It is useful for
 checking the Business OS loop directly: external signal -> normalized facts ->
@@ -57,6 +64,7 @@ risk detection -> role context -> approval-aware action plan.
 | Replay API | The generated SDK and smoke checks can load `GET /demo/connector-fixture-replay` directly. |
 | Intake Pipeline API | Smoke checks can load `GET /demo/business-intake-pipeline` directly. |
 | Task Handoff API | Smoke checks can load `GET /demo/business-task-handoff` directly. |
+| Notification Channel API | Smoke checks can load `GET /demo/business-notification-channels` directly. |
 | Scenario Replay API | Smoke checks can load `GET /demo/business-scenario-replay` directly. |
 
 Example local API-backed run:
@@ -98,7 +106,7 @@ bash scripts/check_public_demo_sdk.sh
 `DRIVEDESK_DEMO_BASE_URL` is provided. It checks `/health`, `/ready`,
 `/demo/public`, `/demo/connector-fixture-replay`,
 `/demo/business-intake-pipeline`, `/demo/business-task-handoff`,
-`/demo/business-scenario-replay`,
+`/demo/business-notification-channels`, `/demo/business-scenario-replay`,
 `/openapi.json`, the generated
 `docs/openapi.json` when present, alert routes, alert-to-runbook bindings,
 connector certification references in `CONNECTOR_CERTIFICATION.md`, connector
@@ -134,6 +142,11 @@ The `businessTaskHandoff` payload is documented in
 steps to internal task cards, internal outbox candidates, and draft in-app
 notifications without persistence, external provider writes, or external
 delivery.
+
+The `businessNotificationChannels` payload is documented in
+`BUSINESS_NOTIFICATION_CHANNELS.md`. It shows the preview-only path from
+operator action to in-app, Telegram, email, SMS, and webhook readiness,
+safe delivery drafts, private secret gates, and no external delivery.
 
 The `businessScenarioReplay` payload is documented in
 `BUSINESS_SCENARIO_REPLAY.md`. It shows three reusable Business OS paths:

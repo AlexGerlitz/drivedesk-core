@@ -104,6 +104,11 @@ Fast external verification path: `docs/public/REVIEWER_QUICKSTART.md`.
   operator work, automation candidates, approval gates, and evidence handoff.
 - Business notification preview for turning action plans into safe channel
   readiness, drafts, delivery plan, approval gates, and evidence.
+- Business notification channel matrix for proving in-app readiness plus
+  Telegram, email, SMS, and webhook draft-only states with private secret gates
+  and no external delivery via `businessNotificationChannels`,
+  `GET /demo/business-notification-channels`, and
+  `docs/public/BUSINESS_NOTIFICATION_CHANNELS.md`.
 - Business provider intake preview for turning Bitrix-style CRM, bank,
   accounting, and support payloads into safe normalized observation previews
   before persistence or workbench rendering.

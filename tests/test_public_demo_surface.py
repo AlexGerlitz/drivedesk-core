@@ -69,6 +69,10 @@ def test_public_demo_html_links_static_assets() -> None:
     assert 'id="businessTaskOutboxRows"' in html
     assert 'id="businessTaskDraftRows"' in html
     assert 'id="businessTaskBoundaryRows"' in html
+    assert 'id="businessNotificationSummaryRows"' in html
+    assert 'id="businessNotificationChannelRows"' in html
+    assert 'id="businessNotificationDraftRows"' in html
+    assert 'id="businessNotificationBoundaryRows"' in html
     assert 'id="controlTowerObservationRows"' in html
     assert 'id="controlTowerExceptionRows"' in html
     assert 'id="controlTowerRepairRows"' in html
@@ -653,6 +657,68 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
         "docs/public/WORKFLOW_DEMO.md",
         "docs/public/BUSINESS_INTAKE_PIPELINE.md",
     }
+    notification_channels = payload["businessNotificationChannels"]
+    assert notification_channels["status"] == "previewed"
+    assert (
+        notification_channels["command"]
+        == "POST /tenants/{tenant_id}/business-notification-channels/preview"
+    )
+    assert {item["label"] for item in notification_channels["summary"]} >= {
+        "Channels",
+        "Internal ready",
+        "Draft-only external",
+        "External deliveries",
+    }
+    assert notification_channels["role"] == "accountant"
+    assert notification_channels["subject"] == "deal:DEAL-2026-001"
+    channel_by_key = {item["channel"]: item for item in notification_channels["channels"]}
+    assert set(channel_by_key) == {"in_app", "telegram", "email", "sms", "webhook"}
+    assert channel_by_key["in_app"]["status"] == "ready"
+    assert channel_by_key["in_app"]["configured"] is True
+    assert channel_by_key["in_app"]["requiresSecret"] is False
+    assert channel_by_key["in_app"]["requiresPrivateConnector"] is False
+    assert {
+        channel_by_key[channel]["requiresSecret"]
+        for channel in ["telegram", "email", "sms", "webhook"]
+    } == {True}
+    assert {
+        channel_by_key[channel]["requiresPrivateConnector"]
+        for channel in ["telegram", "email", "sms", "webhook"]
+    } == {True}
+    assert {item["externalDelivery"] for item in notification_channels["channels"]} == {False}
+    assert {item["containsPii"] for item in notification_channels["channels"]} == {False}
+    assert {item["rawPayloadIncluded"] for item in notification_channels["channels"]} == {False}
+    assert {item["rule"] for item in notification_channels["routingRules"]} == {
+        "prefer_internal_in_app",
+        "external_channels_require_private_connector",
+        "safe_payload_only",
+    }
+    assert len(notification_channels["deliveryDrafts"]) == 5
+    assert {item["wouldEnqueueEvent"] for item in notification_channels["deliveryDrafts"]} == {
+        "notification.delivery.requested"
+    }
+    assert {item["externalDelivery"] for item in notification_channels["deliveryDrafts"]} == {
+        False
+    }
+    assert {item["containsPii"] for item in notification_channels["deliveryDrafts"]} == {False}
+    assert {item["rawPayloadIncluded"] for item in notification_channels["deliveryDrafts"]} == {
+        False
+    }
+    assert {item["gate"] for item in notification_channels["approvalGates"]} == {
+        "notification_content_review",
+        "private_channel_secret_setup",
+        "external_delivery_gate",
+    }
+    assert {item["name"] for item in notification_channels["dataBoundaries"]} == {
+        "preview_only_no_delivery",
+        "server_secret_store_boundary",
+        "safe_notification_payload",
+    }
+    assert {item["path"] for item in notification_channels["docs"]} >= {
+        "docs/public/BUSINESS_NOTIFICATION_CHANNELS.md",
+        "docs/public/BUSINESS_TASK_HANDOFF.md",
+        "docs/public/API_BACKED_DEMO.md",
+    }
     business_scenario_replay = payload["businessScenarioReplay"]
     assert business_scenario_replay["status"] == "validated"
     assert business_scenario_replay["command"] == "bash scripts/check_public_business_scenario_replay.sh"
@@ -840,6 +906,7 @@ def test_public_demo_api_scripts_and_examples_exist() -> None:
     expected = {
         "scripts/run_public_demo_local.sh",
         "scripts/check_public_demo_api.sh",
+        "scripts/check_public_business_notification_channels.sh",
         "scripts/check_public_business_scenario_replay.sh",
         "scripts/check_public_engineering_proof.sh",
         "scripts/check_public_demo_sdk.sh",
@@ -885,6 +952,7 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
             "/ready",
             "/demo/public",
             "/demo/connector-fixture-replay",
+            "/demo/business-notification-channels",
             "/demo/business-scenario-replay",
             "/openapi.json",
             "student_sync",
@@ -1000,9 +1068,11 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
         "scripts/generate_public_demo_sdk.py": [
             "/demo/public",
             "/demo/connector-fixture-replay",
+            "/demo/business-notification-channels",
             "/demo/business-scenario-replay",
             "operationId",
             "ConnectorFixtureReplayRead",
+            "BusinessNotificationChannelMatrixDemoRead",
             "BusinessScenarioReplayRead",
             "drivedesk_public_demo_client.py",
             "drivedesk-public-demo-client.mjs",

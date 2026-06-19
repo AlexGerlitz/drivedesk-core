@@ -900,6 +900,75 @@ def test_business_control_tower_exception_and_repair_flow(
         assert leaked not in serialized_handoff
     assert asyncio.run(count_control_tower_rows()) == handoff_baseline
 
+    notification_matrix_baseline = asyncio.run(count_control_tower_rows())
+    notification_matrix_response = client.post(
+        f"/tenants/{tenant_id}/business-notification-channels/preview",
+        json={
+            "role": "accountant",
+            "subject_type": "deal",
+            "subject_id": "DEAL-2026-001",
+            "channels": ["in_app", "telegram", "email", "sms", "webhook"],
+            "include_delivery_drafts": True,
+        },
+        headers=owner_headers,
+    )
+    assert notification_matrix_response.status_code == 200
+    notification_matrix = notification_matrix_response.json()
+    assert notification_matrix["status"] == "previewed"
+    assert notification_matrix["matrix_kind"] == "operator_channel_readiness"
+    assert notification_matrix["role"] == "accountant"
+    assert notification_matrix["subject_type"] == "deal"
+    assert notification_matrix["subject_id"] == "DEAL-2026-001"
+    assert "evaluated 5 channel" in notification_matrix["summary"]
+    channel_by_key = {item["channel"]: item for item in notification_matrix["channels"]}
+    assert set(channel_by_key) == {"in_app", "telegram", "email", "sms", "webhook"}
+    assert channel_by_key["in_app"]["status"] == "ready"
+    assert channel_by_key["in_app"]["configured"] is True
+    assert channel_by_key["in_app"]["requires_secret"] is False
+    assert channel_by_key["in_app"]["requires_private_connector"] is False
+    assert {
+        channel_by_key[channel]["requires_secret"]
+        for channel in ["telegram", "email", "sms", "webhook"]
+    } == {True}
+    assert {
+        channel_by_key[channel]["requires_private_connector"]
+        for channel in ["telegram", "email", "sms", "webhook"]
+    } == {True}
+    assert {item["external_delivery"] for item in notification_matrix["channels"]} == {False}
+    assert {item["contains_pii"] for item in notification_matrix["channels"]} == {False}
+    assert {item["raw_payload_included"] for item in notification_matrix["channels"]} == {False}
+    assert {item["rule"] for item in notification_matrix["routing_rules"]} == {
+        "prefer_internal_in_app",
+        "external_channels_require_private_connector",
+        "safe_payload_only",
+    }
+    assert len(notification_matrix["delivery_drafts"]) == 5
+    assert {item["would_enqueue_event"] for item in notification_matrix["delivery_drafts"]} == {
+        "notification.delivery.requested"
+    }
+    assert {item["external_delivery"] for item in notification_matrix["delivery_drafts"]} == {False}
+    assert {item["contains_pii"] for item in notification_matrix["delivery_drafts"]} == {False}
+    assert {item["raw_payload_included"] for item in notification_matrix["delivery_drafts"]} == {False}
+    assert {item["gate"] for item in notification_matrix["approval_gates"]} == {
+        "notification_content_review",
+        "private_channel_secret_setup",
+        "external_delivery_gate",
+    }
+    assert {item["name"] for item in notification_matrix["data_boundaries"]} == {
+        "preview_only_no_delivery",
+        "server_secret_store_boundary",
+        "safe_notification_payload",
+    }
+    assert notification_matrix["evidence"][0]["event"] == "business_notification_channel_matrix.previewed"
+    assert (
+        notification_matrix["api"]["preview"]
+        == "POST /tenants/{tenant_id}/business-notification-channels/preview"
+    )
+    serialized_matrix = json.dumps(notification_matrix, ensure_ascii=False, sort_keys=True).lower()
+    for leaked in ["never-return-this", "+70000000000", "synthetic customer", "password", "authorization"]:
+        assert leaked not in serialized_matrix
+    assert asyncio.run(count_control_tower_rows()) == notification_matrix_baseline
+
     observation_payloads = [
         {
             "system_key": "crm.bitrix24.mock",
@@ -2322,6 +2391,62 @@ def test_business_task_handoff_demo_endpoint_exposes_same_public_contract(
     assert any(
         item["path"] == "docs/public/BUSINESS_TASK_HANDOFF.md"
         for item in handoff_payload["docs"]
+    )
+
+
+def test_business_notification_channels_demo_endpoint_exposes_same_public_contract(
+    api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, _ = api_client
+
+    public_response = client.get("/demo/public")
+    matrix_response = client.get("/demo/business-notification-channels")
+
+    assert matrix_response.status_code == 200
+    assert matrix_response.headers["access-control-allow-origin"] == "*"
+    assert matrix_response.headers["cache-control"] == "public, max-age=60"
+    matrix_payload = matrix_response.json()
+    assert matrix_payload == public_response.json()["businessNotificationChannels"]
+    assert matrix_payload["status"] == "previewed"
+    assert (
+        matrix_payload["command"]
+        == "POST /tenants/{tenant_id}/business-notification-channels/preview"
+    )
+    assert matrix_payload["role"] == "accountant"
+    assert matrix_payload["subject"] == "deal:DEAL-2026-001"
+    channel_by_key = {item["channel"]: item for item in matrix_payload["channels"]}
+    assert set(channel_by_key) == {"in_app", "telegram", "email", "sms", "webhook"}
+    assert channel_by_key["in_app"]["status"] == "ready"
+    assert channel_by_key["in_app"]["configured"] is True
+    assert channel_by_key["in_app"]["externalDelivery"] is False
+    assert {
+        channel_by_key[channel]["requiresSecret"]
+        for channel in ["telegram", "email", "sms", "webhook"]
+    } == {True}
+    assert {
+        channel_by_key[channel]["requiresPrivateConnector"]
+        for channel in ["telegram", "email", "sms", "webhook"]
+    } == {True}
+    assert {item["externalDelivery"] for item in matrix_payload["channels"]} == {False}
+    assert {item["containsPii"] for item in matrix_payload["channels"]} == {False}
+    assert len(matrix_payload["deliveryDrafts"]) == 5
+    assert {item["wouldEnqueueEvent"] for item in matrix_payload["deliveryDrafts"]} == {
+        "notification.delivery.requested"
+    }
+    assert {item["externalDelivery"] for item in matrix_payload["deliveryDrafts"]} == {False}
+    assert {item["gate"] for item in matrix_payload["approvalGates"]} == {
+        "notification_content_review",
+        "private_channel_secret_setup",
+        "external_delivery_gate",
+    }
+    assert {item["name"] for item in matrix_payload["dataBoundaries"]} == {
+        "preview_only_no_delivery",
+        "server_secret_store_boundary",
+        "safe_notification_payload",
+    }
+    assert any(
+        item["path"] == "docs/public/BUSINESS_NOTIFICATION_CHANNELS.md"
+        for item in matrix_payload["docs"]
     )
 
 

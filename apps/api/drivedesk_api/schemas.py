@@ -22,6 +22,8 @@ BusinessDetectionRuleSet = Literal["payment_reconciliation"]
 BusinessEscalationPolicy = Literal["exception_triage"]
 BusinessActionPlanKind = Literal["exception_resolution"]
 BusinessNotificationKind = Literal["action_plan_updates"]
+BusinessNotificationChannel = Literal["in_app", "telegram", "email", "sms", "webhook"]
+BusinessNotificationChannelMatrixKind = Literal["operator_channel_readiness"]
 BusinessProviderIntakeSource = Literal["crm_deal", "bank_payment", "accounting_export", "support_ticket"]
 BusinessWorkbenchContextKind = Literal["role_assist"]
 BusinessTaskHandoffKind = Literal["action_plan_task_handoff"]
@@ -607,6 +609,37 @@ class BusinessNotificationPreviewRead(BaseModel):
     api: dict[str, str] = Field(default_factory=dict)
 
 
+class BusinessNotificationChannelMatrixPreviewCreate(BaseModel):
+    matrix_kind: BusinessNotificationChannelMatrixKind = "operator_channel_readiness"
+    role: BusinessBriefingRole = "operator"
+    subject_type: str | None = Field(default=None, min_length=2, max_length=64, pattern=r"^[a-z0-9][a-z0-9_-]*$")
+    subject_id: str | None = Field(default=None, min_length=1, max_length=128)
+    channels: list[BusinessNotificationChannel] = Field(
+        default_factory=lambda: ["in_app", "telegram", "email", "sms", "webhook"],
+        min_length=1,
+        max_length=5,
+    )
+    include_delivery_drafts: bool = True
+
+
+class BusinessNotificationChannelMatrixPreviewRead(BaseModel):
+    tenant_id: str
+    matrix_kind: BusinessNotificationChannelMatrixKind
+    role: BusinessBriefingRole
+    subject_type: str | None = None
+    subject_id: str | None = None
+    generated_at: datetime
+    status: Literal["previewed"]
+    summary: str
+    channels: list[dict[str, Any]] = Field(default_factory=list)
+    routing_rules: list[dict[str, Any]] = Field(default_factory=list)
+    delivery_drafts: list[dict[str, Any]] = Field(default_factory=list)
+    approval_gates: list[dict[str, Any]] = Field(default_factory=list)
+    data_boundaries: list[dict[str, Any]] = Field(default_factory=list)
+    evidence: list[dict[str, Any]] = Field(default_factory=list)
+    api: dict[str, str] = Field(default_factory=dict)
+
+
 class BusinessProviderIntakePreviewCreate(BaseModel):
     provider_key: str = Field(min_length=3, max_length=120, pattern=r"^[a-z0-9][a-z0-9._-]*$")
     source_type: BusinessProviderIntakeSource = "crm_deal"
@@ -845,6 +878,21 @@ class BusinessTaskHandoffDemoRead(BaseModel):
     docs: list[dict[str, str]]
 
 
+class BusinessNotificationChannelMatrixDemoRead(BaseModel):
+    status: Literal["previewed"]
+    command: str
+    summary: list[dict[str, Any]]
+    role: str
+    subject: str
+    channels: list[dict[str, Any]]
+    routingRules: list[dict[str, Any]]
+    deliveryDrafts: list[dict[str, Any]]
+    approvalGates: list[dict[str, Any]]
+    dataBoundaries: list[dict[str, Any]]
+    api: dict[str, str]
+    docs: list[dict[str, str]]
+
+
 class PublicDemoRead(BaseModel):
     schemaVersion: int
     generatedAt: str
@@ -863,6 +911,7 @@ class PublicDemoRead(BaseModel):
     connectorFixtureReplay: dict[str, Any]
     businessIntakePipeline: dict[str, Any]
     businessTaskHandoff: dict[str, Any]
+    businessNotificationChannels: dict[str, Any]
     integrationJobs: list[dict[str, Any]]
     integrationHealth: list[dict[str, str]]
     integrationReadiness: list[dict[str, Any]]

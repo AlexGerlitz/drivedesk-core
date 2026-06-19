@@ -110,6 +110,9 @@ demo, demo_headers = get_json("/demo/public")
 connector_replay_endpoint, connector_replay_headers = get_json("/demo/connector-fixture-replay")
 business_intake_endpoint, business_intake_headers = get_json("/demo/business-intake-pipeline")
 business_task_handoff_endpoint, business_task_handoff_headers = get_json("/demo/business-task-handoff")
+business_notification_channels_endpoint, business_notification_channels_headers = get_json(
+    "/demo/business-notification-channels"
+)
 business_scenario_endpoint, business_scenario_headers = get_json("/demo/business-scenario-replay")
 adapters, _ = get_json("/integration-adapters")
 runbooks, _ = get_json("/integration-runbooks")
@@ -764,6 +767,89 @@ assert {item["path"] for item in business_task_handoff["docs"]} >= {
     "docs/public/WORKFLOW_DEMO.md",
     "docs/public/BUSINESS_INTAKE_PIPELINE.md",
 }, demo
+business_notification_channels = demo["businessNotificationChannels"]
+assert business_notification_channels_endpoint == business_notification_channels, (
+    business_notification_channels_endpoint
+)
+assert (
+    business_notification_channels_headers["access-control-allow-origin"] == "*"
+), business_notification_channels_headers
+assert (
+    business_notification_channels_headers["cache-control"] == "public, max-age=60"
+), business_notification_channels_headers
+assert business_notification_channels["status"] == "previewed", demo
+assert (
+    business_notification_channels["command"]
+    == "POST /tenants/{tenant_id}/business-notification-channels/preview"
+), demo
+assert {item["label"] for item in business_notification_channels["summary"]} >= {
+    "Channels",
+    "Internal ready",
+    "Draft-only external",
+    "External deliveries",
+}, demo
+assert business_notification_channels["role"] == "accountant", demo
+assert business_notification_channels["subject"] == "deal:DEAL-2026-001", demo
+channel_by_key = {item["channel"]: item for item in business_notification_channels["channels"]}
+assert set(channel_by_key) == {"in_app", "telegram", "email", "sms", "webhook"}, demo
+assert channel_by_key["in_app"]["status"] == "ready", demo
+assert channel_by_key["in_app"]["configured"] is True, demo
+assert channel_by_key["in_app"]["requiresSecret"] is False, demo
+assert channel_by_key["in_app"]["requiresPrivateConnector"] is False, demo
+assert {
+    channel_by_key[channel]["status"]
+    for channel in ["telegram", "email", "sms", "webhook"]
+} == {"requires_private_secret", "requires_private_provider", "requires_private_endpoint"}, demo
+assert {
+    channel_by_key[channel]["requiresSecret"]
+    for channel in ["telegram", "email", "sms", "webhook"]
+} == {True}, demo
+assert {
+    channel_by_key[channel]["requiresPrivateConnector"]
+    for channel in ["telegram", "email", "sms", "webhook"]
+} == {True}, demo
+assert {
+    item["externalDelivery"] for item in business_notification_channels["channels"]
+} == {False}, demo
+assert {
+    item["containsPii"] for item in business_notification_channels["channels"]
+} == {False}, demo
+assert {
+    item["rawPayloadIncluded"] for item in business_notification_channels["channels"]
+} == {False}, demo
+assert {item["rule"] for item in business_notification_channels["routingRules"]} == {
+    "prefer_internal_in_app",
+    "external_channels_require_private_connector",
+    "safe_payload_only",
+}, demo
+assert len(business_notification_channels["deliveryDrafts"]) == 5, demo
+assert {
+    item["wouldEnqueueEvent"] for item in business_notification_channels["deliveryDrafts"]
+} == {"notification.delivery.requested"}, demo
+assert {
+    item["externalDelivery"] for item in business_notification_channels["deliveryDrafts"]
+} == {False}, demo
+assert {
+    item["containsPii"] for item in business_notification_channels["deliveryDrafts"]
+} == {False}, demo
+assert {
+    item["rawPayloadIncluded"] for item in business_notification_channels["deliveryDrafts"]
+} == {False}, demo
+assert {item["gate"] for item in business_notification_channels["approvalGates"]} == {
+    "notification_content_review",
+    "private_channel_secret_setup",
+    "external_delivery_gate",
+}, demo
+assert {item["name"] for item in business_notification_channels["dataBoundaries"]} == {
+    "preview_only_no_delivery",
+    "server_secret_store_boundary",
+    "safe_notification_payload",
+}, demo
+assert {item["path"] for item in business_notification_channels["docs"]} >= {
+    "docs/public/BUSINESS_NOTIFICATION_CHANNELS.md",
+    "docs/public/BUSINESS_TASK_HANDOFF.md",
+    "docs/public/API_BACKED_DEMO.md",
+}, demo
 business_scenario_replay = demo["businessScenarioReplay"]
 assert business_scenario_endpoint == business_scenario_replay, business_scenario_endpoint
 assert business_scenario_headers["access-control-allow-origin"] == "*", business_scenario_headers
@@ -936,9 +1022,13 @@ assert "/demo/public" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/connector-fixture-replay" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/business-intake-pipeline" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/business-task-handoff" in openapi["paths"], openapi["paths"].keys()
+assert "/demo/business-notification-channels" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/business-scenario-replay" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/business-intake-pipeline/preview" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/business-task-handoffs/preview" in openapi["paths"], openapi["paths"].keys()
+assert (
+    "/tenants/{tenant_id}/business-notification-channels/preview" in openapi["paths"]
+), openapi["paths"].keys()
 assert "/health" in openapi["paths"], openapi["paths"].keys()
 
 if openapi_file.exists():
@@ -947,9 +1037,13 @@ if openapi_file.exists():
     assert "/demo/connector-fixture-replay" in generated["paths"], generated["paths"].keys()
     assert "/demo/business-intake-pipeline" in generated["paths"], generated["paths"].keys()
     assert "/demo/business-task-handoff" in generated["paths"], generated["paths"].keys()
+    assert "/demo/business-notification-channels" in generated["paths"], generated["paths"].keys()
     assert "/demo/business-scenario-replay" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-intake-pipeline/preview" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-task-handoffs/preview" in generated["paths"], generated["paths"].keys()
+    assert (
+        "/tenants/{tenant_id}/business-notification-channels/preview" in generated["paths"]
+    ), generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-action-plans/preview" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-notifications/preview" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/workflow-action-runs" in generated["paths"], generated["paths"].keys()

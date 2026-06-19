@@ -1520,6 +1520,305 @@
         "title": "BusinessIntakePipelinePreviewRead",
         "type": "object"
       },
+      "BusinessNotificationChannelMatrixDemoRead": {
+        "properties": {
+          "api": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Api",
+            "type": "object"
+          },
+          "approvalGates": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Approvalgates",
+            "type": "array"
+          },
+          "channels": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Channels",
+            "type": "array"
+          },
+          "command": {
+            "title": "Command",
+            "type": "string"
+          },
+          "dataBoundaries": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Databoundaries",
+            "type": "array"
+          },
+          "deliveryDrafts": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Deliverydrafts",
+            "type": "array"
+          },
+          "docs": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "title": "Docs",
+            "type": "array"
+          },
+          "role": {
+            "title": "Role",
+            "type": "string"
+          },
+          "routingRules": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Routingrules",
+            "type": "array"
+          },
+          "status": {
+            "const": "previewed",
+            "title": "Status",
+            "type": "string"
+          },
+          "subject": {
+            "title": "Subject",
+            "type": "string"
+          },
+          "summary": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Summary",
+            "type": "array"
+          }
+        },
+        "required": [
+          "status",
+          "command",
+          "summary",
+          "role",
+          "subject",
+          "channels",
+          "routingRules",
+          "deliveryDrafts",
+          "approvalGates",
+          "dataBoundaries",
+          "api",
+          "docs"
+        ],
+        "title": "BusinessNotificationChannelMatrixDemoRead",
+        "type": "object"
+      },
+      "BusinessNotificationChannelMatrixPreviewCreate": {
+        "properties": {
+          "channels": {
+            "items": {
+              "enum": [
+                "in_app",
+                "telegram",
+                "email",
+                "sms",
+                "webhook"
+              ],
+              "type": "string"
+            },
+            "maxItems": 5,
+            "minItems": 1,
+            "title": "Channels",
+            "type": "array"
+          },
+          "include_delivery_drafts": {
+            "default": true,
+            "title": "Include Delivery Drafts",
+            "type": "boolean"
+          },
+          "matrix_kind": {
+            "const": "operator_channel_readiness",
+            "default": "operator_channel_readiness",
+            "title": "Matrix Kind",
+            "type": "string"
+          },
+          "role": {
+            "default": "operator",
+            "enum": [
+              "operator",
+              "accountant",
+              "manager",
+              "owner",
+              "support"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "subject_id": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Id"
+          },
+          "subject_type": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 2,
+                "pattern": "^[a-z0-9][a-z0-9_-]*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Type"
+          }
+        },
+        "title": "BusinessNotificationChannelMatrixPreviewCreate",
+        "type": "object"
+      },
+      "BusinessNotificationChannelMatrixPreviewRead": {
+        "properties": {
+          "api": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Api",
+            "type": "object"
+          },
+          "approval_gates": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Approval Gates",
+            "type": "array"
+          },
+          "channels": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Channels",
+            "type": "array"
+          },
+          "data_boundaries": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Data Boundaries",
+            "type": "array"
+          },
+          "delivery_drafts": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Delivery Drafts",
+            "type": "array"
+          },
+          "evidence": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "matrix_kind": {
+            "const": "operator_channel_readiness",
+            "title": "Matrix Kind",
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "operator",
+              "accountant",
+              "manager",
+              "owner",
+              "support"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "routing_rules": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Routing Rules",
+            "type": "array"
+          },
+          "status": {
+            "const": "previewed",
+            "title": "Status",
+            "type": "string"
+          },
+          "subject_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Id"
+          },
+          "subject_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Type"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tenant_id",
+          "matrix_kind",
+          "role",
+          "generated_at",
+          "status",
+          "summary"
+        ],
+        "title": "BusinessNotificationChannelMatrixPreviewRead",
+        "type": "object"
+      },
       "BusinessNotificationPreviewCreate": {
         "properties": {
           "channels": {
@@ -4418,6 +4717,11 @@
             "title": "Businessintakepipeline",
             "type": "object"
           },
+          "businessNotificationChannels": {
+            "additionalProperties": true,
+            "title": "Businessnotificationchannels",
+            "type": "object"
+          },
           "businessScenarioReplay": {
             "additionalProperties": true,
             "title": "Businessscenarioreplay",
@@ -4597,6 +4901,7 @@
           "connectorFixtureReplay",
           "businessIntakePipeline",
           "businessTaskHandoff",
+          "businessNotificationChannels",
           "integrationJobs",
           "integrationHealth",
           "integrationReadiness",
@@ -5680,6 +5985,27 @@
           }
         },
         "summary": "Business Intake Pipeline Demo",
+        "tags": [
+          "demo"
+        ]
+      }
+    },
+    "/demo/business-notification-channels": {
+      "get": {
+        "operationId": "business_notification_channels_demo_demo_business_notification_channels_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessNotificationChannelMatrixDemoRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Business Notification Channels Demo",
         "tags": [
           "demo"
         ]
@@ -7166,6 +7492,94 @@
           }
         },
         "summary": "Preview Business Intake Pipeline Endpoint",
+        "tags": [
+          "business-control"
+        ]
+      }
+    },
+    "/tenants/{tenant_id}/business-notification-channels/preview": {
+      "post": {
+        "operationId": "preview_business_notification_channel_matrix_endpoint_tenants__tenant_id__business_notification_channels_preview_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tenant_id",
+            "required": true,
+            "schema": {
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "X-Actor-Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Role",
+            "required": false,
+            "schema": {
+              "default": "viewer",
+              "title": "X-Actor-Role",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessNotificationChannelMatrixPreviewCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessNotificationChannelMatrixPreviewRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Preview Business Notification Channel Matrix Endpoint",
         "tags": [
           "business-control"
         ]

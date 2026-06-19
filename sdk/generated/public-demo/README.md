@@ -21,6 +21,9 @@ operationId: public_demo_demo_public_get
 GET /demo/connector-fixture-replay
 operationId: connector_fixture_replay_demo_demo_connector_fixture_replay_get
 
+GET /demo/business-notification-channels
+operationId: business_notification_channels_demo_demo_business_notification_channels_get
+
 GET /demo/business-scenario-replay
 operationId: business_scenario_replay_demo_demo_business_scenario_replay_get
 ```
@@ -39,6 +42,8 @@ Adapter operation helpers:
 - `DriveDeskPublicDemoClient.get_adapter_operation_plan`
 - `DriveDeskPublicDemoClient.getConnectorFixtureReplay`
 - `DriveDeskPublicDemoClient.get_connector_fixture_replay`
+- `business_notification_channels` manifest entry for
+  `GET /demo/business-notification-channels`
 - `DriveDeskPublicDemoClient.getBusinessScenarioReplay`
 - `DriveDeskPublicDemoClient.get_business_scenario_replay`
 
@@ -53,6 +58,10 @@ review docs.
 Business scenario replay helpers validate the Business OS scenario contract:
 source systems, normalized facts, recommended actions, automation boundaries,
 and replay docs.
+
+Business notification channel metadata validates the public-safe channel matrix:
+in-app readiness, draft-only external channels, private secret gates, and no
+external delivery.
 
 Engineering summary: this is the public-safe integration proof. DriveDesk
 publishes an OpenAPI contract and generates a small SDK from it instead of

@@ -5566,6 +5566,166 @@
         "title": "IntegrationRepairDemoRead",
         "type": "object"
       },
+      "IntegrationRepairPreviewCreate": {
+        "properties": {
+          "action": {
+            "maxLength": 80,
+            "minLength": 2,
+            "pattern": "^[a-z0-9][a-z0-9_]*$",
+            "title": "Action",
+            "type": "string"
+          },
+          "incident_id": {
+            "maxLength": 32,
+            "minLength": 2,
+            "pattern": "^[A-Z]{2}-[0-9]{3}$",
+            "title": "Incident Id",
+            "type": "string"
+          },
+          "include_postchecks": {
+            "default": true,
+            "title": "Include Postchecks",
+            "type": "boolean"
+          },
+          "operator_role": {
+            "default": "operator",
+            "maxLength": 64,
+            "minLength": 2,
+            "title": "Operator Role",
+            "type": "string"
+          },
+          "repair_kind": {
+            "const": "operator_repair_action_preview",
+            "default": "operator_repair_action_preview",
+            "title": "Repair Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "incident_id",
+          "action"
+        ],
+        "title": "IntegrationRepairPreviewCreate",
+        "type": "object"
+      },
+      "IntegrationRepairPreviewRead": {
+        "properties": {
+          "action": {
+            "title": "Action",
+            "type": "string"
+          },
+          "api": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Api",
+            "type": "object"
+          },
+          "approval_gate": {
+            "additionalProperties": true,
+            "title": "Approval Gate",
+            "type": "object"
+          },
+          "data_boundaries": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Data Boundaries",
+            "type": "array"
+          },
+          "dry_run_result": {
+            "additionalProperties": true,
+            "title": "Dry Run Result",
+            "type": "object"
+          },
+          "evidence": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "incident_id": {
+            "title": "Incident Id",
+            "type": "string"
+          },
+          "operator_role": {
+            "title": "Operator Role",
+            "type": "string"
+          },
+          "postchecks": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Postchecks",
+            "type": "array"
+          },
+          "preflight_checks": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Preflight Checks",
+            "type": "array"
+          },
+          "repair_kind": {
+            "const": "operator_repair_action_preview",
+            "title": "Repair Kind",
+            "type": "string"
+          },
+          "runbook": {
+            "additionalProperties": true,
+            "title": "Runbook",
+            "type": "object"
+          },
+          "selected_action": {
+            "additionalProperties": true,
+            "title": "Selected Action",
+            "type": "object"
+          },
+          "selected_incident": {
+            "additionalProperties": true,
+            "title": "Selected Incident",
+            "type": "object"
+          },
+          "status": {
+            "const": "previewed",
+            "title": "Status",
+            "type": "string"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tenant_id",
+          "repair_kind",
+          "incident_id",
+          "action",
+          "operator_role",
+          "generated_at",
+          "status",
+          "summary",
+          "selected_incident",
+          "selected_action",
+          "runbook"
+        ],
+        "title": "IntegrationRepairPreviewRead",
+        "type": "object"
+      },
       "IntegrationRunbookRead": {
         "properties": {
           "alert_name": {
@@ -12142,6 +12302,94 @@
           }
         },
         "summary": "Create Integration Reconciliation Endpoint",
+        "tags": [
+          "integrations"
+        ]
+      }
+    },
+    "/tenants/{tenant_id}/integration-repairs/preview": {
+      "post": {
+        "operationId": "preview_integration_repair_endpoint_tenants__tenant_id__integration_repairs_preview_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tenant_id",
+            "required": true,
+            "schema": {
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "X-Actor-Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Role",
+            "required": false,
+            "schema": {
+              "default": "viewer",
+              "title": "X-Actor-Role",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntegrationRepairPreviewCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationRepairPreviewRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Preview Integration Repair Endpoint",
         "tags": [
           "integrations"
         ]

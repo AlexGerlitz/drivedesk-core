@@ -35,6 +35,11 @@ Fast external verification path: `docs/public/REVIEWER_QUICKSTART.md`.
   dead-letter, and reconciliation failures into runbook-backed impact analysis,
   safe diagnostic actions, approval boundaries, postchecks, and no-provider-call
   evidence.
+- Tenant-scoped integration repair action preview
+  (`POST /tenants/{tenant_id}/integration-repairs/preview`) for selecting one
+  incident/action pair, validating preflight checks, showing approval gates,
+  preparing dry-run result, and planning postchecks without persistence or
+  provider calls.
 - Tenant-scoped operator review queue for retry and dead-letter integration jobs.
 - Mapping validation against runtime adapter requirements.
 - Runtime mapping transform and read-only mapping preview.
@@ -174,7 +179,7 @@ Fast external verification path: `docs/public/REVIEWER_QUICKSTART.md`.
 - More public-safe evidence around local run, CI, OpenAPI, and demo health.
 - More connector certification fixtures, onboarding provider classes, and
   adapter recovery examples with payload mapping, replay evidence, repair
-  workbench scenarios, and follow-up actions.
+  workbench scenarios, repair action previews, and follow-up actions.
 - More operator workbench scenarios that connect action plans and notification
   previews to task creation without public external writes.
 - More Business Context Assistant scenarios for role-specific work surfaces,

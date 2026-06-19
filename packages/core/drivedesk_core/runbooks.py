@@ -416,6 +416,7 @@ def build_integration_repair_workbench() -> dict[str, object]:
         "data_boundaries": data_boundaries,
         "api": {
             "standalone": "GET /demo/integration-repair",
+            "preview": "POST /tenants/{tenant_id}/integration-repairs/preview",
             "operator_review": "GET /tenants/{tenant_id}/integration-operator-review",
             "retry": "POST /tenants/{tenant_id}/outbox-events/{event_id}/retry",
             "incidents": "GET /tenants/{tenant_id}/integration-incidents",
@@ -443,4 +444,188 @@ def build_integration_repair_workbench() -> dict[str, object]:
                 "check": "bash scripts/check_public_provider_onboarding.sh",
             },
         ],
+    }
+
+
+def build_integration_repair_preview(
+    *,
+    incident_id: str,
+    action: str,
+    operator_role: str = "operator",
+    include_postchecks: bool = True,
+) -> dict[str, object]:
+    """Build a public-safe repair action preview for one incident/action pair."""
+
+    workbench = build_integration_repair_workbench()
+    incidents = [
+        item for item in workbench["incident_matrix"]
+        if isinstance(item, dict) and item.get("incident_id") == incident_id
+    ]
+    if not incidents:
+        raise ValueError(f"Unknown integration repair incident: {incident_id}")
+    selected_incident = incidents[0]
+
+    actions = [
+        item for item in workbench["repair_actions"]
+        if (
+            isinstance(item, dict)
+            and item.get("action") == action
+            and item.get("source_incident") == incident_id
+        )
+    ]
+    if not actions:
+        raise ValueError(f"Repair action {action} is not available for incident {incident_id}")
+    selected_action = actions[0]
+
+    runbooks = [
+        item for item in workbench["repair_runbooks"]
+        if isinstance(item, dict) and item.get("incident_id") == incident_id
+    ]
+    runbook = runbooks[0] if runbooks else {}
+
+    requires_approval = bool(selected_action.get("requires_approval"))
+    safe_to_auto_run = bool(selected_action.get("safe_to_auto_run"))
+    dry_run_status = "ready" if safe_to_auto_run else "operator_review_required"
+
+    postchecks = [
+        {
+            "name": "recheck_incident_status",
+            "status": "planned",
+            "detail": "Confirm the incident moved out of retry, dead-letter, or mismatch state.",
+            "external_mutation": False,
+            "provider_call_enabled": False,
+            "evidence": "integration_repair.postcheck.incident_status",
+        },
+        {
+            "name": "refresh_reconciliation",
+            "status": "planned",
+            "detail": "Refresh reconciliation evidence after private runtime completes approved repair.",
+            "external_mutation": False,
+            "provider_call_enabled": False,
+            "evidence": "integration_repair.postcheck.reconciliation",
+        },
+        {
+            "name": "record_operator_evidence",
+            "status": "planned",
+            "detail": "Attach audit, metric, and runbook evidence before closure.",
+            "external_mutation": False,
+            "provider_call_enabled": False,
+            "evidence": "integration_repair.postcheck.operator_evidence",
+        },
+    ]
+
+    return {
+        "repair_kind": "operator_repair_action_preview",
+        "incident_id": incident_id,
+        "action": action,
+        "operator_role": operator_role,
+        "status": "previewed",
+        "summary": (
+            f"Repair preview prepared {action} for {incident_id}; "
+            f"approval_required={str(requires_approval).lower()}, "
+            "provider_call_enabled=false."
+        ),
+        "selected_incident": selected_incident,
+        "selected_action": selected_action,
+        "runbook": runbook,
+        "preflight_checks": [
+            {
+                "name": "incident_known",
+                "status": "passed",
+                "detail": "The incident exists in the repair workbench.",
+                "external_mutation": False,
+                "provider_call_enabled": False,
+                "evidence": "integration_repair.preview.incident_known",
+            },
+            {
+                "name": "action_matches_incident",
+                "status": "passed",
+                "detail": "The requested action belongs to the selected incident.",
+                "external_mutation": False,
+                "provider_call_enabled": False,
+                "evidence": "integration_repair.preview.action_matched",
+            },
+            {
+                "name": "raw_payload_not_required",
+                "status": "passed",
+                "detail": "The preview uses safe payload summary, counts, diff keys, and hashes only.",
+                "external_mutation": False,
+                "provider_call_enabled": False,
+                "raw_payload_included": False,
+                "contains_pii": False,
+                "evidence": "integration_repair.preview.payload_boundary",
+            },
+            {
+                "name": "provider_call_blocked",
+                "status": "passed",
+                "detail": "Public preview cannot call the external provider.",
+                "external_mutation": False,
+                "provider_call_enabled": False,
+                "evidence": "integration_repair.preview.provider_blocked",
+            },
+        ],
+        "approval_gate": {
+            "required": requires_approval,
+            "status": "locked" if requires_approval else "not_required",
+            "detail": (
+                "Approval is required before retry or provider-changing repair."
+                if requires_approval
+                else "Diagnostics or review action can be prepared without approval."
+            ),
+            "external_mutation": False,
+            "provider_call_enabled": False,
+            "evidence": "integration_repair.preview.approval_gate",
+        },
+        "dry_run_result": {
+            "status": dry_run_status,
+            "would_enqueue_outbox": action == "retry_after_diagnostics",
+            "would_update_mapping": action == "fix_mapping_profile",
+            "would_open_review": action == "open_reconciliation_review",
+            "would_run_diagnostics": action == "run_connection_diagnostics",
+            "external_mutation": False,
+            "provider_call_enabled": False,
+            "raw_payload_included": False,
+            "contains_pii": False,
+            "evidence": "integration_repair.preview.dry_run_result",
+        },
+        "postchecks": postchecks if include_postchecks else [],
+        "data_boundaries": [
+            {
+                "name": "preview_only_no_persist",
+                "status": "clean",
+                "contains_pii": False,
+                "raw_payload_included": False,
+                "external_mutation": False,
+                "provider_call_enabled": False,
+                "detail": "The repair preview returns a plan only and does not persist a repair action.",
+            },
+            {
+                "name": "private_commit_boundary",
+                "status": "locked",
+                "contains_pii": False,
+                "raw_payload_included": False,
+                "external_mutation": False,
+                "provider_call_enabled": False,
+                "detail": "Any commit, retry, mapping update, or provider call belongs to private runtime after approval.",
+            },
+        ],
+        "evidence": [
+            {
+                "type": "integration_repair_preview",
+                "event": "integration_repair.action_previewed",
+                "incident_id": incident_id,
+                "action": action,
+                "requires_approval": requires_approval,
+                "external_mutation": False,
+                "provider_call_enabled": False,
+                "raw_payload_included": False,
+                "contains_pii": False,
+            }
+        ],
+        "api": {
+            "preview": "POST /tenants/{tenant_id}/integration-repairs/preview",
+            "workbench": "GET /demo/integration-repair",
+            "operator_review": "GET /tenants/{tenant_id}/integration-operator-review",
+            "retry": "POST /tenants/{tenant_id}/outbox-events/{event_id}/retry",
+        },
     }

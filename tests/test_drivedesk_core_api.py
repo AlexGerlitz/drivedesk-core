@@ -2963,6 +2963,73 @@ def test_integration_repair_demo_endpoint_exposes_same_public_contract(
     )
 
 
+def test_integration_repair_preview_endpoint_prepares_safe_action(
+    api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, _ = api_client
+    owner_headers = {"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"}
+
+    tenant_response = client.post(
+        "/tenants",
+        json={"slug": "repair-preview", "name": "Repair Preview"},
+        headers=owner_headers,
+    )
+    assert tenant_response.status_code == 201
+    tenant_id = tenant_response.json()["id"]
+
+    response = client.post(
+        f"/tenants/{tenant_id}/integration-repairs/preview",
+        json={
+            "incident_id": "IR-001",
+            "action": "run_connection_diagnostics",
+            "operator_role": "operator",
+            "include_postchecks": True,
+        },
+        headers=owner_headers,
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["tenant_id"] == tenant_id
+    assert payload["repair_kind"] == "operator_repair_action_preview"
+    assert payload["incident_id"] == "IR-001"
+    assert payload["action"] == "run_connection_diagnostics"
+    assert payload["status"] == "previewed"
+    assert payload["selected_incident"]["incident_id"] == "IR-001"
+    assert payload["selected_action"]["action"] == "run_connection_diagnostics"
+    assert payload["runbook"]["runbook_key"] == "integration.retry_backlog"
+    assert {item["name"] for item in payload["preflight_checks"]} == {
+        "incident_known",
+        "action_matches_incident",
+        "raw_payload_not_required",
+        "provider_call_blocked",
+    }
+    assert payload["approval_gate"]["required"] is False
+    assert payload["dry_run_result"]["would_run_diagnostics"] is True
+    assert payload["dry_run_result"]["would_enqueue_outbox"] is False
+    assert {item["name"] for item in payload["postchecks"]} == {
+        "recheck_incident_status",
+        "refresh_reconciliation",
+        "record_operator_evidence",
+    }
+    assert payload["api"]["preview"] == "POST /tenants/{tenant_id}/integration-repairs/preview"
+    for collection in (
+        payload["preflight_checks"],
+        payload["postchecks"],
+        payload["data_boundaries"],
+        payload["evidence"],
+    ):
+        assert {item["external_mutation"] for item in collection} == {False}
+        assert {item["provider_call_enabled"] for item in collection} == {False}
+
+    invalid_response = client.post(
+        f"/tenants/{tenant_id}/integration-repairs/preview",
+        json={"incident_id": "IR-001", "action": "fix_mapping_profile"},
+        headers=owner_headers,
+    )
+    assert invalid_response.status_code == 400
+    assert "not available" in invalid_response.json()["detail"]
+
+
 def test_file_import_adapter_success_flow(api_client: tuple[TestClient, async_sessionmaker[AsyncSession]]) -> None:
     client, session_factory = api_client
     owner_headers = {"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"}

@@ -9,6 +9,7 @@ Public endpoint:
 
 ```http
 GET /demo/integration-repair
+POST /tenants/{tenant_id}/integration-repairs/preview
 ```
 
 Public demo field:
@@ -57,6 +58,46 @@ integrationRepair
 `integrationRepair.dataBoundaries`
 : Public-safe boundaries for preview-only repair, safe payload summaries,
   approval before retry, and the private provider runtime.
+
+## Repair Action Preview
+
+The tenant-scoped preview endpoint prepares one safe repair action from the
+workbench without persisting a repair action, retrying an outbox event, updating
+mapping, or calling a provider.
+
+Example request:
+
+```json
+{
+  "incident_id": "IR-001",
+  "action": "run_connection_diagnostics",
+  "operator_role": "operator",
+  "include_postchecks": true
+}
+```
+
+Example response fields:
+
+`selected_incident`
+: The incident from the workbench.
+
+`selected_action`
+: The requested action if it is valid for the incident.
+
+`preflight_checks`
+: Checks proving the incident is known, the action matches the incident, raw
+  payload is not required, and provider calls are blocked.
+
+`approval_gate`
+: Whether the action is locked behind approval before any private commit.
+
+`dry_run_result`
+: What DriveDesk would prepare: diagnostics, retry candidate, mapping repair,
+  or reconciliation review.
+
+`postchecks`
+: Planned incident, reconciliation, and operator-evidence checks after private
+  runtime completes an approved repair.
 
 ## Public-Safe Rule
 

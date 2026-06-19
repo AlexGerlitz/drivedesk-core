@@ -55,8 +55,9 @@ from drivedesk_api.schemas import (
     IntegrationConnectionCreate,
     IntegrationIncidentCreate,
     IntegrationIncidentStatusChange,
-    IntegrationMappingPreviewCreate,
     IntegrationExecutionPreviewCreate,
+    IntegrationMappingPreviewCreate,
+    IntegrationRepairPreviewCreate,
     IntegrationReconciliationCreate,
     IntegrationRuntimePreviewCreate,
     MembershipCreate,
@@ -76,6 +77,7 @@ from drivedesk_core import (
     build_adapter_execution_timeline,
     build_adapter_mapping_preview,
     build_adapter_runtime_plan,
+    build_integration_repair_preview,
     list_adapter_descriptors,
     list_integration_runbooks,
     resolve_adapter,
@@ -696,6 +698,30 @@ async def preview_integration_execution(
             "reconciliations": "GET /tenants/{tenant_id}/integration-reconciliations",
             "incidents": "GET /tenants/{tenant_id}/integration-incidents",
         },
+    }
+
+
+async def preview_integration_repair(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    payload: IntegrationRepairPreviewCreate,
+) -> dict[str, object]:
+    await ensure_tenant_exists(session, tenant_id)
+    try:
+        preview = build_integration_repair_preview(
+            incident_id=payload.incident_id,
+            action=payload.action,
+            operator_role=payload.operator_role,
+            include_postchecks=payload.include_postchecks,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+
+    return {
+        "tenant_id": tenant_id,
+        "generated_at": datetime.now(UTC),
+        **preview,
     }
 
 

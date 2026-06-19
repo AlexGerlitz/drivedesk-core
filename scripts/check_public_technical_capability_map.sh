@@ -96,6 +96,7 @@ for token in [
     "GET /demo/business-task-handoff",
     "GET /demo/business-notification-channels",
     "GET /demo/integration-repair",
+    "POST /tenants/{tenant_id}/integration-repairs/preview",
     "GET /demo/business-scenario-replay",
     "docs/public/PROJECT_STATUS.md",
     "docs/public/ROADMAP.md",

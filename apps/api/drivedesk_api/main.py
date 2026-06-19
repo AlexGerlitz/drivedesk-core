@@ -128,6 +128,8 @@ from drivedesk_api.schemas import (
     IntegrationExecutionPreviewCreate,
     IntegrationExecutionPreviewRead,
     IntegrationRepairDemoRead,
+    IntegrationRepairPreviewCreate,
+    IntegrationRepairPreviewRead,
     IntegrationMappingPreviewCreate,
     IntegrationMappingPreviewRead,
     IntegrationOperatorReviewItemRead,
@@ -215,6 +217,7 @@ from drivedesk_api.services import (
     preview_business_workbench_context,
     preview_integration_execution,
     preview_integration_mapping,
+    preview_integration_repair,
     preview_integration_runtime,
     propose_repair_action,
     retry_outbox_event,
@@ -1290,6 +1293,21 @@ def build_app(settings: Settings | None = None) -> FastAPI:
         await ensure_tenant_exists(session, tenant_id)
         require_tenant_permission(actor, tenant_id, Permission.BUSINESS_RECORD_READ)
         return await preview_integration_execution(session, tenant_id=tenant_id, payload=payload)
+
+    @api.post(
+        "/tenants/{tenant_id}/integration-repairs/preview",
+        response_model=IntegrationRepairPreviewRead,
+        tags=["integrations"],
+    )
+    async def preview_integration_repair_endpoint(
+        tenant_id: str,
+        payload: IntegrationRepairPreviewCreate,
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> dict[str, object]:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.BUSINESS_RECORD_READ)
+        return await preview_integration_repair(session, tenant_id=tenant_id, payload=payload)
 
     @api.post(
         "/tenants/{tenant_id}/business-notification-channels/preview",

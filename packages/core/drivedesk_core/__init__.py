@@ -39,6 +39,7 @@ from drivedesk_core.lifecycle import (
 )
 from drivedesk_core.runbooks import (
     IntegrationRunbook,
+    build_integration_repair_preview,
     build_integration_repair_workbench,
     list_integration_runbooks,
     select_integration_runbook,
@@ -65,6 +66,7 @@ __all__ = [
     "build_adapter_connection_diagnostics",
     "build_adapter_runtime_plan",
     "build_connector_certification_workbench",
+    "build_integration_repair_preview",
     "build_integration_repair_workbench",
     "build_provider_onboarding_workbench",
     "build_event",

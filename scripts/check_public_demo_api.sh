@@ -1474,6 +1474,10 @@ assert {item["name"] for item in integration_repair["dataBoundaries"]} == {
 for field in ("externalMutation", "providerCallEnabled", "rawPayloadIncluded", "containsPii"):
     assert {item[field] for item in integration_repair["dataBoundaries"]} == {False}, demo
 assert integration_repair["api"]["standalone"] == "GET /demo/integration-repair", demo
+assert (
+    integration_repair["api"]["preview"]
+    == "POST /tenants/{tenant_id}/integration-repairs/preview"
+), demo
 assert {item["path"] for item in integration_repair["docs"]} >= {
     "docs/public/INTEGRATION_REPAIR.md",
     "docs/public/INTEGRATION_INCIDENT_RUNBOOKS.md",
@@ -1661,6 +1665,7 @@ assert "/demo/business-approval-gateway" in openapi["paths"], openapi["paths"].k
 assert "/demo/integration-runtime" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/integration-execution" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/integration-repair" in openapi["paths"], openapi["paths"].keys()
+assert "/tenants/{tenant_id}/integration-repairs/preview" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/business-scenario-replay" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/business-intake-pipeline/preview" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/business-task-handoffs/preview" in openapi["paths"], openapi["paths"].keys()
@@ -1692,6 +1697,7 @@ if openapi_file.exists():
     assert "/demo/integration-runtime" in generated["paths"], generated["paths"].keys()
     assert "/demo/integration-execution" in generated["paths"], generated["paths"].keys()
     assert "/demo/integration-repair" in generated["paths"], generated["paths"].keys()
+    assert "/tenants/{tenant_id}/integration-repairs/preview" in generated["paths"], generated["paths"].keys()
     assert "/demo/business-scenario-replay" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-intake-pipeline/preview" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-task-handoffs/preview" in generated["paths"], generated["paths"].keys()

@@ -24,6 +24,7 @@ GET /demo/business-approval-gateway
 GET /demo/integration-runtime
 GET /demo/integration-execution
 GET /demo/integration-repair
+POST /tenants/{tenant_id}/integration-repairs/preview
 GET /demo/business-scenario-replay
 ```
 
@@ -121,6 +122,11 @@ as a standalone endpoint. It is useful for checking the repair workbench
 directly: retry/dead-letter/reconciliation failure -> incident classification
 -> business impact -> runbook -> safe diagnostic action -> approval-gated
 repair -> postcheck evidence.
+
+`POST /tenants/{tenant_id}/integration-repairs/preview` prepares one
+tenant-scoped repair action from the workbench. It validates incident/action
+matching, returns preflight checks, approval gate, dry-run result, postchecks,
+and explicit no-persistence/no-provider-call boundaries.
 
 The public review page for this contract is
 `docs/public/INTEGRATION_REPAIR.md`.
@@ -246,7 +252,8 @@ context, action-plan, and approval boundary across different external systems.
 The `integrationRepair` payload is documented in `INTEGRATION_REPAIR.md`. It
 shows how DriveDesk classifies failed integration work, attaches business
 impact, selects runbooks, separates safe diagnostics from approval-gated repair
-actions, and records postcheck evidence without public provider calls.
+actions, previews one selected repair action, and records postcheck evidence
+without public provider calls.
 
 The incident response payload is documented in `INCIDENT_RESPONSE_DEMO.md`. It
 shows the synthetic path:

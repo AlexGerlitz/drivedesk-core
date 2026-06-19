@@ -1199,6 +1199,7 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
     for field in ("externalMutation", "providerCallEnabled", "rawPayloadIncluded", "containsPii"):
         assert {item[field] for item in integration_repair["dataBoundaries"]} == {False}
     assert integration_repair["api"]["standalone"] == "GET /demo/integration-repair"
+    assert integration_repair["api"]["preview"] == "POST /tenants/{tenant_id}/integration-repairs/preview"
     assert {item["path"] for item in integration_repair["docs"]} >= {
         "docs/public/INTEGRATION_REPAIR.md",
         "docs/public/INTEGRATION_INCIDENT_RUNBOOKS.md",
@@ -1629,6 +1630,7 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
         ],
         "scripts/check_public_integration_repair.sh": [
             "/demo/integration-repair",
+            "/tenants/{tenant_id}/integration-repairs/preview",
             "integrationRepair",
             "operator_repair_ready",
             "run_connection_diagnostics",

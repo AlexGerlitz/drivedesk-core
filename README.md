@@ -45,7 +45,7 @@ Implemented surface includes:
 - public Business OS tour connecting business event -> workflow -> adapter -> incident -> proof;
 - public connector certification path and workbench for provider profiles, capability manifests, contract fixtures, runtime readiness, gates, implementation path, and release proof;
 - public provider onboarding workbench for provider profile selection, mapping preview, preflight checks, sandbox dry-run, approval, private rollout, and reconciliation;
-- public Integration Repair workbench for runbook-backed retry, dead-letter, reconciliation mismatch, impact, safe actions, approval, and postcheck evidence;
+- public Integration Repair workbench and action preview for runbook-backed retry, dead-letter, reconciliation mismatch, impact, safe actions, approval, dry-run, and postcheck evidence;
 - public connector fixture replay for synthetic happy-path, redaction, invalid-payload, retry, dead-letter, and reconciliation cases;
 - generated OpenAPI client SDK example for the public demo API;
 - public-safe synthetic backup/restore drill with sanitized evidence;
@@ -342,6 +342,8 @@ curl http://localhost:8080/demo/business-approval-gateway
 curl http://localhost:8080/demo/integration-runtime
 curl http://localhost:8080/demo/integration-execution
 curl http://localhost:8080/demo/integration-repair
+# Authenticated tenant endpoint:
+# POST /tenants/{tenant_id}/integration-repairs/preview
 curl http://localhost:8080/demo/business-scenario-replay
 ```
 

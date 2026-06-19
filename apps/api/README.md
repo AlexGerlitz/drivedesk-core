@@ -37,6 +37,9 @@ Demo endpoints:
   timeline proof as a standalone synthetic contract.
 - `GET /demo/integration-repair` returns the same Integration Repair workbench
   proof as a standalone synthetic contract.
+- `POST /tenants/{tenant_id}/integration-repairs/preview` prepares one safe
+  repair action preview with preflight, approval, dry-run, and postcheck
+  boundaries.
 - `GET /demo/business-scenario-replay` returns reusable Business OS scenario
   replay data as a standalone synthetic contract.
 

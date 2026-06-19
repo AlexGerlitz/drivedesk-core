@@ -538,7 +538,7 @@
         </div>
         <div class="architecture-trace">
           <div class="trace-line"><strong>Browser</strong><span>Static GitHub Pages shell with synthetic fallback data.</span></div>
-          <div class="trace-line"><strong>Demo API</strong><span>Optional read-only `GET /demo/public`, `GET /demo/connector-certification`, `GET /demo/provider-onboarding`, `GET /demo/integration-repair`, `GET /demo/connector-fixture-replay`, and `GET /demo/business-scenario-replay` contracts with OpenAPI coverage.</span></div>
+          <div class="trace-line"><strong>Demo API</strong><span>Optional read-only `GET /demo/public`, `GET /demo/connector-certification`, `GET /demo/provider-onboarding`, `GET /demo/integration-repair`, tenant-scoped `POST /tenants/{tenant_id}/integration-repairs/preview`, `GET /demo/connector-fixture-replay`, and `GET /demo/business-scenario-replay` contracts with OpenAPI coverage.</span></div>
           <div class="trace-line"><strong>Core</strong><span>Tenants, RBAC, audit, outbox, workflow rules, integration jobs.</span></div>
           <div class="trace-line"><strong>Ops</strong><span>Prometheus-style metrics, alert routing, incident response, recovery evidence.</span></div>
         </div>

@@ -33,6 +33,7 @@ IntegrationRuntimeKind = Literal["adapter_operation_runtime"]
 IntegrationRuntimeExecutionMode = Literal["contract_only", "dry_run", "commit_request"]
 IntegrationExecutionKind = Literal["adapter_execution_timeline"]
 IntegrationRepairKind = Literal["operator_repair_workbench"]
+IntegrationRepairPreviewKind = Literal["operator_repair_action_preview"]
 
 
 class AdapterContractRead(BaseModel):
@@ -1155,6 +1156,35 @@ class IntegrationRepairDemoRead(BaseModel):
     dataBoundaries: list[dict[str, Any]]
     api: dict[str, str]
     docs: list[dict[str, str]]
+
+
+class IntegrationRepairPreviewCreate(BaseModel):
+    repair_kind: IntegrationRepairPreviewKind = "operator_repair_action_preview"
+    incident_id: str = Field(min_length=2, max_length=32, pattern=r"^[A-Z]{2}-[0-9]{3}$")
+    action: str = Field(min_length=2, max_length=80, pattern=r"^[a-z0-9][a-z0-9_]*$")
+    operator_role: str = Field(default="operator", min_length=2, max_length=64)
+    include_postchecks: bool = True
+
+
+class IntegrationRepairPreviewRead(BaseModel):
+    tenant_id: str
+    repair_kind: IntegrationRepairPreviewKind
+    incident_id: str
+    action: str
+    operator_role: str
+    generated_at: datetime
+    status: Literal["previewed"]
+    summary: str
+    selected_incident: dict[str, Any]
+    selected_action: dict[str, Any]
+    runbook: dict[str, Any]
+    preflight_checks: list[dict[str, Any]] = Field(default_factory=list)
+    approval_gate: dict[str, Any] = Field(default_factory=dict)
+    dry_run_result: dict[str, Any] = Field(default_factory=dict)
+    postchecks: list[dict[str, Any]] = Field(default_factory=list)
+    data_boundaries: list[dict[str, Any]] = Field(default_factory=list)
+    evidence: list[dict[str, Any]] = Field(default_factory=list)
+    api: dict[str, str] = Field(default_factory=dict)
 
 
 class PublicDemoRead(BaseModel):

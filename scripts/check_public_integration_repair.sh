@@ -73,6 +73,7 @@ doc = read(doc_path)
 for token in [
     "Integration Repair Workbench",
     "GET /demo/integration-repair",
+    "POST /tenants/{tenant_id}/integration-repairs/preview",
     "integrationRepair",
     "incidentMatrix",
     "repairRunbooks",
@@ -251,9 +252,17 @@ for field in ("externalMutation", "providerCallEnabled", "rawPayloadIncluded", "
         f"integrationRepair boundary field must be false: {field}",
     )
 require(repair.get("api", {}).get("standalone") == "GET /demo/integration-repair", "integrationRepair standalone API mismatch")
+require(
+    repair.get("api", {}).get("preview") == "POST /tenants/{tenant_id}/integration-repairs/preview",
+    "integrationRepair preview API mismatch",
+)
 
 openapi_live = build_app().openapi()
 require("/demo/integration-repair" in openapi_live.get("paths", {}), "live OpenAPI missing integration repair endpoint")
+require(
+    "/tenants/{tenant_id}/integration-repairs/preview" in openapi_live.get("paths", {}),
+    "live OpenAPI missing integration repair preview endpoint",
+)
 required_fields = (
     openapi_live.get("components", {})
     .get("schemas", {})
@@ -262,6 +271,14 @@ required_fields = (
 )
 require("integrationRepair" in required_fields, "PublicDemoRead missing integrationRepair")
 require("IntegrationRepairDemoRead" in openapi_live.get("components", {}).get("schemas", {}), "OpenAPI missing IntegrationRepairDemoRead")
+require(
+    "IntegrationRepairPreviewCreate" in openapi_live.get("components", {}).get("schemas", {}),
+    "OpenAPI missing IntegrationRepairPreviewCreate",
+)
+require(
+    "IntegrationRepairPreviewRead" in openapi_live.get("components", {}).get("schemas", {}),
+    "OpenAPI missing IntegrationRepairPreviewRead",
+)
 
 for path, label, tokens in [
     (
@@ -272,12 +289,12 @@ for path, label, tokens in [
     (
         schemas_path,
         "schemas",
-        ["IntegrationRepairDemoRead", "integrationRepair"],
+        ["IntegrationRepairDemoRead", "IntegrationRepairPreviewCreate", "IntegrationRepairPreviewRead", "integrationRepair"],
     ),
     (
         main_path,
         "main API",
-        ["/demo/integration-repair", "IntegrationRepairDemoRead"],
+        ["/demo/integration-repair", "/tenants/{tenant_id}/integration-repairs/preview", "IntegrationRepairDemoRead", "IntegrationRepairPreviewRead"],
     ),
     (
         demo_app_path,
@@ -292,7 +309,13 @@ for path, label, tokens in [
     (
         openapi_path,
         "committed OpenAPI",
-        ["/demo/integration-repair", "IntegrationRepairDemoRead", "integrationRepair"],
+        [
+            "/demo/integration-repair",
+            "/tenants/{tenant_id}/integration-repairs/preview",
+            "IntegrationRepairDemoRead",
+            "IntegrationRepairPreviewRead",
+            "integrationRepair",
+        ],
     ),
     (
         sdk_manifest_path,
@@ -317,22 +340,35 @@ for path, label, tokens in [
     (
         status_path,
         "project status",
-        ["Integration repair", "GET /demo/integration-repair", "integrationRepair"],
+        [
+            "Integration repair",
+            "GET /demo/integration-repair",
+            "POST /tenants/{tenant_id}/integration-repairs/preview",
+            "integrationRepair",
+        ],
     ),
     (
         roadmap_path,
         "roadmap",
-        ["Public-safe integration repair workbench", "GET /demo/integration-repair"],
+        [
+            "Public-safe integration repair workbench",
+            "GET /demo/integration-repair",
+            "POST /tenants/{tenant_id}/integration-repairs/preview",
+        ],
     ),
     (
         capability_path,
         "capability map",
-        ["Integration repair", "docs/public/INTEGRATION_REPAIR.md"],
+        [
+            "Integration repair",
+            "POST /tenants/{tenant_id}/integration-repairs/preview",
+            "docs/public/INTEGRATION_REPAIR.md",
+        ],
     ),
     (
         api_docs_path,
         "API docs",
-        ["/demo/integration-repair", "integrationRepair"],
+        ["/demo/integration-repair", "POST /tenants/{tenant_id}/integration-repairs/preview", "integrationRepair"],
     ),
     (
         client_sdk_path,
@@ -376,7 +412,7 @@ if public_smoke_path.is_file():
 if is_public_export:
     for path, label, tokens in [
         (root_readme_path, "public root README", ["INTEGRATION_REPAIR.md", "Integration Repair"]),
-        (index_html_path, "public root index", ["INTEGRATION_REPAIR.md", "Integration repair"]),
+        (index_html_path, "public root index", ["INTEGRATION_REPAIR.md", "Integration repair", "integration-repairs/preview"]),
         (manifest_path, "public manifest", ["INTEGRATION_REPAIR.md", "integration-repair.sanitized.json"]),
     ]:
         text = read(path)

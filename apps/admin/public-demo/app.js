@@ -85,6 +85,11 @@
         Array.isArray(payload.adapterStudio.boundaries) &&
         Array.isArray(payload.adapterStudio.diagnostics) &&
         Array.isArray(payload.adapterStudio.docs) &&
+        payload.connectorFixtureReplay &&
+        Array.isArray(payload.connectorFixtureReplay.summary) &&
+        Array.isArray(payload.connectorFixtureReplay.outcomes) &&
+        Array.isArray(payload.connectorFixtureReplay.boundaries) &&
+        Array.isArray(payload.connectorFixtureReplay.docs) &&
         Array.isArray(payload.integrationJobs) &&
         Array.isArray(payload.integrationHealth) &&
         Array.isArray(payload.recoveryEvidence) &&
@@ -513,6 +518,105 @@
     studio.docs.forEach(function (doc) {
       var row = document.createElement("article");
       row.className = "event-row adapter-studio-doc-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var label = document.createElement("strong");
+      label.appendChild(text(doc.label));
+      top.append(label, chip("checked", "green"));
+
+      var path = document.createElement("code");
+      path.appendChild(text(doc.path));
+
+      var check = document.createElement("span");
+      check.className = "muted";
+      check.appendChild(text(doc.check));
+
+      row.append(top, path, check);
+      docRows.appendChild(row);
+    });
+  }
+
+  function fillConnectorFixtureReplay() {
+    var replay = data.connectorFixtureReplay;
+
+    var summaryRows = document.getElementById("connectorReplaySummaryRows");
+    clear(summaryRows);
+    replay.summary.forEach(function (item) {
+      var card = document.createElement("article");
+      card.className = "metric-card";
+      card.dataset.tone = item.tone || "blue";
+
+      var label = document.createElement("span");
+      label.className = "muted";
+      label.appendChild(text(item.label));
+
+      var value = document.createElement("strong");
+      value.appendChild(text(item.value));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      card.append(label, value, detail);
+      summaryRows.appendChild(card);
+    });
+
+    var outcomeRows = document.getElementById("connectorReplayOutcomeRows");
+    clear(outcomeRows);
+    replay.outcomes.forEach(function (outcome) {
+      var row = document.createElement("article");
+      row.className = "event-row connector-replay-outcome-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var group = document.createElement("strong");
+      group.appendChild(text(outcome.group));
+      top.append(group, chip(outcome.status, statusTone(outcome.status)));
+
+      var stage = document.createElement("span");
+      stage.className = "muted";
+      stage.appendChild(text("stage: " + outcome.stage));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(outcome.detail));
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(outcome.evidence));
+
+      row.append(top, stage, detail, evidence);
+      outcomeRows.appendChild(row);
+    });
+
+    var boundaryRows = document.getElementById("connectorReplayBoundaryRows");
+    clear(boundaryRows);
+    replay.boundaries.forEach(function (boundary) {
+      var row = document.createElement("article");
+      row.className = "event-row connector-replay-boundary-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var name = document.createElement("strong");
+      name.appendChild(text(boundary.name));
+      top.append(name, chip(boundary.state, statusTone(boundary.state)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(boundary.detail));
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(boundary.evidence));
+
+      row.append(top, detail, evidence);
+      boundaryRows.appendChild(row);
+    });
+
+    var docRows = document.getElementById("connectorReplayDocRows");
+    clear(docRows);
+    replay.docs.forEach(function (doc) {
+      var row = document.createElement("article");
+      row.className = "event-row connector-replay-doc-row";
 
       var top = document.createElement("div");
       top.className = "event-top";
@@ -1983,6 +2087,7 @@
     fillAdapterContracts();
     fillAdapterScenarios();
     fillAdapterStudio();
+    fillConnectorFixtureReplay();
     fillSyncJobs();
     fillIntegrationHealth();
     fillMembers();

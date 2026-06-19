@@ -593,6 +593,41 @@ assert {item["path"] for item in adapter_studio["docs"]} >= {
     "docs/public/CLIENT_SDK.md",
     "docs/public/PROVIDER_CONNECTOR_GUIDE.md",
 }, demo
+connector_replay = demo["connectorFixtureReplay"]
+assert connector_replay["status"] == "validated", demo
+assert connector_replay["command"] == "bash scripts/check_public_connector_fixture_replay.sh", demo
+assert connector_replay["fixtureFile"] == "examples/connector-fixtures/replay-fixtures.sanitized.json", demo
+assert connector_replay["evidenceFile"] == "docs/public/evidence/connector-fixture-replay.sanitized.json", demo
+assert {item["label"] for item in connector_replay["summary"]} >= {
+    "Fixture groups",
+    "Provider calls",
+    "Secrets",
+    "Operator path",
+}, demo
+replay_outcomes = {item["group"]: item for item in connector_replay["outcomes"]}
+assert set(replay_outcomes) == {
+    "happy_path_preview",
+    "sensitive_payload_redaction",
+    "invalid_payload",
+    "retryable_provider_failure",
+    "dead_letter_provider_failure",
+    "reconciliation_mismatch",
+}, demo
+assert replay_outcomes["happy_path_preview"]["evidence"] == "safe_payload_present=true", demo
+assert replay_outcomes["sensitive_payload_redaction"]["evidence"] == "redaction_evidence_present=true", demo
+assert replay_outcomes["invalid_payload"]["evidence"] == "outbox_event_created=false", demo
+assert replay_outcomes["retryable_provider_failure"]["status"] == "retry_scheduled", demo
+assert replay_outcomes["dead_letter_provider_failure"]["evidence"] == "integration.operator_review.created", demo
+assert replay_outcomes["reconciliation_mismatch"]["evidence"] == "drivedesk_integration_reconciliations", demo
+assert {item["state"] for item in connector_replay["boundaries"]} >= {
+    "not_returned",
+    "disabled",
+}, demo
+assert {item["path"] for item in connector_replay["docs"]} >= {
+    "docs/public/CONNECTOR_FIXTURE_REPLAY.md",
+    "docs/public/evidence/connector-fixture-replay.sanitized.json",
+    "examples/connector-fixtures/replay-fixtures.sanitized.json",
+}, demo
 adapter_catalog = {adapter["key"]: adapter for adapter in adapters}
 assert set(adapter_catalog) == {
     "accounting.export.mock",

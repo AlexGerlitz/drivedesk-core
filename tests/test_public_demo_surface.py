@@ -69,6 +69,10 @@ def test_public_demo_html_links_static_assets() -> None:
     assert 'id="adapterStudioBoundaryRows"' in html
     assert 'id="adapterStudioDiagnosticRows"' in html
     assert 'id="adapterStudioDocRows"' in html
+    assert 'id="connectorReplaySummaryRows"' in html
+    assert 'id="connectorReplayOutcomeRows"' in html
+    assert 'id="connectorReplayBoundaryRows"' in html
+    assert 'id="connectorReplayDocRows"' in html
     assert 'id="adapterScenarioRows"' in html
     assert 'id="adapterRows"' in html
     assert 'id="syncJobRows"' in html
@@ -518,6 +522,41 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
         "docs/public/CLIENT_SDK.md",
         "docs/public/PROVIDER_CONNECTOR_GUIDE.md",
     }
+    connector_replay = payload["connectorFixtureReplay"]
+    assert connector_replay["status"] == "validated"
+    assert connector_replay["command"] == "bash scripts/check_public_connector_fixture_replay.sh"
+    assert connector_replay["fixtureFile"] == "examples/connector-fixtures/replay-fixtures.sanitized.json"
+    assert connector_replay["evidenceFile"] == "docs/public/evidence/connector-fixture-replay.sanitized.json"
+    assert {item["label"] for item in connector_replay["summary"]} >= {
+        "Fixture groups",
+        "Provider calls",
+        "Secrets",
+        "Operator path",
+    }
+    replay_outcomes = {item["group"]: item for item in connector_replay["outcomes"]}
+    assert set(replay_outcomes) == {
+        "happy_path_preview",
+        "sensitive_payload_redaction",
+        "invalid_payload",
+        "retryable_provider_failure",
+        "dead_letter_provider_failure",
+        "reconciliation_mismatch",
+    }
+    assert replay_outcomes["happy_path_preview"]["evidence"] == "safe_payload_present=true"
+    assert replay_outcomes["sensitive_payload_redaction"]["evidence"] == "redaction_evidence_present=true"
+    assert replay_outcomes["invalid_payload"]["evidence"] == "outbox_event_created=false"
+    assert replay_outcomes["retryable_provider_failure"]["status"] == "retry_scheduled"
+    assert replay_outcomes["dead_letter_provider_failure"]["evidence"] == "integration.operator_review.created"
+    assert replay_outcomes["reconciliation_mismatch"]["evidence"] == "drivedesk_integration_reconciliations"
+    assert {item["state"] for item in connector_replay["boundaries"]} >= {
+        "not_returned",
+        "disabled",
+    }
+    assert {item["path"] for item in connector_replay["docs"]} >= {
+        "docs/public/CONNECTOR_FIXTURE_REPLAY.md",
+        "docs/public/evidence/connector-fixture-replay.sanitized.json",
+        "examples/connector-fixtures/replay-fixtures.sanitized.json",
+    }
     assert len(payload["integrationJobs"]) >= 3
     assert len(payload["integrationHealth"]) >= 6
     assert any(item["name"] == "Connection diagnostics" for item in payload["integrationReadiness"])
@@ -635,6 +674,10 @@ def test_public_demo_can_load_api_backed_data_with_static_fallback() -> None:
     assert "public secret" in script
     assert "Array.isArray(payload.adapters)" in script
     assert "Array.isArray(payload.adapterStudio.summary)" in script
+    assert "Array.isArray(payload.connectorFixtureReplay.summary)" in script
+    assert "fillConnectorFixtureReplay" in script
+    assert "connectorReplayOutcomeRows" in script
+    assert "connectorReplayBoundaryRows" in script
     assert "fillAdapterStudio" in script
     assert "adapterStudioPlanRows" in script
     assert "safe public execution: " in script

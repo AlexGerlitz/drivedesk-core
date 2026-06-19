@@ -19,8 +19,8 @@ shell: tenant, health, metrics, work queue, workflow stages, timeline entries,
 workflow scenarios, domain events, members, audit events, outbox events, adapter
 contracts, adapter operation scenarios, Adapter Studio, sync jobs, Integration
 Health, alert routing, incident response, `businessControlTower` data, recovery
-evidence, and the `engineeringProof` contract rendered by the Integrations,
-Operations, Incidents, and Proof tabs.
+evidence, `connectorFixtureReplay`, and the `engineeringProof` contract rendered
+by the Integrations, Operations, Incidents, and Proof tabs.
 
 ## Runtime Modes
 
@@ -71,6 +71,11 @@ present, alert routes, alert-to-runbook bindings, connector certification
 references in `CONNECTOR_CERTIFICATION.md`, connector fixture replay references
 in `CONNECTOR_FIXTURE_REPLAY.md`, and then runs the curl, Python, and JavaScript
 examples against the same API.
+
+The `connectorFixtureReplay` payload is the API-backed form of
+`CONNECTOR_FIXTURE_REPLAY.md`: it exposes the synthetic fixture groups, replay
+outcomes, read-only boundaries, and evidence links rendered in the Integrations
+tab.
 
 The business control tower payload is documented in
 `BUSINESS_CONTROL_TOWER.md`. It shows the synthetic path:

@@ -107,6 +107,23 @@ The verifier is:
 bash scripts/check_public_connector_fixture_replay.sh
 ```
 
+## Public Demo Contract
+
+The replay is also exposed in the public-safe demo payload as
+`connectorFixtureReplay`.
+
+```text
+GET /demo/public
+  -> connectorFixtureReplay.summary
+  -> connectorFixtureReplay.outcomes
+  -> connectorFixtureReplay.boundaries
+  -> connectorFixtureReplay.docs
+```
+
+The GitHub Pages shell renders the same data in the Integrations tab through
+`connectorReplaySummaryRows`, `connectorReplayOutcomeRows`,
+`connectorReplayBoundaryRows`, and `connectorReplayDocRows`.
+
 The check validates:
 
 - this document;

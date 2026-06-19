@@ -3760,6 +3760,11 @@
             "title": "Businesscontroltower",
             "type": "object"
           },
+          "connectorFixtureReplay": {
+            "additionalProperties": true,
+            "title": "Connectorfixturereplay",
+            "type": "object"
+          },
           "dataSource": {
             "const": "api.synthetic",
             "title": "Datasource",
@@ -3921,6 +3926,7 @@
           "adapters",
           "adapterScenarios",
           "adapterStudio",
+          "connectorFixtureReplay",
           "integrationJobs",
           "integrationHealth",
           "integrationReadiness",

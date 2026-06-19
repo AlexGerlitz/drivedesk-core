@@ -509,6 +509,125 @@ def build_public_demo_payload() -> dict[str, Any]:
                 },
             ],
         },
+        "connectorFixtureReplay": {
+            "status": "validated",
+            "command": "bash scripts/check_public_connector_fixture_replay.sh",
+            "fixtureFile": "examples/connector-fixtures/replay-fixtures.sanitized.json",
+            "evidenceFile": "docs/public/evidence/connector-fixture-replay.sanitized.json",
+            "summary": [
+                {
+                    "label": "Fixture groups",
+                    "value": "6",
+                    "detail": "happy path, redaction, invalid, retry, dead-letter, reconciliation",
+                    "tone": "blue",
+                },
+                {
+                    "label": "Provider calls",
+                    "value": "0",
+                    "detail": "Replay is contract-only and public-safe",
+                    "tone": "green",
+                },
+                {
+                    "label": "Secrets",
+                    "value": "redacted",
+                    "detail": "credentials and raw payloads never return to the demo",
+                    "tone": "green",
+                },
+                {
+                    "label": "Operator path",
+                    "value": "review",
+                    "detail": "dead-letter and mismatch cases route to operator review",
+                    "tone": "amber",
+                },
+            ],
+            "outcomes": [
+                {
+                    "group": "happy_path_preview",
+                    "stage": "preview",
+                    "status": "passed",
+                    "detail": "Normalizes external_reference, amount_bucket, status, and provider labels.",
+                    "evidence": "safe_payload_present=true",
+                },
+                {
+                    "group": "sensitive_payload_redaction",
+                    "stage": "redaction",
+                    "status": "passed",
+                    "detail": "Drops access_token, refresh_token, full_name, phone, email, address, and raw body.",
+                    "evidence": "redaction_evidence_present=true",
+                },
+                {
+                    "group": "invalid_payload",
+                    "stage": "validation",
+                    "status": "blocked",
+                    "detail": "Rejects malformed input without creating outbox work.",
+                    "evidence": "outbox_event_created=false",
+                },
+                {
+                    "group": "retryable_provider_failure",
+                    "stage": "retry",
+                    "status": "retry_scheduled",
+                    "detail": "Classifies temporary provider failure as retryable.",
+                    "evidence": "next_state=retry_scheduled",
+                },
+                {
+                    "group": "dead_letter_provider_failure",
+                    "stage": "operator_review",
+                    "status": "dead_letter",
+                    "detail": "Routes permanent provider failure into incident-backed operator review.",
+                    "evidence": "integration.operator_review.created",
+                },
+                {
+                    "group": "reconciliation_mismatch",
+                    "stage": "reconciliation",
+                    "status": "mismatch",
+                    "detail": "Records provider evidence mismatch for manual review.",
+                    "evidence": "drivedesk_integration_reconciliations",
+                },
+            ],
+            "boundaries": [
+                {
+                    "name": "raw payload",
+                    "state": "not_returned",
+                    "detail": "raw_payload_returned=false for every fixture group",
+                    "evidence": "docs/public/evidence/connector-fixture-replay.sanitized.json",
+                },
+                {
+                    "name": "credentials",
+                    "state": "not_returned",
+                    "detail": "credentials_returned=false and provider tokens are excluded",
+                    "evidence": "examples/connector-fixtures/replay-fixtures.sanitized.json",
+                },
+                {
+                    "name": "external calls",
+                    "state": "disabled",
+                    "detail": "external_call_made=false keeps public replay offline",
+                    "evidence": "CONNECTOR_FIXTURE_REPLAY.md",
+                },
+                {
+                    "name": "persistence",
+                    "state": "disabled",
+                    "detail": "public_demo_persistence=false keeps replay read-only",
+                    "evidence": "bash scripts/check_public_connector_fixture_replay.sh",
+                },
+            ],
+            "docs": [
+                {
+                    "label": "Replay path",
+                    "path": "docs/public/CONNECTOR_FIXTURE_REPLAY.md",
+                    "check": "bash scripts/check_public_connector_fixture_replay.sh",
+                },
+                {
+                    "label": "Sanitized evidence",
+                    "path": "docs/public/evidence/connector-fixture-replay.sanitized.json",
+                    "check": "public-evidence-index entry",
+                },
+                {
+                    "label": "Replay fixtures",
+                    "path": "examples/connector-fixtures/replay-fixtures.sanitized.json",
+                    "check": "fixture_set_id=drivedesk-core-connector-fixture-replay-fixtures",
+                },
+            ],
+        },
         "integrationJobs": [
             {
                 "event": "integration.file_import.requested",

@@ -18,6 +18,7 @@ export const REQUIRED_FIELDS = [
   "adapters",
   "adapterScenarios",
   "adapterStudio",
+  "connectorFixtureReplay",
   "integrationJobs",
   "integrationHealth",
   "integrationReadiness",

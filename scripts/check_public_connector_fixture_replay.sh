@@ -45,6 +45,12 @@ adapter_catalog_path = root / "docs/public/INTEGRATION_ADAPTER_CATALOG.md"
 operation_contracts_path = root / "docs/public/INTEGRATION_OPERATION_CONTRACTS.md"
 platform_tour_path = root / "docs/public/PLATFORM_TOUR.md"
 api_demo_path = root / "docs/public/API_BACKED_DEMO.md"
+api_demo_payload_path = root / "apps/api/drivedesk_api/demo.py"
+api_schema_path = root / "apps/api/drivedesk_api/schemas.py"
+public_demo_html_path = root / "apps/admin/public-demo/index.html"
+public_demo_js_path = root / "apps/admin/public-demo/app.js"
+public_demo_data_path = root / "apps/admin/public-demo/demo-data.js"
+public_demo_api_check_path = root / "scripts/check_public_demo_api.sh"
 root_readme_path = root / "README.md"
 index_html_path = root / "index.html"
 private_smoke_path = root / "scripts/ci_smoke.sh"
@@ -94,6 +100,8 @@ for token in [
     "drivedesk_integration_reconciliations",
     "fixtures_ready",
     "public_gate_passed",
+    "connectorFixtureReplay",
+    "connectorReplayOutcomeRows",
 ]:
     require(token in doc, f"connector fixture replay doc missing {token}")
 
@@ -276,6 +284,62 @@ for path, label in [
 ]:
     text = read(path)
     require("CONNECTOR_FIXTURE_REPLAY.md" in text, f"{label} missing connector fixture replay link")
+
+for path, label, tokens in [
+    (
+        api_demo_payload_path,
+        "public demo API payload",
+        [
+            "connectorFixtureReplay",
+            "retryable_provider_failure",
+            "dead_letter_provider_failure",
+            "reconciliation_mismatch",
+        ],
+    ),
+    (api_schema_path, "public demo API schema", ["connectorFixtureReplay"]),
+    (
+        public_demo_data_path,
+        "public demo static payload",
+        [
+            "connectorFixtureReplay",
+            "docs/public/evidence/connector-fixture-replay.sanitized.json",
+            "examples/connector-fixtures/replay-fixtures.sanitized.json",
+        ],
+    ),
+    (
+        public_demo_html_path,
+        "public demo HTML",
+        [
+            "connectorReplaySummaryRows",
+            "connectorReplayOutcomeRows",
+            "connectorReplayBoundaryRows",
+            "connectorReplayDocRows",
+        ],
+    ),
+    (
+        public_demo_js_path,
+        "public demo renderer",
+        [
+            "Array.isArray(payload.connectorFixtureReplay.summary)",
+            "fillConnectorFixtureReplay",
+            "connectorReplayOutcomeRows",
+            "connectorReplayBoundaryRows",
+        ],
+    ),
+    (
+        public_demo_api_check_path,
+        "public demo API checker",
+        [
+            "connectorFixtureReplay",
+            "happy_path_preview",
+            "safe_payload_present=true",
+            "drivedesk_integration_reconciliations",
+        ],
+    ),
+]:
+    text = read(path)
+    for token in tokens:
+        require(token in text, f"{label} missing {token}")
 
 evidence_index_payload = json.loads(read(evidence_index_json_path) or "{}")
 entries = evidence_index_payload.get("entries", [])

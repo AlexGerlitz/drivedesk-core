@@ -24,6 +24,7 @@ BusinessActionPlanKind = Literal["exception_resolution"]
 BusinessNotificationKind = Literal["action_plan_updates"]
 BusinessProviderIntakeSource = Literal["crm_deal", "bank_payment", "accounting_export", "support_ticket"]
 BusinessWorkbenchContextKind = Literal["role_assist"]
+BusinessTaskHandoffKind = Literal["action_plan_task_handoff"]
 
 
 class AdapterContractRead(BaseModel):
@@ -656,6 +657,34 @@ class BusinessIntakePipelinePreviewRead(BaseModel):
     api: dict[str, str] = Field(default_factory=dict)
 
 
+class BusinessTaskHandoffPreviewCreate(BaseModel):
+    handoff_kind: BusinessTaskHandoffKind = "action_plan_task_handoff"
+    role: BusinessBriefingRole = "operator"
+    subject_type: str | None = Field(default=None, min_length=2, max_length=64, pattern=r"^[a-z0-9][a-z0-9_-]*$")
+    subject_id: str | None = Field(default=None, min_length=1, max_length=128)
+    action_plan_steps: list[dict[str, Any]] = Field(default_factory=list, max_length=10)
+    include_internal_outbox: bool = True
+    include_notification_drafts: bool = True
+
+
+class BusinessTaskHandoffPreviewRead(BaseModel):
+    tenant_id: str
+    handoff_kind: BusinessTaskHandoffKind
+    role: BusinessBriefingRole
+    subject_type: str | None = None
+    subject_id: str | None = None
+    generated_at: datetime
+    status: Literal["previewed"]
+    summary: str
+    task_cards: list[dict[str, Any]] = Field(default_factory=list)
+    outbox_candidates: list[dict[str, Any]] = Field(default_factory=list)
+    notification_drafts: list[dict[str, Any]] = Field(default_factory=list)
+    approval_gates: list[dict[str, Any]] = Field(default_factory=list)
+    data_boundaries: list[dict[str, Any]] = Field(default_factory=list)
+    evidence: list[dict[str, Any]] = Field(default_factory=list)
+    api: dict[str, str] = Field(default_factory=dict)
+
+
 class BusinessWorkbenchContextPreviewCreate(BaseModel):
     context_kind: BusinessWorkbenchContextKind = "role_assist"
     role: BusinessBriefingRole = "operator"
@@ -801,6 +830,21 @@ class BusinessIntakePipelineDemoRead(BaseModel):
     docs: list[dict[str, str]]
 
 
+class BusinessTaskHandoffDemoRead(BaseModel):
+    status: Literal["previewed"]
+    command: str
+    summary: list[dict[str, Any]]
+    role: str
+    subject: str
+    taskCards: list[dict[str, Any]]
+    outboxCandidates: list[dict[str, Any]]
+    notificationDrafts: list[dict[str, Any]]
+    approvalGates: list[dict[str, Any]]
+    dataBoundaries: list[dict[str, Any]]
+    api: dict[str, str]
+    docs: list[dict[str, str]]
+
+
 class PublicDemoRead(BaseModel):
     schemaVersion: int
     generatedAt: str
@@ -818,6 +862,7 @@ class PublicDemoRead(BaseModel):
     adapterStudio: dict[str, Any]
     connectorFixtureReplay: dict[str, Any]
     businessIntakePipeline: dict[str, Any]
+    businessTaskHandoff: dict[str, Any]
     integrationJobs: list[dict[str, Any]]
     integrationHealth: list[dict[str, str]]
     integrationReadiness: list[dict[str, Any]]

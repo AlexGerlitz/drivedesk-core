@@ -39,6 +39,7 @@ from drivedesk_api.schemas import (
     BusinessIntakePipelinePreviewCreate,
     BusinessNotificationPreviewCreate,
     BusinessProviderIntakePreviewCreate,
+    BusinessTaskHandoffPreviewCreate,
     BusinessWorkbenchContextPreviewCreate,
     BusinessExceptionCreate,
     BusinessExceptionStatusChange,
@@ -2616,6 +2617,205 @@ async def preview_business_intake_pipeline(
             "detections": "POST /tenants/{tenant_id}/business-detections/preview",
             "action_plan": "POST /tenants/{tenant_id}/business-action-plans/preview",
             "notifications": "POST /tenants/{tenant_id}/business-notifications/preview",
+        },
+    }
+
+
+def _task_handoff_steps(payload: BusinessTaskHandoffPreviewCreate) -> list[dict[str, object]]:
+    if payload.action_plan_steps:
+        source_steps = payload.action_plan_steps
+    else:
+        source_steps = [
+            {
+                "step": "review_detected_exceptions",
+                "status": "action_required",
+                "requiresApproval": False,
+                "externalMutation": False,
+                "evidence": "business_detection.previewed",
+            },
+            {
+                "step": "execute_repair_dry_run",
+                "status": "approval_required",
+                "requiresApproval": True,
+                "externalMutation": False,
+                "evidence": "repair_action.approved",
+            },
+        ]
+
+    safe_steps: list[dict[str, object]] = []
+    for index, item in enumerate(source_steps, start=1):
+        if not isinstance(item, dict):
+            continue
+        action = str(
+            item.get("step")
+            or item.get("action")
+            or item.get("name")
+            or f"operator_step_{index}"
+        )
+        safe_steps.append(
+            {
+                "action": action[:96],
+                "status": str(item.get("status") or "ready")[:32],
+                "requires_approval": bool(
+                    item.get("requires_approval")
+                    or item.get("requiresApproval")
+                    or item.get("approvalRequired")
+                ),
+                "external_mutation": bool(
+                    item.get("external_mutation")
+                    or item.get("externalMutation")
+                    or item.get("externalWrite")
+                ),
+                "evidence": str(item.get("evidence") or "business_action_plan.previewed")[:128],
+            }
+        )
+    return safe_steps
+
+
+async def preview_business_task_handoff(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    payload: BusinessTaskHandoffPreviewCreate,
+) -> dict[str, object]:
+    await ensure_tenant_exists(session, tenant_id)
+    steps = _task_handoff_steps(payload)
+    subject_type = payload.subject_type or "deal"
+    subject_id = payload.subject_id or "DEAL-2026-001"
+    subject = _subject_label(subject_type, subject_id)
+
+    task_cards = [
+        {
+            "task_key": f"task.preview.{index:03d}",
+            "title": step["action"],
+            "assignee_role": payload.role,
+            "status": "would_create",
+            "priority": "high" if step["requires_approval"] else "normal",
+            "source_action": step["action"],
+            "subject": subject,
+            "due": "same_day" if step["requires_approval"] else "next_business_day",
+            "would_create": "BusinessRecord(type=task)",
+            "requires_approval": bool(step["requires_approval"]),
+            "external_mutation": False,
+            "contains_pii": False,
+            "raw_payload_included": False,
+            "evidence": "business_task_handoff.previewed",
+        }
+        for index, step in enumerate(steps, start=1)
+    ]
+
+    outbox_candidates = [
+        {
+            "event_type": "task.created",
+            "adapter_key": "internal.noop",
+            "status": "would_enqueue",
+            "idempotency_key": f"business-task-handoff:{subject}:task-{index:03d}",
+            "payload_profile": "safe_task_reference",
+            "source_action": card["source_action"],
+            "contains_pii": False,
+            "external_mutation": False,
+            "evidence": "business_task_handoff.previewed",
+        }
+        for index, card in enumerate(task_cards, start=1)
+    ] if payload.include_internal_outbox else []
+
+    notification_drafts = [
+        {
+            "draft_id": f"task_handoff.in_app.{payload.role}.{index:03d}",
+            "channel": "in_app",
+            "recipient_role": payload.role,
+            "title": "Task handoff ready",
+            "body": f"{subject} has internal task preview: {card['source_action']}.",
+            "status": "draft_only",
+            "external_delivery": False,
+            "contains_pii": False,
+            "requires_secret": False,
+            "evidence": "business_task_handoff.previewed",
+        }
+        for index, card in enumerate(task_cards, start=1)
+    ] if payload.include_notification_drafts else []
+
+    approval_gates = [
+        {
+            "gate": "task_creation_review",
+            "status": "required",
+            "requires_approval": False,
+            "external_mutation": False,
+            "detail": "Preview shows internal task records before persistence.",
+        },
+        {
+            "gate": "external_write_gate",
+            "status": "closed",
+            "requires_approval": True,
+            "external_mutation": False,
+            "detail": "No external provider write is available from this public preview.",
+        },
+    ]
+    if any(bool(step["requires_approval"]) for step in steps):
+        approval_gates.append(
+            {
+                "gate": "repair_action_approval",
+                "status": "required",
+                "requires_approval": True,
+                "external_mutation": False,
+                "detail": "Repair-like actions remain approval-gated before execution.",
+            }
+        )
+
+    return {
+        "tenant_id": tenant_id,
+        "handoff_kind": payload.handoff_kind,
+        "role": payload.role,
+        "subject_type": subject_type,
+        "subject_id": subject_id,
+        "generated_at": datetime.now(UTC),
+        "status": "previewed",
+        "summary": (
+            f"Task handoff preview prepared {len(task_cards)} internal task card(s), "
+            f"{len(outbox_candidates)} internal outbox candidate(s), and "
+            f"{len(notification_drafts)} notification draft(s) for {payload.role}."
+        ),
+        "task_cards": task_cards,
+        "outbox_candidates": outbox_candidates,
+        "notification_drafts": notification_drafts,
+        "approval_gates": approval_gates,
+        "data_boundaries": [
+            {
+                "name": "preview_only_no_persistence",
+                "status": "preview_only",
+                "external_mutation": False,
+                "detail": "The handoff preview does not create task records, outbox rows, or notifications.",
+            },
+            {
+                "name": "internal_only_outbox",
+                "status": "clean",
+                "adapter_key": "internal.noop",
+                "external_mutation": False,
+                "detail": "Outbox candidates are internal event contracts, not provider calls.",
+            },
+            {
+                "name": "safe_task_payload",
+                "status": "clean",
+                "raw_payload_included": False,
+                "pii_included": False,
+                "contains_pii": False,
+                "detail": "Task cards contain role, subject key, source action, and evidence labels only.",
+            },
+        ],
+        "evidence": [
+            {
+                "type": "task_handoff",
+                "event": "business_task_handoff.previewed",
+                "task_count": len(task_cards),
+                "outbox_candidate_count": len(outbox_candidates),
+                "notification_draft_count": len(notification_drafts),
+            }
+        ],
+        "api": {
+            "preview": "POST /tenants/{tenant_id}/business-task-handoffs/preview",
+            "action_plan": "POST /tenants/{tenant_id}/business-action-plans/preview",
+            "workflow_rules": "POST /tenants/{tenant_id}/workflow-rules",
+            "task_records": "POST /tenants/{tenant_id}/business-records",
         },
     }
 

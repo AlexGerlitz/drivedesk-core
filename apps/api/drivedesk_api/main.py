@@ -98,6 +98,9 @@ from drivedesk_api.schemas import (
     BusinessScenarioReplayRead,
     BusinessStateObservationCreate,
     BusinessStateObservationRead,
+    BusinessTaskHandoffDemoRead,
+    BusinessTaskHandoffPreviewCreate,
+    BusinessTaskHandoffPreviewRead,
     BusinessWorkbenchContextPreviewCreate,
     BusinessWorkbenchContextPreviewRead,
     ConnectorFixtureReplayRead,
@@ -186,6 +189,7 @@ from drivedesk_api.services import (
     preview_business_intake_pipeline,
     preview_business_notifications,
     preview_business_provider_intake,
+    preview_business_task_handoff,
     preview_business_workbench_context,
     preview_integration_mapping,
     propose_repair_action,
@@ -301,6 +305,20 @@ def build_app(settings: Settings | None = None) -> FastAPI:
     async def business_intake_pipeline_demo() -> JSONResponse:
         return JSONResponse(
             build_public_demo_payload()["businessIntakePipeline"],
+            headers={
+                "Access-Control-Allow-Origin": "*",
+                "Cache-Control": "public, max-age=60",
+            },
+        )
+
+    @api.get(
+        "/demo/business-task-handoff",
+        response_model=BusinessTaskHandoffDemoRead,
+        tags=["demo"],
+    )
+    async def business_task_handoff_demo() -> JSONResponse:
+        return JSONResponse(
+            build_public_demo_payload()["businessTaskHandoff"],
             headers={
                 "Access-Control-Allow-Origin": "*",
                 "Cache-Control": "public, max-age=60",
@@ -1047,6 +1065,21 @@ def build_app(settings: Settings | None = None) -> FastAPI:
         await ensure_tenant_exists(session, tenant_id)
         require_tenant_permission(actor, tenant_id, Permission.BUSINESS_RECORD_READ)
         return await preview_business_intake_pipeline(session, tenant_id=tenant_id, payload=payload)
+
+    @api.post(
+        "/tenants/{tenant_id}/business-task-handoffs/preview",
+        response_model=BusinessTaskHandoffPreviewRead,
+        tags=["business-control"],
+    )
+    async def preview_business_task_handoff_endpoint(
+        tenant_id: str,
+        payload: BusinessTaskHandoffPreviewCreate,
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> dict[str, object]:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.BUSINESS_RECORD_READ)
+        return await preview_business_task_handoff(session, tenant_id=tenant_id, payload=payload)
 
     @api.post(
         "/tenants/{tenant_id}/business-workbench-context/preview",

@@ -64,6 +64,11 @@ def test_public_demo_html_links_static_assets() -> None:
     assert 'id="businessIntakeWorkbenchRows"' in html
     assert 'id="businessIntakeActionRows"' in html
     assert 'id="businessIntakeBoundaryRows"' in html
+    assert 'id="businessTaskSummaryRows"' in html
+    assert 'id="businessTaskRows"' in html
+    assert 'id="businessTaskOutboxRows"' in html
+    assert 'id="businessTaskDraftRows"' in html
+    assert 'id="businessTaskBoundaryRows"' in html
     assert 'id="controlTowerObservationRows"' in html
     assert 'id="controlTowerExceptionRows"' in html
     assert 'id="controlTowerRepairRows"' in html
@@ -609,6 +614,44 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
         "docs/public/BUSINESS_INTAKE_PIPELINE.md",
         "docs/public/BUSINESS_CONTROL_TOWER.md",
         "docs/public/API_BACKED_DEMO.md",
+    }
+    task_handoff = payload["businessTaskHandoff"]
+    assert task_handoff["status"] == "previewed"
+    assert task_handoff["command"] == "POST /tenants/{tenant_id}/business-task-handoffs/preview"
+    assert {item["label"] for item in task_handoff["summary"]} >= {
+        "Task cards",
+        "Internal outbox",
+        "Draft notifications",
+        "External writes",
+    }
+    assert task_handoff["role"] == "accountant"
+    assert task_handoff["subject"] == "deal:DEAL-2026-001"
+    assert {item["status"] for item in task_handoff["taskCards"]} == {"would_create"}
+    assert {item["wouldCreate"] for item in task_handoff["taskCards"]} == {"BusinessRecord(type=task)"}
+    assert {item["externalMutation"] for item in task_handoff["taskCards"]} == {False}
+    assert {item["containsPii"] for item in task_handoff["taskCards"]} == {False}
+    assert {item["rawPayloadIncluded"] for item in task_handoff["taskCards"]} == {False}
+    assert {item["eventType"] for item in task_handoff["outboxCandidates"]} == {"task.created"}
+    assert {item["adapterKey"] for item in task_handoff["outboxCandidates"]} == {"internal.noop"}
+    assert {item["status"] for item in task_handoff["outboxCandidates"]} == {"would_enqueue"}
+    assert {item["externalMutation"] for item in task_handoff["outboxCandidates"]} == {False}
+    assert {item["status"] for item in task_handoff["notificationDrafts"]} == {"draft_only"}
+    assert {item["externalDelivery"] for item in task_handoff["notificationDrafts"]} == {False}
+    assert {item["containsPii"] for item in task_handoff["notificationDrafts"]} == {False}
+    assert {item["gate"] for item in task_handoff["approvalGates"]} == {
+        "task_creation_review",
+        "external_write_gate",
+        "repair_action_approval",
+    }
+    assert {item["name"] for item in task_handoff["dataBoundaries"]} == {
+        "preview_only_no_persistence",
+        "internal_only_outbox",
+        "safe_task_payload",
+    }
+    assert {item["path"] for item in task_handoff["docs"]} >= {
+        "docs/public/BUSINESS_TASK_HANDOFF.md",
+        "docs/public/WORKFLOW_DEMO.md",
+        "docs/public/BUSINESS_INTAKE_PIPELINE.md",
     }
     business_scenario_replay = payload["businessScenarioReplay"]
     assert business_scenario_replay["status"] == "validated"

@@ -154,6 +154,13 @@
         Array.isArray(payload.businessIntakePipeline.actionPlan.approvalGates) &&
         payload.businessIntakePipeline.notifications &&
         Array.isArray(payload.businessIntakePipeline.dataBoundaries) &&
+        payload.businessTaskHandoff &&
+        Array.isArray(payload.businessTaskHandoff.summary) &&
+        Array.isArray(payload.businessTaskHandoff.taskCards) &&
+        Array.isArray(payload.businessTaskHandoff.outboxCandidates) &&
+        Array.isArray(payload.businessTaskHandoff.notificationDrafts) &&
+        Array.isArray(payload.businessTaskHandoff.approvalGates) &&
+        Array.isArray(payload.businessTaskHandoff.dataBoundaries) &&
         payload.businessScenarioReplay &&
         Array.isArray(payload.businessScenarioReplay.summary) &&
         Array.isArray(payload.businessScenarioReplay.scenarios) &&
@@ -1227,6 +1234,178 @@
             String(Boolean(item.externalMutation)) +
             " - PII " +
             String(Boolean(item.piiIncluded))
+        )
+      );
+
+      row.append(top, detail);
+      boundaryRows.appendChild(row);
+    });
+  }
+
+  function fillBusinessTaskHandoff() {
+    var handoff = data.businessTaskHandoff;
+
+    var summaryRows = document.getElementById("businessTaskSummaryRows");
+    clear(summaryRows);
+    handoff.summary.forEach(function (item) {
+      var card = document.createElement("article");
+      card.className = "metric-card";
+      card.dataset.tone = item.tone || "blue";
+
+      var label = document.createElement("span");
+      label.className = "muted";
+      label.appendChild(text(item.label));
+
+      var value = document.createElement("strong");
+      value.appendChild(text(item.value));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      card.append(label, value, detail);
+      summaryRows.appendChild(card);
+    });
+
+    var taskRows = document.getElementById("businessTaskRows");
+    clear(taskRows);
+    handoff.taskCards.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(item.title));
+      top.append(title, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          item.assigneeRole +
+            " - " +
+            item.subject +
+            " - priority " +
+            item.priority +
+            " - approval " +
+            String(item.requiresApproval)
+        )
+      );
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(item.evidence));
+
+      row.append(top, detail, evidence);
+      taskRows.appendChild(row);
+    });
+
+    var outboxRows = document.getElementById("businessTaskOutboxRows");
+    clear(outboxRows);
+    handoff.outboxCandidates.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var eventType = document.createElement("strong");
+      eventType.appendChild(text(item.eventType));
+      top.append(eventType, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          item.adapterKey +
+            " - " +
+            item.payloadProfile +
+            " - external mutation " +
+            String(item.externalMutation)
+        )
+      );
+
+      var key = document.createElement("code");
+      key.appendChild(text(item.idempotencyKey));
+
+      row.append(top, detail, key);
+      outboxRows.appendChild(row);
+    });
+
+    var draftRows = document.getElementById("businessTaskDraftRows");
+    clear(draftRows);
+    handoff.notificationDrafts.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(item.title));
+      top.append(title, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          item.channel +
+            " - " +
+            item.recipientRole +
+            " - external delivery " +
+            String(item.externalDelivery) +
+            " - PII " +
+            String(item.containsPii)
+        )
+      );
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(item.evidence));
+
+      row.append(top, detail, evidence);
+      draftRows.appendChild(row);
+    });
+
+    handoff.approvalGates.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var gate = document.createElement("strong");
+      gate.appendChild(text(item.gate));
+      top.append(gate, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text("approval " + String(item.requiresApproval) + " - external mutation " + String(item.externalMutation))
+      );
+
+      row.append(top, detail);
+      draftRows.appendChild(row);
+    });
+
+    var boundaryRows = document.getElementById("businessTaskBoundaryRows");
+    clear(boundaryRows);
+    handoff.dataBoundaries.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var name = document.createElement("strong");
+      name.appendChild(text(item.name));
+      top.append(name, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          "external mutation " +
+            String(Boolean(item.externalMutation)) +
+            " - PII " +
+            String(Boolean(item.piiIncluded || item.containsPii)) +
+            " - raw payload " +
+            String(Boolean(item.rawPayloadIncluded))
         )
       );
 
@@ -2360,7 +2539,7 @@
     ) {
       return "green";
     }
-    if (["blocked", "waiting", "pending", "retry", "partial_success", "current", "open", "acknowledged", "warning", "attention", "review_required", "mitigating", "fired", "proposed", "suggested", "invoice_sent", "not_exported", "waiting_for_repair", "requires_channel_config", "preview_only", "needs_cross_check", "action_required", "approval_required", "draft_only"].indexOf(status) >= 0) {
+    if (["blocked", "waiting", "pending", "retry", "partial_success", "current", "open", "acknowledged", "warning", "attention", "review_required", "mitigating", "fired", "proposed", "suggested", "invoice_sent", "not_exported", "waiting_for_repair", "requires_channel_config", "preview_only", "needs_cross_check", "action_required", "approval_required", "draft_only", "would_create", "would_enqueue", "required"].indexOf(status) >= 0) {
       return "amber";
     }
     if (["high", "dead_letter", "critical"].indexOf(status) >= 0) {
@@ -2424,6 +2603,7 @@
     fillIncidentResponse();
     fillBusinessControlTower();
     fillBusinessIntakePipeline();
+    fillBusinessTaskHandoff();
     fillBusinessScenarioReplay();
     fillEngineeringProof();
   }

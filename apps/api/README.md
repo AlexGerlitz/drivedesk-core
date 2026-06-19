@@ -19,6 +19,8 @@ Demo endpoints:
   as a standalone synthetic contract for SDK and external checks.
 - `GET /demo/business-intake-pipeline` returns the same business intake
   pipeline proof as a standalone synthetic contract.
+- `GET /demo/business-task-handoff` returns the same business task handoff
+  proof as a standalone synthetic contract.
 - `GET /demo/business-scenario-replay` returns reusable Business OS scenario
   replay data as a standalone synthetic contract.
 

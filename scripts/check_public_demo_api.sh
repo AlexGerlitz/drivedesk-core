@@ -109,6 +109,7 @@ ready, _ = get_json("/ready")
 demo, demo_headers = get_json("/demo/public")
 connector_replay_endpoint, connector_replay_headers = get_json("/demo/connector-fixture-replay")
 business_intake_endpoint, business_intake_headers = get_json("/demo/business-intake-pipeline")
+business_task_handoff_endpoint, business_task_handoff_headers = get_json("/demo/business-task-handoff")
 business_scenario_endpoint, business_scenario_headers = get_json("/demo/business-scenario-replay")
 adapters, _ = get_json("/integration-adapters")
 runbooks, _ = get_json("/integration-runbooks")
@@ -702,6 +703,67 @@ assert {item["path"] for item in business_intake["docs"]} >= {
     "docs/public/BUSINESS_CONTROL_TOWER.md",
     "docs/public/API_BACKED_DEMO.md",
 }, demo
+business_task_handoff = demo["businessTaskHandoff"]
+assert business_task_handoff_endpoint == business_task_handoff, business_task_handoff_endpoint
+assert business_task_handoff_headers["access-control-allow-origin"] == "*", business_task_handoff_headers
+assert business_task_handoff_headers["cache-control"] == "public, max-age=60", business_task_handoff_headers
+assert business_task_handoff["status"] == "previewed", demo
+assert (
+    business_task_handoff["command"]
+    == "POST /tenants/{tenant_id}/business-task-handoffs/preview"
+), demo
+assert {item["label"] for item in business_task_handoff["summary"]} >= {
+    "Task cards",
+    "Internal outbox",
+    "Draft notifications",
+    "External writes",
+}, demo
+assert business_task_handoff["role"] == "accountant", demo
+assert business_task_handoff["subject"] == "deal:DEAL-2026-001", demo
+assert len(business_task_handoff["taskCards"]) == 2, demo
+assert len(business_task_handoff["outboxCandidates"]) == 2, demo
+assert len(business_task_handoff["notificationDrafts"]) == 2, demo
+assert {card["status"] for card in business_task_handoff["taskCards"]} == {"would_create"}, demo
+assert {card["wouldCreate"] for card in business_task_handoff["taskCards"]} == {
+    "BusinessRecord(type=task)"
+}, demo
+assert {card["externalMutation"] for card in business_task_handoff["taskCards"]} == {False}, demo
+assert {card["containsPii"] for card in business_task_handoff["taskCards"]} == {False}, demo
+assert {card["rawPayloadIncluded"] for card in business_task_handoff["taskCards"]} == {False}, demo
+assert {
+    candidate["eventType"] for candidate in business_task_handoff["outboxCandidates"]
+} == {"task.created"}, demo
+assert {
+    candidate["adapterKey"] for candidate in business_task_handoff["outboxCandidates"]
+} == {"internal.noop"}, demo
+assert {
+    candidate["status"] for candidate in business_task_handoff["outboxCandidates"]
+} == {"would_enqueue"}, demo
+assert {
+    candidate["externalMutation"] for candidate in business_task_handoff["outboxCandidates"]
+} == {False}, demo
+assert {
+    draft["status"] for draft in business_task_handoff["notificationDrafts"]
+} == {"draft_only"}, demo
+assert {
+    draft["externalDelivery"] for draft in business_task_handoff["notificationDrafts"]
+} == {False}, demo
+assert {draft["containsPii"] for draft in business_task_handoff["notificationDrafts"]} == {False}, demo
+assert {item["gate"] for item in business_task_handoff["approvalGates"]} == {
+    "task_creation_review",
+    "external_write_gate",
+    "repair_action_approval",
+}, demo
+assert {item["name"] for item in business_task_handoff["dataBoundaries"]} == {
+    "preview_only_no_persistence",
+    "internal_only_outbox",
+    "safe_task_payload",
+}, demo
+assert {item["path"] for item in business_task_handoff["docs"]} >= {
+    "docs/public/BUSINESS_TASK_HANDOFF.md",
+    "docs/public/WORKFLOW_DEMO.md",
+    "docs/public/BUSINESS_INTAKE_PIPELINE.md",
+}, demo
 business_scenario_replay = demo["businessScenarioReplay"]
 assert business_scenario_endpoint == business_scenario_replay, business_scenario_endpoint
 assert business_scenario_headers["access-control-allow-origin"] == "*", business_scenario_headers
@@ -873,8 +935,10 @@ assert "/integration-runbooks" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/public" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/connector-fixture-replay" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/business-intake-pipeline" in openapi["paths"], openapi["paths"].keys()
+assert "/demo/business-task-handoff" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/business-scenario-replay" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/business-intake-pipeline/preview" in openapi["paths"], openapi["paths"].keys()
+assert "/tenants/{tenant_id}/business-task-handoffs/preview" in openapi["paths"], openapi["paths"].keys()
 assert "/health" in openapi["paths"], openapi["paths"].keys()
 
 if openapi_file.exists():
@@ -882,8 +946,10 @@ if openapi_file.exists():
     assert "/demo/public" in generated["paths"], generated["paths"].keys()
     assert "/demo/connector-fixture-replay" in generated["paths"], generated["paths"].keys()
     assert "/demo/business-intake-pipeline" in generated["paths"], generated["paths"].keys()
+    assert "/demo/business-task-handoff" in generated["paths"], generated["paths"].keys()
     assert "/demo/business-scenario-replay" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-intake-pipeline/preview" in generated["paths"], generated["paths"].keys()
+    assert "/tenants/{tenant_id}/business-task-handoffs/preview" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-action-plans/preview" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-notifications/preview" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/workflow-action-runs" in generated["paths"], generated["paths"].keys()

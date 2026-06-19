@@ -24,6 +24,7 @@ export const REQUIRED_FIELDS = [
   "adapterStudio",
   "connectorFixtureReplay",
   "businessIntakePipeline",
+  "businessTaskHandoff",
   "integrationJobs",
   "integrationHealth",
   "integrationReadiness",

@@ -2378,6 +2378,303 @@
         "title": "BusinessStateObservationRead",
         "type": "object"
       },
+      "BusinessTaskHandoffDemoRead": {
+        "properties": {
+          "api": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Api",
+            "type": "object"
+          },
+          "approvalGates": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Approvalgates",
+            "type": "array"
+          },
+          "command": {
+            "title": "Command",
+            "type": "string"
+          },
+          "dataBoundaries": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Databoundaries",
+            "type": "array"
+          },
+          "docs": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "title": "Docs",
+            "type": "array"
+          },
+          "notificationDrafts": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Notificationdrafts",
+            "type": "array"
+          },
+          "outboxCandidates": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Outboxcandidates",
+            "type": "array"
+          },
+          "role": {
+            "title": "Role",
+            "type": "string"
+          },
+          "status": {
+            "const": "previewed",
+            "title": "Status",
+            "type": "string"
+          },
+          "subject": {
+            "title": "Subject",
+            "type": "string"
+          },
+          "summary": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Summary",
+            "type": "array"
+          },
+          "taskCards": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Taskcards",
+            "type": "array"
+          }
+        },
+        "required": [
+          "status",
+          "command",
+          "summary",
+          "role",
+          "subject",
+          "taskCards",
+          "outboxCandidates",
+          "notificationDrafts",
+          "approvalGates",
+          "dataBoundaries",
+          "api",
+          "docs"
+        ],
+        "title": "BusinessTaskHandoffDemoRead",
+        "type": "object"
+      },
+      "BusinessTaskHandoffPreviewCreate": {
+        "properties": {
+          "action_plan_steps": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "maxItems": 10,
+            "title": "Action Plan Steps",
+            "type": "array"
+          },
+          "handoff_kind": {
+            "const": "action_plan_task_handoff",
+            "default": "action_plan_task_handoff",
+            "title": "Handoff Kind",
+            "type": "string"
+          },
+          "include_internal_outbox": {
+            "default": true,
+            "title": "Include Internal Outbox",
+            "type": "boolean"
+          },
+          "include_notification_drafts": {
+            "default": true,
+            "title": "Include Notification Drafts",
+            "type": "boolean"
+          },
+          "role": {
+            "default": "operator",
+            "enum": [
+              "operator",
+              "accountant",
+              "manager",
+              "owner",
+              "support"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "subject_id": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Id"
+          },
+          "subject_type": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 2,
+                "pattern": "^[a-z0-9][a-z0-9_-]*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Type"
+          }
+        },
+        "title": "BusinessTaskHandoffPreviewCreate",
+        "type": "object"
+      },
+      "BusinessTaskHandoffPreviewRead": {
+        "properties": {
+          "api": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Api",
+            "type": "object"
+          },
+          "approval_gates": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Approval Gates",
+            "type": "array"
+          },
+          "data_boundaries": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Data Boundaries",
+            "type": "array"
+          },
+          "evidence": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "handoff_kind": {
+            "const": "action_plan_task_handoff",
+            "title": "Handoff Kind",
+            "type": "string"
+          },
+          "notification_drafts": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Notification Drafts",
+            "type": "array"
+          },
+          "outbox_candidates": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Outbox Candidates",
+            "type": "array"
+          },
+          "role": {
+            "enum": [
+              "operator",
+              "accountant",
+              "manager",
+              "owner",
+              "support"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "status": {
+            "const": "previewed",
+            "title": "Status",
+            "type": "string"
+          },
+          "subject_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Id"
+          },
+          "subject_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Type"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "task_cards": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Task Cards",
+            "type": "array"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tenant_id",
+          "handoff_kind",
+          "role",
+          "generated_at",
+          "status",
+          "summary"
+        ],
+        "title": "BusinessTaskHandoffPreviewRead",
+        "type": "object"
+      },
       "BusinessWorkbenchContextPreviewCreate": {
         "properties": {
           "context_kind": {
@@ -4126,6 +4423,11 @@
             "title": "Businessscenarioreplay",
             "type": "object"
           },
+          "businessTaskHandoff": {
+            "additionalProperties": true,
+            "title": "Businesstaskhandoff",
+            "type": "object"
+          },
           "connectorFixtureReplay": {
             "additionalProperties": true,
             "title": "Connectorfixturereplay",
@@ -4294,6 +4596,7 @@
           "adapterStudio",
           "connectorFixtureReplay",
           "businessIntakePipeline",
+          "businessTaskHandoff",
           "integrationJobs",
           "integrationHealth",
           "integrationReadiness",
@@ -5398,6 +5701,27 @@
           }
         },
         "summary": "Business Scenario Replay Demo",
+        "tags": [
+          "demo"
+        ]
+      }
+    },
+    "/demo/business-task-handoff": {
+      "get": {
+        "operationId": "business_task_handoff_demo_demo_business_task_handoff_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessTaskHandoffDemoRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Business Task Handoff Demo",
         "tags": [
           "demo"
         ]
@@ -7613,6 +7937,94 @@
           }
         },
         "summary": "Create Business State Observation Endpoint",
+        "tags": [
+          "business-control"
+        ]
+      }
+    },
+    "/tenants/{tenant_id}/business-task-handoffs/preview": {
+      "post": {
+        "operationId": "preview_business_task_handoff_endpoint_tenants__tenant_id__business_task_handoffs_preview_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tenant_id",
+            "required": true,
+            "schema": {
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "X-Actor-Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Role",
+            "required": false,
+            "schema": {
+              "default": "viewer",
+              "title": "X-Actor-Role",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessTaskHandoffPreviewCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessTaskHandoffPreviewRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Preview Business Task Handoff Endpoint",
         "tags": [
           "business-control"
         ]

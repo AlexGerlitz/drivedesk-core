@@ -46,6 +46,25 @@
       "docs"
     ]
   },
+  "business_task_handoff": {
+    "method": "GET",
+    "operation_id": "business_task_handoff_demo_demo_business_task_handoff_get",
+    "path": "/demo/business-task-handoff",
+    "required_fields": [
+      "status",
+      "command",
+      "summary",
+      "role",
+      "subject",
+      "taskCards",
+      "outboxCandidates",
+      "notificationDrafts",
+      "approvalGates",
+      "dataBoundaries",
+      "api",
+      "docs"
+    ]
+  },
   "connector_replay": {
     "method": "GET",
     "operation_id": "connector_fixture_replay_demo_demo_connector_fixture_replay_get",
@@ -89,6 +108,7 @@
     "adapterStudio",
     "connectorFixtureReplay",
     "businessIntakePipeline",
+    "businessTaskHandoff",
     "integrationJobs",
     "integrationHealth",
     "integrationReadiness",

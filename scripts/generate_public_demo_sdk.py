@@ -13,6 +13,8 @@ CONNECTOR_REPLAY_PATH = "/demo/connector-fixture-replay"
 CONNECTOR_REPLAY_METHOD = "get"
 BUSINESS_INTAKE_PIPELINE_PATH = "/demo/business-intake-pipeline"
 BUSINESS_INTAKE_PIPELINE_METHOD = "get"
+BUSINESS_TASK_HANDOFF_PATH = "/demo/business-task-handoff"
+BUSINESS_TASK_HANDOFF_METHOD = "get"
 BUSINESS_SCENARIO_REPLAY_PATH = "/demo/business-scenario-replay"
 BUSINESS_SCENARIO_REPLAY_METHOD = "get"
 
@@ -42,6 +44,14 @@ def business_intake_pipeline_operation(schema: dict[str, Any]) -> dict[str, Any]
         schema,
         BUSINESS_INTAKE_PIPELINE_PATH,
         BUSINESS_INTAKE_PIPELINE_METHOD,
+    )
+
+
+def business_task_handoff_operation(schema: dict[str, Any]) -> dict[str, Any]:
+    return required_operation(
+        schema,
+        BUSINESS_TASK_HANDOFF_PATH,
+        BUSINESS_TASK_HANDOFF_METHOD,
     )
 
 
@@ -80,6 +90,16 @@ def business_intake_pipeline_required_fields(schema: dict[str, Any]) -> list[str
     required = replay.get("required", [])
     if not isinstance(required, list) or not required:
         raise SystemExit("OpenAPI schema does not contain BusinessIntakePipelineDemoRead.required")
+    return [str(item) for item in required]
+
+
+def business_task_handoff_required_fields(schema: dict[str, Any]) -> list[str]:
+    components = schema.get("components", {})
+    schemas = components.get("schemas", {})
+    handoff = schemas.get("BusinessTaskHandoffDemoRead", {})
+    required = handoff.get("required", [])
+    if not isinstance(required, list) or not required:
+        raise SystemExit("OpenAPI schema does not contain BusinessTaskHandoffDemoRead.required")
     return [str(item) for item in required]
 
 
@@ -1489,6 +1509,8 @@ def render_manifest(
     connector_required_fields: list[str],
     business_intake_operation_id: str,
     business_intake_required_fields: list[str],
+    business_task_handoff_operation_id: str,
+    business_task_handoff_required_fields: list[str],
     business_scenario_operation_id: str,
     business_scenario_required_fields: list[str],
 ) -> str:
@@ -1509,6 +1531,12 @@ def render_manifest(
             "method": BUSINESS_INTAKE_PIPELINE_METHOD.upper(),
             "operation_id": business_intake_operation_id,
             "required_fields": business_intake_required_fields,
+        },
+        "business_task_handoff": {
+            "path": BUSINESS_TASK_HANDOFF_PATH,
+            "method": BUSINESS_TASK_HANDOFF_METHOD.upper(),
+            "operation_id": business_task_handoff_operation_id,
+            "required_fields": business_task_handoff_required_fields,
         },
         "business_scenario_replay": {
             "path": BUSINESS_SCENARIO_REPLAY_PATH,
@@ -1554,6 +1582,11 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
         business_intake_operation.get("operationId") or "get_business_intake_pipeline"
     )
     business_intake_required_fields = business_intake_pipeline_required_fields(schema)
+    business_task_handoff_op = business_task_handoff_operation(schema)
+    business_task_handoff_operation_id = str(
+        business_task_handoff_op.get("operationId") or "get_business_task_handoff"
+    )
+    business_task_handoff_fields = business_task_handoff_required_fields(schema)
     business_scenario_operation = business_scenario_replay_operation(schema)
     business_scenario_operation_id = str(
         business_scenario_operation.get("operationId") or "get_business_scenario_replay"
@@ -1577,6 +1610,8 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
             connector_required_fields,
             business_intake_operation_id,
             business_intake_required_fields,
+            business_task_handoff_operation_id,
+            business_task_handoff_fields,
             business_scenario_operation_id,
             business_scenario_required_fields,
         ),

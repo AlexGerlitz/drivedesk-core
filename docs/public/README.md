@@ -37,6 +37,9 @@ infrastructure, production history, customer data, or operational credentials.
   CRM/bank/accounting events to safe facts, role workbench, detection,
   approval-gated action plan, and draft notifications via the
   `businessIntakePipeline` contract.
+- `BUSINESS_TASK_HANDOFF.md` - preview-only handoff from action plan steps to
+  internal task cards, internal outbox candidates, and draft in-app
+  notifications via the `businessTaskHandoff` contract.
 - `BUSINESS_SCENARIO_REPLAY.md` - reusable Business OS replay paths for
   CRM/bank/accounting mismatch, support SLA risk, and procurement delay risk via
   the `businessScenarioReplay` contract.
@@ -157,6 +160,8 @@ The public repository export also generates:
   for connector fixture groups, redaction outcomes, and boundaries.
 - `GET /demo/business-intake-pipeline` - standalone public-safe intake pipeline
   contract for `businessIntakePipeline`.
+- `GET /demo/business-task-handoff` - standalone public-safe task handoff
+  contract for `businessTaskHandoff`.
 - `incidentResponse` - public-safe incident response contract in the demo
   payload and Incidents tab.
 - `businessControlTower` - public-safe control tower contract for CRM, bank,
@@ -175,6 +180,9 @@ The public repository export also generates:
   owner, queue, SLA, and next-action routing for open business exceptions.
 - `POST /tenants/{tenant_id}/business-action-plans/preview` - read-only
   ordered operator work, automation candidates, approval gates, and evidence.
+- `POST /tenants/{tenant_id}/business-task-handoffs/preview` - read-only
+  preview from action steps to internal task cards, internal outbox candidates,
+  and draft notifications.
 - `POST /tenants/{tenant_id}/business-notifications/preview` - read-only
   notification channel readiness, drafts, delivery plan, and evidence.
 - `POST /tenants/{tenant_id}/business-briefings/preview` - read-only
@@ -196,6 +204,8 @@ The public repository export also generates:
 - `scripts/check_public_demo_api.sh` - local API contract and client-example smoke.
 - `scripts/check_public_business_control_tower.sh` - public-safe business
   control tower contract validation.
+- `scripts/check_public_business_task_handoff.sh` - public-safe business task
+  handoff contract validation.
 - `scripts/check_public_backup_restore.sh` - public-safe synthetic recovery drill.
 - `scripts/check_public_release_rollback.sh` - public-safe release rollback drill.
 - `scripts/check_public_slo_canary_gate.sh` - public-safe SLO canary gate drill.

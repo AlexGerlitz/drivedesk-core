@@ -657,8 +657,17 @@ def test_business_control_tower_exception_and_repair_flow(
         "POST /tenants/{tenant_id}/business-workbench-context/preview"
     )
 
-    async def count_control_tower_rows() -> tuple[int, int, int, int]:
+    async def count_control_tower_rows() -> tuple[int, int, int, int, int]:
         async with session_factory() as session:
+            records_count = len(
+                (
+                    await session.execute(
+                        select(BusinessRecord).where(BusinessRecord.tenant_id == tenant_id)
+                    )
+                )
+                .scalars()
+                .all()
+            )
             observations_count = len(
                 (
                     await session.execute(
@@ -691,7 +700,7 @@ def test_business_control_tower_exception_and_repair_flow(
                 .scalars()
                 .all()
             )
-            return observations_count, exceptions_count, repairs_count, outbox_count
+            return records_count, observations_count, exceptions_count, repairs_count, outbox_count
 
     pipeline_preview_baseline = asyncio.run(count_control_tower_rows())
 
@@ -818,6 +827,78 @@ def test_business_control_tower_exception_and_repair_flow(
     assert pipeline["api"]["provider_intake"] == "POST /tenants/{tenant_id}/business-provider-intake/preview"
 
     assert asyncio.run(count_control_tower_rows()) == pipeline_preview_baseline
+
+    handoff_baseline = asyncio.run(count_control_tower_rows())
+    handoff_response = client.post(
+        f"/tenants/{tenant_id}/business-task-handoffs/preview",
+        json={
+            "role": "accountant",
+            "subject_type": "deal",
+            "subject_id": "DEAL-2026-001",
+            "action_plan_steps": [
+                {
+                    "step": "review_detected_exceptions",
+                    "status": "action_required",
+                    "requiresApproval": False,
+                    "externalMutation": False,
+                    "evidence": "business_detection.previewed",
+                },
+                {
+                    "step": "execute_repair_dry_run",
+                    "status": "approval_required",
+                    "requiresApproval": True,
+                    "externalMutation": False,
+                    "evidence": "repair_action.approved",
+                },
+            ],
+        },
+        headers=owner_headers,
+    )
+    assert handoff_response.status_code == 200
+    handoff = handoff_response.json()
+    assert handoff["status"] == "previewed"
+    assert handoff["handoff_kind"] == "action_plan_task_handoff"
+    assert handoff["role"] == "accountant"
+    assert handoff["subject_type"] == "deal"
+    assert handoff["subject_id"] == "DEAL-2026-001"
+    assert "prepared 2 internal task" in handoff["summary"]
+    assert len(handoff["task_cards"]) == 2
+    assert {item["status"] for item in handoff["task_cards"]} == {"would_create"}
+    assert {item["would_create"] for item in handoff["task_cards"]} == {"BusinessRecord(type=task)"}
+    assert {item["assignee_role"] for item in handoff["task_cards"]} == {"accountant"}
+    assert {item["contains_pii"] for item in handoff["task_cards"]} == {False}
+    assert {item["raw_payload_included"] for item in handoff["task_cards"]} == {False}
+    assert {item["external_mutation"] for item in handoff["task_cards"]} == {False}
+    assert any(item["requires_approval"] is True for item in handoff["task_cards"])
+    assert len(handoff["outbox_candidates"]) == 2
+    assert {item["event_type"] for item in handoff["outbox_candidates"]} == {"task.created"}
+    assert {item["adapter_key"] for item in handoff["outbox_candidates"]} == {"internal.noop"}
+    assert {item["status"] for item in handoff["outbox_candidates"]} == {"would_enqueue"}
+    assert {item["contains_pii"] for item in handoff["outbox_candidates"]} == {False}
+    assert {item["external_mutation"] for item in handoff["outbox_candidates"]} == {False}
+    assert len(handoff["notification_drafts"]) == 2
+    assert {item["status"] for item in handoff["notification_drafts"]} == {"draft_only"}
+    assert {item["external_delivery"] for item in handoff["notification_drafts"]} == {False}
+    assert {item["contains_pii"] for item in handoff["notification_drafts"]} == {False}
+    assert {item["gate"] for item in handoff["approval_gates"]} == {
+        "task_creation_review",
+        "external_write_gate",
+        "repair_action_approval",
+    }
+    assert {item["name"] for item in handoff["data_boundaries"]} == {
+        "preview_only_no_persistence",
+        "internal_only_outbox",
+        "safe_task_payload",
+    }
+    assert {item.get("external_mutation") for item in handoff["data_boundaries"] if "external_mutation" in item} == {
+        False
+    }
+    assert handoff["evidence"][0]["event"] == "business_task_handoff.previewed"
+    assert handoff["api"]["preview"] == "POST /tenants/{tenant_id}/business-task-handoffs/preview"
+    serialized_handoff = json.dumps(handoff, ensure_ascii=False, sort_keys=True).lower()
+    for leaked in ["never-return-this", "+70000000000", "synthetic customer", "password", "authorization"]:
+        assert leaked not in serialized_handoff
+    assert asyncio.run(count_control_tower_rows()) == handoff_baseline
 
     observation_payloads = [
         {
@@ -2198,6 +2279,49 @@ def test_business_intake_pipeline_demo_endpoint_exposes_same_public_contract(
     assert any(
         item["path"] == "docs/public/BUSINESS_INTAKE_PIPELINE.md"
         for item in pipeline_payload["docs"]
+    )
+
+
+def test_business_task_handoff_demo_endpoint_exposes_same_public_contract(
+    api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, _ = api_client
+
+    public_response = client.get("/demo/public")
+    handoff_response = client.get("/demo/business-task-handoff")
+
+    assert handoff_response.status_code == 200
+    assert handoff_response.headers["access-control-allow-origin"] == "*"
+    assert handoff_response.headers["cache-control"] == "public, max-age=60"
+    handoff_payload = handoff_response.json()
+    assert handoff_payload == public_response.json()["businessTaskHandoff"]
+    assert handoff_payload["status"] == "previewed"
+    assert handoff_payload["command"] == "POST /tenants/{tenant_id}/business-task-handoffs/preview"
+    assert handoff_payload["role"] == "accountant"
+    assert handoff_payload["subject"] == "deal:DEAL-2026-001"
+    assert {item["status"] for item in handoff_payload["taskCards"]} == {"would_create"}
+    assert {item["wouldCreate"] for item in handoff_payload["taskCards"]} == {"BusinessRecord(type=task)"}
+    assert {item["externalMutation"] for item in handoff_payload["taskCards"]} == {False}
+    assert {item["containsPii"] for item in handoff_payload["taskCards"]} == {False}
+    assert {item["eventType"] for item in handoff_payload["outboxCandidates"]} == {"task.created"}
+    assert {item["adapterKey"] for item in handoff_payload["outboxCandidates"]} == {"internal.noop"}
+    assert {item["status"] for item in handoff_payload["outboxCandidates"]} == {"would_enqueue"}
+    assert {item["externalMutation"] for item in handoff_payload["outboxCandidates"]} == {False}
+    assert {item["status"] for item in handoff_payload["notificationDrafts"]} == {"draft_only"}
+    assert {item["externalDelivery"] for item in handoff_payload["notificationDrafts"]} == {False}
+    assert {item["gate"] for item in handoff_payload["approvalGates"]} == {
+        "task_creation_review",
+        "external_write_gate",
+        "repair_action_approval",
+    }
+    assert {item["name"] for item in handoff_payload["dataBoundaries"]} == {
+        "preview_only_no_persistence",
+        "internal_only_outbox",
+        "safe_task_payload",
+    }
+    assert any(
+        item["path"] == "docs/public/BUSINESS_TASK_HANDOFF.md"
+        for item in handoff_payload["docs"]
     )
 
 

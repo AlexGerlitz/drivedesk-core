@@ -11,8 +11,9 @@ The first public-safe slice models a common cross-system failure:
 4. DriveDesk previews the detected mismatch before mutating data.
 5. DriveDesk opens a business exception.
 6. DriveDesk previews escalation routing: owner, queue, SLA, and next action.
-7. A repair action is proposed, approved, and executed in dry-run mode.
-8. A role briefing turns the raw evidence into the next useful operator view.
+7. DriveDesk previews an ordered action plan for the responsible operator.
+8. A repair action is proposed, approved, and executed in dry-run mode.
+9. A role briefing turns the raw evidence into the next useful operator view.
 
 This is intentionally not another workflow automation demo. The control tower
 tracks business state across systems, detects an exception, records impact, and
@@ -24,6 +25,7 @@ keeps the repair path auditable.
 | --- | --- | --- |
 | Preview detections | `POST /tenants/{tenant_id}/business-detections/preview` | Detect exception candidates and suggested repair actions from observations without mutating data. |
 | Preview escalations | `POST /tenants/{tenant_id}/business-escalations/preview` | Route open business exceptions to owner roles, queues, SLA targets, and next actions without mutating data. |
+| Preview action plan | `POST /tenants/{tenant_id}/business-action-plans/preview` | Build ordered operator work, automation candidates, approval gates, and evidence links without mutating data. |
 | Preview briefing | `POST /tenants/{tenant_id}/business-briefings/preview` | Build a role-specific work briefing from observations, exceptions, and repair actions without mutating data. |
 | Observe state | `POST /tenants/{tenant_id}/business-state/observations` | Record a normalized state sample from CRM, bank, accounting, support, or another connected system. |
 | List observations | `GET /tenants/{tenant_id}/business-state/observations` | Review the tenant-scoped state timeline for a subject. |
@@ -39,6 +41,7 @@ keeps the repair path auditable.
 | --- | --- |
 | `BusinessDetectionPreview` | A read-only detector result with matched rules, exception candidates, repair suggestions, and evidence. |
 | `BusinessEscalationPreview` | A read-only triage result with queue, owner role, SLA, next action, and evidence. |
+| `BusinessActionPlanPreview` | A read-only work plan with lanes, ordered steps, automation candidates, approval gates, and evidence. |
 | `BusinessBriefing` | A read-model for the current operator role, subject, evidence, risks, and next actions. |
 | `BusinessStateObservation` | One normalized fact from an external system. |
 | `BusinessException` | A business problem derived from observations. |
@@ -99,6 +102,25 @@ It reads open business exceptions and linked repair actions, then returns:
 The preview is read-only. It does not create tasks, approve repairs, execute
 repairs, enqueue outbox events, or notify external systems.
 
+## Action Plan Preview
+
+The action plan preview is the operator workbench step. It turns the routed
+exception into ordered work for a role such as `accountant`.
+
+It returns:
+
+- work lane, for example `finance_reconciliation`;
+- ordered steps such as evidence review, dry-run repair execution, and exception
+  acknowledgement;
+- automation candidates such as repair execution queueing and read-only
+  accounting export recheck;
+- approval gates showing whether repair approval is satisfied;
+- evidence that ties the plan back to observations, exceptions, and repair
+  actions.
+
+The preview is read-only. It does not create tasks, notify users, enqueue
+outbox events, approve repairs, execute repairs, or mutate external systems.
+
 ## Safety Boundary
 
 The public demo does not write to real external systems. Repair execution stores
@@ -128,6 +150,8 @@ The public demo includes a `businessControlTower` payload with:
 - one `crm_payment_mismatch` exception;
 - one `exception_triage` escalation preview with owner, queue, SLA, and next
   action;
+- one `exception_resolution` action plan with ordered steps, automation
+  candidates, and approval gates;
 - one approval-gated `sync_status` repair action;
 - one accountant briefing with source systems, highlights, recommended actions,
   and review points;

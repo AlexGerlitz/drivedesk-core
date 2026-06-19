@@ -35,7 +35,7 @@ window.DRIVEDESK_DEMO_DATA = {
     },
     {
       "label": "OpenAPI paths",
-      "value": "44",
+      "value": "45",
       "detail": "generated contract",
       "tone": "violet"
     },
@@ -896,6 +896,113 @@ window.DRIVEDESK_DEMO_DATA = {
         "preview": "POST /tenants/{tenant_id}/business-escalations/preview"
       }
     },
+    "actionPlan": {
+      "planKind": "exception_resolution",
+      "role": "accountant",
+      "riskLevel": "attention",
+      "summary": "The accountant gets one ordered work plan from CRM, bank, accounting, exception, and repair evidence.",
+      "lanes": [
+        {
+          "lane": "finance_reconciliation",
+          "ownerRole": "accountant",
+          "slaMinutes": 120,
+          "workItems": 1,
+          "status": "active"
+        }
+      ],
+      "steps": [
+        {
+          "sequence": 1,
+          "step": "verify_source_evidence",
+          "lane": "finance_reconciliation",
+          "ownerRole": "accountant",
+          "status": "ready",
+          "summary": "Review CRM, bank, and accounting state before any repair.",
+          "sourceSystems": [
+            "crm.bitrix24.mock",
+            "bank.statement.mock",
+            "accounting.export.mock"
+          ],
+          "endpoint": "GET /tenants/{tenant_id}/business-state/observations",
+          "requiresApproval": false,
+          "externalMutation": false,
+          "evidence": "business_state.observation.recorded"
+        },
+        {
+          "sequence": 2,
+          "step": "execute_repair_dry_run",
+          "lane": "finance_reconciliation",
+          "ownerRole": "accountant",
+          "status": "ready",
+          "summary": "Queue the approved sync_status repair in dry-run mode.",
+          "endpoint": "POST /tenants/{tenant_id}/repair-actions/{repair_action_id}/execute",
+          "requiresApproval": false,
+          "externalMutation": false,
+          "evidence": "repair_action.approved"
+        },
+        {
+          "sequence": 3,
+          "step": "close_or_acknowledge_exception",
+          "lane": "finance_reconciliation",
+          "ownerRole": "accountant",
+          "status": "waiting_for_repair",
+          "summary": "Record the accountant decision after dry-run evidence is reviewed.",
+          "endpoint": "POST /tenants/{tenant_id}/business-exceptions/{business_exception_id}/status",
+          "requiresApproval": false,
+          "externalMutation": false,
+          "evidence": "business_exception.status_changed"
+        }
+      ],
+      "automationCandidates": [
+        {
+          "name": "queue_repair_execution",
+          "status": "ready",
+          "action": "execute_repair_dry_run",
+          "adapterKey": "internal.noop",
+          "endpoint": "POST /tenants/{tenant_id}/repair-actions/{repair_action_id}/execute",
+          "externalMutation": false,
+          "evidence": "repair_action.approved"
+        },
+        {
+          "name": "recheck_accounting_export",
+          "status": "available",
+          "action": "run_read_only_connection_check",
+          "adapterKey": "accounting.export.mock",
+          "endpoint": "POST /tenants/{tenant_id}/integration-connections/{connection_id}/checks",
+          "externalMutation": false,
+          "evidence": "integration_connection.check.requested"
+        }
+      ],
+      "approvalGates": [
+        {
+          "name": "repair_action_approval",
+          "status": "satisfied",
+          "requiresApproval": true,
+          "externalMutation": false,
+          "evidence": "repair_action.approved"
+        }
+      ],
+      "reviewPoints": [
+        {
+          "name": "single_work_surface",
+          "status": "ready",
+          "detail": "Cross-system facts become ordered work inside DriveDesk."
+        },
+        {
+          "name": "approval_boundary",
+          "status": "satisfied",
+          "detail": "External-facing repair remains behind approval and dry-run evidence."
+        },
+        {
+          "name": "automation_boundary",
+          "status": "preview_only",
+          "detail": "The action plan preview does not create tasks, notify users, or mutate external systems."
+        }
+      ],
+      "api": {
+        "preview": "POST /tenants/{tenant_id}/business-action-plans/preview"
+      }
+    },
     "briefing": {
       "role": "accountant",
       "riskLevel": "attention",
@@ -1032,6 +1139,13 @@ window.DRIVEDESK_DEMO_DATA = {
         "state": "done",
         "detail": "Human approval is recorded before execution.",
         "evidence": "repair_action.approved"
+      },
+      {
+        "step": "plan",
+        "owner": "workbench",
+        "state": "ready",
+        "detail": "The operator receives an ordered action plan with approval and automation boundaries.",
+        "evidence": "business_action_plan.previewed"
       },
       {
         "step": "execute",

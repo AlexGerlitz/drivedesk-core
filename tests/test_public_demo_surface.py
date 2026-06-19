@@ -184,6 +184,26 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
     assert control_tower["escalation"]["api"]["preview"] == (
         "POST /tenants/{tenant_id}/business-escalations/preview"
     )
+    assert control_tower["actionPlan"]["planKind"] == "exception_resolution"
+    assert control_tower["actionPlan"]["role"] == "accountant"
+    assert control_tower["actionPlan"]["riskLevel"] == "attention"
+    assert {item["lane"] for item in control_tower["actionPlan"]["lanes"]} == {
+        "finance_reconciliation"
+    }
+    assert [item["step"] for item in control_tower["actionPlan"]["steps"]] == [
+        "verify_source_evidence",
+        "execute_repair_dry_run",
+        "close_or_acknowledge_exception",
+    ]
+    assert {item["externalMutation"] for item in control_tower["actionPlan"]["steps"]} == {False}
+    assert {item["name"] for item in control_tower["actionPlan"]["automationCandidates"]} >= {
+        "queue_repair_execution",
+        "recheck_accounting_export",
+    }
+    assert {item["status"] for item in control_tower["actionPlan"]["approvalGates"]} == {"satisfied"}
+    assert control_tower["actionPlan"]["api"]["preview"] == (
+        "POST /tenants/{tenant_id}/business-action-plans/preview"
+    )
     assert control_tower["briefing"]["role"] == "accountant"
     assert control_tower["briefing"]["riskLevel"] == "attention"
     assert set(control_tower["briefing"]["sourceSystems"]) >= {

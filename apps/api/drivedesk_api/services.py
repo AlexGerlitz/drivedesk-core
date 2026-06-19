@@ -32,6 +32,7 @@ from drivedesk_api.db import (
 from drivedesk_api.rbac import ActorContext
 from drivedesk_api.schemas import (
     AccountingExportCreate,
+    BusinessActionPlanPreviewCreate,
     BusinessBriefingPreviewCreate,
     BusinessDetectionPreviewCreate,
     BusinessEscalationPreviewCreate,
@@ -1547,6 +1548,267 @@ def _latest_repair_by_exception(repairs: list[RepairAction]) -> dict[str, Repair
         if previous is None or repair.created_at > previous.created_at:
             latest[repair.business_exception_id] = repair
     return latest
+
+
+async def preview_business_action_plan(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    payload: BusinessActionPlanPreviewCreate,
+) -> dict[str, object]:
+    await ensure_tenant_exists(session, tenant_id)
+    observations_query = (
+        select(BusinessStateObservation)
+        .where(BusinessStateObservation.tenant_id == tenant_id)
+        .order_by(BusinessStateObservation.observed_at.desc(), BusinessStateObservation.created_at.desc())
+        .limit(payload.limit)
+    )
+    exceptions_query = (
+        select(BusinessException)
+        .where(BusinessException.tenant_id == tenant_id)
+        .order_by(BusinessException.detected_at.desc(), BusinessException.created_at.desc())
+        .limit(payload.limit)
+    )
+    if payload.subject_type:
+        observations_query = observations_query.where(BusinessStateObservation.subject_type == payload.subject_type)
+        exceptions_query = exceptions_query.where(BusinessException.subject_type == payload.subject_type)
+    if payload.subject_id:
+        observations_query = observations_query.where(BusinessStateObservation.subject_id == payload.subject_id)
+        exceptions_query = exceptions_query.where(BusinessException.subject_id == payload.subject_id)
+    if not payload.include_resolved:
+        exceptions_query = exceptions_query.where(BusinessException.status != "resolved")
+
+    observations_result = await session.execute(observations_query)
+    exceptions_result = await session.execute(exceptions_query)
+    observations = list(observations_result.scalars().all())
+    exceptions = list(exceptions_result.scalars().all())
+    exception_ids = [item.id for item in exceptions]
+    repairs: list[RepairAction] = []
+    if exception_ids:
+        repairs_result = await session.execute(
+            select(RepairAction)
+            .where(
+                RepairAction.tenant_id == tenant_id,
+                RepairAction.business_exception_id.in_(exception_ids),
+            )
+            .order_by(RepairAction.created_at.desc())
+        )
+        repairs = list(repairs_result.scalars().all())
+
+    repairs_by_exception = _latest_repair_by_exception(repairs)
+    source_systems = sorted({item.system_key for item in observations})
+    lanes: dict[str, dict[str, object]] = {}
+    steps: list[dict[str, object]] = []
+    automation_candidates: list[dict[str, object]] = []
+    approval_gates: list[dict[str, object]] = []
+    evidence: list[dict[str, object]] = []
+    sequence = 1
+
+    for observation in observations[:5]:
+        evidence.append(
+            {
+                "type": "observation",
+                "id": observation.id,
+                "system": observation.system_key,
+                "state": observation.state,
+                "event": "business_state.observation.recorded",
+            }
+        )
+
+    for business_exception in exceptions:
+        owner_role = _escalation_owner_role(business_exception)
+        queue = _escalation_queue(owner_role)
+        sla_minutes = _escalation_sla_minutes(business_exception.severity)
+        lane = lanes.setdefault(
+            queue,
+            {
+                "lane": queue,
+                "owner_role": owner_role,
+                "sla_minutes": sla_minutes,
+                "work_items": 0,
+                "status": "active",
+            },
+        )
+        lane["work_items"] = int(lane["work_items"]) + 1
+        lane["sla_minutes"] = min(int(lane["sla_minutes"]), sla_minutes)
+
+        repair = repairs_by_exception.get(business_exception.id)
+        next_action = _repair_next_action(
+            tenant_id=tenant_id,
+            business_exception=business_exception,
+            repair=repair,
+        )
+        subject = _subject_label(business_exception.subject_type, business_exception.subject_id)
+
+        steps.append(
+            {
+                "sequence": sequence,
+                "step": "verify_source_evidence",
+                "lane": queue,
+                "owner_role": owner_role,
+                "actor_role": payload.role,
+                "status": "ready" if source_systems else "blocked",
+                "summary": f"Review normalized evidence for {subject} before any repair.",
+                "source_systems": source_systems,
+                "endpoint": "GET /tenants/{tenant_id}/business-state/observations",
+                "requires_approval": False,
+                "external_mutation": False,
+                "evidence": "business_state.observation.recorded",
+            }
+        )
+        sequence += 1
+
+        steps.append(
+            {
+                "sequence": sequence,
+                "step": next_action["action"],
+                "lane": queue,
+                "owner_role": owner_role,
+                "actor_role": payload.role,
+                "status": next_action["status"],
+                "summary": next_action["summary"],
+                "endpoint": next_action["endpoint"],
+                "requires_approval": next_action["requires_approval"],
+                "external_mutation": next_action["external_mutation"],
+                "repair_action_id": next_action.get("repair_action_id"),
+                "evidence": next_action["evidence"],
+            }
+        )
+        sequence += 1
+
+        close_status = "available" if repair is not None and repair.status == "executed" else "waiting_for_repair"
+        steps.append(
+            {
+                "sequence": sequence,
+                "step": "close_or_acknowledge_exception",
+                "lane": queue,
+                "owner_role": owner_role,
+                "actor_role": payload.role,
+                "status": close_status,
+                "summary": f"Record the operator decision for {business_exception.exception_type}.",
+                "endpoint": f"POST /tenants/{tenant_id}/business-exceptions/{business_exception.id}/status",
+                "requires_approval": False,
+                "external_mutation": False,
+                "evidence": "business_exception.status_changed",
+            }
+        )
+        sequence += 1
+
+        if repair is not None:
+            approval_gates.append(
+                {
+                    "name": "repair_action_approval",
+                    "repair_action_id": repair.id,
+                    "status": "satisfied" if repair.status in {"approved", "executed"} else "required",
+                    "requires_approval": repair.requires_approval,
+                    "external_mutation": False,
+                    "evidence": "repair_action.approved" if repair.status in {"approved", "executed"} else "repair_action.proposed",
+                }
+            )
+            automation_candidates.append(
+                {
+                    "name": "queue_repair_execution",
+                    "status": "ready" if repair.status == "approved" else repair.status,
+                    "action": next_action["action"],
+                    "adapter_key": "internal.noop",
+                    "endpoint": next_action["endpoint"],
+                    "external_mutation": False,
+                    "evidence": next_action["evidence"],
+                }
+            )
+        else:
+            approval_gates.append(
+                {
+                    "name": "repair_action_approval",
+                    "business_exception_id": business_exception.id,
+                    "status": "missing_repair_action",
+                    "requires_approval": True,
+                    "external_mutation": False,
+                    "evidence": "business_exception.created",
+                }
+            )
+
+        if any(_observation_family(item.system_key) == "accounting" for item in observations):
+            automation_candidates.append(
+                {
+                    "name": "recheck_accounting_export",
+                    "status": "available",
+                    "action": "run_read_only_connection_check",
+                    "adapter_key": "accounting.export.mock",
+                    "endpoint": "POST /tenants/{tenant_id}/integration-connections/{connection_id}/checks",
+                    "external_mutation": False,
+                    "evidence": "integration_connection.check.requested",
+                }
+            )
+
+        evidence.append(
+            {
+                "type": "business_exception",
+                "id": business_exception.id,
+                "severity": business_exception.severity,
+                "status": business_exception.status,
+                "event": "business_exception.created",
+            }
+        )
+        if repair is not None:
+            evidence.append(
+                {
+                    "type": "repair_action",
+                    "id": repair.id,
+                    "status": repair.status,
+                    "action": repair.action_type,
+                    "event": "repair_action.proposed",
+                }
+            )
+
+    lanes_list = sorted(
+        lanes.values(),
+        key=lambda item: (int(item["sla_minutes"]), str(item["lane"])),
+    )
+    risk_level = _briefing_risk_level(exceptions, repairs)
+    summary = (
+        f"{payload.plan_kind} plan for {payload.role}: {len(steps)} step(s), "
+        f"{len(lanes_list)} lane(s), {len(automation_candidates)} automation candidate(s)."
+    )
+    return {
+        "tenant_id": tenant_id,
+        "plan_kind": payload.plan_kind,
+        "role": payload.role,
+        "subject_type": payload.subject_type,
+        "subject_id": payload.subject_id,
+        "generated_at": datetime.now(UTC),
+        "risk_level": risk_level,
+        "summary": summary,
+        "lanes": lanes_list,
+        "steps": steps,
+        "automation_candidates": automation_candidates,
+        "approval_gates": approval_gates,
+        "review_points": [
+            {
+                "name": "single_work_surface",
+                "status": "ready" if steps else "empty",
+                "detail": "The plan turns cross-system state into ordered operator work inside DriveDesk.",
+            },
+            {
+                "name": "approval_boundary",
+                "status": "satisfied" if approval_gates and all(item["status"] == "satisfied" for item in approval_gates) else "review_required",
+                "detail": "External-facing repair execution stays behind existing repair approval evidence.",
+            },
+            {
+                "name": "automation_boundary",
+                "status": "preview_only",
+                "detail": "Action plan preview does not create tasks, notify users, or mutate external systems.",
+            },
+        ],
+        "evidence": evidence,
+        "api": {
+            "preview": "POST /tenants/{tenant_id}/business-action-plans/preview",
+            "detections": "POST /tenants/{tenant_id}/business-detections/preview",
+            "escalations": "POST /tenants/{tenant_id}/business-escalations/preview",
+            "briefings": "POST /tenants/{tenant_id}/business-briefings/preview",
+            "execute_repair": "POST /tenants/{tenant_id}/repair-actions/{repair_action_id}/execute",
+        },
+    }
 
 
 async def preview_business_escalations(

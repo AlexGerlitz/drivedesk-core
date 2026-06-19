@@ -45,6 +45,10 @@
     return "POST /tenants/{tenant_id}/business-escalations/preview";
   }
 
+  function businessActionPlanPreviewEndpoint() {
+    return "POST /tenants/{tenant_id}/business-action-plans/preview";
+  }
+
   function isValidDemoPayload(payload) {
     return Boolean(
       payload &&
@@ -85,6 +89,11 @@
         Array.isArray(payload.businessControlTower.escalation.queues) &&
         Array.isArray(payload.businessControlTower.escalation.items) &&
         Array.isArray(payload.businessControlTower.escalation.suggestedActions) &&
+        payload.businessControlTower.actionPlan &&
+        Array.isArray(payload.businessControlTower.actionPlan.lanes) &&
+        Array.isArray(payload.businessControlTower.actionPlan.steps) &&
+        Array.isArray(payload.businessControlTower.actionPlan.automationCandidates) &&
+        Array.isArray(payload.businessControlTower.actionPlan.approvalGates) &&
         payload.businessControlTower.briefing &&
         Array.isArray(payload.businessControlTower.briefing.highlights) &&
         Array.isArray(payload.businessControlTower.briefing.recommendedActions) &&
@@ -1071,6 +1080,133 @@
       escalationActionRows.appendChild(row);
     });
 
+    var actionPlan = controlTower.actionPlan;
+    var actionPlanRows = document.getElementById("controlTowerActionPlanRows");
+    clear(actionPlanRows);
+
+    var actionPlanSummary = document.createElement("article");
+    actionPlanSummary.className = "event-row";
+    var actionPlanTop = document.createElement("div");
+    actionPlanTop.className = "event-top";
+    var actionPlanTitle = document.createElement("strong");
+    actionPlanTitle.appendChild(text(actionPlan.planKind + " plan"));
+    actionPlanTop.append(actionPlanTitle, chip(actionPlan.riskLevel, statusTone(actionPlan.riskLevel)));
+
+    var actionPlanDetail = document.createElement("span");
+    actionPlanDetail.className = "muted";
+    actionPlanDetail.appendChild(text(actionPlan.summary));
+
+    var actionPlanApi = document.createElement("code");
+    actionPlanApi.appendChild(
+      text((actionPlan.api && actionPlan.api.preview) || businessActionPlanPreviewEndpoint())
+    );
+
+    actionPlanSummary.append(actionPlanTop, actionPlanDetail, actionPlanApi);
+    actionPlanRows.appendChild(actionPlanSummary);
+
+    actionPlan.lanes.forEach(function (lane) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(lane.lane));
+      top.append(title, chip(lane.status, statusTone(lane.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          lane.ownerRole +
+            " - " +
+            String(lane.workItems) +
+            " work item(s) - SLA " +
+            String(lane.slaMinutes) +
+            "m"
+        )
+      );
+
+      row.append(top, detail);
+      actionPlanRows.appendChild(row);
+    });
+
+    actionPlan.steps.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(String(item.sequence) + ". " + item.step));
+      top.append(title, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          item.ownerRole +
+            " - " +
+            item.lane +
+            " - approval " +
+            String(item.requiresApproval) +
+            " - external mutation " +
+            String(item.externalMutation)
+        )
+      );
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(item.evidence));
+
+      row.append(top, detail, evidence);
+      actionPlanRows.appendChild(row);
+    });
+
+    var actionPlanAutomationRows = document.getElementById("controlTowerActionPlanAutomationRows");
+    clear(actionPlanAutomationRows);
+    actionPlan.automationCandidates.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var name = document.createElement("strong");
+      name.appendChild(text(item.name));
+      top.append(name, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.action + " - " + item.adapterKey));
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(item.evidence));
+
+      row.append(top, detail, evidence);
+      actionPlanAutomationRows.appendChild(row);
+    });
+    actionPlan.approvalGates.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var name = document.createElement("strong");
+      name.appendChild(text(item.name));
+      top.append(name, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text("approval " + String(item.requiresApproval) + " - external mutation " + String(item.externalMutation))
+      );
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(item.evidence));
+
+      row.append(top, detail, evidence);
+      actionPlanAutomationRows.appendChild(row);
+    });
+
     var briefing = controlTower.briefing;
     var briefingRows = document.getElementById("controlTowerBriefingRows");
     clear(briefingRows);
@@ -1240,11 +1376,11 @@
 
   function statusTone(status) {
     if (
-      ["done", "ready", "online", "validated", "processed", "green", "active", "success", "observed", "matched", "resolved", "passed", "routed", "approved", "executed", "paid", "available", "detected"].indexOf(status) >= 0
+      ["done", "ready", "online", "validated", "processed", "green", "active", "success", "observed", "matched", "resolved", "passed", "routed", "approved", "executed", "paid", "available", "detected", "satisfied"].indexOf(status) >= 0
     ) {
       return "green";
     }
-    if (["blocked", "waiting", "pending", "retry", "partial_success", "current", "open", "acknowledged", "warning", "attention", "review_required", "mitigating", "fired", "proposed", "suggested", "invoice_sent", "not_exported"].indexOf(status) >= 0) {
+    if (["blocked", "waiting", "pending", "retry", "partial_success", "current", "open", "acknowledged", "warning", "attention", "review_required", "mitigating", "fired", "proposed", "suggested", "invoice_sent", "not_exported", "waiting_for_repair"].indexOf(status) >= 0) {
       return "amber";
     }
     if (["high", "dead_letter", "critical"].indexOf(status) >= 0) {

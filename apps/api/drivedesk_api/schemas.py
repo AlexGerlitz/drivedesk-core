@@ -20,6 +20,7 @@ BusinessBriefingRole = Literal["operator", "accountant", "manager", "owner", "su
 BusinessBriefingRiskLevel = Literal["normal", "attention", "critical"]
 BusinessDetectionRuleSet = Literal["payment_reconciliation"]
 BusinessEscalationPolicy = Literal["exception_triage"]
+BusinessActionPlanKind = Literal["exception_resolution"]
 
 
 class AdapterContractRead(BaseModel):
@@ -537,6 +538,33 @@ class BusinessEscalationPreviewRead(BaseModel):
     queues: list[dict[str, Any]] = Field(default_factory=list)
     escalation_items: list[dict[str, Any]] = Field(default_factory=list)
     suggested_actions: list[dict[str, Any]] = Field(default_factory=list)
+    review_points: list[dict[str, Any]] = Field(default_factory=list)
+    evidence: list[dict[str, Any]] = Field(default_factory=list)
+    api: dict[str, str] = Field(default_factory=dict)
+
+
+class BusinessActionPlanPreviewCreate(BaseModel):
+    plan_kind: BusinessActionPlanKind = "exception_resolution"
+    role: BusinessBriefingRole = "operator"
+    subject_type: str | None = Field(default=None, min_length=2, max_length=64, pattern=r"^[a-z0-9][a-z0-9_-]*$")
+    subject_id: str | None = Field(default=None, min_length=1, max_length=128)
+    include_resolved: bool = False
+    limit: int = Field(default=20, ge=1, le=50)
+
+
+class BusinessActionPlanPreviewRead(BaseModel):
+    tenant_id: str
+    plan_kind: BusinessActionPlanKind
+    role: BusinessBriefingRole
+    subject_type: str | None = None
+    subject_id: str | None = None
+    generated_at: datetime
+    risk_level: BusinessBriefingRiskLevel
+    summary: str
+    lanes: list[dict[str, Any]] = Field(default_factory=list)
+    steps: list[dict[str, Any]] = Field(default_factory=list)
+    automation_candidates: list[dict[str, Any]] = Field(default_factory=list)
+    approval_gates: list[dict[str, Any]] = Field(default_factory=list)
     review_points: list[dict[str, Any]] = Field(default_factory=list)
     evidence: list[dict[str, Any]] = Field(default_factory=list)
     api: dict[str, str] = Field(default_factory=dict)

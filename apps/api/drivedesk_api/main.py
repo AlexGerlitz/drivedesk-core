@@ -68,6 +68,8 @@ from drivedesk_api.schemas import (
     AccountingExportCreate,
     AdapterContractRead,
     AuditEventRead,
+    BusinessActionPlanPreviewCreate,
+    BusinessActionPlanPreviewRead,
     AuthMeRead,
     AuthSessionRead,
     BusinessBriefingPreviewCreate,
@@ -167,6 +169,7 @@ from drivedesk_api.services import (
     list_repair_actions,
     list_workflow_action_runs,
     list_workflow_rules,
+    preview_business_action_plan,
     preview_business_detections,
     preview_business_escalations,
     preview_integration_mapping,
@@ -987,6 +990,21 @@ def build_app(settings: Settings | None = None) -> FastAPI:
         await ensure_tenant_exists(session, tenant_id)
         require_tenant_permission(actor, tenant_id, Permission.BUSINESS_RECORD_READ)
         return await preview_business_escalations(session, tenant_id=tenant_id, payload=payload)
+
+    @api.post(
+        "/tenants/{tenant_id}/business-action-plans/preview",
+        response_model=BusinessActionPlanPreviewRead,
+        tags=["business-control"],
+    )
+    async def preview_business_action_plan_endpoint(
+        tenant_id: str,
+        payload: BusinessActionPlanPreviewCreate,
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> dict[str, object]:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.BUSINESS_RECORD_READ)
+        return await preview_business_action_plan(session, tenant_id=tenant_id, payload=payload)
 
     @api.post(
         "/tenants/{tenant_id}/business-briefings/preview",

@@ -52,6 +52,7 @@ adr_path = root / "docs/adr/0064-business-operations-control-tower.md"
 briefing_adr_path = root / "docs/adr/0065-business-role-briefings.md"
 detection_adr_path = root / "docs/adr/0066-business-detection-preview.md"
 escalation_adr_path = root / "docs/adr/0067-business-escalation-preview.md"
+action_plan_adr_path = root / "docs/adr/0068-business-action-plan-preview.md"
 demo_data_path = root / "apps/admin/public-demo/demo-data.js"
 demo_html_path = root / "apps/admin/public-demo/index.html"
 demo_app_path = root / "apps/admin/public-demo/app.js"
@@ -66,6 +67,7 @@ for path in [
     briefing_adr_path,
     detection_adr_path,
     escalation_adr_path,
+    action_plan_adr_path,
     demo_data_path,
     demo_html_path,
     demo_app_path,
@@ -131,6 +133,36 @@ require(
     escalation.get("api", {}).get("preview") == "POST /tenants/{tenant_id}/business-escalations/preview",
     "businessControlTower escalation preview endpoint missing",
 )
+action_plan = control.get("actionPlan", {})
+require(action_plan.get("planKind") == "exception_resolution", "businessControlTower action plan kind mismatch")
+require(action_plan.get("role") == "accountant", "businessControlTower action plan role mismatch")
+require(action_plan.get("riskLevel") == "attention", "businessControlTower action plan risk mismatch")
+require(
+    {item.get("lane") for item in action_plan.get("lanes", [])} == {"finance_reconciliation"},
+    "businessControlTower action plan lane mismatch",
+)
+require(
+    [item.get("step") for item in action_plan.get("steps", [])]
+    == ["verify_source_evidence", "execute_repair_dry_run", "close_or_acknowledge_exception"],
+    "businessControlTower action plan steps mismatch",
+)
+require(
+    {item.get("externalMutation") for item in action_plan.get("steps", [])} == {False},
+    "businessControlTower action plan steps must be public-safe",
+)
+require(
+    {item.get("name") for item in action_plan.get("automationCandidates", [])}
+    >= {"queue_repair_execution", "recheck_accounting_export"},
+    "businessControlTower action plan automation candidates missing",
+)
+require(
+    {item.get("status") for item in action_plan.get("approvalGates", [])} == {"satisfied"},
+    "businessControlTower action plan approval gates mismatch",
+)
+require(
+    action_plan.get("api", {}).get("preview") == "POST /tenants/{tenant_id}/business-action-plans/preview",
+    "businessControlTower action plan preview endpoint missing",
+)
 briefing = control.get("briefing", {})
 require(briefing.get("role") == "accountant", "businessControlTower briefing role mismatch")
 require(briefing.get("riskLevel") == "attention", "businessControlTower briefing risk mismatch")
@@ -190,6 +222,7 @@ paths = set(openapi.get("paths", {}))
 required_paths = {
     "/tenants/{tenant_id}/business-detections/preview",
     "/tenants/{tenant_id}/business-escalations/preview",
+    "/tenants/{tenant_id}/business-action-plans/preview",
     "/tenants/{tenant_id}/business-briefings/preview",
     "/tenants/{tenant_id}/business-state/observations",
     "/tenants/{tenant_id}/business-exceptions",
@@ -206,8 +239,10 @@ for needle in [
     "Business Operations Control Tower",
     "POST /tenants/{tenant_id}/business-detections/preview",
     "POST /tenants/{tenant_id}/business-escalations/preview",
+    "POST /tenants/{tenant_id}/business-action-plans/preview",
     "POST /tenants/{tenant_id}/business-briefings/preview",
     "BusinessEscalationPreview",
+    "BusinessActionPlanPreview",
     "POST /tenants/{tenant_id}/business-state/observations",
     "BusinessBriefing",
     "BusinessStateObservation",
@@ -225,6 +260,8 @@ for needle in [
     'id="controlTowerDetectionRepairRows"',
     'id="controlTowerEscalationRows"',
     'id="controlTowerEscalationActionRows"',
+    'id="controlTowerActionPlanRows"',
+    'id="controlTowerActionPlanAutomationRows"',
     'id="controlTowerBriefingRows"',
     'id="controlTowerBriefingActionRows"',
     'id="controlTowerObservationRows"',
@@ -240,6 +277,8 @@ for needle in [
     "business-detections/preview",
     "controlTowerEscalationRows",
     "business-escalations/preview",
+    "controlTowerActionPlanRows",
+    "business-action-plans/preview",
     "controlTowerBriefingRows",
     "fillBusinessControlTower",
     "controlTowerSummaryRows",
@@ -267,6 +306,10 @@ else:
     require(
         'copy_path "docs/adr/0067-business-escalation-preview.md"' in read(export_script_path),
         "export script missing ADR 0067",
+    )
+    require(
+        'copy_path "docs/adr/0068-business-action-plan-preview.md"' in read(export_script_path),
+        "export script missing ADR 0068",
     )
     require(
         'copy_path "scripts/check_public_business_control_tower.sh"' in read(export_script_path),

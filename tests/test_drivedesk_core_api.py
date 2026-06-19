@@ -801,6 +801,72 @@ def test_business_control_tower_exception_and_repair_flow(
     assert {item["type"] for item in escalation["evidence"]} >= {"business_exception", "repair_action"}
     assert escalation["api"]["preview"] == "POST /tenants/{tenant_id}/business-escalations/preview"
 
+    action_plan_response = client.post(
+        f"/tenants/{tenant_id}/business-action-plans/preview",
+        json={
+            "plan_kind": "exception_resolution",
+            "role": "accountant",
+            "subject_type": "deal",
+            "subject_id": "DEAL-2026-001",
+        },
+        headers=owner_headers,
+    )
+    assert action_plan_response.status_code == 200
+    action_plan = action_plan_response.json()
+    assert action_plan["plan_kind"] == "exception_resolution"
+    assert action_plan["role"] == "accountant"
+    assert action_plan["risk_level"] == "attention"
+    assert "3 step" in action_plan["summary"]
+    assert action_plan["lanes"] == [
+        {
+            "lane": "finance_reconciliation",
+            "owner_role": "accountant",
+            "sla_minutes": 120,
+            "work_items": 1,
+            "status": "active",
+        }
+    ]
+    assert [item["step"] for item in action_plan["steps"]] == [
+        "verify_source_evidence",
+        "execute_repair_dry_run",
+        "close_or_acknowledge_exception",
+    ]
+    assert action_plan["steps"][0]["source_systems"] == [
+        "accounting.export.mock",
+        "bank.statement.mock",
+        "crm.bitrix24.mock",
+    ]
+    assert action_plan["steps"][1]["endpoint"] == (
+        f"POST /tenants/{tenant_id}/repair-actions/{repair_action['id']}/execute"
+    )
+    assert action_plan["steps"][1]["external_mutation"] is False
+    assert action_plan["steps"][2]["status"] == "waiting_for_repair"
+    assert {item["name"] for item in action_plan["automation_candidates"]} >= {
+        "queue_repair_execution",
+        "recheck_accounting_export",
+    }
+    assert action_plan["approval_gates"] == [
+        {
+            "name": "repair_action_approval",
+            "repair_action_id": repair_action["id"],
+            "status": "satisfied",
+            "requires_approval": True,
+            "external_mutation": False,
+            "evidence": "repair_action.approved",
+        }
+    ]
+    assert {item["name"] for item in action_plan["review_points"]} == {
+        "single_work_surface",
+        "approval_boundary",
+        "automation_boundary",
+    }
+    assert {item["type"] for item in action_plan["evidence"]} >= {
+        "observation",
+        "business_exception",
+        "repair_action",
+    }
+    assert action_plan["api"]["preview"] == "POST /tenants/{tenant_id}/business-action-plans/preview"
+
     briefing_response = client.post(
         f"/tenants/{tenant_id}/business-briefings/preview",
         json={

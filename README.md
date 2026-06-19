@@ -219,6 +219,8 @@ incident queue, mitigation, recovery, and resolution evidence path.
   notifications.
 - `GET /demo/business-notification-channels` - standalone public-safe
   notification matrix for in-app, Telegram, email, SMS, and webhook readiness.
+- `GET /demo/business-context-assistant` - standalone public-safe Business
+  Context Assistant contract for `businessContextAssistant`.
 - `GET /integration-adapters` - runtime adapter catalog endpoint.
 - `POST /tenants/{tenant_id}/integration-mapping-preview` - read-only mapping transform preview.
 - `file_import:preview` and `file_import:execute` - public-safe connection scope examples.
@@ -304,6 +306,7 @@ curl http://localhost:8080/demo/connector-fixture-replay
 curl http://localhost:8080/demo/business-intake-pipeline
 curl http://localhost:8080/demo/business-task-handoff
 curl http://localhost:8080/demo/business-notification-channels
+curl http://localhost:8080/demo/business-context-assistant
 curl http://localhost:8080/demo/business-scenario-replay
 ```
 
@@ -314,6 +317,7 @@ bash scripts/check_public_demo_api.sh
 bash scripts/check_public_demo_sdk.sh
 bash scripts/check_public_business_task_handoff.sh
 bash scripts/check_public_business_notification_channels.sh
+bash scripts/check_public_business_context_assistant.sh
 bash scripts/check_public_backup_restore.sh
 bash scripts/check_public_release_rollback.sh
 bash scripts/check_public_slo_canary_gate.sh

@@ -43,6 +43,9 @@ infrastructure, production history, customer data, or operational credentials.
 - `BUSINESS_NOTIFICATION_CHANNELS.md` - preview-only notification channel
   matrix for in-app, Telegram, email, SMS, and webhook readiness via the
   `businessNotificationChannels` contract.
+- `BUSINESS_CONTEXT_ASSISTANT.md` - preview-only Business Context Assistant
+  for CRM, bank, accounting, and legal-reference facts via the
+  `businessContextAssistant` contract.
 - `BUSINESS_SCENARIO_REPLAY.md` - reusable Business OS replay paths for
   CRM/bank/accounting mismatch, support SLA risk, and procurement delay risk via
   the `businessScenarioReplay` contract.
@@ -167,6 +170,9 @@ The public repository export also generates:
   contract for `businessTaskHandoff`.
 - `GET /demo/business-notification-channels` - standalone public-safe channel
   readiness contract for `businessNotificationChannels`.
+- `GET /demo/business-context-assistant` - standalone public-safe context
+  assistant contract for `businessContextAssistant`, backed by
+  `POST /tenants/{tenant_id}/business-workbench-context/preview`.
 - `incidentResponse` - public-safe incident response contract in the demo
   payload and Incidents tab.
 - `businessControlTower` - public-safe control tower contract for CRM, bank,
@@ -216,6 +222,9 @@ The public repository export also generates:
   handoff contract validation.
 - `scripts/check_public_business_notification_channels.sh` - public-safe
   notification channel matrix validation.
+- `scripts/check_public_business_context_assistant.sh` - public-safe Business
+  Context Assistant validation for `GET /demo/business-context-assistant` and
+  `businessContextAssistant`.
 - `scripts/check_public_backup_restore.sh` - public-safe synthetic recovery drill.
 - `scripts/check_public_release_rollback.sh` - public-safe release rollback drill.
 - `scripts/check_public_slo_canary_gate.sh` - public-safe SLO canary gate drill.

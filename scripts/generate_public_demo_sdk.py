@@ -17,6 +17,8 @@ BUSINESS_TASK_HANDOFF_PATH = "/demo/business-task-handoff"
 BUSINESS_TASK_HANDOFF_METHOD = "get"
 BUSINESS_NOTIFICATION_CHANNELS_PATH = "/demo/business-notification-channels"
 BUSINESS_NOTIFICATION_CHANNELS_METHOD = "get"
+BUSINESS_CONTEXT_ASSISTANT_PATH = "/demo/business-context-assistant"
+BUSINESS_CONTEXT_ASSISTANT_METHOD = "get"
 BUSINESS_SCENARIO_REPLAY_PATH = "/demo/business-scenario-replay"
 BUSINESS_SCENARIO_REPLAY_METHOD = "get"
 
@@ -62,6 +64,14 @@ def business_notification_channels_operation(schema: dict[str, Any]) -> dict[str
         schema,
         BUSINESS_NOTIFICATION_CHANNELS_PATH,
         BUSINESS_NOTIFICATION_CHANNELS_METHOD,
+    )
+
+
+def business_context_assistant_operation(schema: dict[str, Any]) -> dict[str, Any]:
+    return required_operation(
+        schema,
+        BUSINESS_CONTEXT_ASSISTANT_PATH,
+        BUSINESS_CONTEXT_ASSISTANT_METHOD,
     )
 
 
@@ -122,6 +132,16 @@ def business_notification_channels_required_fields(schema: dict[str, Any]) -> li
         raise SystemExit(
             "OpenAPI schema does not contain BusinessNotificationChannelMatrixDemoRead.required"
         )
+    return [str(item) for item in required]
+
+
+def business_context_assistant_required_fields(schema: dict[str, Any]) -> list[str]:
+    components = schema.get("components", {})
+    schemas = components.get("schemas", {})
+    assistant = schemas.get("BusinessContextAssistantDemoRead", {})
+    required = assistant.get("required", [])
+    if not isinstance(required, list) or not required:
+        raise SystemExit("OpenAPI schema does not contain BusinessContextAssistantDemoRead.required")
     return [str(item) for item in required]
 
 
@@ -1461,6 +1481,7 @@ def render_readme(
     operation_id: str,
     connector_operation_id: str,
     business_notification_channels_operation_id: str,
+    business_context_assistant_operation_id: str,
     business_scenario_operation_id: str,
 ) -> str:
     return f'''# Generated Public Demo SDK
@@ -1489,6 +1510,9 @@ operationId: {connector_operation_id}
 GET {BUSINESS_NOTIFICATION_CHANNELS_PATH}
 operationId: {business_notification_channels_operation_id}
 
+GET {BUSINESS_CONTEXT_ASSISTANT_PATH}
+operationId: {business_context_assistant_operation_id}
+
 GET {BUSINESS_SCENARIO_REPLAY_PATH}
 operationId: {business_scenario_operation_id}
 ```
@@ -1509,6 +1533,8 @@ Adapter operation helpers:
 - `DriveDeskPublicDemoClient.get_connector_fixture_replay`
 - `business_notification_channels` manifest entry for
   `GET {BUSINESS_NOTIFICATION_CHANNELS_PATH}`
+- `business_context_assistant` manifest entry for
+  `GET {BUSINESS_CONTEXT_ASSISTANT_PATH}`
 - `DriveDeskPublicDemoClient.getBusinessScenarioReplay`
 - `DriveDeskPublicDemoClient.get_business_scenario_replay`
 
@@ -1528,6 +1554,10 @@ Business notification channel metadata validates the public-safe channel matrix:
 in-app readiness, draft-only external channels, private secret gates, and no
 external delivery.
 
+Business Context Assistant metadata validates the public-safe context surface:
+CRM, bank, accounting, and legal-reference facts become safe context cards,
+insight rules, and next actions through `businessContextAssistant`.
+
 Engineering summary: this is the public-safe integration proof. DriveDesk
 publishes an OpenAPI contract and generates a small SDK from it instead of
 relying on hand-written request examples only.
@@ -1545,6 +1575,8 @@ def render_manifest(
     business_task_handoff_required_fields: list[str],
     business_notification_channels_operation_id: str,
     business_notification_channels_required_fields: list[str],
+    business_context_assistant_operation_id: str,
+    business_context_assistant_required_fields: list[str],
     business_scenario_operation_id: str,
     business_scenario_required_fields: list[str],
 ) -> str:
@@ -1577,6 +1609,12 @@ def render_manifest(
             "method": BUSINESS_NOTIFICATION_CHANNELS_METHOD.upper(),
             "operation_id": business_notification_channels_operation_id,
             "required_fields": business_notification_channels_required_fields,
+        },
+        "business_context_assistant": {
+            "path": BUSINESS_CONTEXT_ASSISTANT_PATH,
+            "method": BUSINESS_CONTEXT_ASSISTANT_METHOD.upper(),
+            "operation_id": business_context_assistant_operation_id,
+            "required_fields": business_context_assistant_required_fields,
         },
         "business_scenario_replay": {
             "path": BUSINESS_SCENARIO_REPLAY_PATH,
@@ -1633,6 +1671,12 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
         or "get_business_notification_channels"
     )
     business_notification_channels_fields = business_notification_channels_required_fields(schema)
+    business_context_assistant_op = business_context_assistant_operation(schema)
+    business_context_assistant_operation_id = str(
+        business_context_assistant_op.get("operationId")
+        or "get_business_context_assistant"
+    )
+    business_context_assistant_fields = business_context_assistant_required_fields(schema)
     business_scenario_operation = business_scenario_replay_operation(schema)
     business_scenario_operation_id = str(
         business_scenario_operation.get("operationId") or "get_business_scenario_replay"
@@ -1645,6 +1689,7 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
             operation_id,
             connector_operation_id,
             business_notification_channels_operation_id,
+            business_context_assistant_operation_id,
             business_scenario_operation_id,
         ),
     )
@@ -1661,6 +1706,8 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
             business_task_handoff_fields,
             business_notification_channels_operation_id,
             business_notification_channels_fields,
+            business_context_assistant_operation_id,
+            business_context_assistant_fields,
             business_scenario_operation_id,
             business_scenario_required_fields,
         ),

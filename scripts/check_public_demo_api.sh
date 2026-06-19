@@ -113,6 +113,9 @@ business_task_handoff_endpoint, business_task_handoff_headers = get_json("/demo/
 business_notification_channels_endpoint, business_notification_channels_headers = get_json(
     "/demo/business-notification-channels"
 )
+business_context_assistant_endpoint, business_context_assistant_headers = get_json(
+    "/demo/business-context-assistant"
+)
 business_scenario_endpoint, business_scenario_headers = get_json("/demo/business-scenario-replay")
 adapters, _ = get_json("/integration-adapters")
 runbooks, _ = get_json("/integration-runbooks")
@@ -850,6 +853,78 @@ assert {item["path"] for item in business_notification_channels["docs"]} >= {
     "docs/public/BUSINESS_TASK_HANDOFF.md",
     "docs/public/API_BACKED_DEMO.md",
 }, demo
+business_context_assistant = demo["businessContextAssistant"]
+assert business_context_assistant_endpoint == business_context_assistant, business_context_assistant_endpoint
+assert (
+    business_context_assistant_headers["access-control-allow-origin"] == "*"
+), business_context_assistant_headers
+assert (
+    business_context_assistant_headers["cache-control"] == "public, max-age=60"
+), business_context_assistant_headers
+assert business_context_assistant["status"] == "previewed", demo
+assert (
+    business_context_assistant["command"]
+    == "POST /tenants/{tenant_id}/business-workbench-context/preview"
+), demo
+assert {item["label"] for item in business_context_assistant["summary"]} >= {
+    "Context cards",
+    "Source systems",
+    "Suggested actions",
+    "External writes",
+}, demo
+assert business_context_assistant["role"] == "accountant", demo
+assert business_context_assistant["subject"] == "deal:DEAL-2026-001", demo
+assert set(business_context_assistant["sourceSystems"]) == {
+    "crm.bitrix24.mock",
+    "bank.statement.mock",
+    "accounting.export.mock",
+    "legal.reference.mock",
+}, demo
+assert {item["systemFamily"] for item in business_context_assistant["contextCards"]} == {
+    "crm",
+    "bank",
+    "accounting",
+    "legal",
+}, demo
+assert {item["externalFetch"] for item in business_context_assistant["contextCards"]} == {False}, demo
+assert {item["externalMutation"] for item in business_context_assistant["contextCards"]} == {False}, demo
+assert {item["containsPii"] for item in business_context_assistant["contextCards"]} == {False}, demo
+assert {item["rawPayloadIncluded"] for item in business_context_assistant["contextCards"]} == {False}, demo
+assert {
+    item.get("fullTextIncluded", False)
+    for item in business_context_assistant["contextCards"]
+    if item["systemFamily"] == "legal"
+} == {False}, demo
+assert {item["rule"] for item in business_context_assistant["insightRules"]} == {
+    "correlate_payment_evidence",
+    "detect_accounting_export_gap",
+    "attach_policy_reference",
+}, demo
+assert {item["externalMutation"] for item in business_context_assistant["insightRules"]} == {False}, demo
+assert {item["action"] for item in business_context_assistant["suggestedActions"]} == {
+    "open_reconciliation_plan",
+    "queue_accounting_export_after_review",
+    "attach_policy_reference",
+    "prepare_internal_notification",
+}, demo
+assert {item["externalMutation"] for item in business_context_assistant["suggestedActions"]} == {
+    False
+}, demo
+assert {item["name"] for item in business_context_assistant["dataBoundaries"]} == {
+    "read_only_context_preview",
+    "no_raw_provider_payload",
+    "secret_boundary",
+    "legal_reference_link_only",
+}, demo
+assert business_context_assistant["api"]["standalone"] == "GET /demo/business-context-assistant", demo
+assert business_context_assistant["api"]["preview"] == (
+    "POST /tenants/{tenant_id}/business-workbench-context/preview"
+), demo
+assert {item["path"] for item in business_context_assistant["docs"]} >= {
+    "docs/public/BUSINESS_CONTEXT_ASSISTANT.md",
+    "docs/public/BUSINESS_CONTROL_TOWER.md",
+    "docs/public/PROVIDER_CONNECTOR_GUIDE.md",
+}, demo
 business_scenario_replay = demo["businessScenarioReplay"]
 assert business_scenario_endpoint == business_scenario_replay, business_scenario_endpoint
 assert business_scenario_headers["access-control-allow-origin"] == "*", business_scenario_headers
@@ -1023,6 +1098,7 @@ assert "/demo/connector-fixture-replay" in openapi["paths"], openapi["paths"].ke
 assert "/demo/business-intake-pipeline" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/business-task-handoff" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/business-notification-channels" in openapi["paths"], openapi["paths"].keys()
+assert "/demo/business-context-assistant" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/business-scenario-replay" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/business-intake-pipeline/preview" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/business-task-handoffs/preview" in openapi["paths"], openapi["paths"].keys()
@@ -1038,6 +1114,7 @@ if openapi_file.exists():
     assert "/demo/business-intake-pipeline" in generated["paths"], generated["paths"].keys()
     assert "/demo/business-task-handoff" in generated["paths"], generated["paths"].keys()
     assert "/demo/business-notification-channels" in generated["paths"], generated["paths"].keys()
+    assert "/demo/business-context-assistant" in generated["paths"], generated["paths"].keys()
     assert "/demo/business-scenario-replay" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-intake-pipeline/preview" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-task-handoffs/preview" in generated["paths"], generated["paths"].keys()

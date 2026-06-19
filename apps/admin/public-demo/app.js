@@ -168,6 +168,13 @@
         Array.isArray(payload.businessNotificationChannels.deliveryDrafts) &&
         Array.isArray(payload.businessNotificationChannels.approvalGates) &&
         Array.isArray(payload.businessNotificationChannels.dataBoundaries) &&
+        payload.businessContextAssistant &&
+        Array.isArray(payload.businessContextAssistant.summary) &&
+        Array.isArray(payload.businessContextAssistant.sourceSystems) &&
+        Array.isArray(payload.businessContextAssistant.contextCards) &&
+        Array.isArray(payload.businessContextAssistant.insightRules) &&
+        Array.isArray(payload.businessContextAssistant.suggestedActions) &&
+        Array.isArray(payload.businessContextAssistant.dataBoundaries) &&
         payload.businessScenarioReplay &&
         Array.isArray(payload.businessScenarioReplay.summary) &&
         Array.isArray(payload.businessScenarioReplay.scenarios) &&
@@ -1578,6 +1585,150 @@
     });
   }
 
+  function fillBusinessContextAssistant() {
+    var assistant = data.businessContextAssistant;
+
+    var summaryRows = document.getElementById("businessContextSummaryRows");
+    clear(summaryRows);
+    assistant.summary.forEach(function (item) {
+      var card = document.createElement("article");
+      card.className = "metric-card";
+      card.dataset.tone = item.tone || "blue";
+
+      var label = document.createElement("span");
+      label.className = "muted";
+      label.appendChild(text(item.label));
+
+      var value = document.createElement("strong");
+      value.appendChild(text(item.value));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      card.append(label, value, detail);
+      summaryRows.appendChild(card);
+    });
+
+    var cardRows = document.getElementById("businessContextCardRows");
+    clear(cardRows);
+    assistant.contextCards.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(item.title));
+      top.append(title, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          item.sourceSystem +
+            " - " +
+            item.safeFact +
+            " - PII " +
+            String(item.containsPii) +
+            " - external mutation " +
+            String(item.externalMutation)
+        )
+      );
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(item.evidence));
+
+      row.append(top, detail, evidence);
+      cardRows.appendChild(row);
+    });
+
+    var ruleRows = document.getElementById("businessContextRuleRows");
+    clear(ruleRows);
+    assistant.insightRules.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var rule = document.createElement("strong");
+      rule.appendChild(text(item.rule));
+      top.append(rule, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text((item.sources || []).join(", ") + " - " + item.result));
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(item.evidence));
+
+      row.append(top, detail, evidence);
+      ruleRows.appendChild(row);
+    });
+
+    var actionRows = document.getElementById("businessContextActionRows");
+    clear(actionRows);
+    assistant.suggestedActions.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var action = document.createElement("strong");
+      action.appendChild(text(item.action));
+      top.append(action, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          item.mode +
+            " - approval " +
+            String(item.requiresApproval) +
+            " - external mutation " +
+            String(item.externalMutation)
+        )
+      );
+
+      var endpoint = document.createElement("code");
+      endpoint.appendChild(text(item.endpoint));
+
+      row.append(top, detail, endpoint);
+      actionRows.appendChild(row);
+    });
+
+    var boundaryRows = document.getElementById("businessContextBoundaryRows");
+    clear(boundaryRows);
+    assistant.dataBoundaries.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var name = document.createElement("strong");
+      name.appendChild(text(item.name));
+      top.append(name, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          "external fetch " +
+            String(Boolean(item.externalFetch)) +
+            " - external mutation " +
+            String(Boolean(item.externalMutation)) +
+            " - raw payload " +
+            String(Boolean(item.rawPayloadIncluded)) +
+            " - full text " +
+            String(Boolean(item.fullTextIncluded))
+        )
+      );
+
+      row.append(top, detail);
+      boundaryRows.appendChild(row);
+    });
+  }
+
   function fillBusinessScenarioReplay() {
     var replay = data.businessScenarioReplay;
 
@@ -2769,6 +2920,7 @@
     fillBusinessIntakePipeline();
     fillBusinessTaskHandoff();
     fillBusinessNotificationChannels();
+    fillBusinessContextAssistant();
     fillBusinessScenarioReplay();
     fillEngineeringProof();
   }

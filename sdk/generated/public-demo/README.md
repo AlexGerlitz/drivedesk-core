@@ -24,6 +24,9 @@ operationId: connector_fixture_replay_demo_demo_connector_fixture_replay_get
 GET /demo/business-notification-channels
 operationId: business_notification_channels_demo_demo_business_notification_channels_get
 
+GET /demo/business-context-assistant
+operationId: business_context_assistant_demo_demo_business_context_assistant_get
+
 GET /demo/business-scenario-replay
 operationId: business_scenario_replay_demo_demo_business_scenario_replay_get
 ```
@@ -44,6 +47,8 @@ Adapter operation helpers:
 - `DriveDeskPublicDemoClient.get_connector_fixture_replay`
 - `business_notification_channels` manifest entry for
   `GET /demo/business-notification-channels`
+- `business_context_assistant` manifest entry for
+  `GET /demo/business-context-assistant`
 - `DriveDeskPublicDemoClient.getBusinessScenarioReplay`
 - `DriveDeskPublicDemoClient.get_business_scenario_replay`
 
@@ -62,6 +67,10 @@ and replay docs.
 Business notification channel metadata validates the public-safe channel matrix:
 in-app readiness, draft-only external channels, private secret gates, and no
 external delivery.
+
+Business Context Assistant metadata validates the public-safe context surface:
+CRM, bank, accounting, and legal-reference facts become safe context cards,
+insight rules, and next actions through `businessContextAssistant`.
 
 Engineering summary: this is the public-safe integration proof. DriveDesk
 publishes an OpenAPI contract and generates a small SDK from it instead of

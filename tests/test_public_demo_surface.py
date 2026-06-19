@@ -73,6 +73,11 @@ def test_public_demo_html_links_static_assets() -> None:
     assert 'id="businessNotificationChannelRows"' in html
     assert 'id="businessNotificationDraftRows"' in html
     assert 'id="businessNotificationBoundaryRows"' in html
+    assert 'id="businessContextSummaryRows"' in html
+    assert 'id="businessContextCardRows"' in html
+    assert 'id="businessContextRuleRows"' in html
+    assert 'id="businessContextActionRows"' in html
+    assert 'id="businessContextBoundaryRows"' in html
     assert 'id="controlTowerObservationRows"' in html
     assert 'id="controlTowerExceptionRows"' in html
     assert 'id="controlTowerRepairRows"' in html
@@ -719,6 +724,71 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
         "docs/public/BUSINESS_TASK_HANDOFF.md",
         "docs/public/API_BACKED_DEMO.md",
     }
+    context_assistant = payload["businessContextAssistant"]
+    assert context_assistant["status"] == "previewed"
+    assert (
+        context_assistant["command"]
+        == "POST /tenants/{tenant_id}/business-workbench-context/preview"
+    )
+    assert {item["label"] for item in context_assistant["summary"]} >= {
+        "Context cards",
+        "Source systems",
+        "Suggested actions",
+        "External writes",
+    }
+    assert context_assistant["role"] == "accountant"
+    assert context_assistant["subject"] == "deal:DEAL-2026-001"
+    assert set(context_assistant["sourceSystems"]) == {
+        "crm.bitrix24.mock",
+        "bank.statement.mock",
+        "accounting.export.mock",
+        "legal.reference.mock",
+    }
+    assert {item["systemFamily"] for item in context_assistant["contextCards"]} == {
+        "crm",
+        "bank",
+        "accounting",
+        "legal",
+    }
+    assert {item["externalFetch"] for item in context_assistant["contextCards"]} == {False}
+    assert {item["externalMutation"] for item in context_assistant["contextCards"]} == {False}
+    assert {item["containsPii"] for item in context_assistant["contextCards"]} == {False}
+    assert {item["rawPayloadIncluded"] for item in context_assistant["contextCards"]} == {False}
+    assert {
+        item.get("fullTextIncluded", False)
+        for item in context_assistant["contextCards"]
+        if item["systemFamily"] == "legal"
+    } == {False}
+    assert {item["rule"] for item in context_assistant["insightRules"]} == {
+        "correlate_payment_evidence",
+        "detect_accounting_export_gap",
+        "attach_policy_reference",
+    }
+    assert {item["externalMutation"] for item in context_assistant["insightRules"]} == {False}
+    assert {item["action"] for item in context_assistant["suggestedActions"]} == {
+        "open_reconciliation_plan",
+        "queue_accounting_export_after_review",
+        "attach_policy_reference",
+        "prepare_internal_notification",
+    }
+    assert {item["externalMutation"] for item in context_assistant["suggestedActions"]} == {
+        False
+    }
+    assert {item["name"] for item in context_assistant["dataBoundaries"]} == {
+        "read_only_context_preview",
+        "no_raw_provider_payload",
+        "secret_boundary",
+        "legal_reference_link_only",
+    }
+    assert context_assistant["api"]["standalone"] == "GET /demo/business-context-assistant"
+    assert context_assistant["api"]["preview"] == (
+        "POST /tenants/{tenant_id}/business-workbench-context/preview"
+    )
+    assert {item["path"] for item in context_assistant["docs"]} >= {
+        "docs/public/BUSINESS_CONTEXT_ASSISTANT.md",
+        "docs/public/BUSINESS_CONTROL_TOWER.md",
+        "docs/public/PROVIDER_CONNECTOR_GUIDE.md",
+    }
     business_scenario_replay = payload["businessScenarioReplay"]
     assert business_scenario_replay["status"] == "validated"
     assert business_scenario_replay["command"] == "bash scripts/check_public_business_scenario_replay.sh"
@@ -885,9 +955,11 @@ def test_public_demo_can_load_api_backed_data_with_static_fallback() -> None:
     assert "fillAlertRouting" in script
     assert "fillIncidentResponse" in script
     assert "fillEngineeringProof" in script
+    assert "fillBusinessContextAssistant" in script
     assert "alertRouting" in script
     assert "incidentResponse" in script
     assert "engineeringProof" in script
+    assert "businessContextAssistant" in script
     assert "workflowScenarios" in script
     assert "endToEndScenario" in script
     assert "adapterScenarios" in script
@@ -907,6 +979,7 @@ def test_public_demo_api_scripts_and_examples_exist() -> None:
         "scripts/run_public_demo_local.sh",
         "scripts/check_public_demo_api.sh",
         "scripts/check_public_business_notification_channels.sh",
+        "scripts/check_public_business_context_assistant.sh",
         "scripts/check_public_business_scenario_replay.sh",
         "scripts/check_public_engineering_proof.sh",
         "scripts/check_public_demo_sdk.sh",
@@ -953,6 +1026,7 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
             "/demo/public",
             "/demo/connector-fixture-replay",
             "/demo/business-notification-channels",
+            "/demo/business-context-assistant",
             "/demo/business-scenario-replay",
             "/openapi.json",
             "student_sync",
@@ -1069,10 +1143,12 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
             "/demo/public",
             "/demo/connector-fixture-replay",
             "/demo/business-notification-channels",
+            "/demo/business-context-assistant",
             "/demo/business-scenario-replay",
             "operationId",
             "ConnectorFixtureReplayRead",
             "BusinessNotificationChannelMatrixDemoRead",
+            "BusinessContextAssistantDemoRead",
             "BusinessScenarioReplayRead",
             "drivedesk_public_demo_client.py",
             "drivedesk-public-demo-client.mjs",

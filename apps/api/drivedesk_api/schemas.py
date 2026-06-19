@@ -893,6 +893,21 @@ class BusinessNotificationChannelMatrixDemoRead(BaseModel):
     docs: list[dict[str, str]]
 
 
+class BusinessContextAssistantDemoRead(BaseModel):
+    status: Literal["previewed"]
+    command: str
+    summary: list[dict[str, Any]]
+    role: str
+    subject: str
+    sourceSystems: list[str]
+    contextCards: list[dict[str, Any]]
+    insightRules: list[dict[str, Any]]
+    suggestedActions: list[dict[str, Any]]
+    dataBoundaries: list[dict[str, Any]]
+    api: dict[str, str]
+    docs: list[dict[str, str]]
+
+
 class PublicDemoRead(BaseModel):
     schemaVersion: int
     generatedAt: str
@@ -912,6 +927,7 @@ class PublicDemoRead(BaseModel):
     businessIntakePipeline: dict[str, Any]
     businessTaskHandoff: dict[str, Any]
     businessNotificationChannels: dict[str, Any]
+    businessContextAssistant: dict[str, Any]
     integrationJobs: list[dict[str, Any]]
     integrationHealth: list[dict[str, str]]
     integrationReadiness: list[dict[str, Any]]

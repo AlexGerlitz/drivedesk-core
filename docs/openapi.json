@@ -766,6 +766,107 @@
         "title": "BusinessBriefingRead",
         "type": "object"
       },
+      "BusinessContextAssistantDemoRead": {
+        "properties": {
+          "api": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Api",
+            "type": "object"
+          },
+          "command": {
+            "title": "Command",
+            "type": "string"
+          },
+          "contextCards": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Contextcards",
+            "type": "array"
+          },
+          "dataBoundaries": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Databoundaries",
+            "type": "array"
+          },
+          "docs": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "title": "Docs",
+            "type": "array"
+          },
+          "insightRules": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Insightrules",
+            "type": "array"
+          },
+          "role": {
+            "title": "Role",
+            "type": "string"
+          },
+          "sourceSystems": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Sourcesystems",
+            "type": "array"
+          },
+          "status": {
+            "const": "previewed",
+            "title": "Status",
+            "type": "string"
+          },
+          "subject": {
+            "title": "Subject",
+            "type": "string"
+          },
+          "suggestedActions": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Suggestedactions",
+            "type": "array"
+          },
+          "summary": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Summary",
+            "type": "array"
+          }
+        },
+        "required": [
+          "status",
+          "command",
+          "summary",
+          "role",
+          "subject",
+          "sourceSystems",
+          "contextCards",
+          "insightRules",
+          "suggestedActions",
+          "dataBoundaries",
+          "api",
+          "docs"
+        ],
+        "title": "BusinessContextAssistantDemoRead",
+        "type": "object"
+      },
       "BusinessDetectionPreviewCreate": {
         "properties": {
           "limit": {
@@ -4707,6 +4808,11 @@
             "title": "Auditevents",
             "type": "array"
           },
+          "businessContextAssistant": {
+            "additionalProperties": true,
+            "title": "Businesscontextassistant",
+            "type": "object"
+          },
           "businessControlTower": {
             "additionalProperties": true,
             "title": "Businesscontroltower",
@@ -4902,6 +5008,7 @@
           "businessIntakePipeline",
           "businessTaskHandoff",
           "businessNotificationChannels",
+          "businessContextAssistant",
           "integrationJobs",
           "integrationHealth",
           "integrationReadiness",
@@ -5966,6 +6073,27 @@
         "summary": "List Business Record Lifecycle Policies Endpoint",
         "tags": [
           "business-records"
+        ]
+      }
+    },
+    "/demo/business-context-assistant": {
+      "get": {
+        "operationId": "business_context_assistant_demo_demo_business_context_assistant_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessContextAssistantDemoRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Business Context Assistant Demo",
+        "tags": [
+          "demo"
         ]
       }
     },

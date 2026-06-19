@@ -23,6 +23,8 @@ Demo endpoints:
   proof as a standalone synthetic contract.
 - `GET /demo/business-notification-channels` returns the same notification
   channel matrix proof as a standalone synthetic contract.
+- `GET /demo/business-context-assistant` returns the same Business Context
+  Assistant proof as a standalone synthetic contract.
 - `GET /demo/business-scenario-replay` returns reusable Business OS scenario
   replay data as a standalone synthetic contract.
 

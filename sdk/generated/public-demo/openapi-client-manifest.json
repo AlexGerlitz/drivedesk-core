@@ -14,6 +14,25 @@
     "adapter-accounting-export-retry",
     "adapter-dead-letter-review"
   ],
+  "business_context_assistant": {
+    "method": "GET",
+    "operation_id": "business_context_assistant_demo_demo_business_context_assistant_get",
+    "path": "/demo/business-context-assistant",
+    "required_fields": [
+      "status",
+      "command",
+      "summary",
+      "role",
+      "subject",
+      "sourceSystems",
+      "contextCards",
+      "insightRules",
+      "suggestedActions",
+      "dataBoundaries",
+      "api",
+      "docs"
+    ]
+  },
   "business_intake_pipeline": {
     "method": "GET",
     "operation_id": "business_intake_pipeline_demo_demo_business_intake_pipeline_get",
@@ -129,6 +148,7 @@
     "businessIntakePipeline",
     "businessTaskHandoff",
     "businessNotificationChannels",
+    "businessContextAssistant",
     "integrationJobs",
     "integrationHealth",
     "integrationReadiness",

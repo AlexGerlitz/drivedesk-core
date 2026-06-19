@@ -115,6 +115,11 @@ Fast external verification path: `docs/public/REVIEWER_QUICKSTART.md`.
 - Business workbench context preview for turning normalized CRM, bank, and
   accounting observations into role-specific cards without provider calls,
   secrets, raw payloads, PII, or external writes.
+- Business Context Assistant (`docs/public/BUSINESS_CONTEXT_ASSISTANT.md`,
+  `GET /demo/business-context-assistant`, `businessContextAssistant`) for
+  turning CRM, bank, accounting, and legal-reference facts into safe context
+  cards, insight rules, and next actions through
+  `POST /tenants/{tenant_id}/business-workbench-context/preview`.
 - Public-safe provider connector guide (`docs/public/PROVIDER_CONNECTOR_GUIDE.md`)
   for feeding future authenticated
   Bitrix24-style CRM, bank, accounting, and file-provider facts through the
@@ -142,6 +147,9 @@ Fast external verification path: `docs/public/REVIEWER_QUICKSTART.md`.
   payload mapping, replay evidence, and follow-up actions.
 - More operator workbench scenarios that connect action plans and notification
   previews to task creation without public external writes.
+- More Business Context Assistant scenarios for role-specific work surfaces,
+  including CRM, bank, accounting, ERP, legal-reference, support, and
+  procurement facts.
 - More evidence around external notification adapters once destinations and
   secrets are intentionally configured outside the public surface.
 - Broader generated client SDK examples for more provider classes and workflow

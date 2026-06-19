@@ -2450,6 +2450,70 @@ def test_business_notification_channels_demo_endpoint_exposes_same_public_contra
     )
 
 
+def test_business_context_assistant_demo_endpoint_exposes_same_public_contract(
+    api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, _ = api_client
+
+    public_response = client.get("/demo/public")
+    context_response = client.get("/demo/business-context-assistant")
+
+    assert context_response.status_code == 200
+    assert context_response.headers["access-control-allow-origin"] == "*"
+    assert context_response.headers["cache-control"] == "public, max-age=60"
+    context_payload = context_response.json()
+    assert context_payload == public_response.json()["businessContextAssistant"]
+    assert context_payload["status"] == "previewed"
+    assert (
+        context_payload["command"]
+        == "POST /tenants/{tenant_id}/business-workbench-context/preview"
+    )
+    assert context_payload["role"] == "accountant"
+    assert context_payload["subject"] == "deal:DEAL-2026-001"
+    assert set(context_payload["sourceSystems"]) == {
+        "crm.bitrix24.mock",
+        "bank.statement.mock",
+        "accounting.export.mock",
+        "legal.reference.mock",
+    }
+    assert {item["systemFamily"] for item in context_payload["contextCards"]} == {
+        "crm",
+        "bank",
+        "accounting",
+        "legal",
+    }
+    assert {item["externalFetch"] for item in context_payload["contextCards"]} == {False}
+    assert {item["externalMutation"] for item in context_payload["contextCards"]} == {False}
+    assert {item["containsPii"] for item in context_payload["contextCards"]} == {False}
+    assert {item["rawPayloadIncluded"] for item in context_payload["contextCards"]} == {False}
+    assert {item["rule"] for item in context_payload["insightRules"]} == {
+        "correlate_payment_evidence",
+        "detect_accounting_export_gap",
+        "attach_policy_reference",
+    }
+    assert {item["externalMutation"] for item in context_payload["insightRules"]} == {False}
+    assert {item["action"] for item in context_payload["suggestedActions"]} == {
+        "open_reconciliation_plan",
+        "queue_accounting_export_after_review",
+        "attach_policy_reference",
+        "prepare_internal_notification",
+    }
+    assert {item["externalMutation"] for item in context_payload["suggestedActions"]} == {
+        False
+    }
+    assert {item["name"] for item in context_payload["dataBoundaries"]} == {
+        "read_only_context_preview",
+        "no_raw_provider_payload",
+        "secret_boundary",
+        "legal_reference_link_only",
+    }
+    assert context_payload["api"]["standalone"] == "GET /demo/business-context-assistant"
+    assert any(
+        item["path"] == "docs/public/BUSINESS_CONTEXT_ASSISTANT.md"
+        for item in context_payload["docs"]
+    )
+
+
 def test_file_import_adapter_success_flow(api_client: tuple[TestClient, async_sessionmaker[AsyncSession]]) -> None:
     client, session_factory = api_client
     owner_headers = {"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"}

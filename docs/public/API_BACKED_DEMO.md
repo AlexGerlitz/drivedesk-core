@@ -16,6 +16,7 @@ GET /demo/connector-fixture-replay
 GET /demo/business-intake-pipeline
 GET /demo/business-task-handoff
 GET /demo/business-notification-channels
+GET /demo/business-context-assistant
 GET /demo/business-scenario-replay
 ```
 
@@ -26,7 +27,7 @@ outbox events, adapter contracts, adapter operation scenarios, Adapter Studio,
 sync jobs, Integration Health, alert routing, incident response,
 `businessControlTower` data, `businessIntakePipeline`,
 `businessTaskHandoff`, `businessNotificationChannels`,
-`businessScenarioReplay`, recovery evidence,
+`businessContextAssistant`, `businessScenarioReplay`, recovery evidence,
 `connectorFixtureReplay`, and the `engineeringProof` contract rendered by the
 Control Tower, Integrations, Operations, Incidents, and Proof tabs.
 
@@ -50,6 +51,12 @@ candidates -> draft in-app notifications.
 for checking the notification readiness loop directly: internal action -> safe
 drafts -> channel gates -> no external delivery.
 
+`GET /demo/business-context-assistant` returns the same
+`businessContextAssistant` contract as a standalone endpoint. It is useful for
+checking the context loop directly:
+`POST /tenants/{tenant_id}/business-workbench-context/preview` -> safe CRM,
+bank, accounting, and legal-reference facts -> insight rules -> next actions.
+
 `GET /demo/business-scenario-replay` returns the same
 `businessScenarioReplay` contract as a standalone endpoint. It is useful for
 checking the Business OS loop directly: external signal -> normalized facts ->
@@ -65,6 +72,7 @@ risk detection -> role context -> approval-aware action plan.
 | Intake Pipeline API | Smoke checks can load `GET /demo/business-intake-pipeline` directly. |
 | Task Handoff API | Smoke checks can load `GET /demo/business-task-handoff` directly. |
 | Notification Channel API | Smoke checks can load `GET /demo/business-notification-channels` directly. |
+| Business Context Assistant API | Smoke checks can load `GET /demo/business-context-assistant` directly. |
 | Scenario Replay API | Smoke checks can load `GET /demo/business-scenario-replay` directly. |
 
 Example local API-backed run:
@@ -106,7 +114,8 @@ bash scripts/check_public_demo_sdk.sh
 `DRIVEDESK_DEMO_BASE_URL` is provided. It checks `/health`, `/ready`,
 `/demo/public`, `/demo/connector-fixture-replay`,
 `/demo/business-intake-pipeline`, `/demo/business-task-handoff`,
-`/demo/business-notification-channels`, `/demo/business-scenario-replay`,
+`/demo/business-notification-channels`, `/demo/business-context-assistant`,
+`/demo/business-scenario-replay`,
 `/openapi.json`, the generated
 `docs/openapi.json` when present, alert routes, alert-to-runbook bindings,
 connector certification references in `CONNECTOR_CERTIFICATION.md`, connector

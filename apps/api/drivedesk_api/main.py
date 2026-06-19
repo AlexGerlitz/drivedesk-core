@@ -74,6 +74,7 @@ from drivedesk_api.schemas import (
     AuthSessionRead,
     BusinessBriefingPreviewCreate,
     BusinessBriefingRead,
+    BusinessContextAssistantDemoRead,
     BusinessDetectionPreviewCreate,
     BusinessDetectionPreviewRead,
     BusinessEscalationPreviewCreate,
@@ -337,6 +338,20 @@ def build_app(settings: Settings | None = None) -> FastAPI:
     async def business_notification_channels_demo() -> JSONResponse:
         return JSONResponse(
             build_public_demo_payload()["businessNotificationChannels"],
+            headers={
+                "Access-Control-Allow-Origin": "*",
+                "Cache-Control": "public, max-age=60",
+            },
+        )
+
+    @api.get(
+        "/demo/business-context-assistant",
+        response_model=BusinessContextAssistantDemoRead,
+        tags=["demo"],
+    )
+    async def business_context_assistant_demo() -> JSONResponse:
+        return JSONResponse(
+            build_public_demo_payload()["businessContextAssistant"],
             headers={
                 "Access-Control-Allow-Origin": "*",
                 "Cache-Control": "public, max-age=60",

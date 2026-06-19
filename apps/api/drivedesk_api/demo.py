@@ -73,7 +73,7 @@ def build_public_demo_payload() -> dict[str, Any]:
         "metrics": [
             {
                 "label": "API checks",
-                "value": "47",
+                "value": "48",
                 "detail": "private smoke tests",
                 "tone": "blue",
             },
@@ -85,7 +85,7 @@ def build_public_demo_payload() -> dict[str, Any]:
             },
                 {
                     "label": "OpenAPI paths",
-                    "value": "47",
+                    "value": "48",
                     "detail": "generated contract",
                     "tone": "violet",
                 },
@@ -705,7 +705,98 @@ def build_public_demo_payload() -> dict[str, Any]:
                     "detail": "role workbench preview",
                     "tone": "blue",
                 },
+                {
+                    "label": "Provider intake",
+                    "value": "1",
+                    "detail": "safe CRM payload preview",
+                    "tone": "green",
+                },
             ],
+            "providerIntake": {
+                "providerKey": "crm.bitrix24.mock",
+                "sourceType": "crm_deal",
+                "subject": "deal:DEAL-2026-001",
+                "status": "mapped",
+                "summary": (
+                    "Bitrix-style deal payload is mapped into a normalized observation "
+                    "before DriveDesk builds workbench context."
+                ),
+                "safePayload": {
+                    "amount_bucket": "1000-2000",
+                    "owner_role": "sales",
+                    "source_state": "invoice_sent",
+                },
+                "payloadKeys": [
+                    "access_token",
+                    "amount",
+                    "full_name",
+                    "owner_role",
+                    "phone",
+                    "stage",
+                ],
+                "droppedKeys": [
+                    "access_token",
+                    "full_name",
+                    "phone",
+                ],
+                "normalizedObservation": {
+                    "systemKey": "crm.bitrix24.mock",
+                    "systemFamily": "crm",
+                    "subject": "deal:DEAL-2026-001",
+                    "externalRef": "crm-deal-001",
+                    "state": "invoice_sent",
+                    "wouldCreate": "BusinessStateObservation",
+                    "wouldRecordEvent": "business_state.observation.recorded",
+                    "rawPayloadIncluded": False,
+                    "piiIncluded": False,
+                    "externalFetch": False,
+                    "externalMutation": False,
+                    "requiresSecret": False,
+                },
+                "dataBoundaries": [
+                    {
+                        "name": "preview_only_no_persist",
+                        "status": "preview_only",
+                        "detail": "Provider intake preview does not create observations or call provider APIs.",
+                    },
+                    {
+                        "name": "raw_provider_payload_not_returned",
+                        "status": "clean",
+                        "detail": "Only safe fields and dropped key names are returned to the workbench.",
+                    },
+                    {
+                        "name": "secret_boundary",
+                        "status": "clean",
+                        "detail": "No Bitrix, bank, accounting, Telegram, or email credentials are required.",
+                    },
+                ],
+                "nextSteps": [
+                    {
+                        "step": "record_normalized_observation",
+                        "status": "available",
+                        "endpoint": "POST /tenants/{tenant_id}/business-state/observations",
+                        "externalMutation": False,
+                        "evidence": "business_state.observation.recorded",
+                    },
+                    {
+                        "step": "open_workbench_context",
+                        "status": "available",
+                        "endpoint": "POST /tenants/{tenant_id}/business-workbench-context/preview",
+                        "externalMutation": False,
+                        "evidence": "business_workbench_context.previewed",
+                    },
+                    {
+                        "step": "run_detection_preview",
+                        "status": "available",
+                        "endpoint": "POST /tenants/{tenant_id}/business-detections/preview",
+                        "externalMutation": False,
+                        "evidence": "business_detection.previewed",
+                    },
+                ],
+                "api": {
+                    "preview": "POST /tenants/{tenant_id}/business-provider-intake/preview",
+                },
+            },
             "workbenchContext": {
                 "contextKind": "role_assist",
                 "role": "accountant",
@@ -1268,6 +1359,13 @@ def build_public_demo_payload() -> dict[str, Any]:
             ],
             "flow": [
                 {
+                    "step": "intake",
+                    "owner": "adapter",
+                    "state": "preview_only",
+                    "detail": "Provider payload is reduced to safe normalized observation fields.",
+                    "evidence": "business_provider_intake.previewed",
+                },
+                {
                     "step": "observe",
                     "owner": "adapter",
                     "state": "done",
@@ -1325,6 +1423,7 @@ def build_public_demo_payload() -> dict[str, Any]:
                 },
             ],
             "api": {
+                "intake": "POST /tenants/{tenant_id}/business-provider-intake/preview",
                 "observe": "POST /tenants/{tenant_id}/business-state/observations",
                 "exceptions": "POST /tenants/{tenant_id}/business-exceptions",
                 "repair": "POST /tenants/{tenant_id}/business-exceptions/{business_exception_id}/repair-actions",

@@ -237,7 +237,42 @@ assert {item["label"] for item in control_tower["summary"]} >= {
     "Open exceptions",
     "Repair actions",
     "External writes",
+    "Provider intake",
 }, demo
+provider_intake = control_tower["providerIntake"]
+assert provider_intake["providerKey"] == "crm.bitrix24.mock", demo
+assert provider_intake["sourceType"] == "crm_deal", demo
+assert provider_intake["subject"] == "deal:DEAL-2026-001", demo
+assert provider_intake["status"] == "mapped", demo
+assert provider_intake["safePayload"] == {
+    "amount_bucket": "1000-2000",
+    "owner_role": "sales",
+    "source_state": "invoice_sent",
+}, demo
+assert set(provider_intake["droppedKeys"]) >= {"access_token", "full_name", "phone"}, demo
+assert provider_intake["normalizedObservation"]["wouldCreate"] == "BusinessStateObservation", demo
+assert provider_intake["normalizedObservation"]["wouldRecordEvent"] == "business_state.observation.recorded", demo
+assert {
+    provider_intake["normalizedObservation"]["rawPayloadIncluded"],
+    provider_intake["normalizedObservation"]["piiIncluded"],
+    provider_intake["normalizedObservation"]["externalFetch"],
+    provider_intake["normalizedObservation"]["externalMutation"],
+    provider_intake["normalizedObservation"]["requiresSecret"],
+} == {False}, demo
+assert {item["name"] for item in provider_intake["dataBoundaries"]} == {
+    "preview_only_no_persist",
+    "raw_provider_payload_not_returned",
+    "secret_boundary",
+}, demo
+assert {item["step"] for item in provider_intake["nextSteps"]} == {
+    "record_normalized_observation",
+    "open_workbench_context",
+    "run_detection_preview",
+}, demo
+assert {item["externalMutation"] for item in provider_intake["nextSteps"]} == {False}, demo
+assert provider_intake["api"]["preview"] == (
+    "POST /tenants/{tenant_id}/business-provider-intake/preview"
+), demo
 assert control_tower["detection"]["ruleSet"] == "payment_reconciliation", demo
 assert control_tower["detection"]["status"] == "detected", demo
 assert {item["type"] for item in control_tower["detection"]["detectedExceptions"]} == {
@@ -377,6 +412,7 @@ assert {business_exception["type"] for business_exception in control_tower["exce
 assert {repair_action["action"] for repair_action in control_tower["repairActions"]} == {"sync_status"}, demo
 assert {repair_action["externalMutation"] for repair_action in control_tower["repairActions"]} == {False}, demo
 assert {step["step"] for step in control_tower["flow"]} >= {
+    "intake",
     "observe",
     "context",
     "detect",
@@ -392,6 +428,9 @@ assert set(control_tower["metrics"]) >= {
     "drivedesk_repair_actions",
 }, demo
 assert control_tower["api"]["observe"] == "POST /tenants/{tenant_id}/business-state/observations", demo
+assert control_tower["api"]["intake"] == (
+    "POST /tenants/{tenant_id}/business-provider-intake/preview"
+), demo
 assert control_tower["api"]["execute"] == "POST /tenants/{tenant_id}/repair-actions/{repair_action_id}/execute", demo
 assert demo["engineeringProof"]["milestone"] == "engineering_70", demo
 assert demo["engineeringProof"]["status"] == "validated", demo
@@ -587,6 +626,7 @@ assert "/tenants/{tenant_id}/business-records" in openapi["paths"], openapi["pat
 assert "/business-record-lifecycle-policies" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/business-records/lifecycle-preview" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/business-records/{record_id}/transition" in openapi["paths"], openapi["paths"].keys()
+assert "/tenants/{tenant_id}/business-provider-intake/preview" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/business-workbench-context/preview" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/business-action-plans/preview" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/business-notifications/preview" in openapi["paths"], openapi["paths"].keys()
@@ -616,6 +656,7 @@ if openapi_file.exists():
     assert "/tenants/{tenant_id}/outbox-events/{event_id}/retry" in generated["paths"], generated["paths"].keys()
     assert "/business-record-lifecycle-policies" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-records/lifecycle-preview" in generated["paths"], generated["paths"].keys()
+    assert "/tenants/{tenant_id}/business-provider-intake/preview" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-workbench-context/preview" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/integration-connections" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/integration-connections/{connection_id}/health" in generated["paths"], generated["paths"].keys()

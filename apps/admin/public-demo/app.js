@@ -41,6 +41,10 @@
     return "POST /tenants/{tenant_id}/business-detections/preview";
   }
 
+  function businessProviderIntakePreviewEndpoint() {
+    return "POST /tenants/{tenant_id}/business-provider-intake/preview";
+  }
+
   function businessEscalationPreviewEndpoint() {
     return "POST /tenants/{tenant_id}/business-escalations/preview";
   }
@@ -89,6 +93,10 @@
         Array.isArray(payload.incidentResponse.resolutionEvidence) &&
         payload.businessControlTower &&
         Array.isArray(payload.businessControlTower.summary) &&
+        payload.businessControlTower.providerIntake &&
+        Array.isArray(payload.businessControlTower.providerIntake.droppedKeys) &&
+        Array.isArray(payload.businessControlTower.providerIntake.dataBoundaries) &&
+        Array.isArray(payload.businessControlTower.providerIntake.nextSteps) &&
         payload.businessControlTower.detection &&
         Array.isArray(payload.businessControlTower.detection.rules) &&
         Array.isArray(payload.businessControlTower.detection.detectedExceptions) &&
@@ -942,6 +950,114 @@
       summaryRows.appendChild(card);
     });
 
+    var providerIntake = controlTower.providerIntake;
+    var providerRows = document.getElementById("controlTowerProviderRows");
+    clear(providerRows);
+
+    var providerSummary = document.createElement("article");
+    providerSummary.className = "event-row";
+    var providerTop = document.createElement("div");
+    providerTop.className = "event-top";
+    var providerTitle = document.createElement("strong");
+    providerTitle.appendChild(text(providerIntake.providerKey + " intake"));
+    providerTop.append(providerTitle, chip(providerIntake.status, statusTone(providerIntake.status)));
+
+    var providerDetail = document.createElement("span");
+    providerDetail.className = "muted";
+    providerDetail.appendChild(text(providerIntake.summary));
+
+    var providerApi = document.createElement("code");
+    providerApi.appendChild(
+      text((providerIntake.api && providerIntake.api.preview) || businessProviderIntakePreviewEndpoint())
+    );
+
+    providerSummary.append(providerTop, providerDetail, providerApi);
+    providerRows.appendChild(providerSummary);
+
+    var normalized = providerIntake.normalizedObservation || {};
+    var normalizedRow = document.createElement("article");
+    normalizedRow.className = "event-row";
+    var normalizedTop = document.createElement("div");
+    normalizedTop.className = "event-top";
+    var normalizedTitle = document.createElement("strong");
+    normalizedTitle.appendChild(text(normalized.wouldCreate || "BusinessStateObservation"));
+    normalizedTop.append(normalizedTitle, chip(normalized.state || "mapped", statusTone(normalized.state || "mapped")));
+
+    var safePayloadText = Object.keys(providerIntake.safePayload || {})
+      .sort()
+      .map(function (key) {
+        return key + "=" + providerIntake.safePayload[key];
+      })
+      .join(", ");
+    var normalizedDetail = document.createElement("span");
+    normalizedDetail.className = "muted";
+    normalizedDetail.appendChild(
+      text(
+        normalized.systemKey +
+          " - " +
+          normalized.subject +
+          " - safe: " +
+          (safePayloadText || "none")
+      )
+    );
+
+    var normalizedEvidence = document.createElement("code");
+    normalizedEvidence.appendChild(text(normalized.wouldRecordEvent || "business_state.observation.recorded"));
+
+    normalizedRow.append(normalizedTop, normalizedDetail, normalizedEvidence);
+    providerRows.appendChild(normalizedRow);
+
+    var providerBoundaryRows = document.getElementById("controlTowerProviderBoundaryRows");
+    clear(providerBoundaryRows);
+
+    var droppedRow = document.createElement("article");
+    droppedRow.className = "event-row";
+    var droppedTop = document.createElement("div");
+    droppedTop.className = "event-top";
+    var droppedTitle = document.createElement("strong");
+    droppedTitle.appendChild(text("Dropped keys"));
+    droppedTop.append(droppedTitle, chip(String(providerIntake.droppedKeys.length), "amber"));
+    var droppedDetail = document.createElement("span");
+    droppedDetail.className = "muted";
+    droppedDetail.appendChild(text(providerIntake.droppedKeys.join(", ")));
+    droppedRow.append(droppedTop, droppedDetail);
+    providerBoundaryRows.appendChild(droppedRow);
+
+    providerIntake.dataBoundaries.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var name = document.createElement("strong");
+      name.appendChild(text(item.name));
+      top.append(name, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      row.append(top, detail);
+      providerBoundaryRows.appendChild(row);
+    });
+
+    providerIntake.nextSteps.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var step = document.createElement("strong");
+      step.appendChild(text(item.step));
+      top.append(step, chip(item.status, statusTone(item.status)));
+
+      var endpoint = document.createElement("code");
+      endpoint.appendChild(text(item.endpoint));
+
+      row.append(top, endpoint);
+      providerBoundaryRows.appendChild(row);
+    });
+
     var workbenchContext = controlTower.workbenchContext;
     var contextRows = document.getElementById("controlTowerContextRows");
     clear(contextRows);
@@ -1610,7 +1726,7 @@
 
   function statusTone(status) {
     if (
-      ["done", "ready", "online", "validated", "processed", "green", "active", "success", "observed", "matched", "resolved", "passed", "routed", "approved", "executed", "paid", "available", "detected", "satisfied", "clean", "confirmed"].indexOf(status) >= 0
+      ["done", "ready", "online", "validated", "processed", "green", "active", "success", "observed", "matched", "mapped", "resolved", "passed", "routed", "approved", "executed", "paid", "available", "detected", "satisfied", "clean", "confirmed"].indexOf(status) >= 0
     ) {
       return "green";
     }

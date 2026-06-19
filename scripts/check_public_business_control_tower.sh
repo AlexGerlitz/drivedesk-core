@@ -55,6 +55,7 @@ escalation_adr_path = root / "docs/adr/0067-business-escalation-preview.md"
 action_plan_adr_path = root / "docs/adr/0068-business-action-plan-preview.md"
 notification_adr_path = root / "docs/adr/0069-business-notification-preview.md"
 workbench_context_adr_path = root / "docs/adr/0070-business-workbench-context-preview.md"
+provider_intake_adr_path = root / "docs/adr/0071-business-provider-intake-preview.md"
 demo_data_path = root / "apps/admin/public-demo/demo-data.js"
 demo_html_path = root / "apps/admin/public-demo/index.html"
 demo_app_path = root / "apps/admin/public-demo/app.js"
@@ -72,6 +73,7 @@ for path in [
     action_plan_adr_path,
     notification_adr_path,
     workbench_context_adr_path,
+    provider_intake_adr_path,
     demo_data_path,
     demo_html_path,
     demo_app_path,
@@ -84,8 +86,63 @@ control = api_payload.get("businessControlTower", {})
 require(bool(control), "API demo missing businessControlTower")
 require(
     {item.get("label") for item in control.get("summary", [])}
-    >= {"Observed systems", "Open exceptions", "Repair actions", "External writes"},
+    >= {"Observed systems", "Open exceptions", "Repair actions", "External writes", "Provider intake"},
     "businessControlTower summary missing required cards",
+)
+provider_intake = control.get("providerIntake", {})
+require(provider_intake.get("providerKey") == "crm.bitrix24.mock", "businessControlTower provider key mismatch")
+require(provider_intake.get("sourceType") == "crm_deal", "businessControlTower provider source mismatch")
+require(provider_intake.get("subject") == "deal:DEAL-2026-001", "businessControlTower provider subject mismatch")
+require(provider_intake.get("status") == "mapped", "businessControlTower provider status mismatch")
+require(
+    provider_intake.get("safePayload") == {
+        "amount_bucket": "1000-2000",
+        "owner_role": "sales",
+        "source_state": "invoice_sent",
+    },
+    "businessControlTower provider safe payload mismatch",
+)
+require(
+    set(provider_intake.get("droppedKeys", [])) >= {"access_token", "full_name", "phone"},
+    "businessControlTower provider dropped keys missing",
+)
+provider_observation = provider_intake.get("normalizedObservation", {})
+require(
+    provider_observation.get("wouldCreate") == "BusinessStateObservation",
+    "businessControlTower provider normalized observation mismatch",
+)
+require(
+    provider_observation.get("wouldRecordEvent") == "business_state.observation.recorded",
+    "businessControlTower provider event mismatch",
+)
+require(
+    {
+        provider_observation.get("rawPayloadIncluded"),
+        provider_observation.get("piiIncluded"),
+        provider_observation.get("externalFetch"),
+        provider_observation.get("externalMutation"),
+        provider_observation.get("requiresSecret"),
+    }
+    == {False},
+    "businessControlTower provider normalized observation must be public-safe",
+)
+require(
+    {item.get("name") for item in provider_intake.get("dataBoundaries", [])}
+    == {"preview_only_no_persist", "raw_provider_payload_not_returned", "secret_boundary"},
+    "businessControlTower provider data boundaries mismatch",
+)
+require(
+    {item.get("step") for item in provider_intake.get("nextSteps", [])}
+    == {"record_normalized_observation", "open_workbench_context", "run_detection_preview"},
+    "businessControlTower provider next steps mismatch",
+)
+require(
+    {item.get("externalMutation") for item in provider_intake.get("nextSteps", [])} == {False},
+    "businessControlTower provider next steps must be public-safe",
+)
+require(
+    provider_intake.get("api", {}).get("preview") == "POST /tenants/{tenant_id}/business-provider-intake/preview",
+    "businessControlTower provider preview endpoint missing",
 )
 detection = control.get("detection", {})
 require(detection.get("ruleSet") == "payment_reconciliation", "businessControlTower detection rule mismatch")
@@ -311,6 +368,7 @@ require(
 openapi = build_app().openapi()
 paths = set(openapi.get("paths", {}))
 required_paths = {
+    "/tenants/{tenant_id}/business-provider-intake/preview",
     "/tenants/{tenant_id}/business-workbench-context/preview",
     "/tenants/{tenant_id}/business-detections/preview",
     "/tenants/{tenant_id}/business-escalations/preview",
@@ -330,6 +388,7 @@ require(required_paths.issubset(paths), "OpenAPI missing business control paths"
 doc_text = read(doc_path)
 for needle in [
     "Business Operations Control Tower",
+    "POST /tenants/{tenant_id}/business-provider-intake/preview",
     "POST /tenants/{tenant_id}/business-workbench-context/preview",
     "POST /tenants/{tenant_id}/business-detections/preview",
     "POST /tenants/{tenant_id}/business-escalations/preview",
@@ -339,6 +398,7 @@ for needle in [
     "BusinessEscalationPreview",
     "BusinessActionPlanPreview",
     "BusinessNotificationPreview",
+    "BusinessProviderIntakePreview",
     "BusinessWorkbenchContextPreview",
     "POST /tenants/{tenant_id}/business-state/observations",
     "BusinessBriefing",
@@ -353,6 +413,8 @@ html = read(demo_html_path)
 for needle in [
     'data-view="control"',
     'id="controlTowerSummaryRows"',
+    'id="controlTowerProviderRows"',
+    'id="controlTowerProviderBoundaryRows"',
     'id="controlTowerContextRows"',
     'id="controlTowerContextActionRows"',
     'id="controlTowerDetectionRows"',
@@ -374,6 +436,8 @@ for needle in [
 app_js = read(demo_app_path)
 for needle in [
     "businessControlTower",
+    "controlTowerProviderRows",
+    "business-provider-intake/preview",
     "controlTowerContextRows",
     "business-workbench-context/preview",
     "controlTowerDetectionRows",
@@ -419,6 +483,14 @@ else:
     require(
         'copy_path "docs/adr/0069-business-notification-preview.md"' in read(export_script_path),
         "export script missing ADR 0069",
+    )
+    require(
+        'copy_path "docs/adr/0070-business-workbench-context-preview.md"' in read(export_script_path),
+        "export script missing ADR 0070",
+    )
+    require(
+        'copy_path "docs/adr/0071-business-provider-intake-preview.md"' in read(export_script_path),
+        "export script missing ADR 0071",
     )
     require(
         'copy_path "scripts/check_public_business_control_tower.sh"' in read(export_script_path),

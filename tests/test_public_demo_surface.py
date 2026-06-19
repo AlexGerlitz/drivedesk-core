@@ -50,6 +50,8 @@ def test_public_demo_html_links_static_assets() -> None:
     assert 'id="workflowTimelineRows"' in html
     assert 'id="domainEventRows"' in html
     assert 'id="controlTowerSummaryRows"' in html
+    assert 'id="controlTowerProviderRows"' in html
+    assert 'id="controlTowerProviderBoundaryRows"' in html
     assert 'id="controlTowerDetectionRows"' in html
     assert 'id="controlTowerDetectionRepairRows"' in html
     assert 'id="controlTowerEscalationRows"' in html
@@ -154,7 +156,50 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
         "Open exceptions",
         "Repair actions",
         "External writes",
+        "Provider intake",
     }
+    assert control_tower["providerIntake"]["providerKey"] == "crm.bitrix24.mock"
+    assert control_tower["providerIntake"]["sourceType"] == "crm_deal"
+    assert control_tower["providerIntake"]["status"] == "mapped"
+    assert control_tower["providerIntake"]["safePayload"] == {
+        "amount_bucket": "1000-2000",
+        "owner_role": "sales",
+        "source_state": "invoice_sent",
+    }
+    assert set(control_tower["providerIntake"]["droppedKeys"]) >= {
+        "access_token",
+        "full_name",
+        "phone",
+    }
+    assert control_tower["providerIntake"]["normalizedObservation"]["wouldCreate"] == (
+        "BusinessStateObservation"
+    )
+    assert control_tower["providerIntake"]["normalizedObservation"]["wouldRecordEvent"] == (
+        "business_state.observation.recorded"
+    )
+    assert {
+        control_tower["providerIntake"]["normalizedObservation"]["rawPayloadIncluded"],
+        control_tower["providerIntake"]["normalizedObservation"]["piiIncluded"],
+        control_tower["providerIntake"]["normalizedObservation"]["externalFetch"],
+        control_tower["providerIntake"]["normalizedObservation"]["externalMutation"],
+        control_tower["providerIntake"]["normalizedObservation"]["requiresSecret"],
+    } == {False}
+    assert {item["name"] for item in control_tower["providerIntake"]["dataBoundaries"]} == {
+        "preview_only_no_persist",
+        "raw_provider_payload_not_returned",
+        "secret_boundary",
+    }
+    assert {item["step"] for item in control_tower["providerIntake"]["nextSteps"]} == {
+        "record_normalized_observation",
+        "open_workbench_context",
+        "run_detection_preview",
+    }
+    assert {item["externalMutation"] for item in control_tower["providerIntake"]["nextSteps"]} == {
+        False
+    }
+    assert control_tower["providerIntake"]["api"]["preview"] == (
+        "POST /tenants/{tenant_id}/business-provider-intake/preview"
+    )
     assert control_tower["detection"]["ruleSet"] == "payment_reconciliation"
     assert control_tower["detection"]["status"] == "detected"
     assert {item["type"] for item in control_tower["detection"]["detectedExceptions"]} == {
@@ -289,6 +334,7 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
     assert {repair_action["action"] for repair_action in control_tower["repairActions"]} == {"sync_status"}
     assert {repair_action["externalMutation"] for repair_action in control_tower["repairActions"]} == {False}
     assert {step["step"] for step in control_tower["flow"]} >= {
+        "intake",
         "observe",
         "detect",
         "propose",

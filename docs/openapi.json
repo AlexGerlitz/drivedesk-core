@@ -1489,6 +1489,171 @@
         "title": "BusinessNotificationPreviewRead",
         "type": "object"
       },
+      "BusinessProviderIntakePreviewCreate": {
+        "properties": {
+          "external_ref": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "External Ref"
+          },
+          "provider_key": {
+            "maxLength": 120,
+            "minLength": 3,
+            "pattern": "^[a-z0-9][a-z0-9._-]*$",
+            "title": "Provider Key",
+            "type": "string"
+          },
+          "provider_payload": {
+            "additionalProperties": true,
+            "title": "Provider Payload",
+            "type": "object"
+          },
+          "source_type": {
+            "default": "crm_deal",
+            "enum": [
+              "crm_deal",
+              "bank_payment",
+              "accounting_export",
+              "support_ticket"
+            ],
+            "title": "Source Type",
+            "type": "string"
+          },
+          "subject_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Subject Id",
+            "type": "string"
+          },
+          "subject_type": {
+            "maxLength": 64,
+            "minLength": 2,
+            "pattern": "^[a-z0-9][a-z0-9_-]*$",
+            "title": "Subject Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "provider_key",
+          "subject_type",
+          "subject_id"
+        ],
+        "title": "BusinessProviderIntakePreviewCreate",
+        "type": "object"
+      },
+      "BusinessProviderIntakePreviewRead": {
+        "properties": {
+          "api": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Api",
+            "type": "object"
+          },
+          "data_boundaries": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Data Boundaries",
+            "type": "array"
+          },
+          "dropped_keys": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Dropped Keys",
+            "type": "array"
+          },
+          "evidence": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "next_steps": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Next Steps",
+            "type": "array"
+          },
+          "normalized_observation": {
+            "additionalProperties": true,
+            "title": "Normalized Observation",
+            "type": "object"
+          },
+          "payload_keys": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Payload Keys",
+            "type": "array"
+          },
+          "provider_key": {
+            "title": "Provider Key",
+            "type": "string"
+          },
+          "safe_payload": {
+            "additionalProperties": true,
+            "title": "Safe Payload",
+            "type": "object"
+          },
+          "source_type": {
+            "enum": [
+              "crm_deal",
+              "bank_payment",
+              "accounting_export",
+              "support_ticket"
+            ],
+            "title": "Source Type",
+            "type": "string"
+          },
+          "subject_id": {
+            "title": "Subject Id",
+            "type": "string"
+          },
+          "subject_type": {
+            "title": "Subject Type",
+            "type": "string"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tenant_id",
+          "provider_key",
+          "source_type",
+          "subject_type",
+          "subject_id",
+          "generated_at",
+          "summary"
+        ],
+        "title": "BusinessProviderIntakePreviewRead",
+        "type": "object"
+      },
       "BusinessRecordCreate": {
         "properties": {
           "external_ref": {
@@ -6229,6 +6394,94 @@
           }
         },
         "summary": "Preview Business Notifications Endpoint",
+        "tags": [
+          "business-control"
+        ]
+      }
+    },
+    "/tenants/{tenant_id}/business-provider-intake/preview": {
+      "post": {
+        "operationId": "preview_business_provider_intake_endpoint_tenants__tenant_id__business_provider_intake_preview_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tenant_id",
+            "required": true,
+            "schema": {
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "X-Actor-Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Role",
+            "required": false,
+            "schema": {
+              "default": "viewer",
+              "title": "X-Actor-Role",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessProviderIntakePreviewCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessProviderIntakePreviewRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Preview Business Provider Intake Endpoint",
         "tags": [
           "business-control"
         ]

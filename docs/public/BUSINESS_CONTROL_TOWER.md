@@ -5,18 +5,20 @@ operations control layer.
 
 The first public-safe slice models a common cross-system failure:
 
-1. CRM still says a deal is waiting for payment.
-2. Bank evidence says payment was received.
-3. Accounting export has not been sent.
-4. DriveDesk previews role-specific workbench context without raw provider
+1. A Bitrix-style provider payload is safely mapped into a normalized DriveDesk
+   observation preview.
+2. CRM still says a deal is waiting for payment.
+3. Bank evidence says payment was received.
+4. Accounting export has not been sent.
+5. DriveDesk previews role-specific workbench context without raw provider
    payloads.
-5. DriveDesk previews the detected mismatch before mutating data.
-6. DriveDesk opens a business exception.
-7. DriveDesk previews escalation routing: owner, queue, SLA, and next action.
-8. DriveDesk previews an ordered action plan for the responsible operator.
-9. DriveDesk previews notification drafts without sending anything externally.
-10. A repair action is proposed, approved, and executed in dry-run mode.
-11. A role briefing turns the raw evidence into the next useful operator view.
+6. DriveDesk previews the detected mismatch before mutating data.
+7. DriveDesk opens a business exception.
+8. DriveDesk previews escalation routing: owner, queue, SLA, and next action.
+9. DriveDesk previews an ordered action plan for the responsible operator.
+10. DriveDesk previews notification drafts without sending anything externally.
+11. A repair action is proposed, approved, and executed in dry-run mode.
+12. A role briefing turns the raw evidence into the next useful operator view.
 
 This is intentionally not another workflow automation demo. The control tower
 tracks business state across systems, detects an exception, records impact, and
@@ -26,6 +28,7 @@ keeps the repair path auditable.
 
 | Step | Endpoint | Purpose |
 | --- | --- | --- |
+| Preview provider intake | `POST /tenants/{tenant_id}/business-provider-intake/preview` | Map a provider payload into a safe normalized observation preview without provider calls, secrets, raw payload return, persistence, or writes. |
 | Preview workbench context | `POST /tenants/{tenant_id}/business-workbench-context/preview` | Build role-specific context cards from normalized external observations without provider calls, secrets, raw payloads, or writes. |
 | Preview detections | `POST /tenants/{tenant_id}/business-detections/preview` | Detect exception candidates and suggested repair actions from observations without mutating data. |
 | Preview escalations | `POST /tenants/{tenant_id}/business-escalations/preview` | Route open business exceptions to owner roles, queues, SLA targets, and next actions without mutating data. |
@@ -44,6 +47,7 @@ keeps the repair path auditable.
 
 | Model | Meaning |
 | --- | --- |
+| `BusinessProviderIntakePreview` | A read-only provider intake result with normalized observation shape, safe payload, dropped key names, data boundaries, and next steps. |
 | `BusinessDetectionPreview` | A read-only detector result with matched rules, exception candidates, repair suggestions, and evidence. |
 | `BusinessWorkbenchContextPreview` | A read-only workbench context with role cards, safe facts, suggested actions, data boundaries, and evidence. |
 | `BusinessEscalationPreview` | A read-only triage result with queue, owner role, SLA, next action, and evidence. |
@@ -56,6 +60,28 @@ keeps the repair path auditable.
 
 The models are tenant-scoped and use the same audit/outbox foundation as the
 rest of the API.
+
+## Provider Intake Preview
+
+The provider intake preview is the bridge between real-world external payloads
+and DriveDesk business state. A future Bitrix24, 1C, bank, website, file import,
+or support adapter can send provider-shaped data into this contract before the
+system records a normalized observation.
+
+It returns:
+
+- the normalized `BusinessStateObservation` shape that would be created later;
+- a safe payload subset such as amount bucket, owner role, and source state;
+- payload key names for traceability;
+- dropped key names for PII, secrets, tokens, and raw provider fields;
+- data-boundary checks for preview-only operation, raw payload isolation, and
+  secret isolation;
+- next DriveDesk steps for observation recording, workbench context, and
+  detection preview.
+
+The preview is read-only. It does not persist data, call provider APIs, read
+provider secrets, return raw provider payload values, enqueue outbox events, or
+mutate external systems.
 
 ## Workbench Context Preview
 
@@ -192,6 +218,8 @@ phone numbers, and document data.
 
 The public demo includes a `businessControlTower` payload with:
 
+- one `business-provider-intake/preview` example that maps a Bitrix-style CRM
+  payload into a safe normalized observation;
 - synthetic observations from `crm.bitrix24.mock`, `bank.statement.mock`, and
   `accounting.export.mock`;
 - one `payment_reconciliation` detection preview;
@@ -207,8 +235,8 @@ The public demo includes a `businessControlTower` payload with:
 - one approval-gated `sync_status` repair action;
 - one accountant briefing with source systems, highlights, recommended actions,
   and review points;
-- a flow from observation to context, detection, action planning, notification,
-  and dry-run repair evidence.
+- a flow from provider intake to observation, context, detection, action
+  planning, notification, and dry-run repair evidence.
 
 Verification:
 

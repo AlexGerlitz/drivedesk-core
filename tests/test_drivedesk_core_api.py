@@ -596,6 +596,67 @@ def test_business_control_tower_exception_and_repair_flow(
     assert tenant_response.status_code == 201
     tenant_id = tenant_response.json()["id"]
 
+    provider_intake_response = client.post(
+        f"/tenants/{tenant_id}/business-provider-intake/preview",
+        json={
+            "provider_key": "crm.bitrix24.mock",
+            "source_type": "crm_deal",
+            "subject_type": "deal",
+            "subject_id": "DEAL-2026-001",
+            "external_ref": "crm-deal-001",
+            "provider_payload": {
+                "stage": "invoice_sent",
+                "amount": 1500,
+                "owner_role": "sales",
+                "full_name": "Synthetic Customer",
+                "phone": "+70000000000",
+                "access_token": "never-return-this",
+            },
+        },
+        headers=owner_headers,
+    )
+    assert provider_intake_response.status_code == 200
+    provider_intake = provider_intake_response.json()
+    assert provider_intake["provider_key"] == "crm.bitrix24.mock"
+    assert provider_intake["source_type"] == "crm_deal"
+    assert provider_intake["subject_type"] == "deal"
+    assert provider_intake["subject_id"] == "DEAL-2026-001"
+    assert provider_intake["safe_payload"] == {
+        "amount_bucket": "1000-2000",
+        "owner_role": "sales",
+        "source_state": "invoice_sent",
+    }
+    assert set(provider_intake["dropped_keys"]) >= {"access_token", "full_name", "phone"}
+    normalized_observation = provider_intake["normalized_observation"]
+    assert normalized_observation["system_key"] == "crm.bitrix24.mock"
+    assert normalized_observation["system_family"] == "crm"
+    assert normalized_observation["subject"] == "deal:DEAL-2026-001"
+    assert normalized_observation["external_ref"] == "crm-deal-001"
+    assert normalized_observation["state"] == "invoice_sent"
+    assert normalized_observation["would_create"] == "BusinessStateObservation"
+    assert normalized_observation["would_record_event"] == "business_state.observation.recorded"
+    assert normalized_observation["external_fetch"] is False
+    assert normalized_observation["external_mutation"] is False
+    assert normalized_observation["raw_payload_included"] is False
+    assert normalized_observation["pii_included"] is False
+    assert normalized_observation["requires_secret"] is False
+    assert {item["name"] for item in provider_intake["data_boundaries"]} == {
+        "preview_only_no_persist",
+        "raw_provider_payload_not_returned",
+        "secret_boundary",
+    }
+    assert {item["step"] for item in provider_intake["next_steps"]} == {
+        "record_normalized_observation",
+        "open_workbench_context",
+        "run_detection_preview",
+    }
+    assert {item["external_mutation"] for item in provider_intake["next_steps"]} == {False}
+    assert provider_intake["evidence"][0]["event"] == "business_provider_intake.previewed"
+    assert provider_intake["api"]["preview"] == "POST /tenants/{tenant_id}/business-provider-intake/preview"
+    assert provider_intake["api"]["workbench_context"] == (
+        "POST /tenants/{tenant_id}/business-workbench-context/preview"
+    )
+
     observation_payloads = [
         {
             "system_key": "crm.bitrix24.mock",

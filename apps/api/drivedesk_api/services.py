@@ -37,6 +37,7 @@ from drivedesk_api.schemas import (
     BusinessDetectionPreviewCreate,
     BusinessEscalationPreviewCreate,
     BusinessNotificationPreviewCreate,
+    BusinessProviderIntakePreviewCreate,
     BusinessWorkbenchContextPreviewCreate,
     BusinessExceptionCreate,
     BusinessExceptionStatusChange,
@@ -1969,6 +1970,215 @@ SAFE_CONTEXT_FACT_KEYS = {
     "owner_role",
     "reason",
 }
+
+SAFE_PROVIDER_DIRECT_KEYS = SAFE_CONTEXT_FACT_KEYS | {
+    "currency",
+    "invoice_id",
+    "payment_status",
+    "source_state",
+}
+
+UNSAFE_PROVIDER_KEY_TOKENS = {
+    "address",
+    "authorization",
+    "birth",
+    "cookie",
+    "email",
+    "full_name",
+    "name",
+    "passport",
+    "password",
+    "phone",
+    "raw",
+    "secret",
+    "session",
+    "telegram",
+    "token",
+}
+
+
+def _preview_bucket_amount(value: object) -> str | None:
+    try:
+        amount = float(value)
+    except (TypeError, ValueError):
+        return None
+    if amount < 0:
+        return "negative"
+    if amount < 1000:
+        return "0-1000"
+    if amount < 2000:
+        return "1000-2000"
+    if amount < 5000:
+        return "2000-5000"
+    return "5000+"
+
+
+def _provider_key_is_unsafe(key: str) -> bool:
+    lowered = key.lower()
+    return any(token in lowered for token in UNSAFE_PROVIDER_KEY_TOKENS)
+
+
+def _clean_preview_state(value: object, fallback: str) -> str:
+    raw = str(value or fallback).strip().lower()
+    cleaned = "".join(character if character.isalnum() else "_" for character in raw)
+    cleaned = "_".join(part for part in cleaned.split("_") if part)
+    return cleaned[:64] or fallback
+
+
+def _safe_provider_payload(provider_payload: dict[str, object]) -> tuple[dict[str, object], list[str]]:
+    safe_payload: dict[str, object] = {}
+    dropped_keys: list[str] = []
+    for key, value in sorted(provider_payload.items()):
+        if _provider_key_is_unsafe(key):
+            dropped_keys.append(key)
+            continue
+        if key in {"amount", "amount_cents", "sum", "total"}:
+            bucket = _preview_bucket_amount(value)
+            if bucket:
+                safe_payload.setdefault("amount_bucket", bucket)
+            else:
+                dropped_keys.append(key)
+            continue
+        if key in SAFE_PROVIDER_DIRECT_KEYS and isinstance(value, str | int | float | bool):
+            safe_payload[key] = value
+            continue
+        if key in {"stage", "status", "state"} and isinstance(value, str):
+            safe_payload["source_state"] = _clean_preview_state(value, "received")
+            continue
+        dropped_keys.append(key)
+    return safe_payload, sorted(set(dropped_keys))
+
+
+def _provider_preview_state(source_type: str, provider_payload: dict[str, object]) -> str:
+    if source_type == "crm_deal":
+        return _clean_preview_state(
+            provider_payload.get("state") or provider_payload.get("stage") or provider_payload.get("status"),
+            "invoice_sent",
+        )
+    if source_type == "bank_payment":
+        raw_state = _clean_preview_state(
+            provider_payload.get("state") or provider_payload.get("payment_status") or provider_payload.get("status"),
+            "paid",
+        )
+        return "paid" if raw_state in {"success", "succeeded", "completed", "captured"} else raw_state
+    if source_type == "accounting_export":
+        return _clean_preview_state(
+            provider_payload.get("state") or provider_payload.get("export_status") or provider_payload.get("status"),
+            "not_exported",
+        )
+    return _clean_preview_state(provider_payload.get("state") or provider_payload.get("status"), "received")
+
+
+async def preview_business_provider_intake(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    payload: BusinessProviderIntakePreviewCreate,
+) -> dict[str, object]:
+    await ensure_tenant_exists(session, tenant_id)
+    provider_payload = dict(payload.provider_payload)
+    safe_payload, dropped_keys = _safe_provider_payload(provider_payload)
+    state = _provider_preview_state(payload.source_type, provider_payload)
+    external_ref = payload.external_ref or str(
+        provider_payload.get("external_ref")
+        or provider_payload.get("id")
+        or provider_payload.get("deal_id")
+        or f"{payload.source_type}:{payload.subject_id}"
+    )
+    normalized_observation = {
+        "system_key": payload.provider_key,
+        "system_family": _observation_family(payload.provider_key),
+        "subject_type": payload.subject_type,
+        "subject_id": payload.subject_id,
+        "subject": _subject_label(payload.subject_type, payload.subject_id),
+        "external_ref": external_ref,
+        "state": state,
+        "safe_payload": safe_payload,
+        "would_create": "BusinessStateObservation",
+        "would_record_event": "business_state.observation.recorded",
+        "external_fetch": False,
+        "external_mutation": False,
+        "raw_payload_included": False,
+        "pii_included": False,
+        "requires_secret": False,
+    }
+    summary = (
+        f"{payload.source_type} intake from {payload.provider_key}: "
+        f"{len(safe_payload)} safe field(s), {len(dropped_keys)} dropped key(s), "
+        f"state={state} for {_subject_label(payload.subject_type, payload.subject_id)}."
+    )
+    return {
+        "tenant_id": tenant_id,
+        "provider_key": payload.provider_key,
+        "source_type": payload.source_type,
+        "subject_type": payload.subject_type,
+        "subject_id": payload.subject_id,
+        "generated_at": datetime.now(UTC),
+        "summary": summary,
+        "normalized_observation": normalized_observation,
+        "safe_payload": safe_payload,
+        "payload_keys": sorted(provider_payload.keys()),
+        "dropped_keys": dropped_keys,
+        "data_boundaries": [
+            {
+                "name": "preview_only_no_persist",
+                "status": "preview_only",
+                "external_fetch": False,
+                "external_mutation": False,
+                "detail": "The intake preview does not create observations, enqueue events, or call provider APIs.",
+            },
+            {
+                "name": "raw_provider_payload_not_returned",
+                "status": "clean",
+                "raw_payload_included": False,
+                "detail": "The response returns safe fields and dropped key names, not the original provider payload.",
+            },
+            {
+                "name": "secret_boundary",
+                "status": "clean",
+                "requires_secret": False,
+                "detail": "No Bitrix, bank, accounting, email, or Telegram credentials are required for preview.",
+            },
+        ],
+        "next_steps": [
+            {
+                "step": "record_normalized_observation",
+                "status": "available",
+                "endpoint": "POST /tenants/{tenant_id}/business-state/observations",
+                "external_mutation": False,
+                "evidence": "business_state.observation.recorded",
+            },
+            {
+                "step": "open_workbench_context",
+                "status": "available",
+                "endpoint": "POST /tenants/{tenant_id}/business-workbench-context/preview",
+                "external_mutation": False,
+                "evidence": "business_workbench_context.previewed",
+            },
+            {
+                "step": "run_detection_preview",
+                "status": "available",
+                "endpoint": "POST /tenants/{tenant_id}/business-detections/preview",
+                "external_mutation": False,
+                "evidence": "business_detection.previewed",
+            },
+        ],
+        "evidence": [
+            {
+                "type": "provider_payload",
+                "event": "business_provider_intake.previewed",
+                "provider_key": payload.provider_key,
+                "payload_key_count": len(provider_payload),
+                "dropped_key_count": len(dropped_keys),
+            }
+        ],
+        "api": {
+            "preview": "POST /tenants/{tenant_id}/business-provider-intake/preview",
+            "observations": "POST /tenants/{tenant_id}/business-state/observations",
+            "workbench_context": "POST /tenants/{tenant_id}/business-workbench-context/preview",
+            "detections": "POST /tenants/{tenant_id}/business-detections/preview",
+        },
+    }
 
 
 def _workbench_context_card(observation: BusinessStateObservation) -> dict[str, object]:

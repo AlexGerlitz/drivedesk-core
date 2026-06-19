@@ -27,8 +27,9 @@ infrastructure, production history, customer data, or operational credentials.
   and outbox overview.
 - `WORKFLOW_RULES.md` - tenant-owned automation rules, audit, outbox, and metrics.
 - `WORKFLOW_ACTION_RUNS.md` - workflow execution history, links, and metrics.
-- `BUSINESS_CONTROL_TOWER.md` - cross-system observations, business exceptions,
-  approval-gated repair actions, and control tower metrics.
+- `BUSINESS_CONTROL_TOWER.md` - provider intake preview, cross-system
+  observations, business exceptions, approval-gated repair actions, and control
+  tower metrics.
 - `AUTH_FOUNDATION.md` - credential auth, bearer token, and RBAC overview.
 - `AUTH_OBSERVABILITY.md` - aggregate auth metrics, alert names, and runbook shape.
 - `SESSION_REVOCATION.md` - admin-triggered tenant/platform session revocation.
@@ -130,9 +131,12 @@ The public repository export also generates:
 - `incidentResponse` - public-safe incident response contract in the demo
   payload and Incidents tab.
 - `businessControlTower` - public-safe control tower contract for CRM, bank,
-  accounting, workbench context preview, detection preview, escalation preview,
-  business exception, action plan preview, notification preview, repair-action
-  flow, and role briefing preview.
+  accounting, provider intake preview, workbench context preview, detection
+  preview, escalation preview, business exception, action plan preview,
+  notification preview, repair-action flow, and role briefing preview.
+- `POST /tenants/{tenant_id}/business-provider-intake/preview` - read-only
+  provider payload mapping into a safe normalized observation without provider
+  calls, raw payload return, secrets, persistence, or writes.
 - `POST /tenants/{tenant_id}/business-workbench-context/preview` - read-only
   role-specific context cards from normalized external observations without
   provider calls, raw payloads, secrets, or writes.

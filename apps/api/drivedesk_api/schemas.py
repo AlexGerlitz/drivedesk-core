@@ -22,6 +22,7 @@ BusinessDetectionRuleSet = Literal["payment_reconciliation"]
 BusinessEscalationPolicy = Literal["exception_triage"]
 BusinessActionPlanKind = Literal["exception_resolution"]
 BusinessNotificationKind = Literal["action_plan_updates"]
+BusinessProviderIntakeSource = Literal["crm_deal", "bank_payment", "accounting_export", "support_ticket"]
 BusinessWorkbenchContextKind = Literal["role_assist"]
 
 
@@ -600,6 +601,33 @@ class BusinessNotificationPreviewRead(BaseModel):
     delivery_plan: list[dict[str, Any]] = Field(default_factory=list)
     approval_gates: list[dict[str, Any]] = Field(default_factory=list)
     review_points: list[dict[str, Any]] = Field(default_factory=list)
+    evidence: list[dict[str, Any]] = Field(default_factory=list)
+    api: dict[str, str] = Field(default_factory=dict)
+
+
+class BusinessProviderIntakePreviewCreate(BaseModel):
+    provider_key: str = Field(min_length=3, max_length=120, pattern=r"^[a-z0-9][a-z0-9._-]*$")
+    source_type: BusinessProviderIntakeSource = "crm_deal"
+    subject_type: str = Field(min_length=2, max_length=64, pattern=r"^[a-z0-9][a-z0-9_-]*$")
+    subject_id: str = Field(min_length=1, max_length=128)
+    external_ref: str | None = Field(default=None, min_length=1, max_length=128)
+    provider_payload: dict[str, Any] = Field(default_factory=dict)
+
+
+class BusinessProviderIntakePreviewRead(BaseModel):
+    tenant_id: str
+    provider_key: str
+    source_type: BusinessProviderIntakeSource
+    subject_type: str
+    subject_id: str
+    generated_at: datetime
+    summary: str
+    normalized_observation: dict[str, Any] = Field(default_factory=dict)
+    safe_payload: dict[str, Any] = Field(default_factory=dict)
+    payload_keys: list[str] = Field(default_factory=list)
+    dropped_keys: list[str] = Field(default_factory=list)
+    data_boundaries: list[dict[str, Any]] = Field(default_factory=list)
+    next_steps: list[dict[str, Any]] = Field(default_factory=list)
     evidence: list[dict[str, Any]] = Field(default_factory=list)
     api: dict[str, str] = Field(default_factory=dict)
 

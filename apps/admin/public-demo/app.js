@@ -118,6 +118,14 @@
         Array.isArray(payload.integrationExecution.reconciliationLinks) &&
         Array.isArray(payload.integrationExecution.observability) &&
         Array.isArray(payload.integrationExecution.dataBoundaries) &&
+        payload.integrationRepair &&
+        Array.isArray(payload.integrationRepair.summary) &&
+        Array.isArray(payload.integrationRepair.incidentMatrix) &&
+        Array.isArray(payload.integrationRepair.repairRunbooks) &&
+        Array.isArray(payload.integrationRepair.impactAnalysis) &&
+        Array.isArray(payload.integrationRepair.repairActions) &&
+        Array.isArray(payload.integrationRepair.safeExecutionPlan) &&
+        Array.isArray(payload.integrationRepair.dataBoundaries) &&
         payload.connectorFixtureReplay &&
         Array.isArray(payload.connectorFixtureReplay.summary) &&
         Array.isArray(payload.connectorFixtureReplay.outcomes) &&
@@ -1263,6 +1271,195 @@
             String(Boolean(item.externalMutation)) +
             " - raw payload " +
             String(Boolean(item.rawPayloadIncluded))
+        )
+      );
+
+      row.append(top, detail);
+      boundaryRows.appendChild(row);
+    });
+  }
+
+  function fillIntegrationRepair() {
+    var repair = data.integrationRepair;
+
+    var summaryRows = document.getElementById("integrationRepairSummaryRows");
+    clear(summaryRows);
+    repair.summary.forEach(function (item) {
+      var card = document.createElement("article");
+      card.className = "metric-card";
+      card.dataset.tone = item.tone || "blue";
+
+      var label = document.createElement("span");
+      label.className = "muted";
+      label.appendChild(text(item.label));
+
+      var value = document.createElement("strong");
+      value.appendChild(text(item.value));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      card.append(label, value, detail);
+      summaryRows.appendChild(card);
+    });
+
+    var incidentRows = document.getElementById("integrationRepairIncidentRows");
+    clear(incidentRows);
+    repair.incidentMatrix.forEach(function (incident) {
+      var row = document.createElement("article");
+      row.className = "event-row integration-repair-incident-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(incident.incidentId + " / " + incident.adapterKey));
+      top.append(title, chip(incident.severity, statusTone(incident.severity)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          incident.sourceStatus +
+            " - " +
+            incident.businessImpact +
+            " - provider call " +
+            String(Boolean(incident.providerCallEnabled))
+        )
+      );
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(incident.evidence));
+
+      row.append(top, detail, evidence);
+      incidentRows.appendChild(row);
+    });
+
+    var runbookRows = document.getElementById("integrationRepairRunbookRows");
+    clear(runbookRows);
+    repair.repairRunbooks.forEach(function (runbook) {
+      var row = document.createElement("article");
+      row.className = "event-row integration-repair-runbook-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(runbook.runbookKey));
+      top.append(title, chip(runbook.severity, statusTone(runbook.severity)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(runbook.title + " - " + (runbook.recommendedActions || []).join(" / "))
+      );
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(runbook.evidence));
+
+      row.append(top, detail, evidence);
+      runbookRows.appendChild(row);
+    });
+
+    var impactRows = document.getElementById("integrationRepairImpactRows");
+    clear(impactRows);
+    repair.impactAnalysis.forEach(function (impact) {
+      var row = document.createElement("article");
+      row.className = "event-row integration-repair-impact-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(impact.area));
+      top.append(title, chip(impact.status, statusTone(impact.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(impact.affectedItems + " items - " + impact.detail));
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(impact.evidence));
+
+      row.append(top, detail, evidence);
+      impactRows.appendChild(row);
+    });
+
+    var actionRows = document.getElementById("integrationRepairActionRows");
+    clear(actionRows);
+    repair.repairActions.forEach(function (action) {
+      var row = document.createElement("article");
+      row.className = "event-row integration-repair-action-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(action.action));
+      top.append(title, chip(action.status, statusTone(action.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          action.target +
+            " - approval " +
+            String(Boolean(action.requiresApproval)) +
+            " - auto " +
+            String(Boolean(action.safeToAutoRun)) +
+            " - external mutation " +
+            String(Boolean(action.externalMutation))
+        )
+      );
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(action.evidence));
+
+      row.append(top, detail, evidence);
+      actionRows.appendChild(row);
+    });
+
+    var planRows = document.getElementById("integrationRepairPlanRows");
+    clear(planRows);
+    repair.safeExecutionPlan.forEach(function (step) {
+      var row = document.createElement("article");
+      row.className = "event-row integration-repair-plan-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(step.step));
+      top.append(title, chip(step.status, statusTone(step.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(step.detail));
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(step.evidence));
+
+      row.append(top, detail, evidence);
+      planRows.appendChild(row);
+    });
+
+    var boundaryRows = document.getElementById("integrationRepairBoundaryRows");
+    clear(boundaryRows);
+    repair.dataBoundaries.forEach(function (boundary) {
+      var row = document.createElement("article");
+      row.className = "event-row integration-repair-boundary-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(boundary.name));
+      top.append(title, chip(boundary.status, statusTone(boundary.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          boundary.detail +
+            " - raw payload " +
+            String(Boolean(boundary.rawPayloadIncluded)) +
+            " - provider call " +
+            String(Boolean(boundary.providerCallEnabled))
         )
       );
 
@@ -3824,11 +4021,11 @@
 
   function statusTone(status) {
     if (
-      ["done", "ready", "online", "validated", "processed", "previewed", "green", "active", "success", "observed", "matched", "mapped", "resolved", "passed", "routed", "approved", "executed", "paid", "available", "detected", "satisfied", "clean", "confirmed", "closed", "private_ready", "contract_ready", "enforced"].indexOf(status) >= 0
+      ["done", "ready", "online", "validated", "processed", "previewed", "green", "active", "success", "observed", "matched", "mapped", "resolved", "passed", "routed", "approved", "executed", "paid", "available", "detected", "satisfied", "clean", "confirmed", "closed", "private_ready", "contract_ready", "enforced", "safe_dry_run", "actionable"].indexOf(status) >= 0
     ) {
       return "green";
     }
-    if (["blocked", "waiting", "pending", "retry", "partial_success", "current", "open", "acknowledged", "warning", "attention", "review_required", "mitigating", "fired", "proposed", "suggested", "invoice_sent", "not_exported", "waiting_for_repair", "requires_channel_config", "requires_private_secret", "requires_private_provider", "requires_private_endpoint", "documented", "not_needed", "preview_only", "needs_cross_check", "action_required", "approval_required", "draft_only", "would_create", "would_enqueue", "required", "next_private_step", "requires_approval", "separate", "synthetic_only"].indexOf(status) >= 0) {
+    if (["blocked", "waiting", "pending", "retry", "retryable", "partial_success", "current", "open", "acknowledged", "warning", "attention", "review_required", "operator_review", "needs_review", "degraded", "at_risk", "mitigating", "fired", "proposed", "suggested", "invoice_sent", "not_exported", "waiting_for_repair", "requires_channel_config", "requires_private_secret", "requires_private_provider", "requires_private_endpoint", "documented", "not_needed", "preview_only", "needs_cross_check", "action_required", "approval_required", "draft_only", "would_create", "would_enqueue", "required", "next_private_step", "requires_approval", "separate", "synthetic_only", "locked", "planned"].indexOf(status) >= 0) {
       return "amber";
     }
     if (["high", "dead_letter", "critical"].indexOf(status) >= 0) {
@@ -3884,6 +4081,7 @@
     fillProviderOnboarding();
     fillIntegrationRuntime();
     fillIntegrationExecution();
+    fillIntegrationRepair();
     fillConnectorFixtureReplay();
     fillSyncJobs();
     fillIntegrationHealth();

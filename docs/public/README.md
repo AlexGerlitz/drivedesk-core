@@ -58,6 +58,9 @@ infrastructure, production history, customer data, or operational credentials.
 - `INTEGRATION_EXECUTION.md` - Integration execution timeline from run ledger
   to outbox, worker dispatch, blocked provider call, retry, reconciliation, and
   operator closure via the `integrationExecution` contract.
+- `INTEGRATION_REPAIR.md` - Integration repair workbench from failure
+  classification to runbook, safe action, approval gate, and postcheck via the
+  `integrationRepair` contract.
 - `BUSINESS_SCENARIO_REPLAY.md` - reusable Business OS replay paths for
   CRM/bank/accounting mismatch, support SLA risk, and procurement delay risk via
   the `businessScenarioReplay` contract.
@@ -170,6 +173,8 @@ infrastructure, production history, customer data, or operational credentials.
   provider onboarding evidence snapshot.
 - `evidence/connector-fixture-replay.sanitized.json` - machine-readable
   public-safe connector fixture replay evidence snapshot.
+- `evidence/integration-repair.sanitized.json` - machine-readable public-safe
+  integration repair evidence snapshot.
 - `evidence/public-evidence-index.sanitized.json` - machine-readable public
   evidence index.
 - `assets/drivedesk-core-demo-overview.png` - public demo screenshot.
@@ -207,6 +212,9 @@ The public repository export also generates:
 - `GET /demo/integration-execution` - standalone public-safe Integration
   Execution timeline contract for `integrationExecution`, backed by
   `POST /tenants/{tenant_id}/integration-executions/preview`.
+- `GET /demo/integration-repair` - standalone public-safe Integration Repair
+  workbench contract for `integrationRepair`: incident classification,
+  runbooks, safe actions, approvals, and postchecks.
 - `incidentResponse` - public-safe incident response contract in the demo
   payload and Incidents tab.
 - `businessControlTower` - public-safe control tower contract for CRM, bank,
@@ -295,6 +303,8 @@ The public repository export also generates:
   certification path validation.
 - `scripts/check_public_adapter_developer_guide.sh` - public-safe adapter
   developer guide and SDK operation-plan validation.
+- `scripts/check_public_integration_repair.sh` - public-safe integration repair
+  workbench validation.
 - `scripts/check_public_observability_proof.sh` - public-safe observability proof validation.
 - `scripts/check_public_alert_routing.sh` - public-safe alert routing validation.
 - `scripts/check_public_engineering_proof.sh` - public-safe proof tab and evidence contract validation.

@@ -16,9 +16,9 @@ The tour is public-safe: it uses synthetic data and sanitized evidence only.
 | 1 | Business signal | A synthetic lead, contract, payment, task, or external provider fact enters the platform. | `businessControlTower.providerIntake`, `workflowScenarios` |
 | 2 | Workbench context | The operator gets role-specific context, risk level, source-system cards, suggested actions, the provider-event intake pipeline, task handoff preview, notification channel matrix, Business Context Assistant, action execution preview, approval gateway, and reusable scenario replay. | `businessControlTower.workbenchContext`, `businessIntakePipeline`, `businessTaskHandoff`, `businessNotificationChannels`, `businessContextAssistant`, `businessActionExecution`, `businessApprovalGateway`, `businessScenarioReplay`, `BUSINESS_INTAKE_PIPELINE.md`, `BUSINESS_TASK_HANDOFF.md`, `BUSINESS_NOTIFICATION_CHANNELS.md`, `BUSINESS_CONTEXT_ASSISTANT.md`, `BUSINESS_ACTION_EXECUTION.md`, `BUSINESS_APPROVAL_GATEWAY.md`, `BUSINESS_SCENARIO_REPLAY.md`, `GET /demo/business-intake-pipeline`, `GET /demo/business-task-handoff`, `GET /demo/business-notification-channels`, `GET /demo/business-context-assistant`, `GET /demo/business-action-execution`, `GET /demo/business-approval-gateway`, `GET /demo/business-scenario-replay`, `POST /tenants/{tenant_id}/business-workbench-context/preview`, `POST /tenants/{tenant_id}/business-action-executions/preview`, `POST /tenants/{tenant_id}/business-approval-gateway/preview` |
 | 3 | Workflow action | Business rules create audit events, internal task cards, notification channel drafts, execution dry-runs, approval requests, blocked commit unlocks, outbox candidates, or adapter-sync requests. | `workflowScenarios`, `workflow.action_run.created`, `businessTaskHandoff`, `businessNotificationChannels`, `businessActionExecution`, `businessApprovalGateway` |
-| 4 | Adapter Studio | Runtime catalog, connector certification workbench, fixture replay, Integration Runtime, Integration Execution, standalone certification and replay APIs, and generated SDK operation plans show how an external provider is connected without exposing secrets. | `adapterStudio`, `connectorCertification`, `connectorFixtureReplay`, `integrationRuntime`, `integrationExecution`, `GET /demo/connector-certification`, `GET /demo/connector-fixture-replay`, `GET /demo/integration-runtime`, `GET /demo/integration-execution`, `CONNECTOR_CERTIFICATION.md`, `CONNECTOR_FIXTURE_REPLAY.md`, `INTEGRATION_RUNTIME.md`, `INTEGRATION_EXECUTION.md`, `adapter_runtime.previewed`, `integration_execution.run_ledger_prepared`, `sdk/generated/public-demo/` |
-| 5 | Async execution | Accepted work moves through outbox and worker-backed contracts with retry, idempotency, reconciliation, and incident-route boundaries. | `outbox`, `integrationJobs`, `integrationRuntime`, `integrationExecution`, `worker:drivedesk_worker.main.process_pending_outbox`, `adapter_runtime.previewed`, `integration_execution.run_ledger_prepared` |
-| 6 | Operations response | Metrics, alert routing, incidents, runbooks, and operator review make failures visible and recoverable. | `alertRouting`, `incidentResponse`, `drivedesk_integration_incidents` |
+| 4 | Adapter Studio | Runtime catalog, connector certification workbench, fixture replay, Integration Runtime, Integration Execution, Integration Repair, standalone certification, replay, execution, and repair APIs, and generated SDK operation plans show how an external provider is connected without exposing secrets. | `adapterStudio`, `connectorCertification`, `connectorFixtureReplay`, `integrationRuntime`, `integrationExecution`, `integrationRepair`, `GET /demo/connector-certification`, `GET /demo/connector-fixture-replay`, `GET /demo/integration-runtime`, `GET /demo/integration-execution`, `GET /demo/integration-repair`, `CONNECTOR_CERTIFICATION.md`, `CONNECTOR_FIXTURE_REPLAY.md`, `INTEGRATION_RUNTIME.md`, `INTEGRATION_EXECUTION.md`, `INTEGRATION_REPAIR.md`, `adapter_runtime.previewed`, `integration_execution.run_ledger_prepared`, `sdk/generated/public-demo/` |
+| 5 | Async execution | Accepted work moves through outbox and worker-backed contracts with retry, idempotency, reconciliation, repair runbooks, and incident-route boundaries. | `outbox`, `integrationJobs`, `integrationRuntime`, `integrationExecution`, `integrationRepair`, `worker:drivedesk_worker.main.process_pending_outbox`, `adapter_runtime.previewed`, `integration_execution.run_ledger_prepared` |
+| 6 | Operations response | Metrics, alert routing, incidents, runbooks, repair actions, and operator review make failures visible and recoverable. | `alertRouting`, `incidentResponse`, `integrationRepair`, `drivedesk_integration_incidents` |
 | 7 | Release proof | CI, public export, recovery drills, GitOps, OpenTofu, and Pages health prove the public surface stays consistent. | `engineeringProof`, `EVIDENCE_INDEX.md` |
 
 ## Demo Route
@@ -33,7 +33,7 @@ Use the public demo in this order:
    Business Action Execution, Business Approval Gateway,
    and Business Scenario Replay.
 4. `Integrations` - Adapter Studio, connector certification, fixture replay,
-   Integration Runtime, Integration Execution, adapter contracts, operation scenarios, sync jobs, and
+   Integration Runtime, Integration Execution, Integration Repair, adapter contracts, operation scenarios, sync jobs, and
    health.
 5. `Operations` - alert routing and recovery evidence.
 6. `Incidents` - incident queue, timeline, recovery actions, and resolution
@@ -70,6 +70,7 @@ bash scripts/check_public_business_action_execution.sh
 bash scripts/check_public_business_approval_gateway.sh
 bash scripts/check_public_integration_runtime.sh
 bash scripts/check_public_integration_execution.sh
+bash scripts/check_public_integration_repair.sh
 bash scripts/check_public_business_scenario_replay.sh
 bash scripts/check_public_engineering_proof.sh
 ```

@@ -127,6 +127,7 @@ from drivedesk_api.schemas import (
     IntegrationExecutionDemoRead,
     IntegrationExecutionPreviewCreate,
     IntegrationExecutionPreviewRead,
+    IntegrationRepairDemoRead,
     IntegrationMappingPreviewCreate,
     IntegrationMappingPreviewRead,
     IntegrationOperatorReviewItemRead,
@@ -314,6 +315,20 @@ def build_app(settings: Settings | None = None) -> FastAPI:
     async def integration_execution_demo() -> JSONResponse:
         return JSONResponse(
             build_public_demo_payload()["integrationExecution"],
+            headers={
+                "Access-Control-Allow-Origin": "*",
+                "Cache-Control": "public, max-age=60",
+            },
+        )
+
+    @api.get(
+        "/demo/integration-repair",
+        response_model=IntegrationRepairDemoRead,
+        tags=["demo"],
+    )
+    async def integration_repair_demo() -> JSONResponse:
+        return JSONResponse(
+            build_public_demo_payload()["integrationRepair"],
             headers={
                 "Access-Control-Allow-Origin": "*",
                 "Cache-Control": "public, max-age=60",

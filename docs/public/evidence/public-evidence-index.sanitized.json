@@ -187,6 +187,30 @@
       "boundary": "synthetic fixture descriptors and sanitized replay outcomes only; no raw provider payloads, credentials, external calls, or public persistence"
     },
     {
+      "capability_id": "integration-repair",
+      "title": "Integration repair workbench",
+      "status": "validated",
+      "public_doc": "docs/public/INTEGRATION_REPAIR.md",
+      "evidence_files": [
+        "docs/public/evidence/integration-repair.sanitized.json",
+        "docs/public/INTEGRATION_REPAIR.md",
+        "docs/public/INTEGRATION_INCIDENT_RUNBOOKS.md",
+        "apps/admin/public-demo/index.html",
+        "apps/admin/public-demo/demo-data.js"
+      ],
+      "verifiers": [
+        "bash scripts/check_public_integration_repair.sh",
+        "bash scripts/check_public_demo_api.sh",
+        "bash scripts/check_public_demo_sdk.sh"
+      ],
+      "public_urls": [
+        "docs/public/INTEGRATION_REPAIR.md",
+        "docs/public/evidence/integration-repair.sanitized.json",
+        "apps/admin/public-demo/"
+      ],
+      "boundary": "synthetic failure classification, runbook references, safe repair actions, and postcheck evidence only; no raw provider payloads, credentials, external calls, or production data"
+    },
+    {
       "capability_id": "observability",
       "title": "Metrics, logs, alerts, runbooks, and dashboards",
       "status": "validated",

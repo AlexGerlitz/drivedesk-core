@@ -23,6 +23,7 @@ GET /demo/business-action-execution
 GET /demo/business-approval-gateway
 GET /demo/integration-runtime
 GET /demo/integration-execution
+GET /demo/integration-repair
 GET /demo/business-scenario-replay
 ```
 
@@ -35,7 +36,7 @@ connector certification, sync jobs, Integration Health, alert routing, incident 
 `businessTaskHandoff`, `businessNotificationChannels`,
 `businessContextAssistant`, `businessActionExecution`,
 `businessApprovalGateway`, `integrationRuntime`, `integrationExecution`,
-`businessScenarioReplay`, recovery evidence,
+`integrationRepair`, `businessScenarioReplay`, recovery evidence,
 `connectorCertification`, `providerOnboarding`, `connectorFixtureReplay`, and the `engineeringProof` contract rendered by the
 Control Tower, Integrations, Operations, Incidents, and Proof tabs.
 
@@ -115,6 +116,15 @@ dead-letter, reconciliation, observability, and operator closure.
 The public review page for this contract is
 `docs/public/INTEGRATION_EXECUTION.md`.
 
+`GET /demo/integration-repair` returns the same `integrationRepair` contract
+as a standalone endpoint. It is useful for checking the repair workbench
+directly: retry/dead-letter/reconciliation failure -> incident classification
+-> business impact -> runbook -> safe diagnostic action -> approval-gated
+repair -> postcheck evidence.
+
+The public review page for this contract is
+`docs/public/INTEGRATION_REPAIR.md`.
+
 `GET /demo/business-scenario-replay` returns the same
 `businessScenarioReplay` contract as a standalone endpoint. It is useful for
 checking the Business OS loop directly: external signal -> normalized facts ->
@@ -137,6 +147,7 @@ risk detection -> role context -> approval-aware action plan.
 | Business Approval Gateway API | Smoke checks can load `GET /demo/business-approval-gateway` directly. |
 | Integration Runtime API | Smoke checks can load `GET /demo/integration-runtime` directly. |
 | Integration Execution API | Smoke checks can load `GET /demo/integration-execution` directly. |
+| Integration Repair API | Smoke checks can load `GET /demo/integration-repair` directly. |
 | Scenario Replay API | Smoke checks can load `GET /demo/business-scenario-replay` directly. |
 
 Example local API-backed run:
@@ -181,14 +192,15 @@ bash scripts/check_public_demo_sdk.sh
 `/demo/business-intake-pipeline`, `/demo/business-task-handoff`,
 `/demo/business-notification-channels`, `/demo/business-context-assistant`,
 `/demo/business-action-execution`, `/demo/business-approval-gateway`,
-`/demo/business-scenario-replay`,
+`/demo/integration-repair`, `/demo/business-scenario-replay`,
 `/openapi.json`, the generated
 `docs/openapi.json` when present, alert routes, alert-to-runbook bindings,
 connector certification references in `CONNECTOR_CERTIFICATION.md`, connector
 provider onboarding references in `PROVIDER_ONBOARDING.md`,
 fixture replay references in `CONNECTOR_FIXTURE_REPLAY.md`, business scenario
 replay references in `BUSINESS_SCENARIO_REPLAY.md`, approval gateway references
-in `BUSINESS_APPROVAL_GATEWAY.md`, and then runs the curl, Python, and
+in `BUSINESS_APPROVAL_GATEWAY.md`, integration repair references in
+`INTEGRATION_REPAIR.md`, and then runs the curl, Python, and
 JavaScript examples against the same API.
 
 The `connectorFixtureReplay` payload is the API-backed form of
@@ -230,6 +242,11 @@ The `businessScenarioReplay` payload is documented in
 CRM/bank/accounting mismatch, support SLA risk, and procurement delay risk. The
 contract proves that DriveDesk can keep the same normalization, detection,
 context, action-plan, and approval boundary across different external systems.
+
+The `integrationRepair` payload is documented in `INTEGRATION_REPAIR.md`. It
+shows how DriveDesk classifies failed integration work, attaches business
+impact, selects runbooks, separates safe diagnostics from approval-gated repair
+actions, and records postcheck evidence without public provider calls.
 
 The incident response payload is documented in `INCIDENT_RESPONSE_DEMO.md`. It
 shows the synthetic path:
@@ -297,5 +314,5 @@ without infrastructure, and the same UI can be pointed at the FastAPI endpoint
 to verify that the backend owns the demo payload shape: workflow, timeline,
 workflow scenarios, domain events, audit, outbox data, alert routing, incident
 response, business control tower data, business scenario replay data, adapter
-operation scenarios, recovery evidence, Adapter Studio, and engineering proof
-gates.
+operation scenarios, integration repair workbench data, recovery evidence,
+Adapter Studio, and engineering proof gates.

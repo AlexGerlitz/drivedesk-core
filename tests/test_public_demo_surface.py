@@ -99,6 +99,13 @@ def test_public_demo_html_links_static_assets() -> None:
     assert 'id="integrationExecutionStateRows"' in html
     assert 'id="integrationExecutionRecoveryRows"' in html
     assert 'id="integrationExecutionBoundaryRows"' in html
+    assert 'id="integrationRepairSummaryRows"' in html
+    assert 'id="integrationRepairIncidentRows"' in html
+    assert 'id="integrationRepairRunbookRows"' in html
+    assert 'id="integrationRepairImpactRows"' in html
+    assert 'id="integrationRepairActionRows"' in html
+    assert 'id="integrationRepairPlanRows"' in html
+    assert 'id="integrationRepairBoundaryRows"' in html
     assert 'id="controlTowerObservationRows"' in html
     assert 'id="controlTowerExceptionRows"' in html
     assert 'id="controlTowerRepairRows"' in html
@@ -1158,6 +1165,44 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
         "docs/public/INTEGRATION_RUNTIME.md",
         "docs/public/OUTBOX_RECOVERY.md",
     }
+    integration_repair = payload["integrationRepair"]
+    assert integration_repair["status"] == "previewed"
+    assert integration_repair["command"] == "GET /demo/integration-repair"
+    assert integration_repair["repairLevel"] == "operator_repair_ready"
+    assert integration_repair["incidentCount"] == 3
+    assert integration_repair["criticalCount"] == 2
+    assert integration_repair["safeActionCount"] == 1
+    assert {f"{item['sourceType']}:{item['sourceStatus']}" for item in integration_repair["incidentMatrix"]} == {
+        "outbox_event:retry",
+        "outbox_event:dead_letter",
+        "reconciliation:mismatched",
+    }
+    assert {item["runbookKey"] for item in integration_repair["repairRunbooks"]} == {
+        "integration.retry_backlog",
+        "integration.dead_letter",
+        "integration.reconciliation_mismatch",
+    }
+    assert {item["area"] for item in integration_repair["impactAnalysis"]} == {
+        "workflow_delivery",
+        "financial_reconciliation",
+        "operator_queue",
+    }
+    assert {item["action"] for item in integration_repair["repairActions"]} == {
+        "run_connection_diagnostics",
+        "retry_after_diagnostics",
+        "fix_mapping_profile",
+        "open_reconciliation_review",
+    }
+    assert [
+        item["action"] for item in integration_repair["repairActions"] if item["safeToAutoRun"] is True
+    ] == ["run_connection_diagnostics"]
+    for field in ("externalMutation", "providerCallEnabled", "rawPayloadIncluded", "containsPii"):
+        assert {item[field] for item in integration_repair["dataBoundaries"]} == {False}
+    assert integration_repair["api"]["standalone"] == "GET /demo/integration-repair"
+    assert {item["path"] for item in integration_repair["docs"]} >= {
+        "docs/public/INTEGRATION_REPAIR.md",
+        "docs/public/INTEGRATION_INCIDENT_RUNBOOKS.md",
+    }
     business_scenario_replay = payload["businessScenarioReplay"]
     assert business_scenario_replay["status"] == "validated"
     assert business_scenario_replay["command"] == "bash scripts/check_public_business_scenario_replay.sh"
@@ -1339,6 +1384,7 @@ def test_public_demo_can_load_api_backed_data_with_static_fallback() -> None:
     assert "fillBusinessApprovalGateway" in script
     assert "fillIntegrationRuntime" in script
     assert "fillIntegrationExecution" in script
+    assert "fillIntegrationRepair" in script
     assert "alertRouting" in script
     assert "incidentResponse" in script
     assert "engineeringProof" in script
@@ -1347,6 +1393,7 @@ def test_public_demo_can_load_api_backed_data_with_static_fallback() -> None:
     assert "businessApprovalGateway" in script
     assert "integrationRuntime" in script
     assert "integrationExecution" in script
+    assert "integrationRepair" in script
     assert "workflowScenarios" in script
     assert "endToEndScenario" in script
     assert "adapterScenarios" in script
@@ -1536,6 +1583,7 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
             "/demo/business-context-assistant",
             "/demo/business-action-execution",
             "/demo/business-approval-gateway",
+            "/demo/integration-repair",
             "/demo/business-scenario-replay",
             "operationId",
             "ConnectorFixtureReplayRead",
@@ -1543,6 +1591,7 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
             "BusinessContextAssistantDemoRead",
             "BusinessActionExecutionDemoRead",
             "BusinessApprovalGatewayDemoRead",
+            "IntegrationRepairDemoRead",
             "BusinessScenarioReplayRead",
             "drivedesk_public_demo_client.py",
             "drivedesk-public-demo-client.mjs",
@@ -1578,6 +1627,13 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
             "IntegrationReconciliation",
             "INTEGRATION_EXECUTION.md",
         ],
+        "scripts/check_public_integration_repair.sh": [
+            "/demo/integration-repair",
+            "integrationRepair",
+            "operator_repair_ready",
+            "run_connection_diagnostics",
+            "INTEGRATION_REPAIR.md",
+        ],
         "examples/curl/demo-public.sh": ["/demo/public", "api.synthetic", "student_sync"],
         "examples/python/demo_public_client.py": ["/demo/public", "api.synthetic", "student_sync"],
         "examples/python/demo_adapter_operation_plan.py": [
@@ -1594,12 +1650,15 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
         "sdk/generated/public-demo/python/drivedesk_public_demo_client.py": [
             "/demo/public",
             "/demo/connector-fixture-replay",
+            "/demo/integration-repair",
             "/demo/business-scenario-replay",
             "public_demo_demo_public_get",
             "connector_fixture_replay_demo_demo_connector_fixture_replay_get",
+            "integration_repair_demo_demo_integration_repair_get",
             "business_scenario_replay_demo_demo_business_scenario_replay_get",
             "student_sync",
             "get_connector_fixture_replay",
+            "get_integration_repair",
             "get_business_scenario_replay",
             "build_adapter_operation_plan",
             "contract_only",
@@ -1607,12 +1666,15 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
         "sdk/generated/public-demo/javascript/drivedesk-public-demo-client.mjs": [
             "/demo/public",
             "/demo/connector-fixture-replay",
+            "/demo/integration-repair",
             "/demo/business-scenario-replay",
             "public_demo_demo_public_get",
             "connector_fixture_replay_demo_demo_connector_fixture_replay_get",
+            "integration_repair_demo_demo_integration_repair_get",
             "business_scenario_replay_demo_demo_business_scenario_replay_get",
             "student_sync",
             "getConnectorFixtureReplay",
+            "getIntegrationRepair",
             "getBusinessScenarioReplay",
             "buildAdapterOperationPlan",
             "contract_only",
@@ -1620,9 +1682,11 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
         "sdk/generated/public-demo/typescript/drivedesk-public-demo-client.d.ts": [
             "PublicDemoPayload",
             "ConnectorFixtureReplayPayload",
+            "IntegrationRepairPayload",
             "BusinessScenarioReplayPayload",
             "student_sync",
             "getConnectorFixtureReplay",
+            "getIntegrationRepair",
             "getBusinessScenarioReplay",
             "AdapterOperationPlan",
         ],

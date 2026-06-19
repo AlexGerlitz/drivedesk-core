@@ -41,6 +41,7 @@ parsing Markdown by hand.
 | Integration hub | `docs/public/INTEGRATION_ADAPTER_CATALOG.md` | `bash scripts/check_public_demo_api.sh` |
 | Connector certification | `docs/public/CONNECTOR_CERTIFICATION.md` | `bash scripts/check_public_connector_certification.sh` |
 | Connector fixture replay | `docs/public/CONNECTOR_FIXTURE_REPLAY.md` | `bash scripts/check_public_connector_fixture_replay.sh` |
+| Integration repair | `docs/public/INTEGRATION_REPAIR.md` | `bash scripts/check_public_integration_repair.sh` |
 | Observability | `docs/public/OBSERVABILITY_PROOF.md` | `bash scripts/check_public_observability_proof.sh` |
 | Alert routing | `docs/public/ALERT_ROUTING_EVIDENCE.md` | `bash scripts/check_public_alert_routing.sh` |
 | Incident response | `docs/public/INCIDENT_RESPONSE_DEMO.md` | `bash scripts/check_public_engineering_proof.sh` |

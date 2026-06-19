@@ -31,6 +31,8 @@ INTEGRATION_RUNTIME_PATH = "/demo/integration-runtime"
 INTEGRATION_RUNTIME_METHOD = "get"
 INTEGRATION_EXECUTION_PATH = "/demo/integration-execution"
 INTEGRATION_EXECUTION_METHOD = "get"
+INTEGRATION_REPAIR_PATH = "/demo/integration-repair"
+INTEGRATION_REPAIR_METHOD = "get"
 BUSINESS_SCENARIO_REPLAY_PATH = "/demo/business-scenario-replay"
 BUSINESS_SCENARIO_REPLAY_METHOD = "get"
 
@@ -132,6 +134,14 @@ def integration_execution_operation(schema: dict[str, Any]) -> dict[str, Any]:
         schema,
         INTEGRATION_EXECUTION_PATH,
         INTEGRATION_EXECUTION_METHOD,
+    )
+
+
+def integration_repair_operation(schema: dict[str, Any]) -> dict[str, Any]:
+    return required_operation(
+        schema,
+        INTEGRATION_REPAIR_PATH,
+        INTEGRATION_REPAIR_METHOD,
     )
 
 
@@ -265,6 +275,16 @@ def integration_execution_required_fields(schema: dict[str, Any]) -> list[str]:
     return [str(item) for item in required]
 
 
+def integration_repair_required_fields(schema: dict[str, Any]) -> list[str]:
+    components = schema.get("components", {})
+    schemas = components.get("schemas", {})
+    repair = schemas.get("IntegrationRepairDemoRead", {})
+    required = repair.get("required", [])
+    if not isinstance(required, list) or not required:
+        raise SystemExit("OpenAPI schema does not contain IntegrationRepairDemoRead.required")
+    return [str(item) for item in required]
+
+
 def business_scenario_replay_required_fields(schema: dict[str, Any]) -> list[str]:
     components = schema.get("components", {})
     schemas = components.get("schemas", {})
@@ -289,6 +309,8 @@ def render_python_client(
     connector_certification_required_fields: list[str],
     provider_onboarding_operation_id: str,
     provider_onboarding_required_fields: list[str],
+    integration_repair_operation_id: str,
+    integration_repair_required_fields: list[str],
     business_scenario_operation_id: str,
     business_scenario_required_fields: list[str],
 ) -> str:
@@ -300,6 +322,10 @@ def render_python_client(
     )
     provider_onboarding_required_json = json.dumps(
         provider_onboarding_required_fields,
+        indent=2,
+    )
+    integration_repair_required_json = json.dumps(
+        integration_repair_required_fields,
         indent=2,
     )
     business_scenario_required_json = json.dumps(business_scenario_required_fields, indent=2)
@@ -316,16 +342,19 @@ PUBLIC_DEMO_PATH = "{PUBLIC_DEMO_PATH}"
 CONNECTOR_REPLAY_PATH = "{CONNECTOR_REPLAY_PATH}"
 CONNECTOR_CERTIFICATION_PATH = "{CONNECTOR_CERTIFICATION_PATH}"
 PROVIDER_ONBOARDING_PATH = "{PROVIDER_ONBOARDING_PATH}"
+INTEGRATION_REPAIR_PATH = "{INTEGRATION_REPAIR_PATH}"
 BUSINESS_SCENARIO_REPLAY_PATH = "{BUSINESS_SCENARIO_REPLAY_PATH}"
 OPERATION_ID = "{operation_id}"
 CONNECTOR_REPLAY_OPERATION_ID = "{connector_operation_id}"
 CONNECTOR_CERTIFICATION_OPERATION_ID = "{connector_certification_operation_id}"
 PROVIDER_ONBOARDING_OPERATION_ID = "{provider_onboarding_operation_id}"
+INTEGRATION_REPAIR_OPERATION_ID = "{integration_repair_operation_id}"
 BUSINESS_SCENARIO_REPLAY_OPERATION_ID = "{business_scenario_operation_id}"
 REQUIRED_FIELDS = {required_json}
 CONNECTOR_REPLAY_REQUIRED_FIELDS = {connector_required_json}
 CONNECTOR_CERTIFICATION_REQUIRED_FIELDS = {connector_certification_required_json}
 PROVIDER_ONBOARDING_REQUIRED_FIELDS = {provider_onboarding_required_json}
+INTEGRATION_REPAIR_REQUIRED_FIELDS = {integration_repair_required_json}
 BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS = {business_scenario_required_json}
 
 
@@ -354,6 +383,11 @@ class DriveDeskPublicDemoClient:
     def get_provider_onboarding(self) -> dict[str, Any]:
         payload = self._get_json(PROVIDER_ONBOARDING_PATH)
         validate_provider_onboarding_payload(payload)
+        return payload
+
+    def get_integration_repair(self) -> dict[str, Any]:
+        payload = self._get_json(INTEGRATION_REPAIR_PATH)
+        validate_integration_repair_payload(payload)
         return payload
 
     def get_business_scenario_replay(self) -> dict[str, Any]:
@@ -659,6 +693,90 @@ def validate_provider_onboarding_payload(payload: dict[str, Any]) -> None:
         raise ValueError("provider onboarding boundaries must not mutate external providers")
 
 
+def validate_integration_repair_payload(payload: dict[str, Any]) -> None:
+    missing = [field for field in INTEGRATION_REPAIR_REQUIRED_FIELDS if field not in payload]
+    if missing:
+        raise ValueError(f"missing integration repair fields: {{', '.join(missing)}}")
+
+    if payload.get("status") != "previewed":
+        raise ValueError(f"unexpected integration repair status: {{payload.get('status')}}")
+
+    if payload.get("command") != f"GET {{INTEGRATION_REPAIR_PATH}}":
+        raise ValueError(f"unexpected integration repair command: {{payload.get('command')}}")
+
+    if payload.get("repairLevel") != "operator_repair_ready":
+        raise ValueError(f"unexpected integration repair level: {{payload.get('repairLevel')}}")
+
+    if payload.get("incidentCount") != 3:
+        raise ValueError(f"unexpected integration repair incident count: {{payload.get('incidentCount')}}")
+
+    if payload.get("criticalCount") != 2:
+        raise ValueError(f"unexpected integration repair critical count: {{payload.get('criticalCount')}}")
+
+    if payload.get("safeActionCount") != 1:
+        raise ValueError(f"unexpected integration repair safe action count: {{payload.get('safeActionCount')}}")
+
+    for key in (
+        "summary",
+        "incidentMatrix",
+        "repairRunbooks",
+        "impactAnalysis",
+        "repairActions",
+        "safeExecutionPlan",
+        "dataBoundaries",
+    ):
+        value = payload.get(key)
+        if not isinstance(value, list) or not value:
+            raise ValueError(f"integration repair {{key}} is missing or empty")
+
+    incident_ids = {{
+        item.get("incidentId")
+        for item in payload.get("incidentMatrix", [])
+        if isinstance(item, dict)
+    }}
+    required_incidents = {{"IR-001", "IR-002", "IR-003"}}
+    if incident_ids != required_incidents:
+        raise ValueError(f"integration repair ids mismatch: {{sorted(incident_ids)}}")
+
+    runbook_keys = {{
+        item.get("runbookKey")
+        for item in payload.get("repairRunbooks", [])
+        if isinstance(item, dict)
+    }}
+    required_runbooks = {{
+        "integration.retry_backlog",
+        "integration.dead_letter",
+        "integration.reconciliation_mismatch",
+    }}
+    if runbook_keys != required_runbooks:
+        raise ValueError(f"integration repair runbooks mismatch: {{sorted(runbook_keys)}}")
+
+    safe_actions = [
+        item
+        for item in payload.get("repairActions", [])
+        if isinstance(item, dict) and item.get("safeToAutoRun") is True
+    ]
+    if len(safe_actions) != 1 or safe_actions[0].get("action") != "run_connection_diagnostics":
+        raise ValueError("integration repair must expose exactly one safe diagnostic action")
+
+    for action in payload.get("repairActions", []):
+        if not isinstance(action, dict):
+            raise ValueError("integration repair action must be an object")
+        if action.get("providerCallEnabled") is not False or action.get("externalMutation") is not False:
+            raise ValueError("integration repair actions must not call or mutate providers")
+
+    for boundary in payload.get("dataBoundaries", []):
+        if not isinstance(boundary, dict):
+            raise ValueError("integration repair boundary must be an object")
+        if (
+            boundary.get("containsPii") is not False
+            or boundary.get("rawPayloadIncluded") is not False
+            or boundary.get("providerCallEnabled") is not False
+            or boundary.get("externalMutation") is not False
+        ):
+            raise ValueError("integration repair boundaries must stay public-safe")
+
+
 def validate_business_scenario_replay_payload(payload: dict[str, Any]) -> None:
     missing = [field for field in BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS if field not in payload]
     if missing:
@@ -861,6 +979,11 @@ def validate_public_demo_payload(payload: dict[str, Any]) -> None:
         raise ValueError("providerOnboarding is missing")
     validate_provider_onboarding_payload(provider_onboarding)
 
+    integration_repair = payload.get("integrationRepair")
+    if not isinstance(integration_repair, dict):
+        raise ValueError("integrationRepair is missing")
+    validate_integration_repair_payload(integration_repair)
+
     business_scenario_replay = payload.get("businessScenarioReplay")
     if not isinstance(business_scenario_replay, dict):
         raise ValueError("businessScenarioReplay is missing")
@@ -922,6 +1045,7 @@ def main() -> None:
     connector_replay = client.get_connector_fixture_replay()
     connector_certification = client.get_connector_certification()
     provider_onboarding = client.get_provider_onboarding()
+    integration_repair = client.get_integration_repair()
     business_scenario_replay = client.get_business_scenario_replay()
     adapter_plan = build_adapter_operation_plan(payload, "adapter-file-import-preview")
     print(
@@ -933,11 +1057,13 @@ def main() -> None:
         f"connectorReplay={{connector_replay['status']}}",
         f"connectorCertification={{connector_certification['certificationLevel']}}",
         f"providerOnboarding={{provider_onboarding['onboardingLevel']}}",
+        f"integrationRepair={{integration_repair['repairLevel']}}",
         f"businessScenarioReplay={{business_scenario_replay['status']}}",
         f"operation={{OPERATION_ID}}",
         f"connectorOperation={{CONNECTOR_REPLAY_OPERATION_ID}}",
         f"connectorCertificationOperation={{CONNECTOR_CERTIFICATION_OPERATION_ID}}",
         f"providerOnboardingOperation={{PROVIDER_ONBOARDING_OPERATION_ID}}",
+        f"integrationRepairOperation={{INTEGRATION_REPAIR_OPERATION_ID}}",
         f"businessScenarioOperation={{BUSINESS_SCENARIO_REPLAY_OPERATION_ID}}",
     )
 
@@ -956,6 +1082,8 @@ def render_javascript_client(
     connector_certification_required_fields: list[str],
     provider_onboarding_operation_id: str,
     provider_onboarding_required_fields: list[str],
+    integration_repair_operation_id: str,
+    integration_repair_required_fields: list[str],
     business_scenario_operation_id: str,
     business_scenario_required_fields: list[str],
 ) -> str:
@@ -969,6 +1097,10 @@ def render_javascript_client(
         provider_onboarding_required_fields,
         indent=2,
     )
+    integration_repair_required_json = json.dumps(
+        integration_repair_required_fields,
+        indent=2,
+    )
     business_scenario_required_json = json.dumps(business_scenario_required_fields, indent=2)
     return f'''#!/usr/bin/env node
 import {{ pathToFileURL }} from "node:url";
@@ -977,16 +1109,19 @@ export const PUBLIC_DEMO_PATH = "{PUBLIC_DEMO_PATH}";
 export const CONNECTOR_REPLAY_PATH = "{CONNECTOR_REPLAY_PATH}";
 export const CONNECTOR_CERTIFICATION_PATH = "{CONNECTOR_CERTIFICATION_PATH}";
 export const PROVIDER_ONBOARDING_PATH = "{PROVIDER_ONBOARDING_PATH}";
+export const INTEGRATION_REPAIR_PATH = "{INTEGRATION_REPAIR_PATH}";
 export const BUSINESS_SCENARIO_REPLAY_PATH = "{BUSINESS_SCENARIO_REPLAY_PATH}";
 export const OPERATION_ID = "{operation_id}";
 export const CONNECTOR_REPLAY_OPERATION_ID = "{connector_operation_id}";
 export const CONNECTOR_CERTIFICATION_OPERATION_ID = "{connector_certification_operation_id}";
 export const PROVIDER_ONBOARDING_OPERATION_ID = "{provider_onboarding_operation_id}";
+export const INTEGRATION_REPAIR_OPERATION_ID = "{integration_repair_operation_id}";
 export const BUSINESS_SCENARIO_REPLAY_OPERATION_ID = "{business_scenario_operation_id}";
 export const REQUIRED_FIELDS = {required_json};
 export const CONNECTOR_REPLAY_REQUIRED_FIELDS = {connector_required_json};
 export const CONNECTOR_CERTIFICATION_REQUIRED_FIELDS = {connector_certification_required_json};
 export const PROVIDER_ONBOARDING_REQUIRED_FIELDS = {provider_onboarding_required_json};
+export const INTEGRATION_REPAIR_REQUIRED_FIELDS = {integration_repair_required_json};
 export const BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS = {business_scenario_required_json};
 
 export class DriveDeskPublicDemoClient {{
@@ -1059,6 +1194,22 @@ export class DriveDeskPublicDemoClient {{
 
     const payload = await response.json();
     validateProviderOnboardingPayload(payload);
+    return payload;
+  }}
+
+  async getIntegrationRepair() {{
+    const response = await this.fetchImpl(`${{this.baseUrl}}${{INTEGRATION_REPAIR_PATH}}`, {{
+      headers: {{
+        Accept: "application/json",
+      }},
+    }});
+
+    if (!response.ok) {{
+      throw new Error(`GET ${{INTEGRATION_REPAIR_PATH}} failed: ${{response.status}}`);
+    }}
+
+    const payload = await response.json();
+    validateIntegrationRepairPayload(payload);
     return payload;
   }}
 
@@ -1389,6 +1540,82 @@ export function validateProviderOnboardingPayload(payload) {{
   }}
 }}
 
+export function validateIntegrationRepairPayload(payload) {{
+  const missing = INTEGRATION_REPAIR_REQUIRED_FIELDS.filter((field) => !(field in (payload || {{}})));
+  if (missing.length > 0) {{
+    throw new Error(`missing integration repair fields: ${{missing.join(", ")}}`);
+  }}
+
+  if (payload.status !== "previewed") {{
+    throw new Error(`unexpected integration repair status: ${{payload.status}}`);
+  }}
+
+  if (payload.command !== `GET ${{INTEGRATION_REPAIR_PATH}}`) {{
+    throw new Error(`unexpected integration repair command: ${{payload.command}}`);
+  }}
+
+  if (payload.repairLevel !== "operator_repair_ready") {{
+    throw new Error(`unexpected integration repair level: ${{payload.repairLevel}}`);
+  }}
+
+  if (payload.incidentCount !== 3 || payload.criticalCount !== 2 || payload.safeActionCount !== 1) {{
+    throw new Error("integration repair counts do not match the public contract");
+  }}
+
+  for (const key of [
+    "summary",
+    "incidentMatrix",
+    "repairRunbooks",
+    "impactAnalysis",
+    "repairActions",
+    "safeExecutionPlan",
+    "dataBoundaries",
+  ]) {{
+    if (!Array.isArray(payload[key]) || payload[key].length === 0) {{
+      throw new Error(`integration repair ${{key}} is missing or empty`);
+    }}
+  }}
+
+  const incidentIds = new Set(payload.incidentMatrix.map((item) => item?.incidentId));
+  for (const incidentId of ["IR-001", "IR-002", "IR-003"]) {{
+    if (!incidentIds.has(incidentId)) {{
+      throw new Error(`integration repair incident is missing: ${{incidentId}}`);
+    }}
+  }}
+
+  const runbookKeys = new Set(payload.repairRunbooks.map((item) => item?.runbookKey));
+  for (const runbookKey of [
+    "integration.retry_backlog",
+    "integration.dead_letter",
+    "integration.reconciliation_mismatch",
+  ]) {{
+    if (!runbookKeys.has(runbookKey)) {{
+      throw new Error(`integration repair runbook is missing: ${{runbookKey}}`);
+    }}
+  }}
+
+  const safeActions = payload.repairActions.filter((item) => item?.safeToAutoRun === true);
+  if (safeActions.length !== 1 || safeActions[0]?.action !== "run_connection_diagnostics") {{
+    throw new Error("integration repair must expose exactly one safe diagnostic action");
+  }}
+
+  if (payload.repairActions.some((item) => item?.providerCallEnabled !== false || item?.externalMutation !== false)) {{
+    throw new Error("integration repair actions must not call or mutate providers");
+  }}
+
+  if (
+    payload.dataBoundaries.some(
+      (item) =>
+        item?.containsPii !== false ||
+        item?.rawPayloadIncluded !== false ||
+        item?.providerCallEnabled !== false ||
+        item?.externalMutation !== false,
+    )
+  ) {{
+    throw new Error("integration repair boundaries must stay public-safe");
+  }}
+}}
+
 export function validateBusinessScenarioReplayPayload(payload) {{
   const missing = BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS.filter((field) => !(field in payload));
   if (missing.length > 0) {{
@@ -1584,6 +1811,11 @@ export function validatePublicDemoPayload(payload) {{
   }}
   validateProviderOnboardingPayload(payload.providerOnboarding);
 
+  if (!payload.integrationRepair || typeof payload.integrationRepair !== "object") {{
+    throw new Error("integrationRepair is missing");
+  }}
+  validateIntegrationRepairPayload(payload.integrationRepair);
+
   if (!payload.businessScenarioReplay || typeof payload.businessScenarioReplay !== "object") {{
     throw new Error("businessScenarioReplay is missing");
   }}
@@ -1650,6 +1882,7 @@ async function main() {{
   const connectorReplay = await client.getConnectorFixtureReplay();
   const connectorCertification = await client.getConnectorCertification();
   const providerOnboarding = await client.getProviderOnboarding();
+  const integrationRepair = await client.getIntegrationRepair();
   const businessScenarioReplay = await client.getBusinessScenarioReplay();
   const adapterPlan = buildAdapterOperationPlan(payload, "adapter-file-import-preview");
   console.log(
@@ -1661,11 +1894,13 @@ async function main() {{
     `connectorReplay=${{connectorReplay.status}}`,
     `connectorCertification=${{connectorCertification.certificationLevel}}`,
     `providerOnboarding=${{providerOnboarding.onboardingLevel}}`,
+    `integrationRepair=${{integrationRepair.repairLevel}}`,
     `businessScenarioReplay=${{businessScenarioReplay.status}}`,
     `operation=${{OPERATION_ID}}`,
     `connectorOperation=${{CONNECTOR_REPLAY_OPERATION_ID}}`,
     `connectorCertificationOperation=${{CONNECTOR_CERTIFICATION_OPERATION_ID}}`,
     `providerOnboardingOperation=${{PROVIDER_ONBOARDING_OPERATION_ID}}`,
+    `integrationRepairOperation=${{INTEGRATION_REPAIR_OPERATION_ID}}`,
     `businessScenarioOperation=${{BUSINESS_SCENARIO_REPLAY_OPERATION_ID}}`,
   );
 }}
@@ -1688,6 +1923,8 @@ def render_typescript_defs(
     connector_certification_required_fields: list[str],
     provider_onboarding_operation_id: str,
     provider_onboarding_required_fields: list[str],
+    integration_repair_operation_id: str,
+    integration_repair_required_fields: list[str],
     business_scenario_operation_id: str,
     business_scenario_required_fields: list[str],
 ) -> str:
@@ -1699,6 +1936,9 @@ def render_typescript_defs(
     provider_onboarding_required_union = " | ".join(
         f'"{field}"' for field in provider_onboarding_required_fields
     )
+    integration_repair_required_union = " | ".join(
+        f'"{field}"' for field in integration_repair_required_fields
+    )
     business_scenario_required_union = " | ".join(
         f'"{field}"' for field in business_scenario_required_fields
     )
@@ -1707,16 +1947,19 @@ export const PUBLIC_DEMO_PATH: "{PUBLIC_DEMO_PATH}";
 export const CONNECTOR_REPLAY_PATH: "{CONNECTOR_REPLAY_PATH}";
 export const CONNECTOR_CERTIFICATION_PATH: "{CONNECTOR_CERTIFICATION_PATH}";
 export const PROVIDER_ONBOARDING_PATH: "{PROVIDER_ONBOARDING_PATH}";
+export const INTEGRATION_REPAIR_PATH: "{INTEGRATION_REPAIR_PATH}";
 export const BUSINESS_SCENARIO_REPLAY_PATH: "{BUSINESS_SCENARIO_REPLAY_PATH}";
 export const OPERATION_ID: "{operation_id}";
 export const CONNECTOR_REPLAY_OPERATION_ID: "{connector_operation_id}";
 export const CONNECTOR_CERTIFICATION_OPERATION_ID: "{connector_certification_operation_id}";
 export const PROVIDER_ONBOARDING_OPERATION_ID: "{provider_onboarding_operation_id}";
+export const INTEGRATION_REPAIR_OPERATION_ID: "{integration_repair_operation_id}";
 export const BUSINESS_SCENARIO_REPLAY_OPERATION_ID: "{business_scenario_operation_id}";
 export const REQUIRED_FIELDS: Array<{required_union}>;
 export const CONNECTOR_REPLAY_REQUIRED_FIELDS: Array<{connector_required_union}>;
 export const CONNECTOR_CERTIFICATION_REQUIRED_FIELDS: Array<{connector_certification_required_union}>;
 export const PROVIDER_ONBOARDING_REQUIRED_FIELDS: Array<{provider_onboarding_required_union}>;
+export const INTEGRATION_REPAIR_REQUIRED_FIELDS: Array<{integration_repair_required_union}>;
 export const BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS: Array<{business_scenario_required_union}>;
 
 export type AdapterScenarioPhase = "preview" | "execute" | "retry" | "operator_review";
@@ -1809,6 +2052,24 @@ export interface ProviderOnboardingPayload {{
   docs: Array<Record<string, string>>;
 }}
 
+export interface IntegrationRepairPayload {{
+  status: "previewed";
+  command: string;
+  repairLevel: "operator_repair_ready";
+  incidentCount: 3;
+  criticalCount: 2;
+  safeActionCount: 1;
+  summary: Array<Record<string, unknown>>;
+  incidentMatrix: Array<Record<string, unknown>>;
+  repairRunbooks: Array<Record<string, unknown>>;
+  impactAnalysis: Array<Record<string, unknown>>;
+  repairActions: Array<Record<string, unknown>>;
+  safeExecutionPlan: Array<Record<string, unknown>>;
+  dataBoundaries: Array<Record<string, unknown>>;
+  api: Record<string, string>;
+  docs: Array<Record<string, string>>;
+}}
+
 export interface BusinessScenarioReplayPayload {{
   status: "validated";
   command: string;
@@ -1849,6 +2110,7 @@ export interface PublicDemoPayload {{
   adapterStudio: Record<string, unknown>;
   connectorCertification: ConnectorCertificationPayload;
   providerOnboarding: ProviderOnboardingPayload;
+  integrationRepair: IntegrationRepairPayload;
   connectorFixtureReplay: ConnectorFixtureReplayPayload;
   integrationJobs: Array<Record<string, unknown>>;
   integrationHealth: Array<Record<string, string>>;
@@ -1903,6 +2165,7 @@ export class DriveDeskPublicDemoClient {{
   getConnectorFixtureReplay(): Promise<ConnectorFixtureReplayPayload>;
   getConnectorCertification(): Promise<ConnectorCertificationPayload>;
   getProviderOnboarding(): Promise<ProviderOnboardingPayload>;
+  getIntegrationRepair(): Promise<IntegrationRepairPayload>;
   getBusinessScenarioReplay(): Promise<BusinessScenarioReplayPayload>;
   getAdapterOperationPlan(
     scenarioId: string,
@@ -1920,6 +2183,7 @@ export function validatePublicDemoPayload(payload: PublicDemoPayload): void;
 export function validateConnectorFixtureReplayPayload(payload: ConnectorFixtureReplayPayload): void;
 export function validateConnectorCertificationPayload(payload: ConnectorCertificationPayload): void;
 export function validateProviderOnboardingPayload(payload: ProviderOnboardingPayload): void;
+export function validateIntegrationRepairPayload(payload: IntegrationRepairPayload): void;
 export function validateBusinessScenarioReplayPayload(payload: BusinessScenarioReplayPayload): void;
 '''
 
@@ -1935,6 +2199,7 @@ def render_readme(
     business_approval_gateway_operation_id: str,
     integration_runtime_operation_id: str,
     integration_execution_operation_id: str,
+    integration_repair_operation_id: str,
     business_scenario_operation_id: str,
 ) -> str:
     return f'''# Generated Public Demo SDK
@@ -1984,6 +2249,9 @@ operationId: {integration_runtime_operation_id}
 GET {INTEGRATION_EXECUTION_PATH}
 operationId: {integration_execution_operation_id}
 
+GET {INTEGRATION_REPAIR_PATH}
+operationId: {integration_repair_operation_id}
+
 GET {BUSINESS_SCENARIO_REPLAY_PATH}
 operationId: {business_scenario_operation_id}
 ```
@@ -2022,6 +2290,10 @@ Adapter operation helpers:
   `GET {INTEGRATION_RUNTIME_PATH}`
 - `integration_execution` manifest entry for
   `GET {INTEGRATION_EXECUTION_PATH}`
+- `integration_repair` manifest entry for
+  `GET {INTEGRATION_REPAIR_PATH}`
+- `DriveDeskPublicDemoClient.getIntegrationRepair`
+- `DriveDeskPublicDemoClient.get_integration_repair`
 - `DriveDeskPublicDemoClient.getBusinessScenarioReplay`
 - `DriveDeskPublicDemoClient.get_business_scenario_replay`
 
@@ -2070,6 +2342,11 @@ Integration execution metadata validates the public-safe execution timeline:
 run ledger, outbox enqueue, worker dispatch, blocked provider call, retry,
 dead-letter, reconciliation, observability, and no raw provider payloads.
 
+Integration repair metadata validates the public-safe repair workbench:
+incident classification, business impact, runbook attachment, safe diagnostic
+actions, approval boundaries, postcheck steps, and no provider calls in the
+public demo.
+
 Engineering summary: this is the public-safe integration proof. DriveDesk
 publishes an OpenAPI contract and generates a small SDK from it instead of
 relying on hand-written request examples only.
@@ -2101,6 +2378,8 @@ def render_manifest(
     integration_runtime_required_fields: list[str],
     integration_execution_operation_id: str,
     integration_execution_required_fields: list[str],
+    integration_repair_operation_id: str,
+    integration_repair_required_fields: list[str],
     business_scenario_operation_id: str,
     business_scenario_required_fields: list[str],
 ) -> str:
@@ -2175,6 +2454,13 @@ def render_manifest(
             "method": INTEGRATION_EXECUTION_METHOD.upper(),
             "operation_id": integration_execution_operation_id,
             "required_fields": integration_execution_required_fields,
+        },
+        "integration_repair": {
+            "path": INTEGRATION_REPAIR_PATH,
+            "method": INTEGRATION_REPAIR_METHOD.upper(),
+            "operation_id": integration_repair_operation_id,
+            "schema": "IntegrationRepairDemoRead",
+            "required_fields": integration_repair_required_fields,
         },
         "business_scenario_replay": {
             "path": BUSINESS_SCENARIO_REPLAY_PATH,
@@ -2269,6 +2555,11 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
         integration_execution_op.get("operationId") or "get_integration_execution"
     )
     integration_execution_fields = integration_execution_required_fields(schema)
+    integration_repair_op = integration_repair_operation(schema)
+    integration_repair_operation_id = str(
+        integration_repair_op.get("operationId") or "get_integration_repair"
+    )
+    integration_repair_fields = integration_repair_required_fields(schema)
     business_scenario_operation = business_scenario_replay_operation(schema)
     business_scenario_operation_id = str(
         business_scenario_operation.get("operationId") or "get_business_scenario_replay"
@@ -2288,6 +2579,7 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
             business_approval_gateway_operation_id,
             integration_runtime_operation_id,
             integration_execution_operation_id,
+            integration_repair_operation_id,
             business_scenario_operation_id,
         ),
     )
@@ -2318,6 +2610,8 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
             integration_runtime_fields,
             integration_execution_operation_id,
             integration_execution_fields,
+            integration_repair_operation_id,
+            integration_repair_fields,
             business_scenario_operation_id,
             business_scenario_required_fields,
         ),
@@ -2333,6 +2627,8 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
             connector_certification_fields,
             provider_onboarding_operation_id,
             provider_onboarding_fields,
+            integration_repair_operation_id,
+            integration_repair_fields,
             business_scenario_operation_id,
             business_scenario_required_fields,
         ),
@@ -2348,6 +2644,8 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
             connector_certification_fields,
             provider_onboarding_operation_id,
             provider_onboarding_fields,
+            integration_repair_operation_id,
+            integration_repair_fields,
             business_scenario_operation_id,
             business_scenario_required_fields,
         ),
@@ -2363,6 +2661,8 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
             connector_certification_fields,
             provider_onboarding_operation_id,
             provider_onboarding_fields,
+            integration_repair_operation_id,
+            integration_repair_fields,
             business_scenario_operation_id,
             business_scenario_required_fields,
         ),

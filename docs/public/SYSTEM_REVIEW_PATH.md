@@ -42,7 +42,7 @@ Primary artifacts:
 | --- | --- |
 | Platform tour | `docs/public/PLATFORM_TOUR.md` |
 | Architecture | `docs/public/SYSTEM_DESIGN.md` |
-| Demo API | `docs/public/API_BACKED_DEMO.md`, `docs/openapi.json`, `GET /demo/public`, `GET /demo/connector-fixture-replay`, `GET /demo/business-intake-pipeline`, `GET /demo/business-task-handoff`, `GET /demo/business-notification-channels`, `GET /demo/business-context-assistant`, `GET /demo/business-action-execution`, `GET /demo/business-approval-gateway`, `GET /demo/integration-runtime`, `GET /demo/integration-execution`, `GET /demo/business-scenario-replay` |
+| Demo API | `docs/public/API_BACKED_DEMO.md`, `docs/openapi.json`, `GET /demo/public`, `GET /demo/connector-fixture-replay`, `GET /demo/business-intake-pipeline`, `GET /demo/business-task-handoff`, `GET /demo/business-notification-channels`, `GET /demo/business-context-assistant`, `GET /demo/business-action-execution`, `GET /demo/business-approval-gateway`, `GET /demo/integration-runtime`, `GET /demo/integration-execution`, `GET /demo/integration-repair`, `GET /demo/business-scenario-replay` |
 | SDK | `docs/public/CLIENT_SDK.md`, `sdk/generated/public-demo/` |
 | Workflow | `docs/public/WORKFLOW_DEMO.md`, `endToEndScenario` |
 | Connector replay | `docs/public/CONNECTOR_FIXTURE_REPLAY.md`, `GET /demo/connector-fixture-replay`, `examples/connector-fixtures/replay-fixtures.sanitized.json` |
@@ -54,6 +54,7 @@ Primary artifacts:
 | Business approval gateway | `docs/public/BUSINESS_APPROVAL_GATEWAY.md`, `GET /demo/business-approval-gateway`, `businessApprovalGateway`, `POST /tenants/{tenant_id}/business-approval-gateway/preview` |
 | Integration runtime | `docs/public/INTEGRATION_RUNTIME.md`, `GET /demo/integration-runtime`, `integrationRuntime`, `POST /tenants/{tenant_id}/integration-runtime/preview`, `adapter_runtime.previewed` |
 | Integration execution | `docs/public/INTEGRATION_EXECUTION.md`, `GET /demo/integration-execution`, `integrationExecution`, `POST /tenants/{tenant_id}/integration-executions/preview`, `integration_execution.run_ledger_prepared` |
+| Integration repair | `docs/public/INTEGRATION_REPAIR.md`, `GET /demo/integration-repair`, `integrationRepair`, `docs/public/evidence/integration-repair.sanitized.json` |
 | Business scenario replay | `docs/public/BUSINESS_SCENARIO_REPLAY.md`, `GET /demo/business-scenario-replay`, `businessScenarioReplay` |
 | Observability | `docs/public/OBSERVABILITY_PROOF.md` |
 | Alert routing | `docs/public/ALERT_ROUTING_EVIDENCE.md` |
@@ -78,6 +79,7 @@ bash scripts/check_public_business_action_execution.sh
 bash scripts/check_public_business_approval_gateway.sh
 bash scripts/check_public_integration_runtime.sh
 bash scripts/check_public_integration_execution.sh
+bash scripts/check_public_integration_repair.sh
 bash scripts/check_public_business_scenario_replay.sh
 bash scripts/check_public_engineering_proof.sh
 bash scripts/check_public_connector_fixture_replay.sh

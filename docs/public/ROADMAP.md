@@ -30,6 +30,11 @@ Fast external verification path: `docs/public/REVIEWER_QUICKSTART.md`.
   enqueue, worker dispatch, blocked provider call, retry, dead-letter,
   reconciliation, observability, and `integration_execution.run_ledger_prepared`
   evidence.
+- Public-safe integration repair workbench (`docs/public/INTEGRATION_REPAIR.md`,
+  `GET /demo/integration-repair`, `integrationRepair`) for turning retry,
+  dead-letter, and reconciliation failures into runbook-backed impact analysis,
+  safe diagnostic actions, approval boundaries, postchecks, and no-provider-call
+  evidence.
 - Tenant-scoped operator review queue for retry and dead-letter integration jobs.
 - Mapping validation against runtime adapter requirements.
 - Runtime mapping transform and read-only mapping preview.
@@ -168,8 +173,8 @@ Fast external verification path: `docs/public/REVIEWER_QUICKSTART.md`.
   event, and outbox shape.
 - More public-safe evidence around local run, CI, OpenAPI, and demo health.
 - More connector certification fixtures, onboarding provider classes, and
-  adapter recovery examples with payload mapping, replay evidence, and
-  follow-up actions.
+  adapter recovery examples with payload mapping, replay evidence, repair
+  workbench scenarios, and follow-up actions.
 - More operator workbench scenarios that connect action plans and notification
   previews to task creation without public external writes.
 - More Business Context Assistant scenarios for role-specific work surfaces,

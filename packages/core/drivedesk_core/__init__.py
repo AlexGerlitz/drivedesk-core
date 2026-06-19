@@ -37,7 +37,12 @@ from drivedesk_core.lifecycle import (
     list_lifecycle_policies,
     preview_lifecycle_transition,
 )
-from drivedesk_core.runbooks import IntegrationRunbook, list_integration_runbooks, select_integration_runbook
+from drivedesk_core.runbooks import (
+    IntegrationRunbook,
+    build_integration_repair_workbench,
+    list_integration_runbooks,
+    select_integration_runbook,
+)
 
 __all__ = [
     "ActorRef",
@@ -60,6 +65,7 @@ __all__ = [
     "build_adapter_connection_diagnostics",
     "build_adapter_runtime_plan",
     "build_connector_certification_workbench",
+    "build_integration_repair_workbench",
     "build_provider_onboarding_workbench",
     "build_event",
     "describe_adapter",

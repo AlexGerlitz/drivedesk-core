@@ -4311,6 +4311,354 @@ window.DRIVEDESK_DEMO_DATA = {
       "state": "active"
     }
   ],
+  "integrationRepair": {
+    "api": {
+      "incidents": "GET /tenants/{tenant_id}/integration-incidents",
+      "operatorReview": "GET /tenants/{tenant_id}/integration-operator-review",
+      "reconciliations": "GET /tenants/{tenant_id}/integration-reconciliations",
+      "retry": "POST /tenants/{tenant_id}/outbox-events/{event_id}/retry",
+      "standalone": "GET /demo/integration-repair"
+    },
+    "command": "GET /demo/integration-repair",
+    "criticalCount": 2,
+    "dataBoundaries": [
+      {
+        "containsPii": false,
+        "detail": "The workbench computes repair guidance from synthetic status and evidence references.",
+        "externalMutation": false,
+        "name": "repair_preview_only",
+        "providerCallEnabled": false,
+        "rawPayloadIncluded": false,
+        "status": "clean"
+      },
+      {
+        "containsPii": false,
+        "detail": "Operators see counts, buckets, diff keys, and hashes instead of raw provider payloads.",
+        "externalMutation": false,
+        "name": "safe_payload_summary",
+        "providerCallEnabled": false,
+        "rawPayloadIncluded": false,
+        "status": "clean"
+      },
+      {
+        "containsPii": false,
+        "detail": "State-changing repair remains locked behind approval, idempotency, and audit evidence.",
+        "externalMutation": false,
+        "name": "approval_before_retry",
+        "providerCallEnabled": false,
+        "rawPayloadIncluded": false,
+        "status": "locked"
+      },
+      {
+        "containsPii": false,
+        "detail": "Real provider calls belong only to the private connector runtime.",
+        "externalMutation": false,
+        "name": "private_provider_boundary",
+        "providerCallEnabled": false,
+        "rawPayloadIncluded": false,
+        "status": "closed"
+      }
+    ],
+    "docs": [
+      {
+        "check": "bash scripts/check_public_integration_repair.sh",
+        "label": "Integration repair",
+        "path": "docs/public/INTEGRATION_REPAIR.md"
+      },
+      {
+        "check": "bash scripts/check_public_demo_api.sh",
+        "label": "Incident runbooks",
+        "path": "docs/public/INTEGRATION_INCIDENT_RUNBOOKS.md"
+      },
+      {
+        "check": "bash scripts/check_public_integration_execution.sh",
+        "label": "Integration execution",
+        "path": "docs/public/INTEGRATION_EXECUTION.md"
+      },
+      {
+        "check": "bash scripts/check_public_provider_onboarding.sh",
+        "label": "Provider onboarding",
+        "path": "docs/public/PROVIDER_ONBOARDING.md"
+      }
+    ],
+    "impactAnalysis": [
+      {
+        "affectedItems": 2,
+        "area": "workflow_delivery",
+        "detail": "Two downstream workflow steps wait for adapter recovery evidence.",
+        "evidence": "integration_repair.impact.workflow_delivery",
+        "externalMutation": false,
+        "status": "degraded"
+      },
+      {
+        "affectedItems": 1,
+        "area": "financial_reconciliation",
+        "detail": "One export needs reconciliation review before finance closure.",
+        "evidence": "integration_repair.impact.financial_reconciliation",
+        "externalMutation": false,
+        "status": "at_risk"
+      },
+      {
+        "affectedItems": 3,
+        "area": "operator_queue",
+        "detail": "All incidents have a runbook, owner path, and safe next action.",
+        "evidence": "integration_repair.impact.operator_queue",
+        "externalMutation": false,
+        "status": "actionable"
+      }
+    ],
+    "incidentCount": 3,
+    "incidentMatrix": [
+      {
+        "adapterKey": "accounting.export.mock",
+        "attempts": 2,
+        "businessImpact": "Accounting export is delayed but the workflow remains recoverable.",
+        "evidence": "integration_repair.retry_backlog_classified",
+        "externalMutation": false,
+        "incidentId": "IR-001",
+        "nextAction": "run_connection_diagnostics",
+        "operationKey": "accounting_export_execute",
+        "providerCallEnabled": false,
+        "safePayloadSummary": {
+          "amountBucket": "2001-5000",
+          "payloadHashRecorded": true,
+          "records": 2
+        },
+        "severity": "warning",
+        "sourceStatus": "retry",
+        "sourceType": "outbox_event",
+        "status": "retryable"
+      },
+      {
+        "adapterKey": "crm.bitrix24.mock",
+        "attempts": 3,
+        "businessImpact": "CRM deal facts are blocked until mapping or scope is corrected.",
+        "evidence": "integration_repair.dead_letter_classified",
+        "externalMutation": false,
+        "incidentId": "IR-002",
+        "nextAction": "fix_mapping_profile",
+        "operationKey": "crm_deal_ingest_execute",
+        "providerCallEnabled": false,
+        "safePayloadSummary": {
+          "missingMapping": [
+            "deal_id"
+          ],
+          "payloadHashRecorded": true,
+          "records": 1
+        },
+        "severity": "critical",
+        "sourceStatus": "dead_letter",
+        "sourceType": "outbox_event",
+        "status": "operator_review"
+      },
+      {
+        "adapterKey": "accounting.export.mock",
+        "attempts": 1,
+        "businessImpact": "Provider evidence does not match DriveDesk expected result.",
+        "evidence": "integration_repair.reconciliation_mismatch_classified",
+        "externalMutation": false,
+        "incidentId": "IR-003",
+        "nextAction": "open_reconciliation_review",
+        "operationKey": "accounting_export_execute",
+        "providerCallEnabled": false,
+        "safePayloadSummary": {
+          "diffKeys": [
+            "records_accepted",
+            "provider_status"
+          ],
+          "providerStatus": "partial_success"
+        },
+        "severity": "critical",
+        "sourceStatus": "mismatched",
+        "sourceType": "reconciliation",
+        "status": "needs_review"
+      }
+    ],
+    "repairActions": [
+      {
+        "action": "run_connection_diagnostics",
+        "evidence": "integration_repair.action.diagnostics",
+        "externalMutation": false,
+        "providerCallEnabled": false,
+        "requiresApproval": false,
+        "rollback": "no_state_change",
+        "safeToAutoRun": true,
+        "sourceIncident": "IR-001",
+        "status": "safe_dry_run",
+        "target": "accounting.export.mock"
+      },
+      {
+        "action": "retry_after_diagnostics",
+        "evidence": "integration_repair.action.retry",
+        "externalMutation": false,
+        "providerCallEnabled": false,
+        "requiresApproval": true,
+        "rollback": "keep_previous_outbox_attempt",
+        "safeToAutoRun": false,
+        "sourceIncident": "IR-001",
+        "status": "approval_required",
+        "target": "accounting.export.mock"
+      },
+      {
+        "action": "fix_mapping_profile",
+        "evidence": "integration_repair.action.mapping_fix",
+        "externalMutation": false,
+        "providerCallEnabled": false,
+        "requiresApproval": true,
+        "rollback": "restore_previous_mapping_profile",
+        "safeToAutoRun": false,
+        "sourceIncident": "IR-002",
+        "status": "operator_review",
+        "target": "crm.bitrix24.mock"
+      },
+      {
+        "action": "open_reconciliation_review",
+        "evidence": "integration_repair.action.reconciliation_review",
+        "externalMutation": false,
+        "providerCallEnabled": false,
+        "requiresApproval": false,
+        "rollback": "review_only",
+        "safeToAutoRun": false,
+        "sourceIncident": "IR-003",
+        "status": "operator_review",
+        "target": "accounting.export.mock"
+      }
+    ],
+    "repairLevel": "operator_repair_ready",
+    "repairRunbooks": [
+      {
+        "alertName": "DriveDeskIntegrationRetries",
+        "evidence": "integration_repair.runbook_attached",
+        "evidenceFields": [
+          "adapter_key",
+          "operation_key",
+          "attempts",
+          "last_error",
+          "payload_summary"
+        ],
+        "incidentId": "IR-001",
+        "recommendedActions": [
+          "Check connection diagnostics for the affected adapter.",
+          "Review retryable operator-review items and provider status.",
+          "Wait for provider recovery or retry after confirming the failure cleared."
+        ],
+        "runbookKey": "integration.retry_backlog",
+        "severity": "warning",
+        "title": "Retryable integration backlog"
+      },
+      {
+        "alertName": "DriveDeskIntegrationDeadLetters",
+        "evidence": "integration_repair.runbook_attached",
+        "evidenceFields": [
+          "adapter_key",
+          "operation_key",
+          "attempts",
+          "last_error",
+          "payload_summary"
+        ],
+        "incidentId": "IR-002",
+        "recommendedActions": [
+          "Inspect the safe payload summary and required operation scope.",
+          "Fix mapping, connection scope, provider contract, or input data.",
+          "Requeue the outbox event with an audited operator reason after the fix."
+        ],
+        "runbookKey": "integration.dead_letter",
+        "severity": "critical",
+        "title": "Dead-lettered integration job"
+      },
+      {
+        "alertName": "DriveDeskIntegrationReconciliationMismatch",
+        "evidence": "integration_repair.runbook_attached",
+        "evidenceFields": [
+          "adapter_key",
+          "operation_key",
+          "diff_keys",
+          "provider_status"
+        ],
+        "incidentId": "IR-003",
+        "recommendedActions": [
+          "Review reconciliation diff keys and provider status.",
+          "Verify provider dashboard, batch status, and adapter mapping.",
+          "Create a corrective task before marking the incident resolved."
+        ],
+        "runbookKey": "integration.reconciliation_mismatch",
+        "severity": "critical",
+        "title": "Provider evidence mismatch"
+      }
+    ],
+    "safeActionCount": 1,
+    "safeExecutionPlan": [
+      {
+        "detail": "Source status selects retry, dead-letter, or reconciliation runbook.",
+        "evidence": "integration_repair.failure_classified",
+        "externalMutation": false,
+        "status": "ready",
+        "step": "classify_failure"
+      },
+      {
+        "detail": "Operator sees workflow, finance, and queue impact before touching the job.",
+        "evidence": "integration_repair.impact_attached",
+        "externalMutation": false,
+        "status": "ready",
+        "step": "attach_business_impact"
+      },
+      {
+        "detail": "Diagnostics, mapping fix, retry, and reconciliation review are separated.",
+        "evidence": "integration_repair.actions_prepared",
+        "externalMutation": false,
+        "status": "ready",
+        "step": "prepare_safe_actions"
+      },
+      {
+        "detail": "Public contract exposes only dry-run and review actions.",
+        "evidence": "integration_repair.dry_run_enforced",
+        "externalMutation": false,
+        "status": "enforced",
+        "step": "dry_run_first"
+      },
+      {
+        "detail": "Retry or provider-changing repair requires approval and idempotency evidence.",
+        "evidence": "integration_repair.approval_required",
+        "externalMutation": false,
+        "status": "locked",
+        "step": "approval_before_commit"
+      },
+      {
+        "detail": "Repair closure requires updated reconciliation, metrics, and incident evidence.",
+        "evidence": "integration_repair.postcheck_planned",
+        "externalMutation": false,
+        "status": "planned",
+        "step": "observe_after_repair"
+      }
+    ],
+    "status": "previewed",
+    "summary": [
+      {
+        "detail": "retry, dead-letter, reconciliation",
+        "label": "Incidents",
+        "tone": "amber",
+        "value": "3"
+      },
+      {
+        "detail": "operator review required",
+        "label": "Critical",
+        "tone": "red",
+        "value": "2"
+      },
+      {
+        "detail": "diagnostics can run first",
+        "label": "Safe actions",
+        "tone": "green",
+        "value": "1"
+      },
+      {
+        "detail": "blocked in public preview",
+        "label": "Provider writes",
+        "tone": "violet",
+        "value": "0"
+      }
+    ]
+  },
   "integrationRuntime": {
     "adapterKey": "accounting.export.mock",
     "api": {

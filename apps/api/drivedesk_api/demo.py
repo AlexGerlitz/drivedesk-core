@@ -6,6 +6,7 @@ from drivedesk_core import (
     build_adapter_execution_timeline,
     build_adapter_runtime_plan,
     build_connector_certification_workbench,
+    build_integration_repair_workbench,
     build_provider_onboarding_workbench,
     list_adapter_descriptors,
 )
@@ -490,6 +491,12 @@ def _public_provider_onboarding() -> dict[str, Any]:
     return workbench
 
 
+def _public_integration_repair() -> dict[str, Any]:
+    workbench = _public_camelize(build_integration_repair_workbench())
+    workbench["command"] = "GET /demo/integration-repair"
+    return workbench
+
+
 def build_public_demo_payload() -> dict[str, Any]:
     return {
         "schemaVersion": 1,
@@ -939,6 +946,7 @@ def build_public_demo_payload() -> dict[str, Any]:
         "providerOnboarding": _public_provider_onboarding(),
         "integrationRuntime": _public_integration_runtime(),
         "integrationExecution": _public_integration_execution(),
+        "integrationRepair": _public_integration_repair(),
         "connectorFixtureReplay": {
             "status": "validated",
             "command": "bash scripts/check_public_connector_fixture_replay.sh",

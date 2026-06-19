@@ -11,11 +11,13 @@ PUBLIC_DEMO_PATH = "/demo/public"
 CONNECTOR_REPLAY_PATH = "/demo/connector-fixture-replay"
 CONNECTOR_CERTIFICATION_PATH = "/demo/connector-certification"
 PROVIDER_ONBOARDING_PATH = "/demo/provider-onboarding"
+INTEGRATION_REPAIR_PATH = "/demo/integration-repair"
 BUSINESS_SCENARIO_REPLAY_PATH = "/demo/business-scenario-replay"
 OPERATION_ID = "public_demo_demo_public_get"
 CONNECTOR_REPLAY_OPERATION_ID = "connector_fixture_replay_demo_demo_connector_fixture_replay_get"
 CONNECTOR_CERTIFICATION_OPERATION_ID = "connector_certification_demo_demo_connector_certification_get"
 PROVIDER_ONBOARDING_OPERATION_ID = "provider_onboarding_demo_demo_provider_onboarding_get"
+INTEGRATION_REPAIR_OPERATION_ID = "integration_repair_demo_demo_integration_repair_get"
 BUSINESS_SCENARIO_REPLAY_OPERATION_ID = "business_scenario_replay_demo_demo_business_scenario_replay_get"
 REQUIRED_FIELDS = [
   "schemaVersion",
@@ -36,6 +38,7 @@ REQUIRED_FIELDS = [
   "providerOnboarding",
   "integrationRuntime",
   "integrationExecution",
+  "integrationRepair",
   "connectorFixtureReplay",
   "businessIntakePipeline",
   "businessTaskHandoff",
@@ -101,6 +104,23 @@ PROVIDER_ONBOARDING_REQUIRED_FIELDS = [
   "api",
   "docs"
 ]
+INTEGRATION_REPAIR_REQUIRED_FIELDS = [
+  "status",
+  "command",
+  "repairLevel",
+  "incidentCount",
+  "criticalCount",
+  "safeActionCount",
+  "summary",
+  "incidentMatrix",
+  "repairRunbooks",
+  "impactAnalysis",
+  "repairActions",
+  "safeExecutionPlan",
+  "dataBoundaries",
+  "api",
+  "docs"
+]
 BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS = [
   "status",
   "command",
@@ -136,6 +156,11 @@ class DriveDeskPublicDemoClient:
     def get_provider_onboarding(self) -> dict[str, Any]:
         payload = self._get_json(PROVIDER_ONBOARDING_PATH)
         validate_provider_onboarding_payload(payload)
+        return payload
+
+    def get_integration_repair(self) -> dict[str, Any]:
+        payload = self._get_json(INTEGRATION_REPAIR_PATH)
+        validate_integration_repair_payload(payload)
         return payload
 
     def get_business_scenario_replay(self) -> dict[str, Any]:
@@ -441,6 +466,90 @@ def validate_provider_onboarding_payload(payload: dict[str, Any]) -> None:
         raise ValueError("provider onboarding boundaries must not mutate external providers")
 
 
+def validate_integration_repair_payload(payload: dict[str, Any]) -> None:
+    missing = [field for field in INTEGRATION_REPAIR_REQUIRED_FIELDS if field not in payload]
+    if missing:
+        raise ValueError(f"missing integration repair fields: {', '.join(missing)}")
+
+    if payload.get("status") != "previewed":
+        raise ValueError(f"unexpected integration repair status: {payload.get('status')}")
+
+    if payload.get("command") != f"GET {INTEGRATION_REPAIR_PATH}":
+        raise ValueError(f"unexpected integration repair command: {payload.get('command')}")
+
+    if payload.get("repairLevel") != "operator_repair_ready":
+        raise ValueError(f"unexpected integration repair level: {payload.get('repairLevel')}")
+
+    if payload.get("incidentCount") != 3:
+        raise ValueError(f"unexpected integration repair incident count: {payload.get('incidentCount')}")
+
+    if payload.get("criticalCount") != 2:
+        raise ValueError(f"unexpected integration repair critical count: {payload.get('criticalCount')}")
+
+    if payload.get("safeActionCount") != 1:
+        raise ValueError(f"unexpected integration repair safe action count: {payload.get('safeActionCount')}")
+
+    for key in (
+        "summary",
+        "incidentMatrix",
+        "repairRunbooks",
+        "impactAnalysis",
+        "repairActions",
+        "safeExecutionPlan",
+        "dataBoundaries",
+    ):
+        value = payload.get(key)
+        if not isinstance(value, list) or not value:
+            raise ValueError(f"integration repair {key} is missing or empty")
+
+    incident_ids = {
+        item.get("incidentId")
+        for item in payload.get("incidentMatrix", [])
+        if isinstance(item, dict)
+    }
+    required_incidents = {"IR-001", "IR-002", "IR-003"}
+    if incident_ids != required_incidents:
+        raise ValueError(f"integration repair ids mismatch: {sorted(incident_ids)}")
+
+    runbook_keys = {
+        item.get("runbookKey")
+        for item in payload.get("repairRunbooks", [])
+        if isinstance(item, dict)
+    }
+    required_runbooks = {
+        "integration.retry_backlog",
+        "integration.dead_letter",
+        "integration.reconciliation_mismatch",
+    }
+    if runbook_keys != required_runbooks:
+        raise ValueError(f"integration repair runbooks mismatch: {sorted(runbook_keys)}")
+
+    safe_actions = [
+        item
+        for item in payload.get("repairActions", [])
+        if isinstance(item, dict) and item.get("safeToAutoRun") is True
+    ]
+    if len(safe_actions) != 1 or safe_actions[0].get("action") != "run_connection_diagnostics":
+        raise ValueError("integration repair must expose exactly one safe diagnostic action")
+
+    for action in payload.get("repairActions", []):
+        if not isinstance(action, dict):
+            raise ValueError("integration repair action must be an object")
+        if action.get("providerCallEnabled") is not False or action.get("externalMutation") is not False:
+            raise ValueError("integration repair actions must not call or mutate providers")
+
+    for boundary in payload.get("dataBoundaries", []):
+        if not isinstance(boundary, dict):
+            raise ValueError("integration repair boundary must be an object")
+        if (
+            boundary.get("containsPii") is not False
+            or boundary.get("rawPayloadIncluded") is not False
+            or boundary.get("providerCallEnabled") is not False
+            or boundary.get("externalMutation") is not False
+        ):
+            raise ValueError("integration repair boundaries must stay public-safe")
+
+
 def validate_business_scenario_replay_payload(payload: dict[str, Any]) -> None:
     missing = [field for field in BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS if field not in payload]
     if missing:
@@ -643,6 +752,11 @@ def validate_public_demo_payload(payload: dict[str, Any]) -> None:
         raise ValueError("providerOnboarding is missing")
     validate_provider_onboarding_payload(provider_onboarding)
 
+    integration_repair = payload.get("integrationRepair")
+    if not isinstance(integration_repair, dict):
+        raise ValueError("integrationRepair is missing")
+    validate_integration_repair_payload(integration_repair)
+
     business_scenario_replay = payload.get("businessScenarioReplay")
     if not isinstance(business_scenario_replay, dict):
         raise ValueError("businessScenarioReplay is missing")
@@ -704,6 +818,7 @@ def main() -> None:
     connector_replay = client.get_connector_fixture_replay()
     connector_certification = client.get_connector_certification()
     provider_onboarding = client.get_provider_onboarding()
+    integration_repair = client.get_integration_repair()
     business_scenario_replay = client.get_business_scenario_replay()
     adapter_plan = build_adapter_operation_plan(payload, "adapter-file-import-preview")
     print(
@@ -715,11 +830,13 @@ def main() -> None:
         f"connectorReplay={connector_replay['status']}",
         f"connectorCertification={connector_certification['certificationLevel']}",
         f"providerOnboarding={provider_onboarding['onboardingLevel']}",
+        f"integrationRepair={integration_repair['repairLevel']}",
         f"businessScenarioReplay={business_scenario_replay['status']}",
         f"operation={OPERATION_ID}",
         f"connectorOperation={CONNECTOR_REPLAY_OPERATION_ID}",
         f"connectorCertificationOperation={CONNECTOR_CERTIFICATION_OPERATION_ID}",
         f"providerOnboardingOperation={PROVIDER_ONBOARDING_OPERATION_ID}",
+        f"integrationRepairOperation={INTEGRATION_REPAIR_OPERATION_ID}",
         f"businessScenarioOperation={BUSINESS_SCENARIO_REPLAY_OPERATION_ID}",
     )
 

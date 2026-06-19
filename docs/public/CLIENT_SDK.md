@@ -20,6 +20,7 @@ GET /demo/business-action-execution
 GET /demo/business-approval-gateway
 GET /demo/integration-runtime
 GET /demo/integration-execution
+GET /demo/integration-repair
 GET /demo/business-scenario-replay
 ```
 
@@ -38,6 +39,10 @@ The Integration Runtime payload appears in the public contract as
 The Integration Execution payload appears in the public contract as
 `integrationExecution` and is documented in
 `docs/public/INTEGRATION_EXECUTION.md`.
+
+The Integration Repair payload appears in the public contract as
+`integrationRepair` and is documented in
+`docs/public/INTEGRATION_REPAIR.md`.
 
 The Connector Certification payload appears in the public contract as
 `connectorCertification` and is documented in
@@ -87,6 +92,7 @@ It reads the OpenAPI schema, finds `GET /demo/public`,
 `GET /demo/business-approval-gateway`, and
 `GET /demo/integration-runtime`, and
 `GET /demo/integration-execution`, and
+`GET /demo/integration-repair`, and
 `GET /demo/business-scenario-replay`, extracts operation ids and required
 response fields, and writes small public-safe clients.
 
@@ -122,6 +128,9 @@ The SDK includes typed helpers around `adapterScenarios`:
 - `business_action_execution` in `openapi-client-manifest.json`.
 - `integration_runtime` in `openapi-client-manifest.json`.
 - `integration_execution` in `openapi-client-manifest.json`.
+- `integration_repair` in `openapi-client-manifest.json`.
+- `DriveDeskPublicDemoClient.get_integration_repair`;
+- `DriveDeskPublicDemoClient.getIntegrationRepair`.
 - `DriveDeskPublicDemoClient.get_business_scenario_replay`;
 - `DriveDeskPublicDemoClient.getBusinessScenarioReplay`.
 
@@ -180,6 +189,11 @@ The generated manifest also validates the standalone integration execution
 metadata: run ledger, timeline, state transitions, retry policy,
 reconciliation links, observability metrics, and data-boundary evidence.
 
+The generated clients also validate standalone integration repair metadata:
+incident matrix, repair runbooks, impact analysis, safe actions, postcheck
+steps, and public-safe data boundaries. TypeScript exposes this as
+`IntegrationRepairPayload`.
+
 ## Why This Matters
 
 The SDK is not meant to be a full production client yet. It proves a foundation:
@@ -195,6 +209,8 @@ The SDK is not meant to be a full production client yet. It proves a foundation:
   API contract.
 - The generated manifest validates integration execution metadata as a
   standalone API contract.
+- The generated client validates integration repair metadata as a standalone
+  API contract.
 - The generated client validates business scenario replay as a standalone API
   contract.
 - The generated client can show the Bitrix-style CRM provider-intake body and

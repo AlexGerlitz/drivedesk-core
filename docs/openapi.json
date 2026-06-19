@@ -5445,6 +5445,127 @@
         "title": "IntegrationReconciliationRead",
         "type": "object"
       },
+      "IntegrationRepairDemoRead": {
+        "properties": {
+          "api": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Api",
+            "type": "object"
+          },
+          "command": {
+            "title": "Command",
+            "type": "string"
+          },
+          "criticalCount": {
+            "title": "Criticalcount",
+            "type": "integer"
+          },
+          "dataBoundaries": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Databoundaries",
+            "type": "array"
+          },
+          "docs": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "title": "Docs",
+            "type": "array"
+          },
+          "impactAnalysis": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Impactanalysis",
+            "type": "array"
+          },
+          "incidentCount": {
+            "title": "Incidentcount",
+            "type": "integer"
+          },
+          "incidentMatrix": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Incidentmatrix",
+            "type": "array"
+          },
+          "repairActions": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Repairactions",
+            "type": "array"
+          },
+          "repairLevel": {
+            "title": "Repairlevel",
+            "type": "string"
+          },
+          "repairRunbooks": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Repairrunbooks",
+            "type": "array"
+          },
+          "safeActionCount": {
+            "title": "Safeactioncount",
+            "type": "integer"
+          },
+          "safeExecutionPlan": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Safeexecutionplan",
+            "type": "array"
+          },
+          "status": {
+            "const": "previewed",
+            "title": "Status",
+            "type": "string"
+          },
+          "summary": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Summary",
+            "type": "array"
+          }
+        },
+        "required": [
+          "status",
+          "command",
+          "repairLevel",
+          "incidentCount",
+          "criticalCount",
+          "safeActionCount",
+          "summary",
+          "incidentMatrix",
+          "repairRunbooks",
+          "impactAnalysis",
+          "repairActions",
+          "safeExecutionPlan",
+          "dataBoundaries",
+          "api",
+          "docs"
+        ],
+        "title": "IntegrationRepairDemoRead",
+        "type": "object"
+      },
       "IntegrationRunbookRead": {
         "properties": {
           "alert_name": {
@@ -6440,6 +6561,11 @@
             "title": "Integrationreadiness",
             "type": "array"
           },
+          "integrationRepair": {
+            "additionalProperties": true,
+            "title": "Integrationrepair",
+            "type": "object"
+          },
           "integrationRuntime": {
             "additionalProperties": true,
             "title": "Integrationruntime",
@@ -6548,6 +6674,7 @@
           "providerOnboarding",
           "integrationRuntime",
           "integrationExecution",
+          "integrationRepair",
           "connectorFixtureReplay",
           "businessIntakePipeline",
           "businessTaskHandoff",
@@ -7827,6 +7954,27 @@
           }
         },
         "summary": "Integration Execution Demo",
+        "tags": [
+          "demo"
+        ]
+      }
+    },
+    "/demo/integration-repair": {
+      "get": {
+        "operationId": "integration_repair_demo_demo_integration_repair_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationRepairDemoRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Integration Repair Demo",
         "tags": [
           "demo"
         ]

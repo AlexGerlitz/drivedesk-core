@@ -2893,6 +2893,76 @@ def test_integration_execution_demo_endpoint_exposes_same_public_contract(
     )
 
 
+def test_integration_repair_demo_endpoint_exposes_same_public_contract(
+    api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, _ = api_client
+
+    public_response = client.get("/demo/public")
+    repair_response = client.get("/demo/integration-repair")
+
+    assert repair_response.status_code == 200
+    assert repair_response.headers["access-control-allow-origin"] == "*"
+    assert repair_response.headers["cache-control"] == "public, max-age=60"
+    repair_payload = repair_response.json()
+    assert repair_payload == public_response.json()["integrationRepair"]
+    assert repair_payload["status"] == "previewed"
+    assert repair_payload["command"] == "GET /demo/integration-repair"
+    assert repair_payload["repairLevel"] == "operator_repair_ready"
+    assert repair_payload["incidentCount"] == 3
+    assert repair_payload["criticalCount"] == 2
+    assert repair_payload["safeActionCount"] == 1
+    assert {f"{item['sourceType']}:{item['sourceStatus']}" for item in repair_payload["incidentMatrix"]} == {
+        "outbox_event:retry",
+        "outbox_event:dead_letter",
+        "reconciliation:mismatched",
+    }
+    assert {item["providerCallEnabled"] for item in repair_payload["incidentMatrix"]} == {False}
+    assert {item["externalMutation"] for item in repair_payload["incidentMatrix"]} == {False}
+    assert {item["runbookKey"] for item in repair_payload["repairRunbooks"]} == {
+        "integration.retry_backlog",
+        "integration.dead_letter",
+        "integration.reconciliation_mismatch",
+    }
+    assert {item["area"] for item in repair_payload["impactAnalysis"]} == {
+        "workflow_delivery",
+        "financial_reconciliation",
+        "operator_queue",
+    }
+    assert {item["action"] for item in repair_payload["repairActions"]} == {
+        "run_connection_diagnostics",
+        "retry_after_diagnostics",
+        "fix_mapping_profile",
+        "open_reconciliation_review",
+    }
+    assert [item["action"] for item in repair_payload["repairActions"] if item["safeToAutoRun"] is True] == [
+        "run_connection_diagnostics"
+    ]
+    assert {item["providerCallEnabled"] for item in repair_payload["repairActions"]} == {False}
+    assert {item["externalMutation"] for item in repair_payload["repairActions"]} == {False}
+    assert {item["step"] for item in repair_payload["safeExecutionPlan"]} == {
+        "classify_failure",
+        "attach_business_impact",
+        "prepare_safe_actions",
+        "dry_run_first",
+        "approval_before_commit",
+        "observe_after_repair",
+    }
+    assert {item["name"] for item in repair_payload["dataBoundaries"]} == {
+        "repair_preview_only",
+        "safe_payload_summary",
+        "approval_before_retry",
+        "private_provider_boundary",
+    }
+    for field in ("externalMutation", "providerCallEnabled", "rawPayloadIncluded", "containsPii"):
+        assert {item[field] for item in repair_payload["dataBoundaries"]} == {False}
+    assert repair_payload["api"]["standalone"] == "GET /demo/integration-repair"
+    assert any(
+        item["path"] == "docs/public/INTEGRATION_REPAIR.md"
+        for item in repair_payload["docs"]
+    )
+
+
 def test_file_import_adapter_success_flow(api_client: tuple[TestClient, async_sessionmaker[AsyncSession]]) -> None:
     client, session_factory = api_client
     owner_headers = {"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"}

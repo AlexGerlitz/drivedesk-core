@@ -5,11 +5,13 @@ export const PUBLIC_DEMO_PATH = "/demo/public";
 export const CONNECTOR_REPLAY_PATH = "/demo/connector-fixture-replay";
 export const CONNECTOR_CERTIFICATION_PATH = "/demo/connector-certification";
 export const PROVIDER_ONBOARDING_PATH = "/demo/provider-onboarding";
+export const INTEGRATION_REPAIR_PATH = "/demo/integration-repair";
 export const BUSINESS_SCENARIO_REPLAY_PATH = "/demo/business-scenario-replay";
 export const OPERATION_ID = "public_demo_demo_public_get";
 export const CONNECTOR_REPLAY_OPERATION_ID = "connector_fixture_replay_demo_demo_connector_fixture_replay_get";
 export const CONNECTOR_CERTIFICATION_OPERATION_ID = "connector_certification_demo_demo_connector_certification_get";
 export const PROVIDER_ONBOARDING_OPERATION_ID = "provider_onboarding_demo_demo_provider_onboarding_get";
+export const INTEGRATION_REPAIR_OPERATION_ID = "integration_repair_demo_demo_integration_repair_get";
 export const BUSINESS_SCENARIO_REPLAY_OPERATION_ID = "business_scenario_replay_demo_demo_business_scenario_replay_get";
 export const REQUIRED_FIELDS = [
   "schemaVersion",
@@ -30,6 +32,7 @@ export const REQUIRED_FIELDS = [
   "providerOnboarding",
   "integrationRuntime",
   "integrationExecution",
+  "integrationRepair",
   "connectorFixtureReplay",
   "businessIntakePipeline",
   "businessTaskHandoff",
@@ -91,6 +94,23 @@ export const PROVIDER_ONBOARDING_REQUIRED_FIELDS = [
   "preflightChecks",
   "sandboxContract",
   "rolloutPlan",
+  "dataBoundaries",
+  "api",
+  "docs"
+];
+export const INTEGRATION_REPAIR_REQUIRED_FIELDS = [
+  "status",
+  "command",
+  "repairLevel",
+  "incidentCount",
+  "criticalCount",
+  "safeActionCount",
+  "summary",
+  "incidentMatrix",
+  "repairRunbooks",
+  "impactAnalysis",
+  "repairActions",
+  "safeExecutionPlan",
   "dataBoundaries",
   "api",
   "docs"
@@ -174,6 +194,22 @@ export class DriveDeskPublicDemoClient {
 
     const payload = await response.json();
     validateProviderOnboardingPayload(payload);
+    return payload;
+  }
+
+  async getIntegrationRepair() {
+    const response = await this.fetchImpl(`${this.baseUrl}${INTEGRATION_REPAIR_PATH}`, {
+      headers: {
+        Accept: "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`GET ${INTEGRATION_REPAIR_PATH} failed: ${response.status}`);
+    }
+
+    const payload = await response.json();
+    validateIntegrationRepairPayload(payload);
     return payload;
   }
 
@@ -504,6 +540,82 @@ export function validateProviderOnboardingPayload(payload) {
   }
 }
 
+export function validateIntegrationRepairPayload(payload) {
+  const missing = INTEGRATION_REPAIR_REQUIRED_FIELDS.filter((field) => !(field in (payload || {})));
+  if (missing.length > 0) {
+    throw new Error(`missing integration repair fields: ${missing.join(", ")}`);
+  }
+
+  if (payload.status !== "previewed") {
+    throw new Error(`unexpected integration repair status: ${payload.status}`);
+  }
+
+  if (payload.command !== `GET ${INTEGRATION_REPAIR_PATH}`) {
+    throw new Error(`unexpected integration repair command: ${payload.command}`);
+  }
+
+  if (payload.repairLevel !== "operator_repair_ready") {
+    throw new Error(`unexpected integration repair level: ${payload.repairLevel}`);
+  }
+
+  if (payload.incidentCount !== 3 || payload.criticalCount !== 2 || payload.safeActionCount !== 1) {
+    throw new Error("integration repair counts do not match the public contract");
+  }
+
+  for (const key of [
+    "summary",
+    "incidentMatrix",
+    "repairRunbooks",
+    "impactAnalysis",
+    "repairActions",
+    "safeExecutionPlan",
+    "dataBoundaries",
+  ]) {
+    if (!Array.isArray(payload[key]) || payload[key].length === 0) {
+      throw new Error(`integration repair ${key} is missing or empty`);
+    }
+  }
+
+  const incidentIds = new Set(payload.incidentMatrix.map((item) => item?.incidentId));
+  for (const incidentId of ["IR-001", "IR-002", "IR-003"]) {
+    if (!incidentIds.has(incidentId)) {
+      throw new Error(`integration repair incident is missing: ${incidentId}`);
+    }
+  }
+
+  const runbookKeys = new Set(payload.repairRunbooks.map((item) => item?.runbookKey));
+  for (const runbookKey of [
+    "integration.retry_backlog",
+    "integration.dead_letter",
+    "integration.reconciliation_mismatch",
+  ]) {
+    if (!runbookKeys.has(runbookKey)) {
+      throw new Error(`integration repair runbook is missing: ${runbookKey}`);
+    }
+  }
+
+  const safeActions = payload.repairActions.filter((item) => item?.safeToAutoRun === true);
+  if (safeActions.length !== 1 || safeActions[0]?.action !== "run_connection_diagnostics") {
+    throw new Error("integration repair must expose exactly one safe diagnostic action");
+  }
+
+  if (payload.repairActions.some((item) => item?.providerCallEnabled !== false || item?.externalMutation !== false)) {
+    throw new Error("integration repair actions must not call or mutate providers");
+  }
+
+  if (
+    payload.dataBoundaries.some(
+      (item) =>
+        item?.containsPii !== false ||
+        item?.rawPayloadIncluded !== false ||
+        item?.providerCallEnabled !== false ||
+        item?.externalMutation !== false,
+    )
+  ) {
+    throw new Error("integration repair boundaries must stay public-safe");
+  }
+}
+
 export function validateBusinessScenarioReplayPayload(payload) {
   const missing = BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS.filter((field) => !(field in payload));
   if (missing.length > 0) {
@@ -699,6 +811,11 @@ export function validatePublicDemoPayload(payload) {
   }
   validateProviderOnboardingPayload(payload.providerOnboarding);
 
+  if (!payload.integrationRepair || typeof payload.integrationRepair !== "object") {
+    throw new Error("integrationRepair is missing");
+  }
+  validateIntegrationRepairPayload(payload.integrationRepair);
+
   if (!payload.businessScenarioReplay || typeof payload.businessScenarioReplay !== "object") {
     throw new Error("businessScenarioReplay is missing");
   }
@@ -765,6 +882,7 @@ async function main() {
   const connectorReplay = await client.getConnectorFixtureReplay();
   const connectorCertification = await client.getConnectorCertification();
   const providerOnboarding = await client.getProviderOnboarding();
+  const integrationRepair = await client.getIntegrationRepair();
   const businessScenarioReplay = await client.getBusinessScenarioReplay();
   const adapterPlan = buildAdapterOperationPlan(payload, "adapter-file-import-preview");
   console.log(
@@ -776,11 +894,13 @@ async function main() {
     `connectorReplay=${connectorReplay.status}`,
     `connectorCertification=${connectorCertification.certificationLevel}`,
     `providerOnboarding=${providerOnboarding.onboardingLevel}`,
+    `integrationRepair=${integrationRepair.repairLevel}`,
     `businessScenarioReplay=${businessScenarioReplay.status}`,
     `operation=${OPERATION_ID}`,
     `connectorOperation=${CONNECTOR_REPLAY_OPERATION_ID}`,
     `connectorCertificationOperation=${CONNECTOR_CERTIFICATION_OPERATION_ID}`,
     `providerOnboardingOperation=${PROVIDER_ONBOARDING_OPERATION_ID}`,
+    `integrationRepairOperation=${INTEGRATION_REPAIR_OPERATION_ID}`,
     `businessScenarioOperation=${BUSINESS_SCENARIO_REPLAY_OPERATION_ID}`,
   );
 }

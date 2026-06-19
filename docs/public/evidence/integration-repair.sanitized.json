@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "artifact_id": "drivedesk-core-integration-repair",
+  "status": "previewed",
+  "repair_level": "operator_repair_ready",
+  "verifier": "bash scripts/check_public_integration_repair.sh",
+  "incident_sources": [
+    "outbox_event:retry",
+    "outbox_event:dead_letter",
+    "reconciliation:mismatched"
+  ],
+  "runbook_keys": [
+    "integration.retry_backlog",
+    "integration.dead_letter",
+    "integration.reconciliation_mismatch"
+  ],
+  "safe_execution_steps": [
+    "classify_failure",
+    "attach_business_impact",
+    "prepare_safe_actions",
+    "dry_run_first",
+    "approval_before_commit",
+    "observe_after_repair"
+  ],
+  "repair_actions": [
+    "run_connection_diagnostics",
+    "retry_after_diagnostics",
+    "fix_mapping_profile",
+    "open_reconciliation_review"
+  ],
+  "safety_assertions": {
+    "provider_call_enabled": false,
+    "external_mutation": false,
+    "raw_payload_included": false,
+    "contains_pii": false,
+    "automatic_provider_retry": false,
+    "public_demo_persistence": false
+  },
+  "redaction": {
+    "addresses_included": false,
+    "credentials_included": false,
+    "hostnames_included": false,
+    "paths_included": false,
+    "production_data_included": false,
+    "raw_logs_included": false,
+    "request_bodies_included": false
+  }
+}

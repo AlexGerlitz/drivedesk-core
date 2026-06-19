@@ -32,6 +32,7 @@ bash scripts/check_public_business_action_execution.sh
 bash scripts/check_public_business_approval_gateway.sh
 bash scripts/check_public_integration_runtime.sh
 bash scripts/check_public_integration_execution.sh
+bash scripts/check_public_integration_repair.sh
 bash scripts/check_public_business_scenario_replay.sh
 bash scripts/check_public_demo_sdk.sh
 bash scripts/check_public_backup_restore.sh

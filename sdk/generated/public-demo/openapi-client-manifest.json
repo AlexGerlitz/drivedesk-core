@@ -208,6 +208,29 @@
       "docs"
     ]
   },
+  "integration_repair": {
+    "method": "GET",
+    "operation_id": "integration_repair_demo_demo_integration_repair_get",
+    "path": "/demo/integration-repair",
+    "required_fields": [
+      "status",
+      "command",
+      "repairLevel",
+      "incidentCount",
+      "criticalCount",
+      "safeActionCount",
+      "summary",
+      "incidentMatrix",
+      "repairRunbooks",
+      "impactAnalysis",
+      "repairActions",
+      "safeExecutionPlan",
+      "dataBoundaries",
+      "api",
+      "docs"
+    ],
+    "schema": "IntegrationRepairDemoRead"
+  },
   "integration_runtime": {
     "method": "GET",
     "operation_id": "integration_runtime_demo_demo_integration_runtime_get",
@@ -276,6 +299,7 @@
     "providerOnboarding",
     "integrationRuntime",
     "integrationExecution",
+    "integrationRepair",
     "connectorFixtureReplay",
     "businessIntakePipeline",
     "businessTaskHandoff",

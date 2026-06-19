@@ -32,6 +32,7 @@ BusinessApprovalGatewayKind = Literal["execution_approval_gateway"]
 IntegrationRuntimeKind = Literal["adapter_operation_runtime"]
 IntegrationRuntimeExecutionMode = Literal["contract_only", "dry_run", "commit_request"]
 IntegrationExecutionKind = Literal["adapter_execution_timeline"]
+IntegrationRepairKind = Literal["operator_repair_workbench"]
 
 
 class AdapterContractRead(BaseModel):
@@ -1138,6 +1139,24 @@ class IntegrationExecutionDemoRead(BaseModel):
     docs: list[dict[str, str]]
 
 
+class IntegrationRepairDemoRead(BaseModel):
+    status: Literal["previewed"]
+    command: str
+    repairLevel: str
+    incidentCount: int
+    criticalCount: int
+    safeActionCount: int
+    summary: list[dict[str, Any]]
+    incidentMatrix: list[dict[str, Any]]
+    repairRunbooks: list[dict[str, Any]]
+    impactAnalysis: list[dict[str, Any]]
+    repairActions: list[dict[str, Any]]
+    safeExecutionPlan: list[dict[str, Any]]
+    dataBoundaries: list[dict[str, Any]]
+    api: dict[str, str]
+    docs: list[dict[str, str]]
+
+
 class PublicDemoRead(BaseModel):
     schemaVersion: int
     generatedAt: str
@@ -1157,6 +1176,7 @@ class PublicDemoRead(BaseModel):
     providerOnboarding: dict[str, Any]
     integrationRuntime: dict[str, Any]
     integrationExecution: dict[str, Any]
+    integrationRepair: dict[str, Any]
     connectorFixtureReplay: dict[str, Any]
     businessIntakePipeline: dict[str, Any]
     businessTaskHandoff: dict[str, Any]

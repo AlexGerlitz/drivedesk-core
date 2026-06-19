@@ -45,6 +45,9 @@ operationId: integration_runtime_demo_demo_integration_runtime_get
 GET /demo/integration-execution
 operationId: integration_execution_demo_demo_integration_execution_get
 
+GET /demo/integration-repair
+operationId: integration_repair_demo_demo_integration_repair_get
+
 GET /demo/business-scenario-replay
 operationId: business_scenario_replay_demo_demo_business_scenario_replay_get
 ```
@@ -83,6 +86,10 @@ Adapter operation helpers:
   `GET /demo/integration-runtime`
 - `integration_execution` manifest entry for
   `GET /demo/integration-execution`
+- `integration_repair` manifest entry for
+  `GET /demo/integration-repair`
+- `DriveDeskPublicDemoClient.getIntegrationRepair`
+- `DriveDeskPublicDemoClient.get_integration_repair`
 - `DriveDeskPublicDemoClient.getBusinessScenarioReplay`
 - `DriveDeskPublicDemoClient.get_business_scenario_replay`
 
@@ -130,6 +137,11 @@ calls in the public demo.
 Integration execution metadata validates the public-safe execution timeline:
 run ledger, outbox enqueue, worker dispatch, blocked provider call, retry,
 dead-letter, reconciliation, observability, and no raw provider payloads.
+
+Integration repair metadata validates the public-safe repair workbench:
+incident classification, business impact, runbook attachment, safe diagnostic
+actions, approval boundaries, postcheck steps, and no provider calls in the
+public demo.
 
 Engineering summary: this is the public-safe integration proof. DriveDesk
 publishes an OpenAPI contract and generates a small SDK from it instead of

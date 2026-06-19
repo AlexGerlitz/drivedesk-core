@@ -128,6 +128,7 @@ business_approval_gateway_endpoint, business_approval_gateway_headers = get_json
 )
 integration_runtime_endpoint, integration_runtime_headers = get_json("/demo/integration-runtime")
 integration_execution_endpoint, integration_execution_headers = get_json("/demo/integration-execution")
+integration_repair_endpoint, integration_repair_headers = get_json("/demo/integration-repair")
 business_scenario_endpoint, business_scenario_headers = get_json("/demo/business-scenario-replay")
 adapters, _ = get_json("/integration-adapters")
 runbooks, _ = get_json("/integration-runbooks")
@@ -1412,6 +1413,73 @@ assert {item["path"] for item in integration_execution["docs"]} >= {
     "docs/public/OUTBOX_RECOVERY.md",
 }, demo
 
+integration_repair = demo["integrationRepair"]
+assert integration_repair_endpoint == integration_repair, integration_repair_endpoint
+assert integration_repair_headers["access-control-allow-origin"] == "*", integration_repair_headers
+assert integration_repair_headers["cache-control"] == "public, max-age=60", integration_repair_headers
+assert integration_repair["status"] == "previewed", demo
+assert integration_repair["command"] == "GET /demo/integration-repair", demo
+assert integration_repair["repairLevel"] == "operator_repair_ready", demo
+assert integration_repair["incidentCount"] == 3, demo
+assert integration_repair["criticalCount"] == 2, demo
+assert integration_repair["safeActionCount"] == 1, demo
+assert {item["label"] for item in integration_repair["summary"]} >= {
+    "Incidents",
+    "Critical",
+    "Safe actions",
+    "Provider writes",
+}, demo
+assert {f"{item['sourceType']}:{item['sourceStatus']}" for item in integration_repair["incidentMatrix"]} == {
+    "outbox_event:retry",
+    "outbox_event:dead_letter",
+    "reconciliation:mismatched",
+}, demo
+assert {item["providerCallEnabled"] for item in integration_repair["incidentMatrix"]} == {False}, demo
+assert {item["externalMutation"] for item in integration_repair["incidentMatrix"]} == {False}, demo
+assert {item["runbookKey"] for item in integration_repair["repairRunbooks"]} == {
+    "integration.retry_backlog",
+    "integration.dead_letter",
+    "integration.reconciliation_mismatch",
+}, demo
+assert {item["area"] for item in integration_repair["impactAnalysis"]} == {
+    "workflow_delivery",
+    "financial_reconciliation",
+    "operator_queue",
+}, demo
+assert {item["action"] for item in integration_repair["repairActions"]} == {
+    "run_connection_diagnostics",
+    "retry_after_diagnostics",
+    "fix_mapping_profile",
+    "open_reconciliation_review",
+}, demo
+assert [
+    item["action"] for item in integration_repair["repairActions"] if item["safeToAutoRun"] is True
+] == ["run_connection_diagnostics"], demo
+assert {item["providerCallEnabled"] for item in integration_repair["repairActions"]} == {False}, demo
+assert {item["externalMutation"] for item in integration_repair["repairActions"]} == {False}, demo
+assert {item["step"] for item in integration_repair["safeExecutionPlan"]} == {
+    "classify_failure",
+    "attach_business_impact",
+    "prepare_safe_actions",
+    "dry_run_first",
+    "approval_before_commit",
+    "observe_after_repair",
+}, demo
+assert {item["name"] for item in integration_repair["dataBoundaries"]} == {
+    "repair_preview_only",
+    "safe_payload_summary",
+    "approval_before_retry",
+    "private_provider_boundary",
+}, demo
+for field in ("externalMutation", "providerCallEnabled", "rawPayloadIncluded", "containsPii"):
+    assert {item[field] for item in integration_repair["dataBoundaries"]} == {False}, demo
+assert integration_repair["api"]["standalone"] == "GET /demo/integration-repair", demo
+assert {item["path"] for item in integration_repair["docs"]} >= {
+    "docs/public/INTEGRATION_REPAIR.md",
+    "docs/public/INTEGRATION_INCIDENT_RUNBOOKS.md",
+    "docs/public/INTEGRATION_EXECUTION.md",
+}, demo
+
 business_scenario_replay = demo["businessScenarioReplay"]
 assert business_scenario_endpoint == business_scenario_replay, business_scenario_endpoint
 assert business_scenario_headers["access-control-allow-origin"] == "*", business_scenario_headers
@@ -1592,6 +1660,7 @@ assert "/demo/business-action-execution" in openapi["paths"], openapi["paths"].k
 assert "/demo/business-approval-gateway" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/integration-runtime" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/integration-execution" in openapi["paths"], openapi["paths"].keys()
+assert "/demo/integration-repair" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/business-scenario-replay" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/business-intake-pipeline/preview" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/business-task-handoffs/preview" in openapi["paths"], openapi["paths"].keys()
@@ -1622,6 +1691,7 @@ if openapi_file.exists():
     assert "/demo/business-approval-gateway" in generated["paths"], generated["paths"].keys()
     assert "/demo/integration-runtime" in generated["paths"], generated["paths"].keys()
     assert "/demo/integration-execution" in generated["paths"], generated["paths"].keys()
+    assert "/demo/integration-repair" in generated["paths"], generated["paths"].keys()
     assert "/demo/business-scenario-replay" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-intake-pipeline/preview" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-task-handoffs/preview" in generated["paths"], generated["paths"].keys()

@@ -33,6 +33,9 @@ infrastructure, production history, customer data, or operational credentials.
 - `BUSINESS_CONTROL_TOWER.md` - provider intake preview, cross-system
   observations, business exceptions, approval-gated repair actions, and control
   tower metrics.
+- `BUSINESS_SCENARIO_REPLAY.md` - reusable Business OS replay paths for
+  CRM/bank/accounting mismatch, support SLA risk, and procurement delay risk via
+  the `businessScenarioReplay` contract.
 - `AUTH_FOUNDATION.md` - credential auth, bearer token, and RBAC overview.
 - `AUTH_OBSERVABILITY.md` - aggregate auth metrics, alert names, and runbook shape.
 - `SESSION_REVOCATION.md` - admin-triggered tenant/platform session revocation.

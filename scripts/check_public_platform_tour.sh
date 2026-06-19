@@ -66,9 +66,12 @@ for token in [
     "Boundary",
     "businessControlTower.providerIntake",
     "businessControlTower.workbenchContext",
+    "businessScenarioReplay",
+    "BUSINESS_SCENARIO_REPLAY.md",
     "workflowScenarios",
     "adapterStudio",
     "GET /demo/connector-fixture-replay",
+    "GET /demo/business-scenario-replay",
     "sdk/generated/public-demo/",
     "worker:drivedesk_worker.main.process_pending_outbox",
     "alertRouting",
@@ -89,17 +92,18 @@ for token in [
     "bash scripts/check_public_demo_api.sh",
     "bash scripts/check_public_demo_sdk.sh",
     "bash scripts/check_public_business_control_tower.sh",
+    "bash scripts/check_public_business_scenario_replay.sh",
     "bash scripts/check_public_engineering_proof.sh",
 ]:
     require(token in text, f"platform tour missing {token}")
 
 for path, tokens in {
-    demo_data_path: ["adapterStudio", "businessControlTower", "incidentResponse", "engineeringProof"],
+    demo_data_path: ["adapterStudio", "businessControlTower", "businessScenarioReplay", "incidentResponse", "engineeringProof"],
     demo_index_path: ["Adapter Studio", "Control Tower", "Operations", "Incidents", "Proof"],
-    api_doc_path: ["adapterStudio", "businessControlTower", "engineeringProof", "GET /demo/connector-fixture-replay"],
-    sdk_doc_path: ["adapterStudio", "contract_only", "safeToRunAgainstPublicDemo", "getConnectorFixtureReplay"],
-    status_path: ["PLATFORM_TOUR.md", "Adapter Studio", "Business control tower"],
-    capability_map_path: ["PLATFORM_TOUR.md", "Integration adapter model", "Business operations control tower"],
+    api_doc_path: ["adapterStudio", "businessControlTower", "businessScenarioReplay", "engineeringProof", "GET /demo/connector-fixture-replay", "GET /demo/business-scenario-replay"],
+    sdk_doc_path: ["adapterStudio", "contract_only", "safeToRunAgainstPublicDemo", "getConnectorFixtureReplay", "getBusinessScenarioReplay"],
+    status_path: ["PLATFORM_TOUR.md", "Adapter Studio", "Business control tower", "Business scenario replay"],
+    capability_map_path: ["PLATFORM_TOUR.md", "Integration adapter model", "Business operations control tower", "Business scenario replay"],
     docs_readme_path: ["PLATFORM_TOUR.md", "DriveDesk Platform Tour"],
 }.items():
     body = read(path)

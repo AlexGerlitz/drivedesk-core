@@ -14,6 +14,19 @@
     "adapter-accounting-export-retry",
     "adapter-dead-letter-review"
   ],
+  "business_scenario_replay": {
+    "method": "GET",
+    "operation_id": "business_scenario_replay_demo_demo_business_scenario_replay_get",
+    "path": "/demo/business-scenario-replay",
+    "required_fields": [
+      "status",
+      "command",
+      "summary",
+      "scenarios",
+      "flow",
+      "docs"
+    ]
+  },
   "connector_replay": {
     "method": "GET",
     "operation_id": "connector_fixture_replay_demo_demo_connector_fixture_replay_get",
@@ -63,6 +76,7 @@
     "alertRouting",
     "incidentResponse",
     "businessControlTower",
+    "businessScenarioReplay",
     "engineeringProof",
     "workflow",
     "workflowScenarios",

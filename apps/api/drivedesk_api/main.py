@@ -92,6 +92,7 @@ from drivedesk_api.schemas import (
     BusinessRecordRead,
     BusinessRecordTransition,
     BusinessRecordType,
+    BusinessScenarioReplayRead,
     BusinessStateObservationCreate,
     BusinessStateObservationRead,
     BusinessWorkbenchContextPreviewCreate,
@@ -268,6 +269,20 @@ def build_app(settings: Settings | None = None) -> FastAPI:
     async def connector_fixture_replay_demo() -> JSONResponse:
         return JSONResponse(
             build_public_demo_payload()["connectorFixtureReplay"],
+            headers={
+                "Access-Control-Allow-Origin": "*",
+                "Cache-Control": "public, max-age=60",
+            },
+        )
+
+    @api.get(
+        "/demo/business-scenario-replay",
+        response_model=BusinessScenarioReplayRead,
+        tags=["demo"],
+    )
+    async def business_scenario_replay_demo() -> JSONResponse:
+        return JSONResponse(
+            build_public_demo_payload()["businessScenarioReplay"],
             headers={
                 "Access-Control-Allow-Origin": "*",
                 "Cache-Control": "public, max-age=60",

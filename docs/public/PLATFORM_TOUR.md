@@ -14,7 +14,7 @@ The tour is public-safe: it uses synthetic data and sanitized evidence only.
 | Step | Product surface | What happens | Evidence |
 | --- | --- | --- | --- |
 | 1 | Business signal | A synthetic lead, contract, payment, task, or external provider fact enters the platform. | `businessControlTower.providerIntake`, `workflowScenarios` |
-| 2 | Workbench context | The operator gets role-specific context, risk level, source-system cards, and suggested actions. | `businessControlTower.workbenchContext` |
+| 2 | Workbench context | The operator gets role-specific context, risk level, source-system cards, suggested actions, and reusable scenario replay. | `businessControlTower.workbenchContext`, `businessScenarioReplay`, `BUSINESS_SCENARIO_REPLAY.md`, `GET /demo/business-scenario-replay` |
 | 3 | Workflow action | Business rules create audit events, tasks, outbox events, or adapter-sync requests. | `workflowScenarios`, `workflow.action_run.created` |
 | 4 | Adapter Studio | Runtime catalog, connector certification, fixture replay, standalone replay API, and generated SDK operation plans show how an external provider is connected without exposing secrets. | `adapterStudio`, `connectorFixtureReplay`, `GET /demo/connector-fixture-replay`, `CONNECTOR_CERTIFICATION.md`, `CONNECTOR_FIXTURE_REPLAY.md`, `sdk/generated/public-demo/` |
 | 5 | Async execution | Accepted work moves through outbox and worker-backed contracts with retry and idempotency boundaries. | `outbox`, `integrationJobs`, `worker:drivedesk_worker.main.process_pending_outbox` |
@@ -28,7 +28,8 @@ Use the public demo in this order:
 1. `Overview` - system status, queue, timeline, and product-shaped metrics.
 2. `Workflow` - automation scenarios and end-to-end chain.
 3. `Control Tower` - provider intake, workbench context, detection, escalation,
-   action plan, notification preview, and role briefing.
+   action plan, notification preview, role briefing, and Business Scenario
+   Replay.
 4. `Integrations` - Adapter Studio, connector certification, fixture replay,
    adapter contracts, operation scenarios, sync jobs, and health.
 5. `Operations` - alert routing and recovery evidence.
@@ -57,6 +58,7 @@ bash scripts/check_public_connector_certification.sh
 bash scripts/check_public_demo_api.sh
 bash scripts/check_public_demo_sdk.sh
 bash scripts/check_public_business_control_tower.sh
+bash scripts/check_public_business_scenario_replay.sh
 bash scripts/check_public_engineering_proof.sh
 ```
 

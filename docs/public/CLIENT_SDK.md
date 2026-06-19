@@ -14,6 +14,7 @@ It targets the read-only synthetic public demo endpoint:
 ```text
 GET /demo/public
 GET /demo/connector-fixture-replay
+GET /demo/business-scenario-replay
 ```
 
 ## Generated Files
@@ -48,8 +49,9 @@ The generator is:
 scripts/generate_public_demo_sdk.py
 ```
 
-It reads the OpenAPI schema, finds `GET /demo/public` and
-`GET /demo/connector-fixture-replay`, extracts operation ids and required
+It reads the OpenAPI schema, finds `GET /demo/public`,
+`GET /demo/connector-fixture-replay`, and
+`GET /demo/business-scenario-replay`, extracts operation ids and required
 response fields, and writes small public-safe clients.
 
 The SDK smoke is:
@@ -75,6 +77,8 @@ The SDK includes typed helpers around `adapterScenarios`:
 - `DriveDeskPublicDemoClient.getAdapterOperationPlan`.
 - `DriveDeskPublicDemoClient.get_connector_fixture_replay`;
 - `DriveDeskPublicDemoClient.getConnectorFixtureReplay`.
+- `DriveDeskPublicDemoClient.get_business_scenario_replay`;
+- `DriveDeskPublicDemoClient.getBusinessScenarioReplay`.
 
 These helpers convert public synthetic adapter scenarios into a
 contract-only request/response plan:
@@ -117,6 +121,11 @@ fixture groups, redaction outcomes, read-only boundaries, and docs. That gives
 external engineers a small integration-proof API surface without loading the
 full public demo payload.
 
+The generated clients also validate the standalone business scenario replay
+endpoint: source systems, normalized facts, recommended actions, automation
+boundaries, and replay docs. That shows the same Business OS loop across CRM,
+support, and procurement-style scenarios.
+
 ## Why This Matters
 
 The SDK is not meant to be a full production client yet. It proves a foundation:
@@ -127,6 +136,8 @@ The SDK is not meant to be a full production client yet. It proves a foundation:
 - The generated client can build typed adapter operation plans.
 - The generated client validates the Adapter Studio workbench contract.
 - The generated client validates connector fixture replay as a standalone API
+  contract.
+- The generated client validates business scenario replay as a standalone API
   contract.
 - The generated client can show the Bitrix-style CRM provider-intake body and
   worker-backed ingest operation without exposing real credentials.

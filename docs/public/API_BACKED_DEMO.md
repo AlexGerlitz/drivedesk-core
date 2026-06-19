@@ -13,6 +13,7 @@ DriveDesk now exposes:
 ```text
 GET /demo/public
 GET /demo/connector-fixture-replay
+GET /demo/business-scenario-replay
 ```
 
 `GET /demo/public` returns the same product-shaped synthetic demo data used by
@@ -20,14 +21,19 @@ the public demo shell: tenant, health, metrics, work queue, workflow stages,
 timeline entries, workflow scenarios, domain events, members, audit events,
 outbox events, adapter contracts, adapter operation scenarios, Adapter Studio,
 sync jobs, Integration Health, alert routing, incident response,
-`businessControlTower` data, recovery evidence, `connectorFixtureReplay`, and
-the `engineeringProof` contract rendered by the Integrations, Operations,
-Incidents, and Proof tabs.
+`businessControlTower` data, `businessScenarioReplay`, recovery evidence,
+`connectorFixtureReplay`, and the `engineeringProof` contract rendered by the
+Control Tower, Integrations, Operations, Incidents, and Proof tabs.
 
 `GET /demo/connector-fixture-replay` returns the same `connectorFixtureReplay`
 contract as a standalone endpoint. It is useful when a reviewer wants to inspect
 only the integration replay proof: fixture groups, redaction outcomes,
 read-only boundaries, evidence paths, and docs.
+
+`GET /demo/business-scenario-replay` returns the same
+`businessScenarioReplay` contract as a standalone endpoint. It is useful for
+checking the Business OS loop directly: external signal -> normalized facts ->
+risk detection -> role context -> approval-aware action plan.
 
 ## Runtime Modes
 
@@ -36,6 +42,7 @@ read-only boundaries, evidence paths, and docs.
 | Static fallback | GitHub Pages loads `demo-data.js` and works without a backend. |
 | API-backed | The demo shell loads JSON from `GET /demo/public` when `?demoApi=...` is provided. |
 | Replay API | The generated SDK and smoke checks can load `GET /demo/connector-fixture-replay` directly. |
+| Scenario Replay API | Smoke checks can load `GET /demo/business-scenario-replay` directly. |
 
 Example local API-backed run:
 
@@ -74,11 +81,13 @@ bash scripts/check_public_demo_sdk.sh
 
 `check_public_demo_api.sh` starts a temporary local API when no
 `DRIVEDESK_DEMO_BASE_URL` is provided. It checks `/health`, `/ready`,
-`/demo/public`, `/demo/connector-fixture-replay`, `/openapi.json`, the generated
+`/demo/public`, `/demo/connector-fixture-replay`,
+`/demo/business-scenario-replay`, `/openapi.json`, the generated
 `docs/openapi.json` when present, alert routes, alert-to-runbook bindings,
 connector certification references in `CONNECTOR_CERTIFICATION.md`, connector
-fixture replay references in `CONNECTOR_FIXTURE_REPLAY.md`, and then runs the
-curl, Python, and JavaScript examples against the same API.
+fixture replay references in `CONNECTOR_FIXTURE_REPLAY.md`, business scenario
+replay references in `BUSINESS_SCENARIO_REPLAY.md`, and then runs the curl,
+Python, and JavaScript examples against the same API.
 
 The `connectorFixtureReplay` payload is the API-backed form of
 `CONNECTOR_FIXTURE_REPLAY.md`: it exposes the synthetic fixture groups, replay
@@ -96,6 +105,12 @@ CRM observation + bank observation + accounting observation
   -> approval
   -> dry-run repair evidence
 ```
+
+The `businessScenarioReplay` payload is documented in
+`BUSINESS_SCENARIO_REPLAY.md`. It shows three reusable Business OS paths:
+CRM/bank/accounting mismatch, support SLA risk, and procurement delay risk. The
+contract proves that DriveDesk can keep the same normalization, detection,
+context, action-plan, and approval boundary across different external systems.
 
 The incident response payload is documented in `INCIDENT_RESPONSE_DEMO.md`. It
 shows the synthetic path:
@@ -162,5 +177,6 @@ This is the first public frontend/backend contract. The static demo works
 without infrastructure, and the same UI can be pointed at the FastAPI endpoint
 to verify that the backend owns the demo payload shape: workflow, timeline,
 workflow scenarios, domain events, audit, outbox data, alert routing, incident
-response, business control tower data, adapter operation scenarios, recovery
-evidence, Adapter Studio, and engineering proof gates.
+response, business control tower data, business scenario replay data, adapter
+operation scenarios, recovery evidence, Adapter Studio, and engineering proof
+gates.

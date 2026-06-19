@@ -42,10 +42,11 @@ Primary artifacts:
 | --- | --- |
 | Platform tour | `docs/public/PLATFORM_TOUR.md` |
 | Architecture | `docs/public/SYSTEM_DESIGN.md` |
-| Demo API | `docs/public/API_BACKED_DEMO.md`, `docs/openapi.json`, `GET /demo/public`, `GET /demo/connector-fixture-replay` |
+| Demo API | `docs/public/API_BACKED_DEMO.md`, `docs/openapi.json`, `GET /demo/public`, `GET /demo/connector-fixture-replay`, `GET /demo/business-scenario-replay` |
 | SDK | `docs/public/CLIENT_SDK.md`, `sdk/generated/public-demo/` |
 | Workflow | `docs/public/WORKFLOW_DEMO.md`, `endToEndScenario` |
 | Connector replay | `docs/public/CONNECTOR_FIXTURE_REPLAY.md`, `GET /demo/connector-fixture-replay`, `examples/connector-fixtures/replay-fixtures.sanitized.json` |
+| Business scenario replay | `docs/public/BUSINESS_SCENARIO_REPLAY.md`, `GET /demo/business-scenario-replay`, `businessScenarioReplay` |
 | Observability | `docs/public/OBSERVABILITY_PROOF.md` |
 | Alert routing | `docs/public/ALERT_ROUTING_EVIDENCE.md` |
 | Incident response | `docs/public/INCIDENT_RESPONSE_DEMO.md` |
@@ -61,6 +62,7 @@ bash scripts/check_public_system_review_path.sh
 bash scripts/check_public_platform_tour.sh
 bash scripts/check_public_pages_entrypoint.sh
 bash scripts/check_public_demo_api.sh
+bash scripts/check_public_business_scenario_replay.sh
 bash scripts/check_public_engineering_proof.sh
 bash scripts/check_public_connector_fixture_replay.sh
 bash scripts/ci_smoke_public.sh

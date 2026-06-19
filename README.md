@@ -294,6 +294,7 @@ Health:
 curl http://localhost:8080/health
 curl http://localhost:8080/demo/public
 curl http://localhost:8080/demo/connector-fixture-replay
+curl http://localhost:8080/demo/business-scenario-replay
 ```
 
 API contract and client examples:

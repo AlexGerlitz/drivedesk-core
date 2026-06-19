@@ -3,8 +3,10 @@ import { pathToFileURL } from "node:url";
 
 export const PUBLIC_DEMO_PATH = "/demo/public";
 export const CONNECTOR_REPLAY_PATH = "/demo/connector-fixture-replay";
+export const BUSINESS_SCENARIO_REPLAY_PATH = "/demo/business-scenario-replay";
 export const OPERATION_ID = "public_demo_demo_public_get";
 export const CONNECTOR_REPLAY_OPERATION_ID = "connector_fixture_replay_demo_demo_connector_fixture_replay_get";
+export const BUSINESS_SCENARIO_REPLAY_OPERATION_ID = "business_scenario_replay_demo_demo_business_scenario_replay_get";
 export const REQUIRED_FIELDS = [
   "schemaVersion",
   "generatedAt",
@@ -28,6 +30,7 @@ export const REQUIRED_FIELDS = [
   "alertRouting",
   "incidentResponse",
   "businessControlTower",
+  "businessScenarioReplay",
   "engineeringProof",
   "workflow",
   "workflowScenarios",
@@ -43,6 +46,14 @@ export const CONNECTOR_REPLAY_REQUIRED_FIELDS = [
   "summary",
   "outcomes",
   "boundaries",
+  "docs"
+];
+export const BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS = [
+  "status",
+  "command",
+  "summary",
+  "scenarios",
+  "flow",
   "docs"
 ];
 
@@ -84,6 +95,22 @@ export class DriveDeskPublicDemoClient {
 
     const payload = await response.json();
     validateConnectorFixtureReplayPayload(payload);
+    return payload;
+  }
+
+  async getBusinessScenarioReplay() {
+    const response = await this.fetchImpl(`${this.baseUrl}${BUSINESS_SCENARIO_REPLAY_PATH}`, {
+      headers: {
+        Accept: "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`GET ${BUSINESS_SCENARIO_REPLAY_PATH} failed: ${response.status}`);
+    }
+
+    const payload = await response.json();
+    validateBusinessScenarioReplayPayload(payload);
     return payload;
   }
 
@@ -315,6 +342,52 @@ export function validateConnectorFixtureReplayPayload(payload) {
   }
 }
 
+export function validateBusinessScenarioReplayPayload(payload) {
+  const missing = BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS.filter((field) => !(field in payload));
+  if (missing.length > 0) {
+    throw new Error(`missing business scenario replay fields: ${missing.join(", ")}`);
+  }
+
+  if (payload.status !== "validated") {
+    throw new Error(`unexpected business scenario replay status: ${payload.status}`);
+  }
+
+  if (payload.command !== "bash scripts/check_public_business_scenario_replay.sh") {
+    throw new Error(`unexpected business scenario replay command: ${payload.command}`);
+  }
+
+  if (!Array.isArray(payload.scenarios) || payload.scenarios.length < 3) {
+    throw new Error("business scenario replay scenarios are missing or too short");
+  }
+
+  const scenarioIds = new Set(payload.scenarios.map((item) => item?.id));
+  for (const scenarioId of ["crm-bank-payment-mismatch", "support-sla-risk", "procurement-delay-risk"]) {
+    if (!scenarioIds.has(scenarioId)) {
+      throw new Error(`business scenario replay scenario is missing: ${scenarioId}`);
+    }
+  }
+
+  for (const scenario of payload.scenarios) {
+    if (!Array.isArray(scenario?.normalizedFacts) || scenario.normalizedFacts.length === 0) {
+      throw new Error(`business scenario replay facts missing: ${scenario?.id}`);
+    }
+    if (!Array.isArray(scenario?.recommendedActions) || scenario.recommendedActions.length === 0) {
+      throw new Error(`business scenario replay actions missing: ${scenario?.id}`);
+    }
+    if (!Array.isArray(scenario?.automationCandidates) || !scenario.automationCandidates.some((item) => item?.safeToAutoRun === false)) {
+      throw new Error(`business scenario replay lacks approval boundary: ${scenario?.id}`);
+    }
+  }
+
+  if (!Array.isArray(payload.flow) || payload.flow.length < 5) {
+    throw new Error("business scenario replay flow is missing or too short");
+  }
+
+  if (!Array.isArray(payload.docs) || payload.docs.length < 4) {
+    throw new Error("business scenario replay docs are missing or too short");
+  }
+}
+
 export function validatePublicDemoPayload(payload) {
   const missing = REQUIRED_FIELDS.filter((field) => !(field in payload));
   if (missing.length > 0) {
@@ -454,6 +527,11 @@ export function validatePublicDemoPayload(payload) {
   }
   validateConnectorFixtureReplayPayload(payload.connectorFixtureReplay);
 
+  if (!payload.businessScenarioReplay || typeof payload.businessScenarioReplay !== "object") {
+    throw new Error("businessScenarioReplay is missing");
+  }
+  validateBusinessScenarioReplayPayload(payload.businessScenarioReplay);
+
   if (payload.engineeringProof?.milestone !== "engineering_70") {
     throw new Error(`unexpected engineeringProof.milestone: ${payload.engineeringProof?.milestone}`);
   }
@@ -513,6 +591,7 @@ async function main() {
   const client = new DriveDeskPublicDemoClient(baseUrl);
   const payload = await client.getPublicDemo();
   const connectorReplay = await client.getConnectorFixtureReplay();
+  const businessScenarioReplay = await client.getBusinessScenarioReplay();
   const adapterPlan = buildAdapterOperationPlan(payload, "adapter-file-import-preview");
   console.log(
     "generated js SDK ok:",
@@ -521,8 +600,10 @@ async function main() {
     `workflow=${payload.workflow.currentStage}`,
     `adapterPlan=${adapterPlan.phase}`,
     `connectorReplay=${connectorReplay.status}`,
+    `businessScenarioReplay=${businessScenarioReplay.status}`,
     `operation=${OPERATION_ID}`,
     `connectorOperation=${CONNECTOR_REPLAY_OPERATION_ID}`,
+    `businessScenarioOperation=${BUSINESS_SCENARIO_REPLAY_OPERATION_ID}`,
   );
 }
 

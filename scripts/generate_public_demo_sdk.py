@@ -11,6 +11,8 @@ PUBLIC_DEMO_PATH = "/demo/public"
 PUBLIC_DEMO_METHOD = "get"
 CONNECTOR_REPLAY_PATH = "/demo/connector-fixture-replay"
 CONNECTOR_REPLAY_METHOD = "get"
+BUSINESS_SCENARIO_REPLAY_PATH = "/demo/business-scenario-replay"
+BUSINESS_SCENARIO_REPLAY_METHOD = "get"
 
 
 def load_schema(path: Path) -> dict[str, Any]:
@@ -33,6 +35,14 @@ def connector_replay_operation(schema: dict[str, Any]) -> dict[str, Any]:
     return required_operation(schema, CONNECTOR_REPLAY_PATH, CONNECTOR_REPLAY_METHOD)
 
 
+def business_scenario_replay_operation(schema: dict[str, Any]) -> dict[str, Any]:
+    return required_operation(
+        schema,
+        BUSINESS_SCENARIO_REPLAY_PATH,
+        BUSINESS_SCENARIO_REPLAY_METHOD,
+    )
+
+
 def public_demo_required_fields(schema: dict[str, Any]) -> list[str]:
     components = schema.get("components", {})
     schemas = components.get("schemas", {})
@@ -53,6 +63,16 @@ def connector_replay_required_fields(schema: dict[str, Any]) -> list[str]:
     return [str(item) for item in required]
 
 
+def business_scenario_replay_required_fields(schema: dict[str, Any]) -> list[str]:
+    components = schema.get("components", {})
+    schemas = components.get("schemas", {})
+    replay = schemas.get("BusinessScenarioReplayRead", {})
+    required = replay.get("required", [])
+    if not isinstance(required, list) or not required:
+        raise SystemExit("OpenAPI schema does not contain BusinessScenarioReplayRead.required")
+    return [str(item) for item in required]
+
+
 def write(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
@@ -63,9 +83,12 @@ def render_python_client(
     required_fields: list[str],
     connector_operation_id: str,
     connector_required_fields: list[str],
+    business_scenario_operation_id: str,
+    business_scenario_required_fields: list[str],
 ) -> str:
     required_json = json.dumps(required_fields, indent=2)
     connector_required_json = json.dumps(connector_required_fields, indent=2)
+    business_scenario_required_json = json.dumps(business_scenario_required_fields, indent=2)
     return f'''#!/usr/bin/env python3
 from __future__ import annotations
 
@@ -77,10 +100,13 @@ from typing import Any
 
 PUBLIC_DEMO_PATH = "{PUBLIC_DEMO_PATH}"
 CONNECTOR_REPLAY_PATH = "{CONNECTOR_REPLAY_PATH}"
+BUSINESS_SCENARIO_REPLAY_PATH = "{BUSINESS_SCENARIO_REPLAY_PATH}"
 OPERATION_ID = "{operation_id}"
 CONNECTOR_REPLAY_OPERATION_ID = "{connector_operation_id}"
+BUSINESS_SCENARIO_REPLAY_OPERATION_ID = "{business_scenario_operation_id}"
 REQUIRED_FIELDS = {required_json}
 CONNECTOR_REPLAY_REQUIRED_FIELDS = {connector_required_json}
+BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS = {business_scenario_required_json}
 
 
 class DriveDeskPublicDemoClient:
@@ -98,6 +124,11 @@ class DriveDeskPublicDemoClient:
     def get_connector_fixture_replay(self) -> dict[str, Any]:
         payload = self._get_json(CONNECTOR_REPLAY_PATH)
         validate_connector_fixture_replay_payload(payload)
+        return payload
+
+    def get_business_scenario_replay(self) -> dict[str, Any]:
+        payload = self._get_json(BUSINESS_SCENARIO_REPLAY_PATH)
+        validate_business_scenario_replay_payload(payload)
         return payload
 
     def get_adapter_operation_plan(
@@ -321,6 +352,53 @@ def validate_connector_fixture_replay_payload(payload: dict[str, Any]) -> None:
         raise ValueError("connector replay docs are missing or too short")
 
 
+def validate_business_scenario_replay_payload(payload: dict[str, Any]) -> None:
+    missing = [field for field in BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS if field not in payload]
+    if missing:
+        raise ValueError(f"missing business scenario replay fields: {{', '.join(missing)}}")
+
+    if payload.get("status") != "validated":
+        raise ValueError(f"unexpected business scenario replay status: {{payload.get('status')}}")
+
+    if payload.get("command") != "bash scripts/check_public_business_scenario_replay.sh":
+        raise ValueError(f"unexpected business scenario replay command: {{payload.get('command')}}")
+
+    scenarios = payload.get("scenarios")
+    if not isinstance(scenarios, list) or len(scenarios) < 3:
+        raise ValueError("business scenario replay scenarios are missing or too short")
+
+    scenario_ids = {{item.get("id") for item in scenarios if isinstance(item, dict)}}
+    required_scenarios = {{
+        "crm-bank-payment-mismatch",
+        "support-sla-risk",
+        "procurement-delay-risk",
+    }}
+    if scenario_ids != required_scenarios:
+        raise ValueError(f"business scenario replay ids mismatch: {{sorted(scenario_ids)}}")
+
+    for scenario in scenarios:
+        if not isinstance(scenario, dict):
+            raise ValueError("business scenario replay contains non-object scenario")
+        if not scenario.get("normalizedFacts"):
+            raise ValueError(f"business scenario replay facts missing: {{scenario.get('id')}}")
+        if not scenario.get("recommendedActions"):
+            raise ValueError(f"business scenario replay actions missing: {{scenario.get('id')}}")
+        if not any(
+            item.get("safeToAutoRun") is False
+            for item in scenario.get("automationCandidates", [])
+            if isinstance(item, dict)
+        ):
+            raise ValueError(f"business scenario replay lacks approval boundary: {{scenario.get('id')}}")
+
+    flow = payload.get("flow")
+    if not isinstance(flow, list) or len(flow) < 5:
+        raise ValueError("business scenario replay flow is missing or too short")
+
+    docs = payload.get("docs")
+    if not isinstance(docs, list) or len(docs) < 4:
+        raise ValueError("business scenario replay docs are missing or too short")
+
+
 def validate_public_demo_payload(payload: dict[str, Any]) -> None:
     missing = [field for field in REQUIRED_FIELDS if field not in payload]
     if missing:
@@ -466,6 +544,11 @@ def validate_public_demo_payload(payload: dict[str, Any]) -> None:
         raise ValueError("connectorFixtureReplay is missing")
     validate_connector_fixture_replay_payload(connector_replay)
 
+    business_scenario_replay = payload.get("businessScenarioReplay")
+    if not isinstance(business_scenario_replay, dict):
+        raise ValueError("businessScenarioReplay is missing")
+    validate_business_scenario_replay_payload(business_scenario_replay)
+
     proof = payload.get("engineeringProof") or {{}}
     if proof.get("milestone") != "engineering_70":
         raise ValueError(f"unexpected engineeringProof.milestone: {{proof.get('milestone')}}")
@@ -520,6 +603,7 @@ def main() -> None:
     client = DriveDeskPublicDemoClient(args.base_url)
     payload = client.get_public_demo()
     connector_replay = client.get_connector_fixture_replay()
+    business_scenario_replay = client.get_business_scenario_replay()
     adapter_plan = build_adapter_operation_plan(payload, "adapter-file-import-preview")
     print(
         "generated python SDK ok:",
@@ -528,8 +612,10 @@ def main() -> None:
         f"workflow={{payload['workflow']['currentStage']}}",
         f"adapterPlan={{adapter_plan['phase']}}",
         f"connectorReplay={{connector_replay['status']}}",
+        f"businessScenarioReplay={{business_scenario_replay['status']}}",
         f"operation={{OPERATION_ID}}",
         f"connectorOperation={{CONNECTOR_REPLAY_OPERATION_ID}}",
+        f"businessScenarioOperation={{BUSINESS_SCENARIO_REPLAY_OPERATION_ID}}",
     )
 
 
@@ -543,18 +629,24 @@ def render_javascript_client(
     required_fields: list[str],
     connector_operation_id: str,
     connector_required_fields: list[str],
+    business_scenario_operation_id: str,
+    business_scenario_required_fields: list[str],
 ) -> str:
     required_json = json.dumps(required_fields, indent=2)
     connector_required_json = json.dumps(connector_required_fields, indent=2)
+    business_scenario_required_json = json.dumps(business_scenario_required_fields, indent=2)
     return f'''#!/usr/bin/env node
 import {{ pathToFileURL }} from "node:url";
 
 export const PUBLIC_DEMO_PATH = "{PUBLIC_DEMO_PATH}";
 export const CONNECTOR_REPLAY_PATH = "{CONNECTOR_REPLAY_PATH}";
+export const BUSINESS_SCENARIO_REPLAY_PATH = "{BUSINESS_SCENARIO_REPLAY_PATH}";
 export const OPERATION_ID = "{operation_id}";
 export const CONNECTOR_REPLAY_OPERATION_ID = "{connector_operation_id}";
+export const BUSINESS_SCENARIO_REPLAY_OPERATION_ID = "{business_scenario_operation_id}";
 export const REQUIRED_FIELDS = {required_json};
 export const CONNECTOR_REPLAY_REQUIRED_FIELDS = {connector_required_json};
+export const BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS = {business_scenario_required_json};
 
 export class DriveDeskPublicDemoClient {{
   constructor(baseUrl = "http://localhost:8080", options = {{}}) {{
@@ -594,6 +686,22 @@ export class DriveDeskPublicDemoClient {{
 
     const payload = await response.json();
     validateConnectorFixtureReplayPayload(payload);
+    return payload;
+  }}
+
+  async getBusinessScenarioReplay() {{
+    const response = await this.fetchImpl(`${{this.baseUrl}}${{BUSINESS_SCENARIO_REPLAY_PATH}}`, {{
+      headers: {{
+        Accept: "application/json",
+      }},
+    }});
+
+    if (!response.ok) {{
+      throw new Error(`GET ${{BUSINESS_SCENARIO_REPLAY_PATH}} failed: ${{response.status}}`);
+    }}
+
+    const payload = await response.json();
+    validateBusinessScenarioReplayPayload(payload);
     return payload;
   }}
 
@@ -825,6 +933,52 @@ export function validateConnectorFixtureReplayPayload(payload) {{
   }}
 }}
 
+export function validateBusinessScenarioReplayPayload(payload) {{
+  const missing = BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS.filter((field) => !(field in payload));
+  if (missing.length > 0) {{
+    throw new Error(`missing business scenario replay fields: ${{missing.join(", ")}}`);
+  }}
+
+  if (payload.status !== "validated") {{
+    throw new Error(`unexpected business scenario replay status: ${{payload.status}}`);
+  }}
+
+  if (payload.command !== "bash scripts/check_public_business_scenario_replay.sh") {{
+    throw new Error(`unexpected business scenario replay command: ${{payload.command}}`);
+  }}
+
+  if (!Array.isArray(payload.scenarios) || payload.scenarios.length < 3) {{
+    throw new Error("business scenario replay scenarios are missing or too short");
+  }}
+
+  const scenarioIds = new Set(payload.scenarios.map((item) => item?.id));
+  for (const scenarioId of ["crm-bank-payment-mismatch", "support-sla-risk", "procurement-delay-risk"]) {{
+    if (!scenarioIds.has(scenarioId)) {{
+      throw new Error(`business scenario replay scenario is missing: ${{scenarioId}}`);
+    }}
+  }}
+
+  for (const scenario of payload.scenarios) {{
+    if (!Array.isArray(scenario?.normalizedFacts) || scenario.normalizedFacts.length === 0) {{
+      throw new Error(`business scenario replay facts missing: ${{scenario?.id}}`);
+    }}
+    if (!Array.isArray(scenario?.recommendedActions) || scenario.recommendedActions.length === 0) {{
+      throw new Error(`business scenario replay actions missing: ${{scenario?.id}}`);
+    }}
+    if (!Array.isArray(scenario?.automationCandidates) || !scenario.automationCandidates.some((item) => item?.safeToAutoRun === false)) {{
+      throw new Error(`business scenario replay lacks approval boundary: ${{scenario?.id}}`);
+    }}
+  }}
+
+  if (!Array.isArray(payload.flow) || payload.flow.length < 5) {{
+    throw new Error("business scenario replay flow is missing or too short");
+  }}
+
+  if (!Array.isArray(payload.docs) || payload.docs.length < 4) {{
+    throw new Error("business scenario replay docs are missing or too short");
+  }}
+}}
+
 export function validatePublicDemoPayload(payload) {{
   const missing = REQUIRED_FIELDS.filter((field) => !(field in payload));
   if (missing.length > 0) {{
@@ -964,6 +1118,11 @@ export function validatePublicDemoPayload(payload) {{
   }}
   validateConnectorFixtureReplayPayload(payload.connectorFixtureReplay);
 
+  if (!payload.businessScenarioReplay || typeof payload.businessScenarioReplay !== "object") {{
+    throw new Error("businessScenarioReplay is missing");
+  }}
+  validateBusinessScenarioReplayPayload(payload.businessScenarioReplay);
+
   if (payload.engineeringProof?.milestone !== "engineering_70") {{
     throw new Error(`unexpected engineeringProof.milestone: ${{payload.engineeringProof?.milestone}}`);
   }}
@@ -1023,6 +1182,7 @@ async function main() {{
   const client = new DriveDeskPublicDemoClient(baseUrl);
   const payload = await client.getPublicDemo();
   const connectorReplay = await client.getConnectorFixtureReplay();
+  const businessScenarioReplay = await client.getBusinessScenarioReplay();
   const adapterPlan = buildAdapterOperationPlan(payload, "adapter-file-import-preview");
   console.log(
     "generated js SDK ok:",
@@ -1031,8 +1191,10 @@ async function main() {{
     `workflow=${{payload.workflow.currentStage}}`,
     `adapterPlan=${{adapterPlan.phase}}`,
     `connectorReplay=${{connectorReplay.status}}`,
+    `businessScenarioReplay=${{businessScenarioReplay.status}}`,
     `operation=${{OPERATION_ID}}`,
     `connectorOperation=${{CONNECTOR_REPLAY_OPERATION_ID}}`,
+    `businessScenarioOperation=${{BUSINESS_SCENARIO_REPLAY_OPERATION_ID}}`,
   );
 }}
 
@@ -1050,16 +1212,24 @@ def render_typescript_defs(
     required_fields: list[str],
     connector_operation_id: str,
     connector_required_fields: list[str],
+    business_scenario_operation_id: str,
+    business_scenario_required_fields: list[str],
 ) -> str:
     required_union = " | ".join(f'"{field}"' for field in required_fields)
     connector_required_union = " | ".join(f'"{field}"' for field in connector_required_fields)
+    business_scenario_required_union = " | ".join(
+        f'"{field}"' for field in business_scenario_required_fields
+    )
     return f'''// Generated from DriveDesk Core OpenAPI. Do not edit by hand.
 export const PUBLIC_DEMO_PATH: "{PUBLIC_DEMO_PATH}";
 export const CONNECTOR_REPLAY_PATH: "{CONNECTOR_REPLAY_PATH}";
+export const BUSINESS_SCENARIO_REPLAY_PATH: "{BUSINESS_SCENARIO_REPLAY_PATH}";
 export const OPERATION_ID: "{operation_id}";
 export const CONNECTOR_REPLAY_OPERATION_ID: "{connector_operation_id}";
+export const BUSINESS_SCENARIO_REPLAY_OPERATION_ID: "{business_scenario_operation_id}";
 export const REQUIRED_FIELDS: Array<{required_union}>;
 export const CONNECTOR_REPLAY_REQUIRED_FIELDS: Array<{connector_required_union}>;
+export const BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS: Array<{business_scenario_required_union}>;
 
 export type AdapterScenarioPhase = "preview" | "execute" | "retry" | "operator_review";
 
@@ -1116,6 +1286,29 @@ export interface ConnectorFixtureReplayPayload {{
   docs: Array<Record<string, string>>;
 }}
 
+export interface BusinessScenarioReplayPayload {{
+  status: "validated";
+  command: string;
+  summary: Array<Record<string, unknown>>;
+  scenarios: Array<{{
+    id: string;
+    title: string;
+    status: string;
+    riskLevel: string;
+    operatorRole: string;
+    trigger: string;
+    decision: string;
+    sourceSystems: string[];
+    normalizedFacts: Array<Record<string, string>>;
+    recommendedActions: Array<Record<string, string>>;
+    automationCandidates: Array<Record<string, unknown>>;
+    evidence: string[];
+    dataBoundary: string[];
+  }}>;
+  flow: Array<Record<string, string>>;
+  docs: Array<Record<string, string>>;
+}}
+
 export interface PublicDemoPayload {{
   schemaVersion: 1;
   generatedAt: string;
@@ -1149,6 +1342,7 @@ export interface PublicDemoPayload {{
     recoveryActions: Array<Record<string, string>>;
     resolutionEvidence: Array<Record<string, string>>;
   }};
+  businessScenarioReplay: BusinessScenarioReplayPayload;
   engineeringProof: {{
     milestone: "engineering_70";
     status: "validated";
@@ -1182,6 +1376,7 @@ export class DriveDeskPublicDemoClient {{
   constructor(baseUrl?: string, options?: {{ fetchImpl?: typeof fetch }});
   getPublicDemo(): Promise<PublicDemoPayload>;
   getConnectorFixtureReplay(): Promise<ConnectorFixtureReplayPayload>;
+  getBusinessScenarioReplay(): Promise<BusinessScenarioReplayPayload>;
   getAdapterOperationPlan(
     scenarioId: string,
     options?: {{ requestId?: string }},
@@ -1196,10 +1391,15 @@ export function buildAdapterOperationPlan(
 ): AdapterOperationPlan;
 export function validatePublicDemoPayload(payload: PublicDemoPayload): void;
 export function validateConnectorFixtureReplayPayload(payload: ConnectorFixtureReplayPayload): void;
+export function validateBusinessScenarioReplayPayload(payload: BusinessScenarioReplayPayload): void;
 '''
 
 
-def render_readme(operation_id: str, connector_operation_id: str) -> str:
+def render_readme(
+    operation_id: str,
+    connector_operation_id: str,
+    business_scenario_operation_id: str,
+) -> str:
     return f'''# Generated Public Demo SDK
 
 This folder is generated from `docs/openapi.json` by:
@@ -1222,6 +1422,9 @@ operationId: {operation_id}
 
 GET {CONNECTOR_REPLAY_PATH}
 operationId: {connector_operation_id}
+
+GET {BUSINESS_SCENARIO_REPLAY_PATH}
+operationId: {business_scenario_operation_id}
 ```
 
 Run the SDK smoke:
@@ -1238,6 +1441,8 @@ Adapter operation helpers:
 - `DriveDeskPublicDemoClient.get_adapter_operation_plan`
 - `DriveDeskPublicDemoClient.getConnectorFixtureReplay`
 - `DriveDeskPublicDemoClient.get_connector_fixture_replay`
+- `DriveDeskPublicDemoClient.getBusinessScenarioReplay`
+- `DriveDeskPublicDemoClient.get_business_scenario_replay`
 
 These helpers turn the public `adapterScenarios` payload into a typed
 contract-only request/response plan for mapping preview, execution, retry, and
@@ -1246,6 +1451,10 @@ operator-review flows. They do not mutate the public demo.
 Connector fixture replay helpers validate the public-safe replay evidence as a
 standalone API contract: fixture groups, redaction outcomes, boundaries, and
 review docs.
+
+Business scenario replay helpers validate the Business OS scenario contract:
+source systems, normalized facts, recommended actions, automation boundaries,
+and replay docs.
 
 Engineering summary: this is the public-safe integration proof. DriveDesk
 publishes an OpenAPI contract and generates a small SDK from it instead of
@@ -1258,6 +1467,8 @@ def render_manifest(
     required_fields: list[str],
     connector_operation_id: str,
     connector_required_fields: list[str],
+    business_scenario_operation_id: str,
+    business_scenario_required_fields: list[str],
 ) -> str:
     payload = {
         "schema_version": 1,
@@ -1270,6 +1481,12 @@ def render_manifest(
             "method": CONNECTOR_REPLAY_METHOD.upper(),
             "operation_id": connector_operation_id,
             "required_fields": connector_required_fields,
+        },
+        "business_scenario_replay": {
+            "path": BUSINESS_SCENARIO_REPLAY_PATH,
+            "method": BUSINESS_SCENARIO_REPLAY_METHOD.upper(),
+            "operation_id": business_scenario_operation_id,
+            "required_fields": business_scenario_required_fields,
         },
         "data_profile": "synthetic_demo_data",
         "generated_files": [
@@ -1304,8 +1521,20 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
         connector_operation.get("operationId") or "get_connector_fixture_replay"
     )
     connector_required_fields = connector_replay_required_fields(schema)
+    business_scenario_operation = business_scenario_replay_operation(schema)
+    business_scenario_operation_id = str(
+        business_scenario_operation.get("operationId") or "get_business_scenario_replay"
+    )
+    business_scenario_required_fields = business_scenario_replay_required_fields(schema)
 
-    write(out_dir / "README.md", render_readme(operation_id, connector_operation_id))
+    write(
+        out_dir / "README.md",
+        render_readme(
+            operation_id,
+            connector_operation_id,
+            business_scenario_operation_id,
+        ),
+    )
     write(
         out_dir / "openapi-client-manifest.json",
         render_manifest(
@@ -1313,6 +1542,8 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
             required_fields,
             connector_operation_id,
             connector_required_fields,
+            business_scenario_operation_id,
+            business_scenario_required_fields,
         ),
     )
     write(
@@ -1322,6 +1553,8 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
             required_fields,
             connector_operation_id,
             connector_required_fields,
+            business_scenario_operation_id,
+            business_scenario_required_fields,
         ),
     )
     write(
@@ -1331,6 +1564,8 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
             required_fields,
             connector_operation_id,
             connector_required_fields,
+            business_scenario_operation_id,
+            business_scenario_required_fields,
         ),
     )
     write(
@@ -1340,6 +1575,8 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
             required_fields,
             connector_operation_id,
             connector_required_fields,
+            business_scenario_operation_id,
+            business_scenario_required_fields,
         ),
     )
 

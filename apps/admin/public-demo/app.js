@@ -140,6 +140,11 @@
         Array.isArray(payload.businessControlTower.exceptions) &&
         Array.isArray(payload.businessControlTower.repairActions) &&
         Array.isArray(payload.businessControlTower.flow) &&
+        payload.businessScenarioReplay &&
+        Array.isArray(payload.businessScenarioReplay.summary) &&
+        Array.isArray(payload.businessScenarioReplay.scenarios) &&
+        Array.isArray(payload.businessScenarioReplay.flow) &&
+        Array.isArray(payload.businessScenarioReplay.docs) &&
         payload.engineeringProof &&
         Array.isArray(payload.engineeringProof.summary) &&
         Array.isArray(payload.engineeringProof.gates) &&
@@ -1029,6 +1034,128 @@
 
       row.append(top, detail, evidence);
       runbookRows.appendChild(row);
+    });
+  }
+
+  function fillBusinessScenarioReplay() {
+    var replay = data.businessScenarioReplay;
+
+    var summaryRows = document.getElementById("businessScenarioSummaryRows");
+    clear(summaryRows);
+    replay.summary.forEach(function (item) {
+      var card = document.createElement("article");
+      card.className = "metric-card";
+      card.dataset.tone = item.tone || "blue";
+
+      var label = document.createElement("span");
+      label.className = "muted";
+      label.appendChild(text(item.label));
+
+      var value = document.createElement("strong");
+      value.appendChild(text(item.value));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      card.append(label, value, detail);
+      summaryRows.appendChild(card);
+    });
+
+    var scenarioRows = document.getElementById("businessScenarioRows");
+    clear(scenarioRows);
+    replay.scenarios.forEach(function (scenario) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(scenario.title));
+      top.append(title, chip(scenario.status, statusTone(scenario.status)));
+
+      var sources = (scenario.sourceSystems || []).join(", ");
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          scenario.operatorRole +
+            " - " +
+            scenario.decision +
+            " - sources: " +
+            sources
+        )
+      );
+
+      var facts = document.createElement("code");
+      facts.appendChild(
+        text(
+          (scenario.normalizedFacts || [])
+            .map(function (fact) {
+              return fact.key + "=" + fact.value;
+            })
+            .join("; ")
+        )
+      );
+
+      row.append(top, detail, facts);
+      scenarioRows.appendChild(row);
+
+      (scenario.recommendedActions || []).forEach(function (item) {
+        var actionRow = document.createElement("article");
+        actionRow.className = "event-row";
+
+        var actionTop = document.createElement("div");
+        actionTop.className = "event-top";
+        var action = document.createElement("strong");
+        action.appendChild(text(item.action));
+        actionTop.append(action, chip(item.mode, statusTone(item.mode)));
+
+        var evidence = document.createElement("code");
+        evidence.appendChild(text(item.evidence));
+
+        actionRow.append(actionTop, evidence);
+        scenarioRows.appendChild(actionRow);
+      });
+    });
+
+    var flowRows = document.getElementById("businessScenarioFlowRows");
+    clear(flowRows);
+    replay.flow.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var stage = document.createElement("strong");
+      stage.appendChild(text(item.step + ". " + item.stage));
+      top.append(stage, chip(item.evidence, statusTone(item.stage)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      row.append(top, detail);
+      flowRows.appendChild(row);
+    });
+
+    var docRows = document.getElementById("businessScenarioDocRows");
+    clear(docRows);
+    replay.docs.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var label = document.createElement("strong");
+      label.appendChild(text(item.label));
+      top.append(label, chip("doc", "blue"));
+
+      var path = document.createElement("code");
+      path.appendChild(text(item.path));
+
+      row.append(top, path);
+      docRows.appendChild(row);
     });
   }
 
@@ -2098,6 +2225,7 @@
     fillAlertRouting();
     fillIncidentResponse();
     fillBusinessControlTower();
+    fillBusinessScenarioReplay();
     fillEngineeringProof();
   }
 

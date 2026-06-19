@@ -1874,6 +1874,15 @@ def test_public_demo_endpoint_is_read_only_synthetic_contract(
     }
     assert len(payload["integrationJobs"]) >= 3
     assert len(payload["integrationHealth"]) >= 4
+    assert payload["businessScenarioReplay"]["status"] == "validated"
+    assert payload["businessScenarioReplay"]["command"] == (
+        "bash scripts/check_public_business_scenario_replay.sh"
+    )
+    assert {item["id"] for item in payload["businessScenarioReplay"]["scenarios"]} == {
+        "crm-bank-payment-mismatch",
+        "support-sla-risk",
+        "procurement-delay-risk",
+    }
     assert {route["name"] for route in payload["alertRouting"]["routes"]} >= {
         "platform-critical-page",
         "platform-warning-ticket",
@@ -1957,6 +1966,39 @@ def test_connector_fixture_replay_demo_endpoint_exposes_same_public_contract(
         "external calls",
         "persistence",
     }
+
+
+def test_business_scenario_replay_demo_endpoint_exposes_same_public_contract(
+    api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, _ = api_client
+
+    public_response = client.get("/demo/public")
+    replay_response = client.get("/demo/business-scenario-replay")
+
+    assert replay_response.status_code == 200
+    assert replay_response.headers["access-control-allow-origin"] == "*"
+    assert replay_response.headers["cache-control"] == "public, max-age=60"
+    replay_payload = replay_response.json()
+    assert replay_payload == public_response.json()["businessScenarioReplay"]
+    assert replay_payload["status"] == "validated"
+    assert replay_payload["command"] == "bash scripts/check_public_business_scenario_replay.sh"
+    assert {item["id"] for item in replay_payload["scenarios"]} == {
+        "crm-bank-payment-mismatch",
+        "support-sla-risk",
+        "procurement-delay-risk",
+    }
+    assert {item["stage"] for item in replay_payload["flow"]} == {
+        "signal",
+        "normalize",
+        "detect",
+        "plan",
+        "execute",
+    }
+    assert any(
+        item["path"] == "docs/public/BUSINESS_SCENARIO_REPLAY.md"
+        for item in replay_payload["docs"]
+    )
 
 
 def test_file_import_adapter_success_flow(api_client: tuple[TestClient, async_sessionmaker[AsyncSession]]) -> None:

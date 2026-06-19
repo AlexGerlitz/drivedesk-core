@@ -557,6 +557,34 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
         "docs/public/evidence/connector-fixture-replay.sanitized.json",
         "examples/connector-fixtures/replay-fixtures.sanitized.json",
     }
+    business_scenario_replay = payload["businessScenarioReplay"]
+    assert business_scenario_replay["status"] == "validated"
+    assert business_scenario_replay["command"] == "bash scripts/check_public_business_scenario_replay.sh"
+    assert {item["label"] for item in business_scenario_replay["summary"]} >= {
+        "Scenario groups",
+        "Source systems",
+        "Operator actions",
+        "External writes",
+    }
+    scenario_replay_by_id = {item["id"]: item for item in business_scenario_replay["scenarios"]}
+    assert set(scenario_replay_by_id) == {
+        "crm-bank-payment-mismatch",
+        "support-sla-risk",
+        "procurement-delay-risk",
+    }
+    assert {item["stage"] for item in business_scenario_replay["flow"]} == {
+        "signal",
+        "normalize",
+        "detect",
+        "plan",
+        "execute",
+    }
+    assert {item["path"] for item in business_scenario_replay["docs"]} >= {
+        "docs/public/BUSINESS_SCENARIO_REPLAY.md",
+        "docs/public/BUSINESS_CONTROL_TOWER.md",
+        "docs/public/API_BACKED_DEMO.md",
+        "docs/public/TECHNICAL_CAPABILITY_MAP.md",
+    }
     assert len(payload["integrationJobs"]) >= 3
     assert len(payload["integrationHealth"]) >= 6
     assert any(item["name"] == "Connection diagnostics" for item in payload["integrationReadiness"])
@@ -716,6 +744,7 @@ def test_public_demo_api_scripts_and_examples_exist() -> None:
     expected = {
         "scripts/run_public_demo_local.sh",
         "scripts/check_public_demo_api.sh",
+        "scripts/check_public_business_scenario_replay.sh",
         "scripts/check_public_engineering_proof.sh",
         "scripts/check_public_demo_sdk.sh",
         "scripts/check_public_backup_restore.sh",
@@ -760,6 +789,7 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
             "/ready",
             "/demo/public",
             "/demo/connector-fixture-replay",
+            "/demo/business-scenario-replay",
             "/openapi.json",
             "student_sync",
         ],
@@ -874,8 +904,10 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
         "scripts/generate_public_demo_sdk.py": [
             "/demo/public",
             "/demo/connector-fixture-replay",
+            "/demo/business-scenario-replay",
             "operationId",
             "ConnectorFixtureReplayRead",
+            "BusinessScenarioReplayRead",
             "drivedesk_public_demo_client.py",
             "drivedesk-public-demo-client.mjs",
         ],
@@ -895,28 +927,36 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
         "sdk/generated/public-demo/python/drivedesk_public_demo_client.py": [
             "/demo/public",
             "/demo/connector-fixture-replay",
+            "/demo/business-scenario-replay",
             "public_demo_demo_public_get",
             "connector_fixture_replay_demo_demo_connector_fixture_replay_get",
+            "business_scenario_replay_demo_demo_business_scenario_replay_get",
             "student_sync",
             "get_connector_fixture_replay",
+            "get_business_scenario_replay",
             "build_adapter_operation_plan",
             "contract_only",
         ],
         "sdk/generated/public-demo/javascript/drivedesk-public-demo-client.mjs": [
             "/demo/public",
             "/demo/connector-fixture-replay",
+            "/demo/business-scenario-replay",
             "public_demo_demo_public_get",
             "connector_fixture_replay_demo_demo_connector_fixture_replay_get",
+            "business_scenario_replay_demo_demo_business_scenario_replay_get",
             "student_sync",
             "getConnectorFixtureReplay",
+            "getBusinessScenarioReplay",
             "buildAdapterOperationPlan",
             "contract_only",
         ],
         "sdk/generated/public-demo/typescript/drivedesk-public-demo-client.d.ts": [
             "PublicDemoPayload",
             "ConnectorFixtureReplayPayload",
+            "BusinessScenarioReplayPayload",
             "student_sync",
             "getConnectorFixtureReplay",
+            "getBusinessScenarioReplay",
             "AdapterOperationPlan",
         ],
     }

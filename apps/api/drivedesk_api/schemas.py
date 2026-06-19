@@ -754,6 +754,15 @@ class ConnectorFixtureReplayRead(BaseModel):
     docs: list[dict[str, str]]
 
 
+class BusinessScenarioReplayRead(BaseModel):
+    status: Literal["validated"]
+    command: str
+    summary: list[dict[str, Any]]
+    scenarios: list[dict[str, Any]]
+    flow: list[dict[str, Any]]
+    docs: list[dict[str, str]]
+
+
 class PublicDemoRead(BaseModel):
     schemaVersion: int
     generatedAt: str
@@ -777,6 +786,7 @@ class PublicDemoRead(BaseModel):
     alertRouting: dict[str, Any]
     incidentResponse: dict[str, Any]
     businessControlTower: dict[str, Any]
+    businessScenarioReplay: dict[str, Any]
     engineeringProof: dict[str, Any]
     workflow: dict[str, Any]
     workflowScenarios: list[dict[str, Any]]

@@ -1,10 +1,13 @@
 // Generated from DriveDesk Core OpenAPI. Do not edit by hand.
 export const PUBLIC_DEMO_PATH: "/demo/public";
 export const CONNECTOR_REPLAY_PATH: "/demo/connector-fixture-replay";
+export const BUSINESS_SCENARIO_REPLAY_PATH: "/demo/business-scenario-replay";
 export const OPERATION_ID: "public_demo_demo_public_get";
 export const CONNECTOR_REPLAY_OPERATION_ID: "connector_fixture_replay_demo_demo_connector_fixture_replay_get";
-export const REQUIRED_FIELDS: Array<"schemaVersion" | "generatedAt" | "dataSource" | "apiContract" | "tenant" | "health" | "metrics" | "workQueue" | "members" | "auditEvents" | "outbox" | "adapters" | "adapterScenarios" | "adapterStudio" | "connectorFixtureReplay" | "integrationJobs" | "integrationHealth" | "integrationReadiness" | "recoveryEvidence" | "alertRouting" | "incidentResponse" | "businessControlTower" | "engineeringProof" | "workflow" | "workflowScenarios" | "endToEndScenario" | "timeline" | "domainEvents">;
+export const BUSINESS_SCENARIO_REPLAY_OPERATION_ID: "business_scenario_replay_demo_demo_business_scenario_replay_get";
+export const REQUIRED_FIELDS: Array<"schemaVersion" | "generatedAt" | "dataSource" | "apiContract" | "tenant" | "health" | "metrics" | "workQueue" | "members" | "auditEvents" | "outbox" | "adapters" | "adapterScenarios" | "adapterStudio" | "connectorFixtureReplay" | "integrationJobs" | "integrationHealth" | "integrationReadiness" | "recoveryEvidence" | "alertRouting" | "incidentResponse" | "businessControlTower" | "businessScenarioReplay" | "engineeringProof" | "workflow" | "workflowScenarios" | "endToEndScenario" | "timeline" | "domainEvents">;
 export const CONNECTOR_REPLAY_REQUIRED_FIELDS: Array<"status" | "command" | "fixtureFile" | "evidenceFile" | "summary" | "outcomes" | "boundaries" | "docs">;
+export const BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS: Array<"status" | "command" | "summary" | "scenarios" | "flow" | "docs">;
 
 export type AdapterScenarioPhase = "preview" | "execute" | "retry" | "operator_review";
 
@@ -61,6 +64,29 @@ export interface ConnectorFixtureReplayPayload {
   docs: Array<Record<string, string>>;
 }
 
+export interface BusinessScenarioReplayPayload {
+  status: "validated";
+  command: string;
+  summary: Array<Record<string, unknown>>;
+  scenarios: Array<{
+    id: string;
+    title: string;
+    status: string;
+    riskLevel: string;
+    operatorRole: string;
+    trigger: string;
+    decision: string;
+    sourceSystems: string[];
+    normalizedFacts: Array<Record<string, string>>;
+    recommendedActions: Array<Record<string, string>>;
+    automationCandidates: Array<Record<string, unknown>>;
+    evidence: string[];
+    dataBoundary: string[];
+  }>;
+  flow: Array<Record<string, string>>;
+  docs: Array<Record<string, string>>;
+}
+
 export interface PublicDemoPayload {
   schemaVersion: 1;
   generatedAt: string;
@@ -94,6 +120,7 @@ export interface PublicDemoPayload {
     recoveryActions: Array<Record<string, string>>;
     resolutionEvidence: Array<Record<string, string>>;
   };
+  businessScenarioReplay: BusinessScenarioReplayPayload;
   engineeringProof: {
     milestone: "engineering_70";
     status: "validated";
@@ -127,6 +154,7 @@ export class DriveDeskPublicDemoClient {
   constructor(baseUrl?: string, options?: { fetchImpl?: typeof fetch });
   getPublicDemo(): Promise<PublicDemoPayload>;
   getConnectorFixtureReplay(): Promise<ConnectorFixtureReplayPayload>;
+  getBusinessScenarioReplay(): Promise<BusinessScenarioReplayPayload>;
   getAdapterOperationPlan(
     scenarioId: string,
     options?: { requestId?: string },
@@ -141,3 +169,4 @@ export function buildAdapterOperationPlan(
 ): AdapterOperationPlan;
 export function validatePublicDemoPayload(payload: PublicDemoPayload): void;
 export function validateConnectorFixtureReplayPayload(payload: ConnectorFixtureReplayPayload): void;
+export function validateBusinessScenarioReplayPayload(payload: BusinessScenarioReplayPayload): void;

@@ -108,6 +108,7 @@ health, _ = get_json("/health")
 ready, _ = get_json("/ready")
 demo, demo_headers = get_json("/demo/public")
 connector_replay_endpoint, connector_replay_headers = get_json("/demo/connector-fixture-replay")
+business_scenario_endpoint, business_scenario_headers = get_json("/demo/business-scenario-replay")
 adapters, _ = get_json("/integration-adapters")
 runbooks, _ = get_json("/integration-runbooks")
 lifecycle_policies, _ = get_json("/business-record-lifecycle-policies")
@@ -632,6 +633,42 @@ assert {item["path"] for item in connector_replay["docs"]} >= {
     "docs/public/evidence/connector-fixture-replay.sanitized.json",
     "examples/connector-fixtures/replay-fixtures.sanitized.json",
 }, demo
+business_scenario_replay = demo["businessScenarioReplay"]
+assert business_scenario_endpoint == business_scenario_replay, business_scenario_endpoint
+assert business_scenario_headers["access-control-allow-origin"] == "*", business_scenario_headers
+assert business_scenario_headers["cache-control"] == "public, max-age=60", business_scenario_headers
+assert business_scenario_replay["status"] == "validated", demo
+assert business_scenario_replay["command"] == "bash scripts/check_public_business_scenario_replay.sh", demo
+assert {item["label"] for item in business_scenario_replay["summary"]} >= {
+    "Scenario groups",
+    "Source systems",
+    "Operator actions",
+    "External writes",
+}, demo
+scenario_replay_by_id = {item["id"]: item for item in business_scenario_replay["scenarios"]}
+assert set(scenario_replay_by_id) == {
+    "crm-bank-payment-mismatch",
+    "support-sla-risk",
+    "procurement-delay-risk",
+}, demo
+assert {item["stage"] for item in business_scenario_replay["flow"]} == {
+    "signal",
+    "normalize",
+    "detect",
+    "plan",
+    "execute",
+}, demo
+assert {item["path"] for item in business_scenario_replay["docs"]} >= {
+    "docs/public/BUSINESS_SCENARIO_REPLAY.md",
+    "docs/public/BUSINESS_CONTROL_TOWER.md",
+    "docs/public/API_BACKED_DEMO.md",
+    "docs/public/TECHNICAL_CAPABILITY_MAP.md",
+}, demo
+for scenario in scenario_replay_by_id.values():
+    assert scenario["normalizedFacts"], scenario
+    assert scenario["recommendedActions"], scenario
+    assert scenario["automationCandidates"], scenario
+    assert any(item["safeToAutoRun"] is False for item in scenario["automationCandidates"]), scenario
 adapter_catalog = {adapter["key"]: adapter for adapter in adapters}
 assert set(adapter_catalog) == {
     "accounting.export.mock",
@@ -766,12 +803,14 @@ assert "/integration-adapters" in openapi["paths"], openapi["paths"].keys()
 assert "/integration-runbooks" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/public" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/connector-fixture-replay" in openapi["paths"], openapi["paths"].keys()
+assert "/demo/business-scenario-replay" in openapi["paths"], openapi["paths"].keys()
 assert "/health" in openapi["paths"], openapi["paths"].keys()
 
 if openapi_file.exists():
     generated = json.loads(openapi_file.read_text(encoding="utf-8"))
     assert "/demo/public" in generated["paths"], generated["paths"].keys()
     assert "/demo/connector-fixture-replay" in generated["paths"], generated["paths"].keys()
+    assert "/demo/business-scenario-replay" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-action-plans/preview" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-notifications/preview" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/workflow-action-runs" in generated["paths"], generated["paths"].keys()

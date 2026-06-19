@@ -2008,6 +2008,296 @@ window.DRIVEDESK_DEMO_DATA = {
       "drivedesk_repair_actions"
     ]
   },
+  "businessScenarioReplay": {
+    "status": "validated",
+    "command": "bash scripts/check_public_business_scenario_replay.sh",
+    "summary": [
+      {
+        "label": "Scenario groups",
+        "value": "3",
+        "detail": "CRM, support, and procurement replay paths",
+        "tone": "blue"
+      },
+      {
+        "label": "Source systems",
+        "value": "7",
+        "detail": "external signals normalized before action",
+        "tone": "green"
+      },
+      {
+        "label": "Operator actions",
+        "value": "8",
+        "detail": "recommended actions stay approval-aware",
+        "tone": "amber"
+      },
+      {
+        "label": "External writes",
+        "value": "0",
+        "detail": "public replay is read-only",
+        "tone": "violet"
+      }
+    ],
+    "scenarios": [
+      {
+        "id": "crm-bank-payment-mismatch",
+        "title": "CRM and bank payment mismatch",
+        "status": "attention",
+        "riskLevel": "warning",
+        "operatorRole": "accountant",
+        "trigger": "crm.deal.updated",
+        "decision": "open reconciliation workbench",
+        "sourceSystems": [
+          "crm.bitrix24.mock",
+          "bank.statement.mock",
+          "accounting.export.mock"
+        ],
+        "normalizedFacts": [
+          {
+            "key": "crm_stage",
+            "value": "invoice_sent",
+            "source": "crm.bitrix24.mock"
+          },
+          {
+            "key": "bank_status",
+            "value": "payment_seen",
+            "source": "bank.statement.mock"
+          },
+          {
+            "key": "accounting_status",
+            "value": "export_pending",
+            "source": "accounting.export.mock"
+          }
+        ],
+        "recommendedActions": [
+          {
+            "action": "compare bank amount bucket with CRM deal amount",
+            "mode": "operator_review",
+            "evidence": "integration.reconciliation.previewed"
+          },
+          {
+            "action": "queue accounting export after approval",
+            "mode": "approval_required",
+            "evidence": "business_action_plan.previewed"
+          },
+          {
+            "action": "prepare customer payment-status note",
+            "mode": "draft_only",
+            "evidence": "business_notification.previewed"
+          }
+        ],
+        "automationCandidates": [
+          {
+            "candidate": "create business exception",
+            "safeToAutoRun": true,
+            "boundary": "internal_record_only"
+          },
+          {
+            "candidate": "send customer notification",
+            "safeToAutoRun": false,
+            "boundary": "requires_operator_approval"
+          }
+        ],
+        "evidence": [
+          "business_exception.created",
+          "business_action_plan.previewed",
+          "integration.reconciliation.recorded"
+        ],
+        "dataBoundary": [
+          "no raw provider payload",
+          "no credentials",
+          "no personal data",
+          "synthetic sources"
+        ]
+      },
+      {
+        "id": "support-sla-risk",
+        "title": "Support SLA risk",
+        "status": "action_required",
+        "riskLevel": "high",
+        "operatorRole": "support_lead",
+        "trigger": "support.message.received",
+        "decision": "escalate with context before SLA breach",
+        "sourceSystems": [
+          "support.inbox.mock",
+          "telephony.callback.mock",
+          "sla.policy.mock"
+        ],
+        "normalizedFacts": [
+          {
+            "key": "message_state",
+            "value": "waiting_for_reply",
+            "source": "support.inbox.mock"
+          },
+          {
+            "key": "callback_state",
+            "value": "missed",
+            "source": "telephony.callback.mock"
+          },
+          {
+            "key": "sla_window",
+            "value": "15m",
+            "source": "sla.policy.mock"
+          }
+        ],
+        "recommendedActions": [
+          {
+            "action": "assign support lead and create reply task",
+            "mode": "operator_review",
+            "evidence": "business_escalation.previewed"
+          },
+          {
+            "action": "prepare apology and callback draft",
+            "mode": "draft_only",
+            "evidence": "business_notification.previewed"
+          }
+        ],
+        "automationCandidates": [
+          {
+            "candidate": "open escalation item",
+            "safeToAutoRun": true,
+            "boundary": "internal_record_only"
+          },
+          {
+            "candidate": "place callback",
+            "safeToAutoRun": false,
+            "boundary": "external_channel_blocked"
+          }
+        ],
+        "evidence": [
+          "business_escalation.previewed",
+          "business_action_plan.previewed",
+          "business_notification.previewed"
+        ],
+        "dataBoundary": [
+          "message body omitted",
+          "phone number omitted",
+          "no external delivery",
+          "synthetic sources"
+        ]
+      },
+      {
+        "id": "procurement-delay-risk",
+        "title": "Procurement delay risk",
+        "status": "needs_cross_check",
+        "riskLevel": "medium",
+        "operatorRole": "operations_manager",
+        "trigger": "supplier.delivery.updated",
+        "decision": "create procurement exception and check cash timing",
+        "sourceSystems": [
+          "supplier.portal.mock",
+          "inventory.stock.mock",
+          "bank.payment-order.mock"
+        ],
+        "normalizedFacts": [
+          {
+            "key": "supplier_state",
+            "value": "delayed",
+            "source": "supplier.portal.mock"
+          },
+          {
+            "key": "stock_state",
+            "value": "below_minimum",
+            "source": "inventory.stock.mock"
+          },
+          {
+            "key": "payment_order",
+            "value": "prepared",
+            "source": "bank.payment-order.mock"
+          }
+        ],
+        "recommendedActions": [
+          {
+            "action": "open procurement exception",
+            "mode": "operator_review",
+            "evidence": "business_exception.created"
+          },
+          {
+            "action": "compare supplier ETA with minimum stock window",
+            "mode": "operator_review",
+            "evidence": "business_workbench_context.previewed"
+          },
+          {
+            "action": "hold payment order until manager approval",
+            "mode": "approval_required",
+            "evidence": "business_action_plan.previewed"
+          }
+        ],
+        "automationCandidates": [
+          {
+            "candidate": "create manager task",
+            "safeToAutoRun": true,
+            "boundary": "internal_record_only"
+          },
+          {
+            "candidate": "release bank payment",
+            "safeToAutoRun": false,
+            "boundary": "financial_write_blocked"
+          }
+        ],
+        "evidence": [
+          "business_exception.created",
+          "business_workbench_context.previewed",
+          "business_action_plan.previewed"
+        ],
+        "dataBoundary": [
+          "no bank credentials",
+          "no supplier raw payload",
+          "payment values bucketed",
+          "synthetic sources"
+        ]
+      }
+    ],
+    "flow": [
+      {
+        "step": "1",
+        "stage": "signal",
+        "detail": "External systems produce signals through adapters, files, webhooks, or polling.",
+        "evidence": "provider_signal.received"
+      },
+      {
+        "step": "2",
+        "stage": "normalize",
+        "detail": "DriveDesk maps each signal into safe business facts with provider-specific details removed.",
+        "evidence": "business_state.observation.recorded"
+      },
+      {
+        "step": "3",
+        "stage": "detect",
+        "detail": "Rules compare facts across systems and create exception candidates.",
+        "evidence": "business_exception.created"
+      },
+      {
+        "step": "4",
+        "stage": "plan",
+        "detail": "The workbench builds role-specific context, recommended actions, and approval gates.",
+        "evidence": "business_action_plan.previewed"
+      },
+      {
+        "step": "5",
+        "stage": "execute",
+        "detail": "Only approved internal actions can run; external writes stay behind explicit approval.",
+        "evidence": "operator_approval.required"
+      }
+    ],
+    "docs": [
+      {
+        "label": "Business Scenario Replay",
+        "path": "docs/public/BUSINESS_SCENARIO_REPLAY.md"
+      },
+      {
+        "label": "Business Control Tower",
+        "path": "docs/public/BUSINESS_CONTROL_TOWER.md"
+      },
+      {
+        "label": "API Backed Demo",
+        "path": "docs/public/API_BACKED_DEMO.md"
+      },
+      {
+        "label": "Technical Capability Map",
+        "path": "docs/public/TECHNICAL_CAPABILITY_MAP.md"
+      }
+    ]
+  },
   "recoveryEvidence": [
     {
       "name": "Synthetic backup",

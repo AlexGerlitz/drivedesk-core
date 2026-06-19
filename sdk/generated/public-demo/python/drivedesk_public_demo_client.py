@@ -9,8 +9,10 @@ from typing import Any
 
 PUBLIC_DEMO_PATH = "/demo/public"
 CONNECTOR_REPLAY_PATH = "/demo/connector-fixture-replay"
+BUSINESS_SCENARIO_REPLAY_PATH = "/demo/business-scenario-replay"
 OPERATION_ID = "public_demo_demo_public_get"
 CONNECTOR_REPLAY_OPERATION_ID = "connector_fixture_replay_demo_demo_connector_fixture_replay_get"
+BUSINESS_SCENARIO_REPLAY_OPERATION_ID = "business_scenario_replay_demo_demo_business_scenario_replay_get"
 REQUIRED_FIELDS = [
   "schemaVersion",
   "generatedAt",
@@ -34,6 +36,7 @@ REQUIRED_FIELDS = [
   "alertRouting",
   "incidentResponse",
   "businessControlTower",
+  "businessScenarioReplay",
   "engineeringProof",
   "workflow",
   "workflowScenarios",
@@ -49,6 +52,14 @@ CONNECTOR_REPLAY_REQUIRED_FIELDS = [
   "summary",
   "outcomes",
   "boundaries",
+  "docs"
+]
+BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS = [
+  "status",
+  "command",
+  "summary",
+  "scenarios",
+  "flow",
   "docs"
 ]
 
@@ -68,6 +79,11 @@ class DriveDeskPublicDemoClient:
     def get_connector_fixture_replay(self) -> dict[str, Any]:
         payload = self._get_json(CONNECTOR_REPLAY_PATH)
         validate_connector_fixture_replay_payload(payload)
+        return payload
+
+    def get_business_scenario_replay(self) -> dict[str, Any]:
+        payload = self._get_json(BUSINESS_SCENARIO_REPLAY_PATH)
+        validate_business_scenario_replay_payload(payload)
         return payload
 
     def get_adapter_operation_plan(
@@ -291,6 +307,53 @@ def validate_connector_fixture_replay_payload(payload: dict[str, Any]) -> None:
         raise ValueError("connector replay docs are missing or too short")
 
 
+def validate_business_scenario_replay_payload(payload: dict[str, Any]) -> None:
+    missing = [field for field in BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS if field not in payload]
+    if missing:
+        raise ValueError(f"missing business scenario replay fields: {', '.join(missing)}")
+
+    if payload.get("status") != "validated":
+        raise ValueError(f"unexpected business scenario replay status: {payload.get('status')}")
+
+    if payload.get("command") != "bash scripts/check_public_business_scenario_replay.sh":
+        raise ValueError(f"unexpected business scenario replay command: {payload.get('command')}")
+
+    scenarios = payload.get("scenarios")
+    if not isinstance(scenarios, list) or len(scenarios) < 3:
+        raise ValueError("business scenario replay scenarios are missing or too short")
+
+    scenario_ids = {item.get("id") for item in scenarios if isinstance(item, dict)}
+    required_scenarios = {
+        "crm-bank-payment-mismatch",
+        "support-sla-risk",
+        "procurement-delay-risk",
+    }
+    if scenario_ids != required_scenarios:
+        raise ValueError(f"business scenario replay ids mismatch: {sorted(scenario_ids)}")
+
+    for scenario in scenarios:
+        if not isinstance(scenario, dict):
+            raise ValueError("business scenario replay contains non-object scenario")
+        if not scenario.get("normalizedFacts"):
+            raise ValueError(f"business scenario replay facts missing: {scenario.get('id')}")
+        if not scenario.get("recommendedActions"):
+            raise ValueError(f"business scenario replay actions missing: {scenario.get('id')}")
+        if not any(
+            item.get("safeToAutoRun") is False
+            for item in scenario.get("automationCandidates", [])
+            if isinstance(item, dict)
+        ):
+            raise ValueError(f"business scenario replay lacks approval boundary: {scenario.get('id')}")
+
+    flow = payload.get("flow")
+    if not isinstance(flow, list) or len(flow) < 5:
+        raise ValueError("business scenario replay flow is missing or too short")
+
+    docs = payload.get("docs")
+    if not isinstance(docs, list) or len(docs) < 4:
+        raise ValueError("business scenario replay docs are missing or too short")
+
+
 def validate_public_demo_payload(payload: dict[str, Any]) -> None:
     missing = [field for field in REQUIRED_FIELDS if field not in payload]
     if missing:
@@ -436,6 +499,11 @@ def validate_public_demo_payload(payload: dict[str, Any]) -> None:
         raise ValueError("connectorFixtureReplay is missing")
     validate_connector_fixture_replay_payload(connector_replay)
 
+    business_scenario_replay = payload.get("businessScenarioReplay")
+    if not isinstance(business_scenario_replay, dict):
+        raise ValueError("businessScenarioReplay is missing")
+    validate_business_scenario_replay_payload(business_scenario_replay)
+
     proof = payload.get("engineeringProof") or {}
     if proof.get("milestone") != "engineering_70":
         raise ValueError(f"unexpected engineeringProof.milestone: {proof.get('milestone')}")
@@ -490,6 +558,7 @@ def main() -> None:
     client = DriveDeskPublicDemoClient(args.base_url)
     payload = client.get_public_demo()
     connector_replay = client.get_connector_fixture_replay()
+    business_scenario_replay = client.get_business_scenario_replay()
     adapter_plan = build_adapter_operation_plan(payload, "adapter-file-import-preview")
     print(
         "generated python SDK ok:",
@@ -498,8 +567,10 @@ def main() -> None:
         f"workflow={payload['workflow']['currentStage']}",
         f"adapterPlan={adapter_plan['phase']}",
         f"connectorReplay={connector_replay['status']}",
+        f"businessScenarioReplay={business_scenario_replay['status']}",
         f"operation={OPERATION_ID}",
         f"connectorOperation={CONNECTOR_REPLAY_OPERATION_ID}",
+        f"businessScenarioOperation={BUSINESS_SCENARIO_REPLAY_OPERATION_ID}",
     )
 
 

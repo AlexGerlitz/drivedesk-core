@@ -38,6 +38,8 @@ infrastructure, production history, customer data, or operational credentials.
 - `BUSINESS_RECORDS.md` - tenant-owned business record foundation.
 - `BUSINESS_RECORD_LIFECYCLE.md` - lifecycle policies and transition preview.
 - `CLIENT_SDK.md` - generated OpenAPI client SDK example.
+- `PROVIDER_CONNECTOR_GUIDE.md` - public-safe guide for future authenticated
+  Bitrix24-style CRM, bank, accounting, and file provider connectors.
 - `INTEGRATION_ADAPTER_CATALOG.md` - runtime adapter metadata and discovery contract.
 - `INTEGRATION_MAPPING_VALIDATION.md` - mapping validation against adapter requirements.
 - `INTEGRATION_MAPPING_TRANSFORM.md` - runtime field mapping transform and preview.
@@ -186,6 +188,7 @@ The public repository export also generates:
 - `scripts/check_public_reviewer_quickstart.sh` - public-safe verification quickstart validation.
 - `scripts/check_public_project_status.sh` - public-safe project status validation.
 - `scripts/check_public_technical_capability_map.sh` - public-safe capability map validation.
+- `scripts/check_public_provider_connector_guide.sh` - public-safe provider connector guide validation.
 - `scripts/check_public_observability_proof.sh` - public-safe observability proof validation.
 - `scripts/check_public_alert_routing.sh` - public-safe alert routing validation.
 - `scripts/check_public_engineering_proof.sh` - public-safe proof tab and evidence contract validation.

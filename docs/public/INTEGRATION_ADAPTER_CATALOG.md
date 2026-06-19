@@ -132,6 +132,12 @@ real Bitrix24, bank, 1C, KKT, webhook, or accounting connector will be wired:
 tokens stay server-side, browser code receives no provider tokens, and external
 provider calls remain behind private connector code.
 
+The end-to-end connector path is documented in
+`PROVIDER_CONNECTOR_GUIDE.md`: provider class -> auth profile -> tenant-owned
+connection profile -> mapping preview -> provider intake or export operation ->
+outbox execution -> diagnostics, reconciliation, incidents, and operator
+review.
+
 ## Relationship To Connection Profiles
 
 The flow is:

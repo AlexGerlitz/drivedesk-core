@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-19T04:12:19Z
+Generated at: 2026-06-19T04:31:40Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -205,6 +205,9 @@ Copied public-safe areas:
 - public technical capability map doc
 - public technical capability map validation script: scripts/check_public_technical_capability_map.sh
 - public technical capability map links capabilities to evidence and verifier commands
+- public provider connector guide doc
+- public provider connector guide validation script: scripts/check_public_provider_connector_guide.sh
+- public provider connector guide links auth profiles, mapping preview, provider intake, outbox, diagnostics, reconciliation, and incidents
 - public evidence index doc
 - public evidence index validation script: scripts/check_public_evidence_index.sh
 - public evidence index snapshot: docs/public/evidence/public-evidence-index.sanitized.json

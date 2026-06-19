@@ -106,6 +106,11 @@ Fast external verification path: `docs/public/REVIEWER_QUICKSTART.md`.
 - Business workbench context preview for turning normalized CRM, bank, and
   accounting observations into role-specific cards without provider calls,
   secrets, raw payloads, PII, or external writes.
+- Public-safe provider connector guide (`docs/public/PROVIDER_CONNECTOR_GUIDE.md`)
+  for feeding future authenticated
+  Bitrix24-style CRM, bank, accounting, and file-provider facts through the
+  adapter catalog, auth profile, mapping preview, provider intake, outbox,
+  diagnostics, reconciliation, and incident flow.
 
 ## Next
 
@@ -113,9 +118,6 @@ Fast external verification path: `docs/public/REVIEWER_QUICKSTART.md`.
   event, and outbox shape.
 - More public-safe evidence around local run, CI, OpenAPI, and demo health.
 - More adapter recovery examples with payload mapping and follow-up actions.
-- A public-safe provider guide for feeding authenticated Bitrix24-style CRM,
-  bank, and accounting facts through the provider intake and workbench context
-  contracts.
 - More operator workbench scenarios that connect action plans and notification
   previews to task creation without public external writes.
 - More evidence around external notification adapters once destinations and

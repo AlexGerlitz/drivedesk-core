@@ -115,7 +115,7 @@ incident queue, mitigation, recovery, and resolution evidence path.
 8. Run `bash scripts/check_public_demo_api.sh`.
 9. Run one generated client example from `examples/`.
 10. Review `docs/public/PROJECT_STATUS.md`, `docs/public/TECHNICAL_CAPABILITY_MAP.md`, `docs/public/EVIDENCE_INDEX.md`, `docs/public/OBSERVABILITY_PROOF.md`, `docs/public/ALERT_ROUTING_EVIDENCE.md`, `docs/public/INCIDENT_RESPONSE_DEMO.md`, `docs/public/ENGINEERING_PROOF.md`, `docs/public/PLATFORM_MATURITY_70.md`, and `docs/public/SANITIZED_EVIDENCE.md`.
-11. Review `docs/public/SYSTEM_DESIGN.md`, `docs/public/GITOPS_DELIVERY.md`, and the recovery evidence docs.
+11. Review `docs/public/SYSTEM_DESIGN.md`, `docs/public/PROVIDER_CONNECTOR_GUIDE.md`, `docs/public/GITOPS_DELIVERY.md`, and the recovery evidence docs.
 
 ## Full Artifact Reference
 
@@ -144,6 +144,7 @@ incident queue, mitigation, recovery, and resolution evidence path.
 - `docs/public/BUSINESS_RECORDS.md` - tenant-owned business record foundation.
 - `docs/public/BUSINESS_RECORD_LIFECYCLE.md` - lifecycle policy catalog and preview validation.
 - `docs/public/CLIENT_SDK.md` - generated OpenAPI client SDK example.
+- `docs/public/PROVIDER_CONNECTOR_GUIDE.md` - public-safe connector path for future authenticated providers.
 - `docs/public/INTEGRATION_ADAPTER_CATALOG.md` - runtime adapter metadata and discovery contract.
 - `docs/public/INTEGRATION_MAPPING_VALIDATION.md` - mapping validation against adapter requirements.
 - `docs/public/INTEGRATION_MAPPING_TRANSFORM.md` - runtime mapping transform and preview.
@@ -237,6 +238,7 @@ incident queue, mitigation, recovery, and resolution evidence path.
 - `scripts/check_public_system_review_path.sh` - public-safe compact system review path validation.
 - `scripts/check_public_reviewer_quickstart.sh` - public-safe verification quickstart validation.
 - `scripts/check_public_review_guide.sh` - public-safe short verification path validation.
+- `scripts/check_public_provider_connector_guide.sh` - public-safe provider connector guide validation.
 - `scripts/check_public_observability_proof.sh` - public-safe observability proof validation.
 - `scripts/check_public_alert_routing.sh` - public-safe alert routing validation.
 - `scripts/check_public_engineering_proof.sh` - public-safe proof tab and evidence contract validation.
@@ -292,6 +294,7 @@ bash scripts/check_public_review_guide.sh
 bash scripts/check_public_pages_entrypoint.sh
 bash scripts/check_public_project_status.sh
 bash scripts/check_public_technical_capability_map.sh
+bash scripts/check_public_provider_connector_guide.sh
 bash scripts/check_public_evidence_index.sh
 bash scripts/check_public_observability_proof.sh
 bash scripts/check_public_alert_routing.sh
@@ -339,6 +342,7 @@ bash scripts/check_public_review_guide.sh
 bash scripts/check_public_pages_entrypoint.sh
 bash scripts/check_public_project_status.sh
 bash scripts/check_public_technical_capability_map.sh
+bash scripts/check_public_provider_connector_guide.sh
 bash scripts/check_public_evidence_index.sh
 bash scripts/check_public_observability_proof.sh
 bash scripts/check_public_alert_routing.sh
@@ -390,6 +394,7 @@ apps/admin/public-demo/index.html?demoApi=http://localhost:8080/demo/public
 - `docs/public/BUSINESS_RECORDS.md`
 - `docs/public/BUSINESS_RECORD_LIFECYCLE.md`
 - `docs/public/CLIENT_SDK.md`
+- `docs/public/PROVIDER_CONNECTOR_GUIDE.md`
 - `docs/public/INTEGRATION_ADAPTER_CATALOG.md`
 - `docs/public/INTEGRATION_MAPPING_VALIDATION.md`
 - `docs/public/INTEGRATION_MAPPING_TRANSFORM.md`

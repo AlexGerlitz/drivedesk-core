@@ -76,6 +76,7 @@ for token in [
     "reusable workflow scenarios",
     "end-to-end workflow-to-proof scenario",
     "Integration hub",
+    "provider connector guide",
     "operation scenarios",
     "typed SDK operation plans",
     "Recovery and release safety",
@@ -99,6 +100,8 @@ for token in [
     "docs/public/evidence/alert-routing.sanitized.json",
     "docs/public/INCIDENT_RESPONSE_DEMO.md",
     "docs/public/INTEGRATION_INCIDENT_RUNBOOKS.md",
+    "docs/public/PROVIDER_CONNECTOR_GUIDE.md",
+    "bash scripts/check_public_provider_connector_guide.sh",
     "bash scripts/ci_smoke_public.sh",
     "bash scripts/check_public_project_status.sh",
     "bash scripts/check_public_technical_capability_map.sh",
@@ -116,6 +119,7 @@ target_paths = [
     "docs/public/ENGINEERING_REVIEW_GUIDE.md",
     "docs/public/API_BACKED_DEMO.md",
     "docs/public/CLIENT_SDK.md",
+    "docs/public/PROVIDER_CONNECTOR_GUIDE.md",
     "docs/public/AUTH_FOUNDATION.md",
     "docs/public/TENANT_ISOLATION.md",
     "docs/public/PLATFORM_ADMIN.md",
@@ -182,11 +186,16 @@ if is_public_export:
         "check_public_project_status.sh" in read(public_smoke_path),
         "public smoke missing project status check",
     )
+    require(
+        "check_public_provider_connector_guide.sh" in read(public_smoke_path),
+        "public smoke missing provider connector guide check",
+    )
 else:
     export_script = read(export_script_path)
     require("SYSTEM_REVIEW_PATH.md" in export_script, "export script missing system review path")
     require("PROJECT_STATUS.md" in export_script, "export script missing project status")
     require("REVIEWER_QUICKSTART.md" in export_script, "export script missing reviewer quickstart")
+    require("PROVIDER_CONNECTOR_GUIDE.md" in export_script, "export script missing provider connector guide")
     require(
         'copy_path "scripts/check_public_system_review_path.sh"' in export_script,
         "export script missing system review path check copy",
@@ -198,6 +207,10 @@ else:
     require(
         'copy_path "scripts/check_public_project_status.sh"' in export_script,
         "export script missing project status check copy",
+    )
+    require(
+        'copy_path "scripts/check_public_provider_connector_guide.sh"' in export_script,
+        "export script missing provider connector guide check copy",
     )
     require(
         "check_public_system_review_path.sh" in read(private_smoke_path),
@@ -212,6 +225,10 @@ else:
         "private smoke missing project status check",
     )
     require(
+        "check_public_provider_connector_guide.sh" in read(private_smoke_path),
+        "private smoke missing provider connector guide check",
+    )
+    require(
         "check_public_system_review_path.sh" in read(release_gate_path),
         "release gate missing system review path check",
     )
@@ -222,6 +239,10 @@ else:
     require(
         "check_public_project_status.sh" in read(release_gate_path),
         "release gate missing project status check",
+    )
+    require(
+        "check_public_provider_connector_guide.sh" in read(release_gate_path),
+        "release gate missing provider connector guide check",
     )
 
 if public_smoke_path.is_file():
@@ -236,6 +257,10 @@ if public_smoke_path.is_file():
     require(
         "check_public_project_status.sh" in read(public_smoke_path),
         "public smoke missing project status check",
+    )
+    require(
+        "check_public_provider_connector_guide.sh" in read(public_smoke_path),
+        "public smoke missing provider connector guide check",
     )
 
 private_patterns = [

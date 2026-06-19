@@ -114,6 +114,11 @@ static fallback and API-backed payload both show whether the public demo needs a
 secret, whether a real provider needs one, where credentials must be placed, and
 whether browser token storage is forbidden.
 
+The future real-provider path is documented in `PROVIDER_CONNECTOR_GUIDE.md`.
+That guide ties `authProfile`, connection scopes, mapping preview, provider
+intake, outbox execution, diagnostics, reconciliation, incidents, and operator
+review into one connector lifecycle.
+
 The generated SDK is documented in `CLIENT_SDK.md`. It demonstrates that the
 exported OpenAPI schema can produce working Python, JavaScript, and TypeScript
 client artifacts, including typed adapter operation helpers that turn

@@ -241,7 +241,7 @@ Recommended next slices:
 4. More workflow rule actions for notifications, approvals, and mapping-specific adapter jobs.
 5. Broader public observability examples with synthetic metric snapshots.
 
-## Interview Summary
+## Reviewer Summary
 
 DriveDesk is a practical modular-monolith platform
 with CI/CD, metrics, logs, alerts, SLOs, runbooks, and evidence workflows. The

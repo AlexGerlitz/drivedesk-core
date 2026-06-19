@@ -47,6 +47,7 @@ bash scripts/check_public_pages_entrypoint.sh
 bash scripts/check_public_project_status.sh
 bash scripts/check_public_technical_capability_map.sh
 bash scripts/check_public_provider_connector_guide.sh
+bash scripts/check_public_adapter_developer_guide.sh
 bash scripts/check_public_evidence_index.sh
 bash scripts/check_public_observability_proof.sh
 bash scripts/check_public_alert_routing.sh

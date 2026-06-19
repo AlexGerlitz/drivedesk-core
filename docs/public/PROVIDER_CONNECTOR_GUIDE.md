@@ -4,6 +4,9 @@ This guide describes the public-safe provider connector path for DriveDesk.
 It is written for future authenticated adapters without exposing real secrets,
 tenant endpoints, customer data, or provider payloads.
 
+The companion implementation path is `ADAPTER_DEVELOPER_GUIDE.md`. It maps the
+generated SDK operation plans to the future private connector implementation.
+
 ## Goal
 
 External systems should not become the DriveDesk operating center. They feed or
@@ -158,6 +161,8 @@ The public demo proves the connector shape without real providers:
   `/integration-adapters`, operation contracts, and auth boundaries;
 - `check_public_provider_connector_guide.sh` validates this guide and public
   navigation.
+- `check_public_adapter_developer_guide.sh` validates the SDK-driven developer
+  path for file-import and Bitrix-style CRM adapter operation plans.
 
 ## Private Implementation Later
 
@@ -177,6 +182,7 @@ contract:
 
 ```bash
 bash scripts/check_public_provider_connector_guide.sh
+bash scripts/check_public_adapter_developer_guide.sh
 bash scripts/check_public_demo_api.sh
 bash scripts/check_public_business_control_tower.sh
 ```

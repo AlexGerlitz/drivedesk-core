@@ -8,7 +8,7 @@ export type AdapterScenarioPhase = "preview" | "execute" | "retry" | "operator_r
 export interface AdapterScenario {
   id: string;
   title: string;
-  adapter: "file.import.fake" | "accounting.export.mock" | string;
+  adapter: "file.import.fake" | "crm.bitrix24.mock" | "accounting.export.mock" | string;
   operation: string;
   phase: AdapterScenarioPhase;
   endpoint: string;
@@ -28,7 +28,7 @@ export interface AdapterOperationPlan {
   executionMode: "contract_only";
   safeToRunAgainstPublicDemo: false;
   request: {
-    method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+    method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "WORKER";
     path: string;
     headers: Record<string, string>;
     body: Record<string, unknown> | null;

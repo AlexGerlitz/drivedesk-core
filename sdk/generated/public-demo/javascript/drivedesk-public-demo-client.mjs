@@ -114,6 +114,9 @@ export function buildAdapterOperationPlan(payload, scenarioId, options = {}) {
 }
 
 function splitAdapterEndpoint(endpoint) {
+  if (String(endpoint || "").startsWith("worker:")) {
+    return ["WORKER", endpoint];
+  }
   const match = /^(GET|POST|PUT|PATCH|DELETE)\s+(.+)$/.exec(String(endpoint || "").trim());
   if (!match) {
     throw new Error(`invalid adapter endpoint contract: ${endpoint}`);
@@ -127,6 +130,49 @@ function adapterOperationBody(scenario, requestId) {
     scenarioId: scenario.id,
     operation: scenario.operation,
   };
+
+  if (scenario.operation === "crm_deal_intake_preview") {
+    return {
+      ...base,
+      dryRun: true,
+      provider_key: "crm.bitrix24.mock",
+      source_type: "crm_deal",
+      subject_type: "deal",
+      subject_id: "DEAL-2026-001",
+      external_ref: "crm-deal-001",
+      provider_payload: {
+        stage: "invoice_sent",
+        amount: 1500,
+        owner_role: "sales",
+        full_name: "Synthetic Customer",
+        phone: "+70000000000",
+        access_token: "never-return-this",
+      },
+    };
+  }
+
+  if (scenario.operation === "crm_deal_ingest_execute") {
+    return {
+      ...base,
+      dryRun: false,
+      batch_id: "bitrix_demo_batch",
+      mapping: {
+        deal_id: "ID",
+        source_state: "STAGE_ID",
+        owner_role: "ASSIGNED_BY_ROLE",
+        amount: "OPPORTUNITY",
+      },
+      deals: [
+        {
+          ID: "DEAL-2026-001",
+          STAGE_ID: "invoice_sent",
+          ASSIGNED_BY_ROLE: "sales",
+          OPPORTUNITY: 1500,
+        },
+      ],
+      confirm: true,
+    };
+  }
 
   if (scenario.phase === "preview") {
     return {
@@ -245,7 +291,7 @@ export function validatePublicDemoPayload(payload) {
     }
   }
 
-  if (!Array.isArray(payload.adapterScenarios) || payload.adapterScenarios.length < 4) {
+  if (!Array.isArray(payload.adapterScenarios) || payload.adapterScenarios.length < 6) {
     throw new Error("adapterScenarios is missing or too short");
   }
 
@@ -253,6 +299,8 @@ export function validatePublicDemoPayload(payload) {
   for (const requiredScenario of [
     "adapter-file-import-preview",
     "adapter-file-import-execute",
+    "adapter-crm-deal-preview",
+    "adapter-crm-deal-ingest",
     "adapter-accounting-export-retry",
     "adapter-dead-letter-review",
   ]) {
@@ -273,6 +321,10 @@ export function validatePublicDemoPayload(payload) {
     "mapping_preview",
     "outbox_event",
     "adapter_job",
+    "safe_payload",
+    "normalized_observation",
+    "no_provider_call",
+    "redaction_evidence",
     "retry_scheduled",
     "review_card",
     "manual_retry_endpoint",

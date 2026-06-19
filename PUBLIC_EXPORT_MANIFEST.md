@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-19T04:31:40Z
+Generated at: 2026-06-19T06:16:06Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -208,6 +208,9 @@ Copied public-safe areas:
 - public provider connector guide doc
 - public provider connector guide validation script: scripts/check_public_provider_connector_guide.sh
 - public provider connector guide links auth profiles, mapping preview, provider intake, outbox, diagnostics, reconciliation, and incidents
+- public adapter developer guide doc
+- public adapter developer guide validation script: scripts/check_public_adapter_developer_guide.sh
+- public adapter developer guide links SDK operation plans, Bitrix-style CRM preview, worker-backed ingest, auth boundaries, outbox, retry, dead-letter, and operator review
 - public evidence index doc
 - public evidence index validation script: scripts/check_public_evidence_index.sh
 - public evidence index snapshot: docs/public/evidence/public-evidence-index.sanitized.json

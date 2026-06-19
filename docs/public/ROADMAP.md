@@ -111,6 +111,10 @@ Fast external verification path: `docs/public/REVIEWER_QUICKSTART.md`.
   Bitrix24-style CRM, bank, accounting, and file-provider facts through the
   adapter catalog, auth profile, mapping preview, provider intake, outbox,
   diagnostics, reconciliation, and incident flow.
+- Public-safe adapter developer guide (`docs/public/ADAPTER_DEVELOPER_GUIDE.md`)
+  mapping generated SDK operation plans to future private Bitrix-style CRM
+  provider implementations, outbox execution, worker routing, diagnostics,
+  reconciliation, incident cards, and credential boundaries.
 
 ## Next
 
@@ -122,7 +126,8 @@ Fast external verification path: `docs/public/REVIEWER_QUICKSTART.md`.
   previews to task creation without public external writes.
 - More evidence around external notification adapters once destinations and
   secrets are intentionally configured outside the public surface.
-- Broader generated client SDK examples from the OpenAPI schema.
+- Broader generated client SDK examples for more provider classes and workflow
+  operations from the OpenAPI schema.
 
 ## Later
 

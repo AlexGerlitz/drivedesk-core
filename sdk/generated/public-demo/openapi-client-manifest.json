@@ -9,6 +9,8 @@
   "adapter_helper_scenarios": [
     "adapter-file-import-preview",
     "adapter-file-import-execute",
+    "adapter-crm-deal-preview",
+    "adapter-crm-deal-ingest",
     "adapter-accounting-export-retry",
     "adapter-dead-letter-review"
   ],

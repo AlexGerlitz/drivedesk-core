@@ -63,7 +63,7 @@ for token in [
     "Project status",
     "Read-only API contract",
     "Generated client SDK",
-    "typed adapter operation plans",
+    "typed file-import, CRM provider-intake, and worker-backed adapter operation plans",
     "examples/python/demo_adapter_operation_plan.py",
     "examples/js/demo-adapter-operation-plan.mjs",
     "Auth, RBAC, and tenant boundary",
@@ -73,6 +73,7 @@ for token in [
     "end-to-end workflow-to-proof scenario",
     "Integration adapter model",
     "public-safe provider connector guide",
+    "adapter developer guide",
     "operation scenarios",
     "Recovery drills",
     "Observability proof",
@@ -94,6 +95,7 @@ for token in [
     "docs/public/INCIDENT_RESPONSE_DEMO.md",
     "docs/public/INTEGRATION_INCIDENT_RUNBOOKS.md",
     "docs/public/PROVIDER_CONNECTOR_GUIDE.md",
+    "docs/public/ADAPTER_DEVELOPER_GUIDE.md",
     "PUBLIC_EXPORT_MANIFEST.md",
     "docs/public/evidence/*.sanitized.json",
     "bash scripts/ci_smoke_public.sh",
@@ -104,6 +106,7 @@ for token in [
     "bash scripts/check_public_alert_routing.sh",
     "bash scripts/check_public_demo_api.sh",
     "bash scripts/check_public_provider_connector_guide.sh",
+    "bash scripts/check_public_adapter_developer_guide.sh",
     "bash scripts/check_public_demo_sdk.sh",
     "bash scripts/check_public_backup_restore.sh",
     "bash scripts/check_public_release_rollback.sh",
@@ -130,6 +133,7 @@ target_paths = [
     "docs/public/API_BACKED_DEMO.md",
     "docs/public/CLIENT_SDK.md",
     "docs/public/PROVIDER_CONNECTOR_GUIDE.md",
+    "docs/public/ADAPTER_DEVELOPER_GUIDE.md",
     "docs/public/AUTH_FOUNDATION.md",
     "docs/public/TENANT_ISOLATION.md",
     "docs/public/PLATFORM_ADMIN.md",
@@ -202,12 +206,17 @@ if is_public_export:
         "check_public_provider_connector_guide.sh" in read(public_smoke_path),
         "public smoke missing provider connector guide check",
     )
+    require(
+        "check_public_adapter_developer_guide.sh" in read(public_smoke_path),
+        "public smoke missing adapter developer guide check",
+    )
 else:
     export_script = read(export_script_path)
     require("TECHNICAL_CAPABILITY_MAP.md" in export_script, "export script missing capability map")
     require("SYSTEM_REVIEW_PATH.md" in export_script, "export script missing system review path")
     require("REVIEWER_QUICKSTART.md" in export_script, "export script missing reviewer quickstart")
     require("PROVIDER_CONNECTOR_GUIDE.md" in export_script, "export script missing provider connector guide")
+    require("ADAPTER_DEVELOPER_GUIDE.md" in export_script, "export script missing adapter developer guide")
     require(
         'copy_path "scripts/check_public_system_review_path.sh"' in export_script,
         "export script missing system review path check copy",
@@ -223,6 +232,10 @@ else:
     require(
         'copy_path "scripts/check_public_provider_connector_guide.sh"' in export_script,
         "export script missing provider connector guide check copy",
+    )
+    require(
+        'copy_path "scripts/check_public_adapter_developer_guide.sh"' in export_script,
+        "export script missing adapter developer guide check copy",
     )
     require(
         "check_public_system_review_path.sh" in read(private_smoke_path),
@@ -241,6 +254,10 @@ else:
         "private smoke missing provider connector guide check",
     )
     require(
+        "check_public_adapter_developer_guide.sh" in read(private_smoke_path),
+        "private smoke missing adapter developer guide check",
+    )
+    require(
         "check_public_system_review_path.sh" in read(release_gate_path),
         "release gate missing system review path check",
     )
@@ -255,6 +272,10 @@ else:
     require(
         "check_public_provider_connector_guide.sh" in read(release_gate_path),
         "release gate missing provider connector guide check",
+    )
+    require(
+        "check_public_adapter_developer_guide.sh" in read(release_gate_path),
+        "release gate missing adapter developer guide check",
     )
 
 if public_smoke_path.is_file():
@@ -273,6 +294,10 @@ if public_smoke_path.is_file():
     require(
         "check_public_provider_connector_guide.sh" in read(public_smoke_path),
         "public smoke missing provider connector guide check",
+    )
+    require(
+        "check_public_adapter_developer_guide.sh" in read(public_smoke_path),
+        "public smoke missing adapter developer guide check",
     )
 
 private_patterns = [

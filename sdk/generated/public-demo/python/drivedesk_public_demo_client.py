@@ -119,6 +119,8 @@ def build_adapter_operation_plan(
 
 
 def _split_adapter_endpoint(endpoint: str) -> tuple[str, str]:
+    if endpoint.startswith("worker:"):
+        return "WORKER", endpoint
     parts = endpoint.strip().split(maxsplit=1)
     if len(parts) == 2 and parts[0] in {"GET", "POST", "PUT", "PATCH", "DELETE"}:
         return parts[0], parts[1]
@@ -127,11 +129,53 @@ def _split_adapter_endpoint(endpoint: str) -> tuple[str, str]:
 
 def _adapter_operation_body(scenario: dict[str, Any], request_id: str) -> dict[str, Any] | None:
     phase = scenario.get("phase")
+    operation = scenario.get("operation")
     base = {
         "requestId": request_id,
         "scenarioId": scenario.get("id"),
-        "operation": scenario.get("operation"),
+        "operation": operation,
     }
+
+    if operation == "crm_deal_intake_preview":
+        return {
+            **base,
+            "dryRun": True,
+            "provider_key": "crm.bitrix24.mock",
+            "source_type": "crm_deal",
+            "subject_type": "deal",
+            "subject_id": "DEAL-2026-001",
+            "external_ref": "crm-deal-001",
+            "provider_payload": {
+                "stage": "invoice_sent",
+                "amount": 1500,
+                "owner_role": "sales",
+                "full_name": "Synthetic Customer",
+                "phone": "+70000000000",
+                "access_token": "never-return-this",
+            },
+        }
+
+    if operation == "crm_deal_ingest_execute":
+        return {
+            **base,
+            "dryRun": False,
+            "batch_id": "bitrix_demo_batch",
+            "mapping": {
+                "deal_id": "ID",
+                "source_state": "STAGE_ID",
+                "owner_role": "ASSIGNED_BY_ROLE",
+                "amount": "OPPORTUNITY",
+            },
+            "deals": [
+                {
+                    "ID": "DEAL-2026-001",
+                    "STAGE_ID": "invoice_sent",
+                    "ASSIGNED_BY_ROLE": "sales",
+                    "OPPORTUNITY": 1500,
+                },
+            ],
+            "confirm": True,
+        }
 
     if phase == "preview":
         return {
@@ -237,13 +281,15 @@ def validate_public_demo_payload(payload: dict[str, Any]) -> None:
         raise ValueError(f"workflowScenarios does not include required outputs: {sorted(required_outputs - scenario_outputs)}")
 
     adapter_scenarios = payload.get("adapterScenarios")
-    if not isinstance(adapter_scenarios, list) or len(adapter_scenarios) < 4:
+    if not isinstance(adapter_scenarios, list) or len(adapter_scenarios) < 6:
         raise ValueError("adapterScenarios is missing or too short")
 
     adapter_scenario_ids = {scenario.get("id") for scenario in adapter_scenarios if isinstance(scenario, dict)}
     required_adapter_scenarios = {
         "adapter-file-import-preview",
         "adapter-file-import-execute",
+        "adapter-crm-deal-preview",
+        "adapter-crm-deal-ingest",
         "adapter-accounting-export-retry",
         "adapter-dead-letter-review",
     }
@@ -268,6 +314,10 @@ def validate_public_demo_payload(payload: dict[str, Any]) -> None:
         "mapping_preview",
         "outbox_event",
         "adapter_job",
+        "safe_payload",
+        "normalized_observation",
+        "no_provider_call",
+        "redaction_evidence",
         "retry_scheduled",
         "review_card",
         "manual_retry_endpoint",

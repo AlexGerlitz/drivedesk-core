@@ -31,6 +31,9 @@ It contains:
 - `openapi-client-manifest.json`
 - `README.md`
 
+The adapter developer path that uses these generated operation plans is
+documented in `ADAPTER_DEVELOPER_GUIDE.md`.
+
 Runnable SDK-backed examples:
 
 - `examples/python/demo_adapter_operation_plan.py`
@@ -76,12 +79,23 @@ contract-only request/response plan:
 adapter scenario -> method/path/headers/body -> expected outputs/evidence
 ```
 
+Covered public-safe adapter families:
+
+- file import preview and execute;
+- Bitrix-style CRM deal preview and ingest;
+- worker-backed async execution plans.
+
 Covered phases:
 
 - `preview` - validates mapping and dry-run input shape;
 - `execute` - confirms an import/export operation with idempotency key;
 - `retry` - describes bounded retry of a failed adapter job;
 - `operator_review` - describes dead-letter review without mutation.
+
+CRM ingest scenarios can produce a `WORKER` endpoint such as
+`worker:drivedesk_worker.main.process_pending_outbox`, which tells an
+integration developer the public SDK is describing a server-side outbox worker
+operation, not a browser-callable external write.
 
 The plan has `executionMode: contract_only` and
 `safeToRunAgainstPublicDemo: false`. That is intentional: the public endpoint is
@@ -96,6 +110,8 @@ The SDK is not meant to be a full production client yet. It proves a foundation:
 - The contract can generate working client code.
 - The generated client validates the product-shaped demo payload.
 - The generated client can build typed adapter operation plans.
+- The generated client can show the Bitrix-style CRM provider-intake body and
+  worker-backed ingest operation without exposing real credentials.
 - The generated client validates the `engineeringProof` gate shape.
 - The public repo can prove this in CI without private infrastructure.
 

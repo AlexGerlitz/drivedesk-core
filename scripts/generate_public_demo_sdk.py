@@ -21,6 +21,8 @@ BUSINESS_TASK_HANDOFF_PATH = "/demo/business-task-handoff"
 BUSINESS_TASK_HANDOFF_METHOD = "get"
 BUSINESS_NOTIFICATION_CHANNELS_PATH = "/demo/business-notification-channels"
 BUSINESS_NOTIFICATION_CHANNELS_METHOD = "get"
+NOTIFICATION_DELIVERY_PATH = "/demo/notification-delivery"
+NOTIFICATION_DELIVERY_METHOD = "get"
 BUSINESS_CONTEXT_ASSISTANT_PATH = "/demo/business-context-assistant"
 BUSINESS_CONTEXT_ASSISTANT_METHOD = "get"
 BUSINESS_ACTION_EXECUTION_PATH = "/demo/business-action-execution"
@@ -96,6 +98,14 @@ def business_notification_channels_operation(schema: dict[str, Any]) -> dict[str
         schema,
         BUSINESS_NOTIFICATION_CHANNELS_PATH,
         BUSINESS_NOTIFICATION_CHANNELS_METHOD,
+    )
+
+
+def notification_delivery_operation(schema: dict[str, Any]) -> dict[str, Any]:
+    return required_operation(
+        schema,
+        NOTIFICATION_DELIVERY_PATH,
+        NOTIFICATION_DELIVERY_METHOD,
     )
 
 
@@ -232,6 +242,16 @@ def business_notification_channels_required_fields(schema: dict[str, Any]) -> li
         raise SystemExit(
             "OpenAPI schema does not contain BusinessNotificationChannelMatrixDemoRead.required"
         )
+    return [str(item) for item in required]
+
+
+def notification_delivery_required_fields(schema: dict[str, Any]) -> list[str]:
+    components = schema.get("components", {})
+    schemas = components.get("schemas", {})
+    delivery = schemas.get("NotificationDeliveryDemoRead", {})
+    required = delivery.get("required", [])
+    if not isinstance(required, list) or not required:
+        raise SystemExit("OpenAPI schema does not contain NotificationDeliveryDemoRead.required")
     return [str(item) for item in required]
 
 
@@ -2433,6 +2453,7 @@ def render_readme(
     connector_certification_operation_id: str,
     provider_onboarding_operation_id: str,
     business_notification_channels_operation_id: str,
+    notification_delivery_operation_id: str,
     business_context_assistant_operation_id: str,
     business_action_execution_operation_id: str,
     business_approval_gateway_operation_id: str,
@@ -2473,6 +2494,9 @@ operationId: {provider_onboarding_operation_id}
 
 GET {BUSINESS_NOTIFICATION_CHANNELS_PATH}
 operationId: {business_notification_channels_operation_id}
+
+GET {NOTIFICATION_DELIVERY_PATH}
+operationId: {notification_delivery_operation_id}
 
 GET {BUSINESS_CONTEXT_ASSISTANT_PATH}
 operationId: {business_context_assistant_operation_id}
@@ -2523,6 +2547,8 @@ Adapter operation helpers:
   `GET {PROVIDER_ONBOARDING_PATH}`
 - `business_notification_channels` manifest entry for
   `GET {BUSINESS_NOTIFICATION_CHANNELS_PATH}`
+- `notification_delivery` manifest entry for
+  `GET {NOTIFICATION_DELIVERY_PATH}`
 - `business_context_assistant` manifest entry for
   `GET {BUSINESS_CONTEXT_ASSISTANT_PATH}`
 - `business_action_execution` manifest entry for
@@ -2567,6 +2593,10 @@ and replay docs.
 Business notification channel metadata validates the public-safe channel matrix:
 in-app readiness, draft-only external channels, private secret gates, and no
 external delivery.
+
+Notification delivery metadata validates the public-safe delivery runtime:
+adapter profiles, policy checks, idempotent outbox events, worker dispatch,
+provider gates, retry, dead-letter, operator review, and observability.
 
 Business Context Assistant metadata validates the public-safe context surface:
 CRM, bank, accounting, and legal-reference facts become safe context cards,
@@ -2619,6 +2649,8 @@ def render_manifest(
     business_task_handoff_required_fields: list[str],
     business_notification_channels_operation_id: str,
     business_notification_channels_required_fields: list[str],
+    notification_delivery_operation_id: str,
+    notification_delivery_required_fields: list[str],
     business_context_assistant_operation_id: str,
     business_context_assistant_required_fields: list[str],
     business_action_execution_operation_id: str,
@@ -2677,6 +2709,13 @@ def render_manifest(
             "method": BUSINESS_NOTIFICATION_CHANNELS_METHOD.upper(),
             "operation_id": business_notification_channels_operation_id,
             "required_fields": business_notification_channels_required_fields,
+        },
+        "notification_delivery": {
+            "path": NOTIFICATION_DELIVERY_PATH,
+            "method": NOTIFICATION_DELIVERY_METHOD.upper(),
+            "operation_id": notification_delivery_operation_id,
+            "schema": "NotificationDeliveryDemoRead",
+            "required_fields": notification_delivery_required_fields,
         },
         "business_context_assistant": {
             "path": BUSINESS_CONTEXT_ASSISTANT_PATH,
@@ -2787,6 +2826,11 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
         or "get_business_notification_channels"
     )
     business_notification_channels_fields = business_notification_channels_required_fields(schema)
+    notification_delivery_op = notification_delivery_operation(schema)
+    notification_delivery_operation_id = str(
+        notification_delivery_op.get("operationId") or "get_notification_delivery"
+    )
+    notification_delivery_fields = notification_delivery_required_fields(schema)
     business_context_assistant_op = business_context_assistant_operation(schema)
     business_context_assistant_operation_id = str(
         business_context_assistant_op.get("operationId")
@@ -2839,6 +2883,7 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
             connector_certification_operation_id,
             provider_onboarding_operation_id,
             business_notification_channels_operation_id,
+            notification_delivery_operation_id,
             business_context_assistant_operation_id,
             business_action_execution_operation_id,
             business_approval_gateway_operation_id,
@@ -2866,6 +2911,8 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
             business_task_handoff_fields,
             business_notification_channels_operation_id,
             business_notification_channels_fields,
+            notification_delivery_operation_id,
+            notification_delivery_fields,
             business_context_assistant_operation_id,
             business_context_assistant_fields,
             business_action_execution_operation_id,

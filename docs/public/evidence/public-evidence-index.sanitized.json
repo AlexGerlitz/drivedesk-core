@@ -250,6 +250,28 @@
       "boundary": "Grafana-style groups, Prometheus/Loki query shapes, alert links, and runbook references on synthetic public-safe data only"
     },
     {
+      "capability_id": "notification-delivery",
+      "title": "Notification delivery runtime",
+      "status": "validated",
+      "public_doc": "docs/public/NOTIFICATION_DELIVERY.md",
+      "evidence_files": [
+        "docs/public/evidence/notification-delivery.sanitized.json",
+        "infra/notifications/notification-delivery.sanitized.json",
+        "apps/admin/public-demo/index.html",
+        "apps/admin/public-demo/demo-data.js"
+      ],
+      "verifiers": [
+        "bash scripts/check_public_notification_delivery.sh",
+        "bash scripts/check_public_demo_api.sh"
+      ],
+      "public_urls": [
+        "docs/public/NOTIFICATION_DELIVERY.md",
+        "docs/public/evidence/notification-delivery.sanitized.json",
+        "apps/admin/public-demo/"
+      ],
+      "boundary": "notification adapter profiles, outbox events, worker routing, retry, dead-letter, and observability on synthetic public-safe data only"
+    },
+    {
       "capability_id": "alert-routing",
       "title": "Alert routing and escalation",
       "status": "validated",

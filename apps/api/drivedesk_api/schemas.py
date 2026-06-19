@@ -1201,6 +1201,24 @@ class ObservabilityDashboardDemoRead(BaseModel):
     docs: list[dict[str, str]]
 
 
+class NotificationDeliveryDemoRead(BaseModel):
+    status: Literal["validated"]
+    command: str
+    deliveryLevel: str
+    summary: list[dict[str, Any]]
+    deliveryRuntime: str
+    subject: str
+    adapterProfiles: list[dict[str, Any]]
+    deliveryStages: list[dict[str, Any]]
+    outboxEvents: list[dict[str, Any]]
+    retryPolicy: list[dict[str, Any]]
+    deadLetterPlan: list[dict[str, Any]]
+    observability: list[dict[str, Any]]
+    dataBoundaries: list[dict[str, Any]]
+    api: dict[str, str]
+    docs: list[dict[str, str]]
+
+
 class PublicDemoRead(BaseModel):
     schemaVersion: int
     generatedAt: str
@@ -1222,6 +1240,7 @@ class PublicDemoRead(BaseModel):
     integrationExecution: dict[str, Any]
     integrationRepair: dict[str, Any]
     observabilityDashboard: dict[str, Any]
+    notificationDelivery: dict[str, Any]
     connectorFixtureReplay: dict[str, Any]
     businessIntakePipeline: dict[str, Any]
     businessTaskHandoff: dict[str, Any]

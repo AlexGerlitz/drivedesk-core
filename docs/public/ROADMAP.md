@@ -131,6 +131,11 @@ Fast external verification path: `docs/public/REVIEWER_QUICKSTART.md`.
   and no external delivery via `businessNotificationChannels`,
   `GET /demo/business-notification-channels`, and
   `docs/public/BUSINESS_NOTIFICATION_CHANNELS.md`.
+- Public-safe notification delivery runtime (`docs/public/NOTIFICATION_DELIVERY.md`,
+  `GET /demo/notification-delivery`, `notificationDelivery`) for proving
+  adapter profiles, policy checks, idempotent outbox events, worker dispatch,
+  provider gates, retry, dead-letter, operator review, and observability without
+  external provider calls.
 - Business provider intake preview for turning Bitrix-style CRM, bank,
   accounting, and support payloads into safe normalized observation previews
   before persistence or workbench rendering.

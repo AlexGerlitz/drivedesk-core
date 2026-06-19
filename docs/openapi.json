@@ -6217,6 +6217,131 @@
         "title": "MembershipRead",
         "type": "object"
       },
+      "NotificationDeliveryDemoRead": {
+        "properties": {
+          "adapterProfiles": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Adapterprofiles",
+            "type": "array"
+          },
+          "api": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Api",
+            "type": "object"
+          },
+          "command": {
+            "title": "Command",
+            "type": "string"
+          },
+          "dataBoundaries": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Databoundaries",
+            "type": "array"
+          },
+          "deadLetterPlan": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Deadletterplan",
+            "type": "array"
+          },
+          "deliveryLevel": {
+            "title": "Deliverylevel",
+            "type": "string"
+          },
+          "deliveryRuntime": {
+            "title": "Deliveryruntime",
+            "type": "string"
+          },
+          "deliveryStages": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Deliverystages",
+            "type": "array"
+          },
+          "docs": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "title": "Docs",
+            "type": "array"
+          },
+          "observability": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Observability",
+            "type": "array"
+          },
+          "outboxEvents": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Outboxevents",
+            "type": "array"
+          },
+          "retryPolicy": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Retrypolicy",
+            "type": "array"
+          },
+          "status": {
+            "const": "validated",
+            "title": "Status",
+            "type": "string"
+          },
+          "subject": {
+            "title": "Subject",
+            "type": "string"
+          },
+          "summary": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Summary",
+            "type": "array"
+          }
+        },
+        "required": [
+          "status",
+          "command",
+          "deliveryLevel",
+          "summary",
+          "deliveryRuntime",
+          "subject",
+          "adapterProfiles",
+          "deliveryStages",
+          "outboxEvents",
+          "retryPolicy",
+          "deadLetterPlan",
+          "observability",
+          "dataBoundaries",
+          "api",
+          "docs"
+        ],
+        "title": "NotificationDeliveryDemoRead",
+        "type": "object"
+      },
       "ObservabilityDashboardDemoRead": {
         "properties": {
           "alertLinks": {
@@ -6846,6 +6971,11 @@
             "title": "Metrics",
             "type": "array"
           },
+          "notificationDelivery": {
+            "additionalProperties": true,
+            "title": "Notificationdelivery",
+            "type": "object"
+          },
           "observabilityDashboard": {
             "additionalProperties": true,
             "title": "Observabilitydashboard",
@@ -6938,6 +7068,7 @@
           "integrationExecution",
           "integrationRepair",
           "observabilityDashboard",
+          "notificationDelivery",
           "connectorFixtureReplay",
           "businessIntakePipeline",
           "businessTaskHandoff",
@@ -8259,6 +8390,27 @@
           }
         },
         "summary": "Integration Runtime Demo",
+        "tags": [
+          "demo"
+        ]
+      }
+    },
+    "/demo/notification-delivery": {
+      "get": {
+        "operationId": "notification_delivery_demo_demo_notification_delivery_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationDeliveryDemoRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Notification Delivery Demo",
         "tags": [
           "demo"
         ]

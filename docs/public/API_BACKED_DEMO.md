@@ -18,6 +18,7 @@ GET /demo/connector-fixture-replay
 GET /demo/business-intake-pipeline
 GET /demo/business-task-handoff
 GET /demo/business-notification-channels
+GET /demo/notification-delivery
 GET /demo/business-context-assistant
 GET /demo/business-action-execution
 GET /demo/business-approval-gateway
@@ -34,7 +35,7 @@ timeline entries, workflow scenarios, domain events, members, audit events,
 outbox events, adapter contracts, adapter operation scenarios, Adapter Studio,
 connector certification, sync jobs, Integration Health, alert routing, incident response,
 `businessControlTower` data, `businessIntakePipeline`,
-`businessTaskHandoff`, `businessNotificationChannels`,
+`businessTaskHandoff`, `businessNotificationChannels`, `notificationDelivery`,
 `businessContextAssistant`, `businessActionExecution`,
 `businessApprovalGateway`, `integrationRuntime`, `integrationExecution`,
 `integrationRepair`, `businessScenarioReplay`, recovery evidence,
@@ -72,6 +73,14 @@ candidates -> draft in-app notifications.
 `businessNotificationChannels` contract as a standalone endpoint. It is useful
 for checking the notification readiness loop directly: internal action -> safe
 drafts -> channel gates -> no external delivery.
+
+`GET /demo/notification-delivery` returns the same `notificationDelivery`
+contract as a standalone endpoint. It is useful for checking the delivery
+runtime directly: safe draft -> policy check -> outbox -> worker -> provider
+gate -> retry/dead-letter -> observability.
+
+The public review page for this contract is
+`docs/public/NOTIFICATION_DELIVERY.md`.
 
 `GET /demo/business-context-assistant` returns the same
 `businessContextAssistant` contract as a standalone endpoint. It is useful for
@@ -148,6 +157,7 @@ risk detection -> role context -> approval-aware action plan.
 | Intake Pipeline API | Smoke checks can load `GET /demo/business-intake-pipeline` directly. |
 | Task Handoff API | Smoke checks can load `GET /demo/business-task-handoff` directly. |
 | Notification Channel API | Smoke checks can load `GET /demo/business-notification-channels` directly. |
+| Notification Delivery API | Smoke checks can load `GET /demo/notification-delivery` directly. |
 | Business Context Assistant API | Smoke checks can load `GET /demo/business-context-assistant` directly. |
 | Business Action Execution API | Smoke checks can load `GET /demo/business-action-execution` directly. |
 | Business Approval Gateway API | Smoke checks can load `GET /demo/business-approval-gateway` directly. |

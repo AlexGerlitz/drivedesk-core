@@ -133,6 +133,15 @@
         Array.isArray(payload.observabilityDashboard.queryExamples) &&
         Array.isArray(payload.observabilityDashboard.alertLinks) &&
         Array.isArray(payload.observabilityDashboard.dataBoundaries) &&
+        payload.notificationDelivery &&
+        Array.isArray(payload.notificationDelivery.summary) &&
+        Array.isArray(payload.notificationDelivery.adapterProfiles) &&
+        Array.isArray(payload.notificationDelivery.deliveryStages) &&
+        Array.isArray(payload.notificationDelivery.outboxEvents) &&
+        Array.isArray(payload.notificationDelivery.retryPolicy) &&
+        Array.isArray(payload.notificationDelivery.deadLetterPlan) &&
+        Array.isArray(payload.notificationDelivery.observability) &&
+        Array.isArray(payload.notificationDelivery.dataBoundaries) &&
         payload.connectorFixtureReplay &&
         Array.isArray(payload.connectorFixtureReplay.summary) &&
         Array.isArray(payload.connectorFixtureReplay.outcomes) &&
@@ -1994,6 +2003,166 @@
             String(Boolean(boundary.rawPayloadIncluded)) +
             " - private telemetry " +
             String(Boolean(boundary.privateTelemetryIncluded))
+        )
+      );
+
+      row.append(top, detail);
+      boundaryRows.appendChild(row);
+    });
+  }
+
+  function fillNotificationDelivery() {
+    var delivery = data.notificationDelivery;
+
+    var summaryRows = document.getElementById("notificationDeliverySummaryRows");
+    clear(summaryRows);
+    delivery.summary.forEach(function (item) {
+      var card = document.createElement("article");
+      card.className = "metric-card";
+      card.dataset.tone = item.tone || "blue";
+
+      var label = document.createElement("span");
+      label.className = "muted";
+      label.appendChild(text(item.label));
+
+      var value = document.createElement("strong");
+      value.appendChild(text(item.value));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      card.append(label, value, detail);
+      summaryRows.appendChild(card);
+    });
+
+    var adapterRows = document.getElementById("notificationDeliveryAdapterRows");
+    clear(adapterRows);
+    delivery.adapterProfiles.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var channel = document.createElement("strong");
+      channel.appendChild(text(item.channel));
+      top.append(channel, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          item.adapterKey +
+            " - secret " +
+            item.secretSource +
+            " - provider call " +
+            String(Boolean(item.providerCallEnabled))
+        )
+      );
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(item.evidence));
+
+      row.append(top, detail, evidence);
+      adapterRows.appendChild(row);
+    });
+
+    var stageRows = document.getElementById("notificationDeliveryStageRows");
+    clear(stageRows);
+    delivery.deliveryStages.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var stage = document.createElement("strong");
+      stage.appendChild(text(item.stage));
+      top.append(stage, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(item.evidence));
+
+      row.append(top, detail, evidence);
+      stageRows.appendChild(row);
+    });
+
+    var outboxRows = document.getElementById("notificationDeliveryOutboxRows");
+    clear(outboxRows);
+    delivery.outboxEvents.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(item.channel + " outbox"));
+      top.append(title, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          item.workerQueue +
+            " - " +
+            item.eventType +
+            " - external delivery " +
+            String(Boolean(item.externalDelivery))
+        )
+      );
+
+      var idempotency = document.createElement("code");
+      idempotency.appendChild(text(item.idempotencyKey));
+
+      row.append(top, detail, idempotency);
+      outboxRows.appendChild(row);
+    });
+
+    var recoveryRows = document.getElementById("notificationDeliveryRecoveryRows");
+    clear(recoveryRows);
+    delivery.retryPolicy.concat(delivery.deadLetterPlan).forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var name = document.createElement("strong");
+      name.appendChild(text(item.name || item.route));
+      top.append(name, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.backoff || item.runbook || item.queue || item.ownerRole || ""));
+
+      row.append(top, detail);
+      recoveryRows.appendChild(row);
+    });
+
+    var boundaryRows = document.getElementById("notificationDeliveryBoundaryRows");
+    clear(boundaryRows);
+    delivery.dataBoundaries.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var name = document.createElement("strong");
+      name.appendChild(text(item.name));
+      top.append(name, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          "provider call " +
+            String(Boolean(item.providerCallEnabled)) +
+            " - raw payload " +
+            String(Boolean(item.rawPayloadIncluded)) +
+            " - browser tokens " +
+            String(Boolean(item.browserTokenStorage))
         )
       );
 
@@ -4233,6 +4402,7 @@
     fillHealth();
     fillRecoveryEvidence();
     fillObservabilityDashboard();
+    fillNotificationDelivery();
     fillAlertRouting();
     fillIncidentResponse();
     fillBusinessControlTower();

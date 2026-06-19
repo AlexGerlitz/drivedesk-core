@@ -44,6 +44,9 @@ infrastructure, production history, customer data, or operational credentials.
 - `BUSINESS_NOTIFICATION_CHANNELS.md` - preview-only notification channel
   matrix for in-app, Telegram, email, SMS, and webhook readiness via the
   `businessNotificationChannels` contract.
+- `NOTIFICATION_DELIVERY.md` - public-safe notification delivery runtime from
+  safe draft to outbox, worker, provider gate, retry, dead-letter, operator
+  review, and observability via the `notificationDelivery` contract.
 - `BUSINESS_CONTEXT_ASSISTANT.md` - preview-only Business Context Assistant
   for CRM, bank, accounting, and legal-reference facts via the
   `businessContextAssistant` contract.
@@ -166,6 +169,8 @@ infrastructure, production history, customer data, or operational credentials.
   image automation evidence snapshot.
 - `evidence/observability-proof.sanitized.json` - machine-readable public-safe
   observability evidence snapshot.
+- `evidence/notification-delivery.sanitized.json` - machine-readable
+  public-safe notification delivery evidence snapshot.
 - `evidence/alert-routing.sanitized.json` - machine-readable public-safe alert
   routing evidence snapshot.
 - `evidence/connector-certification.sanitized.json` - machine-readable
@@ -198,6 +203,8 @@ The public repository export also generates:
   contract for `businessTaskHandoff`.
 - `GET /demo/business-notification-channels` - standalone public-safe channel
   readiness contract for `businessNotificationChannels`.
+- `GET /demo/notification-delivery` - standalone public-safe notification
+  delivery runtime contract for `notificationDelivery`.
 - `GET /demo/business-context-assistant` - standalone public-safe context
   assistant contract for `businessContextAssistant`, backed by
   `POST /tenants/{tenant_id}/business-workbench-context/preview`.
@@ -308,6 +315,7 @@ The public repository export also generates:
   workbench validation.
 - `scripts/check_public_observability_proof.sh` - public-safe observability proof validation.
 - `scripts/check_public_observability_dashboard.sh` - public-safe observability dashboard validation.
+- `scripts/check_public_notification_delivery.sh` - public-safe notification delivery validation.
 - `scripts/check_public_alert_routing.sh` - public-safe alert routing validation.
 - `scripts/check_public_engineering_proof.sh` - public-safe proof tab and evidence contract validation.
 - `scripts/check_public_evidence_index.sh` - public-safe evidence index validation.
@@ -343,7 +351,7 @@ https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 7. Run `bash scripts/check_public_engineering_proof.sh`.
 8. Run `bash scripts/check_public_demo_api.sh`.
 9. Run one generated client example from `examples/`.
-10. Review `PROJECT_STATUS.md`, `TECHNICAL_CAPABILITY_MAP.md`, `EVIDENCE_INDEX.md`, `BUSINESS_CONTROL_TOWER.md`, `OBSERVABILITY_PROOF.md`, `OBSERVABILITY_DASHBOARD.md`, `ALERT_ROUTING_EVIDENCE.md`, `INCIDENT_RESPONSE_DEMO.md`, `ENGINEERING_PROOF.md`, `PLATFORM_MATURITY_70.md`, and `SANITIZED_EVIDENCE.md`.
+10. Review `PROJECT_STATUS.md`, `TECHNICAL_CAPABILITY_MAP.md`, `EVIDENCE_INDEX.md`, `BUSINESS_CONTROL_TOWER.md`, `OBSERVABILITY_PROOF.md`, `OBSERVABILITY_DASHBOARD.md`, `NOTIFICATION_DELIVERY.md`, `ALERT_ROUTING_EVIDENCE.md`, `INCIDENT_RESPONSE_DEMO.md`, `ENGINEERING_PROOF.md`, `PLATFORM_MATURITY_70.md`, and `SANITIZED_EVIDENCE.md`.
 11. Review `SYSTEM_DESIGN.md`, `CONNECTOR_CERTIFICATION.md`, `CONNECTOR_FIXTURE_REPLAY.md`, `GITOPS_DELIVERY.md`, and the recovery evidence docs.
 
 ## Engineering Summary

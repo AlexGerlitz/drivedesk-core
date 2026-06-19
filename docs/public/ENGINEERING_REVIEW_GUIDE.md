@@ -20,10 +20,11 @@ prove the current engineering surface.
 | 10 | Evidence index | `docs/public/EVIDENCE_INDEX.md`, `docs/public/evidence/public-evidence-index.sanitized.json` |
 | 11 | Observability proof | `docs/public/OBSERVABILITY_PROOF.md` |
 | 12 | Observability dashboard | Operations tab and `docs/public/OBSERVABILITY_DASHBOARD.md` |
-| 13 | Alert routing | Operations tab and `docs/public/ALERT_ROUTING_EVIDENCE.md` |
-| 14 | Connector fixture replay | `docs/public/CONNECTOR_FIXTURE_REPLAY.md` and `bash scripts/check_public_connector_fixture_replay.sh` |
-| 15 | Recovery and release safety | backup/restore, rollback, canary, staged promotion checks |
-| 16 | Infrastructure story | Helm, GitOps, OpenTofu, drift, and sanitized runtime evidence |
+| 13 | Notification delivery | Operations tab, `GET /demo/notification-delivery`, `notificationDelivery`, and `docs/public/NOTIFICATION_DELIVERY.md` |
+| 14 | Alert routing | Operations tab and `docs/public/ALERT_ROUTING_EVIDENCE.md` |
+| 15 | Connector fixture replay | `docs/public/CONNECTOR_FIXTURE_REPLAY.md` and `bash scripts/check_public_connector_fixture_replay.sh` |
+| 16 | Recovery and release safety | backup/restore, rollback, canary, staged promotion checks |
+| 17 | Infrastructure story | Helm, GitOps, OpenTofu, drift, and sanitized runtime evidence |
 
 ## Review Commands
 
@@ -38,6 +39,7 @@ bash scripts/check_public_technical_capability_map.sh
 bash scripts/check_public_evidence_index.sh
 bash scripts/check_public_observability_proof.sh
 bash scripts/check_public_observability_dashboard.sh
+bash scripts/check_public_notification_delivery.sh
 bash scripts/check_public_alert_routing.sh
 bash scripts/check_public_engineering_proof.sh
 bash scripts/check_public_connector_fixture_replay.sh
@@ -65,6 +67,7 @@ bash scripts/check_public_opentofu_plan.sh
 | Evidence index | `docs/public/EVIDENCE_INDEX.md`, `docs/public/evidence/public-evidence-index.sanitized.json` |
 | Observability proof | `docs/public/OBSERVABILITY_PROOF.md` |
 | Observability dashboard | `docs/public/OBSERVABILITY_DASHBOARD.md`, `docs/public/evidence/observability-dashboard.sanitized.json` |
+| Notification delivery | `docs/public/NOTIFICATION_DELIVERY.md`, `docs/public/evidence/notification-delivery.sanitized.json`, `GET /demo/notification-delivery`, `notificationDelivery` |
 | Alert routing | `docs/public/ALERT_ROUTING_EVIDENCE.md` |
 | Incident response | `docs/public/INCIDENT_RESPONSE_DEMO.md` |
 | Case study | `docs/public/ENGINEERING_CASE_STUDY.md` |

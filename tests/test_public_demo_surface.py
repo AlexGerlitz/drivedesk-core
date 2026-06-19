@@ -111,6 +111,12 @@ def test_public_demo_html_links_static_assets() -> None:
     assert 'id="observabilityDashboardPanelRows"' in html
     assert 'id="observabilityDashboardQueryRows"' in html
     assert 'id="observabilityDashboardBoundaryRows"' in html
+    assert 'id="notificationDeliverySummaryRows"' in html
+    assert 'id="notificationDeliveryAdapterRows"' in html
+    assert 'id="notificationDeliveryStageRows"' in html
+    assert 'id="notificationDeliveryOutboxRows"' in html
+    assert 'id="notificationDeliveryRecoveryRows"' in html
+    assert 'id="notificationDeliveryBoundaryRows"' in html
     assert 'id="controlTowerObservationRows"' in html
     assert 'id="controlTowerExceptionRows"' in html
     assert 'id="controlTowerRepairRows"' in html
@@ -1261,6 +1267,61 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
         "docs/public/OBSERVABILITY_PROOF.md",
         "docs/public/ALERT_ROUTING_EVIDENCE.md",
     }
+    notification_delivery = payload["notificationDelivery"]
+    assert notification_delivery["status"] == "validated"
+    assert notification_delivery["command"] == "GET /demo/notification-delivery"
+    assert notification_delivery["deliveryLevel"] == "delivery_runtime_ready"
+    assert notification_delivery["deliveryRuntime"] == "outbox_worker_provider_gate"
+    assert {item["label"] for item in notification_delivery["summary"]} >= {
+        "Channels",
+        "Outbox events",
+        "Provider calls",
+        "Recovery paths",
+    }
+    assert {item["channel"] for item in notification_delivery["adapterProfiles"]} == {
+        "in_app",
+        "telegram",
+        "email",
+        "sms",
+        "webhook",
+    }
+    for field in ("providerCallEnabled", "externalDelivery"):
+        assert {item[field] for item in notification_delivery["adapterProfiles"]} == {False}
+    assert {item["stage"] for item in notification_delivery["deliveryStages"]} >= {
+        "draft_prepared",
+        "policy_checked",
+        "outbox_enqueued",
+        "worker_dispatched",
+        "provider_gate_blocked",
+        "retry_or_dead_letter",
+    }
+    assert len(notification_delivery["outboxEvents"]) == 5
+    assert {item["eventType"] for item in notification_delivery["outboxEvents"]} == {
+        "notification.delivery.requested"
+    }
+    for field in ("providerCallEnabled", "externalDelivery", "containsPii", "rawPayloadIncluded"):
+        assert {item[field] for item in notification_delivery["outboxEvents"]} == {False}
+    assert {item["name"] for item in notification_delivery["retryPolicy"]} == {
+        "short_retry",
+        "dead_letter_after_exhaustion",
+        "operator_review",
+    }
+    assert {item["route"] for item in notification_delivery["deadLetterPlan"]} == {
+        "notifications.dead_letter",
+        "integration.incident",
+    }
+    assert {item["name"] for item in notification_delivery["observability"]} >= {
+        "drivedesk_notification_delivery_attempts_total",
+        "drivedesk_notification_delivery_dead_letters_total",
+        "notification.delivery.status_changed",
+        "DriveDeskNotificationDeadLetters",
+    }
+    assert notification_delivery["api"]["standalone"] == "GET /demo/notification-delivery"
+    assert {item["path"] for item in notification_delivery["docs"]} >= {
+        "docs/public/NOTIFICATION_DELIVERY.md",
+        "docs/public/BUSINESS_NOTIFICATION_CHANNELS.md",
+        "docs/public/OUTBOX_RECOVERY.md",
+    }
     business_scenario_replay = payload["businessScenarioReplay"]
     assert business_scenario_replay["status"] == "validated"
     assert business_scenario_replay["command"] == "bash scripts/check_public_business_scenario_replay.sh"
@@ -1444,6 +1505,7 @@ def test_public_demo_can_load_api_backed_data_with_static_fallback() -> None:
     assert "fillIntegrationExecution" in script
     assert "fillIntegrationRepair" in script
     assert "fillObservabilityDashboard" in script
+    assert "fillNotificationDelivery" in script
     assert "alertRouting" in script
     assert "incidentResponse" in script
     assert "engineeringProof" in script
@@ -1454,6 +1516,7 @@ def test_public_demo_can_load_api_backed_data_with_static_fallback() -> None:
     assert "integrationExecution" in script
     assert "integrationRepair" in script
     assert "observabilityDashboard" in script
+    assert "notificationDelivery" in script
     assert "workflowScenarios" in script
     assert "endToEndScenario" in script
     assert "adapterScenarios" in script
@@ -1526,6 +1589,7 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
             "/demo/business-action-execution",
             "/demo/business-approval-gateway",
             "/demo/observability-dashboard",
+            "/demo/notification-delivery",
             "/demo/business-scenario-replay",
             "/openapi.json",
             "student_sync",
@@ -1647,12 +1711,14 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
             "/demo/business-approval-gateway",
             "/demo/integration-repair",
             "/demo/observability-dashboard",
+            "/demo/notification-delivery",
             "/demo/business-scenario-replay",
             "operationId",
             "ConnectorFixtureReplayRead",
             "BusinessNotificationChannelMatrixDemoRead",
             "BusinessContextAssistantDemoRead",
             "BusinessActionExecutionDemoRead",
+            "NotificationDeliveryDemoRead",
             "BusinessApprovalGatewayDemoRead",
             "IntegrationRepairDemoRead",
             "ObservabilityDashboardDemoRead",
@@ -1706,6 +1772,14 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
             "dashboard_contract_ready",
             "observability_dashboard.panel.latency_p95",
             "OBSERVABILITY_DASHBOARD.md",
+        ],
+        "scripts/check_public_notification_delivery.sh": [
+            "/demo/notification-delivery",
+            "public_notification_delivery",
+            "notificationDelivery",
+            "delivery_runtime_ready",
+            "notification_delivery.provider_gate_blocked",
+            "NOTIFICATION_DELIVERY.md",
         ],
         "examples/curl/demo-public.sh": ["/demo/public", "api.synthetic", "student_sync"],
         "examples/python/demo_public_client.py": ["/demo/public", "api.synthetic", "student_sync"],

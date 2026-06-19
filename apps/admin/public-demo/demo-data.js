@@ -5005,6 +5005,323 @@ window.DRIVEDESK_DEMO_DATA = {
       "value": "1"
     }
   ],
+  "notificationDelivery": {
+    "adapterProfiles": [
+      {
+        "adapterKey": "notification.in_app",
+        "channel": "in_app",
+        "evidence": "notification_delivery.adapter.ready",
+        "externalDelivery": false,
+        "providerCallEnabled": false,
+        "safePayloadProfile": "role_subject_action_reference",
+        "secretSource": "none",
+        "status": "ready"
+      },
+      {
+        "adapterKey": "notification.telegram",
+        "channel": "telegram",
+        "evidence": "notification_delivery.adapter.gated",
+        "externalDelivery": false,
+        "providerCallEnabled": false,
+        "safePayloadProfile": "role_subject_action_reference",
+        "secretSource": "server_secret_store",
+        "status": "private_secret_required"
+      },
+      {
+        "adapterKey": "notification.email",
+        "channel": "email",
+        "evidence": "notification_delivery.adapter.gated",
+        "externalDelivery": false,
+        "providerCallEnabled": false,
+        "safePayloadProfile": "role_subject_action_reference",
+        "secretSource": "server_secret_store",
+        "status": "private_secret_required"
+      },
+      {
+        "adapterKey": "notification.sms",
+        "channel": "sms",
+        "evidence": "notification_delivery.adapter.gated",
+        "externalDelivery": false,
+        "providerCallEnabled": false,
+        "safePayloadProfile": "role_subject_action_reference",
+        "secretSource": "server_secret_store",
+        "status": "provider_contract_required"
+      },
+      {
+        "adapterKey": "notification.webhook",
+        "channel": "webhook",
+        "evidence": "notification_delivery.adapter.gated",
+        "externalDelivery": false,
+        "providerCallEnabled": false,
+        "safePayloadProfile": "role_subject_action_reference",
+        "secretSource": "server_secret_store",
+        "status": "endpoint_and_signing_key_required"
+      }
+    ],
+    "api": {
+      "channelMatrix": "GET /demo/business-notification-channels",
+      "preview": "POST /tenants/{tenant_id}/business-notifications/preview",
+      "public": "GET /demo/public",
+      "standalone": "GET /demo/notification-delivery"
+    },
+    "command": "GET /demo/notification-delivery",
+    "dataBoundaries": [
+      {
+        "browserTokenStorage": false,
+        "name": "server_secret_store_boundary",
+        "providerCallEnabled": false,
+        "secretRefsVisible": false,
+        "status": "enforced"
+      },
+      {
+        "containsPii": false,
+        "name": "safe_delivery_payload",
+        "providerCallEnabled": false,
+        "rawPayloadIncluded": false,
+        "requestBodyIncluded": false,
+        "status": "clean"
+      },
+      {
+        "externalDelivery": false,
+        "externalProviderMutation": false,
+        "name": "public_provider_gate",
+        "providerCallEnabled": false,
+        "status": "closed"
+      }
+    ],
+    "deadLetterPlan": [
+      {
+        "evidence": "notification_delivery.dead_letter_ready",
+        "ownerRole": "platform_operator",
+        "route": "notifications.dead_letter",
+        "runbook": "docs/public/OUTBOX_RECOVERY.md",
+        "status": "ready"
+      },
+      {
+        "evidence": "integration.incident.status_changed",
+        "ownerRole": "integration_operator",
+        "route": "integration.incident",
+        "runbook": "docs/public/INTEGRATION_INCIDENT_RUNBOOKS.md",
+        "status": "ready"
+      }
+    ],
+    "deliveryLevel": "delivery_runtime_ready",
+    "deliveryRuntime": "outbox_worker_provider_gate",
+    "deliveryStages": [
+      {
+        "detail": "Channel draft contains role, subject key, action reference, and evidence only.",
+        "evidence": "notification_delivery.draft_prepared",
+        "stage": "draft_prepared",
+        "status": "validated"
+      },
+      {
+        "detail": "Payload classification confirms no raw provider payload, token, or PII.",
+        "evidence": "notification_delivery.policy_checked",
+        "stage": "policy_checked",
+        "status": "passed"
+      },
+      {
+        "detail": "Delivery intent is represented as an idempotent outbox event.",
+        "evidence": "notification.delivery.requested",
+        "stage": "outbox_enqueued",
+        "status": "planned"
+      },
+      {
+        "detail": "Worker reads channel adapter metadata and stops before provider I/O.",
+        "evidence": "notification_delivery.worker_dispatched",
+        "stage": "worker_dispatched",
+        "status": "simulated"
+      },
+      {
+        "detail": "External delivery requires private connector secrets and rollout approval.",
+        "evidence": "notification_delivery.provider_gate_blocked",
+        "stage": "provider_gate_blocked",
+        "status": "closed"
+      },
+      {
+        "detail": "Failed delivery attempts route through retry policy, DLQ, and operator review.",
+        "evidence": "notification_delivery.recovery_ready",
+        "stage": "retry_or_dead_letter",
+        "status": "ready"
+      }
+    ],
+    "docs": [
+      {
+        "check": "bash scripts/check_public_notification_delivery.sh",
+        "label": "Notification Delivery",
+        "path": "docs/public/NOTIFICATION_DELIVERY.md"
+      },
+      {
+        "check": "bash scripts/check_public_business_notification_channels.sh",
+        "label": "Business Notification Channels",
+        "path": "docs/public/BUSINESS_NOTIFICATION_CHANNELS.md"
+      },
+      {
+        "check": "bash scripts/ci_smoke_public.sh",
+        "label": "Outbox Recovery",
+        "path": "docs/public/OUTBOX_RECOVERY.md"
+      }
+    ],
+    "observability": [
+      {
+        "containsPii": false,
+        "evidence": "notification_delivery.metric.bound",
+        "name": "drivedesk_notification_delivery_attempts_total",
+        "rawPayloadIncluded": false,
+        "safeLabels": [
+          "channel",
+          "status",
+          "adapter_key"
+        ],
+        "signal": "metric"
+      },
+      {
+        "containsPii": false,
+        "evidence": "notification_delivery.metric.bound",
+        "name": "drivedesk_notification_delivery_dead_letters_total",
+        "rawPayloadIncluded": false,
+        "safeLabels": [
+          "channel",
+          "adapter_key"
+        ],
+        "signal": "metric"
+      },
+      {
+        "containsPii": false,
+        "evidence": "notification_delivery.log.bound",
+        "name": "notification.delivery.status_changed",
+        "rawPayloadIncluded": false,
+        "safeLabels": [
+          "channel",
+          "event_type",
+          "status"
+        ],
+        "signal": "log"
+      },
+      {
+        "containsPii": false,
+        "evidence": "notification_delivery.alert.bound",
+        "name": "DriveDeskNotificationDeadLetters",
+        "rawPayloadIncluded": false,
+        "safeLabels": [
+          "channel",
+          "severity"
+        ],
+        "signal": "alert"
+      }
+    ],
+    "outboxEvents": [
+      {
+        "channel": "in_app",
+        "containsPii": false,
+        "eventType": "notification.delivery.requested",
+        "evidence": "notification_delivery.outbox_prepared",
+        "externalDelivery": false,
+        "idempotencyKey": "notification:deal:DEAL-2026-001:in_app:001",
+        "providerCallEnabled": false,
+        "rawPayloadIncluded": false,
+        "status": "ready",
+        "workerQueue": "notifications.default"
+      },
+      {
+        "channel": "telegram",
+        "containsPii": false,
+        "eventType": "notification.delivery.requested",
+        "evidence": "notification_delivery.outbox_prepared",
+        "externalDelivery": false,
+        "idempotencyKey": "notification:deal:DEAL-2026-001:telegram:001",
+        "providerCallEnabled": false,
+        "rawPayloadIncluded": false,
+        "status": "provider_gate_closed",
+        "workerQueue": "notifications.external"
+      },
+      {
+        "channel": "email",
+        "containsPii": false,
+        "eventType": "notification.delivery.requested",
+        "evidence": "notification_delivery.outbox_prepared",
+        "externalDelivery": false,
+        "idempotencyKey": "notification:deal:DEAL-2026-001:email:001",
+        "providerCallEnabled": false,
+        "rawPayloadIncluded": false,
+        "status": "provider_gate_closed",
+        "workerQueue": "notifications.external"
+      },
+      {
+        "channel": "sms",
+        "containsPii": false,
+        "eventType": "notification.delivery.requested",
+        "evidence": "notification_delivery.outbox_prepared",
+        "externalDelivery": false,
+        "idempotencyKey": "notification:deal:DEAL-2026-001:sms:001",
+        "providerCallEnabled": false,
+        "rawPayloadIncluded": false,
+        "status": "provider_gate_closed",
+        "workerQueue": "notifications.external"
+      },
+      {
+        "channel": "webhook",
+        "containsPii": false,
+        "eventType": "notification.delivery.requested",
+        "evidence": "notification_delivery.outbox_prepared",
+        "externalDelivery": false,
+        "idempotencyKey": "notification:deal:DEAL-2026-001:webhook:001",
+        "providerCallEnabled": false,
+        "rawPayloadIncluded": false,
+        "status": "provider_gate_closed",
+        "workerQueue": "notifications.external"
+      }
+    ],
+    "retryPolicy": [
+      {
+        "attempts": 3,
+        "backoff": "30s, 2m, 10m",
+        "evidence": "notification_delivery.retry_policy_attached",
+        "name": "short_retry",
+        "status": "ready"
+      },
+      {
+        "evidence": "notification_delivery.dead_letter_ready",
+        "name": "dead_letter_after_exhaustion",
+        "queue": "notifications.dead_letter",
+        "status": "ready"
+      },
+      {
+        "evidence": "notification_delivery.operator_review_ready",
+        "name": "operator_review",
+        "ownerRole": "platform_operator",
+        "status": "ready"
+      }
+    ],
+    "status": "validated",
+    "subject": "deal:DEAL-2026-001",
+    "summary": [
+      {
+        "detail": "in-app plus Telegram, email, SMS, and webhook adapters",
+        "label": "Channels",
+        "tone": "blue",
+        "value": "5"
+      },
+      {
+        "detail": "one delivery intent per channel",
+        "label": "Outbox events",
+        "tone": "green",
+        "value": "5"
+      },
+      {
+        "detail": "public runtime blocks all external sends",
+        "label": "Provider calls",
+        "tone": "violet",
+        "value": "0"
+      },
+      {
+        "detail": "retry, dead-letter, and operator review",
+        "label": "Recovery paths",
+        "tone": "amber",
+        "value": "3"
+      }
+    ]
+  },
   "observabilityDashboard": {
     "alertLinks": [
       {

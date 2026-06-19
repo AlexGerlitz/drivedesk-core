@@ -507,6 +507,35 @@
             <div class="event-list compact-list" id="observabilityDashboardBoundaryRows"></div>
           </section>
 
+          <div class="proof-summary-grid" id="notificationDeliverySummaryRows"></div>
+          <div class="dashboard-grid">
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Notification Delivery</h3>
+                <span class="muted">Adapters and provider gates</span>
+              </div>
+              <div class="event-list" id="notificationDeliveryAdapterRows"></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Delivery Runtime</h3>
+                <span class="muted">Outbox to worker to recovery</span>
+              </div>
+              <div class="event-list" id="notificationDeliveryStageRows"></div>
+            </section>
+          </div>
+
+          <section class="panel">
+            <div class="panel-header">
+              <h3>Notification Outbox</h3>
+              <span class="muted">Idempotency, retry, and DLQ</span>
+            </div>
+            <div class="event-list" id="notificationDeliveryOutboxRows"></div>
+            <div class="event-list compact-list" id="notificationDeliveryRecoveryRows"></div>
+            <div class="event-list compact-list" id="notificationDeliveryBoundaryRows"></div>
+          </section>
+
           <div class="dashboard-grid">
             <section class="panel">
               <div class="panel-header">

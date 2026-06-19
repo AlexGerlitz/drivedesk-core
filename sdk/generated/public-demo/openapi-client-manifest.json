@@ -255,6 +255,29 @@
     ]
   },
   "method": "GET",
+  "notification_delivery": {
+    "method": "GET",
+    "operation_id": "notification_delivery_demo_demo_notification_delivery_get",
+    "path": "/demo/notification-delivery",
+    "required_fields": [
+      "status",
+      "command",
+      "deliveryLevel",
+      "summary",
+      "deliveryRuntime",
+      "subject",
+      "adapterProfiles",
+      "deliveryStages",
+      "outboxEvents",
+      "retryPolicy",
+      "deadLetterPlan",
+      "observability",
+      "dataBoundaries",
+      "api",
+      "docs"
+    ],
+    "schema": "NotificationDeliveryDemoRead"
+  },
   "observability_dashboard": {
     "method": "GET",
     "operation_id": "observability_dashboard_demo_demo_observability_dashboard_get",
@@ -320,6 +343,7 @@
     "integrationExecution",
     "integrationRepair",
     "observabilityDashboard",
+    "notificationDelivery",
     "connectorFixtureReplay",
     "businessIntakePipeline",
     "businessTaskHandoff",

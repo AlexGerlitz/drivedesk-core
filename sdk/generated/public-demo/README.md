@@ -30,6 +30,9 @@ operationId: provider_onboarding_demo_demo_provider_onboarding_get
 GET /demo/business-notification-channels
 operationId: business_notification_channels_demo_demo_business_notification_channels_get
 
+GET /demo/notification-delivery
+operationId: notification_delivery_demo_demo_notification_delivery_get
+
 GET /demo/business-context-assistant
 operationId: business_context_assistant_demo_demo_business_context_assistant_get
 
@@ -79,6 +82,8 @@ Adapter operation helpers:
   `GET /demo/provider-onboarding`
 - `business_notification_channels` manifest entry for
   `GET /demo/business-notification-channels`
+- `notification_delivery` manifest entry for
+  `GET /demo/notification-delivery`
 - `business_context_assistant` manifest entry for
   `GET /demo/business-context-assistant`
 - `business_action_execution` manifest entry for
@@ -123,6 +128,10 @@ and replay docs.
 Business notification channel metadata validates the public-safe channel matrix:
 in-app readiness, draft-only external channels, private secret gates, and no
 external delivery.
+
+Notification delivery metadata validates the public-safe delivery runtime:
+adapter profiles, policy checks, idempotent outbox events, worker dispatch,
+provider gates, retry, dead-letter, operator review, and observability.
 
 Business Context Assistant metadata validates the public-safe context surface:
 CRM, bank, accounting, and legal-reference facts become safe context cards,

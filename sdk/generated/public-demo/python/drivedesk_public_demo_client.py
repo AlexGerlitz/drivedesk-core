@@ -42,6 +42,7 @@ REQUIRED_FIELDS = [
   "integrationExecution",
   "integrationRepair",
   "observabilityDashboard",
+  "notificationDelivery",
   "connectorFixtureReplay",
   "businessIntakePipeline",
   "businessTaskHandoff",

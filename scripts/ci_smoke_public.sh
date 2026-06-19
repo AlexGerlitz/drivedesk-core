@@ -65,6 +65,7 @@ bash scripts/check_public_adapter_developer_guide.sh
 bash scripts/check_public_evidence_index.sh
 bash scripts/check_public_observability_proof.sh
 bash scripts/check_public_observability_dashboard.sh
+bash scripts/check_public_notification_delivery.sh
 bash scripts/check_public_alert_routing.sh
 bash scripts/check_public_engineering_proof.sh
 bash scripts/check_public_gitops_layout.sh

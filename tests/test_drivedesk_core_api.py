@@ -2542,6 +2542,50 @@ def test_business_notification_channels_demo_endpoint_exposes_same_public_contra
     )
 
 
+def test_notification_delivery_demo_endpoint_exposes_same_public_contract(
+    api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, _ = api_client
+
+    public_response = client.get("/demo/public")
+    delivery_response = client.get("/demo/notification-delivery")
+
+    assert delivery_response.status_code == 200
+    assert delivery_response.headers["access-control-allow-origin"] == "*"
+    assert delivery_response.headers["cache-control"] == "public, max-age=60"
+    delivery_payload = delivery_response.json()
+    assert delivery_payload == public_response.json()["notificationDelivery"]
+    assert delivery_payload["status"] == "validated"
+    assert delivery_payload["command"] == "GET /demo/notification-delivery"
+    assert delivery_payload["deliveryLevel"] == "delivery_runtime_ready"
+    assert delivery_payload["deliveryRuntime"] == "outbox_worker_provider_gate"
+    assert {item["channel"] for item in delivery_payload["adapterProfiles"]} == {
+        "in_app",
+        "telegram",
+        "email",
+        "sms",
+        "webhook",
+    }
+    assert {item["providerCallEnabled"] for item in delivery_payload["adapterProfiles"]} == {False}
+    assert {item["externalDelivery"] for item in delivery_payload["adapterProfiles"]} == {False}
+    assert {item["eventType"] for item in delivery_payload["outboxEvents"]} == {
+        "notification.delivery.requested"
+    }
+    assert {item["providerCallEnabled"] for item in delivery_payload["outboxEvents"]} == {False}
+    assert {item["containsPii"] for item in delivery_payload["outboxEvents"]} == {False}
+    assert {item["name"] for item in delivery_payload["retryPolicy"]} == {
+        "short_retry",
+        "dead_letter_after_exhaustion",
+        "operator_review",
+    }
+    assert {item["name"] for item in delivery_payload["observability"]} >= {
+        "drivedesk_notification_delivery_attempts_total",
+        "DriveDeskNotificationDeadLetters",
+    }
+    assert delivery_payload["api"]["standalone"] == "GET /demo/notification-delivery"
+    assert any(item["path"] == "docs/public/NOTIFICATION_DELIVERY.md" for item in delivery_payload["docs"])
+
+
 def test_business_context_assistant_demo_endpoint_exposes_same_public_contract(
     api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
 ) -> None:

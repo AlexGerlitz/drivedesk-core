@@ -44,6 +44,7 @@ parsing Markdown by hand.
 | Integration repair | `docs/public/INTEGRATION_REPAIR.md` | `bash scripts/check_public_integration_repair.sh` |
 | Observability | `docs/public/OBSERVABILITY_PROOF.md` | `bash scripts/check_public_observability_proof.sh` |
 | Observability dashboard | `docs/public/OBSERVABILITY_DASHBOARD.md` | `bash scripts/check_public_observability_dashboard.sh` |
+| Notification delivery | `docs/public/NOTIFICATION_DELIVERY.md` | `bash scripts/check_public_notification_delivery.sh` |
 | Alert routing | `docs/public/ALERT_ROUTING_EVIDENCE.md` | `bash scripts/check_public_alert_routing.sh` |
 | Incident response | `docs/public/INCIDENT_RESPONSE_DEMO.md` | `bash scripts/check_public_engineering_proof.sh` |
 | Release safety | `docs/public/RELEASE_ROLLBACK_EVIDENCE.md` | `bash scripts/check_public_release_rollback.sh` |
@@ -66,7 +67,11 @@ bash scripts/check_public_evidence_index.sh
 bash scripts/check_public_connector_fixture_replay.sh
 bash scripts/check_public_business_control_tower.sh
 bash scripts/check_public_observability_dashboard.sh
+bash scripts/check_public_notification_delivery.sh
 ```
+
+Notification delivery is exposed through `GET /demo/notification-delivery` and
+the public demo payload key `notificationDelivery`.
 
 The check validates that:
 

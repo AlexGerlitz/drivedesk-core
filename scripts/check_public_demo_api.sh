@@ -132,6 +132,9 @@ integration_repair_endpoint, integration_repair_headers = get_json("/demo/integr
 observability_dashboard_endpoint, observability_dashboard_headers = get_json(
     "/demo/observability-dashboard"
 )
+notification_delivery_endpoint, notification_delivery_headers = get_json(
+    "/demo/notification-delivery"
+)
 business_scenario_endpoint, business_scenario_headers = get_json("/demo/business-scenario-replay")
 adapters, _ = get_json("/integration-adapters")
 runbooks, _ = get_json("/integration-runbooks")
@@ -1543,6 +1546,72 @@ assert {item["path"] for item in observability_dashboard["docs"]} >= {
     "docs/public/ALERT_ROUTING_EVIDENCE.md",
 }, demo
 
+notification_delivery = demo["notificationDelivery"]
+assert notification_delivery_endpoint == notification_delivery, notification_delivery_endpoint
+assert notification_delivery_headers["access-control-allow-origin"] == "*", notification_delivery_headers
+assert notification_delivery_headers["cache-control"] == "public, max-age=60", notification_delivery_headers
+assert notification_delivery["status"] == "validated", demo
+assert notification_delivery["command"] == "GET /demo/notification-delivery", demo
+assert notification_delivery["deliveryLevel"] == "delivery_runtime_ready", demo
+assert notification_delivery["deliveryRuntime"] == "outbox_worker_provider_gate", demo
+assert {item["label"] for item in notification_delivery["summary"]} >= {
+    "Channels",
+    "Outbox events",
+    "Provider calls",
+    "Recovery paths",
+}, demo
+assert {item["channel"] for item in notification_delivery["adapterProfiles"]} == {
+    "in_app",
+    "telegram",
+    "email",
+    "sms",
+    "webhook",
+}, demo
+for profile in notification_delivery["adapterProfiles"]:
+    assert profile["providerCallEnabled"] is False, profile
+    assert profile["externalDelivery"] is False, profile
+    assert profile["safePayloadProfile"] == "role_subject_action_reference", profile
+assert {item["stage"] for item in notification_delivery["deliveryStages"]} >= {
+    "draft_prepared",
+    "policy_checked",
+    "outbox_enqueued",
+    "worker_dispatched",
+    "provider_gate_blocked",
+    "retry_or_dead_letter",
+}, demo
+assert len(notification_delivery["outboxEvents"]) == 5, demo
+for event in notification_delivery["outboxEvents"]:
+    assert event["eventType"] == "notification.delivery.requested", event
+    assert event["providerCallEnabled"] is False, event
+    assert event["externalDelivery"] is False, event
+    assert event["containsPii"] is False, event
+    assert event["rawPayloadIncluded"] is False, event
+assert {item["name"] for item in notification_delivery["retryPolicy"]} == {
+    "short_retry",
+    "dead_letter_after_exhaustion",
+    "operator_review",
+}, demo
+assert {item["route"] for item in notification_delivery["deadLetterPlan"]} == {
+    "notifications.dead_letter",
+    "integration.incident",
+}, demo
+assert {item["name"] for item in notification_delivery["observability"]} >= {
+    "drivedesk_notification_delivery_attempts_total",
+    "drivedesk_notification_delivery_dead_letters_total",
+    "notification.delivery.status_changed",
+    "DriveDeskNotificationDeadLetters",
+}, demo
+for signal in notification_delivery["observability"]:
+    assert set(signal["safeLabels"]).isdisjoint({"email", "phone", "name", "token", "payload"}), signal
+    assert signal["containsPii"] is False, signal
+    assert signal["rawPayloadIncluded"] is False, signal
+assert notification_delivery["api"]["standalone"] == "GET /demo/notification-delivery", demo
+assert {item["path"] for item in notification_delivery["docs"]} >= {
+    "docs/public/NOTIFICATION_DELIVERY.md",
+    "docs/public/BUSINESS_NOTIFICATION_CHANNELS.md",
+    "docs/public/OUTBOX_RECOVERY.md",
+}, demo
+
 business_scenario_replay = demo["businessScenarioReplay"]
 assert business_scenario_endpoint == business_scenario_replay, business_scenario_endpoint
 assert business_scenario_headers["access-control-allow-origin"] == "*", business_scenario_headers
@@ -1725,6 +1794,7 @@ assert "/demo/integration-runtime" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/integration-execution" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/integration-repair" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/observability-dashboard" in openapi["paths"], openapi["paths"].keys()
+assert "/demo/notification-delivery" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/integration-repairs/preview" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/business-scenario-replay" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/business-intake-pipeline/preview" in openapi["paths"], openapi["paths"].keys()
@@ -1758,6 +1828,7 @@ if openapi_file.exists():
     assert "/demo/integration-execution" in generated["paths"], generated["paths"].keys()
     assert "/demo/integration-repair" in generated["paths"], generated["paths"].keys()
     assert "/demo/observability-dashboard" in generated["paths"], generated["paths"].keys()
+    assert "/demo/notification-delivery" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/integration-repairs/preview" in generated["paths"], generated["paths"].keys()
     assert "/demo/business-scenario-replay" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-intake-pipeline/preview" in generated["paths"], generated["paths"].keys()

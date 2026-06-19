@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "check": "public_notification_delivery",
+  "delivery_model": "outbox_worker_provider_gate",
+  "data_profile": "synthetic_demo_data",
+  "status": "validated",
+  "channels": [
+    "in_app",
+    "telegram",
+    "email",
+    "sms",
+    "webhook"
+  ],
+  "delivery_stages": [
+    "draft_prepared",
+    "policy_checked",
+    "outbox_enqueued",
+    "worker_dispatched",
+    "provider_gate_blocked",
+    "retry_or_dead_letter"
+  ],
+  "outbox_event_type": "notification.delivery.requested",
+  "worker_queues": [
+    "notifications.default",
+    "notifications.external"
+  ],
+  "recovery_paths": [
+    "short_retry",
+    "dead_letter_after_exhaustion",
+    "operator_review"
+  ],
+  "observability_signals": [
+    "drivedesk_notification_delivery_attempts_total",
+    "drivedesk_notification_delivery_dead_letters_total",
+    "notification.delivery.status_changed",
+    "DriveDeskNotificationDeadLetters"
+  ],
+  "checks": {
+    "adapter_profiles_present": true,
+    "delivery_stages_present": true,
+    "outbox_events_present": true,
+    "retry_policy_present": true,
+    "dead_letter_plan_present": true,
+    "observability_present": true,
+    "public_demo_payload_present": true,
+    "openapi_path_present": true,
+    "public_docs_linked": true,
+    "private_markers_absent": true,
+    "production_data_touched": false
+  },
+  "redaction": {
+    "addresses_included": false,
+    "credentials_included": false,
+    "hostnames_included": false,
+    "paths_included": false,
+    "production_data_included": false,
+    "raw_logs_included": false,
+    "request_bodies_included": false,
+    "secrets_included": false
+  }
+}

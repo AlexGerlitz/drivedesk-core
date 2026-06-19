@@ -130,6 +130,7 @@ from drivedesk_api.schemas import (
     IntegrationRepairDemoRead,
     IntegrationRepairPreviewCreate,
     IntegrationRepairPreviewRead,
+    NotificationDeliveryDemoRead,
     ObservabilityDashboardDemoRead,
     IntegrationMappingPreviewCreate,
     IntegrationMappingPreviewRead,
@@ -347,6 +348,20 @@ def build_app(settings: Settings | None = None) -> FastAPI:
     async def observability_dashboard_demo() -> JSONResponse:
         return JSONResponse(
             build_public_demo_payload()["observabilityDashboard"],
+            headers={
+                "Access-Control-Allow-Origin": "*",
+                "Cache-Control": "public, max-age=60",
+            },
+        )
+
+    @api.get(
+        "/demo/notification-delivery",
+        response_model=NotificationDeliveryDemoRead,
+        tags=["demo"],
+    )
+    async def notification_delivery_demo() -> JSONResponse:
+        return JSONResponse(
+            build_public_demo_payload()["notificationDelivery"],
             headers={
                 "Access-Control-Allow-Origin": "*",
                 "Cache-Control": "public, max-age=60",

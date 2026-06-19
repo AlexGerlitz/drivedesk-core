@@ -10,7 +10,7 @@ implementation surface, evidence, and verifier commands.
 | Public engineering entrypoint | GitHub Pages root `index.html`, compact system review path, quickstart, and static demo shell | `docs/public/SYSTEM_REVIEW_PATH.md`, `docs/public/REVIEWER_QUICKSTART.md`, `docs/public/ENGINEERING_REVIEW_GUIDE.md`, `docs/public/ENGINEERING_PROOF.md` | `bash scripts/check_public_pages_entrypoint.sh && bash scripts/check_public_system_review_path.sh && bash scripts/check_public_reviewer_quickstart.sh` |
 | Platform tour | Business event -> workflow -> adapter -> incident -> proof route across Control Tower, Adapter Studio, operations, and proof | `docs/public/PLATFORM_TOUR.md`, `apps/admin/public-demo/index.html`, `GET /demo/public` | `bash scripts/check_public_platform_tour.sh && bash scripts/check_public_demo_api.sh` |
 | Project status | Current public-safe state, limits, next work, and validation commands | `docs/public/PROJECT_STATUS.md`, `docs/public/ROADMAP.md` | `bash scripts/check_public_project_status.sh` |
-| Read-only API contract | FastAPI `GET /demo/public`, `GET /demo/connector-certification`, `GET /demo/connector-fixture-replay`, `GET /demo/business-intake-pipeline`, `GET /demo/business-task-handoff`, `GET /demo/business-notification-channels`, `GET /demo/business-context-assistant`, `GET /demo/business-action-execution`, `GET /demo/business-approval-gateway`, `GET /demo/integration-runtime`, `GET /demo/integration-execution`, `GET /demo/integration-repair`, `POST /tenants/{tenant_id}/integration-repairs/preview`, `GET /demo/business-scenario-replay`, and generated `docs/openapi.json` | `docs/public/API_BACKED_DEMO.md`, `examples/curl/demo-public.sh` | `bash scripts/check_public_demo_api.sh` |
+| Read-only API contract | FastAPI `GET /demo/public`, `GET /demo/connector-certification`, `GET /demo/connector-fixture-replay`, `GET /demo/business-intake-pipeline`, `GET /demo/business-task-handoff`, `GET /demo/business-notification-channels`, `GET /demo/notification-delivery`, `GET /demo/business-context-assistant`, `GET /demo/business-action-execution`, `GET /demo/business-approval-gateway`, `GET /demo/integration-runtime`, `GET /demo/integration-execution`, `GET /demo/integration-repair`, `POST /tenants/{tenant_id}/integration-repairs/preview`, `GET /demo/business-scenario-replay`, and generated `docs/openapi.json` | `docs/public/API_BACKED_DEMO.md`, `examples/curl/demo-public.sh` | `bash scripts/check_public_demo_api.sh` |
 | Generated client SDK | Python, JavaScript, and TypeScript demo clients plus typed file-import, CRM provider-intake, and worker-backed adapter operation plans, standalone connector certification, provider onboarding, and replay validation, Adapter Studio validation, integration runtime metadata, integration execution metadata, and integration repair metadata | `docs/public/CLIENT_SDK.md`, `docs/public/CONNECTOR_CERTIFICATION.md`, `docs/public/PROVIDER_ONBOARDING.md`, `docs/public/ADAPTER_DEVELOPER_GUIDE.md`, `docs/public/INTEGRATION_RUNTIME.md`, `docs/public/INTEGRATION_EXECUTION.md`, `docs/public/INTEGRATION_REPAIR.md`, `sdk/generated/public-demo/`, `examples/python/demo_adapter_operation_plan.py`, `examples/js/demo-adapter-operation-plan.mjs` | `bash scripts/check_public_demo_sdk.sh && bash scripts/check_public_connector_certification.sh && bash scripts/check_public_provider_onboarding.sh && bash scripts/check_public_adapter_developer_guide.sh && bash scripts/check_public_integration_runtime.sh && bash scripts/check_public_integration_execution.sh && bash scripts/check_public_integration_repair.sh` |
 | Auth, RBAC, and tenant boundary | Bearer-token auth, tenant-scoped helpers, platform-admin model | `docs/public/AUTH_FOUNDATION.md`, `docs/public/TENANT_ISOLATION.md`, `docs/public/PLATFORM_ADMIN.md` | `bash scripts/ci_smoke_public.sh` |
 | Audit and outbox recovery | Audited retry path for failed outbox jobs | `docs/public/OUTBOX_RECOVERY.md`, `docs/adr/0030-outbox-retry-recovery.md` | `bash scripts/ci_smoke_public.sh` |
@@ -19,6 +19,7 @@ implementation surface, evidence, and verifier commands.
 | Business intake pipeline | Preview-only provider event pipeline for CRM/bank/accounting signals: safe payload, role workbench cards, detection, approval-gated action plan, draft notifications, and explicit no-persistence/no-external-call boundaries | `docs/public/BUSINESS_INTAKE_PIPELINE.md`, `GET /demo/business-intake-pipeline`, `GET /demo/public` `businessIntakePipeline`, `POST /tenants/{tenant_id}/business-intake-pipeline/preview`, `apps/admin/public-demo/index.html` | `bash scripts/check_public_business_intake_pipeline.sh && bash scripts/check_public_demo_api.sh` |
 | Business task handoff | Preview-only operator handoff for action-plan steps: internal task cards, internal outbox candidates, draft in-app notifications, approval gates, and explicit no-persistence/no-external-write boundaries | `docs/public/BUSINESS_TASK_HANDOFF.md`, `GET /demo/business-task-handoff`, `GET /demo/public` `businessTaskHandoff`, `POST /tenants/{tenant_id}/business-task-handoffs/preview`, `apps/admin/public-demo/index.html` | `bash scripts/check_public_business_task_handoff.sh && bash scripts/check_public_demo_api.sh` |
 | Business notification channels | Preview-only notification readiness matrix for in-app, Telegram, email, SMS, and webhook: safe delivery drafts, private secret gates, and explicit no-external-delivery boundaries | `docs/public/BUSINESS_NOTIFICATION_CHANNELS.md`, `GET /demo/business-notification-channels`, `GET /demo/public` `businessNotificationChannels`, `POST /tenants/{tenant_id}/business-notification-channels/preview`, `apps/admin/public-demo/index.html` | `bash scripts/check_public_business_notification_channels.sh && bash scripts/check_public_demo_api.sh` |
+| Notification delivery runtime | Public-safe delivery runtime for in-app, Telegram, email, SMS, and webhook: adapter profiles, policy check, idempotent outbox events, worker dispatch, provider gate, retry, dead-letter, operator review, and observability | `docs/public/NOTIFICATION_DELIVERY.md`, `GET /demo/notification-delivery`, `GET /demo/public` `notificationDelivery`, `docs/public/evidence/notification-delivery.sanitized.json`, `infra/notifications/notification-delivery.sanitized.json`, `apps/admin/public-demo/index.html` | `bash scripts/check_public_notification_delivery.sh && bash scripts/check_public_demo_api.sh` |
 | Business Context Assistant | Preview-only Business Context Assistant that turns CRM, bank, accounting, and legal-reference facts into safe context cards, insight rules, and next actions without provider writes | `docs/public/BUSINESS_CONTEXT_ASSISTANT.md`, `GET /demo/business-context-assistant`, `GET /demo/public` `businessContextAssistant`, `POST /tenants/{tenant_id}/business-workbench-context/preview`, `apps/admin/public-demo/index.html` | `bash scripts/check_public_business_context_assistant.sh && bash scripts/check_public_demo_api.sh` |
 | Business action execution | Preview-only action execution plan that turns suggested actions into idempotent dry-run candidates, preflight checks, approval gates, rollback notes, and explicit no-provider-write boundaries | `docs/public/BUSINESS_ACTION_EXECUTION.md`, `GET /demo/business-action-execution`, `GET /demo/public` `businessActionExecution`, `POST /tenants/{tenant_id}/business-action-executions/preview`, `apps/admin/public-demo/index.html` | `bash scripts/check_public_business_action_execution.sh && bash scripts/check_public_demo_api.sh` |
 | Business approval gateway | Preview-only approval gateway that turns provider-changing execution candidates into approval requests, RBAC/dual-control policy checks, approver routing, blocked commit unlocks, and audit trail evidence | `docs/public/BUSINESS_APPROVAL_GATEWAY.md`, `GET /demo/business-approval-gateway`, `GET /demo/public` `businessApprovalGateway`, `POST /tenants/{tenant_id}/business-approval-gateway/preview`, `apps/admin/public-demo/index.html` | `bash scripts/check_public_business_approval_gateway.sh && bash scripts/check_public_demo_api.sh` |
@@ -46,7 +47,7 @@ implementation surface, evidence, and verifier commands.
 4. Open the GitHub Pages engineering reference.
 5. Open the live demo and switch to the Workflow, Control Tower, Integrations, Operations, Incidents, and Proof tabs.
 6. Read `docs/public/PROJECT_STATUS.md`.
-7. Inspect `docs/openapi.json`, `GET /demo/public`, `GET /demo/connector-certification`, `GET /demo/connector-fixture-replay`, `GET /demo/business-intake-pipeline`, `GET /demo/business-task-handoff`, `GET /demo/business-notification-channels`, `GET /demo/business-context-assistant`, `GET /demo/business-action-execution`, `GET /demo/business-approval-gateway`, `GET /demo/integration-runtime`, `GET /demo/integration-execution`, `GET /demo/integration-repair`, `POST /tenants/{tenant_id}/integration-repairs/preview`, and `GET /demo/business-scenario-replay`.
+7. Inspect `docs/openapi.json`, `GET /demo/public`, `GET /demo/connector-certification`, `GET /demo/connector-fixture-replay`, `GET /demo/business-intake-pipeline`, `GET /demo/business-task-handoff`, `GET /demo/business-notification-channels`, `GET /demo/notification-delivery`, `GET /demo/business-context-assistant`, `GET /demo/business-action-execution`, `GET /demo/business-approval-gateway`, `GET /demo/integration-runtime`, `GET /demo/integration-execution`, `GET /demo/integration-repair`, `POST /tenants/{tenant_id}/integration-repairs/preview`, and `GET /demo/business-scenario-replay`.
 8. Run `bash scripts/ci_smoke_public.sh`.
 9. Run `bash scripts/check_public_system_review_path.sh`.
 10. Run `bash scripts/check_public_platform_tour.sh`.
@@ -58,19 +59,20 @@ implementation surface, evidence, and verifier commands.
 16. Run `bash scripts/check_public_business_intake_pipeline.sh`.
 17. Run `bash scripts/check_public_business_task_handoff.sh`.
 18. Run `bash scripts/check_public_business_notification_channels.sh`.
-19. Run `bash scripts/check_public_business_context_assistant.sh`.
-20. Run `bash scripts/check_public_business_action_execution.sh`.
-21. Run `bash scripts/check_public_business_approval_gateway.sh`.
-22. Run `bash scripts/check_public_integration_runtime.sh`.
-23. Run `bash scripts/check_public_integration_execution.sh`.
-24. Run `bash scripts/check_public_integration_repair.sh`.
-25. Run `bash scripts/check_public_business_scenario_replay.sh`.
-26. Run `bash scripts/check_public_observability_proof.sh`.
-27. Run `bash scripts/check_public_observability_dashboard.sh`.
-28. Run `bash scripts/check_public_alert_routing.sh`.
-29. Run `bash scripts/check_public_connector_certification.sh`.
-30. Run `bash scripts/check_public_connector_fixture_replay.sh`.
-31. Run the capability-specific verifier from the table above.
+19. Run `bash scripts/check_public_notification_delivery.sh`.
+20. Run `bash scripts/check_public_business_context_assistant.sh`.
+21. Run `bash scripts/check_public_business_action_execution.sh`.
+22. Run `bash scripts/check_public_business_approval_gateway.sh`.
+23. Run `bash scripts/check_public_integration_runtime.sh`.
+24. Run `bash scripts/check_public_integration_execution.sh`.
+25. Run `bash scripts/check_public_integration_repair.sh`.
+26. Run `bash scripts/check_public_business_scenario_replay.sh`.
+27. Run `bash scripts/check_public_observability_proof.sh`.
+28. Run `bash scripts/check_public_observability_dashboard.sh`.
+29. Run `bash scripts/check_public_alert_routing.sh`.
+30. Run `bash scripts/check_public_connector_certification.sh`.
+31. Run `bash scripts/check_public_connector_fixture_replay.sh`.
+32. Run the capability-specific verifier from the table above.
 
 ## Boundary
 

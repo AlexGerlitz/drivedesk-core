@@ -10,10 +10,12 @@ from typing import Any
 PUBLIC_DEMO_PATH = "/demo/public"
 CONNECTOR_REPLAY_PATH = "/demo/connector-fixture-replay"
 CONNECTOR_CERTIFICATION_PATH = "/demo/connector-certification"
+PROVIDER_ONBOARDING_PATH = "/demo/provider-onboarding"
 BUSINESS_SCENARIO_REPLAY_PATH = "/demo/business-scenario-replay"
 OPERATION_ID = "public_demo_demo_public_get"
 CONNECTOR_REPLAY_OPERATION_ID = "connector_fixture_replay_demo_demo_connector_fixture_replay_get"
 CONNECTOR_CERTIFICATION_OPERATION_ID = "connector_certification_demo_demo_connector_certification_get"
+PROVIDER_ONBOARDING_OPERATION_ID = "provider_onboarding_demo_demo_provider_onboarding_get"
 BUSINESS_SCENARIO_REPLAY_OPERATION_ID = "business_scenario_replay_demo_demo_business_scenario_replay_get"
 REQUIRED_FIELDS = [
   "schemaVersion",
@@ -31,6 +33,7 @@ REQUIRED_FIELDS = [
   "adapterScenarios",
   "adapterStudio",
   "connectorCertification",
+  "providerOnboarding",
   "integrationRuntime",
   "integrationExecution",
   "connectorFixtureReplay",
@@ -80,6 +83,24 @@ CONNECTOR_CERTIFICATION_REQUIRED_FIELDS = [
   "api",
   "docs"
 ]
+PROVIDER_ONBOARDING_REQUIRED_FIELDS = [
+  "status",
+  "command",
+  "onboardingLevel",
+  "providerKey",
+  "providerName",
+  "providerCategory",
+  "summary",
+  "providerProfile",
+  "onboardingStages",
+  "mappingPreview",
+  "preflightChecks",
+  "sandboxContract",
+  "rolloutPlan",
+  "dataBoundaries",
+  "api",
+  "docs"
+]
 BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS = [
   "status",
   "command",
@@ -110,6 +131,11 @@ class DriveDeskPublicDemoClient:
     def get_connector_certification(self) -> dict[str, Any]:
         payload = self._get_json(CONNECTOR_CERTIFICATION_PATH)
         validate_connector_certification_payload(payload)
+        return payload
+
+    def get_provider_onboarding(self) -> dict[str, Any]:
+        payload = self._get_json(PROVIDER_ONBOARDING_PATH)
+        validate_provider_onboarding_payload(payload)
         return payload
 
     def get_business_scenario_replay(self) -> dict[str, Any]:
@@ -379,6 +405,42 @@ def validate_connector_certification_payload(payload: dict[str, Any]) -> None:
         raise ValueError("connector certification data boundaries are missing or too short")
 
 
+def validate_provider_onboarding_payload(payload: dict[str, Any]) -> None:
+    missing = [field for field in PROVIDER_ONBOARDING_REQUIRED_FIELDS if field not in payload]
+    if missing:
+        raise ValueError(f"missing provider onboarding fields: {', '.join(missing)}")
+
+    if payload.get("status") != "previewed":
+        raise ValueError(f"unexpected provider onboarding status: {payload.get('status')}")
+
+    if payload.get("command") != f"GET {PROVIDER_ONBOARDING_PATH}":
+        raise ValueError(f"unexpected provider onboarding command: {payload.get('command')}")
+
+    if payload.get("onboardingLevel") != "sandbox_onboarding_ready":
+        raise ValueError(
+            f"unexpected provider onboarding level: {payload.get('onboardingLevel')}"
+        )
+
+    if payload.get("providerKey") != "crm.bitrix24.mock":
+        raise ValueError(f"unexpected provider onboarding key: {payload.get('providerKey')}")
+
+    for key in ("summary", "onboardingStages", "preflightChecks", "rolloutPlan", "dataBoundaries"):
+        value = payload.get(key)
+        if not isinstance(value, list) or not value:
+            raise ValueError(f"provider onboarding {key} is missing or empty")
+
+    sandbox = payload.get("sandboxContract")
+    if not isinstance(sandbox, dict) or sandbox.get("providerCallEnabled") is not False:
+        raise ValueError("provider onboarding sandbox contract must not call providers")
+
+    if any(
+        item.get("externalMutation") is not False
+        for item in payload.get("dataBoundaries", [])
+        if isinstance(item, dict)
+    ):
+        raise ValueError("provider onboarding boundaries must not mutate external providers")
+
+
 def validate_business_scenario_replay_payload(payload: dict[str, Any]) -> None:
     missing = [field for field in BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS if field not in payload]
     if missing:
@@ -576,6 +638,11 @@ def validate_public_demo_payload(payload: dict[str, Any]) -> None:
         raise ValueError("connectorCertification is missing")
     validate_connector_certification_payload(connector_certification)
 
+    provider_onboarding = payload.get("providerOnboarding")
+    if not isinstance(provider_onboarding, dict):
+        raise ValueError("providerOnboarding is missing")
+    validate_provider_onboarding_payload(provider_onboarding)
+
     business_scenario_replay = payload.get("businessScenarioReplay")
     if not isinstance(business_scenario_replay, dict):
         raise ValueError("businessScenarioReplay is missing")
@@ -636,6 +703,7 @@ def main() -> None:
     payload = client.get_public_demo()
     connector_replay = client.get_connector_fixture_replay()
     connector_certification = client.get_connector_certification()
+    provider_onboarding = client.get_provider_onboarding()
     business_scenario_replay = client.get_business_scenario_replay()
     adapter_plan = build_adapter_operation_plan(payload, "adapter-file-import-preview")
     print(
@@ -646,10 +714,12 @@ def main() -> None:
         f"adapterPlan={adapter_plan['phase']}",
         f"connectorReplay={connector_replay['status']}",
         f"connectorCertification={connector_certification['certificationLevel']}",
+        f"providerOnboarding={provider_onboarding['onboardingLevel']}",
         f"businessScenarioReplay={business_scenario_replay['status']}",
         f"operation={OPERATION_ID}",
         f"connectorOperation={CONNECTOR_REPLAY_OPERATION_ID}",
         f"connectorCertificationOperation={CONNECTOR_CERTIFICATION_OPERATION_ID}",
+        f"providerOnboardingOperation={PROVIDER_ONBOARDING_OPERATION_ID}",
         f"businessScenarioOperation={BUSINESS_SCENARIO_REPLAY_OPERATION_ID}",
     )
 

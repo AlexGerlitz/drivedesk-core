@@ -1662,6 +1662,319 @@ def build_connector_certification_workbench() -> dict[str, object]:
     }
 
 
+def build_provider_onboarding_workbench(adapter_key: str = "crm.bitrix24.mock") -> dict[str, object]:
+    descriptor = resolve_adapter(adapter_key).descriptor
+    mapping = dict(descriptor.mapping_example)
+    scopes = list(descriptor.default_connection_scopes)
+    sample_records: list[dict[str, object]] = [
+        {
+            "ID": "DEAL-2026-001",
+            "STAGE_ID": "invoice_sent",
+            "ASSIGNED_BY_ROLE": "sales",
+            "OPPORTUNITY": 1500,
+            "CLIENT_NAME": "Synthetic Customer",
+            "PHONE": "+70000000000",
+            "ACCESS_TOKEN": "redacted-in-public-contract",
+        },
+        {
+            "ID": "DEAL-2026-002",
+            "STAGE_ID": "paid",
+            "ASSIGNED_BY_ROLE": "manager",
+            "OPPORTUNITY": 4200,
+            "EMAIL": "synthetic@example.invalid",
+            "SECRET": "redacted-in-public-contract",
+        },
+    ]
+    diagnostics = build_adapter_connection_diagnostics(
+        adapter_key,
+        mapping=mapping,
+        scopes=scopes,
+    )
+    mapping_preview = build_adapter_mapping_preview(
+        adapter_key,
+        records=sample_records,
+        mapping=mapping,
+    )
+    preview_runtime = build_adapter_runtime_plan(
+        adapter_key,
+        operation_key="crm_deal_intake_preview",
+        scopes=["crm:deal.preview"],
+        execution_mode="contract_only",
+    )
+    ingest_execution = build_adapter_execution_timeline(
+        adapter_key,
+        operation_key="crm_deal_ingest_execute",
+        scopes=scopes,
+        execution_mode="contract_only",
+        include_failure_path=True,
+    )
+    dropped_sensitive_keys = sorted(
+        {
+            sensitive_key
+            for record in sample_records
+            for sensitive_key in _crm_sensitive_keys(record)
+        }
+    )
+    auth_profile = descriptor.auth_profile
+
+    return {
+        "status": "previewed",
+        "onboarding_level": "sandbox_onboarding_ready",
+        "provider_key": descriptor.key,
+        "provider_name": descriptor.name,
+        "provider_category": descriptor.category,
+        "summary": [
+            {
+                "label": "Provider",
+                "value": descriptor.category.upper(),
+                "detail": descriptor.key,
+                "tone": "blue",
+            },
+            {
+                "label": "Records",
+                "value": str(mapping_preview["records_accepted"]),
+                "detail": "synthetic records accepted in mapping preview",
+                "tone": "green",
+            },
+            {
+                "label": "External calls",
+                "value": "0",
+                "detail": "public onboarding is dry-run only",
+                "tone": "amber",
+            },
+            {
+                "label": "Rollout",
+                "value": "gated",
+                "detail": "private connector requires approval evidence",
+                "tone": "violet",
+            },
+        ],
+        "provider_profile": {
+            "adapter_key": descriptor.key,
+            "adapter_name": descriptor.name,
+            "category": descriptor.category,
+            "direction": descriptor.direction,
+            "auth_mode": auth_profile.get("mode", "unspecified"),
+            "credential_placement": auth_profile.get("credential_placement", "unspecified"),
+            "secret_refs": sorted(str(item) for item in auth_profile.get("secret_refs", [])),
+            "public_demo_requires_secret": bool(auth_profile.get("public_demo_requires_secret")),
+            "real_provider_requires_secret": bool(auth_profile.get("real_provider_requires_secret")),
+            "supported_scopes": scopes,
+            "operation_keys": diagnostics["operation_keys"],
+            "executable_operation_keys": diagnostics["executable_operation_keys"],
+            "evidence": "provider_onboarding.provider_profile_selected",
+        },
+        "onboarding_stages": [
+            {
+                "stage": "select_provider_profile",
+                "status": "selected",
+                "detail": f"{descriptor.key} selected from the adapter catalog.",
+                "evidence": "GET /integration-adapters",
+            },
+            {
+                "stage": "bind_connection_profile",
+                "status": "prepared",
+                "detail": "Tenant mapping, scopes, and server-side secret references are ready.",
+                "evidence": "IntegrationConnection",
+            },
+            {
+                "stage": "mapping_preview",
+                "status": "previewed",
+                "detail": (
+                    f"{mapping_preview['records_accepted']} accepted, "
+                    f"{mapping_preview['records_rejected']} rejected."
+                ),
+                "evidence": "adapter_mapping.previewed",
+            },
+            {
+                "stage": "sandbox_dry_run",
+                "status": "previewed",
+                "detail": "Runtime and execution plans are computed without provider mutation.",
+                "evidence": "adapter_runtime.previewed",
+            },
+            {
+                "stage": "approval_review",
+                "status": "approval_required",
+                "detail": "Provider writes stay behind approval, idempotency, and rollback review.",
+                "evidence": "business_approval_gateway.previewed",
+            },
+            {
+                "stage": "private_rollout",
+                "status": "next_private_step",
+                "detail": "Private connector can swap the mock client for a real provider client.",
+                "evidence": "private_connector_only",
+            },
+        ],
+        "mapping_preview": {
+            "adapter_key": mapping_preview["adapter_key"],
+            "records_received": mapping_preview["records_received"],
+            "records_accepted": mapping_preview["records_accepted"],
+            "records_rejected": mapping_preview["records_rejected"],
+            "required_mapping_keys": mapping_preview["required_mapping_keys"],
+            "mapping_keys": sorted(mapping.keys()),
+            "dropped_sensitive_keys": dropped_sensitive_keys,
+            "raw_payload_included": False,
+            "contains_pii": False,
+            "evidence": "adapter_mapping.previewed",
+        },
+        "preflight_checks": [
+            {
+                "check": "adapter_registered",
+                "status": "passed",
+                "detail": descriptor.key,
+                "external_mutation": False,
+                "evidence": "provider_onboarding.preflight_passed",
+            },
+            {
+                "check": "connection_scopes_available",
+                "status": "passed",
+                "detail": ", ".join(scopes),
+                "external_mutation": False,
+                "evidence": "adapter_runtime.scope_checked",
+            },
+            {
+                "check": "mapping_profile_valid",
+                "status": "passed",
+                "detail": ", ".join(sorted(mapping.keys())),
+                "external_mutation": False,
+                "evidence": "adapter_mapping.previewed",
+            },
+            {
+                "check": "secret_refs_server_side",
+                "status": "clean",
+                "detail": str(auth_profile.get("credential_placement") or "unspecified"),
+                "external_mutation": False,
+                "evidence": "server_secret_store",
+            },
+            {
+                "check": "provider_call_disabled",
+                "status": "closed",
+                "detail": "Public onboarding never calls the external provider.",
+                "external_mutation": False,
+                "evidence": "provider_call_enabled=false",
+            },
+        ],
+        "sandbox_contract": {
+            "preview_operation": preview_runtime["operation_contract"]["key"],
+            "execute_operation": ingest_execution["operation_key"],
+            "runtime_steps": len(preview_runtime["runtime_steps"]),
+            "execution_timeline_steps": len(ingest_execution["timeline"]),
+            "provider_call_enabled": False,
+            "external_mutation": False,
+            "raw_payload_included": False,
+            "contains_pii": False,
+            "evidence": "provider_onboarding.sandbox_contract_ready",
+        },
+        "rollout_plan": [
+            {
+                "step": "create_tenant_connection",
+                "status": "ready",
+                "detail": "Create tenant-scoped connection metadata with mapping and scopes.",
+                "evidence": "IntegrationConnection",
+            },
+            {
+                "step": "run_mapping_preview",
+                "status": "ready",
+                "detail": "Validate provider field mapping against synthetic and sandbox fixtures.",
+                "evidence": "adapter_mapping.previewed",
+            },
+            {
+                "step": "run_fixture_replay",
+                "status": "ready",
+                "detail": "Replay success, redaction, invalid payload, retry, dead-letter, and reconciliation cases.",
+                "evidence": "connector_fixture_replay",
+            },
+            {
+                "step": "enable_private_dry_run",
+                "status": "next_private_step",
+                "detail": "Use real provider sandbox credentials only inside the private connector runtime.",
+                "evidence": "private_connector_only",
+            },
+            {
+                "step": "request_write_unlock",
+                "status": "approval_required",
+                "detail": "Enable write-mode only after approval, idempotency, SLO, and rollback evidence are attached.",
+                "evidence": "business_approval_gateway.previewed",
+            },
+            {
+                "step": "monitor_and_reconcile",
+                "status": "scheduled",
+                "detail": "Track outbox, reconciliation, incidents, and scheduled validation after rollout.",
+                "evidence": "drivedesk_integration_reconciliations",
+            },
+        ],
+        "data_boundaries": [
+            {
+                "name": "public_onboarding_payload",
+                "status": "synthetic_only",
+                "contains_pii": False,
+                "raw_payload_included": False,
+                "external_mutation": False,
+                "detail": "Public payload contains adapter metadata, counts, and redaction evidence only.",
+            },
+            {
+                "name": "server_secret_store",
+                "status": "server_side",
+                "contains_pii": False,
+                "raw_payload_included": False,
+                "external_mutation": False,
+                "detail": "Secret reference names are visible, values stay in the private secret store.",
+            },
+            {
+                "name": "browser_session",
+                "status": "metadata_only",
+                "contains_pii": False,
+                "raw_payload_included": False,
+                "external_mutation": False,
+                "detail": "Browser sees onboarding evidence, never provider tokens or raw responses.",
+            },
+            {
+                "name": "private_provider_runtime",
+                "status": "separate",
+                "contains_pii": False,
+                "raw_payload_included": False,
+                "external_mutation": False,
+                "detail": "Real provider API calls belong only in the private connector runtime.",
+            },
+        ],
+        "api": {
+            "standalone": "GET /demo/provider-onboarding",
+            "publicDemo": "GET /demo/public",
+            "catalog": "GET /integration-adapters",
+            "mappingPreview": "POST /tenants/{tenant_id}/integration-mapping/preview",
+            "runtimePreview": "POST /tenants/{tenant_id}/integration-runtime/preview",
+            "approvalGateway": "POST /tenants/{tenant_id}/business-approval-gateway/preview",
+        },
+        "docs": [
+            {
+                "label": "Provider onboarding",
+                "path": "docs/public/PROVIDER_ONBOARDING.md",
+                "check": "bash scripts/check_public_provider_onboarding.sh",
+            },
+            {
+                "label": "Provider onboarding evidence",
+                "path": "docs/public/evidence/provider-onboarding.sanitized.json",
+                "check": "bash scripts/check_public_provider_onboarding.sh",
+            },
+            {
+                "label": "Generated SDK",
+                "path": "docs/public/CLIENT_SDK.md",
+                "check": "bash scripts/check_public_demo_sdk.sh",
+            },
+            {
+                "label": "Provider connector guide",
+                "path": "docs/public/PROVIDER_CONNECTOR_GUIDE.md",
+                "check": "bash scripts/check_public_provider_connector_guide.sh",
+            },
+            {
+                "label": "Connector certification",
+                "path": "docs/public/CONNECTOR_CERTIFICATION.md",
+                "check": "bash scripts/check_public_connector_certification.sh",
+            },
+        ],
+    }
+
+
 def execute_adapter(adapter_key: str | None, payload: dict[str, object]) -> AdapterResult:
     adapter = resolve_adapter(adapter_key)
     return adapter.execute(payload)

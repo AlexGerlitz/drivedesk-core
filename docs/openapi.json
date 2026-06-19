@@ -6152,6 +6152,127 @@
         "title": "PlatformAdminRead",
         "type": "object"
       },
+      "ProviderOnboardingRead": {
+        "properties": {
+          "api": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Api",
+            "type": "object"
+          },
+          "command": {
+            "title": "Command",
+            "type": "string"
+          },
+          "dataBoundaries": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Databoundaries",
+            "type": "array"
+          },
+          "docs": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "title": "Docs",
+            "type": "array"
+          },
+          "mappingPreview": {
+            "additionalProperties": true,
+            "title": "Mappingpreview",
+            "type": "object"
+          },
+          "onboardingLevel": {
+            "title": "Onboardinglevel",
+            "type": "string"
+          },
+          "onboardingStages": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Onboardingstages",
+            "type": "array"
+          },
+          "preflightChecks": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Preflightchecks",
+            "type": "array"
+          },
+          "providerCategory": {
+            "title": "Providercategory",
+            "type": "string"
+          },
+          "providerKey": {
+            "title": "Providerkey",
+            "type": "string"
+          },
+          "providerName": {
+            "title": "Providername",
+            "type": "string"
+          },
+          "providerProfile": {
+            "additionalProperties": true,
+            "title": "Providerprofile",
+            "type": "object"
+          },
+          "rolloutPlan": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Rolloutplan",
+            "type": "array"
+          },
+          "sandboxContract": {
+            "additionalProperties": true,
+            "title": "Sandboxcontract",
+            "type": "object"
+          },
+          "status": {
+            "const": "previewed",
+            "title": "Status",
+            "type": "string"
+          },
+          "summary": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Summary",
+            "type": "array"
+          }
+        },
+        "required": [
+          "status",
+          "command",
+          "onboardingLevel",
+          "providerKey",
+          "providerName",
+          "providerCategory",
+          "summary",
+          "providerProfile",
+          "onboardingStages",
+          "mappingPreview",
+          "preflightChecks",
+          "sandboxContract",
+          "rolloutPlan",
+          "dataBoundaries",
+          "api",
+          "docs"
+        ],
+        "title": "ProviderOnboardingRead",
+        "type": "object"
+      },
       "PublicDemoRead": {
         "properties": {
           "adapterScenarios": {
@@ -6350,6 +6471,11 @@
             "title": "Outbox",
             "type": "array"
           },
+          "providerOnboarding": {
+            "additionalProperties": true,
+            "title": "Provideronboarding",
+            "type": "object"
+          },
           "recoveryEvidence": {
             "items": {
               "additionalProperties": {
@@ -6419,6 +6545,7 @@
           "adapterScenarios",
           "adapterStudio",
           "connectorCertification",
+          "providerOnboarding",
           "integrationRuntime",
           "integrationExecution",
           "connectorFixtureReplay",
@@ -7721,6 +7848,27 @@
           }
         },
         "summary": "Integration Runtime Demo",
+        "tags": [
+          "demo"
+        ]
+      }
+    },
+    "/demo/provider-onboarding": {
+      "get": {
+        "operationId": "provider_onboarding_demo_demo_provider_onboarding_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderOnboardingRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Provider Onboarding Demo",
         "tags": [
           "demo"
         ]

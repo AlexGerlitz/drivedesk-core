@@ -981,6 +981,25 @@ class ConnectorCertificationRead(BaseModel):
     docs: list[dict[str, str]]
 
 
+class ProviderOnboardingRead(BaseModel):
+    status: Literal["previewed"]
+    command: str
+    onboardingLevel: str
+    providerKey: str
+    providerName: str
+    providerCategory: str
+    summary: list[dict[str, Any]]
+    providerProfile: dict[str, Any]
+    onboardingStages: list[dict[str, Any]]
+    mappingPreview: dict[str, Any]
+    preflightChecks: list[dict[str, Any]]
+    sandboxContract: dict[str, Any]
+    rolloutPlan: list[dict[str, Any]]
+    dataBoundaries: list[dict[str, Any]]
+    api: dict[str, str]
+    docs: list[dict[str, str]]
+
+
 class BusinessScenarioReplayRead(BaseModel):
     status: Literal["validated"]
     command: str
@@ -1135,6 +1154,7 @@ class PublicDemoRead(BaseModel):
     adapterScenarios: list[dict[str, Any]]
     adapterStudio: dict[str, Any]
     connectorCertification: dict[str, Any]
+    providerOnboarding: dict[str, Any]
     integrationRuntime: dict[str, Any]
     integrationExecution: dict[str, Any]
     connectorFixtureReplay: dict[str, Any]

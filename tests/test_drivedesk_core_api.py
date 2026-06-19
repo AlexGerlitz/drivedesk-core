@@ -2314,6 +2314,64 @@ def test_connector_certification_demo_endpoint_exposes_same_public_contract(
     }
 
 
+def test_provider_onboarding_demo_endpoint_exposes_same_public_contract(
+    api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, _ = api_client
+
+    public_response = client.get("/demo/public")
+    onboarding_response = client.get("/demo/provider-onboarding")
+
+    assert onboarding_response.status_code == 200
+    assert onboarding_response.headers["access-control-allow-origin"] == "*"
+    assert onboarding_response.headers["cache-control"] == "public, max-age=60"
+    onboarding_payload = onboarding_response.json()
+    assert onboarding_payload == public_response.json()["providerOnboarding"]
+    assert onboarding_payload["status"] == "previewed"
+    assert onboarding_payload["command"] == "GET /demo/provider-onboarding"
+    assert onboarding_payload["onboardingLevel"] == "sandbox_onboarding_ready"
+    assert onboarding_payload["providerKey"] == "crm.bitrix24.mock"
+    assert onboarding_payload["providerCategory"] == "crm"
+    assert set(onboarding_payload["providerProfile"]["operationKeys"]) >= {
+        "crm_deal_intake_preview",
+        "crm_deal_ingest_execute",
+    }
+    assert onboarding_payload["mappingPreview"]["recordsAccepted"] == 2
+    assert onboarding_payload["mappingPreview"]["recordsRejected"] == 0
+    assert onboarding_payload["mappingPreview"]["rawPayloadIncluded"] is False
+    assert onboarding_payload["mappingPreview"]["containsPii"] is False
+    assert set(onboarding_payload["mappingPreview"]["droppedSensitiveKeys"]) >= {
+        "ACCESS_TOKEN",
+        "CLIENT_NAME",
+        "EMAIL",
+        "PHONE",
+        "SECRET",
+    }
+    assert {item["check"] for item in onboarding_payload["preflightChecks"]} >= {
+        "adapter_registered",
+        "connection_scopes_available",
+        "mapping_profile_valid",
+        "secret_refs_server_side",
+        "provider_call_disabled",
+    }
+    assert onboarding_payload["sandboxContract"]["providerCallEnabled"] is False
+    assert onboarding_payload["sandboxContract"]["externalMutation"] is False
+    assert {item["step"] for item in onboarding_payload["rolloutPlan"]} == {
+        "create_tenant_connection",
+        "run_mapping_preview",
+        "run_fixture_replay",
+        "enable_private_dry_run",
+        "request_write_unlock",
+        "monitor_and_reconcile",
+    }
+    assert {item["name"] for item in onboarding_payload["dataBoundaries"]} == {
+        "public_onboarding_payload",
+        "server_secret_store",
+        "browser_session",
+        "private_provider_runtime",
+    }
+
+
 def test_business_scenario_replay_demo_endpoint_exposes_same_public_contract(
     api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
 ) -> None:

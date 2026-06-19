@@ -150,6 +150,10 @@ Fast external verification path: `docs/public/REVIEWER_QUICKSTART.md`.
 - Public-safe connector certification workbench (`GET /demo/connector-certification`)
   for provider profiles, certification stages, safety gates, implementation
   path, and boundaries in the API-backed demo.
+- Public-safe provider onboarding workbench (`docs/public/PROVIDER_ONBOARDING.md`,
+  `GET /demo/provider-onboarding`, `providerOnboarding`) for taking one
+  provider from catalog profile to mapping preview, preflight checks, sandbox
+  dry-run, approval review, private rollout, and monitored reconciliation.
 - Public-safe connector fixture replay (`docs/public/CONNECTOR_FIXTURE_REPLAY.md`)
   for replaying synthetic happy-path, redaction, invalid-payload, retry,
   dead-letter, and reconciliation cases before private provider calls.
@@ -163,8 +167,9 @@ Fast external verification path: `docs/public/REVIEWER_QUICKSTART.md`.
 - More public-safe workflow examples that reuse the same rule, action-run, task,
   event, and outbox shape.
 - More public-safe evidence around local run, CI, OpenAPI, and demo health.
-- More connector certification fixtures, workbench providers, and adapter recovery examples with
-  payload mapping, replay evidence, and follow-up actions.
+- More connector certification fixtures, onboarding provider classes, and
+  adapter recovery examples with payload mapping, replay evidence, and
+  follow-up actions.
 - More operator workbench scenarios that connect action plans and notification
   previews to task creation without public external writes.
 - More Business Context Assistant scenarios for role-specific work surfaces,

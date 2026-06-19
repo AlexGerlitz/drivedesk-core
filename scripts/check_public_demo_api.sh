@@ -110,6 +110,7 @@ demo, demo_headers = get_json("/demo/public")
 connector_certification_endpoint, connector_certification_headers = get_json(
     "/demo/connector-certification"
 )
+provider_onboarding_endpoint, provider_onboarding_headers = get_json("/demo/provider-onboarding")
 connector_replay_endpoint, connector_replay_headers = get_json("/demo/connector-fixture-replay")
 business_intake_endpoint, business_intake_headers = get_json("/demo/business-intake-pipeline")
 business_task_handoff_endpoint, business_task_handoff_headers = get_json("/demo/business-task-handoff")
@@ -679,6 +680,84 @@ assert {item["path"] for item in connector_certification["docs"]} >= {
     "docs/public/CONNECTOR_FIXTURE_REPLAY.md",
     "docs/public/INTEGRATION_RUNTIME.md",
     "docs/public/INTEGRATION_EXECUTION.md",
+}, demo
+provider_onboarding = demo["providerOnboarding"]
+assert provider_onboarding_endpoint == provider_onboarding, provider_onboarding_endpoint
+assert provider_onboarding_headers["access-control-allow-origin"] == "*", provider_onboarding_headers
+assert provider_onboarding_headers["cache-control"] == "public, max-age=60", provider_onboarding_headers
+assert provider_onboarding["status"] == "previewed", demo
+assert provider_onboarding["command"] == "GET /demo/provider-onboarding", demo
+assert provider_onboarding["onboardingLevel"] == "sandbox_onboarding_ready", demo
+assert provider_onboarding["providerKey"] == "crm.bitrix24.mock", demo
+assert provider_onboarding["providerName"] == "Mock Bitrix24 CRM Intake", demo
+assert provider_onboarding["providerCategory"] == "crm", demo
+assert {item["label"] for item in provider_onboarding["summary"]} >= {
+    "Provider",
+    "Records",
+    "External calls",
+    "Rollout",
+}, demo
+profile = provider_onboarding["providerProfile"]
+assert profile["adapterKey"] == "crm.bitrix24.mock", demo
+assert set(profile["operationKeys"]) >= {
+    "crm_deal_intake_preview",
+    "crm_deal_ingest_execute",
+}, demo
+assert profile["realProviderRequiresSecret"] is True, demo
+assert profile["publicDemoRequiresSecret"] is False, demo
+assert {item["stage"] for item in provider_onboarding["onboardingStages"]} == {
+    "select_provider_profile",
+    "bind_connection_profile",
+    "mapping_preview",
+    "sandbox_dry_run",
+    "approval_review",
+    "private_rollout",
+}, demo
+mapping_preview = provider_onboarding["mappingPreview"]
+assert mapping_preview["recordsAccepted"] == 2, demo
+assert mapping_preview["recordsRejected"] == 0, demo
+assert mapping_preview["rawPayloadIncluded"] is False, demo
+assert mapping_preview["containsPii"] is False, demo
+assert set(mapping_preview["droppedSensitiveKeys"]) >= {
+    "ACCESS_TOKEN",
+    "CLIENT_NAME",
+    "EMAIL",
+    "PHONE",
+    "SECRET",
+}, demo
+assert {item["check"] for item in provider_onboarding["preflightChecks"]} >= {
+    "adapter_registered",
+    "connection_scopes_available",
+    "mapping_profile_valid",
+    "secret_refs_server_side",
+    "provider_call_disabled",
+}, demo
+sandbox_contract = provider_onboarding["sandboxContract"]
+assert sandbox_contract["previewOperation"] == "crm_deal_intake_preview", demo
+assert sandbox_contract["executeOperation"] == "crm_deal_ingest_execute", demo
+assert sandbox_contract["providerCallEnabled"] is False, demo
+assert sandbox_contract["externalMutation"] is False, demo
+assert {item["step"] for item in provider_onboarding["rolloutPlan"]} == {
+    "create_tenant_connection",
+    "run_mapping_preview",
+    "run_fixture_replay",
+    "enable_private_dry_run",
+    "request_write_unlock",
+    "monitor_and_reconcile",
+}, demo
+assert {item["name"] for item in provider_onboarding["dataBoundaries"]} == {
+    "public_onboarding_payload",
+    "server_secret_store",
+    "browser_session",
+    "private_provider_runtime",
+}, demo
+assert {item["containsPii"] for item in provider_onboarding["dataBoundaries"]} == {False}, demo
+assert {item["externalMutation"] for item in provider_onboarding["dataBoundaries"]} == {False}, demo
+assert provider_onboarding["api"]["standalone"] == "GET /demo/provider-onboarding", demo
+assert {item["path"] for item in provider_onboarding["docs"]} >= {
+    "docs/public/PROVIDER_ONBOARDING.md",
+    "docs/public/evidence/provider-onboarding.sanitized.json",
+    "docs/public/CLIENT_SDK.md",
 }, demo
 connector_replay = demo["connectorFixtureReplay"]
 assert connector_replay_endpoint == connector_replay, connector_replay_endpoint
@@ -1503,6 +1582,7 @@ assert "/integration-adapters" in openapi["paths"], openapi["paths"].keys()
 assert "/integration-runbooks" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/public" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/connector-certification" in openapi["paths"], openapi["paths"].keys()
+assert "/demo/provider-onboarding" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/connector-fixture-replay" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/business-intake-pipeline" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/business-task-handoff" in openapi["paths"], openapi["paths"].keys()
@@ -1532,6 +1612,7 @@ if openapi_file.exists():
     generated = json.loads(openapi_file.read_text(encoding="utf-8"))
     assert "/demo/public" in generated["paths"], generated["paths"].keys()
     assert "/demo/connector-certification" in generated["paths"], generated["paths"].keys()
+    assert "/demo/provider-onboarding" in generated["paths"], generated["paths"].keys()
     assert "/demo/connector-fixture-replay" in generated["paths"], generated["paths"].keys()
     assert "/demo/business-intake-pipeline" in generated["paths"], generated["paths"].keys()
     assert "/demo/business-task-handoff" in generated["paths"], generated["paths"].keys()

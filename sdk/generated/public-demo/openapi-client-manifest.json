@@ -234,6 +234,29 @@
   "method": "GET",
   "operation_id": "public_demo_demo_public_get",
   "path": "/demo/public",
+  "provider_onboarding": {
+    "method": "GET",
+    "operation_id": "provider_onboarding_demo_demo_provider_onboarding_get",
+    "path": "/demo/provider-onboarding",
+    "required_fields": [
+      "status",
+      "command",
+      "onboardingLevel",
+      "providerKey",
+      "providerName",
+      "providerCategory",
+      "summary",
+      "providerProfile",
+      "onboardingStages",
+      "mappingPreview",
+      "preflightChecks",
+      "sandboxContract",
+      "rolloutPlan",
+      "dataBoundaries",
+      "api",
+      "docs"
+    ]
+  },
   "required_fields": [
     "schemaVersion",
     "generatedAt",
@@ -250,6 +273,7 @@
     "adapterScenarios",
     "adapterStudio",
     "connectorCertification",
+    "providerOnboarding",
     "integrationRuntime",
     "integrationExecution",
     "connectorFixtureReplay",

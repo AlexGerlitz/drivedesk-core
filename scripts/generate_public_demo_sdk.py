@@ -13,6 +13,8 @@ CONNECTOR_REPLAY_PATH = "/demo/connector-fixture-replay"
 CONNECTOR_REPLAY_METHOD = "get"
 CONNECTOR_CERTIFICATION_PATH = "/demo/connector-certification"
 CONNECTOR_CERTIFICATION_METHOD = "get"
+PROVIDER_ONBOARDING_PATH = "/demo/provider-onboarding"
+PROVIDER_ONBOARDING_METHOD = "get"
 BUSINESS_INTAKE_PIPELINE_PATH = "/demo/business-intake-pipeline"
 BUSINESS_INTAKE_PIPELINE_METHOD = "get"
 BUSINESS_TASK_HANDOFF_PATH = "/demo/business-task-handoff"
@@ -58,6 +60,14 @@ def connector_certification_operation(schema: dict[str, Any]) -> dict[str, Any]:
         schema,
         CONNECTOR_CERTIFICATION_PATH,
         CONNECTOR_CERTIFICATION_METHOD,
+    )
+
+
+def provider_onboarding_operation(schema: dict[str, Any]) -> dict[str, Any]:
+    return required_operation(
+        schema,
+        PROVIDER_ONBOARDING_PATH,
+        PROVIDER_ONBOARDING_METHOD,
     )
 
 
@@ -160,6 +170,16 @@ def connector_certification_required_fields(schema: dict[str, Any]) -> list[str]
     required = certification.get("required", [])
     if not isinstance(required, list) or not required:
         raise SystemExit("OpenAPI schema does not contain ConnectorCertificationRead.required")
+    return [str(item) for item in required]
+
+
+def provider_onboarding_required_fields(schema: dict[str, Any]) -> list[str]:
+    components = schema.get("components", {})
+    schemas = components.get("schemas", {})
+    onboarding = schemas.get("ProviderOnboardingRead", {})
+    required = onboarding.get("required", [])
+    if not isinstance(required, list) or not required:
+        raise SystemExit("OpenAPI schema does not contain ProviderOnboardingRead.required")
     return [str(item) for item in required]
 
 
@@ -267,6 +287,8 @@ def render_python_client(
     connector_required_fields: list[str],
     connector_certification_operation_id: str,
     connector_certification_required_fields: list[str],
+    provider_onboarding_operation_id: str,
+    provider_onboarding_required_fields: list[str],
     business_scenario_operation_id: str,
     business_scenario_required_fields: list[str],
 ) -> str:
@@ -274,6 +296,10 @@ def render_python_client(
     connector_required_json = json.dumps(connector_required_fields, indent=2)
     connector_certification_required_json = json.dumps(
         connector_certification_required_fields,
+        indent=2,
+    )
+    provider_onboarding_required_json = json.dumps(
+        provider_onboarding_required_fields,
         indent=2,
     )
     business_scenario_required_json = json.dumps(business_scenario_required_fields, indent=2)
@@ -289,14 +315,17 @@ from typing import Any
 PUBLIC_DEMO_PATH = "{PUBLIC_DEMO_PATH}"
 CONNECTOR_REPLAY_PATH = "{CONNECTOR_REPLAY_PATH}"
 CONNECTOR_CERTIFICATION_PATH = "{CONNECTOR_CERTIFICATION_PATH}"
+PROVIDER_ONBOARDING_PATH = "{PROVIDER_ONBOARDING_PATH}"
 BUSINESS_SCENARIO_REPLAY_PATH = "{BUSINESS_SCENARIO_REPLAY_PATH}"
 OPERATION_ID = "{operation_id}"
 CONNECTOR_REPLAY_OPERATION_ID = "{connector_operation_id}"
 CONNECTOR_CERTIFICATION_OPERATION_ID = "{connector_certification_operation_id}"
+PROVIDER_ONBOARDING_OPERATION_ID = "{provider_onboarding_operation_id}"
 BUSINESS_SCENARIO_REPLAY_OPERATION_ID = "{business_scenario_operation_id}"
 REQUIRED_FIELDS = {required_json}
 CONNECTOR_REPLAY_REQUIRED_FIELDS = {connector_required_json}
 CONNECTOR_CERTIFICATION_REQUIRED_FIELDS = {connector_certification_required_json}
+PROVIDER_ONBOARDING_REQUIRED_FIELDS = {provider_onboarding_required_json}
 BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS = {business_scenario_required_json}
 
 
@@ -320,6 +349,11 @@ class DriveDeskPublicDemoClient:
     def get_connector_certification(self) -> dict[str, Any]:
         payload = self._get_json(CONNECTOR_CERTIFICATION_PATH)
         validate_connector_certification_payload(payload)
+        return payload
+
+    def get_provider_onboarding(self) -> dict[str, Any]:
+        payload = self._get_json(PROVIDER_ONBOARDING_PATH)
+        validate_provider_onboarding_payload(payload)
         return payload
 
     def get_business_scenario_replay(self) -> dict[str, Any]:
@@ -589,6 +623,42 @@ def validate_connector_certification_payload(payload: dict[str, Any]) -> None:
         raise ValueError("connector certification data boundaries are missing or too short")
 
 
+def validate_provider_onboarding_payload(payload: dict[str, Any]) -> None:
+    missing = [field for field in PROVIDER_ONBOARDING_REQUIRED_FIELDS if field not in payload]
+    if missing:
+        raise ValueError(f"missing provider onboarding fields: {{', '.join(missing)}}")
+
+    if payload.get("status") != "previewed":
+        raise ValueError(f"unexpected provider onboarding status: {{payload.get('status')}}")
+
+    if payload.get("command") != f"GET {{PROVIDER_ONBOARDING_PATH}}":
+        raise ValueError(f"unexpected provider onboarding command: {{payload.get('command')}}")
+
+    if payload.get("onboardingLevel") != "sandbox_onboarding_ready":
+        raise ValueError(
+            f"unexpected provider onboarding level: {{payload.get('onboardingLevel')}}"
+        )
+
+    if payload.get("providerKey") != "crm.bitrix24.mock":
+        raise ValueError(f"unexpected provider onboarding key: {{payload.get('providerKey')}}")
+
+    for key in ("summary", "onboardingStages", "preflightChecks", "rolloutPlan", "dataBoundaries"):
+        value = payload.get(key)
+        if not isinstance(value, list) or not value:
+            raise ValueError(f"provider onboarding {{key}} is missing or empty")
+
+    sandbox = payload.get("sandboxContract")
+    if not isinstance(sandbox, dict) or sandbox.get("providerCallEnabled") is not False:
+        raise ValueError("provider onboarding sandbox contract must not call providers")
+
+    if any(
+        item.get("externalMutation") is not False
+        for item in payload.get("dataBoundaries", [])
+        if isinstance(item, dict)
+    ):
+        raise ValueError("provider onboarding boundaries must not mutate external providers")
+
+
 def validate_business_scenario_replay_payload(payload: dict[str, Any]) -> None:
     missing = [field for field in BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS if field not in payload]
     if missing:
@@ -786,6 +856,11 @@ def validate_public_demo_payload(payload: dict[str, Any]) -> None:
         raise ValueError("connectorCertification is missing")
     validate_connector_certification_payload(connector_certification)
 
+    provider_onboarding = payload.get("providerOnboarding")
+    if not isinstance(provider_onboarding, dict):
+        raise ValueError("providerOnboarding is missing")
+    validate_provider_onboarding_payload(provider_onboarding)
+
     business_scenario_replay = payload.get("businessScenarioReplay")
     if not isinstance(business_scenario_replay, dict):
         raise ValueError("businessScenarioReplay is missing")
@@ -846,6 +921,7 @@ def main() -> None:
     payload = client.get_public_demo()
     connector_replay = client.get_connector_fixture_replay()
     connector_certification = client.get_connector_certification()
+    provider_onboarding = client.get_provider_onboarding()
     business_scenario_replay = client.get_business_scenario_replay()
     adapter_plan = build_adapter_operation_plan(payload, "adapter-file-import-preview")
     print(
@@ -856,10 +932,12 @@ def main() -> None:
         f"adapterPlan={{adapter_plan['phase']}}",
         f"connectorReplay={{connector_replay['status']}}",
         f"connectorCertification={{connector_certification['certificationLevel']}}",
+        f"providerOnboarding={{provider_onboarding['onboardingLevel']}}",
         f"businessScenarioReplay={{business_scenario_replay['status']}}",
         f"operation={{OPERATION_ID}}",
         f"connectorOperation={{CONNECTOR_REPLAY_OPERATION_ID}}",
         f"connectorCertificationOperation={{CONNECTOR_CERTIFICATION_OPERATION_ID}}",
+        f"providerOnboardingOperation={{PROVIDER_ONBOARDING_OPERATION_ID}}",
         f"businessScenarioOperation={{BUSINESS_SCENARIO_REPLAY_OPERATION_ID}}",
     )
 
@@ -876,6 +954,8 @@ def render_javascript_client(
     connector_required_fields: list[str],
     connector_certification_operation_id: str,
     connector_certification_required_fields: list[str],
+    provider_onboarding_operation_id: str,
+    provider_onboarding_required_fields: list[str],
     business_scenario_operation_id: str,
     business_scenario_required_fields: list[str],
 ) -> str:
@@ -885,6 +965,10 @@ def render_javascript_client(
         connector_certification_required_fields,
         indent=2,
     )
+    provider_onboarding_required_json = json.dumps(
+        provider_onboarding_required_fields,
+        indent=2,
+    )
     business_scenario_required_json = json.dumps(business_scenario_required_fields, indent=2)
     return f'''#!/usr/bin/env node
 import {{ pathToFileURL }} from "node:url";
@@ -892,14 +976,17 @@ import {{ pathToFileURL }} from "node:url";
 export const PUBLIC_DEMO_PATH = "{PUBLIC_DEMO_PATH}";
 export const CONNECTOR_REPLAY_PATH = "{CONNECTOR_REPLAY_PATH}";
 export const CONNECTOR_CERTIFICATION_PATH = "{CONNECTOR_CERTIFICATION_PATH}";
+export const PROVIDER_ONBOARDING_PATH = "{PROVIDER_ONBOARDING_PATH}";
 export const BUSINESS_SCENARIO_REPLAY_PATH = "{BUSINESS_SCENARIO_REPLAY_PATH}";
 export const OPERATION_ID = "{operation_id}";
 export const CONNECTOR_REPLAY_OPERATION_ID = "{connector_operation_id}";
 export const CONNECTOR_CERTIFICATION_OPERATION_ID = "{connector_certification_operation_id}";
+export const PROVIDER_ONBOARDING_OPERATION_ID = "{provider_onboarding_operation_id}";
 export const BUSINESS_SCENARIO_REPLAY_OPERATION_ID = "{business_scenario_operation_id}";
 export const REQUIRED_FIELDS = {required_json};
 export const CONNECTOR_REPLAY_REQUIRED_FIELDS = {connector_required_json};
 export const CONNECTOR_CERTIFICATION_REQUIRED_FIELDS = {connector_certification_required_json};
+export const PROVIDER_ONBOARDING_REQUIRED_FIELDS = {provider_onboarding_required_json};
 export const BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS = {business_scenario_required_json};
 
 export class DriveDeskPublicDemoClient {{
@@ -956,6 +1043,22 @@ export class DriveDeskPublicDemoClient {{
 
     const payload = await response.json();
     validateConnectorCertificationPayload(payload);
+    return payload;
+  }}
+
+  async getProviderOnboarding() {{
+    const response = await this.fetchImpl(`${{this.baseUrl}}${{PROVIDER_ONBOARDING_PATH}}`, {{
+      headers: {{
+        Accept: "application/json",
+      }},
+    }});
+
+    if (!response.ok) {{
+      throw new Error(`GET ${{PROVIDER_ONBOARDING_PATH}} failed: ${{response.status}}`);
+    }}
+
+    const payload = await response.json();
+    validateProviderOnboardingPayload(payload);
     return payload;
   }}
 
@@ -1249,6 +1352,43 @@ export function validateConnectorCertificationPayload(payload) {{
   }}
 }}
 
+export function validateProviderOnboardingPayload(payload) {{
+  const missing = PROVIDER_ONBOARDING_REQUIRED_FIELDS.filter((field) => !(field in (payload || {{}})));
+  if (missing.length > 0) {{
+    throw new Error(`missing provider onboarding fields: ${{missing.join(", ")}}`);
+  }}
+
+  if (payload.status !== "previewed") {{
+    throw new Error(`unexpected provider onboarding status: ${{payload.status}}`);
+  }}
+
+  if (payload.command !== `GET ${{PROVIDER_ONBOARDING_PATH}}`) {{
+    throw new Error(`unexpected provider onboarding command: ${{payload.command}}`);
+  }}
+
+  if (payload.onboardingLevel !== "sandbox_onboarding_ready") {{
+    throw new Error(`unexpected provider onboarding level: ${{payload.onboardingLevel}}`);
+  }}
+
+  if (payload.providerKey !== "crm.bitrix24.mock") {{
+    throw new Error(`unexpected provider onboarding key: ${{payload.providerKey}}`);
+  }}
+
+  for (const key of ["summary", "onboardingStages", "preflightChecks", "rolloutPlan", "dataBoundaries"]) {{
+    if (!Array.isArray(payload[key]) || payload[key].length === 0) {{
+      throw new Error(`provider onboarding ${{key}} is missing or empty`);
+    }}
+  }}
+
+  if (!payload.sandboxContract || payload.sandboxContract.providerCallEnabled !== false) {{
+    throw new Error("provider onboarding sandbox contract must not call providers");
+  }}
+
+  if (payload.dataBoundaries.some((item) => item?.externalMutation !== false)) {{
+    throw new Error("provider onboarding boundaries must not mutate external providers");
+  }}
+}}
+
 export function validateBusinessScenarioReplayPayload(payload) {{
   const missing = BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS.filter((field) => !(field in payload));
   if (missing.length > 0) {{
@@ -1439,6 +1579,11 @@ export function validatePublicDemoPayload(payload) {{
   }}
   validateConnectorCertificationPayload(payload.connectorCertification);
 
+  if (!payload.providerOnboarding || typeof payload.providerOnboarding !== "object") {{
+    throw new Error("providerOnboarding is missing");
+  }}
+  validateProviderOnboardingPayload(payload.providerOnboarding);
+
   if (!payload.businessScenarioReplay || typeof payload.businessScenarioReplay !== "object") {{
     throw new Error("businessScenarioReplay is missing");
   }}
@@ -1504,6 +1649,7 @@ async function main() {{
   const payload = await client.getPublicDemo();
   const connectorReplay = await client.getConnectorFixtureReplay();
   const connectorCertification = await client.getConnectorCertification();
+  const providerOnboarding = await client.getProviderOnboarding();
   const businessScenarioReplay = await client.getBusinessScenarioReplay();
   const adapterPlan = buildAdapterOperationPlan(payload, "adapter-file-import-preview");
   console.log(
@@ -1514,10 +1660,12 @@ async function main() {{
     `adapterPlan=${{adapterPlan.phase}}`,
     `connectorReplay=${{connectorReplay.status}}`,
     `connectorCertification=${{connectorCertification.certificationLevel}}`,
+    `providerOnboarding=${{providerOnboarding.onboardingLevel}}`,
     `businessScenarioReplay=${{businessScenarioReplay.status}}`,
     `operation=${{OPERATION_ID}}`,
     `connectorOperation=${{CONNECTOR_REPLAY_OPERATION_ID}}`,
     `connectorCertificationOperation=${{CONNECTOR_CERTIFICATION_OPERATION_ID}}`,
+    `providerOnboardingOperation=${{PROVIDER_ONBOARDING_OPERATION_ID}}`,
     `businessScenarioOperation=${{BUSINESS_SCENARIO_REPLAY_OPERATION_ID}}`,
   );
 }}
@@ -1538,6 +1686,8 @@ def render_typescript_defs(
     connector_required_fields: list[str],
     connector_certification_operation_id: str,
     connector_certification_required_fields: list[str],
+    provider_onboarding_operation_id: str,
+    provider_onboarding_required_fields: list[str],
     business_scenario_operation_id: str,
     business_scenario_required_fields: list[str],
 ) -> str:
@@ -1546,6 +1696,9 @@ def render_typescript_defs(
     connector_certification_required_union = " | ".join(
         f'"{field}"' for field in connector_certification_required_fields
     )
+    provider_onboarding_required_union = " | ".join(
+        f'"{field}"' for field in provider_onboarding_required_fields
+    )
     business_scenario_required_union = " | ".join(
         f'"{field}"' for field in business_scenario_required_fields
     )
@@ -1553,14 +1706,17 @@ def render_typescript_defs(
 export const PUBLIC_DEMO_PATH: "{PUBLIC_DEMO_PATH}";
 export const CONNECTOR_REPLAY_PATH: "{CONNECTOR_REPLAY_PATH}";
 export const CONNECTOR_CERTIFICATION_PATH: "{CONNECTOR_CERTIFICATION_PATH}";
+export const PROVIDER_ONBOARDING_PATH: "{PROVIDER_ONBOARDING_PATH}";
 export const BUSINESS_SCENARIO_REPLAY_PATH: "{BUSINESS_SCENARIO_REPLAY_PATH}";
 export const OPERATION_ID: "{operation_id}";
 export const CONNECTOR_REPLAY_OPERATION_ID: "{connector_operation_id}";
 export const CONNECTOR_CERTIFICATION_OPERATION_ID: "{connector_certification_operation_id}";
+export const PROVIDER_ONBOARDING_OPERATION_ID: "{provider_onboarding_operation_id}";
 export const BUSINESS_SCENARIO_REPLAY_OPERATION_ID: "{business_scenario_operation_id}";
 export const REQUIRED_FIELDS: Array<{required_union}>;
 export const CONNECTOR_REPLAY_REQUIRED_FIELDS: Array<{connector_required_union}>;
 export const CONNECTOR_CERTIFICATION_REQUIRED_FIELDS: Array<{connector_certification_required_union}>;
+export const PROVIDER_ONBOARDING_REQUIRED_FIELDS: Array<{provider_onboarding_required_union}>;
 export const BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS: Array<{business_scenario_required_union}>;
 
 export type AdapterScenarioPhase = "preview" | "execute" | "retry" | "operator_review";
@@ -1634,6 +1790,25 @@ export interface ConnectorCertificationPayload {{
   docs: Array<Record<string, string>>;
 }}
 
+export interface ProviderOnboardingPayload {{
+  status: "previewed";
+  command: string;
+  onboardingLevel: "sandbox_onboarding_ready";
+  providerKey: string;
+  providerName: string;
+  providerCategory: string;
+  summary: Array<Record<string, unknown>>;
+  providerProfile: Record<string, unknown>;
+  onboardingStages: Array<Record<string, unknown>>;
+  mappingPreview: Record<string, unknown>;
+  preflightChecks: Array<Record<string, unknown>>;
+  sandboxContract: Record<string, unknown>;
+  rolloutPlan: Array<Record<string, unknown>>;
+  dataBoundaries: Array<Record<string, unknown>>;
+  api: Record<string, string>;
+  docs: Array<Record<string, string>>;
+}}
+
 export interface BusinessScenarioReplayPayload {{
   status: "validated";
   command: string;
@@ -1673,6 +1848,7 @@ export interface PublicDemoPayload {{
   adapterScenarios: AdapterScenario[];
   adapterStudio: Record<string, unknown>;
   connectorCertification: ConnectorCertificationPayload;
+  providerOnboarding: ProviderOnboardingPayload;
   connectorFixtureReplay: ConnectorFixtureReplayPayload;
   integrationJobs: Array<Record<string, unknown>>;
   integrationHealth: Array<Record<string, string>>;
@@ -1726,6 +1902,7 @@ export class DriveDeskPublicDemoClient {{
   getPublicDemo(): Promise<PublicDemoPayload>;
   getConnectorFixtureReplay(): Promise<ConnectorFixtureReplayPayload>;
   getConnectorCertification(): Promise<ConnectorCertificationPayload>;
+  getProviderOnboarding(): Promise<ProviderOnboardingPayload>;
   getBusinessScenarioReplay(): Promise<BusinessScenarioReplayPayload>;
   getAdapterOperationPlan(
     scenarioId: string,
@@ -1742,6 +1919,7 @@ export function buildAdapterOperationPlan(
 export function validatePublicDemoPayload(payload: PublicDemoPayload): void;
 export function validateConnectorFixtureReplayPayload(payload: ConnectorFixtureReplayPayload): void;
 export function validateConnectorCertificationPayload(payload: ConnectorCertificationPayload): void;
+export function validateProviderOnboardingPayload(payload: ProviderOnboardingPayload): void;
 export function validateBusinessScenarioReplayPayload(payload: BusinessScenarioReplayPayload): void;
 '''
 
@@ -1750,6 +1928,7 @@ def render_readme(
     operation_id: str,
     connector_operation_id: str,
     connector_certification_operation_id: str,
+    provider_onboarding_operation_id: str,
     business_notification_channels_operation_id: str,
     business_context_assistant_operation_id: str,
     business_action_execution_operation_id: str,
@@ -1783,6 +1962,9 @@ operationId: {connector_operation_id}
 
 GET {CONNECTOR_CERTIFICATION_PATH}
 operationId: {connector_certification_operation_id}
+
+GET {PROVIDER_ONBOARDING_PATH}
+operationId: {provider_onboarding_operation_id}
 
 GET {BUSINESS_NOTIFICATION_CHANNELS_PATH}
 operationId: {business_notification_channels_operation_id}
@@ -1824,6 +2006,10 @@ Adapter operation helpers:
 - `DriveDeskPublicDemoClient.get_connector_certification`
 - `connector_certification` manifest entry for
   `GET {CONNECTOR_CERTIFICATION_PATH}`
+- `DriveDeskPublicDemoClient.getProviderOnboarding`
+- `DriveDeskPublicDemoClient.get_provider_onboarding`
+- `provider_onboarding` manifest entry for
+  `GET {PROVIDER_ONBOARDING_PATH}`
 - `business_notification_channels` manifest entry for
   `GET {BUSINESS_NOTIFICATION_CHANNELS_PATH}`
 - `business_context_assistant` manifest entry for
@@ -1850,6 +2036,10 @@ review docs.
 Connector certification helpers validate the public-safe provider-readiness
 workbench: provider profiles, certification stages, gates, implementation path,
 data boundaries, and review docs.
+
+Provider onboarding helpers validate the sandbox-to-private rollout path:
+connection profile, mapping preview, preflight checks, sandbox contract, rollout
+plan, and provider data boundaries.
 
 Business scenario replay helpers validate the Business OS scenario contract:
 source systems, normalized facts, recommended actions, automation boundaries,
@@ -1893,6 +2083,8 @@ def render_manifest(
     connector_required_fields: list[str],
     connector_certification_operation_id: str,
     connector_certification_required_fields: list[str],
+    provider_onboarding_operation_id: str,
+    provider_onboarding_required_fields: list[str],
     business_intake_operation_id: str,
     business_intake_required_fields: list[str],
     business_task_handoff_operation_id: str,
@@ -1929,6 +2121,12 @@ def render_manifest(
             "method": CONNECTOR_CERTIFICATION_METHOD.upper(),
             "operation_id": connector_certification_operation_id,
             "required_fields": connector_certification_required_fields,
+        },
+        "provider_onboarding": {
+            "path": PROVIDER_ONBOARDING_PATH,
+            "method": PROVIDER_ONBOARDING_METHOD.upper(),
+            "operation_id": provider_onboarding_operation_id,
+            "required_fields": provider_onboarding_required_fields,
         },
         "business_intake_pipeline": {
             "path": BUSINESS_INTAKE_PIPELINE_PATH,
@@ -2022,6 +2220,11 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
         connector_certification_op.get("operationId") or "get_connector_certification"
     )
     connector_certification_fields = connector_certification_required_fields(schema)
+    provider_onboarding_op = provider_onboarding_operation(schema)
+    provider_onboarding_operation_id = str(
+        provider_onboarding_op.get("operationId") or "get_provider_onboarding"
+    )
+    provider_onboarding_fields = provider_onboarding_required_fields(schema)
     business_intake_operation = business_intake_pipeline_operation(schema)
     business_intake_operation_id = str(
         business_intake_operation.get("operationId") or "get_business_intake_pipeline"
@@ -2078,6 +2281,7 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
             operation_id,
             connector_operation_id,
             connector_certification_operation_id,
+            provider_onboarding_operation_id,
             business_notification_channels_operation_id,
             business_context_assistant_operation_id,
             business_action_execution_operation_id,
@@ -2096,6 +2300,8 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
             connector_required_fields,
             connector_certification_operation_id,
             connector_certification_fields,
+            provider_onboarding_operation_id,
+            provider_onboarding_fields,
             business_intake_operation_id,
             business_intake_required_fields,
             business_task_handoff_operation_id,
@@ -2125,6 +2331,8 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
             connector_required_fields,
             connector_certification_operation_id,
             connector_certification_fields,
+            provider_onboarding_operation_id,
+            provider_onboarding_fields,
             business_scenario_operation_id,
             business_scenario_required_fields,
         ),
@@ -2138,6 +2346,8 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
             connector_required_fields,
             connector_certification_operation_id,
             connector_certification_fields,
+            provider_onboarding_operation_id,
+            provider_onboarding_fields,
             business_scenario_operation_id,
             business_scenario_required_fields,
         ),
@@ -2151,6 +2361,8 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
             connector_required_fields,
             connector_certification_operation_id,
             connector_certification_fields,
+            provider_onboarding_operation_id,
+            provider_onboarding_fields,
             business_scenario_operation_id,
             business_scenario_required_fields,
         ),

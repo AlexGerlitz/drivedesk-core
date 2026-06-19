@@ -115,6 +115,12 @@ def test_public_demo_html_links_static_assets() -> None:
     assert 'id="connectorCertificationGateRows"' in html
     assert 'id="connectorCertificationPathRows"' in html
     assert 'id="connectorCertificationBoundaryRows"' in html
+    assert 'id="providerOnboardingSummaryRows"' in html
+    assert 'id="providerOnboardingProfileRows"' in html
+    assert 'id="providerOnboardingStageRows"' in html
+    assert 'id="providerOnboardingPreflightRows"' in html
+    assert 'id="providerOnboardingRolloutRows"' in html
+    assert 'id="providerOnboardingBoundaryRows"' in html
     assert 'id="connectorReplaySummaryRows"' in html
     assert 'id="connectorReplayOutcomeRows"' in html
     assert 'id="connectorReplayBoundaryRows"' in html
@@ -605,6 +611,64 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
         "public_demo_data",
         "browser_boundary",
         "private_connector_boundary",
+    }
+    provider_onboarding = payload["providerOnboarding"]
+    assert provider_onboarding["status"] == "previewed"
+    assert provider_onboarding["command"] == "GET /demo/provider-onboarding"
+    assert provider_onboarding["onboardingLevel"] == "sandbox_onboarding_ready"
+    assert provider_onboarding["providerKey"] == "crm.bitrix24.mock"
+    assert provider_onboarding["providerCategory"] == "crm"
+    assert {item["label"] for item in provider_onboarding["summary"]} >= {
+        "Provider",
+        "Records",
+        "External calls",
+        "Rollout",
+    }
+    assert set(provider_onboarding["providerProfile"]["operationKeys"]) >= {
+        "crm_deal_intake_preview",
+        "crm_deal_ingest_execute",
+    }
+    assert {item["stage"] for item in provider_onboarding["onboardingStages"]} == {
+        "select_provider_profile",
+        "bind_connection_profile",
+        "mapping_preview",
+        "sandbox_dry_run",
+        "approval_review",
+        "private_rollout",
+    }
+    assert provider_onboarding["mappingPreview"]["recordsAccepted"] == 2
+    assert provider_onboarding["mappingPreview"]["recordsRejected"] == 0
+    assert provider_onboarding["mappingPreview"]["rawPayloadIncluded"] is False
+    assert provider_onboarding["mappingPreview"]["containsPii"] is False
+    assert set(provider_onboarding["mappingPreview"]["droppedSensitiveKeys"]) >= {
+        "ACCESS_TOKEN",
+        "CLIENT_NAME",
+        "EMAIL",
+        "PHONE",
+        "SECRET",
+    }
+    assert {item["check"] for item in provider_onboarding["preflightChecks"]} >= {
+        "adapter_registered",
+        "connection_scopes_available",
+        "mapping_profile_valid",
+        "secret_refs_server_side",
+        "provider_call_disabled",
+    }
+    assert provider_onboarding["sandboxContract"]["providerCallEnabled"] is False
+    assert provider_onboarding["sandboxContract"]["externalMutation"] is False
+    assert {item["step"] for item in provider_onboarding["rolloutPlan"]} == {
+        "create_tenant_connection",
+        "run_mapping_preview",
+        "run_fixture_replay",
+        "enable_private_dry_run",
+        "request_write_unlock",
+        "monitor_and_reconcile",
+    }
+    assert {item["name"] for item in provider_onboarding["dataBoundaries"]} == {
+        "public_onboarding_payload",
+        "server_secret_store",
+        "browser_session",
+        "private_provider_runtime",
     }
     connector_replay = payload["connectorFixtureReplay"]
     assert connector_replay["status"] == "validated"
@@ -1244,6 +1308,11 @@ def test_public_demo_can_load_api_backed_data_with_static_fallback() -> None:
     assert "fillConnectorCertification" in script
     assert "connectorCertificationProviderRows" in script
     assert "connectorCertificationGateRows" in script
+    assert "Array.isArray(payload.providerOnboarding.summary)" in script
+    assert "Array.isArray(payload.providerOnboarding.onboardingStages)" in script
+    assert "fillProviderOnboarding" in script
+    assert "providerOnboardingStageRows" in script
+    assert "providerOnboardingRolloutRows" in script
     assert "Array.isArray(payload.connectorFixtureReplay.summary)" in script
     assert "fillConnectorFixtureReplay" in script
     assert "connectorReplayOutcomeRows" in script

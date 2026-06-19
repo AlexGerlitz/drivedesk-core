@@ -92,6 +92,15 @@
         Array.isArray(payload.connectorCertification.certificationGates) &&
         Array.isArray(payload.connectorCertification.implementationPath) &&
         Array.isArray(payload.connectorCertification.dataBoundaries) &&
+        payload.providerOnboarding &&
+        Array.isArray(payload.providerOnboarding.summary) &&
+        payload.providerOnboarding.providerProfile &&
+        Array.isArray(payload.providerOnboarding.onboardingStages) &&
+        payload.providerOnboarding.mappingPreview &&
+        Array.isArray(payload.providerOnboarding.preflightChecks) &&
+        payload.providerOnboarding.sandboxContract &&
+        Array.isArray(payload.providerOnboarding.rolloutPlan) &&
+        Array.isArray(payload.providerOnboarding.dataBoundaries) &&
         payload.integrationRuntime &&
         Array.isArray(payload.integrationRuntime.summary) &&
         Array.isArray(payload.integrationRuntime.runtimeSteps) &&
@@ -780,6 +789,174 @@
             String(boundary.containsPii) +
             " - raw payload " +
             String(boundary.rawPayloadIncluded)
+        )
+      );
+
+      row.append(top, detail);
+      boundaryRows.appendChild(row);
+    });
+  }
+
+  function fillProviderOnboarding() {
+    var onboarding = data.providerOnboarding;
+
+    var summaryRows = document.getElementById("providerOnboardingSummaryRows");
+    clear(summaryRows);
+    onboarding.summary.forEach(function (item) {
+      var card = document.createElement("article");
+      card.className = "metric-card";
+      card.dataset.tone = item.tone || "blue";
+
+      var label = document.createElement("span");
+      label.className = "muted";
+      label.appendChild(text(item.label));
+
+      var value = document.createElement("strong");
+      value.appendChild(text(item.value));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      card.append(label, value, detail);
+      summaryRows.appendChild(card);
+    });
+
+    var profileRows = document.getElementById("providerOnboardingProfileRows");
+    clear(profileRows);
+    var profile = onboarding.providerProfile;
+    var profileRow = document.createElement("article");
+    profileRow.className = "event-row provider-onboarding-profile-row";
+
+    var profileTop = document.createElement("div");
+    profileTop.className = "event-top";
+    var profileTitle = document.createElement("strong");
+    profileTitle.appendChild(text(profile.adapterName));
+    profileTop.append(profileTitle, chip(onboarding.onboardingLevel, "green"));
+
+    var profileKey = document.createElement("code");
+    profileKey.appendChild(text(profile.adapterKey));
+
+    var profileDetail = document.createElement("span");
+    profileDetail.className = "muted";
+    profileDetail.appendChild(
+      text(
+        profile.category +
+          " / " +
+          profile.direction +
+          " - auth " +
+          profile.authMode +
+          " - scopes " +
+          (profile.supportedScopes || []).join(", ")
+      )
+    );
+
+    var profileSecret = document.createElement("span");
+    profileSecret.className = "muted";
+    profileSecret.appendChild(
+      text(
+        "secret refs: " +
+          (profile.secretRefs || []).join(", ") +
+          " - public secret required: " +
+          String(profile.publicDemoRequiresSecret)
+      )
+    );
+
+    profileRow.append(profileTop, profileKey, profileDetail, profileSecret);
+    profileRows.appendChild(profileRow);
+
+    var stageRows = document.getElementById("providerOnboardingStageRows");
+    clear(stageRows);
+    onboarding.onboardingStages.forEach(function (stage) {
+      var row = document.createElement("article");
+      row.className = "event-row provider-onboarding-stage-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(stage.stage));
+      top.append(title, chip(stage.status, statusTone(stage.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(stage.detail));
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(stage.evidence));
+
+      row.append(top, detail, evidence);
+      stageRows.appendChild(row);
+    });
+
+    var preflightRows = document.getElementById("providerOnboardingPreflightRows");
+    clear(preflightRows);
+    onboarding.preflightChecks.forEach(function (check) {
+      var row = document.createElement("article");
+      row.className = "event-row provider-onboarding-preflight-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(check.check));
+      top.append(title, chip(check.status, statusTone(check.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(check.detail + " - external mutation " + String(check.externalMutation))
+      );
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(check.evidence));
+
+      row.append(top, detail, evidence);
+      preflightRows.appendChild(row);
+    });
+
+    var rolloutRows = document.getElementById("providerOnboardingRolloutRows");
+    clear(rolloutRows);
+    onboarding.rolloutPlan.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row provider-onboarding-rollout-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var step = document.createElement("strong");
+      step.appendChild(text(item.step));
+      top.append(step, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(item.evidence));
+
+      row.append(top, detail, evidence);
+      rolloutRows.appendChild(row);
+    });
+
+    var boundaryRows = document.getElementById("providerOnboardingBoundaryRows");
+    clear(boundaryRows);
+    onboarding.dataBoundaries.forEach(function (boundary) {
+      var row = document.createElement("article");
+      row.className = "event-row provider-onboarding-boundary-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var name = document.createElement("strong");
+      name.appendChild(text(boundary.name));
+      top.append(name, chip(boundary.status, statusTone(boundary.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          boundary.detail +
+            " - raw payload " +
+            String(boundary.rawPayloadIncluded) +
+            " - external mutation " +
+            String(boundary.externalMutation)
         )
       );
 
@@ -3704,6 +3881,7 @@
     fillAdapterScenarios();
     fillAdapterStudio();
     fillConnectorCertification();
+    fillProviderOnboarding();
     fillIntegrationRuntime();
     fillIntegrationExecution();
     fillConnectorFixtureReplay();

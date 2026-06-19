@@ -6,6 +6,7 @@ from drivedesk_core import (
     build_adapter_execution_timeline,
     build_adapter_runtime_plan,
     build_connector_certification_workbench,
+    build_provider_onboarding_workbench,
     list_adapter_descriptors,
 )
 
@@ -46,6 +47,22 @@ def _public_auth_profile(descriptor: dict[str, Any]) -> dict[str, Any]:
         "externalTokenExchange": profile.get("external_token_exchange", False),
         "dataBoundaries": profile.get("data_boundaries", []),
     }
+
+
+def _snake_to_camel(name: str) -> str:
+    parts = name.split("_")
+    return parts[0] + "".join(part.capitalize() for part in parts[1:])
+
+
+def _public_camelize(value: Any) -> Any:
+    if isinstance(value, list):
+        return [_public_camelize(item) for item in value]
+    if isinstance(value, dict):
+        return {
+            _snake_to_camel(str(key)): _public_camelize(item)
+            for key, item in value.items()
+        }
+    return value
 
 
 def _public_adapter_rows() -> list[dict[str, Any]]:
@@ -465,6 +482,12 @@ def _public_connector_certification() -> dict[str, Any]:
         "api": workbench["api"],
         "docs": workbench["docs"],
     }
+
+
+def _public_provider_onboarding() -> dict[str, Any]:
+    workbench = _public_camelize(build_provider_onboarding_workbench())
+    workbench["command"] = "GET /demo/provider-onboarding"
+    return workbench
 
 
 def build_public_demo_payload() -> dict[str, Any]:
@@ -913,6 +936,7 @@ def build_public_demo_payload() -> dict[str, Any]:
             ],
         },
         "connectorCertification": _public_connector_certification(),
+        "providerOnboarding": _public_provider_onboarding(),
         "integrationRuntime": _public_integration_runtime(),
         "integrationExecution": _public_integration_execution(),
         "connectorFixtureReplay": {

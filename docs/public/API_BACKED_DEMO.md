@@ -13,6 +13,7 @@ DriveDesk now exposes:
 ```text
 GET /demo/public
 GET /demo/connector-certification
+GET /demo/provider-onboarding
 GET /demo/connector-fixture-replay
 GET /demo/business-intake-pipeline
 GET /demo/business-task-handoff
@@ -35,7 +36,7 @@ connector certification, sync jobs, Integration Health, alert routing, incident 
 `businessContextAssistant`, `businessActionExecution`,
 `businessApprovalGateway`, `integrationRuntime`, `integrationExecution`,
 `businessScenarioReplay`, recovery evidence,
-`connectorCertification`, `connectorFixtureReplay`, and the `engineeringProof` contract rendered by the
+`connectorCertification`, `providerOnboarding`, `connectorFixtureReplay`, and the `engineeringProof` contract rendered by the
 Control Tower, Integrations, Operations, Incidents, and Proof tabs.
 
 `GET /demo/connector-certification` returns the same
@@ -43,6 +44,12 @@ Control Tower, Integrations, Operations, Incidents, and Proof tabs.
 reviewer wants to inspect provider-readiness directly: provider profiles,
 certification stages, safety gates, implementation path, data boundaries, and
 linked verifier docs.
+
+`GET /demo/provider-onboarding` returns the same `providerOnboarding` contract
+as a standalone endpoint. It is useful when a reviewer wants to inspect one
+provider onboarding flow directly: catalog profile, mapping preview, connection
+preflight, sandbox dry-run, approval review, private rollout, and monitored
+reconciliation.
 
 `GET /demo/connector-fixture-replay` returns the same `connectorFixtureReplay`
 contract as a standalone endpoint. It is useful when a reviewer wants to inspect
@@ -120,6 +127,7 @@ risk detection -> role context -> approval-aware action plan.
 | Static fallback | GitHub Pages loads `demo-data.js` and works without a backend. |
 | API-backed | The demo shell loads JSON from `GET /demo/public` when `?demoApi=...` is provided. |
 | Connector certification API | Smoke checks can load `GET /demo/connector-certification` directly. |
+| Provider Onboarding API | Smoke checks can load `GET /demo/provider-onboarding` directly. |
 | Replay API | The generated SDK and smoke checks can load `GET /demo/connector-fixture-replay` directly. |
 | Intake Pipeline API | Smoke checks can load `GET /demo/business-intake-pipeline` directly. |
 | Task Handoff API | Smoke checks can load `GET /demo/business-task-handoff` directly. |
@@ -169,6 +177,7 @@ bash scripts/check_public_demo_sdk.sh
 `check_public_demo_api.sh` starts a temporary local API when no
 `DRIVEDESK_DEMO_BASE_URL` is provided. It checks `/health`, `/ready`,
 `/demo/public`, `/demo/connector-fixture-replay`,
+`/demo/provider-onboarding`,
 `/demo/business-intake-pipeline`, `/demo/business-task-handoff`,
 `/demo/business-notification-channels`, `/demo/business-context-assistant`,
 `/demo/business-action-execution`, `/demo/business-approval-gateway`,
@@ -176,6 +185,7 @@ bash scripts/check_public_demo_sdk.sh
 `/openapi.json`, the generated
 `docs/openapi.json` when present, alert routes, alert-to-runbook bindings,
 connector certification references in `CONNECTOR_CERTIFICATION.md`, connector
+provider onboarding references in `PROVIDER_ONBOARDING.md`,
 fixture replay references in `CONNECTOR_FIXTURE_REPLAY.md`, business scenario
 replay references in `BUSINESS_SCENARIO_REPLAY.md`, approval gateway references
 in `BUSINESS_APPROVAL_GATEWAY.md`, and then runs the curl, Python, and

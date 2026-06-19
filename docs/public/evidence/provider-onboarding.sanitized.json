@@ -1,0 +1,58 @@
+{
+  "artifact_id": "drivedesk-core-provider-onboarding",
+  "check": "public_provider_onboarding",
+  "data_profile": "synthetic_demo_data",
+  "provider_key": "crm.bitrix24.mock",
+  "schema_version": 1,
+  "status": "previewed",
+  "onboarding_level": "sandbox_onboarding_ready",
+  "public_doc": "docs/public/PROVIDER_ONBOARDING.md",
+  "verifier": "bash scripts/check_public_provider_onboarding.sh",
+  "onboarding_stages": [
+    "select_provider_profile",
+    "bind_connection_profile",
+    "mapping_preview",
+    "sandbox_dry_run",
+    "approval_review",
+    "private_rollout"
+  ],
+  "runtime_surfaces": [
+    "GET /integration-adapters",
+    "POST /tenants/{tenant_id}/integration-mapping/preview",
+    "POST /tenants/{tenant_id}/integration-runtime/preview",
+    "POST /tenants/{tenant_id}/business-approval-gateway/preview",
+    "GET /demo/provider-onboarding",
+    "GET /demo/connector-certification",
+    "GET /demo/connector-fixture-replay",
+    "GET /demo/integration-execution"
+  ],
+  "safety_assertions": {
+    "provider_call_enabled": false,
+    "external_mutation": false,
+    "raw_payload_included": false,
+    "contains_pii": false,
+    "browser_token_storage": false,
+    "public_demo_persistence": false
+  },
+  "private_rollout_requirements": [
+    "server_secret_store",
+    "private_connector_only",
+    "tenant_scoped_connection_profile",
+    "mapping_preview",
+    "fixture_replay",
+    "sandbox_dry_run",
+    "approval_gateway",
+    "idempotency_keys",
+    "reconciliation",
+    "scheduled_validation"
+  ],
+  "redaction": {
+    "addresses_included": false,
+    "credentials_included": false,
+    "hostnames_included": false,
+    "paths_included": false,
+    "production_data_included": false,
+    "raw_logs_included": false,
+    "request_bodies_included": false
+  }
+}

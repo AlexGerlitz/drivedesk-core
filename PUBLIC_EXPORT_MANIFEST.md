@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-19T15:41:57Z
+Generated at: 2026-06-19T16:16:58Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -213,6 +213,10 @@ Copied public-safe areas:
 - public connector certification evidence snapshot: docs/public/evidence/connector-certification.sanitized.json
 - public connector certification ADR: 0074-public-safe-connector-certification
 - public connector certification links provider profiles, capability manifests, contract fixtures, runtime readiness, and release proof
+- public provider onboarding doc
+- public provider onboarding validation script: scripts/check_public_provider_onboarding.sh
+- public provider onboarding evidence snapshot: docs/public/evidence/provider-onboarding.sanitized.json
+- public provider onboarding links provider profile, mapping preview, preflight, sandbox contract, approval, and private rollout
 - public connector fixture replay doc
 - public connector fixture replay validation script: scripts/check_public_connector_fixture_replay.sh
 - public connector fixture replay evidence snapshot: docs/public/evidence/connector-fixture-replay.sanitized.json

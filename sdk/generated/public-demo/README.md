@@ -24,6 +24,9 @@ operationId: connector_fixture_replay_demo_demo_connector_fixture_replay_get
 GET /demo/connector-certification
 operationId: connector_certification_demo_demo_connector_certification_get
 
+GET /demo/provider-onboarding
+operationId: provider_onboarding_demo_demo_provider_onboarding_get
+
 GET /demo/business-notification-channels
 operationId: business_notification_channels_demo_demo_business_notification_channels_get
 
@@ -64,6 +67,10 @@ Adapter operation helpers:
 - `DriveDeskPublicDemoClient.get_connector_certification`
 - `connector_certification` manifest entry for
   `GET /demo/connector-certification`
+- `DriveDeskPublicDemoClient.getProviderOnboarding`
+- `DriveDeskPublicDemoClient.get_provider_onboarding`
+- `provider_onboarding` manifest entry for
+  `GET /demo/provider-onboarding`
 - `business_notification_channels` manifest entry for
   `GET /demo/business-notification-channels`
 - `business_context_assistant` manifest entry for
@@ -90,6 +97,10 @@ review docs.
 Connector certification helpers validate the public-safe provider-readiness
 workbench: provider profiles, certification stages, gates, implementation path,
 data boundaries, and review docs.
+
+Provider onboarding helpers validate the sandbox-to-private rollout path:
+connection profile, mapping preview, preflight checks, sandbox contract, rollout
+plan, and provider data boundaries.
 
 Business scenario replay helpers validate the Business OS scenario contract:
 source systems, normalized facts, recommended actions, automation boundaries,

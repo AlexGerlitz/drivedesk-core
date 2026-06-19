@@ -14,6 +14,7 @@ It targets the read-only synthetic public demo endpoint:
 ```text
 GET /demo/public
 GET /demo/connector-certification
+GET /demo/provider-onboarding
 GET /demo/connector-fixture-replay
 GET /demo/business-action-execution
 GET /demo/business-approval-gateway
@@ -41,6 +42,10 @@ The Integration Execution payload appears in the public contract as
 The Connector Certification payload appears in the public contract as
 `connectorCertification` and is documented in
 `docs/public/CONNECTOR_CERTIFICATION.md`.
+
+The Provider Onboarding payload appears in the public contract as
+`providerOnboarding` and is documented in
+`docs/public/PROVIDER_ONBOARDING.md`.
 
 ## Generated Files
 
@@ -76,6 +81,7 @@ scripts/generate_public_demo_sdk.py
 
 It reads the OpenAPI schema, finds `GET /demo/public`,
 `GET /demo/connector-certification`,
+`GET /demo/provider-onboarding`,
 `GET /demo/connector-fixture-replay`,
 `GET /demo/business-action-execution`, and
 `GET /demo/business-approval-gateway`, and
@@ -109,7 +115,10 @@ The SDK includes typed helpers around `adapterScenarios`:
 - `DriveDeskPublicDemoClient.getConnectorFixtureReplay`.
 - `DriveDeskPublicDemoClient.get_connector_certification`;
 - `DriveDeskPublicDemoClient.getConnectorCertification`.
+- `DriveDeskPublicDemoClient.get_provider_onboarding`;
+- `DriveDeskPublicDemoClient.getProviderOnboarding`.
 - `connector_certification` in `openapi-client-manifest.json`.
+- `provider_onboarding` in `openapi-client-manifest.json`.
 - `business_action_execution` in `openapi-client-manifest.json`.
 - `integration_runtime` in `openapi-client-manifest.json`.
 - `integration_execution` in `openapi-client-manifest.json`.

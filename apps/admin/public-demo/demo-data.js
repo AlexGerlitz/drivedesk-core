@@ -4683,6 +4683,286 @@ window.DRIVEDESK_DEMO_DATA = {
       "status": "pending"
     }
   ],
+  "providerOnboarding": {
+    "api": {
+      "approvalGateway": "POST /tenants/{tenant_id}/business-approval-gateway/preview",
+      "catalog": "GET /integration-adapters",
+      "mappingPreview": "POST /tenants/{tenant_id}/integration-mapping/preview",
+      "publicDemo": "GET /demo/public",
+      "runtimePreview": "POST /tenants/{tenant_id}/integration-runtime/preview",
+      "standalone": "GET /demo/provider-onboarding"
+    },
+    "command": "GET /demo/provider-onboarding",
+    "dataBoundaries": [
+      {
+        "containsPii": false,
+        "detail": "Public payload contains adapter metadata, counts, and redaction evidence only.",
+        "externalMutation": false,
+        "name": "public_onboarding_payload",
+        "rawPayloadIncluded": false,
+        "status": "synthetic_only"
+      },
+      {
+        "containsPii": false,
+        "detail": "Secret reference names are visible, values stay in the private secret store.",
+        "externalMutation": false,
+        "name": "server_secret_store",
+        "rawPayloadIncluded": false,
+        "status": "server_side"
+      },
+      {
+        "containsPii": false,
+        "detail": "Browser sees onboarding evidence, never provider tokens or raw responses.",
+        "externalMutation": false,
+        "name": "browser_session",
+        "rawPayloadIncluded": false,
+        "status": "metadata_only"
+      },
+      {
+        "containsPii": false,
+        "detail": "Real provider API calls belong only in the private connector runtime.",
+        "externalMutation": false,
+        "name": "private_provider_runtime",
+        "rawPayloadIncluded": false,
+        "status": "separate"
+      }
+    ],
+    "docs": [
+      {
+        "check": "bash scripts/check_public_provider_onboarding.sh",
+        "label": "Provider onboarding",
+        "path": "docs/public/PROVIDER_ONBOARDING.md"
+      },
+      {
+        "check": "bash scripts/check_public_provider_onboarding.sh",
+        "label": "Provider onboarding evidence",
+        "path": "docs/public/evidence/provider-onboarding.sanitized.json"
+      },
+      {
+        "check": "bash scripts/check_public_demo_sdk.sh",
+        "label": "Generated SDK",
+        "path": "docs/public/CLIENT_SDK.md"
+      },
+      {
+        "check": "bash scripts/check_public_provider_connector_guide.sh",
+        "label": "Provider connector guide",
+        "path": "docs/public/PROVIDER_CONNECTOR_GUIDE.md"
+      },
+      {
+        "check": "bash scripts/check_public_connector_certification.sh",
+        "label": "Connector certification",
+        "path": "docs/public/CONNECTOR_CERTIFICATION.md"
+      }
+    ],
+    "mappingPreview": {
+      "adapterKey": "crm.bitrix24.mock",
+      "containsPii": false,
+      "droppedSensitiveKeys": [
+        "ACCESS_TOKEN",
+        "CLIENT_NAME",
+        "EMAIL",
+        "PHONE",
+        "SECRET"
+      ],
+      "evidence": "adapter_mapping.previewed",
+      "mappingKeys": [
+        "amount",
+        "deal_id",
+        "owner_role",
+        "source_state"
+      ],
+      "rawPayloadIncluded": false,
+      "recordsAccepted": 2,
+      "recordsReceived": 2,
+      "recordsRejected": 0,
+      "requiredMappingKeys": [
+        "deal_id",
+        "source_state"
+      ]
+    },
+    "onboardingLevel": "sandbox_onboarding_ready",
+    "onboardingStages": [
+      {
+        "detail": "crm.bitrix24.mock selected from the adapter catalog.",
+        "evidence": "GET /integration-adapters",
+        "stage": "select_provider_profile",
+        "status": "selected"
+      },
+      {
+        "detail": "Tenant mapping, scopes, and server-side secret references are ready.",
+        "evidence": "IntegrationConnection",
+        "stage": "bind_connection_profile",
+        "status": "prepared"
+      },
+      {
+        "detail": "2 accepted, 0 rejected.",
+        "evidence": "adapter_mapping.previewed",
+        "stage": "mapping_preview",
+        "status": "previewed"
+      },
+      {
+        "detail": "Runtime and execution plans are computed without provider mutation.",
+        "evidence": "adapter_runtime.previewed",
+        "stage": "sandbox_dry_run",
+        "status": "previewed"
+      },
+      {
+        "detail": "Provider writes stay behind approval, idempotency, and rollback review.",
+        "evidence": "business_approval_gateway.previewed",
+        "stage": "approval_review",
+        "status": "approval_required"
+      },
+      {
+        "detail": "Private connector can swap the mock client for a real provider client.",
+        "evidence": "private_connector_only",
+        "stage": "private_rollout",
+        "status": "next_private_step"
+      }
+    ],
+    "preflightChecks": [
+      {
+        "check": "adapter_registered",
+        "detail": "crm.bitrix24.mock",
+        "evidence": "provider_onboarding.preflight_passed",
+        "externalMutation": false,
+        "status": "passed"
+      },
+      {
+        "check": "connection_scopes_available",
+        "detail": "crm:deal.ingest, crm:deal.preview",
+        "evidence": "adapter_runtime.scope_checked",
+        "externalMutation": false,
+        "status": "passed"
+      },
+      {
+        "check": "mapping_profile_valid",
+        "detail": "amount, deal_id, owner_role, source_state",
+        "evidence": "adapter_mapping.previewed",
+        "externalMutation": false,
+        "status": "passed"
+      },
+      {
+        "check": "secret_refs_server_side",
+        "detail": "server_secret_store",
+        "evidence": "server_secret_store",
+        "externalMutation": false,
+        "status": "clean"
+      },
+      {
+        "check": "provider_call_disabled",
+        "detail": "Public onboarding never calls the external provider.",
+        "evidence": "provider_call_enabled=false",
+        "externalMutation": false,
+        "status": "closed"
+      }
+    ],
+    "providerCategory": "crm",
+    "providerKey": "crm.bitrix24.mock",
+    "providerName": "Mock Bitrix24 CRM Intake",
+    "providerProfile": {
+      "adapterKey": "crm.bitrix24.mock",
+      "adapterName": "Mock Bitrix24 CRM Intake",
+      "authMode": "oauth2_or_webhook_boundary",
+      "category": "crm",
+      "credentialPlacement": "server_secret_store",
+      "direction": "inbound",
+      "evidence": "provider_onboarding.provider_profile_selected",
+      "executableOperationKeys": [
+        "crm_deal_intake_preview",
+        "crm_deal_ingest_execute"
+      ],
+      "operationKeys": [
+        "crm_deal_intake_preview",
+        "crm_deal_ingest_execute"
+      ],
+      "publicDemoRequiresSecret": false,
+      "realProviderRequiresSecret": true,
+      "secretRefs": [
+        "BITRIX24_CLIENT_SECRET",
+        "BITRIX24_WEBHOOK_URL"
+      ],
+      "supportedScopes": [
+        "crm:deal.ingest",
+        "crm:deal.preview"
+      ]
+    },
+    "rolloutPlan": [
+      {
+        "detail": "Create tenant-scoped connection metadata with mapping and scopes.",
+        "evidence": "IntegrationConnection",
+        "status": "ready",
+        "step": "create_tenant_connection"
+      },
+      {
+        "detail": "Validate provider field mapping against synthetic and sandbox fixtures.",
+        "evidence": "adapter_mapping.previewed",
+        "status": "ready",
+        "step": "run_mapping_preview"
+      },
+      {
+        "detail": "Replay success, redaction, invalid payload, retry, dead-letter, and reconciliation cases.",
+        "evidence": "connector_fixture_replay",
+        "status": "ready",
+        "step": "run_fixture_replay"
+      },
+      {
+        "detail": "Use real provider sandbox credentials only inside the private connector runtime.",
+        "evidence": "private_connector_only",
+        "status": "next_private_step",
+        "step": "enable_private_dry_run"
+      },
+      {
+        "detail": "Enable write-mode only after approval, idempotency, SLO, and rollback evidence are attached.",
+        "evidence": "business_approval_gateway.previewed",
+        "status": "approval_required",
+        "step": "request_write_unlock"
+      },
+      {
+        "detail": "Track outbox, reconciliation, incidents, and scheduled validation after rollout.",
+        "evidence": "drivedesk_integration_reconciliations",
+        "status": "scheduled",
+        "step": "monitor_and_reconcile"
+      }
+    ],
+    "sandboxContract": {
+      "containsPii": false,
+      "evidence": "provider_onboarding.sandbox_contract_ready",
+      "executeOperation": "crm_deal_ingest_execute",
+      "executionTimelineSteps": 8,
+      "externalMutation": false,
+      "previewOperation": "crm_deal_intake_preview",
+      "providerCallEnabled": false,
+      "rawPayloadIncluded": false,
+      "runtimeSteps": 7
+    },
+    "status": "previewed",
+    "summary": [
+      {
+        "detail": "crm.bitrix24.mock",
+        "label": "Provider",
+        "tone": "blue",
+        "value": "CRM"
+      },
+      {
+        "detail": "synthetic records accepted in mapping preview",
+        "label": "Records",
+        "tone": "green",
+        "value": "2"
+      },
+      {
+        "detail": "public onboarding is dry-run only",
+        "label": "External calls",
+        "tone": "amber",
+        "value": "0"
+      },
+      {
+        "detail": "private connector requires approval evidence",
+        "label": "Rollout",
+        "tone": "violet",
+        "value": "gated"
+      }
+    ]
+  },
   "recoveryEvidence": [
     {
       "detail": "temporary SQLite backup artifact created",

@@ -143,6 +143,7 @@ from drivedesk_api.schemas import (
     OutboxEventRetryRequest,
     PlatformAdminCreate,
     PlatformAdminRead,
+    ProviderOnboardingRead,
     PublicDemoRead,
     RepairActionExecutionRequest,
     RepairActionPropose,
@@ -327,6 +328,20 @@ def build_app(settings: Settings | None = None) -> FastAPI:
     async def connector_certification_demo() -> JSONResponse:
         return JSONResponse(
             build_public_demo_payload()["connectorCertification"],
+            headers={
+                "Access-Control-Allow-Origin": "*",
+                "Cache-Control": "public, max-age=60",
+            },
+        )
+
+    @api.get(
+        "/demo/provider-onboarding",
+        response_model=ProviderOnboardingRead,
+        tags=["demo"],
+    )
+    async def provider_onboarding_demo() -> JSONResponse:
+        return JSONResponse(
+            build_public_demo_payload()["providerOnboarding"],
             headers={
                 "Access-Control-Allow-Origin": "*",
                 "Cache-Control": "public, max-age=60",

@@ -75,6 +75,9 @@ infrastructure, production history, customer data, or operational credentials.
 - `CONNECTOR_CERTIFICATION.md` - provider-neutral certification path for CRM,
   bank, accounting, ERP, KKT, webhook, file, email, telephony, and custom API
   connectors.
+- `PROVIDER_ONBOARDING.md` - public-safe onboarding workbench for moving a
+  provider from catalog profile to mapping preview, sandbox dry-run, approval,
+  private rollout, and monitored reconciliation.
 - `CONNECTOR_FIXTURE_REPLAY.md` - public-safe replay contract for synthetic
   connector fixtures: happy path, redaction, invalid payload, retry,
   dead-letter, and reconciliation.
@@ -163,6 +166,8 @@ infrastructure, production history, customer data, or operational credentials.
   routing evidence snapshot.
 - `evidence/connector-certification.sanitized.json` - machine-readable
   public-safe connector certification evidence snapshot.
+- `evidence/provider-onboarding.sanitized.json` - machine-readable public-safe
+  provider onboarding evidence snapshot.
 - `evidence/connector-fixture-replay.sanitized.json` - machine-readable
   public-safe connector fixture replay evidence snapshot.
 - `evidence/public-evidence-index.sanitized.json` - machine-readable public
@@ -176,6 +181,9 @@ The public repository export also generates:
 - `GET /demo/public` - read-only synthetic demo payload in the exported API.
 - `GET /demo/connector-certification` - standalone public-safe provider
   readiness contract for connector certification stages, gates, and boundaries.
+- `GET /demo/provider-onboarding` - standalone public-safe provider onboarding
+  contract for provider profile selection, mapping preview, preflight checks,
+  sandbox dry-run, approval, rollout, and data boundaries.
 - `GET /demo/connector-fixture-replay` - standalone public-safe replay contract
   for connector fixture groups, redaction outcomes, and boundaries.
 - `GET /demo/business-intake-pipeline` - standalone public-safe intake pipeline

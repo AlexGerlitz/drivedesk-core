@@ -4,10 +4,12 @@ import { pathToFileURL } from "node:url";
 export const PUBLIC_DEMO_PATH = "/demo/public";
 export const CONNECTOR_REPLAY_PATH = "/demo/connector-fixture-replay";
 export const CONNECTOR_CERTIFICATION_PATH = "/demo/connector-certification";
+export const PROVIDER_ONBOARDING_PATH = "/demo/provider-onboarding";
 export const BUSINESS_SCENARIO_REPLAY_PATH = "/demo/business-scenario-replay";
 export const OPERATION_ID = "public_demo_demo_public_get";
 export const CONNECTOR_REPLAY_OPERATION_ID = "connector_fixture_replay_demo_demo_connector_fixture_replay_get";
 export const CONNECTOR_CERTIFICATION_OPERATION_ID = "connector_certification_demo_demo_connector_certification_get";
+export const PROVIDER_ONBOARDING_OPERATION_ID = "provider_onboarding_demo_demo_provider_onboarding_get";
 export const BUSINESS_SCENARIO_REPLAY_OPERATION_ID = "business_scenario_replay_demo_demo_business_scenario_replay_get";
 export const REQUIRED_FIELDS = [
   "schemaVersion",
@@ -25,6 +27,7 @@ export const REQUIRED_FIELDS = [
   "adapterScenarios",
   "adapterStudio",
   "connectorCertification",
+  "providerOnboarding",
   "integrationRuntime",
   "integrationExecution",
   "connectorFixtureReplay",
@@ -70,6 +73,24 @@ export const CONNECTOR_CERTIFICATION_REQUIRED_FIELDS = [
   "certificationStages",
   "certificationGates",
   "implementationPath",
+  "dataBoundaries",
+  "api",
+  "docs"
+];
+export const PROVIDER_ONBOARDING_REQUIRED_FIELDS = [
+  "status",
+  "command",
+  "onboardingLevel",
+  "providerKey",
+  "providerName",
+  "providerCategory",
+  "summary",
+  "providerProfile",
+  "onboardingStages",
+  "mappingPreview",
+  "preflightChecks",
+  "sandboxContract",
+  "rolloutPlan",
   "dataBoundaries",
   "api",
   "docs"
@@ -137,6 +158,22 @@ export class DriveDeskPublicDemoClient {
 
     const payload = await response.json();
     validateConnectorCertificationPayload(payload);
+    return payload;
+  }
+
+  async getProviderOnboarding() {
+    const response = await this.fetchImpl(`${this.baseUrl}${PROVIDER_ONBOARDING_PATH}`, {
+      headers: {
+        Accept: "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`GET ${PROVIDER_ONBOARDING_PATH} failed: ${response.status}`);
+    }
+
+    const payload = await response.json();
+    validateProviderOnboardingPayload(payload);
     return payload;
   }
 
@@ -430,6 +467,43 @@ export function validateConnectorCertificationPayload(payload) {
   }
 }
 
+export function validateProviderOnboardingPayload(payload) {
+  const missing = PROVIDER_ONBOARDING_REQUIRED_FIELDS.filter((field) => !(field in (payload || {})));
+  if (missing.length > 0) {
+    throw new Error(`missing provider onboarding fields: ${missing.join(", ")}`);
+  }
+
+  if (payload.status !== "previewed") {
+    throw new Error(`unexpected provider onboarding status: ${payload.status}`);
+  }
+
+  if (payload.command !== `GET ${PROVIDER_ONBOARDING_PATH}`) {
+    throw new Error(`unexpected provider onboarding command: ${payload.command}`);
+  }
+
+  if (payload.onboardingLevel !== "sandbox_onboarding_ready") {
+    throw new Error(`unexpected provider onboarding level: ${payload.onboardingLevel}`);
+  }
+
+  if (payload.providerKey !== "crm.bitrix24.mock") {
+    throw new Error(`unexpected provider onboarding key: ${payload.providerKey}`);
+  }
+
+  for (const key of ["summary", "onboardingStages", "preflightChecks", "rolloutPlan", "dataBoundaries"]) {
+    if (!Array.isArray(payload[key]) || payload[key].length === 0) {
+      throw new Error(`provider onboarding ${key} is missing or empty`);
+    }
+  }
+
+  if (!payload.sandboxContract || payload.sandboxContract.providerCallEnabled !== false) {
+    throw new Error("provider onboarding sandbox contract must not call providers");
+  }
+
+  if (payload.dataBoundaries.some((item) => item?.externalMutation !== false)) {
+    throw new Error("provider onboarding boundaries must not mutate external providers");
+  }
+}
+
 export function validateBusinessScenarioReplayPayload(payload) {
   const missing = BUSINESS_SCENARIO_REPLAY_REQUIRED_FIELDS.filter((field) => !(field in payload));
   if (missing.length > 0) {
@@ -620,6 +694,11 @@ export function validatePublicDemoPayload(payload) {
   }
   validateConnectorCertificationPayload(payload.connectorCertification);
 
+  if (!payload.providerOnboarding || typeof payload.providerOnboarding !== "object") {
+    throw new Error("providerOnboarding is missing");
+  }
+  validateProviderOnboardingPayload(payload.providerOnboarding);
+
   if (!payload.businessScenarioReplay || typeof payload.businessScenarioReplay !== "object") {
     throw new Error("businessScenarioReplay is missing");
   }
@@ -685,6 +764,7 @@ async function main() {
   const payload = await client.getPublicDemo();
   const connectorReplay = await client.getConnectorFixtureReplay();
   const connectorCertification = await client.getConnectorCertification();
+  const providerOnboarding = await client.getProviderOnboarding();
   const businessScenarioReplay = await client.getBusinessScenarioReplay();
   const adapterPlan = buildAdapterOperationPlan(payload, "adapter-file-import-preview");
   console.log(
@@ -695,10 +775,12 @@ async function main() {
     `adapterPlan=${adapterPlan.phase}`,
     `connectorReplay=${connectorReplay.status}`,
     `connectorCertification=${connectorCertification.certificationLevel}`,
+    `providerOnboarding=${providerOnboarding.onboardingLevel}`,
     `businessScenarioReplay=${businessScenarioReplay.status}`,
     `operation=${OPERATION_ID}`,
     `connectorOperation=${CONNECTOR_REPLAY_OPERATION_ID}`,
     `connectorCertificationOperation=${CONNECTOR_CERTIFICATION_OPERATION_ID}`,
+    `providerOnboardingOperation=${PROVIDER_ONBOARDING_OPERATION_ID}`,
     `businessScenarioOperation=${BUSINESS_SCENARIO_REPLAY_OPERATION_ID}`,
   );
 }

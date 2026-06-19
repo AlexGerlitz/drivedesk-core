@@ -115,6 +115,11 @@ Fast external verification path: `docs/public/REVIEWER_QUICKSTART.md`.
   Bitrix24-style CRM, bank, accounting, and file-provider facts through the
   adapter catalog, auth profile, mapping preview, provider intake, outbox,
   diagnostics, reconciliation, and incident flow.
+- Public-safe connector certification path (`docs/public/CONNECTOR_CERTIFICATION.md`)
+  for moving CRM, bank, accounting, ERP, KKT, webhook, file, email, telephony,
+  and custom API providers through provider profile, capability manifest,
+  contract fixtures, local certification gate, runtime readiness review, and
+  release proof before private connector code.
 - Public-safe adapter developer guide (`docs/public/ADAPTER_DEVELOPER_GUIDE.md`)
   mapping generated SDK operation plans to future private Bitrix-style CRM
   provider implementations, outbox execution, worker routing, diagnostics,
@@ -125,7 +130,8 @@ Fast external verification path: `docs/public/REVIEWER_QUICKSTART.md`.
 - More public-safe workflow examples that reuse the same rule, action-run, task,
   event, and outbox shape.
 - More public-safe evidence around local run, CI, OpenAPI, and demo health.
-- More adapter recovery examples with payload mapping and follow-up actions.
+- More connector certification fixtures and adapter recovery examples with
+  payload mapping and follow-up actions.
 - More operator workbench scenarios that connect action plans and notification
   previews to task creation without public external writes.
 - More evidence around external notification adapters once destinations and

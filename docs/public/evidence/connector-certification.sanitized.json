@@ -1,0 +1,145 @@
+{
+  "schema_version": 1,
+  "artifact_id": "drivedesk-core-connector-certification",
+  "status": "validated",
+  "data_profile": "synthetic_demo_data",
+  "generated_from": "public_safe_export",
+  "public_doc": "docs/public/CONNECTOR_CERTIFICATION.md",
+  "verifier": "bash scripts/check_public_connector_certification.sh",
+  "redaction": {
+    "addresses_included": false,
+    "credentials_included": false,
+    "hostnames_included": false,
+    "paths_included": false,
+    "production_data_included": false,
+    "raw_logs_included": false,
+    "request_bodies_included": false
+  },
+  "provider_profiles": [
+    {
+      "provider_key": "crm.demo.mock",
+      "provider_class": "crm",
+      "protocols": ["rest_api", "webhook"],
+      "directions": ["inbound"],
+      "auth_mode": "oauth2_or_webhook_boundary",
+      "credential_placement": "server_secret_store",
+      "public_demo_mode": "synthetic_only",
+      "rate_limit_model": "provider_backoff",
+      "failure_modes": ["timeout", "rate_limited", "validation_error"]
+    },
+    {
+      "provider_key": "accounting.export.mock",
+      "provider_class": "accounting_or_erp",
+      "protocols": ["rest_api", "file_export"],
+      "directions": ["outbound"],
+      "auth_mode": "private_connector_only",
+      "credential_placement": "server_secret_store",
+      "public_demo_mode": "synthetic_only",
+      "rate_limit_model": "provider_backoff",
+      "failure_modes": ["temporary_provider_failure", "reconciliation_mismatch"]
+    },
+    {
+      "provider_key": "bank.statement.mock",
+      "provider_class": "bank",
+      "protocols": ["file_import", "api_pull"],
+      "directions": ["inbound"],
+      "auth_mode": "private_connector_only",
+      "credential_placement": "server_secret_store",
+      "public_demo_mode": "synthetic_only",
+      "rate_limit_model": "scheduled_pull",
+      "failure_modes": ["schema_changed", "duplicate_statement", "reconciliation_mismatch"]
+    }
+  ],
+  "certification_stages": [
+    {
+      "key": "provider_profile",
+      "output": "provider class, protocol, direction, auth mode, data classes, rate-limit model, and failure modes",
+      "pass_signal": "profile contains no secrets or real tenant identifiers"
+    },
+    {
+      "key": "capability_manifest",
+      "output": "operations, scopes, idempotency keys, retry policy, dead-letter policy, diagnostics, and reconciliation hooks",
+      "pass_signal": "operations map to operation_contracts from GET /integration-adapters"
+    },
+    {
+      "key": "contract_fixtures",
+      "output": "synthetic request, response, failure, redaction, and invalid-payload examples",
+      "pass_signal": "fixture replay proves normalization, redaction, validation, retry, dead-letter, and reconciliation behavior"
+    },
+    {
+      "key": "local_certification_gate",
+      "output": "public-safe checker command and evidence JSON",
+      "pass_signal": "bash scripts/check_public_connector_certification.sh passes"
+    },
+    {
+      "key": "runtime_readiness_review",
+      "output": "auth boundary, secret placement, outbox route, worker route, observability, runbook, and incident mapping",
+      "pass_signal": "server-side execution path is defined without browser token storage"
+    },
+    {
+      "key": "release_proof",
+      "output": "public docs, evidence index entry, export manifest, public CI, and release gate coverage",
+      "pass_signal": "public export proves connector shape without provider credentials"
+    }
+  ],
+  "state_machine": [
+    "proposed",
+    "profile_ready",
+    "manifest_ready",
+    "fixtures_ready",
+    "public_gate_passed",
+    "private_connector_ready",
+    "production_review_required"
+  ],
+  "required_fixture_groups": [
+    "happy_path_preview",
+    "sensitive_payload_redaction",
+    "invalid_payload",
+    "retryable_provider_failure",
+    "dead_letter_provider_failure",
+    "reconciliation_mismatch"
+  ],
+  "public_fixture_assertions": {
+    "raw_payload_returned": false,
+    "credentials_returned": false,
+    "external_call_made": false,
+    "public_demo_persistence": false,
+    "safe_payload_present": true,
+    "redaction_evidence_present": true
+  },
+  "runtime_surfaces": [
+    "auth_profile",
+    "server_secret_store",
+    "operation_contracts",
+    "outbox",
+    "worker",
+    "drivedesk_integration_connection_checks",
+    "drivedesk_integration_reconciliations",
+    "drivedesk_integration_incidents",
+    "integration.operator_review.created",
+    "EVIDENCE_INDEX.md"
+  ],
+  "release_proof": {
+    "docs": [
+      "docs/public/CONNECTOR_CERTIFICATION.md",
+      "docs/public/PROVIDER_CONNECTOR_GUIDE.md",
+      "docs/public/ADAPTER_DEVELOPER_GUIDE.md",
+      "docs/public/INTEGRATION_ADAPTER_CATALOG.md",
+      "docs/public/INTEGRATION_OPERATION_CONTRACTS.md"
+    ],
+    "verifiers": [
+      "bash scripts/check_public_connector_certification.sh",
+      "bash scripts/check_public_provider_connector_guide.sh",
+      "bash scripts/check_public_adapter_developer_guide.sh",
+      "bash scripts/check_public_evidence_index.sh"
+    ],
+    "boundaries": [
+      "synthetic_demo_data",
+      "contract_only",
+      "server_secret_store",
+      "private_connector_only",
+      "no_browser_token_storage",
+      "no_provider_call_from_public_demo"
+    ]
+  }
+}

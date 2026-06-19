@@ -4,8 +4,10 @@ This guide describes the public-safe provider connector path for DriveDesk.
 It is written for future authenticated adapters without exposing real secrets,
 tenant endpoints, customer data, or provider payloads.
 
-The companion implementation path is `ADAPTER_DEVELOPER_GUIDE.md`. It maps the
-generated SDK operation plans to the future private connector implementation.
+The certification path is `CONNECTOR_CERTIFICATION.md`. The companion
+implementation path is `ADAPTER_DEVELOPER_GUIDE.md`. Certification describes
+provider profile, capability manifest, contract fixtures, local gate, runtime
+readiness review, and release proof before private connector code is added.
 
 ## Goal
 
@@ -155,6 +157,9 @@ The public demo proves the connector shape without real providers:
 
 - `GET /demo/public` returns adapter cards with `authProfile`;
 - `adapterScenarios` cover preview, execute, retry, and operator review;
+- `CONNECTOR_CERTIFICATION.md` defines how a provider profile, capability
+  manifest, contract fixtures, runtime readiness review, and release proof move
+  a new system toward a private connector;
 - the Business Control Tower shows CRM provider intake, workbench context,
   detection, action planning, notification preview, and dry-run repair;
 - `check_public_demo_api.sh` validates `/demo/public`,
@@ -182,6 +187,7 @@ contract:
 
 ```bash
 bash scripts/check_public_provider_connector_guide.sh
+bash scripts/check_public_connector_certification.sh
 bash scripts/check_public_adapter_developer_guide.sh
 bash scripts/check_public_demo_api.sh
 bash scripts/check_public_business_control_tower.sh

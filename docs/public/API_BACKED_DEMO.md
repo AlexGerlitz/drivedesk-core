@@ -67,8 +67,9 @@ bash scripts/check_public_demo_sdk.sh
 `check_public_demo_api.sh` starts a temporary local API when no
 `DRIVEDESK_DEMO_BASE_URL` is provided. It checks `/health`, `/ready`,
 `/demo/public`, `/openapi.json`, the generated `docs/openapi.json` when
-present, alert routes, alert-to-runbook bindings, and then runs the curl,
-Python, and JavaScript examples against the same API.
+present, alert routes, alert-to-runbook bindings, connector certification
+references in `CONNECTOR_CERTIFICATION.md`, and then runs the curl, Python, and
+JavaScript examples against the same API.
 
 The business control tower payload is documented in
 `BUSINESS_CONTROL_TOWER.md`. It shows the synthetic path:

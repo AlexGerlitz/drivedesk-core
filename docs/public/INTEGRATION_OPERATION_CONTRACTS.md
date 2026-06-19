@@ -111,3 +111,12 @@ Structured operation contracts keep the Integration Hub explicit:
   adapters through the same shape later.
 
 This avoids building future integrations as one-off code paths.
+
+## Relationship To Connector Certification
+
+`CONNECTOR_CERTIFICATION.md` uses operation contracts as one of its required
+inputs. A new connector is not ready when it only has a provider client; it must
+also expose provider profile, capability manifest, contract fixtures, local
+certification gate, runtime readiness review, and release proof. The
+`operation_contracts` section from `GET /integration-adapters` is the bridge
+between those certification artifacts and runtime behavior.

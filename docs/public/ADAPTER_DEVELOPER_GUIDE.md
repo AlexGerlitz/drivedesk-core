@@ -3,6 +3,11 @@
 This guide describes how a new DriveDesk provider adapter moves from a public
 contract to a private implementation.
 
+Connector certification is defined in `CONNECTOR_CERTIFICATION.md`. Use it
+before this implementation guide when the provider profile, capability
+manifest, contract fixtures, local certification gate, runtime readiness
+review, and release proof have not been recorded yet.
+
 It is public-safe on purpose: the steps use synthetic adapter scenarios,
 generated SDK operation plans, and documented credential boundaries. Real
 provider secrets, raw payloads, tenant data, browser tokens, and production
@@ -214,6 +219,7 @@ Minimum checks for a public-safe adapter developer change:
 
 ```bash
 bash scripts/check_public_adapter_developer_guide.sh
+bash scripts/check_public_connector_certification.sh
 bash scripts/check_public_provider_connector_guide.sh
 bash scripts/check_public_demo_sdk.sh
 bash scripts/check_public_demo_api.sh

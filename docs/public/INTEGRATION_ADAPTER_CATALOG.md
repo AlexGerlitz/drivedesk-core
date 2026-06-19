@@ -138,6 +138,13 @@ connection profile -> mapping preview -> provider intake or export operation ->
 outbox execution -> diagnostics, reconciliation, incidents, and operator
 review.
 
+The connector certification path is documented in
+`CONNECTOR_CERTIFICATION.md`: provider profile -> capability manifest ->
+contract fixtures -> local certification gate -> runtime readiness review ->
+release proof. That path keeps future CRM, bank, accounting, ERP, KKT, webhook,
+file, email, telephony, and custom API connectors aligned before private
+provider code is added.
+
 ## Relationship To Connection Profiles
 
 The flow is:

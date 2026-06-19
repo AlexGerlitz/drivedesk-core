@@ -44,6 +44,9 @@ infrastructure, production history, customer data, or operational credentials.
   validation.
 - `PROVIDER_CONNECTOR_GUIDE.md` - public-safe guide for future authenticated
   Bitrix24-style CRM, bank, accounting, and file provider connectors.
+- `CONNECTOR_CERTIFICATION.md` - provider-neutral certification path for CRM,
+  bank, accounting, ERP, KKT, webhook, file, email, telephony, and custom API
+  connectors.
 - `ADAPTER_DEVELOPER_GUIDE.md` - public-safe developer path from SDK adapter
   operation plans to future private provider implementations.
 - `INTEGRATION_ADAPTER_CATALOG.md` - runtime adapter metadata and discovery contract.
@@ -127,6 +130,8 @@ infrastructure, production history, customer data, or operational credentials.
   observability evidence snapshot.
 - `evidence/alert-routing.sanitized.json` - machine-readable public-safe alert
   routing evidence snapshot.
+- `evidence/connector-certification.sanitized.json` - machine-readable
+  public-safe connector certification evidence snapshot.
 - `evidence/public-evidence-index.sanitized.json` - machine-readable public
   evidence index.
 - `assets/drivedesk-core-demo-overview.png` - public demo screenshot.
@@ -195,6 +200,8 @@ The public repository export also generates:
 - `scripts/check_public_project_status.sh` - public-safe project status validation.
 - `scripts/check_public_technical_capability_map.sh` - public-safe capability map validation.
 - `scripts/check_public_provider_connector_guide.sh` - public-safe provider connector guide validation.
+- `scripts/check_public_connector_certification.sh` - public-safe connector
+  certification path validation.
 - `scripts/check_public_adapter_developer_guide.sh` - public-safe adapter
   developer guide and SDK operation-plan validation.
 - `scripts/check_public_observability_proof.sh` - public-safe observability proof validation.
@@ -234,7 +241,7 @@ https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 8. Run `bash scripts/check_public_demo_api.sh`.
 9. Run one generated client example from `examples/`.
 10. Review `PROJECT_STATUS.md`, `TECHNICAL_CAPABILITY_MAP.md`, `EVIDENCE_INDEX.md`, `BUSINESS_CONTROL_TOWER.md`, `OBSERVABILITY_PROOF.md`, `ALERT_ROUTING_EVIDENCE.md`, `INCIDENT_RESPONSE_DEMO.md`, `ENGINEERING_PROOF.md`, `PLATFORM_MATURITY_70.md`, and `SANITIZED_EVIDENCE.md`.
-11. Review `SYSTEM_DESIGN.md`, `GITOPS_DELIVERY.md`, and the recovery evidence docs.
+11. Review `SYSTEM_DESIGN.md`, `CONNECTOR_CERTIFICATION.md`, `GITOPS_DELIVERY.md`, and the recovery evidence docs.
 
 ## Engineering Summary
 

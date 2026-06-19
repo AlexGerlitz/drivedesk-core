@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-19T07:18:46Z
+Generated at: 2026-06-19T07:41:10Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -208,6 +208,11 @@ Copied public-safe areas:
 - public provider connector guide doc
 - public provider connector guide validation script: scripts/check_public_provider_connector_guide.sh
 - public provider connector guide links auth profiles, mapping preview, provider intake, outbox, diagnostics, reconciliation, and incidents
+- public connector certification doc
+- public connector certification validation script: scripts/check_public_connector_certification.sh
+- public connector certification evidence snapshot: docs/public/evidence/connector-certification.sanitized.json
+- public connector certification ADR: 0074-public-safe-connector-certification
+- public connector certification links provider profiles, capability manifests, contract fixtures, runtime readiness, and release proof
 - public adapter developer guide doc
 - public adapter developer guide validation script: scripts/check_public_adapter_developer_guide.sh
 - public adapter developer guide links SDK operation plans, Bitrix-style CRM preview, worker-backed ingest, auth boundaries, outbox, retry, dead-letter, and operator review

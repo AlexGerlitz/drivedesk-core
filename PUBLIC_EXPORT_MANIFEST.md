@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-19T03:48:19Z
+Generated at: 2026-06-19T04:12:19Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -89,6 +89,7 @@ Copied public-safe areas:
 - public integration connection diagnostics ADR: 0040-integration-connection-diagnostics
 - public integration reconciliation ADR: 0041-integration-reconciliation-evidence
 - public integration incident runbooks ADR: 0042-integration-incident-runbooks
+- public adapter auth profile ADR: 0073-adapter-auth-profile-boundary
 - public backup restore evidence doc
 - public backup restore drill script: scripts/check_public_backup_restore.sh
 - public backup restore evidence snapshot: docs/public/evidence/backup-restore-drill.sanitized.json

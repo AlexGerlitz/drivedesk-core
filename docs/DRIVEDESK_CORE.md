@@ -337,6 +337,9 @@ Why this matters:
   hardcoding adapter keys;
 - connection-profile screens can show which adapters support tenant-owned
   profiles;
+- adapter descriptors expose `auth_profile` so clients can distinguish a
+  public-safe mock from a future real provider that needs server-side secrets,
+  private token exchange, and no browser token storage;
 - public smoke tests can verify that runtime adapter contracts, OpenAPI, docs,
   and demo data stay aligned;
 - planned adapters stay out of the runtime catalog until the worker can execute

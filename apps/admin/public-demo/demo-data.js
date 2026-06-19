@@ -193,6 +193,22 @@ window.DRIVEDESK_DEMO_DATA = {
           "operatorReview": true
         }
       ],
+      "authProfile": {
+        "mode": "mock_outbound_boundary",
+        "publicDemoRequiresSecret": false,
+        "realProviderRequiresSecret": true,
+        "secretRefs": [
+          "ACCOUNTING_PROVIDER_API_KEY",
+          "ACCOUNTING_PROVIDER_ENDPOINT"
+        ],
+        "credentialPlacement": "server_secret_store",
+        "tokenExchange": "private_connector_only",
+        "externalTokenExchange": false,
+        "dataBoundaries": [
+          "no_public_secrets",
+          "server_side_provider_calls_only"
+        ]
+      },
       "contract": "Export synthetic accounting documents through the shared outbox adapter boundary."
     },
     {
@@ -248,6 +264,23 @@ window.DRIVEDESK_DEMO_DATA = {
           "operatorReview": true
         }
       ],
+      "authProfile": {
+        "mode": "oauth2_or_webhook_boundary",
+        "publicDemoRequiresSecret": false,
+        "realProviderRequiresSecret": true,
+        "secretRefs": [
+          "BITRIX24_WEBHOOK_URL",
+          "BITRIX24_CLIENT_SECRET"
+        ],
+        "credentialPlacement": "server_secret_store",
+        "tokenExchange": "private_connector_only",
+        "externalTokenExchange": false,
+        "dataBoundaries": [
+          "no_public_secrets",
+          "no_browser_token_storage",
+          "server_side_provider_calls_only"
+        ]
+      },
       "contract": "Normalize synthetic CRM deal facts into safe DriveDesk observations without calling a real CRM provider."
     },
     {
@@ -303,6 +336,19 @@ window.DRIVEDESK_DEMO_DATA = {
           "operatorReview": true
         }
       ],
+      "authProfile": {
+        "mode": "local_file_boundary",
+        "publicDemoRequiresSecret": false,
+        "realProviderRequiresSecret": false,
+        "secretRefs": [],
+        "credentialPlacement": "none",
+        "tokenExchange": "none",
+        "externalTokenExchange": false,
+        "dataBoundaries": [
+          "no_public_secrets",
+          "tenant_owned_mapping_only"
+        ]
+      },
       "contract": "Normalize synthetic imported rows and report accepted or rejected records."
     },
     {
@@ -330,6 +376,18 @@ window.DRIVEDESK_DEMO_DATA = {
           "operatorReview": false
         }
       ],
+      "authProfile": {
+        "mode": "none",
+        "publicDemoRequiresSecret": false,
+        "realProviderRequiresSecret": false,
+        "secretRefs": [],
+        "credentialPlacement": "none",
+        "tokenExchange": "none",
+        "externalTokenExchange": false,
+        "dataBoundaries": [
+          "internal_event_only"
+        ]
+      },
       "contract": "Acknowledge internal domain events without calling an external provider."
     }
   ],

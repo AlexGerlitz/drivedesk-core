@@ -45,6 +45,16 @@ and replaces them with runtime metadata:
       "required_connection_scope": "accounting:export"
     }
   ],
+  "auth_profile": {
+    "mode": "mock_outbound_boundary",
+    "public_demo_requires_secret": false,
+    "real_provider_requires_secret": true,
+    "secret_refs": ["ACCOUNTING_PROVIDER_API_KEY", "ACCOUNTING_PROVIDER_ENDPOINT"],
+    "credential_placement": "server_secret_store",
+    "token_exchange": "private_connector_only",
+    "external_token_exchange": false,
+    "data_boundaries": ["no_public_secrets", "server_side_provider_calls_only"]
+  },
   "capabilities": [
     "outbound export boundary",
     "connection scope enforcement",
@@ -74,6 +84,7 @@ Each adapter descriptor includes:
 | `supported_connection_scopes` | Operations a tenant-owned profile may request for this adapter. |
 | `default_connection_scopes` | Scopes stored when a profile does not request explicit scopes. |
 | `operation_contracts` | Machine-readable operations, endpoints, events, required scopes, idempotency keys, and recovery behavior. |
+| `auth_profile` | Public-safe credential boundary: auth mode, whether public demo or real provider needs secrets, secret reference names, token exchange placement, and data-boundary rules. |
 | `capabilities` | What the adapter proves. |
 | `failure_modes` | Public-safe failure modes used for retry/dead-letter tests. |
 
@@ -91,6 +102,35 @@ The current catalog contains executable adapters only:
 Provider-specific real adapters can appear in private product work later. Public
 runtime adapters appear in this catalog only when the worker/core can execute a
 safe contract without real credentials or raw provider payloads.
+
+## Auth Profile Boundary
+
+`auth_profile` is not a credential. It is the contract that says where
+credentials would live when the mock adapter becomes a real provider adapter.
+
+For example, `crm.bitrix24.mock` declares:
+
+```json
+{
+  "mode": "oauth2_or_webhook_boundary",
+  "public_demo_requires_secret": false,
+  "real_provider_requires_secret": true,
+  "secret_refs": ["BITRIX24_WEBHOOK_URL", "BITRIX24_CLIENT_SECRET"],
+  "credential_placement": "server_secret_store",
+  "token_exchange": "private_connector_only",
+  "external_token_exchange": false,
+  "data_boundaries": [
+    "no_public_secrets",
+    "no_browser_token_storage",
+    "server_side_provider_calls_only"
+  ]
+}
+```
+
+This keeps the public demo usable with no secrets while still showing how a
+real Bitrix24, bank, 1C, KKT, webhook, or accounting connector will be wired:
+tokens stay server-side, browser code receives no provider tokens, and external
+provider calls remain behind private connector code.
 
 ## Relationship To Connection Profiles
 
@@ -156,6 +196,9 @@ The public smoke test validates:
 - the accounting export operation declares `accounting:export`;
 - the CRM adapter declares `crm_deal_intake_preview`,
   `crm_deal_ingest_execute`, `crm:deal.preview`, and `crm:deal.ingest`;
+- the CRM adapter declares an `auth_profile` with
+  `oauth2_or_webhook_boundary`, `server_secret_store`, and
+  `no_browser_token_storage`;
 - the public demo exposes adapter scenarios for preview, execute, retry, and
   operator review;
 - the file-import descriptor exposes mapping transform and preview capabilities;

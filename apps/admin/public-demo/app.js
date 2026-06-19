@@ -76,6 +76,7 @@
         Array.isArray(payload.endToEndScenario.proof) &&
         Array.isArray(payload.timeline) &&
         Array.isArray(payload.domainEvents) &&
+        Array.isArray(payload.adapters) &&
         Array.isArray(payload.adapterScenarios) &&
         Array.isArray(payload.integrationJobs) &&
         Array.isArray(payload.integrationHealth) &&
@@ -283,7 +284,34 @@
         )
       );
 
-      row.append(top, key, contract, meta, mapping, scopes, operations);
+      var authProfile = adapter.authProfile || {};
+      var auth = document.createElement("span");
+      auth.className = "muted";
+      auth.appendChild(
+        text(
+          "auth: " +
+            (authProfile.mode || "unspecified") +
+            " · public secret: " +
+            (authProfile.publicDemoRequiresSecret ? "required" : "none") +
+            " · real provider secret: " +
+            (authProfile.realProviderRequiresSecret ? "required" : "none")
+        )
+      );
+
+      var authBoundary = document.createElement("span");
+      authBoundary.className = "muted";
+      var dataBoundaries = authProfile.dataBoundaries || [];
+      authBoundary.appendChild(
+        text(
+          "auth boundary: " +
+            (authProfile.credentialPlacement || "unspecified") +
+            " · " +
+            (authProfile.tokenExchange || "unspecified") +
+            (dataBoundaries.length ? " · " + dataBoundaries.join(", ") : "")
+        )
+      );
+
+      row.append(top, key, contract, meta, mapping, scopes, operations, auth, authBoundary);
       rows.appendChild(row);
     });
   }

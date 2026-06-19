@@ -27,6 +27,22 @@ def _public_operation_contracts(descriptor: dict[str, Any]) -> list[dict[str, An
     return contracts
 
 
+def _public_auth_profile(descriptor: dict[str, Any]) -> dict[str, Any]:
+    profile = descriptor.get("auth_profile", {})
+    if not isinstance(profile, dict):
+        profile = {}
+    return {
+        "mode": profile.get("mode", "unspecified"),
+        "publicDemoRequiresSecret": profile.get("public_demo_requires_secret", False),
+        "realProviderRequiresSecret": profile.get("real_provider_requires_secret", False),
+        "secretRefs": profile.get("secret_refs", []),
+        "credentialPlacement": profile.get("credential_placement", "unspecified"),
+        "tokenExchange": profile.get("token_exchange", "unspecified"),
+        "externalTokenExchange": profile.get("external_token_exchange", False),
+        "dataBoundaries": profile.get("data_boundaries", []),
+    }
+
+
 def _public_adapter_rows() -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for descriptor in list_adapter_descriptors():
@@ -41,6 +57,7 @@ def _public_adapter_rows() -> list[dict[str, Any]]:
                 "supportedConnectionScopes": descriptor["supported_connection_scopes"],
                 "defaultConnectionScopes": descriptor["default_connection_scopes"],
                 "operationContracts": _public_operation_contracts(descriptor),
+                "authProfile": _public_auth_profile(descriptor),
                 "contract": descriptor["purpose"],
             }
         )

@@ -86,6 +86,11 @@
       },
       "AdapterContractRead": {
         "properties": {
+          "auth_profile": {
+            "additionalProperties": true,
+            "title": "Auth Profile",
+            "type": "object"
+          },
           "capabilities": {
             "items": {
               "type": "string"

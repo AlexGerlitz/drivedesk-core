@@ -95,6 +95,7 @@ class AdapterDescriptor:
     supported_connection_scopes: list[str] = field(default_factory=list)
     default_connection_scopes: list[str] = field(default_factory=list)
     operation_contracts: list[AdapterOperationContract] = field(default_factory=list)
+    auth_profile: dict[str, object] = field(default_factory=dict)
     capabilities: list[str] = field(default_factory=list)
     failure_modes: list[str] = field(default_factory=list)
     public_notes: list[str] = field(default_factory=list)
@@ -304,6 +305,16 @@ class NoopAdapter:
                 operator_review=False,
             )
         ],
+        auth_profile={
+            "mode": "none",
+            "public_demo_requires_secret": False,
+            "real_provider_requires_secret": False,
+            "secret_refs": [],
+            "credential_placement": "none",
+            "token_exchange": "none",
+            "external_token_exchange": False,
+            "data_boundaries": ["internal_event_only"],
+        },
         capabilities=["internal acknowledgement", "outbox smoke path"],
         failure_modes=[],
         public_notes=["Used as the default adapter for internal outbox events."],
@@ -370,6 +381,16 @@ class FakeFileImportAdapter:
                 operator_review=True,
             ),
         ],
+        auth_profile={
+            "mode": "local_file_boundary",
+            "public_demo_requires_secret": False,
+            "real_provider_requires_secret": False,
+            "secret_refs": [],
+            "credential_placement": "none",
+            "token_exchange": "none",
+            "external_token_exchange": False,
+            "data_boundaries": ["no_public_secrets", "tenant_owned_mapping_only"],
+        },
         capabilities=[
             "payload validation",
             "field mapping transform",
@@ -497,6 +518,16 @@ class MockAccountingExportAdapter:
                 operator_review=True,
             ),
         ],
+        auth_profile={
+            "mode": "mock_outbound_boundary",
+            "public_demo_requires_secret": False,
+            "real_provider_requires_secret": True,
+            "secret_refs": ["ACCOUNTING_PROVIDER_API_KEY", "ACCOUNTING_PROVIDER_ENDPOINT"],
+            "credential_placement": "server_secret_store",
+            "token_exchange": "private_connector_only",
+            "external_token_exchange": False,
+            "data_boundaries": ["no_public_secrets", "server_side_provider_calls_only"],
+        },
         capabilities=[
             "outbound export boundary",
             "connection scope enforcement",
@@ -634,6 +665,20 @@ class MockCrmDealAdapter:
                 operator_review=True,
             ),
         ],
+        auth_profile={
+            "mode": "oauth2_or_webhook_boundary",
+            "public_demo_requires_secret": False,
+            "real_provider_requires_secret": True,
+            "secret_refs": ["BITRIX24_WEBHOOK_URL", "BITRIX24_CLIENT_SECRET"],
+            "credential_placement": "server_secret_store",
+            "token_exchange": "private_connector_only",
+            "external_token_exchange": False,
+            "data_boundaries": [
+                "no_public_secrets",
+                "no_browser_token_storage",
+                "server_side_provider_calls_only",
+            ],
+        },
         capabilities=[
             "crm deal normalization",
             "safe provider payload summary",
@@ -829,6 +874,10 @@ def build_adapter_connection_diagnostics(
         "operation_keys": operation_keys,
         "executable_operation_keys": executable_operation_keys,
         "missing_operation_scopes": sorted(set(missing_operation_scopes)),
+        "auth_mode": str(descriptor.auth_profile.get("mode") or "unspecified"),
+        "public_demo_requires_secret": bool(descriptor.auth_profile.get("public_demo_requires_secret")),
+        "real_provider_requires_secret": bool(descriptor.auth_profile.get("real_provider_requires_secret")),
+        "secret_refs": sorted(str(item) for item in descriptor.auth_profile.get("secret_refs", [])),
         "capabilities": list(descriptor.capabilities),
     }
 

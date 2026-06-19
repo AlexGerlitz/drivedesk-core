@@ -359,6 +359,21 @@ def test_adapter_catalog_describes_runtime_adapters() -> None:
     )
     assert "crm deal normalization" in descriptors["crm.bitrix24.mock"]["capabilities"]
     assert "sensitive key redaction evidence" in descriptors["crm.bitrix24.mock"]["capabilities"]
+    assert descriptors["crm.bitrix24.mock"]["auth_profile"] == {
+        "mode": "oauth2_or_webhook_boundary",
+        "public_demo_requires_secret": False,
+        "real_provider_requires_secret": True,
+        "secret_refs": ["BITRIX24_WEBHOOK_URL", "BITRIX24_CLIENT_SECRET"],
+        "credential_placement": "server_secret_store",
+        "token_exchange": "private_connector_only",
+        "external_token_exchange": False,
+        "data_boundaries": [
+            "no_public_secrets",
+            "no_browser_token_storage",
+            "server_side_provider_calls_only",
+        ],
+    }
+    assert descriptors["file.import.fake"]["auth_profile"]["public_demo_requires_secret"] is False
     assert descriptors["internal.noop"]["connection_profile_supported"] is False
 
 
@@ -388,6 +403,9 @@ def test_adapter_connection_diagnostics_are_safe_and_operation_aware() -> None:
     assert accounting["direction"] == "outbound"
     assert accounting["executable_operation_keys"] == ["accounting_export_execute"]
     assert accounting["missing_operation_scopes"] == []
+    assert accounting["auth_mode"] == "mock_outbound_boundary"
+    assert accounting["public_demo_requires_secret"] is False
+    assert accounting["real_provider_requires_secret"] is True
 
     crm = build_adapter_connection_diagnostics(
         "crm.bitrix24.mock",
@@ -401,6 +419,10 @@ def test_adapter_connection_diagnostics_are_safe_and_operation_aware() -> None:
     assert crm["operation_keys"] == ["crm_deal_intake_preview", "crm_deal_ingest_execute"]
     assert crm["executable_operation_keys"] == ["crm_deal_intake_preview"]
     assert crm["missing_operation_scopes"] == ["crm:deal.ingest"]
+    assert crm["auth_mode"] == "oauth2_or_webhook_boundary"
+    assert crm["public_demo_requires_secret"] is False
+    assert crm["real_provider_requires_secret"] is True
+    assert crm["secret_refs"] == ["BITRIX24_CLIENT_SECRET", "BITRIX24_WEBHOOK_URL"]
     assert "STAGE_ID" not in json.dumps(crm)
 
 
@@ -525,6 +547,10 @@ def test_api_integration_adapter_catalog_endpoint() -> None:
         "batch_id",
         "deals_hash",
     ]
+    assert payload["crm.bitrix24.mock"]["auth_profile"]["mode"] == "oauth2_or_webhook_boundary"
+    assert payload["crm.bitrix24.mock"]["auth_profile"]["public_demo_requires_secret"] is False
+    assert payload["crm.bitrix24.mock"]["auth_profile"]["real_provider_requires_secret"] is True
+    assert payload["crm.bitrix24.mock"]["auth_profile"]["credential_placement"] == "server_secret_store"
     assert payload["internal.noop"]["direction"] == "internal"
 
 

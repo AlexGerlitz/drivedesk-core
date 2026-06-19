@@ -17,6 +17,8 @@ Fast external verification path: `docs/public/REVIEWER_QUICKSTART.md`.
 - Synthetic Bitrix24-style CRM deal intake adapter with preview, ingest scopes,
   redaction evidence, and runtime catalog operations.
 - Runtime adapter catalog with `GET /integration-adapters`.
+- Adapter auth profiles that separate public demos from future real-provider
+  secrets, server-side token exchange, and browser token boundaries.
 - Tenant-owned integration connection profiles with safe config and mapping.
 - Integration connection scopes for preview and execution boundaries.
 - Structured adapter operation contracts in the runtime catalog.

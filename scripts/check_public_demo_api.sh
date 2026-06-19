@@ -490,6 +490,14 @@ assert any(adapter.get("connectionProfileSupported") for adapter in demo["adapte
 assert any(adapter.get("requiredMappingKeys") for adapter in demo["adapters"]), demo
 assert any(adapter.get("supportedConnectionScopes") for adapter in demo["adapters"]), demo
 assert any(adapter.get("operationContracts") for adapter in demo["adapters"]), demo
+demo_adapter_catalog = {adapter["key"]: adapter for adapter in demo["adapters"]}
+demo_crm_auth = demo_adapter_catalog["crm.bitrix24.mock"]["authProfile"]
+assert demo_crm_auth["mode"] == "oauth2_or_webhook_boundary", demo
+assert demo_crm_auth["publicDemoRequiresSecret"] is False, demo
+assert demo_crm_auth["realProviderRequiresSecret"] is True, demo
+assert demo_crm_auth["credentialPlacement"] == "server_secret_store", demo
+assert demo_crm_auth["tokenExchange"] == "private_connector_only", demo
+assert "no_browser_token_storage" in demo_crm_auth["dataBoundaries"], demo
 assert len(demo["adapterScenarios"]) >= 4, demo
 adapter_scenario_by_id = {scenario["id"]: scenario for scenario in demo["adapterScenarios"]}
 assert set(adapter_scenario_by_id) >= {
@@ -554,6 +562,13 @@ crm_contracts = {
 }
 assert crm_contracts["crm_deal_intake_preview"]["required_connection_scope"] == "crm:deal.preview", adapters
 assert crm_contracts["crm_deal_ingest_execute"]["required_connection_scope"] == "crm:deal.ingest", adapters
+crm_auth = adapter_catalog["crm.bitrix24.mock"]["auth_profile"]
+assert crm_auth["mode"] == "oauth2_or_webhook_boundary", adapters
+assert crm_auth["public_demo_requires_secret"] is False, adapters
+assert crm_auth["real_provider_requires_secret"] is True, adapters
+assert crm_auth["credential_placement"] == "server_secret_store", adapters
+assert crm_auth["token_exchange"] == "private_connector_only", adapters
+assert "no_browser_token_storage" in crm_auth["data_boundaries"], adapters
 runbook_catalog = {runbook["key"]: runbook for runbook in runbooks}
 assert runbook_catalog["integration.retry_backlog"]["alert_name"] == "DriveDeskIntegrationRetries", runbooks
 assert runbook_catalog["integration.dead_letter"]["source_statuses"] == ["dead_letter"], runbooks

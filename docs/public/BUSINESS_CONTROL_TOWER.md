@@ -70,6 +70,11 @@ provider-shaped data into this contract before the system records a normalized
 observation. Future authenticated Bitrix24, 1C, bank, website, file import, or
 support adapters should use the same boundary.
 
+The same adapter descriptor exposes an auth profile: the public demo requires
+no secret, while a real Bitrix24-style provider would keep webhook/OAuth secrets
+in a server-side secret store, run token exchange inside private connector code,
+and never store provider tokens in browser state.
+
 It returns:
 
 - the normalized `BusinessStateObservation` shape that would be created later;

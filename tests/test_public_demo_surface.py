@@ -403,6 +403,13 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
         "crm:deal.ingest",
         "crm:deal.preview",
     ]
+    crm_auth = adapter_by_key["crm.bitrix24.mock"]["authProfile"]
+    assert crm_auth["mode"] == "oauth2_or_webhook_boundary"
+    assert crm_auth["publicDemoRequiresSecret"] is False
+    assert crm_auth["realProviderRequiresSecret"] is True
+    assert crm_auth["credentialPlacement"] == "server_secret_store"
+    assert crm_auth["tokenExchange"] == "private_connector_only"
+    assert "no_browser_token_storage" in crm_auth["dataBoundaries"]
     crm_operations = {
         operation["key"]: operation
         for operation in adapter_by_key["crm.bitrix24.mock"]["operationContracts"]
@@ -574,6 +581,11 @@ def test_public_demo_can_load_api_backed_data_with_static_fallback() -> None:
     assert "loadApiBackedDemoData" in script
     assert "operationContracts" in script
     assert "operations: " in script
+    assert "auth: " in script
+    assert "auth boundary: " in script
+    assert "real provider secret" in script
+    assert "public secret" in script
+    assert "Array.isArray(payload.adapters)" in script
     assert "fillWorkflow" in script
     assert "fillWorkflowScenarios" in script
     assert "fillEndToEndScenario" in script

@@ -51,6 +51,13 @@ normalized deal facts through the outbox and keeps raw provider payloads,
 credentials, names, phone numbers, emails, addresses, and tokens out of the
 public response.
 
+The adapter descriptor also exposes an `auth_profile`. That profile is separate
+from operation scope: scopes say what the connection may do, while the auth
+profile says where provider credentials and token exchange must live. For the
+Bitrix24-style adapter the public demo requires no secret, but a real provider
+connector must use server-side secret storage, private token exchange, and no
+browser token storage.
+
 ## Accounting Export Operations
 
 | Operation | Scope | Recovery |
@@ -97,6 +104,7 @@ integration lifecycle shape.
 Structured operation contracts keep the Integration Hub explicit:
 
 - UI can show exactly which operations a profile can perform;
+- UI can show the credential boundary without exposing credentials;
 - SDK examples can point to the right endpoint and required scope;
 - worker behavior can be documented per operation;
 - public docs can describe 1C, bank, KKT, webhook, file-import, and accounting

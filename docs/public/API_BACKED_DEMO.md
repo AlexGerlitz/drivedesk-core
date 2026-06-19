@@ -109,6 +109,11 @@ operation lifecycle as mapping preview -> CRM intake preview -> execute ->
 retry -> operator review, using the same operation contracts documented in
 `INTEGRATION_OPERATION_CONTRACTS.md`.
 
+Adapter cards also include `authProfile` metadata from the runtime catalog. The
+static fallback and API-backed payload both show whether the public demo needs a
+secret, whether a real provider needs one, where credentials must be placed, and
+whether browser token storage is forbidden.
+
 The generated SDK is documented in `CLIENT_SDK.md`. It demonstrates that the
 exported OpenAPI schema can produce working Python, JavaScript, and TypeScript
 client artifacts, including typed adapter operation helpers that turn

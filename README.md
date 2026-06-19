@@ -5,7 +5,20 @@
 DriveDesk Core is a modular monolith backend foundation for a business
 operations platform.
 
-It includes:
+First read: this is proof for remote backend/platform and integration work where
+business workflows need tenant boundaries, RBAC, audit, outbox recovery,
+operator review, connector contracts, public demos, CI, release evidence, and
+runbooks instead of a thin prototype.
+
+Fast review route:
+
+| Need | Open | What it proves |
+| --- | --- | --- |
+| Live product surface | [public engineering reference](https://alexgerlitz.github.io/drivedesk-core/) and [public demo](https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/) | Browser-visible operations platform, workflow, adapter, incident, and proof surfaces on synthetic data. |
+| Technical review path | `docs/public/SYSTEM_REVIEW_PATH.md` | How the public root, demo, API, SDK, operations evidence, release safety, GitOps, OpenTofu, and evidence index fit together. |
+| Verification command | `bash scripts/ci_smoke_public.sh` | Public smoke path covering docs, demo contract, OpenAPI, SDK examples, workbenches, and release evidence. |
+
+Implemented surface includes:
 
 - FastAPI API;
 - PostgreSQL migrations with Alembic;

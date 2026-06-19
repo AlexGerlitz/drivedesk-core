@@ -5,7 +5,27 @@
 DriveDesk Core is a modular monolith backend foundation for a business
 operations platform.
 
-It includes:
+[![Public Demo Health](https://github.com/AlexGerlitz/drivedesk-core/actions/workflows/public-demo-health.yml/badge.svg)](https://github.com/AlexGerlitz/drivedesk-core/actions/workflows/public-demo-health.yml)
+
+## Live Demo
+
+[Open the public DriveDesk Core engineering reference](https://alexgerlitz.github.io/drivedesk-core/)
+
+[Open the public DriveDesk Core demo](https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/)
+
+![DriveDesk Core demo overview](docs/public/assets/drivedesk-core-demo-overview.png)
+
+## Reviewer Snapshot
+
+| Signal | Public proof |
+| --- | --- |
+| Backend/platform foundation | FastAPI API, PostgreSQL-shaped persistence, Alembic migrations, RBAC, audit log, outbox, background worker, and metrics. |
+| Integration system design | Adapter catalog, connector certification, fixture replay, operation contracts, diagnostics, reconciliation, and operator review. |
+| Business operations product thinking | Public Business OS tour, Control Tower, workflow automation, incidents, proof tabs, and synthetic end-to-end scenarios. |
+| Production-style delivery | Docker Compose, Helm, GitOps, OpenTofu plan evidence, CI, public demo health checks, and release safety drills. |
+| Reviewable evidence | `docs/public/SYSTEM_REVIEW_PATH.md`, `docs/public/TECHNICAL_CAPABILITY_MAP.md`, `docs/public/EVIDENCE_INDEX.md`, and `bash scripts/ci_smoke_public.sh`. |
+
+## What Is Implemented
 
 - FastAPI API;
 - PostgreSQL migrations with Alembic;
@@ -39,16 +59,6 @@ It includes:
 - Docker Compose local runtime;
 - pytest coverage for the Core API;
 - architecture docs and ADRs.
-
-[![Public Demo Health](https://github.com/AlexGerlitz/drivedesk-core/actions/workflows/public-demo-health.yml/badge.svg)](https://github.com/AlexGerlitz/drivedesk-core/actions/workflows/public-demo-health.yml)
-
-## Live Demo
-
-[Open the public DriveDesk Core engineering reference](https://alexgerlitz.github.io/drivedesk-core/)
-
-[Open the public DriveDesk Core demo](https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/)
-
-![DriveDesk Core demo overview](docs/public/assets/drivedesk-core-demo-overview.png)
 
 ## Start Here
 

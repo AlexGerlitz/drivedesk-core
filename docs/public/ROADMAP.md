@@ -76,6 +76,11 @@ Fast external verification path: `docs/public/REVIEWER_QUICKSTART.md`.
   `docs/public/evidence/public-demo-health.sanitized.json`,
   `bash scripts/check_public_demo_health.sh`) tying Pages, static fallback,
   OpenAPI, SDK manifest, and public evidence into one health contract.
+- Public OpenAPI drift evidence (`docs/public/OPENAPI_DRIFT.md`,
+  `docs/public/evidence/openapi-drift.sanitized.json`,
+  `bash scripts/check_public_openapi_drift.sh`) comparing committed
+  `docs/openapi.json` with the schema generated from the current FastAPI app,
+  generated SDK manifest, and static demo markers.
 - Public system review path tying the public root, demo, API, SDK, operations
   evidence, release safety, GitOps, OpenTofu, and evidence index together.
 - Public Platform Tour (`docs/public/PLATFORM_TOUR.md`) connecting business
@@ -190,7 +195,7 @@ Fast external verification path: `docs/public/REVIEWER_QUICKSTART.md`.
 
 - More public-safe workflow examples that reuse the same rule, action-run, task,
   event, and outbox shape.
-- More public-safe evidence around local run, CI, and OpenAPI drift.
+- More public-safe evidence around local run and CI drift.
 - More connector certification fixtures, onboarding provider classes, and
   adapter recovery examples with payload mapping, replay evidence, repair
   workbench scenarios, repair action previews, and follow-up actions.

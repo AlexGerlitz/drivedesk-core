@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "check": "public_openapi_drift",
+  "status": "validated",
+  "data_profile": "synthetic_demo_data",
+  "drift_model": "fastapi_generated_openapi_to_committed_public_contract",
+  "source": {
+    "committed_openapi": "docs/openapi.json",
+    "generated_from": "drivedesk_api.main:app.openapi",
+    "sdk_manifest": "sdk/generated/public-demo/openapi-client-manifest.json",
+    "static_demo_payload": "apps/admin/public-demo/demo-data.js"
+  },
+  "openapi": {
+    "openapi_version": "3.1.0",
+    "title": "DriveDesk Core API",
+    "api_version": "0.1.0",
+    "path_count": 71,
+    "schema_count": 99,
+    "sha256_prefix": "a61568f61a68be61",
+    "public_demo_paths": [
+      "/demo/public",
+      "/demo/connector-certification",
+      "/demo/provider-onboarding",
+      "/demo/connector-fixture-replay",
+      "/demo/business-intake-pipeline",
+      "/demo/business-task-handoff",
+      "/demo/business-notification-channels",
+      "/demo/notification-delivery",
+      "/demo/business-context-assistant",
+      "/demo/business-action-execution",
+      "/demo/business-approval-gateway",
+      "/demo/integration-runtime",
+      "/demo/integration-execution",
+      "/demo/integration-repair",
+      "/demo/observability-dashboard",
+      "/demo/business-scenario-replay"
+    ]
+  },
+  "sdk": {
+    "source": "docs/openapi.json",
+    "schema_version": 1,
+    "data_profile": "synthetic_demo_data",
+    "sha256_prefix": "f82b9908b3009611",
+    "generated_files": [
+      "README.md",
+      "openapi-client-manifest.json",
+      "python/drivedesk_public_demo_client.py",
+      "javascript/drivedesk-public-demo-client.mjs",
+      "typescript/drivedesk-public-demo-client.d.ts"
+    ]
+  },
+  "checks": {
+    "committed_openapi_present": true,
+    "generated_openapi_matches_committed": true,
+    "public_demo_paths_present": true,
+    "sdk_manifest_present": true,
+    "sdk_manifest_source_matches": true,
+    "sdk_manifest_operations_match": true,
+    "static_demo_payload_markers_present": true,
+    "public_demo_health_links_openapi": true,
+    "ci_smoke_includes_check": true,
+    "public_export_includes_check": true,
+    "release_gate_includes_check": true,
+    "production_data_touched": false
+  },
+  "redaction": {
+    "addresses_included": false,
+    "credentials_included": false,
+    "hostnames_included": false,
+    "paths_included": false,
+    "production_data_included": false,
+    "raw_logs_included": false,
+    "request_bodies_included": false,
+    "secrets_included": false
+  }
+}

@@ -22,6 +22,10 @@ infrastructure, production history, customer data, or operational credentials.
   static fallback, OpenAPI, SDK, and evidence health contract.
 - `evidence/public-demo-health.sanitized.json` - machine-readable public demo
   health evidence.
+- `OPENAPI_DRIFT.md` - public-safe OpenAPI drift contract comparing the
+  committed schema, generated FastAPI schema, SDK manifest, and demo markers.
+- `evidence/openapi-drift.sanitized.json` - machine-readable OpenAPI drift
+  evidence.
 - `ENGINEERING_PROOF.md` - proof tab payload, gates, evidence, and verifier contract.
 - `OBSERVABILITY_PROOF.md` - public-safe metrics, logs, alerts, and dashboard evidence.
 - `OBSERVABILITY_DASHBOARD.md` - public-safe Grafana-style dashboard groups, panel queries, alert links, and redaction boundaries.
@@ -331,6 +335,8 @@ The public repository export also generates:
 - `scripts/check_public_gitops_drift_remediation.sh` - public-safe GitOps drift remediation validation.
 - `scripts/generate_public_demo_sdk.py` - generated SDK builder from OpenAPI.
 - `scripts/check_public_demo_sdk.sh` - generated SDK drift and runtime smoke.
+- `scripts/check_public_openapi_drift.sh` - generated FastAPI OpenAPI schema
+  versus committed `docs/openapi.json` drift check.
 - `sdk/generated/public-demo/` - generated Python, JavaScript, and TypeScript
   client artifacts.
 - `examples/curl/demo-public.sh` - curl client example.

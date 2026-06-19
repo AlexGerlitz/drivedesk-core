@@ -62,6 +62,31 @@
       "boundary": "static GitHub Pages, synthetic fallback data, generated SDK metadata, and public workflow health only"
     },
     {
+      "capability_id": "openapi-drift",
+      "title": "OpenAPI drift evidence",
+      "status": "validated",
+      "public_doc": "docs/public/OPENAPI_DRIFT.md",
+      "evidence_files": [
+        "docs/public/evidence/openapi-drift.sanitized.json",
+        "docs/openapi.json",
+        "sdk/generated/public-demo/openapi-client-manifest.json",
+        "apps/admin/public-demo/demo-data.js",
+        "docs/public/PUBLIC_DEMO_HEALTH.md"
+      ],
+      "verifiers": [
+        "bash scripts/check_public_openapi_drift.sh",
+        "bash scripts/check_public_demo_api.sh",
+        "bash scripts/check_public_demo_sdk.sh"
+      ],
+      "public_urls": [
+        "docs/openapi.json",
+        "docs/public/OPENAPI_DRIFT.md",
+        "docs/public/evidence/openapi-drift.sanitized.json",
+        "sdk/generated/public-demo/openapi-client-manifest.json"
+      ],
+      "boundary": "committed OpenAPI, generated FastAPI schema, SDK manifest, and static demo markers on synthetic public-safe data only"
+    },
+    {
       "capability_id": "business-os-tour",
       "title": "Business OS tour",
       "status": "validated",

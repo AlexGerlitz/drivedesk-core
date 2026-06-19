@@ -84,11 +84,13 @@ The current catalog contains executable adapters only:
 | Adapter | Direction | Connection Profile | Purpose |
 | --- | --- | --- | --- |
 | `file.import.fake` | `inbound` | supported | Synthetic file import adapter for contract tests and public demos. |
+| `crm.bitrix24.mock` | `inbound` | supported | Synthetic CRM deal intake adapter for Bitrix24-style provider contracts. |
 | `accounting.export.mock` | `outbound` | supported | Synthetic accounting export adapter for outbound contract tests. |
 | `internal.noop` | `internal` | not supported | Internal acknowledgement path for default outbox events. |
 
-Planned provider adapters can appear in product docs and public demo data, but
-they should not appear in the runtime catalog until the worker can execute them.
+Provider-specific real adapters can appear in private product work later. Public
+runtime adapters appear in this catalog only when the worker/core can execute a
+safe contract without real credentials or raw provider payloads.
 
 ## Relationship To Connection Profiles
 
@@ -102,6 +104,9 @@ POST /tenants/{tenant_id}/integration-connections
         |
         v
 POST /tenants/{tenant_id}/integration-mapping-preview
+        |
+        v
+POST /tenants/{tenant_id}/business-provider-intake/preview
         |
         v
 POST /tenants/{tenant_id}/integration-imports/file
@@ -126,6 +131,8 @@ an operational lifecycle, not only as a catalog.
 | --- | --- | --- | --- | --- | --- |
 | File import mapping preview | `file.import.fake` | `file_import_preview` | `preview` | `file_import:preview` | `integration.mapping_preview.completed` |
 | File import execution | `file.import.fake` | `file_import_execute` | `execute` | `file_import:execute` | `integration.file_import.requested` |
+| CRM deal intake preview | `crm.bitrix24.mock` | `crm_deal_intake_preview` | `preview` | `crm:deal.preview` | `business_provider_intake.previewed` |
+| CRM deal intake queue | `crm.bitrix24.mock` | `crm_deal_ingest_execute` | `execute` | `crm:deal.ingest` | `integration.crm_deal.ingest.requested` |
 | Accounting export retry | `accounting.export.mock` | `accounting_export_execute` | `retry` | `accounting:export` | `integration.export.retry_scheduled` |
 | Dead-letter operator review | `file.import.fake` | `file_import_execute` | `operator_review` | `file_import:execute` | `integration.operator_review.created` |
 
@@ -136,8 +143,8 @@ demo API, generated SDK, static fallback, and release gate.
 
 The public smoke test validates:
 
-- `/integration-adapters` returns `file.import.fake`, `accounting.export.mock`,
-  and `internal.noop`;
+- `/integration-adapters` returns `file.import.fake`, `crm.bitrix24.mock`,
+  `accounting.export.mock`, and `internal.noop`;
 - OpenAPI includes `GET /integration-adapters`;
 - the file-import descriptor exposes `connection_profile_supported`;
 - the file-import descriptor exposes `required_mapping_keys`;
@@ -147,6 +154,8 @@ The public smoke test validates:
 - the file-import execute operation declares `integration.file_import.requested`;
 - the accounting export operation declares `accounting.export.requested`;
 - the accounting export operation declares `accounting:export`;
+- the CRM adapter declares `crm_deal_intake_preview`,
+  `crm_deal_ingest_execute`, `crm:deal.preview`, and `crm:deal.ingest`;
 - the public demo exposes adapter scenarios for preview, execute, retry, and
   operator review;
 - the file-import descriptor exposes mapping transform and preview capabilities;

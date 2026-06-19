@@ -63,10 +63,12 @@ rest of the API.
 
 ## Provider Intake Preview
 
-The provider intake preview is the bridge between real-world external payloads
-and DriveDesk business state. A future Bitrix24, 1C, bank, website, file import,
-or support adapter can send provider-shaped data into this contract before the
-system records a normalized observation.
+The provider intake preview is the bridge between external payloads and
+DriveDesk business state. The current runtime catalog includes
+`crm.bitrix24.mock`, a public-safe CRM deal adapter that can send
+provider-shaped data into this contract before the system records a normalized
+observation. Future authenticated Bitrix24, 1C, bank, website, file import, or
+support adapters should use the same boundary.
 
 It returns:
 
@@ -82,6 +84,13 @@ It returns:
 The preview is read-only. It does not persist data, call provider APIs, read
 provider secrets, return raw provider payload values, enqueue outbox events, or
 mutate external systems.
+
+The related CRM adapter operation contracts are:
+
+| Operation | Scope | Evidence |
+| --- | --- | --- |
+| `crm_deal_intake_preview` | `crm:deal.preview` | `business_provider_intake.previewed` |
+| `crm_deal_ingest_execute` | `crm:deal.ingest` | `integration.crm_deal.ingest.requested` |
 
 ## Workbench Context Preview
 
@@ -220,6 +229,8 @@ The public demo includes a `businessControlTower` payload with:
 
 - one `business-provider-intake/preview` example that maps a Bitrix-style CRM
   payload into a safe normalized observation;
+- one `crm.bitrix24.mock` runtime adapter contract with preview and ingest
+  scopes;
 - synthetic observations from `crm.bitrix24.mock`, `bank.statement.mock`, and
   `accounting.export.mock`;
 - one `payment_reconciliation` detection preview;

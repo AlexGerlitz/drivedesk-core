@@ -347,6 +347,8 @@ The current catalog exposes:
 | Adapter | Direction | Connection Profile | Purpose |
 | --- | --- | --- | --- |
 | `file.import.fake` | `inbound` | supported | Synthetic file import contract tests and public demos. |
+| `crm.bitrix24.mock` | `inbound` | supported | Synthetic Bitrix24-style CRM deal intake contract. |
+| `accounting.export.mock` | `outbound` | supported | Synthetic accounting export contract tests. |
 | `internal.noop` | `internal` | not supported | Default internal outbox acknowledgement path. |
 
 ## Sprint 4F Integration Mapping Validation

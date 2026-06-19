@@ -398,9 +398,24 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
     assert accounting_operations["accounting_export_execute"]["endpoint"] == (
         "POST /tenants/{tenant_id}/integration-exports/accounting"
     )
+    assert adapter_by_key["crm.bitrix24.mock"]["status"] == "active"
+    assert adapter_by_key["crm.bitrix24.mock"]["supportedConnectionScopes"] == [
+        "crm:deal.ingest",
+        "crm:deal.preview",
+    ]
+    crm_operations = {
+        operation["key"]: operation
+        for operation in adapter_by_key["crm.bitrix24.mock"]["operationContracts"]
+    }
+    assert crm_operations["crm_deal_intake_preview"]["eventType"] == "business_provider_intake.previewed"
+    assert crm_operations["crm_deal_intake_preview"]["requiredConnectionScope"] == "crm:deal.preview"
+    assert crm_operations["crm_deal_ingest_execute"]["eventType"] == "integration.crm_deal.ingest.requested"
+    assert crm_operations["crm_deal_ingest_execute"]["requiredConnectionScope"] == "crm:deal.ingest"
     assert len(payload["adapterScenarios"]) >= 4
     adapter_scenario_by_id = {scenario["id"]: scenario for scenario in payload["adapterScenarios"]}
     assert set(adapter_scenario_by_id) >= {
+        "adapter-crm-deal-ingest",
+        "adapter-crm-deal-preview",
         "adapter-file-import-preview",
         "adapter-file-import-execute",
         "adapter-accounting-export-retry",
@@ -413,10 +428,13 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
         "operator_review",
     }
     assert {scenario["adapter"] for scenario in payload["adapterScenarios"]} >= {
+        "crm.bitrix24.mock",
         "file.import.fake",
         "accounting.export.mock",
     }
     assert {scenario["requiredScope"] for scenario in payload["adapterScenarios"]} >= {
+        "crm:deal.ingest",
+        "crm:deal.preview",
         "file_import:preview",
         "file_import:execute",
         "accounting:export",
@@ -426,6 +444,9 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
         for scenario in payload["adapterScenarios"]
         for output in scenario["outputs"]
     } >= {
+        "normalized_observation",
+        "redaction_evidence",
+        "safe_payload",
         "mapping_preview",
         "outbox_event",
         "adapter_job",
@@ -436,6 +457,10 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
     assert adapter_scenario_by_id["adapter-file-import-preview"]["endpoint"] == (
         "POST /tenants/{tenant_id}/integration-mapping-preview"
     )
+    assert adapter_scenario_by_id["adapter-crm-deal-preview"]["endpoint"] == (
+        "POST /tenants/{tenant_id}/business-provider-intake/preview"
+    )
+    assert adapter_scenario_by_id["adapter-crm-deal-ingest"]["operation"] == "crm_deal_ingest_execute"
     assert adapter_scenario_by_id["adapter-accounting-export-retry"]["status"] == "retry"
     assert adapter_scenario_by_id["adapter-dead-letter-review"]["status"] == "dead_letter"
     assert len(payload["integrationJobs"]) >= 3

@@ -105,8 +105,8 @@ It also exposes reusable `workflowScenarios` so the demo can show automation as
 trigger -> action type -> outputs -> evidence instead of only a single timeline.
 
 The integration payload includes `adapterScenarios`. These show the adapter
-operation lifecycle as mapping preview -> execute -> retry -> operator review,
-using the same operation contracts documented in
+operation lifecycle as mapping preview -> CRM intake preview -> execute ->
+retry -> operator review, using the same operation contracts documented in
 `INTEGRATION_OPERATION_CONTRACTS.md`.
 
 The generated SDK is documented in `CLIENT_SDK.md`. It demonstrates that the

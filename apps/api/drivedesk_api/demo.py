@@ -242,6 +242,37 @@ def build_public_demo_payload() -> dict[str, Any]:
                 "evidence": "integration.file_import.requested",
             },
             {
+                "id": "adapter-crm-deal-preview",
+                "title": "CRM deal intake preview",
+                "adapter": "crm.bitrix24.mock",
+                "operation": "crm_deal_intake_preview",
+                "phase": "preview",
+                "endpoint": "POST /tenants/{tenant_id}/business-provider-intake/preview",
+                "requiredScope": "crm:deal.preview",
+                "status": "mapped",
+                "detail": (
+                    "Bitrix-style CRM deal data is mapped into a safe provider intake preview "
+                    "before DriveDesk records any business state."
+                ),
+                "inputs": ["provider_key", "subject_ref", "payload_hash"],
+                "outputs": ["safe_payload", "normalized_observation", "no_provider_call"],
+                "evidence": "business_provider_intake.previewed",
+            },
+            {
+                "id": "adapter-crm-deal-ingest",
+                "title": "CRM deal intake queue",
+                "adapter": "crm.bitrix24.mock",
+                "operation": "crm_deal_ingest_execute",
+                "phase": "execute",
+                "endpoint": "worker:drivedesk_worker.main.process_pending_outbox",
+                "requiredScope": "crm:deal.ingest",
+                "status": "pending",
+                "detail": "Accepted CRM facts are queued through the outbox for retryable worker execution.",
+                "inputs": ["batch_id", "deals_hash", "idempotency_key"],
+                "outputs": ["outbox_event", "adapter_job", "redaction_evidence"],
+                "evidence": "integration.crm_deal.ingest.requested",
+            },
+            {
                 "id": "adapter-accounting-export-retry",
                 "title": "Accounting export retry",
                 "adapter": "accounting.export.mock",

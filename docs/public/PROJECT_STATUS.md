@@ -14,7 +14,7 @@ work so the repository can be verified without private operational context.
 | Auth and tenant boundary | Public-safe auth, RBAC, platform-admin, and tenant-isolation contracts are documented and tested. | `docs/public/AUTH_FOUNDATION.md`, `docs/public/TENANT_ISOLATION.md`, `docs/public/PLATFORM_ADMIN.md` | `bash scripts/ci_smoke_public.sh` |
 | Business workflow | Tenant-owned business records, lifecycle transitions, reusable workflow scenarios, end-to-end workflow-to-proof scenario, workflow rules, action runs, audit, and outbox handoff are covered. | `docs/public/BUSINESS_RECORDS.md`, `docs/public/WORKFLOW_RULES.md`, `docs/public/WORKFLOW_ACTION_RUNS.md`, `docs/public/WORKFLOW_DEMO.md` | `bash scripts/ci_smoke_public.sh && bash scripts/check_public_demo_api.sh` |
 | Business control tower | Provider intake preview, cross-system observations, role-specific workbench context preview, automatic detection preview, escalation preview with owner/queue/SLA routing, action-plan preview with ordered operator work, notification preview with channel/draft boundaries, business exception queue, role briefing preview, approval-gated repair action, dry-run execution, aggregate metrics, and public demo payload are covered. | `docs/public/BUSINESS_CONTROL_TOWER.md`, `apps/admin/public-demo/index.html`, `GET /demo/public`, `POST /tenants/{tenant_id}/business-provider-intake/preview`, `POST /tenants/{tenant_id}/business-workbench-context/preview`, `POST /tenants/{tenant_id}/business-detections/preview`, `POST /tenants/{tenant_id}/business-escalations/preview`, `POST /tenants/{tenant_id}/business-action-plans/preview`, `POST /tenants/{tenant_id}/business-notifications/preview`, `POST /tenants/{tenant_id}/business-briefings/preview` | `bash scripts/check_public_business_control_tower.sh && bash scripts/check_public_demo_api.sh` |
-| Integration hub | Adapter catalog, mapping, scopes, operation scenarios, typed SDK operation plans, operation contracts, diagnostics, reconciliation, incident cards, and operator review are represented with public-safe providers. | `docs/public/INTEGRATION_ADAPTER_CATALOG.md`, `docs/public/INTEGRATION_OPERATION_CONTRACTS.md`, `docs/public/INTEGRATION_RECONCILIATION.md`, `docs/public/CLIENT_SDK.md` | `bash scripts/check_public_demo_api.sh && bash scripts/check_public_demo_sdk.sh` |
+| Integration hub | Adapter catalog, CRM deal intake, mapping, scopes, operation scenarios, typed SDK operation plans, operation contracts, diagnostics, reconciliation, incident cards, and operator review are represented with public-safe providers. | `docs/public/INTEGRATION_ADAPTER_CATALOG.md`, `docs/public/INTEGRATION_OPERATION_CONTRACTS.md`, `docs/public/INTEGRATION_RECONCILIATION.md`, `docs/public/CLIENT_SDK.md`, `docs/adr/0072-mock-crm-deal-adapter.md` | `bash scripts/check_public_demo_api.sh && bash scripts/check_public_demo_sdk.sh` |
 | Recovery and release safety | Backup/restore, rollback, SLO canary gate, and staged promotion drills use sanitized synthetic evidence. | `docs/public/BACKUP_RESTORE_EVIDENCE.md`, `docs/public/RELEASE_ROLLBACK_EVIDENCE.md`, `docs/public/SLO_CANARY_GATE_EVIDENCE.md`, `docs/public/STAGED_PROMOTION_EVIDENCE.md` | `bash scripts/check_public_backup_restore.sh && bash scripts/check_public_release_rollback.sh && bash scripts/check_public_slo_canary_gate.sh && bash scripts/check_public_staged_promotion.sh` |
 | GitOps and IaC | Helm, Argo CD, OpenTofu, image automation, drift detection, and remediation are modeled with public-safe manifests and evidence. | `docs/public/GITOPS_DELIVERY.md`, `docs/public/GITOPS_IMAGE_AUTOMATION.md`, `docs/public/OPENTOFU_PLAN_EVIDENCE.md`, `docs/public/INFRA_STATE_DRIFT_EVIDENCE.md` | `bash scripts/check_public_helm_render.sh && bash scripts/check_public_gitops_layout.sh && bash scripts/check_public_opentofu_plan.sh && bash scripts/check_public_infra_state_drift.sh` |
 | Evidence boundary | Public export contains synthetic data and sanitized evidence only. | `PUBLIC_EXPORT_MANIFEST.md`, `docs/public/SANITIZED_EVIDENCE.md`, `docs/public/evidence/*.sanitized.json` | `bash scripts/check_public_export_secrets.sh` |
@@ -33,15 +33,15 @@ work so the repository can be verified without private operational context.
   run locally with `bash scripts/run_public_demo_local.sh`.
 - Real customer data, private infrastructure addresses, credentials, raw logs,
   payment provider details, and production deployment state are not included.
-- Mobile apps, commercial onboarding, and real external-provider adapters are
+- Mobile apps, commercial onboarding, and authenticated real external-provider adapters are
   outside the current public surface.
 
 ## Next Engineering Work
 
 Longer public-safe direction lives in `docs/public/ROADMAP.md`.
 
-1. Expand the provider intake preview into a public-safe provider developer guide
-   for Bitrix24-style CRM, bank, and accounting adapters.
+1. Expand the CRM mock adapter and provider intake preview into a public-safe
+   provider developer guide for Bitrix24-style CRM, bank, and accounting adapters.
 2. Expand scenario coverage with additional notification channels on top of the
    notification preview contract.
 3. Expand the public observability proof into richer synthetic dashboard

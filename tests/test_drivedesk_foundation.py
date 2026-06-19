@@ -24,6 +24,7 @@ from drivedesk_api.session import get_session
 from drivedesk_core import (
     ActorRef,
     MockAccountingExportAdapter,
+    MockCrmDealAdapter,
     TenantRef,
     build_adapter_connection_diagnostics,
     build_event,
@@ -187,10 +188,92 @@ def test_mock_accounting_export_adapter_contract() -> None:
         raise AssertionError("expected retryable accounting adapter failure")
 
 
+def test_mock_crm_deal_adapter_contract() -> None:
+    adapter = MockCrmDealAdapter()
+
+    result = adapter.execute(
+        {
+            "batch_id": "bitrix_demo_batch",
+            "mapping": {
+                "deal_id": "ID",
+                "source_state": "STAGE_ID",
+                "owner_role": "ASSIGNED_BY_ROLE",
+                "amount": "OPPORTUNITY",
+            },
+            "deals": [
+                {
+                    "ID": "DEAL-2026-001",
+                    "STAGE_ID": "invoice_sent",
+                    "ASSIGNED_BY_ROLE": "sales",
+                    "OPPORTUNITY": "1500",
+                    "PHONE": "+70000000000",
+                    "access_token": "secret-token",
+                },
+                {
+                    "ID": "",
+                    "STAGE_ID": "lost",
+                    "CLIENT_NAME": "Hidden Person",
+                },
+            ],
+        }
+    )
+
+    assert result.adapter_key == "crm.bitrix24.mock"
+    assert result.status == "partial_success"
+    assert result.records_received == 2
+    assert result.records_accepted == 1
+    assert result.records_rejected == 1
+    payload = result.to_payload()
+    assert payload["external_ref"] == "mock-crm-deal-intake:bitrix_demo_batch"
+    assert payload["details"]["accepted_subject_refs"] == ["deal:DEAL-2026-001"]
+    assert payload["details"]["source_states"] == ["invoice_sent"]
+    assert payload["details"]["amount_buckets"] == ["1000-2000"]
+    assert set(payload["details"]["dropped_sensitive_keys"]) >= {
+        "CLIENT_NAME",
+        "PHONE",
+        "access_token",
+    }
+    assert payload["details"]["public_safe"] is True
+    assert payload["details"]["raw_payload_included"] is False
+    assert payload["details"]["external_mutation"] is False
+    assert payload["details"]["requires_secret"] is False
+    assert "+70000000000" not in json.dumps(payload)
+    assert "secret-token" not in json.dumps(payload)
+    assert "Hidden Person" not in json.dumps(payload)
+
+    success_result = adapter.execute(
+        {
+            "batch_id": "bitrix_success",
+            "deals": [
+                {
+                    "deal_id": "DEAL-2026-002",
+                    "source_state": "paid",
+                    "amount_bucket": "2001-5000",
+                }
+            ],
+        }
+    )
+    assert success_result.status == "success"
+    assert success_result.records_rejected == 0
+
+    try:
+        adapter.execute({"simulate_failure": "retryable", "deals": []})
+    except AdapterExecutionError as exc:
+        assert exc.retryable is True
+        assert exc.adapter_key == "crm.bitrix24.mock"
+    else:
+        raise AssertionError("expected retryable CRM adapter failure")
+
+
 def test_adapter_catalog_describes_runtime_adapters() -> None:
     descriptors = {item["key"]: item for item in list_adapter_descriptors()}
 
-    assert set(descriptors) == {"accounting.export.mock", "file.import.fake", "internal.noop"}
+    assert set(descriptors) == {
+        "accounting.export.mock",
+        "crm.bitrix24.mock",
+        "file.import.fake",
+        "internal.noop",
+    }
     assert descriptors["file.import.fake"]["connection_profile_supported"] is True
     assert descriptors["file.import.fake"]["connection_profile_required"] is False
     assert descriptors["file.import.fake"]["mapping_example"] == {
@@ -237,6 +320,45 @@ def test_adapter_catalog_describes_runtime_adapters() -> None:
     )
     assert accounting_operation_contracts["accounting_export_execute"]["retryable"] is True
     assert accounting_operation_contracts["accounting_export_execute"]["dead_letter"] is True
+    assert descriptors["crm.bitrix24.mock"]["direction"] == "inbound"
+    assert descriptors["crm.bitrix24.mock"]["category"] == "crm"
+    assert descriptors["crm.bitrix24.mock"]["connection_profile_supported"] is True
+    assert descriptors["crm.bitrix24.mock"]["required_mapping_keys"] == ["deal_id", "source_state"]
+    assert descriptors["crm.bitrix24.mock"]["mapping_example"] == {
+        "deal_id": "ID",
+        "source_state": "STAGE_ID",
+        "owner_role": "ASSIGNED_BY_ROLE",
+        "amount": "OPPORTUNITY",
+    }
+    assert descriptors["crm.bitrix24.mock"]["supported_connection_scopes"] == [
+        "crm:deal.ingest",
+        "crm:deal.preview",
+    ]
+    assert descriptors["crm.bitrix24.mock"]["default_connection_scopes"] == [
+        "crm:deal.ingest",
+        "crm:deal.preview",
+    ]
+    crm_operation_contracts = {
+        item["key"]: item for item in descriptors["crm.bitrix24.mock"]["operation_contracts"]
+    }
+    assert set(crm_operation_contracts) == {
+        "crm_deal_ingest_execute",
+        "crm_deal_intake_preview",
+    }
+    assert crm_operation_contracts["crm_deal_intake_preview"]["endpoint"] == (
+        "POST /tenants/{tenant_id}/business-provider-intake/preview"
+    )
+    assert crm_operation_contracts["crm_deal_intake_preview"]["required_connection_scope"] == (
+        "crm:deal.preview"
+    )
+    assert crm_operation_contracts["crm_deal_ingest_execute"]["event_type"] == (
+        "integration.crm_deal.ingest.requested"
+    )
+    assert crm_operation_contracts["crm_deal_ingest_execute"]["required_connection_scope"] == (
+        "crm:deal.ingest"
+    )
+    assert "crm deal normalization" in descriptors["crm.bitrix24.mock"]["capabilities"]
+    assert "sensitive key redaction evidence" in descriptors["crm.bitrix24.mock"]["capabilities"]
     assert descriptors["internal.noop"]["connection_profile_supported"] is False
 
 
@@ -266,6 +388,20 @@ def test_adapter_connection_diagnostics_are_safe_and_operation_aware() -> None:
     assert accounting["direction"] == "outbound"
     assert accounting["executable_operation_keys"] == ["accounting_export_execute"]
     assert accounting["missing_operation_scopes"] == []
+
+    crm = build_adapter_connection_diagnostics(
+        "crm.bitrix24.mock",
+        mapping={"deal_id": "ID", "source_state": "STAGE_ID"},
+        scopes=["crm:deal.preview"],
+    )
+    assert crm["adapter_key"] == "crm.bitrix24.mock"
+    assert crm["direction"] == "inbound"
+    assert crm["mapping_keys"] == ["deal_id", "source_state"]
+    assert crm["scopes"] == ["crm:deal.preview"]
+    assert crm["operation_keys"] == ["crm_deal_intake_preview", "crm_deal_ingest_execute"]
+    assert crm["executable_operation_keys"] == ["crm_deal_intake_preview"]
+    assert crm["missing_operation_scopes"] == ["crm:deal.ingest"]
+    assert "STAGE_ID" not in json.dumps(crm)
 
 
 def test_integration_runbook_catalog_covers_operational_states() -> None:
@@ -328,7 +464,12 @@ def test_api_integration_adapter_catalog_endpoint() -> None:
 
     assert response.status_code == 200
     payload = {item["key"]: item for item in response.json()}
-    assert set(payload) == {"accounting.export.mock", "file.import.fake", "internal.noop"}
+    assert set(payload) == {
+        "accounting.export.mock",
+        "crm.bitrix24.mock",
+        "file.import.fake",
+        "internal.noop",
+    }
     assert payload["file.import.fake"]["status"] == "active"
     assert payload["file.import.fake"]["direction"] == "inbound"
     assert payload["file.import.fake"]["connection_profile_supported"] is True
@@ -366,6 +507,23 @@ def test_api_integration_adapter_catalog_endpoint() -> None:
         "tenant_id",
         "export_batch_id",
         "documents_hash",
+    ]
+    assert payload["crm.bitrix24.mock"]["status"] == "active"
+    assert payload["crm.bitrix24.mock"]["direction"] == "inbound"
+    assert payload["crm.bitrix24.mock"]["supported_connection_scopes"] == [
+        "crm:deal.ingest",
+        "crm:deal.preview",
+    ]
+    crm_api_contracts = {
+        item["key"]: item for item in payload["crm.bitrix24.mock"]["operation_contracts"]
+    }
+    assert crm_api_contracts["crm_deal_intake_preview"]["endpoint"] == (
+        "POST /tenants/{tenant_id}/business-provider-intake/preview"
+    )
+    assert crm_api_contracts["crm_deal_ingest_execute"]["idempotency_keys"] == [
+        "tenant_id",
+        "batch_id",
+        "deals_hash",
     ]
     assert payload["internal.noop"]["direction"] == "internal"
 

@@ -196,6 +196,61 @@ window.DRIVEDESK_DEMO_DATA = {
       "contract": "Export synthetic accounting documents through the shared outbox adapter boundary."
     },
     {
+      "key": "crm.bitrix24.mock",
+      "name": "Mock Bitrix24 CRM Intake",
+      "status": "active",
+      "direction": "inbound",
+      "connectionProfileSupported": true,
+      "requiredMappingKeys": [
+        "deal_id",
+        "source_state"
+      ],
+      "supportedConnectionScopes": [
+        "crm:deal.ingest",
+        "crm:deal.preview"
+      ],
+      "defaultConnectionScopes": [
+        "crm:deal.ingest",
+        "crm:deal.preview"
+      ],
+      "operationContracts": [
+        {
+          "key": "crm_deal_intake_preview",
+          "title": "Preview CRM deal intake",
+          "trigger": "api.request",
+          "eventType": "business_provider_intake.previewed",
+          "endpoint": "POST /tenants/{tenant_id}/business-provider-intake/preview",
+          "requiredConnectionScope": "crm:deal.preview",
+          "idempotencyKeys": [
+            "tenant_id",
+            "provider_key",
+            "subject_ref",
+            "payload_hash"
+          ],
+          "retryable": false,
+          "deadLetter": false,
+          "operatorReview": false
+        },
+        {
+          "key": "crm_deal_ingest_execute",
+          "title": "Queue CRM deal intake",
+          "trigger": "api.outbox.enqueue",
+          "eventType": "integration.crm_deal.ingest.requested",
+          "endpoint": "worker:drivedesk_worker.main.process_pending_outbox",
+          "requiredConnectionScope": "crm:deal.ingest",
+          "idempotencyKeys": [
+            "tenant_id",
+            "batch_id",
+            "deals_hash"
+          ],
+          "retryable": true,
+          "deadLetter": true,
+          "operatorReview": true
+        }
+      ],
+      "contract": "Normalize synthetic CRM deal facts into safe DriveDesk observations without calling a real CRM provider."
+    },
+    {
       "key": "file.import.fake",
       "name": "Synthetic File Import",
       "status": "active",
@@ -322,6 +377,50 @@ window.DRIVEDESK_DEMO_DATA = {
         "audit_event"
       ],
       "evidence": "integration.file_import.requested"
+    },
+    {
+      "id": "adapter-crm-deal-preview",
+      "title": "CRM deal intake preview",
+      "adapter": "crm.bitrix24.mock",
+      "operation": "crm_deal_intake_preview",
+      "phase": "preview",
+      "endpoint": "POST /tenants/{tenant_id}/business-provider-intake/preview",
+      "requiredScope": "crm:deal.preview",
+      "status": "mapped",
+      "detail": "Bitrix-style CRM deal data is mapped into a safe provider intake preview before DriveDesk records any business state.",
+      "inputs": [
+        "provider_key",
+        "subject_ref",
+        "payload_hash"
+      ],
+      "outputs": [
+        "safe_payload",
+        "normalized_observation",
+        "no_provider_call"
+      ],
+      "evidence": "business_provider_intake.previewed"
+    },
+    {
+      "id": "adapter-crm-deal-ingest",
+      "title": "CRM deal intake queue",
+      "adapter": "crm.bitrix24.mock",
+      "operation": "crm_deal_ingest_execute",
+      "phase": "execute",
+      "endpoint": "worker:drivedesk_worker.main.process_pending_outbox",
+      "requiredScope": "crm:deal.ingest",
+      "status": "pending",
+      "detail": "Accepted CRM facts are queued through the outbox for retryable worker execution.",
+      "inputs": [
+        "batch_id",
+        "deals_hash",
+        "idempotency_key"
+      ],
+      "outputs": [
+        "outbox_event",
+        "adapter_job",
+        "redaction_evidence"
+      ],
+      "evidence": "integration.crm_deal.ingest.requested"
     },
     {
       "id": "adapter-accounting-export-retry",

@@ -3,6 +3,51 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field
 from typing import Protocol
 
+CRM_SENSITIVE_KEY_TOKENS = (
+    "access_token",
+    "address",
+    "birth",
+    "client_name",
+    "email",
+    "full_name",
+    "name",
+    "passport",
+    "phone",
+    "secret",
+    "token",
+)
+
+
+def _crm_amount_bucket(value: object) -> str:
+    if value is None:
+        return "unknown"
+    text = str(value).strip()
+    if not text:
+        return "unknown"
+    try:
+        amount = float(text.replace(",", "."))
+    except ValueError:
+        return text[:32]
+
+    if amount < 1000:
+        return "0-999"
+    if amount <= 2000:
+        return "1000-2000"
+    if amount <= 5000:
+        return "2001-5000"
+    return "5000+"
+
+
+def _crm_sensitive_keys(record: object) -> list[str]:
+    if not isinstance(record, dict):
+        return []
+    sensitive_keys = []
+    for key in record:
+        lowered = str(key).lower()
+        if any(token in lowered for token in CRM_SENSITIVE_KEY_TOKENS):
+            sensitive_keys.append(str(key))
+    return sorted(set(sensitive_keys))
+
 
 @dataclass(frozen=True)
 class AdapterResult:
@@ -529,7 +574,180 @@ class MockAccountingExportAdapter:
         )
 
 
+class MockCrmDealAdapter:
+    adapter_key = "crm.bitrix24.mock"
+    descriptor = AdapterDescriptor(
+        key=adapter_key,
+        name="Mock Bitrix24 CRM Intake",
+        status="active",
+        category="crm",
+        direction="inbound",
+        purpose=(
+            "Normalize synthetic CRM deal facts into safe DriveDesk observations "
+            "without calling a real CRM provider."
+        ),
+        connection_profile_supported=True,
+        connection_profile_required=False,
+        payload_schema={
+            "type": "object",
+            "required": ["deals"],
+            "properties": {
+                "batch_id": "idempotent synthetic CRM batch label",
+                "deals": "list of CRM deal objects",
+                "mapping": "optional provider field mapping",
+                "simulate_failure": "optional retryable or permanent test mode",
+            },
+        },
+        config_example={"provider": "bitrix24", "mode": "synthetic"},
+        mapping_example={
+            "deal_id": "ID",
+            "source_state": "STAGE_ID",
+            "owner_role": "ASSIGNED_BY_ROLE",
+            "amount": "OPPORTUNITY",
+        },
+        required_mapping_keys=["deal_id", "source_state"],
+        supported_connection_scopes=["crm:deal.ingest", "crm:deal.preview"],
+        default_connection_scopes=["crm:deal.ingest", "crm:deal.preview"],
+        operation_contracts=[
+            AdapterOperationContract(
+                key="crm_deal_intake_preview",
+                title="Preview CRM deal intake",
+                trigger="api.request",
+                event_type="business_provider_intake.previewed",
+                endpoint="POST /tenants/{tenant_id}/business-provider-intake/preview",
+                required_connection_scope="crm:deal.preview",
+                idempotency_keys=["tenant_id", "provider_key", "subject_ref", "payload_hash"],
+                retryable=False,
+                dead_letter=False,
+                operator_review=False,
+            ),
+            AdapterOperationContract(
+                key="crm_deal_ingest_execute",
+                title="Queue CRM deal intake",
+                trigger="api.outbox.enqueue",
+                event_type="integration.crm_deal.ingest.requested",
+                endpoint="worker:drivedesk_worker.main.process_pending_outbox",
+                required_connection_scope="crm:deal.ingest",
+                idempotency_keys=["tenant_id", "batch_id", "deals_hash"],
+                retryable=True,
+                dead_letter=True,
+                operator_review=True,
+            ),
+        ],
+        capabilities=[
+            "crm deal normalization",
+            "safe provider payload summary",
+            "field mapping transform",
+            "mapping preview",
+            "connection scope enforcement",
+            "sensitive key redaction evidence",
+            "retryable failure simulation",
+            "permanent failure simulation",
+        ],
+        failure_modes=["retryable", "permanent"],
+        public_notes=[
+            "Public-safe Bitrix24-style adapter contract using synthetic data.",
+            "No real CRM credentials, raw provider payloads, or personal data are returned.",
+        ],
+    )
+
+    def execute(self, payload: dict[str, object]) -> AdapterResult:
+        simulated_failure = payload.get("simulate_failure")
+        if simulated_failure == "retryable":
+            raise AdapterExecutionError(
+                "Mock CRM provider is temporarily unavailable.",
+                adapter_key=self.adapter_key,
+                retryable=True,
+            )
+        if simulated_failure == "permanent":
+            raise AdapterExecutionError(
+                "Mock CRM provider rejected the deal intake contract.",
+                adapter_key=self.adapter_key,
+                retryable=False,
+            )
+
+        deals = payload.get("deals")
+        if deals is None:
+            deals = payload.get("records")
+        if not isinstance(deals, list):
+            raise AdapterExecutionError(
+                "CRM intake payload must contain a deals list.",
+                adapter_key=self.adapter_key,
+                retryable=False,
+            )
+
+        mapping = payload.get("mapping", {})
+        if mapping is None:
+            mapping = {}
+        if not isinstance(mapping, dict):
+            raise AdapterExecutionError(
+                "CRM intake payload mapping must be a JSON object.",
+                adapter_key=self.adapter_key,
+                retryable=False,
+            )
+        try:
+            normalized_deals = normalize_adapter_records(self.adapter_key, records=deals, mapping=mapping)
+        except AdapterValidationError as exc:
+            raise AdapterExecutionError(
+                exc.message,
+                adapter_key=self.adapter_key,
+                retryable=False,
+            ) from exc
+
+        accepted_subject_refs: list[str] = []
+        source_states: set[str] = set()
+        amount_buckets: set[str] = set()
+        dropped_sensitive_keys: set[str] = set()
+        rejected = 0
+
+        for original, normalized in zip(deals, normalized_deals, strict=False):
+            dropped_sensitive_keys.update(_crm_sensitive_keys(original))
+            if not isinstance(normalized, dict):
+                rejected += 1
+                continue
+
+            deal_id = str(normalized.get("deal_id") or "").strip()
+            source_state = str(
+                normalized.get("source_state") or normalized.get("stage") or ""
+            ).strip()
+            if not deal_id or not source_state:
+                rejected += 1
+                continue
+
+            accepted_subject_refs.append(f"deal:{deal_id}")
+            source_states.add(source_state)
+            amount_buckets.add(
+                _crm_amount_bucket(normalized.get("amount_bucket") or normalized.get("amount"))
+            )
+
+        accepted = len(accepted_subject_refs)
+        batch_id = str(payload.get("batch_id") or "crm-deal-intake")
+        status = "success" if rejected == 0 else "partial_success"
+        return AdapterResult(
+            adapter_key=self.adapter_key,
+            status=status,
+            message=f"Accepted {accepted} synthetic CRM deals from {batch_id}.",
+            records_received=len(deals),
+            records_accepted=accepted,
+            records_rejected=rejected,
+            external_ref=f"mock-crm-deal-intake:{batch_id}",
+            details={
+                "provider_family": "crm",
+                "normalized_observation_type": "BusinessStateObservation",
+                "accepted_subject_refs": accepted_subject_refs,
+                "source_states": sorted(source_states),
+                "amount_buckets": sorted(amount_buckets),
+                "dropped_sensitive_keys": sorted(dropped_sensitive_keys),
+                "public_safe": True,
+                "raw_payload_included": False,
+                "external_mutation": False,
+                "requires_secret": False,
+            },
+        )
+
+
 ADAPTERS: dict[str, IntegrationAdapter] = {
+    MockCrmDealAdapter.adapter_key: MockCrmDealAdapter(),
     NoopAdapter.adapter_key: NoopAdapter(),
     FakeFileImportAdapter.adapter_key: FakeFileImportAdapter(),
     MockAccountingExportAdapter.adapter_key: MockAccountingExportAdapter(),

@@ -482,6 +482,7 @@ assert any(item["metric"] == "drivedesk_integration_reconciliations" for item in
 assert any(item["metric"] == "drivedesk_integration_incidents" for item in demo["integrationHealth"]), demo
 assert {adapter["key"] for adapter in demo["adapters"]} >= {
     "accounting.export.mock",
+    "crm.bitrix24.mock",
     "file.import.fake",
     "internal.noop",
 }, demo
@@ -492,6 +493,8 @@ assert any(adapter.get("operationContracts") for adapter in demo["adapters"]), d
 assert len(demo["adapterScenarios"]) >= 4, demo
 adapter_scenario_by_id = {scenario["id"]: scenario for scenario in demo["adapterScenarios"]}
 assert set(adapter_scenario_by_id) >= {
+    "adapter-crm-deal-ingest",
+    "adapter-crm-deal-preview",
     "adapter-file-import-preview",
     "adapter-file-import-execute",
     "adapter-accounting-export-retry",
@@ -504,10 +507,13 @@ assert {scenario["phase"] for scenario in demo["adapterScenarios"]} >= {
     "operator_review",
 }, demo
 assert {scenario["adapter"] for scenario in demo["adapterScenarios"]} >= {
+    "crm.bitrix24.mock",
     "file.import.fake",
     "accounting.export.mock",
 }, demo
 assert {scenario["requiredScope"] for scenario in demo["adapterScenarios"]} >= {
+    "crm:deal.ingest",
+    "crm:deal.preview",
     "file_import:preview",
     "file_import:execute",
     "accounting:export",
@@ -517,6 +523,9 @@ assert {
     for scenario in demo["adapterScenarios"]
     for output in scenario["outputs"]
 } >= {
+    "normalized_observation",
+    "redaction_evidence",
+    "safe_payload",
     "mapping_preview",
     "outbox_event",
     "adapter_job",
@@ -527,10 +536,24 @@ assert {
 assert adapter_scenario_by_id["adapter-file-import-preview"]["endpoint"] == (
     "POST /tenants/{tenant_id}/integration-mapping-preview"
 ), demo
+assert adapter_scenario_by_id["adapter-crm-deal-preview"]["endpoint"] == (
+    "POST /tenants/{tenant_id}/business-provider-intake/preview"
+), demo
+assert adapter_scenario_by_id["adapter-crm-deal-ingest"]["operation"] == "crm_deal_ingest_execute", demo
 assert adapter_scenario_by_id["adapter-accounting-export-retry"]["status"] == "retry", demo
 assert adapter_scenario_by_id["adapter-dead-letter-review"]["status"] == "dead_letter", demo
 adapter_catalog = {adapter["key"]: adapter for adapter in adapters}
-assert set(adapter_catalog) == {"accounting.export.mock", "file.import.fake", "internal.noop"}, adapters
+assert set(adapter_catalog) == {
+    "accounting.export.mock",
+    "crm.bitrix24.mock",
+    "file.import.fake",
+    "internal.noop",
+}, adapters
+crm_contracts = {
+    contract["key"]: contract for contract in adapter_catalog["crm.bitrix24.mock"]["operation_contracts"]
+}
+assert crm_contracts["crm_deal_intake_preview"]["required_connection_scope"] == "crm:deal.preview", adapters
+assert crm_contracts["crm_deal_ingest_execute"]["required_connection_scope"] == "crm:deal.ingest", adapters
 runbook_catalog = {runbook["key"]: runbook for runbook in runbooks}
 assert runbook_catalog["integration.retry_backlog"]["alert_name"] == "DriveDeskIntegrationRetries", runbooks
 assert runbook_catalog["integration.dead_letter"]["source_statuses"] == ["dead_letter"], runbooks

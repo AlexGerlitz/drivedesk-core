@@ -38,6 +38,19 @@ scope/recovery behavior applies?
 Preview is a read-only API operation. Execute is an outbox-backed operation that
 the worker can process, retry, or move to dead-letter.
 
+## CRM Deal Intake Operations
+
+| Operation | Scope | Recovery |
+| --- | --- | --- |
+| `crm_deal_intake_preview` | `crm:deal.preview` | no retry or dead-letter; read-only provider intake preview |
+| `crm_deal_ingest_execute` | `crm:deal.ingest` | retry, dead-letter, and operator review |
+
+The CRM adapter uses a Bitrix24-style synthetic contract. Preview maps provider
+facts into the `business-provider-intake/preview` boundary. Ingest queues safe
+normalized deal facts through the outbox and keeps raw provider payloads,
+credentials, names, phone numbers, emails, addresses, and tokens out of the
+public response.
+
 ## Accounting Export Operations
 
 | Operation | Scope | Recovery |
@@ -70,7 +83,9 @@ operator-visible behavior:
 | Phase | Contract | Expected behavior |
 | --- | --- | --- |
 | `preview` | `file_import_preview` | Validate mapping and sample records without creating an outbox event. |
+| `preview` | `crm_deal_intake_preview` | Normalize CRM deal facts into a safe provider intake preview. |
 | `execute` | `file_import_execute` | Queue an idempotent outbox event and record audit evidence. |
+| `execute` | `crm_deal_ingest_execute` | Queue CRM deal facts through the outbox with redaction evidence. |
 | `retry` | `accounting_export_execute` | Keep a temporary provider failure retryable and visible. |
 | `operator_review` | `file_import_execute` | Create a review card for dead-letter work with runbook context. |
 

@@ -14,6 +14,8 @@ Fast external verification path: `docs/public/REVIEWER_QUICKSTART.md`.
 - FastAPI health, readiness, and metrics endpoints.
 - Tenant, user, membership, RBAC, audit, and outbox primitives.
 - Synthetic file import adapter with retry and dead-letter state.
+- Synthetic Bitrix24-style CRM deal intake adapter with preview, ingest scopes,
+  redaction evidence, and runtime catalog operations.
 - Runtime adapter catalog with `GET /integration-adapters`.
 - Tenant-owned integration connection profiles with safe config and mapping.
 - Integration connection scopes for preview and execution boundaries.
@@ -109,8 +111,9 @@ Fast external verification path: `docs/public/REVIEWER_QUICKSTART.md`.
   event, and outbox shape.
 - More public-safe evidence around local run, CI, OpenAPI, and demo health.
 - More adapter recovery examples with payload mapping and follow-up actions.
-- A public-safe provider guide for feeding Bitrix24-style CRM, bank, and
-  accounting facts through the provider intake and workbench context contracts.
+- A public-safe provider guide for feeding authenticated Bitrix24-style CRM,
+  bank, and accounting facts through the provider intake and workbench context
+  contracts.
 - More operator workbench scenarios that connect action plans and notification
   previews to task creation without public external writes.
 - More evidence around external notification adapters once destinations and

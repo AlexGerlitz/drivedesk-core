@@ -66,6 +66,8 @@ jobs:
           curl -fsSL --retry 3 --retry-delay 5 "$base/demo-data.js" | grep -F "incident.resolved"
           curl -fsSL --retry 3 --retry-delay 5 "$base/demo-data.js" | grep -F "postcheck.gates.passed"
           curl -fsSL --retry 3 --retry-delay 5 "$base/demo-data.js" | grep -F "file.import.fake"
+          curl -fsSL --retry 3 --retry-delay 5 "$base/demo-data.js" | grep -F "crm.bitrix24.mock"
+          curl -fsSL --retry 3 --retry-delay 5 "$base/demo-data.js" | grep -F "crm_deal_intake_preview"
           curl -fsSL --retry 3 --retry-delay 5 "$base/demo-data.js" | grep -F "dead_letter"
           curl -fsSL --retry 3 --retry-delay 5 "$base/demo-data.js" | grep -F "drivedesk_integration_jobs"
           curl -fsSL --retry 3 --retry-delay 5 "$base/demo-data.js" | grep -F "drivedesk_integration_adapter_duration_milliseconds"

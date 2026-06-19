@@ -569,6 +569,150 @@
         "title": "BusinessBriefingRead",
         "type": "object"
       },
+      "BusinessDetectionPreviewCreate": {
+        "properties": {
+          "limit": {
+            "default": 50,
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "rule_set": {
+            "const": "payment_reconciliation",
+            "default": "payment_reconciliation",
+            "title": "Rule Set",
+            "type": "string"
+          },
+          "subject_id": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Id"
+          },
+          "subject_type": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 2,
+                "pattern": "^[a-z0-9][a-z0-9_-]*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Type"
+          }
+        },
+        "title": "BusinessDetectionPreviewCreate",
+        "type": "object"
+      },
+      "BusinessDetectionPreviewRead": {
+        "properties": {
+          "api": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Api",
+            "type": "object"
+          },
+          "detected_exceptions": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Detected Exceptions",
+            "type": "array"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "observations": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Observations",
+            "type": "array"
+          },
+          "rule_set": {
+            "const": "payment_reconciliation",
+            "title": "Rule Set",
+            "type": "string"
+          },
+          "rules": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Rules",
+            "type": "array"
+          },
+          "source_systems": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Source Systems",
+            "type": "array"
+          },
+          "subject_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Id"
+          },
+          "subject_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Type"
+          },
+          "suggested_repair_actions": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Suggested Repair Actions",
+            "type": "array"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tenant_id",
+          "rule_set",
+          "generated_at",
+          "summary"
+        ],
+        "title": "BusinessDetectionPreviewRead",
+        "type": "object"
+      },
       "BusinessExceptionCreate": {
         "properties": {
           "evidence": {
@@ -4554,6 +4698,94 @@
           }
         },
         "summary": "Build Business Briefing Endpoint",
+        "tags": [
+          "business-control"
+        ]
+      }
+    },
+    "/tenants/{tenant_id}/business-detections/preview": {
+      "post": {
+        "operationId": "preview_business_detections_endpoint_tenants__tenant_id__business_detections_preview_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tenant_id",
+            "required": true,
+            "schema": {
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "X-Actor-Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Role",
+            "required": false,
+            "schema": {
+              "default": "viewer",
+              "title": "X-Actor-Role",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessDetectionPreviewCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessDetectionPreviewRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Preview Business Detections Endpoint",
         "tags": [
           "business-control"
         ]

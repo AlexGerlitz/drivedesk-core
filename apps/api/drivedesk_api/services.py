@@ -33,6 +33,7 @@ from drivedesk_api.rbac import ActorContext
 from drivedesk_api.schemas import (
     AccountingExportCreate,
     BusinessBriefingPreviewCreate,
+    BusinessDetectionPreviewCreate,
     BusinessExceptionCreate,
     BusinessExceptionStatusChange,
     BusinessRecordCreate,
@@ -1451,6 +1452,202 @@ async def build_business_briefing(
             "observations": "GET /tenants/{tenant_id}/business-state/observations",
             "exceptions": "GET /tenants/{tenant_id}/business-exceptions",
             "repair_actions": "GET /tenants/{tenant_id}/repair-actions",
+        },
+    }
+
+
+CRM_WAITING_PAYMENT_STATES = {"invoice_sent", "awaiting_payment", "unpaid"}
+BANK_PAID_STATES = {"paid", "settled", "captured"}
+ACCOUNTING_NOT_EXPORTED_STATES = {"not_exported", "waiting_for_crm_status", "export_pending"}
+
+
+def _observation_family(system_key: str) -> str:
+    lowered = system_key.lower()
+    if "bank" in lowered or "payment" in lowered:
+        return "bank"
+    if "accounting" in lowered or "1c" in lowered or "export" in lowered:
+        return "accounting"
+    if "crm" in lowered or "bitrix" in lowered:
+        return "crm"
+    return "other"
+
+
+def _observation_snapshot(observation: BusinessStateObservation) -> dict[str, object]:
+    payload = _json_dict(observation.payload_json)
+    return {
+        "observation_id": observation.id,
+        "system_key": observation.system_key,
+        "system_family": _observation_family(observation.system_key),
+        "subject_type": observation.subject_type,
+        "subject_id": observation.subject_id,
+        "subject": _subject_label(observation.subject_type, observation.subject_id),
+        "state": observation.state,
+        "observed_at": observation.observed_at.isoformat(),
+        "payload_keys": sorted(payload.keys()),
+        "evidence": "business_state.observation.recorded",
+    }
+
+
+def _latest_family_states(observations: list[BusinessStateObservation]) -> dict[str, BusinessStateObservation]:
+    latest: dict[str, BusinessStateObservation] = {}
+    for observation in observations:
+        family = _observation_family(observation.system_key)
+        if family == "other":
+            continue
+        previous = latest.get(family)
+        if previous is None or observation.observed_at > previous.observed_at:
+            latest[family] = observation
+    return latest
+
+
+def _detect_payment_reconciliation_subject(
+    *,
+    subject_type: str,
+    subject_id: str,
+    observations: list[BusinessStateObservation],
+) -> tuple[list[dict[str, object]], list[dict[str, object]], list[dict[str, object]]]:
+    family_states = _latest_family_states(observations)
+    crm = family_states.get("crm")
+    bank = family_states.get("bank")
+    accounting = family_states.get("accounting")
+    evidence = [
+        _observation_snapshot(observation)
+        for observation in [crm, bank, accounting]
+        if observation is not None
+    ]
+
+    detected: list[dict[str, object]] = []
+    repairs: list[dict[str, object]] = []
+    if (
+        crm is not None
+        and bank is not None
+        and accounting is not None
+        and crm.state in CRM_WAITING_PAYMENT_STATES
+        and bank.state in BANK_PAID_STATES
+        and accounting.state in ACCOUNTING_NOT_EXPORTED_STATES
+    ):
+        subject = _subject_label(subject_type, subject_id)
+        detected.append(
+            {
+                "exception_type": "crm_payment_mismatch",
+                "severity": "warning",
+                "status": "detected",
+                "subject_type": subject_type,
+                "subject_id": subject_id,
+                "subject": subject,
+                "title": "Payment received but CRM and accounting lag behind",
+                "summary": (
+                    "Bank evidence shows payment while CRM is still waiting for payment "
+                    "and accounting export is not completed."
+                ),
+                "confidence": "high",
+                "impact": {
+                    "cash_state": "received",
+                    "operational_risk": "manual follow-up required",
+                    "accounting_export_state": accounting.state,
+                },
+                "evidence": evidence,
+                "would_create": "BusinessException",
+            }
+        )
+        repairs.append(
+            {
+                "action_type": "sync_status",
+                "safety_level": "medium",
+                "requires_approval": True,
+                "status": "suggested",
+                "subject_type": subject_type,
+                "subject_id": subject_id,
+                "summary": "Synchronize CRM status from verified bank evidence, then unblock accounting export.",
+                "payload": {
+                    "target_adapter_key": crm.system_key,
+                    "desired_state": "paid",
+                    "source_evidence": bank.system_key,
+                    "accounting_follow_up": accounting.system_key,
+                    "external_mutation": False,
+                },
+                "would_create": "RepairAction",
+            }
+        )
+
+    return detected, repairs, evidence
+
+
+async def preview_business_detections(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    payload: BusinessDetectionPreviewCreate,
+) -> dict[str, object]:
+    await ensure_tenant_exists(session, tenant_id)
+    query = (
+        select(BusinessStateObservation)
+        .where(BusinessStateObservation.tenant_id == tenant_id)
+        .order_by(BusinessStateObservation.observed_at.desc(), BusinessStateObservation.created_at.desc())
+        .limit(payload.limit)
+    )
+    if payload.subject_type:
+        query = query.where(BusinessStateObservation.subject_type == payload.subject_type)
+    if payload.subject_id:
+        query = query.where(BusinessStateObservation.subject_id == payload.subject_id)
+
+    result = await session.execute(query)
+    observations = list(result.scalars().all())
+    grouped: dict[tuple[str, str], list[BusinessStateObservation]] = {}
+    for observation in observations:
+        grouped.setdefault((observation.subject_type, observation.subject_id), []).append(observation)
+
+    detected_exceptions: list[dict[str, object]] = []
+    suggested_repairs: list[dict[str, object]] = []
+    evidence: list[dict[str, object]] = []
+    for (subject_type, subject_id), subject_observations in grouped.items():
+        detected, repairs, subject_evidence = _detect_payment_reconciliation_subject(
+            subject_type=subject_type,
+            subject_id=subject_id,
+            observations=subject_observations,
+        )
+        detected_exceptions.extend(detected)
+        suggested_repairs.extend(repairs)
+        evidence.extend(subject_evidence)
+
+    source_systems = sorted({observation.system_key for observation in observations})
+    summary = (
+        f"{payload.rule_set} detector reviewed {len(grouped)} subject(s), "
+        f"{len(observations)} observation(s), and found {len(detected_exceptions)} exception candidate(s)."
+    )
+    return {
+        "tenant_id": tenant_id,
+        "rule_set": payload.rule_set,
+        "subject_type": payload.subject_type,
+        "subject_id": payload.subject_id,
+        "generated_at": datetime.now(UTC),
+        "summary": summary,
+        "source_systems": source_systems,
+        "observations": evidence,
+        "detected_exceptions": detected_exceptions,
+        "suggested_repair_actions": suggested_repairs,
+        "rules": [
+            {
+                "key": "payment_reconciliation.crm_bank_accounting_mismatch",
+                "status": "active",
+                "if": [
+                    "crm.state in invoice_sent,awaiting_payment,unpaid",
+                    "bank.state in paid,settled,captured",
+                    "accounting.state in not_exported,waiting_for_crm_status,export_pending",
+                ],
+                "then": [
+                    "detect crm_payment_mismatch",
+                    "suggest sync_status repair action",
+                    "keep execution approval-gated",
+                ],
+            }
+        ],
+        "api": {
+            "preview": "POST /tenants/{tenant_id}/business-detections/preview",
+            "observations": "POST /tenants/{tenant_id}/business-state/observations",
+            "exceptions": "POST /tenants/{tenant_id}/business-exceptions",
+            "repair": "POST /tenants/{tenant_id}/business-exceptions/{business_exception_id}/repair-actions",
+            "briefing": "POST /tenants/{tenant_id}/business-briefings/preview",
         },
     }
 

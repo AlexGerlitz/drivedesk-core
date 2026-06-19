@@ -647,6 +647,46 @@ def test_business_control_tower_exception_and_repair_flow(
         "accounting.export.mock",
     }
 
+    detection_response = client.post(
+        f"/tenants/{tenant_id}/business-detections/preview",
+        json={
+            "rule_set": "payment_reconciliation",
+            "subject_type": "deal",
+            "subject_id": "DEAL-2026-001",
+        },
+        headers=owner_headers,
+    )
+    assert detection_response.status_code == 200
+    detection = detection_response.json()
+    assert detection["rule_set"] == "payment_reconciliation"
+    assert detection["subject_type"] == "deal"
+    assert detection["subject_id"] == "DEAL-2026-001"
+    assert detection["source_systems"] == [
+        "accounting.export.mock",
+        "bank.statement.mock",
+        "crm.bitrix24.mock",
+    ]
+    assert "found 1 exception candidate" in detection["summary"]
+    assert len(detection["detected_exceptions"]) == 1
+    detected_exception = detection["detected_exceptions"][0]
+    assert detected_exception["exception_type"] == "crm_payment_mismatch"
+    assert detected_exception["severity"] == "warning"
+    assert detected_exception["confidence"] == "high"
+    assert detected_exception["would_create"] == "BusinessException"
+    assert {item["system_family"] for item in detected_exception["evidence"]} == {
+        "accounting",
+        "bank",
+        "crm",
+    }
+    assert len(detection["suggested_repair_actions"]) == 1
+    suggested_repair = detection["suggested_repair_actions"][0]
+    assert suggested_repair["action_type"] == "sync_status"
+    assert suggested_repair["requires_approval"] is True
+    assert suggested_repair["payload"]["external_mutation"] is False
+    assert suggested_repair["would_create"] == "RepairAction"
+    assert detection["api"]["preview"] == "POST /tenants/{tenant_id}/business-detections/preview"
+    assert detection["api"]["briefing"] == "POST /tenants/{tenant_id}/business-briefings/preview"
+
     business_exception_response = client.post(
         f"/tenants/{tenant_id}/business-exceptions",
         json={

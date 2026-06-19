@@ -8,9 +8,10 @@ The first public-safe slice models a common cross-system failure:
 1. CRM still says a deal is waiting for payment.
 2. Bank evidence says payment was received.
 3. Accounting export has not been sent.
-4. DriveDesk opens a business exception.
-5. A repair action is proposed, approved, and executed in dry-run mode.
-6. A role briefing turns the raw evidence into the next useful operator view.
+4. DriveDesk previews the detected mismatch before mutating data.
+5. DriveDesk opens a business exception.
+6. A repair action is proposed, approved, and executed in dry-run mode.
+7. A role briefing turns the raw evidence into the next useful operator view.
 
 This is intentionally not another workflow automation demo. The control tower
 tracks business state across systems, detects an exception, records impact, and
@@ -20,6 +21,7 @@ keeps the repair path auditable.
 
 | Step | Endpoint | Purpose |
 | --- | --- | --- |
+| Preview detections | `POST /tenants/{tenant_id}/business-detections/preview` | Detect exception candidates and suggested repair actions from observations without mutating data. |
 | Preview briefing | `POST /tenants/{tenant_id}/business-briefings/preview` | Build a role-specific work briefing from observations, exceptions, and repair actions without mutating data. |
 | Observe state | `POST /tenants/{tenant_id}/business-state/observations` | Record a normalized state sample from CRM, bank, accounting, support, or another connected system. |
 | List observations | `GET /tenants/{tenant_id}/business-state/observations` | Review the tenant-scoped state timeline for a subject. |
@@ -33,6 +35,7 @@ keeps the repair path auditable.
 
 | Model | Meaning |
 | --- | --- |
+| `BusinessDetectionPreview` | A read-only detector result with matched rules, exception candidates, repair suggestions, and evidence. |
 | `BusinessBriefing` | A read-model for the current operator role, subject, evidence, risks, and next actions. |
 | `BusinessStateObservation` | One normalized fact from an external system. |
 | `BusinessException` | A business problem derived from observations. |
@@ -55,6 +58,27 @@ work. For example, an accountant can open a payment mismatch and see:
 The preview is read-only. It does not create records, approve repairs, or write
 to external systems. It composes the current tenant-scoped state into a compact
 work surface.
+
+## Detection Preview
+
+The detection preview is the automatic step before a real exception is created.
+The first public-safe rule set is `payment_reconciliation`.
+
+It matches:
+
+- CRM says `invoice_sent`;
+- bank says `paid`;
+- accounting says `not_exported`.
+
+It returns:
+
+- a `crm_payment_mismatch` exception candidate;
+- source observation evidence;
+- a suggested approval-gated `sync_status` repair action;
+- API links for committing the exception, repair, and role briefing.
+
+The preview is read-only. It does not create `BusinessException`,
+`RepairAction`, or outbox records.
 
 ## Safety Boundary
 
@@ -81,6 +105,7 @@ The public demo includes a `businessControlTower` payload with:
 
 - synthetic observations from `crm.bitrix24.mock`, `bank.statement.mock`, and
   `accounting.export.mock`;
+- one `payment_reconciliation` detection preview;
 - one `crm_payment_mismatch` exception;
 - one approval-gated `sync_status` repair action;
 - one accountant briefing with source systems, highlights, recommended actions,

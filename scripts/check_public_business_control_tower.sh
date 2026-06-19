@@ -50,6 +50,7 @@ def read(path: Path) -> str:
 doc_path = root / "docs/public/BUSINESS_CONTROL_TOWER.md"
 adr_path = root / "docs/adr/0064-business-operations-control-tower.md"
 briefing_adr_path = root / "docs/adr/0065-business-role-briefings.md"
+detection_adr_path = root / "docs/adr/0066-business-detection-preview.md"
 demo_data_path = root / "apps/admin/public-demo/demo-data.js"
 demo_html_path = root / "apps/admin/public-demo/index.html"
 demo_app_path = root / "apps/admin/public-demo/app.js"
@@ -58,7 +59,7 @@ ci_smoke_path = root / "scripts/ci_smoke.sh"
 public_smoke_path = root / "scripts/ci_smoke_public.sh"
 is_public_export = (root / "PUBLIC_EXPORT_MANIFEST.md").is_file()
 
-for path in [doc_path, adr_path, briefing_adr_path, demo_data_path, demo_html_path, demo_app_path]:
+for path in [doc_path, adr_path, briefing_adr_path, detection_adr_path, demo_data_path, demo_html_path, demo_app_path]:
     require(path.is_file(), f"missing file: {path.relative_to(root)}")
 
 api_payload = build_public_demo_payload()
@@ -69,6 +70,25 @@ require(
     {item.get("label") for item in control.get("summary", [])}
     >= {"Observed systems", "Open exceptions", "Repair actions", "External writes"},
     "businessControlTower summary missing required cards",
+)
+detection = control.get("detection", {})
+require(detection.get("ruleSet") == "payment_reconciliation", "businessControlTower detection rule mismatch")
+require(detection.get("status") == "detected", "businessControlTower detection status mismatch")
+require(
+    {item.get("type") for item in detection.get("detectedExceptions", [])} == {"crm_payment_mismatch"},
+    "businessControlTower detection exception mismatch",
+)
+require(
+    {item.get("action") for item in detection.get("suggestedRepairActions", [])} == {"sync_status"},
+    "businessControlTower detection repair action mismatch",
+)
+require(
+    {item.get("externalMutation") for item in detection.get("suggestedRepairActions", [])} == {False},
+    "businessControlTower detection suggested repair must be public-safe",
+)
+require(
+    detection.get("api", {}).get("preview") == "POST /tenants/{tenant_id}/business-detections/preview",
+    "businessControlTower detection preview endpoint missing",
 )
 briefing = control.get("briefing", {})
 require(briefing.get("role") == "accountant", "businessControlTower briefing role mismatch")
@@ -127,6 +147,7 @@ require(
 openapi = build_app().openapi()
 paths = set(openapi.get("paths", {}))
 required_paths = {
+    "/tenants/{tenant_id}/business-detections/preview",
     "/tenants/{tenant_id}/business-briefings/preview",
     "/tenants/{tenant_id}/business-state/observations",
     "/tenants/{tenant_id}/business-exceptions",
@@ -141,6 +162,7 @@ require(required_paths.issubset(paths), "OpenAPI missing business control paths"
 doc_text = read(doc_path)
 for needle in [
     "Business Operations Control Tower",
+    "POST /tenants/{tenant_id}/business-detections/preview",
     "POST /tenants/{tenant_id}/business-briefings/preview",
     "POST /tenants/{tenant_id}/business-state/observations",
     "BusinessBriefing",
@@ -155,6 +177,8 @@ html = read(demo_html_path)
 for needle in [
     'data-view="control"',
     'id="controlTowerSummaryRows"',
+    'id="controlTowerDetectionRows"',
+    'id="controlTowerDetectionRepairRows"',
     'id="controlTowerBriefingRows"',
     'id="controlTowerBriefingActionRows"',
     'id="controlTowerObservationRows"',
@@ -166,6 +190,8 @@ for needle in [
 app_js = read(demo_app_path)
 for needle in [
     "businessControlTower",
+    "controlTowerDetectionRows",
+    "business-detections/preview",
     "controlTowerBriefingRows",
     "fillBusinessControlTower",
     "controlTowerSummaryRows",
@@ -185,6 +211,10 @@ else:
     require(
         'copy_path "docs/adr/0065-business-role-briefings.md"' in read(export_script_path),
         "export script missing ADR 0065",
+    )
+    require(
+        'copy_path "docs/adr/0066-business-detection-preview.md"' in read(export_script_path),
+        "export script missing ADR 0066",
     )
     require(
         'copy_path "scripts/check_public_business_control_tower.sh"' in read(export_script_path),

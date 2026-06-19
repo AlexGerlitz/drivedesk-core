@@ -37,6 +37,10 @@
     return "";
   }
 
+  function businessDetectionPreviewEndpoint() {
+    return "POST /tenants/{tenant_id}/business-detections/preview";
+  }
+
   function isValidDemoPayload(payload) {
     return Boolean(
       payload &&
@@ -69,6 +73,10 @@
         Array.isArray(payload.incidentResponse.resolutionEvidence) &&
         payload.businessControlTower &&
         Array.isArray(payload.businessControlTower.summary) &&
+        payload.businessControlTower.detection &&
+        Array.isArray(payload.businessControlTower.detection.rules) &&
+        Array.isArray(payload.businessControlTower.detection.detectedExceptions) &&
+        Array.isArray(payload.businessControlTower.detection.suggestedRepairActions) &&
         payload.businessControlTower.briefing &&
         Array.isArray(payload.businessControlTower.briefing.highlights) &&
         Array.isArray(payload.businessControlTower.briefing.recommendedActions) &&
@@ -900,6 +908,74 @@
       summaryRows.appendChild(card);
     });
 
+    var detection = controlTower.detection;
+    var detectionRows = document.getElementById("controlTowerDetectionRows");
+    clear(detectionRows);
+
+    var detectionSummary = document.createElement("article");
+    detectionSummary.className = "event-row";
+    var detectionTop = document.createElement("div");
+    detectionTop.className = "event-top";
+    var detectorName = document.createElement("strong");
+    detectorName.appendChild(text(detection.ruleSet));
+    detectionTop.append(detectorName, chip(detection.status, statusTone(detection.status)));
+
+    var detectionDetail = document.createElement("span");
+    detectionDetail.className = "muted";
+    detectionDetail.appendChild(text(detection.summary));
+
+    var detectionApi = document.createElement("code");
+    detectionApi.appendChild(text((detection.api && detection.api.preview) || businessDetectionPreviewEndpoint()));
+
+    detectionSummary.append(detectionTop, detectionDetail, detectionApi);
+    detectionRows.appendChild(detectionSummary);
+
+    detection.detectedExceptions.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(item.type));
+      top.append(title, chip(item.severity, statusTone(item.severity)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.subject + " - confidence " + item.confidence + " - " + item.wouldCreate));
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(item.evidence));
+
+      row.append(top, detail, evidence);
+      detectionRows.appendChild(row);
+    });
+
+    var detectionRepairRows = document.getElementById("controlTowerDetectionRepairRows");
+    clear(detectionRepairRows);
+    detection.suggestedRepairActions.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var action = document.createElement("strong");
+      action.appendChild(text(item.action));
+      top.append(action, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text("approval " + String(item.requiresApproval) + " - external mutation " + String(item.externalMutation))
+      );
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(item.wouldCreate + " - " + item.evidence));
+
+      row.append(top, detail, evidence);
+      detectionRepairRows.appendChild(row);
+    });
+
     var briefing = controlTower.briefing;
     var briefingRows = document.getElementById("controlTowerBriefingRows");
     clear(briefingRows);
@@ -1069,11 +1145,11 @@
 
   function statusTone(status) {
     if (
-      ["done", "ready", "online", "validated", "processed", "green", "active", "success", "observed", "matched", "resolved", "passed", "routed", "approved", "executed", "paid", "available"].indexOf(status) >= 0
+      ["done", "ready", "online", "validated", "processed", "green", "active", "success", "observed", "matched", "resolved", "passed", "routed", "approved", "executed", "paid", "available", "detected"].indexOf(status) >= 0
     ) {
       return "green";
     }
-    if (["blocked", "waiting", "pending", "retry", "partial_success", "current", "open", "acknowledged", "warning", "attention", "review_required", "mitigating", "fired", "proposed", "invoice_sent", "not_exported"].indexOf(status) >= 0) {
+    if (["blocked", "waiting", "pending", "retry", "partial_success", "current", "open", "acknowledged", "warning", "attention", "review_required", "mitigating", "fired", "proposed", "suggested", "invoice_sent", "not_exported"].indexOf(status) >= 0) {
       return "amber";
     }
     if (["high", "dead_letter", "critical"].indexOf(status) >= 0) {

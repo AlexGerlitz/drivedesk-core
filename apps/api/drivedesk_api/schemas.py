@@ -18,6 +18,7 @@ RepairActionSafetyLevel = Literal["low", "medium", "high"]
 RepairActionExecutionMode = Literal["dry_run", "commit_request"]
 BusinessBriefingRole = Literal["operator", "accountant", "manager", "owner", "support"]
 BusinessBriefingRiskLevel = Literal["normal", "attention", "critical"]
+BusinessDetectionRuleSet = Literal["payment_reconciliation"]
 
 
 class AdapterContractRead(BaseModel):
@@ -513,6 +514,28 @@ class BusinessBriefingRead(BaseModel):
     recommended_actions: list[dict[str, Any]] = Field(default_factory=list)
     review_points: list[dict[str, Any]] = Field(default_factory=list)
     evidence: list[dict[str, Any]] = Field(default_factory=list)
+    api: dict[str, str] = Field(default_factory=dict)
+
+
+class BusinessDetectionPreviewCreate(BaseModel):
+    rule_set: BusinessDetectionRuleSet = "payment_reconciliation"
+    subject_type: str | None = Field(default=None, min_length=2, max_length=64, pattern=r"^[a-z0-9][a-z0-9_-]*$")
+    subject_id: str | None = Field(default=None, min_length=1, max_length=128)
+    limit: int = Field(default=50, ge=1, le=100)
+
+
+class BusinessDetectionPreviewRead(BaseModel):
+    tenant_id: str
+    rule_set: BusinessDetectionRuleSet
+    subject_type: str | None = None
+    subject_id: str | None = None
+    generated_at: datetime
+    summary: str
+    source_systems: list[str] = Field(default_factory=list)
+    observations: list[dict[str, Any]] = Field(default_factory=list)
+    detected_exceptions: list[dict[str, Any]] = Field(default_factory=list)
+    suggested_repair_actions: list[dict[str, Any]] = Field(default_factory=list)
+    rules: list[dict[str, Any]] = Field(default_factory=list)
     api: dict[str, str] = Field(default_factory=dict)
 
 

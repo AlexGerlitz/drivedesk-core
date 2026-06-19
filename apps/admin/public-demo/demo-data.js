@@ -35,7 +35,7 @@ window.DRIVEDESK_DEMO_DATA = {
     },
     {
       "label": "OpenAPI paths",
-      "value": "42",
+      "value": "43",
       "detail": "generated contract",
       "tone": "violet"
     },
@@ -770,6 +770,49 @@ window.DRIVEDESK_DEMO_DATA = {
         "tone": "violet"
       }
     ],
+    "detection": {
+      "ruleSet": "payment_reconciliation",
+      "status": "detected",
+      "summary": "Detector reviewed CRM, bank, and accounting observations and found one payment reconciliation exception candidate.",
+      "rules": [
+        {
+          "key": "payment_reconciliation.crm_bank_accounting_mismatch",
+          "status": "active",
+          "if": [
+            "crm.state=invoice_sent",
+            "bank.state=paid",
+            "accounting.state=not_exported"
+          ],
+          "then": [
+            "detect crm_payment_mismatch",
+            "suggest sync_status repair"
+          ]
+        }
+      ],
+      "detectedExceptions": [
+        {
+          "type": "crm_payment_mismatch",
+          "severity": "warning",
+          "confidence": "high",
+          "subject": "deal:DEAL-2026-001",
+          "wouldCreate": "BusinessException",
+          "evidence": "business_detection.previewed"
+        }
+      ],
+      "suggestedRepairActions": [
+        {
+          "action": "sync_status",
+          "status": "suggested",
+          "requiresApproval": true,
+          "externalMutation": false,
+          "wouldCreate": "RepairAction",
+          "evidence": "business_detection.previewed"
+        }
+      ],
+      "api": {
+        "preview": "POST /tenants/{tenant_id}/business-detections/preview"
+      }
+    },
     "briefing": {
       "role": "accountant",
       "riskLevel": "attention",

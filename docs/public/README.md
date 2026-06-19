@@ -130,7 +130,10 @@ The public repository export also generates:
 - `incidentResponse` - public-safe incident response contract in the demo
   payload and Incidents tab.
 - `businessControlTower` - public-safe control tower contract for CRM, bank,
-  accounting, business exception, repair-action flow, and role briefing preview.
+  accounting, detection preview, business exception, repair-action flow, and
+  role briefing preview.
+- `POST /tenants/{tenant_id}/business-detections/preview` - read-only
+  exception candidate detection from normalized business observations.
 - `POST /tenants/{tenant_id}/business-briefings/preview` - read-only
   role-context briefing over observations, exceptions, and repair actions.
 - `GET /business-record-lifecycle-policies` - public-safe lifecycle policy catalog.

@@ -238,6 +238,20 @@ assert {item["label"] for item in control_tower["summary"]} >= {
     "Repair actions",
     "External writes",
 }, demo
+assert control_tower["detection"]["ruleSet"] == "payment_reconciliation", demo
+assert control_tower["detection"]["status"] == "detected", demo
+assert {item["type"] for item in control_tower["detection"]["detectedExceptions"]} == {
+    "crm_payment_mismatch"
+}, demo
+assert {item["action"] for item in control_tower["detection"]["suggestedRepairActions"]} == {
+    "sync_status"
+}, demo
+assert {item["externalMutation"] for item in control_tower["detection"]["suggestedRepairActions"]} == {
+    False
+}, demo
+assert control_tower["detection"]["api"]["preview"] == (
+    "POST /tenants/{tenant_id}/business-detections/preview"
+), demo
 assert control_tower["briefing"]["role"] == "accountant", demo
 assert control_tower["briefing"]["riskLevel"] == "attention", demo
 assert set(control_tower["briefing"]["sourceSystems"]) >= {

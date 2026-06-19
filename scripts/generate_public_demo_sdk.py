@@ -23,6 +23,8 @@ BUSINESS_ACTION_EXECUTION_PATH = "/demo/business-action-execution"
 BUSINESS_ACTION_EXECUTION_METHOD = "get"
 BUSINESS_APPROVAL_GATEWAY_PATH = "/demo/business-approval-gateway"
 BUSINESS_APPROVAL_GATEWAY_METHOD = "get"
+INTEGRATION_RUNTIME_PATH = "/demo/integration-runtime"
+INTEGRATION_RUNTIME_METHOD = "get"
 BUSINESS_SCENARIO_REPLAY_PATH = "/demo/business-scenario-replay"
 BUSINESS_SCENARIO_REPLAY_METHOD = "get"
 
@@ -92,6 +94,14 @@ def business_approval_gateway_operation(schema: dict[str, Any]) -> dict[str, Any
         schema,
         BUSINESS_APPROVAL_GATEWAY_PATH,
         BUSINESS_APPROVAL_GATEWAY_METHOD,
+    )
+
+
+def integration_runtime_operation(schema: dict[str, Any]) -> dict[str, Any]:
+    return required_operation(
+        schema,
+        INTEGRATION_RUNTIME_PATH,
+        INTEGRATION_RUNTIME_METHOD,
     )
 
 
@@ -182,6 +192,16 @@ def business_approval_gateway_required_fields(schema: dict[str, Any]) -> list[st
     required = gateway.get("required", [])
     if not isinstance(required, list) or not required:
         raise SystemExit("OpenAPI schema does not contain BusinessApprovalGatewayDemoRead.required")
+    return [str(item) for item in required]
+
+
+def integration_runtime_required_fields(schema: dict[str, Any]) -> list[str]:
+    components = schema.get("components", {})
+    schemas = components.get("schemas", {})
+    runtime = schemas.get("IntegrationRuntimeDemoRead", {})
+    required = runtime.get("required", [])
+    if not isinstance(required, list) or not required:
+        raise SystemExit("OpenAPI schema does not contain IntegrationRuntimeDemoRead.required")
     return [str(item) for item in required]
 
 
@@ -1524,6 +1544,7 @@ def render_readme(
     business_context_assistant_operation_id: str,
     business_action_execution_operation_id: str,
     business_approval_gateway_operation_id: str,
+    integration_runtime_operation_id: str,
     business_scenario_operation_id: str,
 ) -> str:
     return f'''# Generated Public Demo SDK
@@ -1561,6 +1582,9 @@ operationId: {business_action_execution_operation_id}
 GET {BUSINESS_APPROVAL_GATEWAY_PATH}
 operationId: {business_approval_gateway_operation_id}
 
+GET {INTEGRATION_RUNTIME_PATH}
+operationId: {integration_runtime_operation_id}
+
 GET {BUSINESS_SCENARIO_REPLAY_PATH}
 operationId: {business_scenario_operation_id}
 ```
@@ -1587,6 +1611,8 @@ Adapter operation helpers:
   `GET {BUSINESS_ACTION_EXECUTION_PATH}`
 - `business_approval_gateway` manifest entry for
   `GET {BUSINESS_APPROVAL_GATEWAY_PATH}`
+- `integration_runtime` manifest entry for
+  `GET {INTEGRATION_RUNTIME_PATH}`
 - `DriveDeskPublicDemoClient.getBusinessScenarioReplay`
 - `DriveDeskPublicDemoClient.get_business_scenario_replay`
 
@@ -1618,6 +1644,11 @@ Business approval gateway metadata validates the public-safe approval preview:
 approval requests, RBAC and dual-control checks, approver routing, blocked
 commit unlocks, and explicit no-provider-write boundaries.
 
+Integration runtime metadata validates the public-safe adapter runtime:
+operation contract selection, scope and idempotency preflight, outbox handoff,
+worker boundary, reconciliation planning, incident routing, and no provider
+calls in the public demo.
+
 Engineering summary: this is the public-safe integration proof. DriveDesk
 publishes an OpenAPI contract and generates a small SDK from it instead of
 relying on hand-written request examples only.
@@ -1641,6 +1672,8 @@ def render_manifest(
     business_action_execution_required_fields: list[str],
     business_approval_gateway_operation_id: str,
     business_approval_gateway_required_fields: list[str],
+    integration_runtime_operation_id: str,
+    integration_runtime_required_fields: list[str],
     business_scenario_operation_id: str,
     business_scenario_required_fields: list[str],
 ) -> str:
@@ -1691,6 +1724,12 @@ def render_manifest(
             "method": BUSINESS_APPROVAL_GATEWAY_METHOD.upper(),
             "operation_id": business_approval_gateway_operation_id,
             "required_fields": business_approval_gateway_required_fields,
+        },
+        "integration_runtime": {
+            "path": INTEGRATION_RUNTIME_PATH,
+            "method": INTEGRATION_RUNTIME_METHOD.upper(),
+            "operation_id": integration_runtime_operation_id,
+            "required_fields": integration_runtime_required_fields,
         },
         "business_scenario_replay": {
             "path": BUSINESS_SCENARIO_REPLAY_PATH,
@@ -1765,6 +1804,11 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
         or "get_business_approval_gateway"
     )
     business_approval_gateway_fields = business_approval_gateway_required_fields(schema)
+    integration_runtime_op = integration_runtime_operation(schema)
+    integration_runtime_operation_id = str(
+        integration_runtime_op.get("operationId") or "get_integration_runtime"
+    )
+    integration_runtime_fields = integration_runtime_required_fields(schema)
     business_scenario_operation = business_scenario_replay_operation(schema)
     business_scenario_operation_id = str(
         business_scenario_operation.get("operationId") or "get_business_scenario_replay"
@@ -1780,6 +1824,7 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
             business_context_assistant_operation_id,
             business_action_execution_operation_id,
             business_approval_gateway_operation_id,
+            integration_runtime_operation_id,
             business_scenario_operation_id,
         ),
     )
@@ -1802,6 +1847,8 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
             business_action_execution_fields,
             business_approval_gateway_operation_id,
             business_approval_gateway_fields,
+            integration_runtime_operation_id,
+            integration_runtime_fields,
             business_scenario_operation_id,
             business_scenario_required_fields,
         ),

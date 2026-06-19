@@ -57,6 +57,7 @@ from drivedesk_api.schemas import (
     IntegrationIncidentStatusChange,
     IntegrationMappingPreviewCreate,
     IntegrationReconciliationCreate,
+    IntegrationRuntimePreviewCreate,
     MembershipCreate,
     OutboxEventRetryRequest,
     PlatformAdminCreate,
@@ -72,6 +73,7 @@ from drivedesk_core import (
     AdapterValidationError,
     build_adapter_connection_diagnostics,
     build_adapter_mapping_preview,
+    build_adapter_runtime_plan,
     list_adapter_descriptors,
     list_integration_runbooks,
     resolve_adapter,
@@ -558,6 +560,73 @@ async def preview_integration_mapping(
         )
     except (AdapterExecutionError, AdapterValidationError) as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=exc.message) from exc
+
+
+async def preview_integration_runtime(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    payload: IntegrationRuntimePreviewCreate,
+) -> dict[str, object]:
+    await ensure_tenant_exists(session, tenant_id)
+    try:
+        plan = build_adapter_runtime_plan(
+            payload.adapter_key,
+            operation_key=payload.operation_key,
+            scopes=payload.connection_scopes or None,
+            execution_mode=payload.execution_mode,
+        )
+    except (AdapterExecutionError, AdapterValidationError) as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=exc.message) from exc
+
+    operation_contract = plan["operation_contract"]
+    if not isinstance(operation_contract, dict):
+        operation_contract = {}
+    operation_key = str(operation_contract.get("key") or payload.operation_key or "unknown")
+    reconciliation_plan = plan.get("reconciliation_plan", [])
+    incident_routes = plan.get("incident_routes", [])
+
+    return {
+        "tenant_id": tenant_id,
+        "runtime_kind": payload.runtime_kind,
+        "adapter_key": str(plan["adapter_key"]),
+        "operation_key": operation_key,
+        "execution_mode": payload.execution_mode,
+        "generated_at": datetime.now(UTC),
+        "status": "previewed",
+        "summary": (
+            f"Integration runtime preview selected {plan['adapter_key']}.{operation_key}, "
+            f"prepared {len(plan.get('runtime_steps', []))} runtime step(s), "
+            f"{len(plan.get('preflight_checks', []))} preflight check(s), and "
+            f"{len(incident_routes) if payload.include_incident_routes else 0} incident route(s)."
+        ),
+        "operation_contract": operation_contract,
+        "runtime_steps": plan.get("runtime_steps", []),
+        "preflight_checks": plan.get("preflight_checks", []),
+        "outbox_handoff": plan.get("outbox_handoff", {}),
+        "worker_boundary": plan.get("worker_boundary", {}),
+        "reconciliation_plan": reconciliation_plan if payload.include_reconciliation else [],
+        "incident_routes": incident_routes if payload.include_incident_routes else [],
+        "data_boundaries": plan.get("data_boundaries", []),
+        "evidence": [
+            {
+                "type": "integration_runtime",
+                "event": "adapter_runtime.previewed",
+                "adapter_key": str(plan["adapter_key"]),
+                "operation_key": operation_key,
+                "execution_mode": payload.execution_mode,
+                "external_mutation": False,
+                "provider_call_enabled": False,
+            }
+        ],
+        "api": {
+            "preview": "POST /tenants/{tenant_id}/integration-runtime/preview",
+            "adapters": "GET /integration-adapters",
+            "runbooks": "GET /integration-runbooks",
+            "operator_review": "GET /tenants/{tenant_id}/integration-operator-review",
+            "outbox": "GET /tenants/{tenant_id}/outbox",
+        },
+    }
 
 
 async def _active_connection_for_file_import(

@@ -29,6 +29,8 @@ BusinessWorkbenchContextKind = Literal["role_assist"]
 BusinessTaskHandoffKind = Literal["action_plan_task_handoff"]
 BusinessActionExecutionKind = Literal["action_plan_execution_preview"]
 BusinessApprovalGatewayKind = Literal["execution_approval_gateway"]
+IntegrationRuntimeKind = Literal["adapter_operation_runtime"]
+IntegrationRuntimeExecutionMode = Literal["contract_only", "dry_run", "commit_request"]
 
 
 class AdapterContractRead(BaseModel):
@@ -358,6 +360,37 @@ class IntegrationMappingPreviewRead(BaseModel):
     records_accepted: int
     records_rejected: int
     records: list[IntegrationMappingPreviewRecordRead]
+
+
+class IntegrationRuntimePreviewCreate(BaseModel):
+    runtime_kind: IntegrationRuntimeKind = "adapter_operation_runtime"
+    adapter_key: str = Field(default="crm.bitrix24.mock", min_length=2, max_length=128, pattern=r"^[a-z0-9][a-z0-9_.-]*$")
+    operation_key: str | None = Field(default="crm_deal_ingest_execute", min_length=2, max_length=128, pattern=r"^[a-z0-9][a-z0-9_.-]*$")
+    connection_scopes: list[str] = Field(default_factory=list, max_length=8)
+    execution_mode: IntegrationRuntimeExecutionMode = "contract_only"
+    include_reconciliation: bool = True
+    include_incident_routes: bool = True
+
+
+class IntegrationRuntimePreviewRead(BaseModel):
+    tenant_id: str
+    runtime_kind: IntegrationRuntimeKind
+    adapter_key: str
+    operation_key: str
+    execution_mode: IntegrationRuntimeExecutionMode
+    generated_at: datetime
+    status: Literal["previewed"]
+    summary: str
+    operation_contract: dict[str, Any] = Field(default_factory=dict)
+    runtime_steps: list[dict[str, Any]] = Field(default_factory=list)
+    preflight_checks: list[dict[str, Any]] = Field(default_factory=list)
+    outbox_handoff: dict[str, Any] = Field(default_factory=dict)
+    worker_boundary: dict[str, Any] = Field(default_factory=dict)
+    reconciliation_plan: list[dict[str, Any]] = Field(default_factory=list)
+    incident_routes: list[dict[str, Any]] = Field(default_factory=list)
+    data_boundaries: list[dict[str, Any]] = Field(default_factory=list)
+    evidence: list[dict[str, Any]] = Field(default_factory=list)
+    api: dict[str, str] = Field(default_factory=dict)
 
 
 class BusinessRecordCreate(BaseModel):
@@ -1002,6 +1035,25 @@ class BusinessApprovalGatewayDemoRead(BaseModel):
     docs: list[dict[str, str]]
 
 
+class IntegrationRuntimeDemoRead(BaseModel):
+    status: Literal["previewed"]
+    command: str
+    summary: list[dict[str, Any]]
+    adapterKey: str
+    operationKey: str
+    executionMode: str
+    operationContract: dict[str, Any]
+    runtimeSteps: list[dict[str, Any]]
+    preflightChecks: list[dict[str, Any]]
+    outboxHandoff: dict[str, Any]
+    workerBoundary: dict[str, Any]
+    reconciliationPlan: list[dict[str, Any]]
+    incidentRoutes: list[dict[str, Any]]
+    dataBoundaries: list[dict[str, Any]]
+    api: dict[str, str]
+    docs: list[dict[str, str]]
+
+
 class PublicDemoRead(BaseModel):
     schemaVersion: int
     generatedAt: str
@@ -1017,6 +1069,7 @@ class PublicDemoRead(BaseModel):
     adapters: list[dict[str, Any]]
     adapterScenarios: list[dict[str, Any]]
     adapterStudio: dict[str, Any]
+    integrationRuntime: dict[str, Any]
     connectorFixtureReplay: dict[str, Any]
     businessIntakePipeline: dict[str, Any]
     businessTaskHandoff: dict[str, Any]

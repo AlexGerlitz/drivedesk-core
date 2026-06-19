@@ -29,6 +29,8 @@ Demo endpoints:
   as a standalone synthetic contract.
 - `GET /demo/business-approval-gateway` returns the same approval gateway proof
   as a standalone synthetic contract.
+- `GET /demo/integration-runtime` returns the same Integration Runtime proof
+  as a standalone synthetic contract.
 - `GET /demo/business-scenario-replay` returns reusable Business OS scenario
   replay data as a standalone synthetic contract.
 

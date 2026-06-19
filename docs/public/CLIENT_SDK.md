@@ -16,6 +16,7 @@ GET /demo/public
 GET /demo/connector-fixture-replay
 GET /demo/business-action-execution
 GET /demo/business-approval-gateway
+GET /demo/integration-runtime
 GET /demo/business-scenario-replay
 ```
 
@@ -26,6 +27,10 @@ The action execution payload appears in the public contract as
 The approval gateway payload appears in the public contract as
 `businessApprovalGateway` and is documented in
 `docs/public/BUSINESS_APPROVAL_GATEWAY.md`.
+
+The Integration Runtime payload appears in the public contract as
+`integrationRuntime` and is documented in
+`docs/public/INTEGRATION_RUNTIME.md`.
 
 ## Generated Files
 
@@ -63,6 +68,7 @@ It reads the OpenAPI schema, finds `GET /demo/public`,
 `GET /demo/connector-fixture-replay`,
 `GET /demo/business-action-execution`, and
 `GET /demo/business-approval-gateway`, and
+`GET /demo/integration-runtime`, and
 `GET /demo/business-scenario-replay`, extracts operation ids and required
 response fields, and writes small public-safe clients.
 
@@ -90,6 +96,7 @@ The SDK includes typed helpers around `adapterScenarios`:
 - `DriveDeskPublicDemoClient.get_connector_fixture_replay`;
 - `DriveDeskPublicDemoClient.getConnectorFixtureReplay`.
 - `business_action_execution` in `openapi-client-manifest.json`.
+- `integration_runtime` in `openapi-client-manifest.json`.
 - `DriveDeskPublicDemoClient.get_business_scenario_replay`;
 - `DriveDeskPublicDemoClient.getBusinessScenarioReplay`.
 
@@ -139,6 +146,11 @@ endpoint: source systems, normalized facts, recommended actions, automation
 boundaries, and replay docs. That shows the same Business OS loop across CRM,
 support, and procurement-style scenarios.
 
+The generated manifest also validates the standalone integration runtime
+metadata: adapter operation contract, runtime steps, preflight checks, outbox
+handoff, worker boundary, reconciliation plan, incident routes, and no-provider
+call boundaries.
+
 ## Why This Matters
 
 The SDK is not meant to be a full production client yet. It proves a foundation:
@@ -150,6 +162,8 @@ The SDK is not meant to be a full production client yet. It proves a foundation:
 - The generated client validates the Adapter Studio workbench contract.
 - The generated client validates connector fixture replay as a standalone API
   contract.
+- The generated manifest validates integration runtime metadata as a standalone
+  API contract.
 - The generated client validates business scenario replay as a standalone API
   contract.
 - The generated client can show the Bitrix-style CRM provider-intake body and

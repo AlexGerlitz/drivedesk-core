@@ -5103,6 +5103,320 @@
         "title": "IntegrationRunbookRead",
         "type": "object"
       },
+      "IntegrationRuntimeDemoRead": {
+        "properties": {
+          "adapterKey": {
+            "title": "Adapterkey",
+            "type": "string"
+          },
+          "api": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Api",
+            "type": "object"
+          },
+          "command": {
+            "title": "Command",
+            "type": "string"
+          },
+          "dataBoundaries": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Databoundaries",
+            "type": "array"
+          },
+          "docs": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "title": "Docs",
+            "type": "array"
+          },
+          "executionMode": {
+            "title": "Executionmode",
+            "type": "string"
+          },
+          "incidentRoutes": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Incidentroutes",
+            "type": "array"
+          },
+          "operationContract": {
+            "additionalProperties": true,
+            "title": "Operationcontract",
+            "type": "object"
+          },
+          "operationKey": {
+            "title": "Operationkey",
+            "type": "string"
+          },
+          "outboxHandoff": {
+            "additionalProperties": true,
+            "title": "Outboxhandoff",
+            "type": "object"
+          },
+          "preflightChecks": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Preflightchecks",
+            "type": "array"
+          },
+          "reconciliationPlan": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Reconciliationplan",
+            "type": "array"
+          },
+          "runtimeSteps": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Runtimesteps",
+            "type": "array"
+          },
+          "status": {
+            "const": "previewed",
+            "title": "Status",
+            "type": "string"
+          },
+          "summary": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Summary",
+            "type": "array"
+          },
+          "workerBoundary": {
+            "additionalProperties": true,
+            "title": "Workerboundary",
+            "type": "object"
+          }
+        },
+        "required": [
+          "status",
+          "command",
+          "summary",
+          "adapterKey",
+          "operationKey",
+          "executionMode",
+          "operationContract",
+          "runtimeSteps",
+          "preflightChecks",
+          "outboxHandoff",
+          "workerBoundary",
+          "reconciliationPlan",
+          "incidentRoutes",
+          "dataBoundaries",
+          "api",
+          "docs"
+        ],
+        "title": "IntegrationRuntimeDemoRead",
+        "type": "object"
+      },
+      "IntegrationRuntimePreviewCreate": {
+        "properties": {
+          "adapter_key": {
+            "default": "crm.bitrix24.mock",
+            "maxLength": 128,
+            "minLength": 2,
+            "pattern": "^[a-z0-9][a-z0-9_.-]*$",
+            "title": "Adapter Key",
+            "type": "string"
+          },
+          "connection_scopes": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 8,
+            "title": "Connection Scopes",
+            "type": "array"
+          },
+          "execution_mode": {
+            "default": "contract_only",
+            "enum": [
+              "contract_only",
+              "dry_run",
+              "commit_request"
+            ],
+            "title": "Execution Mode",
+            "type": "string"
+          },
+          "include_incident_routes": {
+            "default": true,
+            "title": "Include Incident Routes",
+            "type": "boolean"
+          },
+          "include_reconciliation": {
+            "default": true,
+            "title": "Include Reconciliation",
+            "type": "boolean"
+          },
+          "operation_key": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 2,
+                "pattern": "^[a-z0-9][a-z0-9_.-]*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "crm_deal_ingest_execute",
+            "title": "Operation Key"
+          },
+          "runtime_kind": {
+            "const": "adapter_operation_runtime",
+            "default": "adapter_operation_runtime",
+            "title": "Runtime Kind",
+            "type": "string"
+          }
+        },
+        "title": "IntegrationRuntimePreviewCreate",
+        "type": "object"
+      },
+      "IntegrationRuntimePreviewRead": {
+        "properties": {
+          "adapter_key": {
+            "title": "Adapter Key",
+            "type": "string"
+          },
+          "api": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Api",
+            "type": "object"
+          },
+          "data_boundaries": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Data Boundaries",
+            "type": "array"
+          },
+          "evidence": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "execution_mode": {
+            "enum": [
+              "contract_only",
+              "dry_run",
+              "commit_request"
+            ],
+            "title": "Execution Mode",
+            "type": "string"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "incident_routes": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Incident Routes",
+            "type": "array"
+          },
+          "operation_contract": {
+            "additionalProperties": true,
+            "title": "Operation Contract",
+            "type": "object"
+          },
+          "operation_key": {
+            "title": "Operation Key",
+            "type": "string"
+          },
+          "outbox_handoff": {
+            "additionalProperties": true,
+            "title": "Outbox Handoff",
+            "type": "object"
+          },
+          "preflight_checks": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Preflight Checks",
+            "type": "array"
+          },
+          "reconciliation_plan": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Reconciliation Plan",
+            "type": "array"
+          },
+          "runtime_kind": {
+            "const": "adapter_operation_runtime",
+            "title": "Runtime Kind",
+            "type": "string"
+          },
+          "runtime_steps": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Runtime Steps",
+            "type": "array"
+          },
+          "status": {
+            "const": "previewed",
+            "title": "Status",
+            "type": "string"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "worker_boundary": {
+            "additionalProperties": true,
+            "title": "Worker Boundary",
+            "type": "object"
+          }
+        },
+        "required": [
+          "tenant_id",
+          "runtime_kind",
+          "adapter_key",
+          "operation_key",
+          "execution_mode",
+          "generated_at",
+          "status",
+          "summary"
+        ],
+        "title": "IntegrationRuntimePreviewRead",
+        "type": "object"
+      },
       "LoginRequest": {
         "properties": {
           "email": {
@@ -5576,6 +5890,11 @@
             "title": "Integrationreadiness",
             "type": "array"
           },
+          "integrationRuntime": {
+            "additionalProperties": true,
+            "title": "Integrationruntime",
+            "type": "object"
+          },
           "members": {
             "items": {
               "additionalProperties": {
@@ -5670,6 +5989,7 @@
           "adapters",
           "adapterScenarios",
           "adapterStudio",
+          "integrationRuntime",
           "connectorFixtureReplay",
           "businessIntakePipeline",
           "businessTaskHandoff",
@@ -6907,6 +7227,27 @@
           }
         },
         "summary": "Connector Fixture Replay Demo",
+        "tags": [
+          "demo"
+        ]
+      }
+    },
+    "/demo/integration-runtime": {
+      "get": {
+        "operationId": "integration_runtime_demo_demo_integration_runtime_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationRuntimeDemoRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Integration Runtime Demo",
         "tags": [
           "demo"
         ]
@@ -10944,6 +11285,94 @@
           }
         },
         "summary": "Create Integration Reconciliation Endpoint",
+        "tags": [
+          "integrations"
+        ]
+      }
+    },
+    "/tenants/{tenant_id}/integration-runtime/preview": {
+      "post": {
+        "operationId": "preview_integration_runtime_endpoint_tenants__tenant_id__integration_runtime_preview_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tenant_id",
+            "required": true,
+            "schema": {
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "X-Actor-Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Role",
+            "required": false,
+            "schema": {
+              "default": "viewer",
+              "title": "X-Actor-Role",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntegrationRuntimePreviewCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationRuntimePreviewRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Preview Integration Runtime Endpoint",
         "tags": [
           "integrations"
         ]

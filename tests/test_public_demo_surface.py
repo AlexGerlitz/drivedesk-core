@@ -88,6 +88,11 @@ def test_public_demo_html_links_static_assets() -> None:
     assert 'id="businessApprovalGatewayPolicyRows"' in html
     assert 'id="businessApprovalGatewayUnlockRows"' in html
     assert 'id="businessApprovalGatewayBoundaryRows"' in html
+    assert 'id="integrationRuntimeSummaryRows"' in html
+    assert 'id="integrationRuntimeStepRows"' in html
+    assert 'id="integrationRuntimePreflightRows"' in html
+    assert 'id="integrationRuntimeOutboxRows"' in html
+    assert 'id="integrationRuntimeBoundaryRows"' in html
     assert 'id="controlTowerObservationRows"' in html
     assert 'id="controlTowerExceptionRows"' in html
     assert 'id="controlTowerRepairRows"' in html
@@ -936,6 +941,61 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
         "docs/public/BUSINESS_ACTION_EXECUTION.md",
         "docs/public/BUSINESS_TASK_HANDOFF.md",
     }
+    integration_runtime = payload["integrationRuntime"]
+    assert integration_runtime["status"] == "previewed"
+    assert integration_runtime["command"] == "POST /tenants/{tenant_id}/integration-runtime/preview"
+    assert integration_runtime["adapterKey"] == "accounting.export.mock"
+    assert integration_runtime["operationKey"] == "accounting_export_execute"
+    assert integration_runtime["executionMode"] == "contract_only"
+    assert {item["label"] for item in integration_runtime["summary"]} >= {
+        "Runtime steps",
+        "Adapter",
+        "Outbox",
+        "Provider calls",
+    }
+    assert integration_runtime["operationContract"]["eventType"] == "accounting.export.requested"
+    assert integration_runtime["operationContract"]["requiredConnectionScope"] == "accounting:export"
+    assert {item["step"] for item in integration_runtime["runtimeSteps"]} >= {
+        "contract_selected",
+        "scope_preflight",
+        "idempotency_prepared",
+        "approval_dependency",
+        "outbox_handoff",
+        "worker_boundary",
+        "reconciliation_plan",
+    }
+    assert {item["check"] for item in integration_runtime["preflightChecks"]} == {
+        "adapter_registered",
+        "operation_contract_present",
+        "required_scope_available",
+        "idempotency_keys_declared",
+        "secret_boundary_server_side",
+        "provider_write_disabled_in_preview",
+    }
+    assert integration_runtime["outboxHandoff"]["wouldEnqueueEvent"] == "accounting.export.requested"
+    assert integration_runtime["outboxHandoff"]["providerCallEnabled"] is False
+    assert integration_runtime["workerBoundary"]["publicRunMode"] == "contract_only"
+    assert integration_runtime["workerBoundary"]["providerCallEnabled"] is False
+    assert {item["route"] for item in integration_runtime["incidentRoutes"]} == {
+        "retry_queue",
+        "dead_letter_review",
+        "reconciliation_mismatch",
+    }
+    assert {item["name"] for item in integration_runtime["dataBoundaries"]} == {
+        "contract_only_preview",
+        "server_side_secret_boundary",
+        "safe_payload_boundary",
+        "approval_before_provider_write",
+    }
+    assert integration_runtime["api"]["standalone"] == "GET /demo/integration-runtime"
+    assert integration_runtime["api"]["preview"] == (
+        "POST /tenants/{tenant_id}/integration-runtime/preview"
+    )
+    assert {item["path"] for item in integration_runtime["docs"]} >= {
+        "docs/public/INTEGRATION_RUNTIME.md",
+        "docs/public/INTEGRATION_OPERATION_CONTRACTS.md",
+        "docs/public/ADAPTER_DEVELOPER_GUIDE.md",
+    }
     business_scenario_replay = payload["businessScenarioReplay"]
     assert business_scenario_replay["status"] == "validated"
     assert business_scenario_replay["command"] == "bash scripts/check_public_business_scenario_replay.sh"
@@ -1105,12 +1165,14 @@ def test_public_demo_can_load_api_backed_data_with_static_fallback() -> None:
     assert "fillBusinessContextAssistant" in script
     assert "fillBusinessActionExecution" in script
     assert "fillBusinessApprovalGateway" in script
+    assert "fillIntegrationRuntime" in script
     assert "alertRouting" in script
     assert "incidentResponse" in script
     assert "engineeringProof" in script
     assert "businessContextAssistant" in script
     assert "businessActionExecution" in script
     assert "businessApprovalGateway" in script
+    assert "integrationRuntime" in script
     assert "workflowScenarios" in script
     assert "endToEndScenario" in script
     assert "adapterScenarios" in script
@@ -1326,6 +1388,14 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
             "providerWriteUnlocked",
             "safe_approval_payload",
             "BUSINESS_APPROVAL_GATEWAY.md",
+        ],
+        "scripts/check_public_integration_runtime.sh": [
+            "/demo/integration-runtime",
+            "integrationRuntime",
+            "adapter_runtime.previewed",
+            "accounting_export_execute",
+            "providerCallEnabled",
+            "INTEGRATION_RUNTIME.md",
         ],
         "examples/curl/demo-public.sh": ["/demo/public", "api.synthetic", "student_sync"],
         "examples/python/demo_public_client.py": ["/demo/public", "api.synthetic", "student_sync"],

@@ -128,6 +128,9 @@ from drivedesk_api.schemas import (
     IntegrationOperatorReviewItemRead,
     IntegrationReconciliationCreate,
     IntegrationReconciliationRead,
+    IntegrationRuntimeDemoRead,
+    IntegrationRuntimePreviewCreate,
+    IntegrationRuntimePreviewRead,
     IntegrationRunbookRead,
     LoginRequest,
     MembershipCreate,
@@ -205,6 +208,7 @@ from drivedesk_api.services import (
     preview_business_task_handoff,
     preview_business_workbench_context,
     preview_integration_mapping,
+    preview_integration_runtime,
     propose_repair_action,
     retry_outbox_event,
     run_integration_connection_check,
@@ -276,6 +280,20 @@ def build_app(settings: Settings | None = None) -> FastAPI:
     async def public_demo() -> JSONResponse:
         return JSONResponse(
             build_public_demo_payload(),
+            headers={
+                "Access-Control-Allow-Origin": "*",
+                "Cache-Control": "public, max-age=60",
+            },
+        )
+
+    @api.get(
+        "/demo/integration-runtime",
+        response_model=IntegrationRuntimeDemoRead,
+        tags=["demo"],
+    )
+    async def integration_runtime_demo() -> JSONResponse:
+        return JSONResponse(
+            build_public_demo_payload()["integrationRuntime"],
             headers={
                 "Access-Control-Allow-Origin": "*",
                 "Cache-Control": "public, max-age=60",
@@ -1179,6 +1197,21 @@ def build_app(settings: Settings | None = None) -> FastAPI:
         await ensure_tenant_exists(session, tenant_id)
         require_tenant_permission(actor, tenant_id, Permission.BUSINESS_RECORD_READ)
         return await preview_business_approval_gateway(session, tenant_id=tenant_id, payload=payload)
+
+    @api.post(
+        "/tenants/{tenant_id}/integration-runtime/preview",
+        response_model=IntegrationRuntimePreviewRead,
+        tags=["integrations"],
+    )
+    async def preview_integration_runtime_endpoint(
+        tenant_id: str,
+        payload: IntegrationRuntimePreviewCreate,
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> dict[str, object]:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.BUSINESS_RECORD_READ)
+        return await preview_integration_runtime(session, tenant_id=tenant_id, payload=payload)
 
     @api.post(
         "/tenants/{tenant_id}/business-notification-channels/preview",

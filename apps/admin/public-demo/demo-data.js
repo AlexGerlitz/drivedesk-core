@@ -3727,6 +3727,299 @@ window.DRIVEDESK_DEMO_DATA = {
       "state": "active"
     }
   ],
+  "integrationRuntime": {
+    "adapterKey": "accounting.export.mock",
+    "api": {
+      "adapters": "GET /integration-adapters",
+      "operatorReview": "GET /tenants/{tenant_id}/integration-operator-review",
+      "preview": "POST /tenants/{tenant_id}/integration-runtime/preview",
+      "runbooks": "GET /integration-runbooks",
+      "standalone": "GET /demo/integration-runtime"
+    },
+    "command": "POST /tenants/{tenant_id}/integration-runtime/preview",
+    "dataBoundaries": [
+      {
+        "containsPii": false,
+        "detail": "The runtime plan is computed without queueing or executing provider work.",
+        "externalMutation": false,
+        "name": "contract_only_preview",
+        "rawPayloadIncluded": false,
+        "secretRefs": [],
+        "status": "preview_only"
+      },
+      {
+        "containsPii": false,
+        "detail": "Secret names may be referenced, but secret values are never returned.",
+        "externalMutation": false,
+        "name": "server_side_secret_boundary",
+        "rawPayloadIncluded": false,
+        "secretRefs": [
+          "ACCOUNTING_PROVIDER_API_KEY",
+          "ACCOUNTING_PROVIDER_ENDPOINT"
+        ],
+        "status": "clean"
+      },
+      {
+        "containsPii": false,
+        "detail": "Runtime preview uses contract metadata and safe references only.",
+        "externalMutation": false,
+        "name": "safe_payload_boundary",
+        "rawPayloadIncluded": false,
+        "secretRefs": [],
+        "status": "clean"
+      },
+      {
+        "containsPii": false,
+        "detail": "Provider mutation remains unavailable until approval and outbox commit exist.",
+        "externalMutation": false,
+        "name": "approval_before_provider_write",
+        "rawPayloadIncluded": false,
+        "secretRefs": [],
+        "status": "closed"
+      }
+    ],
+    "docs": [
+      {
+        "check": "bash scripts/check_public_integration_runtime.sh",
+        "label": "Integration runtime",
+        "path": "docs/public/INTEGRATION_RUNTIME.md"
+      },
+      {
+        "check": "bash scripts/check_public_demo_api.sh",
+        "label": "Operation contracts",
+        "path": "docs/public/INTEGRATION_OPERATION_CONTRACTS.md"
+      },
+      {
+        "check": "bash scripts/check_public_adapter_developer_guide.sh",
+        "label": "Adapter developer guide",
+        "path": "docs/public/ADAPTER_DEVELOPER_GUIDE.md"
+      }
+    ],
+    "executionMode": "contract_only",
+    "incidentRoutes": [
+      {
+        "evidence": "adapter_runtime.incident_route_selected",
+        "externalMutation": false,
+        "route": "retry_queue",
+        "runbook": "integration.retry_backlog",
+        "source": "outbox.retry",
+        "status": "armed"
+      },
+      {
+        "evidence": "adapter_runtime.incident_route_selected",
+        "externalMutation": false,
+        "route": "dead_letter_review",
+        "runbook": "integration.dead_letter",
+        "source": "outbox.dead_letter",
+        "status": "armed"
+      },
+      {
+        "evidence": "adapter_runtime.incident_route_selected",
+        "externalMutation": false,
+        "route": "reconciliation_mismatch",
+        "runbook": "integration.reconciliation_mismatch",
+        "source": "integration.reconciliation",
+        "status": "armed"
+      }
+    ],
+    "operationContract": {
+      "deadLetter": true,
+      "endpoint": "POST /tenants/{tenant_id}/integration-exports/accounting",
+      "eventType": "accounting.export.requested",
+      "idempotencyKeys": [
+        "tenant_id",
+        "export_batch_id",
+        "documents_hash"
+      ],
+      "key": "accounting_export_execute",
+      "operatorReview": true,
+      "requiredConnectionScope": "accounting:export",
+      "retryable": true,
+      "title": "Export accounting documents",
+      "trigger": "api.outbox.enqueue"
+    },
+    "operationKey": "accounting_export_execute",
+    "outboxHandoff": {
+      "adapterKey": "accounting.export.mock",
+      "deadLetter": true,
+      "evidence": "adapter_runtime.outbox_handoff_prepared",
+      "externalMutation": false,
+      "idempotencyKeys": [
+        "tenant_id",
+        "export_batch_id",
+        "documents_hash"
+      ],
+      "operationKey": "accounting_export_execute",
+      "operatorReview": true,
+      "providerCallEnabled": false,
+      "requiredConnectionScope": "accounting:export",
+      "retryable": true,
+      "status": "ready",
+      "wouldEnqueueEvent": "accounting.export.requested"
+    },
+    "preflightChecks": [
+      {
+        "check": "adapter_registered",
+        "detail": "accounting.export.mock",
+        "evidence": "adapter_runtime.previewed",
+        "externalMutation": false,
+        "providerCallEnabled": false,
+        "secretRefsVisible": false,
+        "status": "passed"
+      },
+      {
+        "check": "operation_contract_present",
+        "detail": "accounting_export_execute",
+        "evidence": "adapter_runtime.previewed",
+        "externalMutation": false,
+        "providerCallEnabled": false,
+        "secretRefsVisible": false,
+        "status": "passed"
+      },
+      {
+        "check": "required_scope_available",
+        "detail": "accounting:export",
+        "evidence": "adapter_runtime.previewed",
+        "externalMutation": false,
+        "providerCallEnabled": false,
+        "secretRefsVisible": false,
+        "status": "passed"
+      },
+      {
+        "check": "idempotency_keys_declared",
+        "detail": "tenant_id, export_batch_id, documents_hash",
+        "evidence": "adapter_runtime.previewed",
+        "externalMutation": false,
+        "providerCallEnabled": false,
+        "secretRefsVisible": false,
+        "status": "passed"
+      },
+      {
+        "check": "secret_boundary_server_side",
+        "detail": "server_secret_store",
+        "evidence": "adapter_runtime.previewed",
+        "externalMutation": false,
+        "providerCallEnabled": false,
+        "secretRefsVisible": true,
+        "status": "clean"
+      },
+      {
+        "check": "provider_write_disabled_in_preview",
+        "detail": "Runtime preview never calls the external provider.",
+        "evidence": "adapter_runtime.previewed",
+        "externalMutation": false,
+        "providerCallEnabled": false,
+        "secretRefsVisible": false,
+        "status": "closed"
+      }
+    ],
+    "reconciliationPlan": [
+      {
+        "detail": "Expected adapter result is derived from the operation contract and idempotency key.",
+        "evidence": "adapter_runtime.reconciliation_planned",
+        "externalMutation": false,
+        "status": "ready",
+        "step": "capture_expected_result"
+      },
+      {
+        "detail": "Provider status, accepted/rejected counts, and external reference are compared after execution.",
+        "evidence": "adapter_runtime.reconciliation_planned",
+        "externalMutation": false,
+        "status": "ready",
+        "step": "compare_provider_evidence"
+      },
+      {
+        "detail": "Mismatched or blocked evidence becomes an operator review card.",
+        "evidence": "adapter_runtime.reconciliation_planned",
+        "externalMutation": false,
+        "status": "armed",
+        "step": "route_mismatch_to_operator"
+      }
+    ],
+    "runtimeSteps": [
+      {
+        "detail": "accounting.export.mock.accounting_export_execute selected from runtime adapter catalog.",
+        "evidence": "adapter_runtime.contract_selected",
+        "status": "ready",
+        "step": "contract_selected"
+      },
+      {
+        "detail": "accounting:export",
+        "evidence": "adapter_runtime.scope_checked",
+        "status": "available",
+        "step": "scope_preflight"
+      },
+      {
+        "detail": "tenant_id, export_batch_id, documents_hash",
+        "evidence": "adapter_runtime.idempotency_prepared",
+        "status": "ready",
+        "step": "idempotency_prepared"
+      },
+      {
+        "detail": "Provider-changing or operator-review operations remain behind approval gates.",
+        "evidence": "adapter_runtime.approval_dependency_attached",
+        "status": "required",
+        "step": "approval_dependency"
+      },
+      {
+        "detail": "accounting.export.requested",
+        "evidence": "adapter_runtime.outbox_handoff_prepared",
+        "status": "ready",
+        "step": "outbox_handoff"
+      },
+      {
+        "detail": "POST /tenants/{tenant_id}/integration-exports/accounting",
+        "evidence": "adapter_runtime.worker_boundary_selected",
+        "status": "ready",
+        "step": "worker_boundary"
+      },
+      {
+        "detail": "Provider evidence is compared after execution before the operator closes the loop.",
+        "evidence": "adapter_runtime.reconciliation_planned",
+        "status": "ready",
+        "step": "reconciliation_plan"
+      }
+    ],
+    "status": "previewed",
+    "summary": [
+      {
+        "detail": "contract to reconciliation",
+        "label": "Runtime steps",
+        "tone": "blue",
+        "value": "7"
+      },
+      {
+        "detail": "accounting.export.mock",
+        "label": "Adapter",
+        "tone": "green",
+        "value": "accounting"
+      },
+      {
+        "detail": "accounting.export.requested",
+        "label": "Outbox",
+        "tone": "violet",
+        "value": "ready"
+      },
+      {
+        "detail": "contract-only public preview",
+        "label": "Provider calls",
+        "tone": "amber",
+        "value": "0"
+      }
+    ],
+    "workerBoundary": {
+      "containsPii": false,
+      "endpoint": "POST /tenants/{tenant_id}/integration-exports/accounting",
+      "evidence": "adapter_runtime.worker_boundary_selected",
+      "executionMode": "contract_only",
+      "externalMutation": false,
+      "providerCallEnabled": false,
+      "publicRunMode": "contract_only",
+      "rawPayloadIncluded": false,
+      "status": "ready",
+      "workerFunction": "drivedesk_worker.main.process_pending_outbox"
+    }
+  },
   "members": [
     {
       "email": "owner@example.test",

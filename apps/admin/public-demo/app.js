@@ -85,6 +85,15 @@
         Array.isArray(payload.adapterStudio.boundaries) &&
         Array.isArray(payload.adapterStudio.diagnostics) &&
         Array.isArray(payload.adapterStudio.docs) &&
+        payload.integrationRuntime &&
+        Array.isArray(payload.integrationRuntime.summary) &&
+        Array.isArray(payload.integrationRuntime.runtimeSteps) &&
+        Array.isArray(payload.integrationRuntime.preflightChecks) &&
+        payload.integrationRuntime.outboxHandoff &&
+        payload.integrationRuntime.workerBoundary &&
+        Array.isArray(payload.integrationRuntime.reconciliationPlan) &&
+        Array.isArray(payload.integrationRuntime.incidentRoutes) &&
+        Array.isArray(payload.integrationRuntime.dataBoundaries) &&
         payload.connectorFixtureReplay &&
         Array.isArray(payload.connectorFixtureReplay.summary) &&
         Array.isArray(payload.connectorFixtureReplay.outcomes) &&
@@ -590,6 +599,152 @@
       row.append(top, path, check);
       docRows.appendChild(row);
     });
+  }
+
+  function fillIntegrationRuntime() {
+    var runtime = data.integrationRuntime;
+
+    var summaryRows = document.getElementById("integrationRuntimeSummaryRows");
+    clear(summaryRows);
+    runtime.summary.forEach(function (item) {
+      var card = document.createElement("article");
+      card.className = "metric-card";
+      card.dataset.tone = item.tone || "blue";
+
+      var label = document.createElement("span");
+      label.className = "muted";
+      label.appendChild(text(item.label));
+
+      var value = document.createElement("strong");
+      value.appendChild(text(item.value));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      card.append(label, value, detail);
+      summaryRows.appendChild(card);
+    });
+
+    var stepRows = document.getElementById("integrationRuntimeStepRows");
+    clear(stepRows);
+    runtime.runtimeSteps.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var step = document.createElement("strong");
+      step.appendChild(text(item.step));
+      top.append(step, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(item.evidence));
+
+      row.append(top, detail, evidence);
+      stepRows.appendChild(row);
+    });
+
+    var preflightRows = document.getElementById("integrationRuntimePreflightRows");
+    clear(preflightRows);
+    runtime.preflightChecks.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var check = document.createElement("strong");
+      check.appendChild(text(item.check));
+      top.append(check, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          item.detail +
+            " - provider call " +
+            String(Boolean(item.providerCallEnabled)) +
+            " - external mutation " +
+            String(Boolean(item.externalMutation))
+        )
+      );
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(item.evidence));
+
+      row.append(top, detail, evidence);
+      preflightRows.appendChild(row);
+    });
+
+    var outboxRows = document.getElementById("integrationRuntimeOutboxRows");
+    clear(outboxRows);
+    [runtime.outboxHandoff, runtime.workerBoundary].forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(item.wouldEnqueueEvent || item.workerFunction || item.endpoint));
+      top.append(title, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          "provider call " +
+            String(Boolean(item.providerCallEnabled)) +
+            " - external mutation " +
+            String(Boolean(item.externalMutation)) +
+            " - raw payload " +
+            String(Boolean(item.rawPayloadIncluded))
+        )
+      );
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(item.evidence));
+
+      row.append(top, detail, evidence);
+      outboxRows.appendChild(row);
+    });
+
+    var boundaryRows = document.getElementById("integrationRuntimeBoundaryRows");
+    clear(boundaryRows);
+    runtime.reconciliationPlan
+      .concat(runtime.incidentRoutes)
+      .concat(runtime.dataBoundaries)
+      .forEach(function (item) {
+        var row = document.createElement("article");
+        row.className = "event-row";
+
+        var top = document.createElement("div");
+        top.className = "event-top";
+        var name = document.createElement("strong");
+        name.appendChild(text(item.name || item.step || item.route));
+        top.append(name, chip(item.status, statusTone(item.status)));
+
+        var detail = document.createElement("span");
+        detail.className = "muted";
+        detail.appendChild(
+          text(
+            (item.detail || item.source || item.runbook || "") +
+              " - external mutation " +
+              String(Boolean(item.externalMutation)) +
+              " - PII " +
+              String(Boolean(item.containsPii))
+          )
+        );
+
+        var evidence = document.createElement("code");
+        evidence.appendChild(text(item.evidence || item.runbook || ""));
+
+        row.append(top, detail, evidence);
+        boundaryRows.appendChild(row);
+      });
   }
 
   function fillConnectorFixtureReplay() {
@@ -3201,6 +3356,7 @@
     fillAdapterContracts();
     fillAdapterScenarios();
     fillAdapterStudio();
+    fillIntegrationRuntime();
     fillConnectorFixtureReplay();
     fillSyncJobs();
     fillIntegrationHealth();

@@ -22,6 +22,7 @@ export const REQUIRED_FIELDS = [
   "adapters",
   "adapterScenarios",
   "adapterStudio",
+  "integrationRuntime",
   "connectorFixtureReplay",
   "businessIntakePipeline",
   "businessTaskHandoff",

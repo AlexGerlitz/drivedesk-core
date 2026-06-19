@@ -19,6 +19,7 @@ GET /demo/business-notification-channels
 GET /demo/business-context-assistant
 GET /demo/business-action-execution
 GET /demo/business-approval-gateway
+GET /demo/integration-runtime
 GET /demo/business-scenario-replay
 ```
 
@@ -30,7 +31,7 @@ sync jobs, Integration Health, alert routing, incident response,
 `businessControlTower` data, `businessIntakePipeline`,
 `businessTaskHandoff`, `businessNotificationChannels`,
 `businessContextAssistant`, `businessActionExecution`,
-`businessApprovalGateway`, `businessScenarioReplay`, recovery evidence,
+`businessApprovalGateway`, `integrationRuntime`, `businessScenarioReplay`, recovery evidence,
 `connectorFixtureReplay`, and the `engineeringProof` contract rendered by the
 Control Tower, Integrations, Operations, Incidents, and Proof tabs.
 
@@ -80,6 +81,15 @@ provider writes.
 The public review page for this contract is
 `docs/public/BUSINESS_APPROVAL_GATEWAY.md`.
 
+`GET /demo/integration-runtime` returns the same `integrationRuntime` contract
+as a standalone endpoint. It is useful for checking the adapter-runtime loop
+directly: `POST /tenants/{tenant_id}/integration-runtime/preview` -> operation
+contract selection -> scope and idempotency preflight -> outbox handoff ->
+worker boundary -> reconciliation and incident routes.
+
+The public review page for this contract is
+`docs/public/INTEGRATION_RUNTIME.md`.
+
 `GET /demo/business-scenario-replay` returns the same
 `businessScenarioReplay` contract as a standalone endpoint. It is useful for
 checking the Business OS loop directly: external signal -> normalized facts ->
@@ -98,6 +108,7 @@ risk detection -> role context -> approval-aware action plan.
 | Business Context Assistant API | Smoke checks can load `GET /demo/business-context-assistant` directly. |
 | Business Action Execution API | Smoke checks can load `GET /demo/business-action-execution` directly. |
 | Business Approval Gateway API | Smoke checks can load `GET /demo/business-approval-gateway` directly. |
+| Integration Runtime API | Smoke checks can load `GET /demo/integration-runtime` directly. |
 | Scenario Replay API | Smoke checks can load `GET /demo/business-scenario-replay` directly. |
 
 Example local API-backed run:

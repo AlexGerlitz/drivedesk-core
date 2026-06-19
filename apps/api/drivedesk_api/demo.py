@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from drivedesk_core import list_adapter_descriptors
+from drivedesk_core import build_adapter_runtime_plan, list_adapter_descriptors
 
 
 def _public_operation_contracts(descriptor: dict[str, Any]) -> list[dict[str, Any]]:
@@ -62,6 +62,175 @@ def _public_adapter_rows() -> list[dict[str, Any]]:
             }
         )
     return rows
+
+
+def _public_integration_runtime() -> dict[str, Any]:
+    runtime = build_adapter_runtime_plan(
+        "accounting.export.mock",
+        operation_key="accounting_export_execute",
+        scopes=["accounting:export"],
+        execution_mode="contract_only",
+    )
+    contract = runtime["operation_contract"]
+    outbox_handoff = runtime["outbox_handoff"]
+    worker_boundary = runtime["worker_boundary"]
+
+    operation_contract = {
+        "key": contract["key"],
+        "title": contract["title"],
+        "trigger": contract["trigger"],
+        "eventType": contract["event_type"],
+        "endpoint": contract["endpoint"],
+        "requiredConnectionScope": contract["required_connection_scope"],
+        "idempotencyKeys": contract["idempotency_keys"],
+        "retryable": contract["retryable"],
+        "deadLetter": contract["dead_letter"],
+        "operatorReview": contract["operator_review"],
+    }
+    runtime_steps = [
+        {
+            "step": item["step"],
+            "status": item["status"],
+            "detail": item["detail"],
+            "evidence": item["evidence"],
+        }
+        for item in runtime["runtime_steps"]
+    ]
+    preflight_checks = [
+        {
+            "check": item["check"],
+            "status": item["status"],
+            "detail": item["detail"],
+            "externalMutation": item["external_mutation"],
+            "providerCallEnabled": item.get("provider_call_enabled", False),
+            "secretRefsVisible": item.get("secret_refs_visible", False),
+            "evidence": item["evidence"],
+        }
+        for item in runtime["preflight_checks"]
+    ]
+    reconciliation_plan = [
+        {
+            "step": item["step"],
+            "status": item["status"],
+            "detail": item["detail"],
+            "externalMutation": item["external_mutation"],
+            "evidence": item["evidence"],
+        }
+        for item in runtime["reconciliation_plan"]
+    ]
+    incident_routes = [
+        {
+            "route": item["route"],
+            "status": item["status"],
+            "source": item["source"],
+            "runbook": item["runbook"],
+            "externalMutation": item["external_mutation"],
+            "evidence": item["evidence"],
+        }
+        for item in runtime["incident_routes"]
+    ]
+    data_boundaries = [
+        {
+            "name": item["name"],
+            "status": item["status"],
+            "externalMutation": item.get("external_mutation", False),
+            "containsPii": item.get("contains_pii", False),
+            "rawPayloadIncluded": item.get("raw_payload_included", False),
+            "secretRefs": item.get("secret_refs", []),
+            "detail": item["detail"],
+        }
+        for item in runtime["data_boundaries"]
+    ]
+
+    return {
+        "status": "previewed",
+        "command": "POST /tenants/{tenant_id}/integration-runtime/preview",
+        "summary": [
+            {
+                "label": "Runtime steps",
+                "value": str(len(runtime_steps)),
+                "detail": "contract to reconciliation",
+                "tone": "blue",
+            },
+            {
+                "label": "Adapter",
+                "value": "accounting",
+                "detail": "accounting.export.mock",
+                "tone": "green",
+            },
+            {
+                "label": "Outbox",
+                "value": outbox_handoff["status"],
+                "detail": outbox_handoff["would_enqueue_event"],
+                "tone": "violet",
+            },
+            {
+                "label": "Provider calls",
+                "value": "0",
+                "detail": "contract-only public preview",
+                "tone": "amber",
+            },
+        ],
+        "adapterKey": runtime["adapter_key"],
+        "operationKey": operation_contract["key"],
+        "executionMode": "contract_only",
+        "operationContract": operation_contract,
+        "runtimeSteps": runtime_steps,
+        "preflightChecks": preflight_checks,
+        "outboxHandoff": {
+            "status": outbox_handoff["status"],
+            "wouldEnqueueEvent": outbox_handoff["would_enqueue_event"],
+            "adapterKey": outbox_handoff["adapter_key"],
+            "operationKey": outbox_handoff["operation_key"],
+            "requiredConnectionScope": outbox_handoff["required_connection_scope"],
+            "idempotencyKeys": outbox_handoff["idempotency_keys"],
+            "retryable": outbox_handoff["retryable"],
+            "deadLetter": outbox_handoff["dead_letter"],
+            "operatorReview": outbox_handoff["operator_review"],
+            "externalMutation": outbox_handoff["external_mutation"],
+            "providerCallEnabled": outbox_handoff["provider_call_enabled"],
+            "evidence": outbox_handoff["evidence"],
+        },
+        "workerBoundary": {
+            "status": worker_boundary["status"],
+            "endpoint": worker_boundary["endpoint"],
+            "workerFunction": worker_boundary["worker_function"],
+            "executionMode": worker_boundary["execution_mode"],
+            "publicRunMode": worker_boundary["public_run_mode"],
+            "externalMutation": worker_boundary["external_mutation"],
+            "providerCallEnabled": worker_boundary["provider_call_enabled"],
+            "rawPayloadIncluded": worker_boundary["raw_payload_included"],
+            "containsPii": worker_boundary["contains_pii"],
+            "evidence": worker_boundary["evidence"],
+        },
+        "reconciliationPlan": reconciliation_plan,
+        "incidentRoutes": incident_routes,
+        "dataBoundaries": data_boundaries,
+        "api": {
+            "standalone": "GET /demo/integration-runtime",
+            "preview": "POST /tenants/{tenant_id}/integration-runtime/preview",
+            "adapters": "GET /integration-adapters",
+            "runbooks": "GET /integration-runbooks",
+            "operatorReview": "GET /tenants/{tenant_id}/integration-operator-review",
+        },
+        "docs": [
+            {
+                "label": "Integration runtime",
+                "path": "docs/public/INTEGRATION_RUNTIME.md",
+                "check": "bash scripts/check_public_integration_runtime.sh",
+            },
+            {
+                "label": "Operation contracts",
+                "path": "docs/public/INTEGRATION_OPERATION_CONTRACTS.md",
+                "check": "bash scripts/check_public_demo_api.sh",
+            },
+            {
+                "label": "Adapter developer guide",
+                "path": "docs/public/ADAPTER_DEVELOPER_GUIDE.md",
+                "check": "bash scripts/check_public_adapter_developer_guide.sh",
+            },
+        ],
+    }
 
 
 def build_public_demo_payload() -> dict[str, Any]:
@@ -509,6 +678,7 @@ def build_public_demo_payload() -> dict[str, Any]:
                 },
             ],
         },
+        "integrationRuntime": _public_integration_runtime(),
         "connectorFixtureReplay": {
             "status": "validated",
             "command": "bash scripts/check_public_connector_fixture_replay.sh",

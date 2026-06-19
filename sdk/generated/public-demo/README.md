@@ -33,6 +33,9 @@ operationId: business_action_execution_demo_demo_business_action_execution_get
 GET /demo/business-approval-gateway
 operationId: business_approval_gateway_demo_demo_business_approval_gateway_get
 
+GET /demo/integration-runtime
+operationId: integration_runtime_demo_demo_integration_runtime_get
+
 GET /demo/business-scenario-replay
 operationId: business_scenario_replay_demo_demo_business_scenario_replay_get
 ```
@@ -59,6 +62,8 @@ Adapter operation helpers:
   `GET /demo/business-action-execution`
 - `business_approval_gateway` manifest entry for
   `GET /demo/business-approval-gateway`
+- `integration_runtime` manifest entry for
+  `GET /demo/integration-runtime`
 - `DriveDeskPublicDemoClient.getBusinessScenarioReplay`
 - `DriveDeskPublicDemoClient.get_business_scenario_replay`
 
@@ -89,6 +94,11 @@ notes, and explicit no-provider-write boundaries.
 Business approval gateway metadata validates the public-safe approval preview:
 approval requests, RBAC and dual-control checks, approver routing, blocked
 commit unlocks, and explicit no-provider-write boundaries.
+
+Integration runtime metadata validates the public-safe adapter runtime:
+operation contract selection, scope and idempotency preflight, outbox handoff,
+worker boundary, reconciliation planning, incident routing, and no provider
+calls in the public demo.
 
 Engineering summary: this is the public-safe integration proof. DriveDesk
 publishes an OpenAPI contract and generates a small SDK from it instead of

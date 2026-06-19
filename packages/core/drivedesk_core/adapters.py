@@ -882,6 +882,258 @@ def build_adapter_connection_diagnostics(
     }
 
 
+def build_adapter_runtime_plan(
+    adapter_key: str,
+    *,
+    operation_key: str | None = None,
+    scopes: list[str] | None = None,
+    execution_mode: str = "contract_only",
+) -> dict[str, object]:
+    descriptor = resolve_adapter(adapter_key).descriptor
+    if not descriptor.operation_contracts:
+        raise AdapterValidationError(
+            f"Adapter does not expose operation contracts: {adapter_key}",
+            adapter_key=adapter_key,
+        )
+
+    if operation_key is None:
+        operation = descriptor.operation_contracts[0]
+    else:
+        matching = [item for item in descriptor.operation_contracts if item.key == operation_key]
+        if not matching:
+            raise AdapterValidationError(
+                f"Adapter operation is not available for {adapter_key}: {operation_key}",
+                adapter_key=adapter_key,
+            )
+        operation = matching[0]
+
+    resolved_scopes = resolve_adapter_connection_scopes(adapter_key, scopes=scopes)
+    required_scope = operation.required_connection_scope
+    scope_status = "not_required"
+    if required_scope is not None:
+        scope_status = "available" if required_scope in resolved_scopes else "missing"
+
+    is_worker_endpoint = operation.endpoint.startswith("worker:")
+    provider_write_candidate = descriptor.direction == "outbound" or operation.trigger == "api.outbox.enqueue"
+    provider_call_enabled = execution_mode == "commit_request" and provider_write_candidate
+    secret_refs = sorted(str(item) for item in descriptor.auth_profile.get("secret_refs", []))
+
+    runtime_steps = [
+        {
+            "step": "contract_selected",
+            "status": "ready",
+            "detail": f"{descriptor.key}.{operation.key} selected from runtime adapter catalog.",
+            "evidence": "adapter_runtime.contract_selected",
+        },
+        {
+            "step": "scope_preflight",
+            "status": scope_status,
+            "detail": required_scope or "Operation does not require a tenant connection scope.",
+            "evidence": "adapter_runtime.scope_checked",
+        },
+        {
+            "step": "idempotency_prepared",
+            "status": "ready" if operation.idempotency_keys else "missing",
+            "detail": ", ".join(operation.idempotency_keys) or "No idempotency keys declared.",
+            "evidence": "adapter_runtime.idempotency_prepared",
+        },
+        {
+            "step": "approval_dependency",
+            "status": "required" if operation.operator_review or provider_write_candidate else "not_required",
+            "detail": "Provider-changing or operator-review operations remain behind approval gates.",
+            "evidence": "adapter_runtime.approval_dependency_attached",
+        },
+        {
+            "step": "outbox_handoff",
+            "status": "ready" if operation.trigger == "api.outbox.enqueue" else "not_required",
+            "detail": operation.event_type,
+            "evidence": "adapter_runtime.outbox_handoff_prepared",
+        },
+        {
+            "step": "worker_boundary",
+            "status": "ready" if operation.retryable or is_worker_endpoint else "not_required",
+            "detail": operation.endpoint,
+            "evidence": "adapter_runtime.worker_boundary_selected",
+        },
+        {
+            "step": "reconciliation_plan",
+            "status": "ready" if provider_write_candidate else "not_required",
+            "detail": "Provider evidence is compared after execution before the operator closes the loop.",
+            "evidence": "adapter_runtime.reconciliation_planned",
+        },
+    ]
+
+    preflight_checks = [
+        {
+            "check": "adapter_registered",
+            "status": "passed",
+            "detail": descriptor.key,
+            "external_mutation": False,
+            "evidence": "adapter_runtime.previewed",
+        },
+        {
+            "check": "operation_contract_present",
+            "status": "passed",
+            "detail": operation.key,
+            "external_mutation": False,
+            "evidence": "adapter_runtime.previewed",
+        },
+        {
+            "check": "required_scope_available",
+            "status": "passed" if scope_status in {"available", "not_required"} else "blocked",
+            "detail": required_scope or "scope_not_required",
+            "external_mutation": False,
+            "evidence": "adapter_runtime.previewed",
+        },
+        {
+            "check": "idempotency_keys_declared",
+            "status": "passed" if operation.idempotency_keys else "warning",
+            "detail": ", ".join(operation.idempotency_keys) or "no_idempotency_keys_declared",
+            "external_mutation": False,
+            "evidence": "adapter_runtime.previewed",
+        },
+        {
+            "check": "secret_boundary_server_side",
+            "status": "clean",
+            "detail": str(descriptor.auth_profile.get("credential_placement") or "unspecified"),
+            "external_mutation": False,
+            "secret_refs_visible": bool(secret_refs),
+            "evidence": "adapter_runtime.previewed",
+        },
+        {
+            "check": "provider_write_disabled_in_preview",
+            "status": "closed",
+            "detail": "Runtime preview never calls the external provider.",
+            "external_mutation": False,
+            "provider_call_enabled": False,
+            "evidence": "adapter_runtime.previewed",
+        },
+    ]
+
+    return {
+        "adapter_key": descriptor.key,
+        "adapter_name": descriptor.name,
+        "adapter_direction": descriptor.direction,
+        "operation_contract": {
+            "key": operation.key,
+            "title": operation.title,
+            "trigger": operation.trigger,
+            "event_type": operation.event_type,
+            "endpoint": operation.endpoint,
+            "required_connection_scope": required_scope,
+            "idempotency_keys": list(operation.idempotency_keys),
+            "retryable": operation.retryable,
+            "dead_letter": operation.dead_letter,
+            "operator_review": operation.operator_review,
+        },
+        "runtime_steps": runtime_steps,
+        "preflight_checks": preflight_checks,
+        "outbox_handoff": {
+            "status": "ready" if operation.trigger == "api.outbox.enqueue" else "not_required",
+            "would_enqueue_event": operation.event_type,
+            "adapter_key": descriptor.key,
+            "operation_key": operation.key,
+            "required_connection_scope": required_scope,
+            "idempotency_keys": list(operation.idempotency_keys),
+            "retryable": operation.retryable,
+            "dead_letter": operation.dead_letter,
+            "operator_review": operation.operator_review,
+            "external_mutation": False,
+            "provider_call_enabled": False,
+            "evidence": "adapter_runtime.outbox_handoff_prepared",
+        },
+        "worker_boundary": {
+            "status": "ready" if operation.retryable or is_worker_endpoint else "not_required",
+            "endpoint": operation.endpoint,
+            "worker_function": operation.endpoint.removeprefix("worker:") if is_worker_endpoint else "drivedesk_worker.main.process_pending_outbox",
+            "execution_mode": execution_mode,
+            "public_run_mode": "contract_only",
+            "external_mutation": False,
+            "provider_call_enabled": provider_call_enabled,
+            "raw_payload_included": False,
+            "contains_pii": False,
+            "evidence": "adapter_runtime.worker_boundary_selected",
+        },
+        "reconciliation_plan": [
+            {
+                "step": "capture_expected_result",
+                "status": "ready",
+                "detail": "Expected adapter result is derived from the operation contract and idempotency key.",
+                "external_mutation": False,
+                "evidence": "adapter_runtime.reconciliation_planned",
+            },
+            {
+                "step": "compare_provider_evidence",
+                "status": "ready" if provider_write_candidate else "not_required",
+                "detail": "Provider status, accepted/rejected counts, and external reference are compared after execution.",
+                "external_mutation": False,
+                "evidence": "adapter_runtime.reconciliation_planned",
+            },
+            {
+                "step": "route_mismatch_to_operator",
+                "status": "armed" if operation.operator_review else "not_required",
+                "detail": "Mismatched or blocked evidence becomes an operator review card.",
+                "external_mutation": False,
+                "evidence": "adapter_runtime.reconciliation_planned",
+            },
+        ],
+        "incident_routes": [
+            {
+                "route": "retry_queue",
+                "status": "armed" if operation.retryable else "not_required",
+                "source": "outbox.retry",
+                "runbook": "integration.retry_backlog",
+                "external_mutation": False,
+                "evidence": "adapter_runtime.incident_route_selected",
+            },
+            {
+                "route": "dead_letter_review",
+                "status": "armed" if operation.dead_letter else "not_required",
+                "source": "outbox.dead_letter",
+                "runbook": "integration.dead_letter",
+                "external_mutation": False,
+                "evidence": "adapter_runtime.incident_route_selected",
+            },
+            {
+                "route": "reconciliation_mismatch",
+                "status": "armed" if provider_write_candidate else "not_required",
+                "source": "integration.reconciliation",
+                "runbook": "integration.reconciliation_mismatch",
+                "external_mutation": False,
+                "evidence": "adapter_runtime.incident_route_selected",
+            },
+        ],
+        "data_boundaries": [
+            {
+                "name": "contract_only_preview",
+                "status": "preview_only",
+                "external_mutation": False,
+                "detail": "The runtime plan is computed without queueing or executing provider work.",
+            },
+            {
+                "name": "server_side_secret_boundary",
+                "status": "clean",
+                "external_mutation": False,
+                "secret_refs": secret_refs,
+                "detail": "Secret names may be referenced, but secret values are never returned.",
+            },
+            {
+                "name": "safe_payload_boundary",
+                "status": "clean",
+                "contains_pii": False,
+                "raw_payload_included": False,
+                "detail": "Runtime preview uses contract metadata and safe references only.",
+            },
+            {
+                "name": "approval_before_provider_write",
+                "status": "closed",
+                "external_mutation": False,
+                "detail": "Provider mutation remains unavailable until approval and outbox commit exist.",
+            },
+        ],
+    }
+
+
 def execute_adapter(adapter_key: str | None, payload: dict[str, object]) -> AdapterResult:
     adapter = resolve_adapter(adapter_key)
     return adapter.execute(payload)

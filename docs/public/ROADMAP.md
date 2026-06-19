@@ -23,6 +23,9 @@ Fast external verification path: `docs/public/REVIEWER_QUICKSTART.md`.
 - Tenant-owned integration connection profiles with safe config and mapping.
 - Integration connection scopes for preview and execution boundaries.
 - Structured adapter operation contracts in the runtime catalog.
+- Integration Runtime preview from adapter runtime contract to scope preflight,
+  idempotency, approval dependency, outbox handoff, worker boundary,
+  reconciliation, incident route, and `adapter_runtime.previewed` evidence.
 - Tenant-scoped operator review queue for retry and dead-letter integration jobs.
 - Mapping validation against runtime adapter requirements.
 - Runtime mapping transform and read-only mapping preview.

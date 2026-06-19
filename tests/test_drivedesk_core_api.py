@@ -2652,6 +2652,78 @@ def test_business_approval_gateway_demo_endpoint_exposes_same_public_contract(
     )
 
 
+def test_integration_runtime_demo_endpoint_exposes_same_public_contract(
+    api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, _ = api_client
+
+    public_response = client.get("/demo/public")
+    runtime_response = client.get("/demo/integration-runtime")
+
+    assert runtime_response.status_code == 200
+    assert runtime_response.headers["access-control-allow-origin"] == "*"
+    assert runtime_response.headers["cache-control"] == "public, max-age=60"
+    runtime_payload = runtime_response.json()
+    assert runtime_payload == public_response.json()["integrationRuntime"]
+    assert runtime_payload["status"] == "previewed"
+    assert (
+        runtime_payload["command"]
+        == "POST /tenants/{tenant_id}/integration-runtime/preview"
+    )
+    assert runtime_payload["adapterKey"] == "accounting.export.mock"
+    assert runtime_payload["operationKey"] == "accounting_export_execute"
+    assert runtime_payload["executionMode"] == "contract_only"
+    assert (
+        runtime_payload["operationContract"]["eventType"]
+        == "accounting.export.requested"
+    )
+    assert (
+        runtime_payload["operationContract"]["requiredConnectionScope"]
+        == "accounting:export"
+    )
+    assert {item["step"] for item in runtime_payload["runtimeSteps"]} >= {
+        "contract_selected",
+        "scope_preflight",
+        "idempotency_prepared",
+        "approval_dependency",
+        "outbox_handoff",
+        "worker_boundary",
+        "reconciliation_plan",
+    }
+    assert {item["check"] for item in runtime_payload["preflightChecks"]} == {
+        "adapter_registered",
+        "operation_contract_present",
+        "required_scope_available",
+        "idempotency_keys_declared",
+        "secret_boundary_server_side",
+        "provider_write_disabled_in_preview",
+    }
+    assert runtime_payload["outboxHandoff"]["wouldEnqueueEvent"] == "accounting.export.requested"
+    assert runtime_payload["outboxHandoff"]["providerCallEnabled"] is False
+    assert runtime_payload["workerBoundary"]["publicRunMode"] == "contract_only"
+    assert runtime_payload["workerBoundary"]["providerCallEnabled"] is False
+    assert {item["route"] for item in runtime_payload["incidentRoutes"]} == {
+        "retry_queue",
+        "dead_letter_review",
+        "reconciliation_mismatch",
+    }
+    assert {item["name"] for item in runtime_payload["dataBoundaries"]} == {
+        "contract_only_preview",
+        "server_side_secret_boundary",
+        "safe_payload_boundary",
+        "approval_before_provider_write",
+    }
+    assert runtime_payload["api"]["standalone"] == "GET /demo/integration-runtime"
+    assert (
+        runtime_payload["api"]["preview"]
+        == "POST /tenants/{tenant_id}/integration-runtime/preview"
+    )
+    assert any(
+        item["path"] == "docs/public/INTEGRATION_RUNTIME.md"
+        for item in runtime_payload["docs"]
+    )
+
+
 def test_file_import_adapter_success_flow(api_client: tuple[TestClient, async_sessionmaker[AsyncSession]]) -> None:
     client, session_factory = api_client
     owner_headers = {"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"}

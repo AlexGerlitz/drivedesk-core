@@ -85,7 +85,7 @@ def build_public_demo_payload() -> dict[str, Any]:
             },
                 {
                     "label": "OpenAPI paths",
-                    "value": "43",
+                    "value": "44",
                     "detail": "generated contract",
                     "tone": "violet",
                 },
@@ -746,6 +746,61 @@ def build_public_demo_payload() -> dict[str, Any]:
                     "preview": "POST /tenants/{tenant_id}/business-detections/preview",
                 },
             },
+            "escalation": {
+                "policy": "exception_triage",
+                "riskLevel": "attention",
+                "summary": "One warning exception is routed to the finance reconciliation queue with a dry-run repair next step.",
+                "queues": [
+                    {
+                        "queue": "finance_reconciliation",
+                        "ownerRole": "accountant",
+                        "openItems": 1,
+                        "highestSeverity": "warning",
+                        "minSlaMinutes": 120,
+                        "status": "active",
+                    }
+                ],
+                "items": [
+                    {
+                        "exceptionType": "crm_payment_mismatch",
+                        "severity": "warning",
+                        "status": "open",
+                        "subject": "deal:DEAL-2026-001",
+                        "ownerRole": "accountant",
+                        "queue": "finance_reconciliation",
+                        "escalationLevel": "L2",
+                        "slaMinutes": 120,
+                        "nextAction": "execute_repair_dry_run",
+                        "nextActionStatus": "ready",
+                        "externalMutation": False,
+                        "evidence": "business_escalation.previewed",
+                    }
+                ],
+                "suggestedActions": [
+                    {
+                        "action": "execute_repair_dry_run",
+                        "status": "ready",
+                        "endpoint": "POST /tenants/{tenant_id}/repair-actions/{repair_action_id}/execute",
+                        "externalMutation": False,
+                        "evidence": "repair_action.approved",
+                    }
+                ],
+                "reviewPoints": [
+                    {
+                        "name": "write_boundary",
+                        "status": "preview_only",
+                        "detail": "Escalation does not create tasks, approve repairs, or mutate external systems.",
+                    },
+                    {
+                        "name": "owner_routing",
+                        "status": "ready",
+                        "detail": "Exception type and severity map to role, queue, and SLA.",
+                    },
+                ],
+                "api": {
+                    "preview": "POST /tenants/{tenant_id}/business-escalations/preview",
+                },
+            },
             "briefing": {
                 "role": "accountant",
                 "riskLevel": "attention",
@@ -979,6 +1034,66 @@ def build_public_demo_payload() -> dict[str, Any]:
                 "state": "success",
                 "detail": "promotion history hash recorded for auditability",
                 "evidence": "promotion_history_hash_recorded",
+            },
+            {
+                "name": "Runtime rollout",
+                "state": "success",
+                "detail": "private staging runtime evidence is collected through public-safe contracts",
+                "evidence": "runtime.rollout.evidence_collected",
+            },
+            {
+                "name": "Loopback boundary",
+                "state": "success",
+                "detail": "private staging checks stay behind a loopback-only public boundary",
+                "evidence": "loopback_boundary_recorded",
+            },
+            {
+                "name": "Private state validation",
+                "state": "success",
+                "detail": "read-only private infra validation evidence is recorded",
+                "evidence": "infra.private_state.validated",
+            },
+            {
+                "name": "No runtime mutation",
+                "state": "success",
+                "detail": "validation records that no runtime mutation was performed",
+                "evidence": "no_runtime_mutation_recorded",
+            },
+            {
+                "name": "Remediation plan",
+                "state": "success",
+                "detail": "drift remediation is planned with operator review before apply",
+                "evidence": "infra.remediation.plan.ready",
+            },
+            {
+                "name": "Rollback attached",
+                "state": "success",
+                "detail": "remediation plan includes rollback context",
+                "evidence": "rollback_attached",
+            },
+            {
+                "name": "Remediation execution",
+                "state": "success",
+                "detail": "reviewed private staging remediation execution is recorded",
+                "evidence": "infra.remediation.execution.completed",
+            },
+            {
+                "name": "Post-remediation validation",
+                "state": "success",
+                "detail": "postcheck validation is recorded after remediation execution",
+                "evidence": "post_remediation_validation_recorded",
+            },
+            {
+                "name": "Post-remediation drift",
+                "state": "success",
+                "detail": "read-only drift refresh shows clean state after remediation",
+                "evidence": "infra.post_remediation_drift.clean",
+            },
+            {
+                "name": "No residual drift",
+                "state": "success",
+                "detail": "post-remediation refresh records no residual drift",
+                "evidence": "no_residual_drift_recorded",
             },
             {
                 "name": "Scheduled validation",

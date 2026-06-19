@@ -90,6 +90,8 @@ Fast external verification path: `docs/public/REVIEWER_QUICKSTART.md`.
 - Public-safe GitOps drift remediation evidence with approval and rollback context.
 - Public-safe GitOps image automation evidence with digest, SBOM, scan,
   provenance, and pull-request-only proposal metadata.
+- Business escalation preview for routing open exceptions to owner roles,
+  queues, SLA targets, and approval-gated next actions.
 
 ## Next
 

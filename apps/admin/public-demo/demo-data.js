@@ -1,6 +1,6 @@
 window.DRIVEDESK_DEMO_DATA = {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-17T08:20:00Z",
+  "generatedAt": "2026-06-17T10:55:00Z",
   "dataSource": "static.fallback",
   "apiContract": {
     "path": "/demo/public",
@@ -35,7 +35,7 @@ window.DRIVEDESK_DEMO_DATA = {
     },
     {
       "label": "OpenAPI paths",
-      "value": "43",
+      "value": "44",
       "detail": "generated contract",
       "tone": "violet"
     },
@@ -163,14 +163,56 @@ window.DRIVEDESK_DEMO_DATA = {
   ],
   "adapters": [
     {
+      "key": "accounting.export.mock",
+      "name": "Mock Accounting Export",
+      "status": "active",
+      "direction": "outbound",
+      "connectionProfileSupported": true,
+      "requiredMappingKeys": [],
+      "supportedConnectionScopes": [
+        "accounting:export"
+      ],
+      "defaultConnectionScopes": [
+        "accounting:export"
+      ],
+      "operationContracts": [
+        {
+          "key": "accounting_export_execute",
+          "title": "Export accounting documents",
+          "trigger": "api.outbox.enqueue",
+          "eventType": "accounting.export.requested",
+          "endpoint": "POST /tenants/{tenant_id}/integration-exports/accounting",
+          "requiredConnectionScope": "accounting:export",
+          "idempotencyKeys": [
+            "tenant_id",
+            "export_batch_id",
+            "documents_hash"
+          ],
+          "retryable": true,
+          "deadLetter": true,
+          "operatorReview": true
+        }
+      ],
+      "contract": "Export synthetic accounting documents through the shared outbox adapter boundary."
+    },
+    {
       "key": "file.import.fake",
       "name": "Synthetic File Import",
       "status": "active",
       "direction": "inbound",
       "connectionProfileSupported": true,
-      "requiredMappingKeys": ["external_id", "display_name"],
-      "supportedConnectionScopes": ["file_import:execute", "file_import:preview"],
-      "defaultConnectionScopes": ["file_import:execute", "file_import:preview"],
+      "requiredMappingKeys": [
+        "external_id",
+        "display_name"
+      ],
+      "supportedConnectionScopes": [
+        "file_import:execute",
+        "file_import:preview"
+      ],
+      "defaultConnectionScopes": [
+        "file_import:execute",
+        "file_import:preview"
+      ],
       "operationContracts": [
         {
           "key": "file_import_preview",
@@ -179,7 +221,11 @@ window.DRIVEDESK_DEMO_DATA = {
           "eventType": "integration.mapping_preview.requested",
           "endpoint": "POST /tenants/{tenant_id}/integration-mapping-preview",
           "requiredConnectionScope": "file_import:preview",
-          "idempotencyKeys": ["tenant_id", "integration_connection_id", "records_hash"],
+          "idempotencyKeys": [
+            "tenant_id",
+            "integration_connection_id",
+            "records_hash"
+          ],
           "retryable": false,
           "deadLetter": false,
           "operatorReview": false
@@ -191,13 +237,18 @@ window.DRIVEDESK_DEMO_DATA = {
           "eventType": "integration.file_import.requested",
           "endpoint": "POST /tenants/{tenant_id}/integration-imports/file",
           "requiredConnectionScope": "file_import:execute",
-          "idempotencyKeys": ["tenant_id", "source_name", "source_format", "records_hash"],
+          "idempotencyKeys": [
+            "tenant_id",
+            "source_name",
+            "source_format",
+            "records_hash"
+          ],
           "retryable": true,
           "deadLetter": true,
           "operatorReview": true
         }
       ],
-      "contract": "Normalizes provider rows, previews mapped records, returns accepted and rejected counts, and stores the result on the outbox event."
+      "contract": "Normalize synthetic imported rows and report accepted or rejected records."
     },
     {
       "key": "internal.noop",
@@ -216,38 +267,15 @@ window.DRIVEDESK_DEMO_DATA = {
           "eventType": "internal.*",
           "endpoint": "worker:drivedesk_worker.main.process_pending_outbox",
           "requiredConnectionScope": null,
-          "idempotencyKeys": ["outbox_event.id"],
+          "idempotencyKeys": [
+            "outbox_event.id"
+          ],
           "retryable": false,
           "deadLetter": false,
           "operatorReview": false
         }
       ],
-      "contract": "Acknowledges internal domain events without calling an external provider."
-    },
-    {
-      "key": "accounting.export.mock",
-      "name": "Mock Accounting Export",
-      "status": "active",
-      "direction": "outbound",
-      "connectionProfileSupported": true,
-      "requiredMappingKeys": [],
-      "supportedConnectionScopes": ["accounting:export"],
-      "defaultConnectionScopes": ["accounting:export"],
-      "operationContracts": [
-        {
-          "key": "accounting_export_execute",
-          "title": "Export accounting documents",
-          "trigger": "api.outbox.enqueue",
-          "eventType": "accounting.export.requested",
-          "endpoint": "POST /tenants/{tenant_id}/integration-exports/accounting",
-          "requiredConnectionScope": "accounting:export",
-          "idempotencyKeys": ["tenant_id", "export_batch_id", "documents_hash"],
-          "retryable": true,
-          "deadLetter": true,
-          "operatorReview": true
-        }
-      ],
-      "contract": "Exports synthetic accounting document batches through the shared outbox adapter boundary."
+      "contract": "Acknowledge internal domain events without calling an external provider."
     }
   ],
   "adapterScenarios": [
@@ -813,6 +841,61 @@ window.DRIVEDESK_DEMO_DATA = {
         "preview": "POST /tenants/{tenant_id}/business-detections/preview"
       }
     },
+    "escalation": {
+      "policy": "exception_triage",
+      "riskLevel": "attention",
+      "summary": "One warning exception is routed to the finance reconciliation queue with a dry-run repair next step.",
+      "queues": [
+        {
+          "queue": "finance_reconciliation",
+          "ownerRole": "accountant",
+          "openItems": 1,
+          "highestSeverity": "warning",
+          "minSlaMinutes": 120,
+          "status": "active"
+        }
+      ],
+      "items": [
+        {
+          "exceptionType": "crm_payment_mismatch",
+          "severity": "warning",
+          "status": "open",
+          "subject": "deal:DEAL-2026-001",
+          "ownerRole": "accountant",
+          "queue": "finance_reconciliation",
+          "escalationLevel": "L2",
+          "slaMinutes": 120,
+          "nextAction": "execute_repair_dry_run",
+          "nextActionStatus": "ready",
+          "externalMutation": false,
+          "evidence": "business_escalation.previewed"
+        }
+      ],
+      "suggestedActions": [
+        {
+          "action": "execute_repair_dry_run",
+          "status": "ready",
+          "endpoint": "POST /tenants/{tenant_id}/repair-actions/{repair_action_id}/execute",
+          "externalMutation": false,
+          "evidence": "repair_action.approved"
+        }
+      ],
+      "reviewPoints": [
+        {
+          "name": "write_boundary",
+          "status": "preview_only",
+          "detail": "Escalation does not create tasks, approve repairs, or mutate external systems."
+        },
+        {
+          "name": "owner_routing",
+          "status": "ready",
+          "detail": "Exception type and severity map to role, queue, and SLA."
+        }
+      ],
+      "api": {
+        "preview": "POST /tenants/{tenant_id}/business-escalations/preview"
+      }
+    },
     "briefing": {
       "role": "accountant",
       "riskLevel": "attention",
@@ -1047,61 +1130,61 @@ window.DRIVEDESK_DEMO_DATA = {
     {
       "name": "Runtime rollout",
       "state": "success",
-      "detail": "private staging rollout passed health and observability gates",
+      "detail": "private staging runtime evidence is collected through public-safe contracts",
       "evidence": "runtime.rollout.evidence_collected"
     },
     {
       "name": "Loopback boundary",
       "state": "success",
-      "detail": "public evidence records no public runtime route",
+      "detail": "private staging checks stay behind a loopback-only public boundary",
       "evidence": "loopback_boundary_recorded"
     },
     {
-      "name": "Private infra validation",
+      "name": "Private state validation",
       "state": "success",
-      "detail": "read-only staging/control-plane validation recorded before changes",
+      "detail": "read-only private infra validation evidence is recorded",
       "evidence": "infra.private_state.validated"
     },
     {
       "name": "No runtime mutation",
       "state": "success",
-      "detail": "validation evidence records no apply, restart, or runtime mutation",
+      "detail": "validation records that no runtime mutation was performed",
       "evidence": "no_runtime_mutation_recorded"
     },
     {
-      "name": "Infra remediation plan",
+      "name": "Remediation plan",
       "state": "success",
-      "detail": "drift converted into operator-reviewed plan-only actions",
+      "detail": "drift remediation is planned with operator review before apply",
       "evidence": "infra.remediation.plan.ready"
     },
     {
       "name": "Rollback attached",
       "state": "success",
-      "detail": "each planned remediation action keeps rollback context",
+      "detail": "remediation plan includes rollback context",
       "evidence": "rollback_attached"
     },
     {
       "name": "Remediation execution",
       "state": "success",
-      "detail": "reviewed private staging execution completed with no production apply",
+      "detail": "reviewed private staging remediation execution is recorded",
       "evidence": "infra.remediation.execution.completed"
     },
     {
       "name": "Post-remediation validation",
       "state": "success",
-      "detail": "postchecks and sanitized evidence refresh recorded",
+      "detail": "postcheck validation is recorded after remediation execution",
       "evidence": "post_remediation_validation_recorded"
     },
     {
-      "name": "Drift refresh clean",
+      "name": "Post-remediation drift",
       "state": "success",
-      "detail": "read-only refresh marks repaired components aligned",
+      "detail": "read-only drift refresh shows clean state after remediation",
       "evidence": "infra.post_remediation_drift.clean"
     },
     {
       "name": "No residual drift",
       "state": "success",
-      "detail": "sanitized refresh records no residual or accepted drift",
+      "detail": "post-remediation refresh records no residual drift",
       "evidence": "no_residual_drift_recorded"
     },
     {

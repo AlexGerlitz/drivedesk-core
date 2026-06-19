@@ -34,6 +34,7 @@ from drivedesk_api.schemas import (
     AccountingExportCreate,
     BusinessBriefingPreviewCreate,
     BusinessDetectionPreviewCreate,
+    BusinessEscalationPreviewCreate,
     BusinessExceptionCreate,
     BusinessExceptionStatusChange,
     BusinessRecordCreate,
@@ -1450,6 +1451,253 @@ async def build_business_briefing(
         "api": {
             "preview": "POST /tenants/{tenant_id}/business-briefings/preview",
             "observations": "GET /tenants/{tenant_id}/business-state/observations",
+            "exceptions": "GET /tenants/{tenant_id}/business-exceptions",
+            "repair_actions": "GET /tenants/{tenant_id}/repair-actions",
+        },
+    }
+
+
+SEVERITY_RANK = {"info": 1, "warning": 2, "critical": 3}
+
+
+def _escalation_owner_role(business_exception: BusinessException) -> str:
+    if business_exception.severity == "critical":
+        return "owner"
+    if business_exception.exception_type in {"crm_payment_mismatch"}:
+        return "accountant"
+    if "support" in business_exception.exception_type:
+        return "support"
+    return "operator"
+
+
+def _escalation_sla_minutes(severity: str) -> int:
+    if severity == "critical":
+        return 15
+    if severity == "warning":
+        return 120
+    return 1440
+
+
+def _escalation_queue(owner_role: str) -> str:
+    if owner_role == "accountant":
+        return "finance_reconciliation"
+    if owner_role == "owner":
+        return "owner_review"
+    if owner_role == "manager":
+        return "ops_management"
+    if owner_role == "support":
+        return "support_queue"
+    return "operations_triage"
+
+
+def _repair_next_action(
+    *,
+    tenant_id: str,
+    business_exception: BusinessException,
+    repair: RepairAction | None,
+) -> dict[str, object]:
+    if repair is None:
+        return {
+            "action": "propose_repair_action",
+            "status": "available",
+            "summary": f"Create a repair action for {business_exception.exception_type}.",
+            "endpoint": f"POST /tenants/{tenant_id}/business-exceptions/{business_exception.id}/repair-actions",
+            "requires_approval": True,
+            "external_mutation": False,
+            "evidence": "business_exception.created",
+        }
+    if repair.status == "proposed" and repair.requires_approval:
+        return {
+            "action": "approve_repair_action",
+            "status": "requires_approval",
+            "summary": repair.summary,
+            "endpoint": f"POST /tenants/{tenant_id}/repair-actions/{repair.id}/approve",
+            "requires_approval": True,
+            "external_mutation": False,
+            "evidence": "repair_action.proposed",
+            "repair_action_id": repair.id,
+        }
+    if repair.status == "approved":
+        return {
+            "action": "execute_repair_dry_run",
+            "status": "ready",
+            "summary": repair.summary,
+            "endpoint": f"POST /tenants/{tenant_id}/repair-actions/{repair.id}/execute",
+            "requires_approval": False,
+            "external_mutation": False,
+            "evidence": "repair_action.approved",
+            "repair_action_id": repair.id,
+        }
+    return {
+        "action": "inspect_repair_result",
+        "status": repair.status,
+        "summary": repair.summary,
+        "endpoint": f"GET /tenants/{tenant_id}/repair-actions?business_exception_id={repair.business_exception_id}",
+        "requires_approval": False,
+        "external_mutation": False,
+        "evidence": "repair_action.executed" if repair.status == "executed" else "repair_action.proposed",
+        "repair_action_id": repair.id,
+    }
+
+
+def _latest_repair_by_exception(repairs: list[RepairAction]) -> dict[str, RepairAction]:
+    latest: dict[str, RepairAction] = {}
+    for repair in repairs:
+        previous = latest.get(repair.business_exception_id)
+        if previous is None or repair.created_at > previous.created_at:
+            latest[repair.business_exception_id] = repair
+    return latest
+
+
+async def preview_business_escalations(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    payload: BusinessEscalationPreviewCreate,
+) -> dict[str, object]:
+    await ensure_tenant_exists(session, tenant_id)
+    exceptions_query = (
+        select(BusinessException)
+        .where(BusinessException.tenant_id == tenant_id)
+        .order_by(BusinessException.detected_at.desc(), BusinessException.created_at.desc())
+        .limit(payload.limit)
+    )
+    if payload.subject_type:
+        exceptions_query = exceptions_query.where(BusinessException.subject_type == payload.subject_type)
+    if payload.subject_id:
+        exceptions_query = exceptions_query.where(BusinessException.subject_id == payload.subject_id)
+    if not payload.include_resolved:
+        exceptions_query = exceptions_query.where(BusinessException.status != "resolved")
+
+    exceptions_result = await session.execute(exceptions_query)
+    exceptions = list(exceptions_result.scalars().all())
+    exception_ids = [item.id for item in exceptions]
+    repairs: list[RepairAction] = []
+    if exception_ids:
+        repairs_result = await session.execute(
+            select(RepairAction)
+            .where(
+                RepairAction.tenant_id == tenant_id,
+                RepairAction.business_exception_id.in_(exception_ids),
+            )
+            .order_by(RepairAction.created_at.desc())
+        )
+        repairs = list(repairs_result.scalars().all())
+
+    repairs_by_exception = _latest_repair_by_exception(repairs)
+    escalation_items: list[dict[str, object]] = []
+    suggested_actions: list[dict[str, object]] = []
+    evidence: list[dict[str, object]] = []
+    queue_state: dict[str, dict[str, object]] = {}
+
+    for business_exception in exceptions:
+        owner_role = _escalation_owner_role(business_exception)
+        queue = _escalation_queue(owner_role)
+        sla_minutes = _escalation_sla_minutes(business_exception.severity)
+        repair = repairs_by_exception.get(business_exception.id)
+        next_action = _repair_next_action(
+            tenant_id=tenant_id,
+            business_exception=business_exception,
+            repair=repair,
+        )
+        escalation_level = "L3" if business_exception.severity == "critical" else "L2"
+        item = {
+            "business_exception_id": business_exception.id,
+            "exception_type": business_exception.exception_type,
+            "severity": business_exception.severity,
+            "status": business_exception.status,
+            "subject_type": business_exception.subject_type,
+            "subject_id": business_exception.subject_id,
+            "subject": _subject_label(business_exception.subject_type, business_exception.subject_id),
+            "owner_role": owner_role,
+            "queue": queue,
+            "escalation_level": escalation_level,
+            "sla_minutes": sla_minutes,
+            "next_action": next_action["action"],
+            "next_action_status": next_action["status"],
+            "repair_action_id": next_action.get("repair_action_id"),
+            "external_mutation": False,
+            "evidence": "business_escalation.previewed",
+        }
+        escalation_items.append(item)
+        suggested_actions.append(next_action)
+        evidence.append(
+            {
+                "type": "business_exception",
+                "id": business_exception.id,
+                "event": "business_exception.created",
+                "severity": business_exception.severity,
+                "status": business_exception.status,
+            }
+        )
+        if repair is not None:
+            evidence.append(
+                {
+                    "type": "repair_action",
+                    "id": repair.id,
+                    "event": "repair_action.proposed",
+                    "action": repair.action_type,
+                    "status": repair.status,
+                }
+            )
+
+        state = queue_state.setdefault(
+            queue,
+            {
+                "queue": queue,
+                "owner_role": owner_role,
+                "open_items": 0,
+                "highest_severity": "info",
+                "min_sla_minutes": sla_minutes,
+                "status": "active",
+            },
+        )
+        state["open_items"] = int(state["open_items"]) + 1
+        if SEVERITY_RANK[business_exception.severity] > SEVERITY_RANK[str(state["highest_severity"])]:
+            state["highest_severity"] = business_exception.severity
+        state["min_sla_minutes"] = min(int(state["min_sla_minutes"]), sla_minutes)
+
+    queues = sorted(
+        queue_state.values(),
+        key=lambda item: (-SEVERITY_RANK[str(item["highest_severity"])], int(item["min_sla_minutes"]), str(item["queue"])),
+    )
+    risk_level = _briefing_risk_level(exceptions, repairs)
+    summary = (
+        f"{payload.policy} policy routed {len(escalation_items)} open exception(s) "
+        f"across {len(queues)} queue(s) with {len(suggested_actions)} next action(s)."
+    )
+    return {
+        "tenant_id": tenant_id,
+        "policy": payload.policy,
+        "subject_type": payload.subject_type,
+        "subject_id": payload.subject_id,
+        "generated_at": datetime.now(UTC),
+        "risk_level": risk_level,
+        "summary": summary,
+        "queues": queues,
+        "escalation_items": escalation_items,
+        "suggested_actions": suggested_actions,
+        "review_points": [
+            {
+                "name": "write_boundary",
+                "status": "preview_only",
+                "detail": "Escalation preview does not create tasks, approve repairs, or mutate external systems.",
+            },
+            {
+                "name": "owner_routing",
+                "status": "ready" if escalation_items else "empty",
+                "detail": "Business exception type and severity are mapped to owner role, queue, and SLA.",
+            },
+            {
+                "name": "repair_handoff",
+                "status": "ready" if suggested_actions else "not_requested",
+                "detail": "Next actions reuse existing approval-gated repair endpoints.",
+            },
+        ],
+        "evidence": evidence,
+        "api": {
+            "preview": "POST /tenants/{tenant_id}/business-escalations/preview",
+            "briefing": "POST /tenants/{tenant_id}/business-briefings/preview",
             "exceptions": "GET /tenants/{tenant_id}/business-exceptions",
             "repair_actions": "GET /tenants/{tenant_id}/repair-actions",
         },

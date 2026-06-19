@@ -41,6 +41,10 @@
     return "POST /tenants/{tenant_id}/business-detections/preview";
   }
 
+  function businessEscalationPreviewEndpoint() {
+    return "POST /tenants/{tenant_id}/business-escalations/preview";
+  }
+
   function isValidDemoPayload(payload) {
     return Boolean(
       payload &&
@@ -77,6 +81,10 @@
         Array.isArray(payload.businessControlTower.detection.rules) &&
         Array.isArray(payload.businessControlTower.detection.detectedExceptions) &&
         Array.isArray(payload.businessControlTower.detection.suggestedRepairActions) &&
+        payload.businessControlTower.escalation &&
+        Array.isArray(payload.businessControlTower.escalation.queues) &&
+        Array.isArray(payload.businessControlTower.escalation.items) &&
+        Array.isArray(payload.businessControlTower.escalation.suggestedActions) &&
         payload.businessControlTower.briefing &&
         Array.isArray(payload.businessControlTower.briefing.highlights) &&
         Array.isArray(payload.businessControlTower.briefing.recommendedActions) &&
@@ -974,6 +982,93 @@
 
       row.append(top, detail, evidence);
       detectionRepairRows.appendChild(row);
+    });
+
+    var escalation = controlTower.escalation;
+    var escalationRows = document.getElementById("controlTowerEscalationRows");
+    clear(escalationRows);
+
+    var escalationSummary = document.createElement("article");
+    escalationSummary.className = "event-row";
+    var escalationTop = document.createElement("div");
+    escalationTop.className = "event-top";
+    var escalationTitle = document.createElement("strong");
+    escalationTitle.appendChild(text(escalation.policy + " escalation"));
+    escalationTop.append(escalationTitle, chip(escalation.riskLevel, statusTone(escalation.riskLevel)));
+
+    var escalationDetail = document.createElement("span");
+    escalationDetail.className = "muted";
+    escalationDetail.appendChild(text(escalation.summary));
+
+    var escalationApi = document.createElement("code");
+    escalationApi.appendChild(
+      text((escalation.api && escalation.api.preview) || businessEscalationPreviewEndpoint())
+    );
+
+    escalationSummary.append(escalationTop, escalationDetail, escalationApi);
+    escalationRows.appendChild(escalationSummary);
+
+    escalation.queues.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(item.queue));
+      top.append(title, chip(item.highestSeverity, statusTone(item.highestSeverity)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          item.ownerRole +
+            " - " +
+            String(item.openItems) +
+            " item(s) - SLA " +
+            String(item.minSlaMinutes) +
+            "m"
+        )
+      );
+
+      var status = document.createElement("code");
+      status.appendChild(text(item.status));
+
+      row.append(top, detail, status);
+      escalationRows.appendChild(row);
+    });
+
+    var escalationActionRows = document.getElementById("controlTowerEscalationActionRows");
+    clear(escalationActionRows);
+    escalation.items.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(item.exceptionType));
+      top.append(title, chip(item.nextActionStatus, statusTone(item.nextActionStatus)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          item.subject +
+            " - " +
+            item.ownerRole +
+            " - " +
+            item.queue +
+            " - " +
+            item.escalationLevel
+        )
+      );
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(item.nextAction + " - " + item.evidence));
+
+      row.append(top, detail, evidence);
+      escalationActionRows.appendChild(row);
     });
 
     var briefing = controlTower.briefing;

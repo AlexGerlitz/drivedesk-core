@@ -74,6 +74,8 @@ from drivedesk_api.schemas import (
     BusinessBriefingRead,
     BusinessDetectionPreviewCreate,
     BusinessDetectionPreviewRead,
+    BusinessEscalationPreviewCreate,
+    BusinessEscalationPreviewRead,
     BusinessExceptionCreate,
     BusinessExceptionRead,
     BusinessExceptionStatusChange,
@@ -166,6 +168,7 @@ from drivedesk_api.services import (
     list_workflow_action_runs,
     list_workflow_rules,
     preview_business_detections,
+    preview_business_escalations,
     preview_integration_mapping,
     propose_repair_action,
     retry_outbox_event,
@@ -969,6 +972,21 @@ def build_app(settings: Settings | None = None) -> FastAPI:
         await ensure_tenant_exists(session, tenant_id)
         require_tenant_permission(actor, tenant_id, Permission.BUSINESS_RECORD_READ)
         return await preview_business_detections(session, tenant_id=tenant_id, payload=payload)
+
+    @api.post(
+        "/tenants/{tenant_id}/business-escalations/preview",
+        response_model=BusinessEscalationPreviewRead,
+        tags=["business-control"],
+    )
+    async def preview_business_escalations_endpoint(
+        tenant_id: str,
+        payload: BusinessEscalationPreviewCreate,
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> dict[str, object]:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.BUSINESS_RECORD_READ)
+        return await preview_business_escalations(session, tenant_id=tenant_id, payload=payload)
 
     @api.post(
         "/tenants/{tenant_id}/business-briefings/preview",

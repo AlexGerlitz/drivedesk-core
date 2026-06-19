@@ -754,6 +754,53 @@ def test_business_control_tower_exception_and_repair_flow(
     assert approved_response.status_code == 200
     assert approved_response.json()["status"] == "approved"
 
+    escalation_response = client.post(
+        f"/tenants/{tenant_id}/business-escalations/preview",
+        json={
+            "policy": "exception_triage",
+            "subject_type": "deal",
+            "subject_id": "DEAL-2026-001",
+        },
+        headers=owner_headers,
+    )
+    assert escalation_response.status_code == 200
+    escalation = escalation_response.json()
+    assert escalation["policy"] == "exception_triage"
+    assert escalation["risk_level"] == "attention"
+    assert "routed 1 open exception" in escalation["summary"]
+    assert escalation["queues"] == [
+        {
+            "queue": "finance_reconciliation",
+            "owner_role": "accountant",
+            "open_items": 1,
+            "highest_severity": "warning",
+            "min_sla_minutes": 120,
+            "status": "active",
+        }
+    ]
+    assert len(escalation["escalation_items"]) == 1
+    escalation_item = escalation["escalation_items"][0]
+    assert escalation_item["business_exception_id"] == business_exception["id"]
+    assert escalation_item["exception_type"] == "crm_payment_mismatch"
+    assert escalation_item["owner_role"] == "accountant"
+    assert escalation_item["queue"] == "finance_reconciliation"
+    assert escalation_item["sla_minutes"] == 120
+    assert escalation_item["next_action"] == "execute_repair_dry_run"
+    assert escalation_item["next_action_status"] == "ready"
+    assert escalation_item["external_mutation"] is False
+    assert {item["action"] for item in escalation["suggested_actions"]} == {"execute_repair_dry_run"}
+    assert escalation["suggested_actions"][0]["endpoint"] == (
+        f"POST /tenants/{tenant_id}/repair-actions/{repair_action['id']}/execute"
+    )
+    assert escalation["suggested_actions"][0]["external_mutation"] is False
+    assert {item["name"] for item in escalation["review_points"]} == {
+        "write_boundary",
+        "owner_routing",
+        "repair_handoff",
+    }
+    assert {item["type"] for item in escalation["evidence"]} >= {"business_exception", "repair_action"}
+    assert escalation["api"]["preview"] == "POST /tenants/{tenant_id}/business-escalations/preview"
+
     briefing_response = client.post(
         f"/tenants/{tenant_id}/business-briefings/preview",
         json={

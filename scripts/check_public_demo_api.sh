@@ -252,6 +252,23 @@ assert {item["externalMutation"] for item in control_tower["detection"]["suggest
 assert control_tower["detection"]["api"]["preview"] == (
     "POST /tenants/{tenant_id}/business-detections/preview"
 ), demo
+assert control_tower["escalation"]["policy"] == "exception_triage", demo
+assert control_tower["escalation"]["riskLevel"] == "attention", demo
+assert {item["queue"] for item in control_tower["escalation"]["queues"]} == {
+    "finance_reconciliation"
+}, demo
+assert {item["ownerRole"] for item in control_tower["escalation"]["queues"]} == {"accountant"}, demo
+assert {item["minSlaMinutes"] for item in control_tower["escalation"]["queues"]} == {120}, demo
+assert {item["nextAction"] for item in control_tower["escalation"]["items"]} == {
+    "execute_repair_dry_run"
+}, demo
+assert {item["externalMutation"] for item in control_tower["escalation"]["items"]} == {False}, demo
+assert {item["action"] for item in control_tower["escalation"]["suggestedActions"]} == {
+    "execute_repair_dry_run"
+}, demo
+assert control_tower["escalation"]["api"]["preview"] == (
+    "POST /tenants/{tenant_id}/business-escalations/preview"
+), demo
 assert control_tower["briefing"]["role"] == "accountant", demo
 assert control_tower["briefing"]["riskLevel"] == "attention", demo
 assert set(control_tower["briefing"]["sourceSystems"]) >= {

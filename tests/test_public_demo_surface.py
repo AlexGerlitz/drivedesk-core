@@ -52,6 +52,8 @@ def test_public_demo_html_links_static_assets() -> None:
     assert 'id="controlTowerSummaryRows"' in html
     assert 'id="controlTowerDetectionRows"' in html
     assert 'id="controlTowerDetectionRepairRows"' in html
+    assert 'id="controlTowerEscalationRows"' in html
+    assert 'id="controlTowerEscalationActionRows"' in html
     assert 'id="controlTowerBriefingRows"' in html
     assert 'id="controlTowerBriefingActionRows"' in html
     assert 'id="controlTowerFlowRows"' in html
@@ -164,6 +166,23 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
     assert {item["externalMutation"] for item in control_tower["detection"]["suggestedRepairActions"]} == {False}
     assert control_tower["detection"]["api"]["preview"] == (
         "POST /tenants/{tenant_id}/business-detections/preview"
+    )
+    assert control_tower["escalation"]["policy"] == "exception_triage"
+    assert control_tower["escalation"]["riskLevel"] == "attention"
+    assert {item["queue"] for item in control_tower["escalation"]["queues"]} == {
+        "finance_reconciliation"
+    }
+    assert {item["ownerRole"] for item in control_tower["escalation"]["queues"]} == {"accountant"}
+    assert {item["minSlaMinutes"] for item in control_tower["escalation"]["queues"]} == {120}
+    assert {item["nextAction"] for item in control_tower["escalation"]["items"]} == {
+        "execute_repair_dry_run"
+    }
+    assert {item["externalMutation"] for item in control_tower["escalation"]["items"]} == {False}
+    assert {item["action"] for item in control_tower["escalation"]["suggestedActions"]} == {
+        "execute_repair_dry_run"
+    }
+    assert control_tower["escalation"]["api"]["preview"] == (
+        "POST /tenants/{tenant_id}/business-escalations/preview"
     )
     assert control_tower["briefing"]["role"] == "accountant"
     assert control_tower["briefing"]["riskLevel"] == "attention"

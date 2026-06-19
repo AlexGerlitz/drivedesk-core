@@ -10,8 +10,9 @@ The first public-safe slice models a common cross-system failure:
 3. Accounting export has not been sent.
 4. DriveDesk previews the detected mismatch before mutating data.
 5. DriveDesk opens a business exception.
-6. A repair action is proposed, approved, and executed in dry-run mode.
-7. A role briefing turns the raw evidence into the next useful operator view.
+6. DriveDesk previews escalation routing: owner, queue, SLA, and next action.
+7. A repair action is proposed, approved, and executed in dry-run mode.
+8. A role briefing turns the raw evidence into the next useful operator view.
 
 This is intentionally not another workflow automation demo. The control tower
 tracks business state across systems, detects an exception, records impact, and
@@ -22,6 +23,7 @@ keeps the repair path auditable.
 | Step | Endpoint | Purpose |
 | --- | --- | --- |
 | Preview detections | `POST /tenants/{tenant_id}/business-detections/preview` | Detect exception candidates and suggested repair actions from observations without mutating data. |
+| Preview escalations | `POST /tenants/{tenant_id}/business-escalations/preview` | Route open business exceptions to owner roles, queues, SLA targets, and next actions without mutating data. |
 | Preview briefing | `POST /tenants/{tenant_id}/business-briefings/preview` | Build a role-specific work briefing from observations, exceptions, and repair actions without mutating data. |
 | Observe state | `POST /tenants/{tenant_id}/business-state/observations` | Record a normalized state sample from CRM, bank, accounting, support, or another connected system. |
 | List observations | `GET /tenants/{tenant_id}/business-state/observations` | Review the tenant-scoped state timeline for a subject. |
@@ -36,6 +38,7 @@ keeps the repair path auditable.
 | Model | Meaning |
 | --- | --- |
 | `BusinessDetectionPreview` | A read-only detector result with matched rules, exception candidates, repair suggestions, and evidence. |
+| `BusinessEscalationPreview` | A read-only triage result with queue, owner role, SLA, next action, and evidence. |
 | `BusinessBriefing` | A read-model for the current operator role, subject, evidence, risks, and next actions. |
 | `BusinessStateObservation` | One normalized fact from an external system. |
 | `BusinessException` | A business problem derived from observations. |
@@ -80,6 +83,22 @@ It returns:
 The preview is read-only. It does not create `BusinessException`,
 `RepairAction`, or outbox records.
 
+## Escalation Preview
+
+The escalation preview is the triage step after an exception exists and before
+an operator decides what to do next. The first policy is `exception_triage`.
+
+It reads open business exceptions and linked repair actions, then returns:
+
+- owner role, for example `accountant`;
+- queue, for example `finance_reconciliation`;
+- escalation level and SLA minutes;
+- the next safe action, for example `execute_repair_dry_run`;
+- evidence that ties the route back to the exception and repair action.
+
+The preview is read-only. It does not create tasks, approve repairs, execute
+repairs, enqueue outbox events, or notify external systems.
+
 ## Safety Boundary
 
 The public demo does not write to real external systems. Repair execution stores
@@ -107,6 +126,8 @@ The public demo includes a `businessControlTower` payload with:
   `accounting.export.mock`;
 - one `payment_reconciliation` detection preview;
 - one `crm_payment_mismatch` exception;
+- one `exception_triage` escalation preview with owner, queue, SLA, and next
+  action;
 - one approval-gated `sync_status` repair action;
 - one accountant briefing with source systems, highlights, recommended actions,
   and review points;

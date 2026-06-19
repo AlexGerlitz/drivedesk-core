@@ -713,6 +713,166 @@
         "title": "BusinessDetectionPreviewRead",
         "type": "object"
       },
+      "BusinessEscalationPreviewCreate": {
+        "properties": {
+          "include_resolved": {
+            "default": false,
+            "title": "Include Resolved",
+            "type": "boolean"
+          },
+          "limit": {
+            "default": 20,
+            "maximum": 50.0,
+            "minimum": 1.0,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "policy": {
+            "const": "exception_triage",
+            "default": "exception_triage",
+            "title": "Policy",
+            "type": "string"
+          },
+          "subject_id": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Id"
+          },
+          "subject_type": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 2,
+                "pattern": "^[a-z0-9][a-z0-9_-]*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Type"
+          }
+        },
+        "title": "BusinessEscalationPreviewCreate",
+        "type": "object"
+      },
+      "BusinessEscalationPreviewRead": {
+        "properties": {
+          "api": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Api",
+            "type": "object"
+          },
+          "escalation_items": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Escalation Items",
+            "type": "array"
+          },
+          "evidence": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "policy": {
+            "const": "exception_triage",
+            "title": "Policy",
+            "type": "string"
+          },
+          "queues": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Queues",
+            "type": "array"
+          },
+          "review_points": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Review Points",
+            "type": "array"
+          },
+          "risk_level": {
+            "enum": [
+              "normal",
+              "attention",
+              "critical"
+            ],
+            "title": "Risk Level",
+            "type": "string"
+          },
+          "subject_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Id"
+          },
+          "subject_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Type"
+          },
+          "suggested_actions": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Suggested Actions",
+            "type": "array"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tenant_id",
+          "policy",
+          "generated_at",
+          "risk_level",
+          "summary"
+        ],
+        "title": "BusinessEscalationPreviewRead",
+        "type": "object"
+      },
       "BusinessExceptionCreate": {
         "properties": {
           "evidence": {
@@ -4786,6 +4946,94 @@
           }
         },
         "summary": "Preview Business Detections Endpoint",
+        "tags": [
+          "business-control"
+        ]
+      }
+    },
+    "/tenants/{tenant_id}/business-escalations/preview": {
+      "post": {
+        "operationId": "preview_business_escalations_endpoint_tenants__tenant_id__business_escalations_preview_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tenant_id",
+            "required": true,
+            "schema": {
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "X-Actor-Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Role",
+            "required": false,
+            "schema": {
+              "default": "viewer",
+              "title": "X-Actor-Role",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessEscalationPreviewCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessEscalationPreviewRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Preview Business Escalations Endpoint",
         "tags": [
           "business-control"
         ]

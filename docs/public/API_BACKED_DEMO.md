@@ -17,10 +17,10 @@ GET /demo/public
 The endpoint returns the same product-shaped synthetic demo data used by the public demo
 shell: tenant, health, metrics, work queue, workflow stages, timeline entries,
 workflow scenarios, domain events, members, audit events, outbox events, adapter
-contracts, adapter operation scenarios, sync jobs, Integration Health, alert
-routing, incident response, business control tower data, recovery evidence, and
-the `engineeringProof` contract rendered by the Operations, Incidents, and Proof
-tabs.
+contracts, adapter operation scenarios, Adapter Studio, sync jobs, Integration
+Health, alert routing, incident response, business control tower data, recovery
+evidence, and the `engineeringProof` contract rendered by the Integrations,
+Operations, Incidents, and Proof tabs.
 
 ## Runtime Modes
 
@@ -109,6 +109,12 @@ operation lifecycle as mapping preview -> CRM intake preview -> execute ->
 retry -> operator review, using the same operation contracts documented in
 `INTEGRATION_OPERATION_CONTRACTS.md`.
 
+The same payload now includes `adapterStudio`. This is the public integration
+workbench contract: runtime catalog -> generated SDK operation plan -> safe CRM
+preview -> worker/outbox ingest -> diagnostics and operator review. It keeps the
+public demo read-only while showing the exact boundary a real Bitrix-style
+provider connector would follow.
+
 Adapter cards also include `authProfile` metadata from the runtime catalog. The
 static fallback and API-backed payload both show whether the public demo needs a
 secret, whether a real provider needs one, where credentials must be placed, and
@@ -141,4 +147,4 @@ without infrastructure, and the same UI can be pointed at the FastAPI endpoint
 to verify that the backend owns the demo payload shape: workflow, timeline,
 workflow scenarios, domain events, audit, outbox data, alert routing, incident
 response, business control tower data, adapter operation scenarios, recovery
-evidence, and engineering proof gates.
+evidence, Adapter Studio, and engineering proof gates.

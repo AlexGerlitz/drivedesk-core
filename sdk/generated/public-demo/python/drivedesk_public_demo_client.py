@@ -23,6 +23,7 @@ REQUIRED_FIELDS = [
   "outbox",
   "adapters",
   "adapterScenarios",
+  "adapterStudio",
   "integrationJobs",
   "integrationHealth",
   "integrationReadiness",
@@ -325,6 +326,45 @@ def validate_public_demo_payload(payload: dict[str, Any]) -> None:
     if not required_adapter_outputs.issubset(adapter_outputs):
         raise ValueError(
             f"adapterScenarios does not include required outputs: {sorted(required_adapter_outputs - adapter_outputs)}"
+        )
+
+    adapter_studio = payload.get("adapterStudio") or {}
+    for key in ("summary", "flow", "operationPlans", "boundaries", "diagnostics", "docs"):
+        value = adapter_studio.get(key)
+        if not isinstance(value, list) or not value:
+            raise ValueError(f"adapterStudio.{key} is missing or empty")
+
+    adapter_studio_plans = {
+        item.get("scenarioId"): item
+        for item in adapter_studio.get("operationPlans", [])
+        if isinstance(item, dict)
+    }
+    required_studio_plans = {"adapter-crm-deal-preview", "adapter-crm-deal-ingest"}
+    if not required_studio_plans.issubset(adapter_studio_plans):
+        raise ValueError(
+            "adapterStudio.operationPlans does not include required plans: "
+            f"{sorted(required_studio_plans - set(adapter_studio_plans))}"
+        )
+
+    if adapter_studio_plans["adapter-crm-deal-preview"].get("executionMode") != "contract_only":
+        raise ValueError("adapterStudio CRM preview plan must be contract_only")
+
+    if adapter_studio_plans["adapter-crm-deal-preview"].get("safeToRunAgainstPublicDemo") is not False:
+        raise ValueError("adapterStudio CRM preview plan must not be marked safe for live public execution")
+
+    if adapter_studio_plans["adapter-crm-deal-ingest"].get("method") != "WORKER":
+        raise ValueError("adapterStudio CRM ingest plan must be worker-backed")
+
+    adapter_studio_boundary_evidence = {
+        item.get("evidence")
+        for item in adapter_studio.get("boundaries", [])
+        if isinstance(item, dict)
+    }
+    required_boundary_evidence = {"server_secret_store", "private_connector_only", "redaction_evidence"}
+    if not required_boundary_evidence.issubset(adapter_studio_boundary_evidence):
+        raise ValueError(
+            "adapterStudio.boundaries does not include required evidence: "
+            f"{sorted(required_boundary_evidence - adapter_studio_boundary_evidence)}"
         )
 
     proof = payload.get("engineeringProof") or {}

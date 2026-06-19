@@ -17,6 +17,7 @@ export const REQUIRED_FIELDS = [
   "outbox",
   "adapters",
   "adapterScenarios",
+  "adapterStudio",
   "integrationJobs",
   "integrationHealth",
   "integrationReadiness",
@@ -331,6 +332,38 @@ export function validatePublicDemoPayload(payload) {
   ]) {
     if (!adapterOutputs.has(requiredOutput)) {
       throw new Error(`adapterScenarios does not include required output: ${requiredOutput}`);
+    }
+  }
+
+  for (const key of ["summary", "flow", "operationPlans", "boundaries", "diagnostics", "docs"]) {
+    if (!Array.isArray(payload.adapterStudio?.[key]) || payload.adapterStudio[key].length === 0) {
+      throw new Error(`adapterStudio.${key} is missing or empty`);
+    }
+  }
+
+  const adapterStudioPlans = new Map(payload.adapterStudio.operationPlans.map((item) => [item?.scenarioId, item]));
+  for (const requiredPlan of ["adapter-crm-deal-preview", "adapter-crm-deal-ingest"]) {
+    if (!adapterStudioPlans.has(requiredPlan)) {
+      throw new Error(`adapterStudio.operationPlans does not include required plan: ${requiredPlan}`);
+    }
+  }
+
+  if (adapterStudioPlans.get("adapter-crm-deal-preview")?.executionMode !== "contract_only") {
+    throw new Error("adapterStudio CRM preview plan must be contract_only");
+  }
+
+  if (adapterStudioPlans.get("adapter-crm-deal-preview")?.safeToRunAgainstPublicDemo !== false) {
+    throw new Error("adapterStudio CRM preview plan must not be marked safe for live public execution");
+  }
+
+  if (adapterStudioPlans.get("adapter-crm-deal-ingest")?.method !== "WORKER") {
+    throw new Error("adapterStudio CRM ingest plan must be worker-backed");
+  }
+
+  const adapterStudioBoundaryEvidence = new Set(payload.adapterStudio.boundaries.map((item) => item?.evidence));
+  for (const requiredEvidence of ["server_secret_store", "private_connector_only", "redaction_evidence"]) {
+    if (!adapterStudioBoundaryEvidence.has(requiredEvidence)) {
+      throw new Error(`adapterStudio.boundaries does not include required evidence: ${requiredEvidence}`);
     }
   }
 

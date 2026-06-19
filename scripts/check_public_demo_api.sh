@@ -550,6 +550,49 @@ assert adapter_scenario_by_id["adapter-crm-deal-preview"]["endpoint"] == (
 assert adapter_scenario_by_id["adapter-crm-deal-ingest"]["operation"] == "crm_deal_ingest_execute", demo
 assert adapter_scenario_by_id["adapter-accounting-export-retry"]["status"] == "retry", demo
 assert adapter_scenario_by_id["adapter-dead-letter-review"]["status"] == "dead_letter", demo
+adapter_studio = demo["adapterStudio"]
+assert {item["label"] for item in adapter_studio["summary"]} >= {
+    "SDK plans",
+    "CRM preview",
+    "Worker ingest",
+    "Secrets",
+}, demo
+assert {item["evidence"] for item in adapter_studio["flow"]} >= {
+    "GET /integration-adapters",
+    "sdk/generated/public-demo/",
+    "business_provider_intake.previewed",
+    "integration.crm_deal.ingest.requested",
+    "drivedesk_integration_incidents",
+}, demo
+studio_plans = {item["scenarioId"]: item for item in adapter_studio["operationPlans"]}
+assert set(studio_plans) == {"adapter-crm-deal-preview", "adapter-crm-deal-ingest"}, demo
+assert studio_plans["adapter-crm-deal-preview"]["operation"] == "crm_deal_intake_preview", demo
+assert studio_plans["adapter-crm-deal-preview"]["endpoint"] == (
+    "POST /tenants/{tenant_id}/business-provider-intake/preview"
+), demo
+assert studio_plans["adapter-crm-deal-preview"]["executionMode"] == "contract_only", demo
+assert studio_plans["adapter-crm-deal-preview"]["safeToRunAgainstPublicDemo"] is False, demo
+assert studio_plans["adapter-crm-deal-ingest"]["method"] == "WORKER", demo
+assert studio_plans["adapter-crm-deal-ingest"]["endpoint"] == (
+    "worker:drivedesk_worker.main.process_pending_outbox"
+), demo
+assert {item["evidence"] for item in adapter_studio["boundaries"]} >= {
+    "server_secret_store",
+    "private_connector_only",
+    "redaction_evidence",
+    "safeToRunAgainstPublicDemo=false",
+}, demo
+assert {item["metric"] for item in adapter_studio["diagnostics"]} >= {
+    "drivedesk_integration_connection_checks",
+    "drivedesk_integration_reconciliations",
+    "drivedesk_integration_incidents",
+    "integration.operator_review.created",
+}, demo
+assert {item["path"] for item in adapter_studio["docs"]} >= {
+    "docs/public/ADAPTER_DEVELOPER_GUIDE.md",
+    "docs/public/CLIENT_SDK.md",
+    "docs/public/PROVIDER_CONNECTOR_GUIDE.md",
+}, demo
 adapter_catalog = {adapter["key"]: adapter for adapter in adapters}
 assert set(adapter_catalog) == {
     "accounting.export.mock",

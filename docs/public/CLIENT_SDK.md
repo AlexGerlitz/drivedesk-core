@@ -102,6 +102,12 @@ The plan has `executionMode: contract_only` and
 read-only, while the SDK still shows the integration contract a real adapter
 would follow.
 
+The public payload also exposes `adapterStudio`, which connects the generated
+operation plan to the runtime catalog, safe provider-intake preview,
+worker-backed outbox ingest, diagnostics, reconciliation, incident cards, and
+operator review evidence. The generated clients validate that this workbench
+contract is present.
+
 ## Why This Matters
 
 The SDK is not meant to be a full production client yet. It proves a foundation:
@@ -110,6 +116,7 @@ The SDK is not meant to be a full production client yet. It proves a foundation:
 - The contract can generate working client code.
 - The generated client validates the product-shaped demo payload.
 - The generated client can build typed adapter operation plans.
+- The generated client validates the Adapter Studio workbench contract.
 - The generated client can show the Bitrix-style CRM provider-intake body and
   worker-backed ingest operation without exposing real credentials.
 - The generated client validates the `engineeringProof` gate shape.

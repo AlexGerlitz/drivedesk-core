@@ -525,6 +525,189 @@ window.DRIVEDESK_DEMO_DATA = {
       "evidence": "integration.operator_review.created"
     }
   ],
+  "adapterStudio": {
+    "summary": [
+      {
+        "label": "SDK plans",
+        "value": "6",
+        "detail": "Contract-only adapter operations",
+        "tone": "blue"
+      },
+      {
+        "label": "CRM preview",
+        "value": "safe",
+        "detail": "Redacted Bitrix-style provider intake",
+        "tone": "green"
+      },
+      {
+        "label": "Worker ingest",
+        "value": "outbox",
+        "detail": "Server-side retry boundary",
+        "tone": "violet"
+      },
+      {
+        "label": "Secrets",
+        "value": "server",
+        "detail": "No browser token storage",
+        "tone": "amber"
+      }
+    ],
+    "flow": [
+      {
+        "step": "1",
+        "name": "Runtime catalog",
+        "state": "ready",
+        "detail": "GET /integration-adapters exposes crm.bitrix24.mock descriptors, auth_profile, scopes, and operation contracts.",
+        "evidence": "GET /integration-adapters"
+      },
+      {
+        "step": "2",
+        "name": "SDK operation plan",
+        "state": "contract_only",
+        "detail": "Generated Python and JavaScript SDK builds adapter-crm-deal-preview and adapter-crm-deal-ingest request plans without live provider writes.",
+        "evidence": "sdk/generated/public-demo/"
+      },
+      {
+        "step": "3",
+        "name": "Preview boundary",
+        "state": "preview_only",
+        "detail": "CRM payload is normalized through business-provider-intake preview; raw payload, phone, full_name, and access_token are dropped.",
+        "evidence": "business_provider_intake.previewed"
+      },
+      {
+        "step": "4",
+        "name": "Worker ingest",
+        "state": "queued",
+        "detail": "Accepted CRM facts become integration.crm_deal.ingest.requested and are handled by worker:drivedesk_worker.main.process_pending_outbox.",
+        "evidence": "integration.crm_deal.ingest.requested"
+      },
+      {
+        "step": "5",
+        "name": "Diagnostics and review",
+        "state": "observable",
+        "detail": "Connection checks, reconciliations, incident cards, retry, dead-letter, and operator_review make failures recoverable.",
+        "evidence": "drivedesk_integration_incidents"
+      }
+    ],
+    "operationPlans": [
+      {
+        "scenarioId": "adapter-crm-deal-preview",
+        "adapter": "crm.bitrix24.mock",
+        "operation": "crm_deal_intake_preview",
+        "method": "POST",
+        "endpoint": "POST /tenants/{tenant_id}/business-provider-intake/preview",
+        "scope": "crm:deal.preview",
+        "executionMode": "contract_only",
+        "safeToRunAgainstPublicDemo": false,
+        "requestShape": [
+          "dryRun",
+          "provider_key",
+          "source_type",
+          "subject_type",
+          "subject_id",
+          "external_ref",
+          "provider_payload"
+        ],
+        "safeOutputs": [
+          "safe_payload",
+          "normalized_observation",
+          "no_provider_call"
+        ],
+        "evidence": "business_provider_intake.previewed"
+      },
+      {
+        "scenarioId": "adapter-crm-deal-ingest",
+        "adapter": "crm.bitrix24.mock",
+        "operation": "crm_deal_ingest_execute",
+        "method": "WORKER",
+        "endpoint": "worker:drivedesk_worker.main.process_pending_outbox",
+        "scope": "crm:deal.ingest",
+        "executionMode": "contract_only",
+        "safeToRunAgainstPublicDemo": false,
+        "requestShape": [
+          "batch_id",
+          "deals_hash",
+          "mapping",
+          "idempotency_key"
+        ],
+        "safeOutputs": [
+          "outbox_event",
+          "adapter_job",
+          "redaction_evidence"
+        ],
+        "evidence": "integration.crm_deal.ingest.requested"
+      }
+    ],
+    "boundaries": [
+      {
+        "name": "auth_profile",
+        "state": "server_only",
+        "detail": "oauth2_or_webhook_boundary keeps token exchange in private connector code.",
+        "evidence": "server_secret_store"
+      },
+      {
+        "name": "browser token boundary",
+        "state": "clean",
+        "detail": "no_browser_token_storage and server_side_provider_calls_only prevent provider tokens from entering the public UI.",
+        "evidence": "private_connector_only"
+      },
+      {
+        "name": "redaction",
+        "state": "clean",
+        "detail": "safe_payload excludes access_token, full_name, phone, raw provider payload, and tenant secrets.",
+        "evidence": "redaction_evidence"
+      },
+      {
+        "name": "public run mode",
+        "state": "contract_only",
+        "detail": "Public demo never calls Bitrix, bank, accounting, Telegram, email, or provider APIs.",
+        "evidence": "safeToRunAgainstPublicDemo=false"
+      }
+    ],
+    "diagnostics": [
+      {
+        "name": "Connection checks",
+        "state": "passed",
+        "metric": "drivedesk_integration_connection_checks",
+        "detail": "Provider readiness without raw payloads"
+      },
+      {
+        "name": "Reconciliation",
+        "state": "matched",
+        "metric": "drivedesk_integration_reconciliations",
+        "detail": "Provider evidence comparison"
+      },
+      {
+        "name": "Incident cards",
+        "state": "open",
+        "metric": "drivedesk_integration_incidents",
+        "detail": "Runbook-backed operator flow"
+      },
+      {
+        "name": "Dead-letter review",
+        "state": "ready",
+        "metric": "integration.operator_review.created",
+        "detail": "Manual review for failed jobs"
+      }
+    ],
+    "docs": [
+      {
+        "label": "Adapter developer guide",
+        "path": "docs/public/ADAPTER_DEVELOPER_GUIDE.md",
+        "check": "bash scripts/check_public_adapter_developer_guide.sh"
+      },
+      {
+        "label": "Generated SDK",
+        "path": "docs/public/CLIENT_SDK.md",
+        "check": "bash scripts/check_public_demo_sdk.sh"
+      },
+      {
+        "label": "Provider connector guide",
+        "path": "docs/public/PROVIDER_CONNECTOR_GUIDE.md",
+        "check": "bash scripts/check_public_provider_connector_guide.sh"
+      }
+    ]
+  },
   "integrationJobs": [
     {
       "event": "integration.file_import.requested",

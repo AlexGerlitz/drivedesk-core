@@ -1,7 +1,7 @@
 // Generated from DriveDesk Core OpenAPI. Do not edit by hand.
 export const PUBLIC_DEMO_PATH: "/demo/public";
 export const OPERATION_ID: "public_demo_demo_public_get";
-export const REQUIRED_FIELDS: Array<"schemaVersion" | "generatedAt" | "dataSource" | "apiContract" | "tenant" | "health" | "metrics" | "workQueue" | "members" | "auditEvents" | "outbox" | "adapters" | "adapterScenarios" | "integrationJobs" | "integrationHealth" | "integrationReadiness" | "recoveryEvidence" | "alertRouting" | "incidentResponse" | "businessControlTower" | "engineeringProof" | "workflow" | "workflowScenarios" | "endToEndScenario" | "timeline" | "domainEvents">;
+export const REQUIRED_FIELDS: Array<"schemaVersion" | "generatedAt" | "dataSource" | "apiContract" | "tenant" | "health" | "metrics" | "workQueue" | "members" | "auditEvents" | "outbox" | "adapters" | "adapterScenarios" | "adapterStudio" | "integrationJobs" | "integrationHealth" | "integrationReadiness" | "recoveryEvidence" | "alertRouting" | "incidentResponse" | "businessControlTower" | "engineeringProof" | "workflow" | "workflowScenarios" | "endToEndScenario" | "timeline" | "domainEvents">;
 
 export type AdapterScenarioPhase = "preview" | "execute" | "retry" | "operator_review";
 
@@ -55,6 +55,7 @@ export interface PublicDemoPayload {
   outbox: Array<Record<string, unknown>>;
   adapters: Array<Record<string, string>>;
   adapterScenarios: AdapterScenario[];
+  adapterStudio: Record<string, unknown>;
   integrationJobs: Array<Record<string, unknown>>;
   integrationHealth: Array<Record<string, string>>;
   integrationReadiness: Array<Record<string, unknown>>;

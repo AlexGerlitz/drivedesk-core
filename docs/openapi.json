@@ -3720,6 +3720,11 @@
             "title": "Adapterscenarios",
             "type": "array"
           },
+          "adapterStudio": {
+            "additionalProperties": true,
+            "title": "Adapterstudio",
+            "type": "object"
+          },
           "adapters": {
             "items": {
               "additionalProperties": true,
@@ -3915,6 +3920,7 @@
           "outbox",
           "adapters",
           "adapterScenarios",
+          "adapterStudio",
           "integrationJobs",
           "integrationHealth",
           "integrationReadiness",

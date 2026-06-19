@@ -63,6 +63,12 @@ def test_public_demo_html_links_static_assets() -> None:
     assert 'id="controlTowerExceptionRows"' in html
     assert 'id="controlTowerRepairRows"' in html
     assert 'id="integrationHealthRows"' in html
+    assert 'id="adapterStudioSummaryRows"' in html
+    assert 'id="adapterStudioFlowRows"' in html
+    assert 'id="adapterStudioPlanRows"' in html
+    assert 'id="adapterStudioBoundaryRows"' in html
+    assert 'id="adapterStudioDiagnosticRows"' in html
+    assert 'id="adapterStudioDocRows"' in html
     assert 'id="adapterScenarioRows"' in html
     assert 'id="adapterRows"' in html
     assert 'id="syncJobRows"' in html
@@ -470,6 +476,48 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
     assert adapter_scenario_by_id["adapter-crm-deal-ingest"]["operation"] == "crm_deal_ingest_execute"
     assert adapter_scenario_by_id["adapter-accounting-export-retry"]["status"] == "retry"
     assert adapter_scenario_by_id["adapter-dead-letter-review"]["status"] == "dead_letter"
+    adapter_studio = payload["adapterStudio"]
+    assert {item["label"] for item in adapter_studio["summary"]} >= {
+        "SDK plans",
+        "CRM preview",
+        "Worker ingest",
+        "Secrets",
+    }
+    assert {item["evidence"] for item in adapter_studio["flow"]} >= {
+        "GET /integration-adapters",
+        "sdk/generated/public-demo/",
+        "business_provider_intake.previewed",
+        "integration.crm_deal.ingest.requested",
+        "drivedesk_integration_incidents",
+    }
+    studio_plans = {item["scenarioId"]: item for item in adapter_studio["operationPlans"]}
+    assert set(studio_plans) == {"adapter-crm-deal-preview", "adapter-crm-deal-ingest"}
+    assert studio_plans["adapter-crm-deal-preview"]["endpoint"] == (
+        "POST /tenants/{tenant_id}/business-provider-intake/preview"
+    )
+    assert studio_plans["adapter-crm-deal-preview"]["executionMode"] == "contract_only"
+    assert studio_plans["adapter-crm-deal-preview"]["safeToRunAgainstPublicDemo"] is False
+    assert studio_plans["adapter-crm-deal-ingest"]["method"] == "WORKER"
+    assert studio_plans["adapter-crm-deal-ingest"]["endpoint"] == (
+        "worker:drivedesk_worker.main.process_pending_outbox"
+    )
+    assert {item["evidence"] for item in adapter_studio["boundaries"]} >= {
+        "server_secret_store",
+        "private_connector_only",
+        "redaction_evidence",
+        "safeToRunAgainstPublicDemo=false",
+    }
+    assert {item["metric"] for item in adapter_studio["diagnostics"]} >= {
+        "drivedesk_integration_connection_checks",
+        "drivedesk_integration_reconciliations",
+        "drivedesk_integration_incidents",
+        "integration.operator_review.created",
+    }
+    assert {item["path"] for item in adapter_studio["docs"]} >= {
+        "docs/public/ADAPTER_DEVELOPER_GUIDE.md",
+        "docs/public/CLIENT_SDK.md",
+        "docs/public/PROVIDER_CONNECTOR_GUIDE.md",
+    }
     assert len(payload["integrationJobs"]) >= 3
     assert len(payload["integrationHealth"]) >= 6
     assert any(item["name"] == "Connection diagnostics" for item in payload["integrationReadiness"])
@@ -586,6 +634,14 @@ def test_public_demo_can_load_api_backed_data_with_static_fallback() -> None:
     assert "real provider secret" in script
     assert "public secret" in script
     assert "Array.isArray(payload.adapters)" in script
+    assert "Array.isArray(payload.adapterStudio.summary)" in script
+    assert "fillAdapterStudio" in script
+    assert "adapterStudioPlanRows" in script
+    assert "safe public execution: " in script
+    assert "safeToRunAgainstPublicDemo" in script
+    assert "operationPlans" in script
+    assert "boundaries" in script
+    assert "diagnostics" in script
     assert "fillWorkflow" in script
     assert "fillWorkflowScenarios" in script
     assert "fillEndToEndScenario" in script

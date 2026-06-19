@@ -39,6 +39,7 @@
     "outbox",
     "adapters",
     "adapterScenarios",
+    "adapterStudio",
     "integrationJobs",
     "integrationHealth",
     "integrationReadiness",

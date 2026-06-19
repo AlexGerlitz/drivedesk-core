@@ -757,6 +757,7 @@ class PublicDemoRead(BaseModel):
     outbox: list[dict[str, Any]]
     adapters: list[dict[str, Any]]
     adapterScenarios: list[dict[str, Any]]
+    adapterStudio: dict[str, Any]
     integrationJobs: list[dict[str, Any]]
     integrationHealth: list[dict[str, str]]
     integrationReadiness: list[dict[str, Any]]

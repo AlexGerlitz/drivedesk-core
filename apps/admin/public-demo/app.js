@@ -78,6 +78,13 @@
         Array.isArray(payload.domainEvents) &&
         Array.isArray(payload.adapters) &&
         Array.isArray(payload.adapterScenarios) &&
+        payload.adapterStudio &&
+        Array.isArray(payload.adapterStudio.summary) &&
+        Array.isArray(payload.adapterStudio.flow) &&
+        Array.isArray(payload.adapterStudio.operationPlans) &&
+        Array.isArray(payload.adapterStudio.boundaries) &&
+        Array.isArray(payload.adapterStudio.diagnostics) &&
+        Array.isArray(payload.adapterStudio.docs) &&
         Array.isArray(payload.integrationJobs) &&
         Array.isArray(payload.integrationHealth) &&
         Array.isArray(payload.recoveryEvidence) &&
@@ -356,6 +363,172 @@
 
       row.append(top, operation, endpoint, detail, io, evidence);
       rows.appendChild(row);
+    });
+  }
+
+  function fillAdapterStudio() {
+    var studio = data.adapterStudio;
+
+    var summaryRows = document.getElementById("adapterStudioSummaryRows");
+    clear(summaryRows);
+    studio.summary.forEach(function (item) {
+      var card = document.createElement("article");
+      card.className = "metric-card";
+      card.dataset.tone = item.tone || "blue";
+
+      var label = document.createElement("span");
+      label.className = "muted";
+      label.appendChild(text(item.label));
+
+      var value = document.createElement("strong");
+      value.appendChild(text(item.value));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      card.append(label, value, detail);
+      summaryRows.appendChild(card);
+    });
+
+    var flowRows = document.getElementById("adapterStudioFlowRows");
+    clear(flowRows);
+    studio.flow.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row adapter-studio-flow-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var name = document.createElement("strong");
+      name.appendChild(text(item.step + ". " + item.name));
+      top.append(name, chip(item.state, statusTone(item.state)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(item.evidence));
+
+      row.append(top, detail, evidence);
+      flowRows.appendChild(row);
+    });
+
+    var planRows = document.getElementById("adapterStudioPlanRows");
+    clear(planRows);
+    studio.operationPlans.forEach(function (plan) {
+      var row = document.createElement("article");
+      row.className = "event-row adapter-studio-plan-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var name = document.createElement("strong");
+      name.appendChild(text(plan.scenarioId));
+      top.append(name, chip(plan.executionMode, statusTone(plan.executionMode)));
+
+      var operation = document.createElement("code");
+      operation.appendChild(text(plan.adapter + " / " + plan.operation));
+
+      var endpoint = document.createElement("span");
+      endpoint.className = "muted";
+      endpoint.appendChild(text(plan.method + " - " + plan.endpoint));
+
+      var scope = document.createElement("span");
+      scope.className = "muted";
+      scope.appendChild(
+        text(
+          "scope: " +
+            plan.scope +
+            " - safe public execution: " +
+            (plan.safeToRunAgainstPublicDemo ? "yes" : "no")
+        )
+      );
+
+      var shape = document.createElement("span");
+      shape.className = "muted";
+      shape.appendChild(
+        text(
+          "request: " +
+            (plan.requestShape || []).join(", ") +
+            " / safe outputs: " +
+            (plan.safeOutputs || []).join(", ")
+        )
+      );
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(plan.evidence));
+
+      row.append(top, operation, endpoint, scope, shape, evidence);
+      planRows.appendChild(row);
+    });
+
+    var boundaryRows = document.getElementById("adapterStudioBoundaryRows");
+    clear(boundaryRows);
+    studio.boundaries.forEach(function (boundary) {
+      var row = document.createElement("article");
+      row.className = "event-row adapter-studio-boundary-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var name = document.createElement("strong");
+      name.appendChild(text(boundary.name));
+      top.append(name, chip(boundary.state, statusTone(boundary.state)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(boundary.detail));
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(boundary.evidence));
+
+      row.append(top, detail, evidence);
+      boundaryRows.appendChild(row);
+    });
+
+    var diagnosticRows = document.getElementById("adapterStudioDiagnosticRows");
+    clear(diagnosticRows);
+    studio.diagnostics.forEach(function (diagnostic) {
+      var row = document.createElement("article");
+      row.className = "event-row adapter-studio-diagnostic-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var name = document.createElement("strong");
+      name.appendChild(text(diagnostic.name));
+      top.append(name, chip(diagnostic.state, statusTone(diagnostic.state)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(diagnostic.detail));
+
+      var metric = document.createElement("code");
+      metric.appendChild(text(diagnostic.metric));
+
+      row.append(top, detail, metric);
+      diagnosticRows.appendChild(row);
+    });
+
+    var docRows = document.getElementById("adapterStudioDocRows");
+    clear(docRows);
+    studio.docs.forEach(function (doc) {
+      var row = document.createElement("article");
+      row.className = "event-row adapter-studio-doc-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var label = document.createElement("strong");
+      label.appendChild(text(doc.label));
+      top.append(label, chip("checked", "green"));
+
+      var path = document.createElement("code");
+      path.appendChild(text(doc.path));
+
+      var check = document.createElement("span");
+      check.className = "muted";
+      check.appendChild(text(doc.check));
+
+      row.append(top, path, check);
+      docRows.appendChild(row);
     });
   }
 
@@ -1809,6 +1982,7 @@
     fillIntegrations();
     fillAdapterContracts();
     fillAdapterScenarios();
+    fillAdapterStudio();
     fillSyncJobs();
     fillIntegrationHealth();
     fillMembers();

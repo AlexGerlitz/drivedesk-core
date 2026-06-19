@@ -22,7 +22,8 @@ infrastructure, production history, customer data, or operational credentials.
 - `INCIDENT_RESPONSE_DEMO.md` - public-safe incident queue, recovery actions,
   and resolution evidence in the demo.
 - `SYSTEM_DESIGN.md` - public-safe system design overview.
-- `API_BACKED_DEMO.md` - read-only synthetic API contract for the public demo.
+- `API_BACKED_DEMO.md` - read-only synthetic API contract for the public demo,
+  including Adapter Studio.
 - `WORKFLOW_DEMO.md` - synthetic business workflow, timeline, events, audit,
   and outbox overview.
 - `WORKFLOW_RULES.md` - tenant-owned automation rules, audit, outbox, and metrics.
@@ -37,7 +38,8 @@ infrastructure, production history, customer data, or operational credentials.
 - `TENANT_ISOLATION.md` - tenant-scoped bearer access and cross-tenant boundaries.
 - `BUSINESS_RECORDS.md` - tenant-owned business record foundation.
 - `BUSINESS_RECORD_LIFECYCLE.md` - lifecycle policies and transition preview.
-- `CLIENT_SDK.md` - generated OpenAPI client SDK example.
+- `CLIENT_SDK.md` - generated OpenAPI client SDK example with Adapter Studio
+  validation.
 - `PROVIDER_CONNECTOR_GUIDE.md` - public-safe guide for future authenticated
   Bitrix24-style CRM, bank, accounting, and file provider connectors.
 - `ADAPTER_DEVELOPER_GUIDE.md` - public-safe developer path from SDK adapter

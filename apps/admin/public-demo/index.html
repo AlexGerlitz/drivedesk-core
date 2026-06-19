@@ -237,6 +237,39 @@
             <span class="muted">Outbox-driven delivery</span>
           </div>
           <div class="integration-health-grid" id="integrationHealthRows" aria-label="Integration health"></div>
+          <section class="panel adapter-studio-panel">
+            <div class="panel-header">
+              <h3>Adapter Studio</h3>
+              <span class="muted">Catalog to SDK to worker</span>
+            </div>
+            <div class="proof-summary-grid" id="adapterStudioSummaryRows"></div>
+            <div class="event-list" id="adapterStudioFlowRows"></div>
+          </section>
+          <div class="dashboard-grid adapter-studio-grid">
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Operation Plans</h3>
+                <span class="muted">Contract-only SDK output</span>
+              </div>
+              <div class="event-list" id="adapterStudioPlanRows"></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Boundaries And Diagnostics</h3>
+                <span class="muted">Secrets, redaction, recovery</span>
+              </div>
+              <div class="event-list compact-list" id="adapterStudioBoundaryRows"></div>
+              <div class="event-list compact-list" id="adapterStudioDiagnosticRows"></div>
+            </section>
+          </div>
+          <section class="panel adapter-studio-doc-panel">
+            <div class="panel-header">
+              <h3>Developer Evidence</h3>
+              <span class="muted">Docs and checks</span>
+            </div>
+            <div class="event-list" id="adapterStudioDocRows"></div>
+          </section>
           <section class="panel adapter-scenario-panel">
             <div class="panel-header">
               <h3>Adapter Operation Scenarios</h3>

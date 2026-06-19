@@ -342,6 +342,45 @@ def validate_public_demo_payload(payload: dict[str, Any]) -> None:
             f"adapterScenarios does not include required outputs: {{sorted(required_adapter_outputs - adapter_outputs)}}"
         )
 
+    adapter_studio = payload.get("adapterStudio") or {{}}
+    for key in ("summary", "flow", "operationPlans", "boundaries", "diagnostics", "docs"):
+        value = adapter_studio.get(key)
+        if not isinstance(value, list) or not value:
+            raise ValueError(f"adapterStudio.{{key}} is missing or empty")
+
+    adapter_studio_plans = {{
+        item.get("scenarioId"): item
+        for item in adapter_studio.get("operationPlans", [])
+        if isinstance(item, dict)
+    }}
+    required_studio_plans = {{"adapter-crm-deal-preview", "adapter-crm-deal-ingest"}}
+    if not required_studio_plans.issubset(adapter_studio_plans):
+        raise ValueError(
+            "adapterStudio.operationPlans does not include required plans: "
+            f"{{sorted(required_studio_plans - set(adapter_studio_plans))}}"
+        )
+
+    if adapter_studio_plans["adapter-crm-deal-preview"].get("executionMode") != "contract_only":
+        raise ValueError("adapterStudio CRM preview plan must be contract_only")
+
+    if adapter_studio_plans["adapter-crm-deal-preview"].get("safeToRunAgainstPublicDemo") is not False:
+        raise ValueError("adapterStudio CRM preview plan must not be marked safe for live public execution")
+
+    if adapter_studio_plans["adapter-crm-deal-ingest"].get("method") != "WORKER":
+        raise ValueError("adapterStudio CRM ingest plan must be worker-backed")
+
+    adapter_studio_boundary_evidence = {{
+        item.get("evidence")
+        for item in adapter_studio.get("boundaries", [])
+        if isinstance(item, dict)
+    }}
+    required_boundary_evidence = {{"server_secret_store", "private_connector_only", "redaction_evidence"}}
+    if not required_boundary_evidence.issubset(adapter_studio_boundary_evidence):
+        raise ValueError(
+            "adapterStudio.boundaries does not include required evidence: "
+            f"{{sorted(required_boundary_evidence - adapter_studio_boundary_evidence)}}"
+        )
+
     proof = payload.get("engineeringProof") or {{}}
     if proof.get("milestone") != "engineering_70":
         raise ValueError(f"unexpected engineeringProof.milestone: {{proof.get('milestone')}}")
@@ -722,6 +761,38 @@ export function validatePublicDemoPayload(payload) {{
     }}
   }}
 
+  for (const key of ["summary", "flow", "operationPlans", "boundaries", "diagnostics", "docs"]) {{
+    if (!Array.isArray(payload.adapterStudio?.[key]) || payload.adapterStudio[key].length === 0) {{
+      throw new Error(`adapterStudio.${{key}} is missing or empty`);
+    }}
+  }}
+
+  const adapterStudioPlans = new Map(payload.adapterStudio.operationPlans.map((item) => [item?.scenarioId, item]));
+  for (const requiredPlan of ["adapter-crm-deal-preview", "adapter-crm-deal-ingest"]) {{
+    if (!adapterStudioPlans.has(requiredPlan)) {{
+      throw new Error(`adapterStudio.operationPlans does not include required plan: ${{requiredPlan}}`);
+    }}
+  }}
+
+  if (adapterStudioPlans.get("adapter-crm-deal-preview")?.executionMode !== "contract_only") {{
+    throw new Error("adapterStudio CRM preview plan must be contract_only");
+  }}
+
+  if (adapterStudioPlans.get("adapter-crm-deal-preview")?.safeToRunAgainstPublicDemo !== false) {{
+    throw new Error("adapterStudio CRM preview plan must not be marked safe for live public execution");
+  }}
+
+  if (adapterStudioPlans.get("adapter-crm-deal-ingest")?.method !== "WORKER") {{
+    throw new Error("adapterStudio CRM ingest plan must be worker-backed");
+  }}
+
+  const adapterStudioBoundaryEvidence = new Set(payload.adapterStudio.boundaries.map((item) => item?.evidence));
+  for (const requiredEvidence of ["server_secret_store", "private_connector_only", "redaction_evidence"]) {{
+    if (!adapterStudioBoundaryEvidence.has(requiredEvidence)) {{
+      throw new Error(`adapterStudio.boundaries does not include required evidence: ${{requiredEvidence}}`);
+    }}
+  }}
+
   if (payload.engineeringProof?.milestone !== "engineering_70") {{
     throw new Error(`unexpected engineeringProof.milestone: ${{payload.engineeringProof?.milestone}}`);
   }}
@@ -859,6 +930,7 @@ export interface PublicDemoPayload {{
   outbox: Array<Record<string, unknown>>;
   adapters: Array<Record<string, string>>;
   adapterScenarios: AdapterScenario[];
+  adapterStudio: Record<string, unknown>;
   integrationJobs: Array<Record<string, unknown>>;
   integrationHealth: Array<Record<string, string>>;
   integrationReadiness: Array<Record<string, unknown>>;

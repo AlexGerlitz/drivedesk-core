@@ -18,6 +18,10 @@ infrastructure, production history, customer data, or operational credentials.
 - `PROJECT_STATUS.md` - current public-safe engineering status, limits, and next work.
 - `TECHNICAL_CAPABILITY_MAP.md` - capability-to-evidence map with verifier commands.
 - `EVIDENCE_INDEX.md` - human-readable public evidence index contract.
+- `PUBLIC_DEMO_HEALTH.md` - public-safe Pages/demo health workflow,
+  static fallback, OpenAPI, SDK, and evidence health contract.
+- `evidence/public-demo-health.sanitized.json` - machine-readable public demo
+  health evidence.
 - `ENGINEERING_PROOF.md` - proof tab payload, gates, evidence, and verifier contract.
 - `OBSERVABILITY_PROOF.md` - public-safe metrics, logs, alerts, and dashboard evidence.
 - `OBSERVABILITY_DASHBOARD.md` - public-safe Grafana-style dashboard groups, panel queries, alert links, and redaction boundaries.
@@ -304,6 +308,8 @@ The public repository export also generates:
 - `scripts/check_public_platform_maturity_70.sh` - public-safe 70 percent milestone validation.
 - `scripts/check_public_system_review_path.sh` - public-safe compact system review path validation.
 - `scripts/check_public_reviewer_quickstart.sh` - public-safe verification quickstart validation.
+- `scripts/check_public_demo_health.sh` - public-safe Pages/demo health
+  workflow and evidence validation.
 - `scripts/check_public_project_status.sh` - public-safe project status validation.
 - `scripts/check_public_technical_capability_map.sh` - public-safe capability map validation.
 - `scripts/check_public_provider_connector_guide.sh` - public-safe provider connector guide validation.

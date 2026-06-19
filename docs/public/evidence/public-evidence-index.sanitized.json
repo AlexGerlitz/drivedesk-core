@@ -39,6 +39,29 @@
       "boundary": "static public surface with synthetic data only"
     },
     {
+      "capability_id": "public-demo-health",
+      "title": "Public demo health",
+      "status": "validated",
+      "public_doc": "docs/public/PUBLIC_DEMO_HEALTH.md",
+      "evidence_files": [
+        "docs/public/evidence/public-demo-health.sanitized.json",
+        "apps/admin/public-demo/index.html",
+        "apps/admin/public-demo/demo-data.js",
+        "docs/openapi.json",
+        "sdk/generated/public-demo/openapi-client-manifest.json"
+      ],
+      "verifiers": [
+        "bash scripts/check_public_demo_health.sh",
+        "bash scripts/check_public_pages_entrypoint.sh"
+      ],
+      "public_urls": [
+        "https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/",
+        ".github/workflows/public-demo-health.yml",
+        "docs/public/PUBLIC_DEMO_HEALTH.md"
+      ],
+      "boundary": "static GitHub Pages, synthetic fallback data, generated SDK metadata, and public workflow health only"
+    },
+    {
       "capability_id": "business-os-tour",
       "title": "Business OS tour",
       "status": "validated",

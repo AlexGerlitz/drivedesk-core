@@ -8,6 +8,7 @@ implementation surface, evidence, and verifier commands.
 | Capability | Implementation surface | Evidence | Verifier |
 | --- | --- | --- | --- |
 | Public engineering entrypoint | GitHub Pages root `index.html`, compact system review path, quickstart, and static demo shell | `docs/public/SYSTEM_REVIEW_PATH.md`, `docs/public/REVIEWER_QUICKSTART.md`, `docs/public/ENGINEERING_REVIEW_GUIDE.md`, `docs/public/ENGINEERING_PROOF.md` | `bash scripts/check_public_pages_entrypoint.sh && bash scripts/check_public_system_review_path.sh && bash scripts/check_public_reviewer_quickstart.sh` |
+| Public demo health | Public Demo Health workflow, static fallback, OpenAPI artifact, generated SDK manifest, demo payload markers, and public evidence contract | `docs/public/PUBLIC_DEMO_HEALTH.md`, `docs/public/evidence/public-demo-health.sanitized.json`, `.github/workflows/public-demo-health.yml`, `apps/admin/public-demo/demo-data.js`, `sdk/generated/public-demo/openapi-client-manifest.json` | `bash scripts/check_public_demo_health.sh && bash scripts/check_public_pages_entrypoint.sh` |
 | Platform tour | Business event -> workflow -> adapter -> incident -> proof route across Control Tower, Adapter Studio, operations, and proof | `docs/public/PLATFORM_TOUR.md`, `apps/admin/public-demo/index.html`, `GET /demo/public` | `bash scripts/check_public_platform_tour.sh && bash scripts/check_public_demo_api.sh` |
 | Project status | Current public-safe state, limits, next work, and validation commands | `docs/public/PROJECT_STATUS.md`, `docs/public/ROADMAP.md` | `bash scripts/check_public_project_status.sh` |
 | Read-only API contract | FastAPI `GET /demo/public`, `GET /demo/connector-certification`, `GET /demo/connector-fixture-replay`, `GET /demo/business-intake-pipeline`, `GET /demo/business-task-handoff`, `GET /demo/business-notification-channels`, `GET /demo/notification-delivery`, `GET /demo/business-context-assistant`, `GET /demo/business-action-execution`, `GET /demo/business-approval-gateway`, `GET /demo/integration-runtime`, `GET /demo/integration-execution`, `GET /demo/integration-repair`, `POST /tenants/{tenant_id}/integration-repairs/preview`, `GET /demo/business-scenario-replay`, and generated `docs/openapi.json` | `docs/public/API_BACKED_DEMO.md`, `examples/curl/demo-public.sh` | `bash scripts/check_public_demo_api.sh` |
@@ -50,29 +51,30 @@ implementation surface, evidence, and verifier commands.
 7. Inspect `docs/openapi.json`, `GET /demo/public`, `GET /demo/connector-certification`, `GET /demo/connector-fixture-replay`, `GET /demo/business-intake-pipeline`, `GET /demo/business-task-handoff`, `GET /demo/business-notification-channels`, `GET /demo/notification-delivery`, `GET /demo/business-context-assistant`, `GET /demo/business-action-execution`, `GET /demo/business-approval-gateway`, `GET /demo/integration-runtime`, `GET /demo/integration-execution`, `GET /demo/integration-repair`, `POST /tenants/{tenant_id}/integration-repairs/preview`, and `GET /demo/business-scenario-replay`.
 8. Run `bash scripts/ci_smoke_public.sh`.
 9. Run `bash scripts/check_public_system_review_path.sh`.
-10. Run `bash scripts/check_public_platform_tour.sh`.
-11. Run `bash scripts/check_public_reviewer_quickstart.sh`.
-12. Run `bash scripts/check_public_project_status.sh`.
-13. Run `bash scripts/check_public_technical_capability_map.sh`.
-14. Run `bash scripts/check_public_evidence_index.sh`.
-15. Run `bash scripts/check_public_business_control_tower.sh`.
-16. Run `bash scripts/check_public_business_intake_pipeline.sh`.
-17. Run `bash scripts/check_public_business_task_handoff.sh`.
-18. Run `bash scripts/check_public_business_notification_channels.sh`.
-19. Run `bash scripts/check_public_notification_delivery.sh`.
-20. Run `bash scripts/check_public_business_context_assistant.sh`.
-21. Run `bash scripts/check_public_business_action_execution.sh`.
-22. Run `bash scripts/check_public_business_approval_gateway.sh`.
-23. Run `bash scripts/check_public_integration_runtime.sh`.
-24. Run `bash scripts/check_public_integration_execution.sh`.
-25. Run `bash scripts/check_public_integration_repair.sh`.
-26. Run `bash scripts/check_public_business_scenario_replay.sh`.
-27. Run `bash scripts/check_public_observability_proof.sh`.
-28. Run `bash scripts/check_public_observability_dashboard.sh`.
-29. Run `bash scripts/check_public_alert_routing.sh`.
-30. Run `bash scripts/check_public_connector_certification.sh`.
-31. Run `bash scripts/check_public_connector_fixture_replay.sh`.
-32. Run the capability-specific verifier from the table above.
+10. Run `bash scripts/check_public_demo_health.sh`.
+11. Run `bash scripts/check_public_platform_tour.sh`.
+12. Run `bash scripts/check_public_reviewer_quickstart.sh`.
+13. Run `bash scripts/check_public_project_status.sh`.
+14. Run `bash scripts/check_public_technical_capability_map.sh`.
+15. Run `bash scripts/check_public_evidence_index.sh`.
+16. Run `bash scripts/check_public_business_control_tower.sh`.
+17. Run `bash scripts/check_public_business_intake_pipeline.sh`.
+18. Run `bash scripts/check_public_business_task_handoff.sh`.
+19. Run `bash scripts/check_public_business_notification_channels.sh`.
+20. Run `bash scripts/check_public_notification_delivery.sh`.
+21. Run `bash scripts/check_public_business_context_assistant.sh`.
+22. Run `bash scripts/check_public_business_action_execution.sh`.
+23. Run `bash scripts/check_public_business_approval_gateway.sh`.
+24. Run `bash scripts/check_public_integration_runtime.sh`.
+25. Run `bash scripts/check_public_integration_execution.sh`.
+26. Run `bash scripts/check_public_integration_repair.sh`.
+27. Run `bash scripts/check_public_business_scenario_replay.sh`.
+28. Run `bash scripts/check_public_observability_proof.sh`.
+29. Run `bash scripts/check_public_observability_dashboard.sh`.
+30. Run `bash scripts/check_public_alert_routing.sh`.
+31. Run `bash scripts/check_public_connector_certification.sh`.
+32. Run `bash scripts/check_public_connector_fixture_replay.sh`.
+33. Run the capability-specific verifier from the table above.
 
 ## Boundary
 

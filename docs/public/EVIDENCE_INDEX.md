@@ -33,6 +33,7 @@ parsing Markdown by hand.
 | Capability group | Primary doc | Verifier |
 | --- | --- | --- |
 | Public engineering entrypoint | `docs/public/SYSTEM_REVIEW_PATH.md` | `bash scripts/check_public_system_review_path.sh` |
+| Public demo health | `docs/public/PUBLIC_DEMO_HEALTH.md` | `bash scripts/check_public_demo_health.sh` |
 | Business OS tour | `docs/public/PLATFORM_TOUR.md` | `bash scripts/check_public_platform_tour.sh` |
 | Quick verification path | `docs/public/REVIEWER_QUICKSTART.md` | `bash scripts/check_public_reviewer_quickstart.sh` |
 | API and SDK | `docs/public/API_BACKED_DEMO.md` | `bash scripts/check_public_demo_api.sh` |
@@ -68,10 +69,15 @@ bash scripts/check_public_connector_fixture_replay.sh
 bash scripts/check_public_business_control_tower.sh
 bash scripts/check_public_observability_dashboard.sh
 bash scripts/check_public_notification_delivery.sh
+bash scripts/check_public_demo_health.sh
 ```
 
 Notification delivery is exposed through `GET /demo/notification-delivery` and
 the public demo payload key `notificationDelivery`.
+
+Public demo health is tracked through `docs/public/PUBLIC_DEMO_HEALTH.md`,
+`docs/public/evidence/public-demo-health.sanitized.json`, and
+`bash scripts/check_public_demo_health.sh`.
 
 The check validates that:
 

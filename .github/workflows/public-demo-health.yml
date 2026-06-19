@@ -317,3 +317,5 @@ jobs:
           curl -fsSL --retry 3 --retry-delay 5 "$root/docs/public/SYSTEM_REVIEW_PATH.md" | grep -F "System Review Path"
           curl -fsSL --retry 3 --retry-delay 5 "$root/docs/public/SYSTEM_REVIEW_PATH.md" | grep -F "endToEndScenario"
           curl -fsSL --retry 3 --retry-delay 5 "$root/docs/public/REVIEWER_QUICKSTART.md" | grep -F "45-Minute Deep Check"
+          curl -fsSL --retry 3 --retry-delay 5 "$root/docs/openapi.json" | grep -F "/demo/public"
+          curl -fsSL --retry 3 --retry-delay 5 "$root/docs/openapi.json" | grep -F "/demo/notification-delivery"

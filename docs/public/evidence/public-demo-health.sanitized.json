@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "check": "public_demo_health",
+  "status": "validated",
+  "data_profile": "synthetic_demo_data",
+  "health_model": "pages_static_demo_ci_health",
+  "public_root_url": "https://alexgerlitz.github.io/drivedesk-core/",
+  "public_demo_url": "https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/",
+  "workflow": {
+    "name": "Public Demo Health",
+    "path": ".github/workflows/public-demo-health.yml",
+    "trigger_modes": [
+      "workflow_dispatch",
+      "schedule"
+    ],
+    "cron_utc": "17 */6 * * *",
+    "timeout_minutes": 6
+  },
+  "checks": {
+    "public_export_generates_workflow": true,
+    "workflow_dispatch_present": true,
+    "schedule_present": true,
+    "pages_root_linked": true,
+    "demo_shell_checked": true,
+    "static_fallback_checked": true,
+    "openapi_artifact_checked": true,
+    "generated_sdk_checked": true,
+    "notification_delivery_checked": true,
+    "business_scenario_replay_checked": true,
+    "engineering_proof_checked": true,
+    "public_docs_linked": true,
+    "production_data_touched": false
+  },
+  "assets": [
+    "index.html",
+    "apps/admin/public-demo/index.html",
+    "apps/admin/public-demo/demo-data.js",
+    "apps/admin/public-demo/app.js",
+    "apps/admin/public-demo/styles.css",
+    "docs/openapi.json",
+    "sdk/generated/public-demo/openapi-client-manifest.json"
+  ],
+  "payload_markers": [
+    "DRIVEDESK_DEMO_DATA",
+    "notificationDelivery",
+    "businessScenarioReplay",
+    "integrationExecution",
+    "engineeringProof",
+    "static.fallback"
+  ],
+  "redaction": {
+    "addresses_included": false,
+    "credentials_included": false,
+    "hostnames_included": false,
+    "paths_included": false,
+    "production_data_included": false,
+    "raw_logs_included": false,
+    "request_bodies_included": false,
+    "secrets_included": false
+  }
+}

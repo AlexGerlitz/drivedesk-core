@@ -49,6 +49,7 @@ def read(path: Path) -> str:
 
 doc_path = root / "docs/public/BUSINESS_CONTROL_TOWER.md"
 adr_path = root / "docs/adr/0064-business-operations-control-tower.md"
+briefing_adr_path = root / "docs/adr/0065-business-role-briefings.md"
 demo_data_path = root / "apps/admin/public-demo/demo-data.js"
 demo_html_path = root / "apps/admin/public-demo/index.html"
 demo_app_path = root / "apps/admin/public-demo/app.js"
@@ -57,7 +58,7 @@ ci_smoke_path = root / "scripts/ci_smoke.sh"
 public_smoke_path = root / "scripts/ci_smoke_public.sh"
 is_public_export = (root / "PUBLIC_EXPORT_MANIFEST.md").is_file()
 
-for path in [doc_path, adr_path, demo_data_path, demo_html_path, demo_app_path]:
+for path in [doc_path, adr_path, briefing_adr_path, demo_data_path, demo_html_path, demo_app_path]:
     require(path.is_file(), f"missing file: {path.relative_to(root)}")
 
 api_payload = build_public_demo_payload()
@@ -68,6 +69,28 @@ require(
     {item.get("label") for item in control.get("summary", [])}
     >= {"Observed systems", "Open exceptions", "Repair actions", "External writes"},
     "businessControlTower summary missing required cards",
+)
+briefing = control.get("briefing", {})
+require(briefing.get("role") == "accountant", "businessControlTower briefing role mismatch")
+require(briefing.get("riskLevel") == "attention", "businessControlTower briefing risk mismatch")
+require(
+    set(briefing.get("sourceSystems", []))
+    >= {"crm.bitrix24.mock", "bank.statement.mock", "accounting.export.mock"},
+    "businessControlTower briefing missing source systems",
+)
+require(
+    {item.get("type") for item in briefing.get("highlights", [])}
+    >= {"business_exception", "state_observation", "repair_context"},
+    "businessControlTower briefing highlights missing",
+)
+require(
+    {item.get("action") for item in briefing.get("recommendedActions", [])}
+    >= {"execute_repair_dry_run", "review_accounting_export"},
+    "businessControlTower briefing recommended actions missing",
+)
+require(
+    briefing.get("api", {}).get("preview") == "POST /tenants/{tenant_id}/business-briefings/preview",
+    "businessControlTower briefing preview endpoint missing",
 )
 require(
     {item.get("system") for item in control.get("observations", [])}
@@ -104,6 +127,7 @@ require(
 openapi = build_app().openapi()
 paths = set(openapi.get("paths", {}))
 required_paths = {
+    "/tenants/{tenant_id}/business-briefings/preview",
     "/tenants/{tenant_id}/business-state/observations",
     "/tenants/{tenant_id}/business-exceptions",
     "/tenants/{tenant_id}/business-exceptions/{business_exception_id}/status",
@@ -117,7 +141,9 @@ require(required_paths.issubset(paths), "OpenAPI missing business control paths"
 doc_text = read(doc_path)
 for needle in [
     "Business Operations Control Tower",
+    "POST /tenants/{tenant_id}/business-briefings/preview",
     "POST /tenants/{tenant_id}/business-state/observations",
+    "BusinessBriefing",
     "BusinessStateObservation",
     "BusinessException",
     "RepairAction",
@@ -129,6 +155,8 @@ html = read(demo_html_path)
 for needle in [
     'data-view="control"',
     'id="controlTowerSummaryRows"',
+    'id="controlTowerBriefingRows"',
+    'id="controlTowerBriefingActionRows"',
     'id="controlTowerObservationRows"',
     'id="controlTowerExceptionRows"',
     'id="controlTowerRepairRows"',
@@ -138,6 +166,7 @@ for needle in [
 app_js = read(demo_app_path)
 for needle in [
     "businessControlTower",
+    "controlTowerBriefingRows",
     "fillBusinessControlTower",
     "controlTowerSummaryRows",
 ]:
@@ -152,6 +181,10 @@ else:
     require(
         'copy_path "docs/adr/0064-business-operations-control-tower.md"' in read(export_script_path),
         "export script missing ADR 0064",
+    )
+    require(
+        'copy_path "docs/adr/0065-business-role-briefings.md"' in read(export_script_path),
+        "export script missing ADR 0065",
     )
     require(
         'copy_path "scripts/check_public_business_control_tower.sh"' in read(export_script_path),

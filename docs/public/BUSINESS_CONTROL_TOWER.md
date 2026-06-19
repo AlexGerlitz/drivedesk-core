@@ -10,6 +10,7 @@ The first public-safe slice models a common cross-system failure:
 3. Accounting export has not been sent.
 4. DriveDesk opens a business exception.
 5. A repair action is proposed, approved, and executed in dry-run mode.
+6. A role briefing turns the raw evidence into the next useful operator view.
 
 This is intentionally not another workflow automation demo. The control tower
 tracks business state across systems, detects an exception, records impact, and
@@ -19,6 +20,7 @@ keeps the repair path auditable.
 
 | Step | Endpoint | Purpose |
 | --- | --- | --- |
+| Preview briefing | `POST /tenants/{tenant_id}/business-briefings/preview` | Build a role-specific work briefing from observations, exceptions, and repair actions without mutating data. |
 | Observe state | `POST /tenants/{tenant_id}/business-state/observations` | Record a normalized state sample from CRM, bank, accounting, support, or another connected system. |
 | List observations | `GET /tenants/{tenant_id}/business-state/observations` | Review the tenant-scoped state timeline for a subject. |
 | Open exception | `POST /tenants/{tenant_id}/business-exceptions` | Convert inconsistent observations into a business-level exception with severity, impact, and evidence. |
@@ -31,12 +33,28 @@ keeps the repair path auditable.
 
 | Model | Meaning |
 | --- | --- |
+| `BusinessBriefing` | A read-model for the current operator role, subject, evidence, risks, and next actions. |
 | `BusinessStateObservation` | One normalized fact from an external system. |
 | `BusinessException` | A business problem derived from observations. |
 | `RepairAction` | A proposed and auditable fix for an exception. |
 
 The models are tenant-scoped and use the same audit/outbox foundation as the
 rest of the API.
+
+## Role Briefing
+
+The briefing endpoint is the practical bridge between integrations and daily
+work. For example, an accountant can open a payment mismatch and see:
+
+- which systems contributed evidence;
+- what exception is still open;
+- why the issue matters for accounting export;
+- which repair action is ready;
+- which endpoint or workflow should be used next.
+
+The preview is read-only. It does not create records, approve repairs, or write
+to external systems. It composes the current tenant-scoped state into a compact
+work surface.
 
 ## Safety Boundary
 
@@ -65,6 +83,8 @@ The public demo includes a `businessControlTower` payload with:
   `accounting.export.mock`;
 - one `crm_payment_mismatch` exception;
 - one approval-gated `sync_status` repair action;
+- one accountant briefing with source systems, highlights, recommended actions,
+  and review points;
 - a five-step flow from observation to dry-run repair evidence.
 
 Verification:

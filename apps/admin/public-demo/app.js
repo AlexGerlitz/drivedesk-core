@@ -69,6 +69,10 @@
         Array.isArray(payload.incidentResponse.resolutionEvidence) &&
         payload.businessControlTower &&
         Array.isArray(payload.businessControlTower.summary) &&
+        payload.businessControlTower.briefing &&
+        Array.isArray(payload.businessControlTower.briefing.highlights) &&
+        Array.isArray(payload.businessControlTower.briefing.recommendedActions) &&
+        Array.isArray(payload.businessControlTower.briefing.reviewPoints) &&
         Array.isArray(payload.businessControlTower.observations) &&
         Array.isArray(payload.businessControlTower.exceptions) &&
         Array.isArray(payload.businessControlTower.repairActions) &&
@@ -896,6 +900,72 @@
       summaryRows.appendChild(card);
     });
 
+    var briefing = controlTower.briefing;
+    var briefingRows = document.getElementById("controlTowerBriefingRows");
+    clear(briefingRows);
+
+    var briefingSummary = document.createElement("article");
+    briefingSummary.className = "event-row";
+    var briefingTop = document.createElement("div");
+    briefingTop.className = "event-top";
+    var briefingTitle = document.createElement("strong");
+    briefingTitle.appendChild(text(briefing.role + " briefing"));
+    briefingTop.append(briefingTitle, chip(briefing.riskLevel, statusTone(briefing.riskLevel)));
+
+    var briefingDetail = document.createElement("span");
+    briefingDetail.className = "muted";
+    briefingDetail.appendChild(text(briefing.summary));
+
+    var briefingSources = document.createElement("code");
+    briefingSources.appendChild(text((briefing.sourceSystems || []).join(", ")));
+
+    briefingSummary.append(briefingTop, briefingDetail, briefingSources);
+    briefingRows.appendChild(briefingSummary);
+
+    briefing.highlights.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(item.title));
+      top.append(title, chip(item.type, "blue"));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(item.evidence));
+
+      row.append(top, detail, evidence);
+      briefingRows.appendChild(row);
+    });
+
+    var briefingActionRows = document.getElementById("controlTowerBriefingActionRows");
+    clear(briefingActionRows);
+    briefing.recommendedActions.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var action = document.createElement("strong");
+      action.appendChild(text(item.action));
+      top.append(action, chip(item.status, statusTone(item.status)));
+
+      var endpoint = document.createElement("code");
+      endpoint.appendChild(text(item.endpoint));
+
+      var evidence = document.createElement("span");
+      evidence.className = "muted";
+      evidence.appendChild(text(item.evidence));
+
+      row.append(top, endpoint, evidence);
+      briefingActionRows.appendChild(row);
+    });
+
     var flowRows = document.getElementById("controlTowerFlowRows");
     clear(flowRows);
     controlTower.flow.forEach(function (step) {
@@ -999,11 +1069,11 @@
 
   function statusTone(status) {
     if (
-      ["done", "ready", "online", "validated", "processed", "green", "active", "success", "observed", "matched", "resolved", "passed", "routed", "approved", "executed", "paid"].indexOf(status) >= 0
+      ["done", "ready", "online", "validated", "processed", "green", "active", "success", "observed", "matched", "resolved", "passed", "routed", "approved", "executed", "paid", "available"].indexOf(status) >= 0
     ) {
       return "green";
     }
-    if (["blocked", "waiting", "pending", "retry", "partial_success", "current", "open", "acknowledged", "warning", "mitigating", "fired", "proposed", "invoice_sent", "not_exported"].indexOf(status) >= 0) {
+    if (["blocked", "waiting", "pending", "retry", "partial_success", "current", "open", "acknowledged", "warning", "attention", "review_required", "mitigating", "fired", "proposed", "invoice_sent", "not_exported"].indexOf(status) >= 0) {
       return "amber";
     }
     if (["high", "dead_letter", "critical"].indexOf(status) >= 0) {

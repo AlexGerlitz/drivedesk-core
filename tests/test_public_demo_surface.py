@@ -50,6 +50,8 @@ def test_public_demo_html_links_static_assets() -> None:
     assert 'id="workflowTimelineRows"' in html
     assert 'id="domainEventRows"' in html
     assert 'id="controlTowerSummaryRows"' in html
+    assert 'id="controlTowerBriefingRows"' in html
+    assert 'id="controlTowerBriefingActionRows"' in html
     assert 'id="controlTowerFlowRows"' in html
     assert 'id="controlTowerObservationRows"' in html
     assert 'id="controlTowerExceptionRows"' in html
@@ -149,6 +151,25 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
         "Repair actions",
         "External writes",
     }
+    assert control_tower["briefing"]["role"] == "accountant"
+    assert control_tower["briefing"]["riskLevel"] == "attention"
+    assert set(control_tower["briefing"]["sourceSystems"]) >= {
+        "crm.bitrix24.mock",
+        "bank.statement.mock",
+        "accounting.export.mock",
+    }
+    assert {item["type"] for item in control_tower["briefing"]["highlights"]} >= {
+        "business_exception",
+        "state_observation",
+        "repair_context",
+    }
+    assert {item["action"] for item in control_tower["briefing"]["recommendedActions"]} >= {
+        "execute_repair_dry_run",
+        "review_accounting_export",
+    }
+    assert control_tower["briefing"]["api"]["preview"] == (
+        "POST /tenants/{tenant_id}/business-briefings/preview"
+    )
     assert {observation["system"] for observation in control_tower["observations"]} >= {
         "crm.bitrix24.mock",
         "bank.statement.mock",

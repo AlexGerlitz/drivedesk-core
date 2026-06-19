@@ -398,6 +398,177 @@
         "title": "AuthSessionRead",
         "type": "object"
       },
+      "BusinessBriefingPreviewCreate": {
+        "properties": {
+          "include_resolved": {
+            "default": false,
+            "title": "Include Resolved",
+            "type": "boolean"
+          },
+          "limit": {
+            "default": 20,
+            "maximum": 50.0,
+            "minimum": 1.0,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "role": {
+            "default": "operator",
+            "enum": [
+              "operator",
+              "accountant",
+              "manager",
+              "owner",
+              "support"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "subject_id": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Id"
+          },
+          "subject_type": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 2,
+                "pattern": "^[a-z0-9][a-z0-9_-]*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Type"
+          }
+        },
+        "title": "BusinessBriefingPreviewCreate",
+        "type": "object"
+      },
+      "BusinessBriefingRead": {
+        "properties": {
+          "api": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Api",
+            "type": "object"
+          },
+          "evidence": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "highlights": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Highlights",
+            "type": "array"
+          },
+          "recommended_actions": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Recommended Actions",
+            "type": "array"
+          },
+          "review_points": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Review Points",
+            "type": "array"
+          },
+          "risk_level": {
+            "enum": [
+              "normal",
+              "attention",
+              "critical"
+            ],
+            "title": "Risk Level",
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "operator",
+              "accountant",
+              "manager",
+              "owner",
+              "support"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "source_systems": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Source Systems",
+            "type": "array"
+          },
+          "subject_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Id"
+          },
+          "subject_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Type"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tenant_id",
+          "role",
+          "generated_at",
+          "risk_level",
+          "summary"
+        ],
+        "title": "BusinessBriefingRead",
+        "type": "object"
+      },
       "BusinessExceptionCreate": {
         "properties": {
           "evidence": {
@@ -4298,6 +4469,94 @@
           }
         },
         "summary": "List Audit Events Endpoint"
+      }
+    },
+    "/tenants/{tenant_id}/business-briefings/preview": {
+      "post": {
+        "operationId": "build_business_briefing_endpoint_tenants__tenant_id__business_briefings_preview_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tenant_id",
+            "required": true,
+            "schema": {
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "X-Actor-Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Role",
+            "required": false,
+            "schema": {
+              "default": "viewer",
+              "title": "X-Actor-Role",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessBriefingPreviewCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessBriefingRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Build Business Briefing Endpoint",
+        "tags": [
+          "business-control"
+        ]
       }
     },
     "/tenants/{tenant_id}/business-exceptions": {

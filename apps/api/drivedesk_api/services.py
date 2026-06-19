@@ -32,6 +32,7 @@ from drivedesk_api.db import (
 from drivedesk_api.rbac import ActorContext
 from drivedesk_api.schemas import (
     AccountingExportCreate,
+    BusinessBriefingPreviewCreate,
     BusinessExceptionCreate,
     BusinessExceptionStatusChange,
     BusinessRecordCreate,
@@ -1214,6 +1215,244 @@ async def execute_repair_action(
     )
     await commit_or_conflict(session, "repair action execution failed")
     return repair_action
+
+
+def _json_dict(raw_json: str | None) -> dict[str, object]:
+    try:
+        payload = json.loads(raw_json or "{}")
+    except json.JSONDecodeError:
+        return {"payload_valid": False}
+    if not isinstance(payload, dict):
+        return {"payload_valid": False}
+    return payload
+
+
+def _subject_label(subject_type: str | None, subject_id: str | None) -> str:
+    if subject_type and subject_id:
+        return f"{subject_type}:{subject_id}"
+    if subject_type:
+        return f"{subject_type}:*"
+    if subject_id:
+        return f"*:{subject_id}"
+    return "tenant"
+
+
+def _briefing_risk_level(exceptions: list[BusinessException], repairs: list[RepairAction]) -> str:
+    open_exceptions = [item for item in exceptions if item.status != "resolved"]
+    if any(item.severity == "critical" for item in open_exceptions):
+        return "critical"
+    if any(item.severity == "warning" for item in open_exceptions):
+        return "attention"
+    if any(item.status in {"proposed", "approved"} for item in repairs):
+        return "attention"
+    return "normal"
+
+
+def _briefing_repair_action(
+    *,
+    tenant_id: str,
+    repair: RepairAction,
+) -> dict[str, object]:
+    if repair.status == "proposed" and repair.requires_approval:
+        return {
+            "action": "review_repair_action",
+            "status": "requires_approval",
+            "summary": repair.summary,
+            "endpoint": f"POST /tenants/{tenant_id}/repair-actions/{repair.id}/approve",
+            "evidence": "repair_action.proposed",
+        }
+    if repair.status == "approved":
+        return {
+            "action": "execute_repair_dry_run",
+            "status": "ready",
+            "summary": repair.summary,
+            "endpoint": f"POST /tenants/{tenant_id}/repair-actions/{repair.id}/execute",
+            "evidence": "repair_action.approved",
+        }
+    return {
+        "action": "inspect_repair_result",
+        "status": repair.status,
+        "summary": repair.summary,
+        "endpoint": f"GET /tenants/{tenant_id}/repair-actions?business_exception_id={repair.business_exception_id}",
+        "evidence": "repair_action.executed" if repair.status == "executed" else "repair_action.proposed",
+    }
+
+
+async def build_business_briefing(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    payload: BusinessBriefingPreviewCreate,
+) -> dict[str, object]:
+    await ensure_tenant_exists(session, tenant_id)
+    observations_query = (
+        select(BusinessStateObservation)
+        .where(BusinessStateObservation.tenant_id == tenant_id)
+        .order_by(BusinessStateObservation.observed_at.desc(), BusinessStateObservation.created_at.desc())
+        .limit(payload.limit)
+    )
+    exceptions_query = (
+        select(BusinessException)
+        .where(BusinessException.tenant_id == tenant_id)
+        .order_by(BusinessException.detected_at.desc(), BusinessException.created_at.desc())
+        .limit(payload.limit)
+    )
+    repairs_query = (
+        select(RepairAction)
+        .where(RepairAction.tenant_id == tenant_id)
+        .order_by(RepairAction.created_at.desc())
+        .limit(payload.limit)
+    )
+    if payload.subject_type:
+        observations_query = observations_query.where(BusinessStateObservation.subject_type == payload.subject_type)
+        exceptions_query = exceptions_query.where(BusinessException.subject_type == payload.subject_type)
+    if payload.subject_id:
+        observations_query = observations_query.where(BusinessStateObservation.subject_id == payload.subject_id)
+        exceptions_query = exceptions_query.where(BusinessException.subject_id == payload.subject_id)
+    if not payload.include_resolved:
+        exceptions_query = exceptions_query.where(BusinessException.status != "resolved")
+        repairs_query = repairs_query.where(RepairAction.status != "executed")
+
+    observations_result = await session.execute(observations_query)
+    exceptions_result = await session.execute(exceptions_query)
+    observations = list(observations_result.scalars().all())
+    exceptions = list(exceptions_result.scalars().all())
+    exception_ids = {item.id for item in exceptions}
+    subject_filter_requested = bool(payload.subject_type or payload.subject_id)
+    if exception_ids:
+        repairs_query = repairs_query.where(RepairAction.business_exception_id.in_(exception_ids))
+    elif subject_filter_requested:
+        repairs_query = repairs_query.where(RepairAction.business_exception_id == "__no_matching_exception__")
+    repairs_result = await session.execute(repairs_query)
+    repairs = list(repairs_result.scalars().all())
+
+    source_systems = sorted({item.system_key for item in observations})
+    risk_level = _briefing_risk_level(exceptions, repairs)
+    subject = _subject_label(payload.subject_type, payload.subject_id)
+    open_count = len([item for item in exceptions if item.status != "resolved"])
+    summary = (
+        f"{payload.role} briefing for {subject}: {open_count} open exception(s), "
+        f"{len(source_systems)} source system(s), {len(repairs)} pending repair action(s)."
+    )
+
+    highlights: list[dict[str, object]] = []
+    for exception in exceptions[:5]:
+        impact = _json_dict(exception.impact_json)
+        highlights.append(
+            {
+                "type": "business_exception",
+                "severity": exception.severity,
+                "status": exception.status,
+                "title": exception.title,
+                "subject": _subject_label(exception.subject_type, exception.subject_id),
+                "impact": impact,
+                "evidence": "business_exception.created",
+            }
+        )
+    for observation in observations[:5]:
+        observation_payload = _json_dict(observation.payload_json)
+        highlights.append(
+            {
+                "type": "state_observation",
+                "system": observation.system_key,
+                "state": observation.state,
+                "subject": _subject_label(observation.subject_type, observation.subject_id),
+                "observed_at": observation.observed_at.isoformat(),
+                "payload_keys": sorted(observation_payload.keys()),
+                "evidence": "business_state.observation.recorded",
+            }
+        )
+
+    repair_exception_ids = {repair.business_exception_id for repair in repairs}
+    recommended_actions = [
+        _briefing_repair_action(tenant_id=tenant_id, repair=repair)
+        for repair in repairs[:5]
+    ]
+    for exception in exceptions[:5]:
+        if exception.id not in repair_exception_ids and exception.status != "resolved":
+            recommended_actions.append(
+                {
+                    "action": "propose_repair_action",
+                    "status": "available",
+                    "summary": f"Create a repair action for {exception.exception_type}.",
+                    "endpoint": (
+                        "POST "
+                        f"/tenants/{tenant_id}/business-exceptions/{exception.id}/repair-actions"
+                    ),
+                    "evidence": "business_exception.created",
+                }
+            )
+
+    review_points = [
+        {
+            "name": "source_evidence",
+            "status": "ready" if source_systems else "missing",
+            "detail": "Briefing is based on normalized observations, exceptions, and repair actions.",
+        },
+        {
+            "name": "external_mutation",
+            "status": "review_required" if recommended_actions else "not_requested",
+            "detail": "External writes stay behind the existing repair action approval and outbox evidence path.",
+        },
+        {
+            "name": "role_context",
+            "status": payload.role,
+            "detail": "The same business facts can be rendered for accountant, operator, manager, owner, or support work.",
+        },
+    ]
+
+    evidence: list[dict[str, object]] = []
+    for observation in observations[:5]:
+        evidence.append(
+            {
+                "type": "observation",
+                "id": observation.id,
+                "system": observation.system_key,
+                "state": observation.state,
+                "event": "business_state.observation.recorded",
+            }
+        )
+    for exception in exceptions[:5]:
+        evidence.append(
+            {
+                "type": "exception",
+                "id": exception.id,
+                "severity": exception.severity,
+                "status": exception.status,
+                "event": "business_exception.created",
+            }
+        )
+    for repair in repairs[:5]:
+        evidence.append(
+            {
+                "type": "repair_action",
+                "id": repair.id,
+                "status": repair.status,
+                "action": repair.action_type,
+                "event": "repair_action.proposed",
+            }
+        )
+
+    return {
+        "tenant_id": tenant_id,
+        "role": payload.role,
+        "subject_type": payload.subject_type,
+        "subject_id": payload.subject_id,
+        "generated_at": datetime.now(UTC),
+        "risk_level": risk_level,
+        "summary": summary,
+        "source_systems": source_systems,
+        "highlights": highlights,
+        "recommended_actions": recommended_actions,
+        "review_points": review_points,
+        "evidence": evidence,
+        "api": {
+            "preview": "POST /tenants/{tenant_id}/business-briefings/preview",
+            "observations": "GET /tenants/{tenant_id}/business-state/observations",
+            "exceptions": "GET /tenants/{tenant_id}/business-exceptions",
+            "repair_actions": "GET /tenants/{tenant_id}/repair-actions",
+        },
+    }
 
 
 async def create_business_record(

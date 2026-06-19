@@ -70,6 +70,8 @@ from drivedesk_api.schemas import (
     AuditEventRead,
     AuthMeRead,
     AuthSessionRead,
+    BusinessBriefingPreviewCreate,
+    BusinessBriefingRead,
     BusinessExceptionCreate,
     BusinessExceptionRead,
     BusinessExceptionStatusChange,
@@ -119,6 +121,7 @@ from drivedesk_api.schemas import (
 )
 from drivedesk_api.services import (
     approve_repair_action,
+    build_business_briefing,
     change_business_exception_status,
     count_business_records_by_type_status,
     count_business_exceptions_by_type_severity_status,
@@ -948,6 +951,21 @@ def build_app(settings: Settings | None = None) -> FastAPI:
             payload=payload,
             actor=actor,
         )
+
+    @api.post(
+        "/tenants/{tenant_id}/business-briefings/preview",
+        response_model=BusinessBriefingRead,
+        tags=["business-control"],
+    )
+    async def build_business_briefing_endpoint(
+        tenant_id: str,
+        payload: BusinessBriefingPreviewCreate,
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> dict[str, object]:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.BUSINESS_RECORD_READ)
+        return await build_business_briefing(session, tenant_id=tenant_id, payload=payload)
 
     @api.post(
         "/tenants/{tenant_id}/business-state/observations",

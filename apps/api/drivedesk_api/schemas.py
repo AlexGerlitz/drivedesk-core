@@ -16,6 +16,8 @@ BusinessExceptionStatus = Literal["open", "acknowledged", "resolved"]
 RepairActionStatus = Literal["proposed", "approved", "executed"]
 RepairActionSafetyLevel = Literal["low", "medium", "high"]
 RepairActionExecutionMode = Literal["dry_run", "commit_request"]
+BusinessBriefingRole = Literal["operator", "accountant", "manager", "owner", "support"]
+BusinessBriefingRiskLevel = Literal["normal", "attention", "critical"]
 
 
 class AdapterContractRead(BaseModel):
@@ -488,6 +490,30 @@ class RepairActionRead(BaseModel):
     executed_at: datetime | None = None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class BusinessBriefingPreviewCreate(BaseModel):
+    role: BusinessBriefingRole = "operator"
+    subject_type: str | None = Field(default=None, min_length=2, max_length=64, pattern=r"^[a-z0-9][a-z0-9_-]*$")
+    subject_id: str | None = Field(default=None, min_length=1, max_length=128)
+    include_resolved: bool = False
+    limit: int = Field(default=20, ge=1, le=50)
+
+
+class BusinessBriefingRead(BaseModel):
+    tenant_id: str
+    role: BusinessBriefingRole
+    subject_type: str | None = None
+    subject_id: str | None = None
+    generated_at: datetime
+    risk_level: BusinessBriefingRiskLevel
+    summary: str
+    source_systems: list[str] = Field(default_factory=list)
+    highlights: list[dict[str, Any]] = Field(default_factory=list)
+    recommended_actions: list[dict[str, Any]] = Field(default_factory=list)
+    review_points: list[dict[str, Any]] = Field(default_factory=list)
+    evidence: list[dict[str, Any]] = Field(default_factory=list)
+    api: dict[str, str] = Field(default_factory=dict)
 
 
 class WorkflowRuleCreate(BaseModel):

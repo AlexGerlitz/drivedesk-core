@@ -714,6 +714,47 @@ def test_business_control_tower_exception_and_repair_flow(
     assert approved_response.status_code == 200
     assert approved_response.json()["status"] == "approved"
 
+    briefing_response = client.post(
+        f"/tenants/{tenant_id}/business-briefings/preview",
+        json={
+            "role": "accountant",
+            "subject_type": "deal",
+            "subject_id": "DEAL-2026-001",
+        },
+        headers=owner_headers,
+    )
+    assert briefing_response.status_code == 200
+    briefing = briefing_response.json()
+    assert briefing["role"] == "accountant"
+    assert briefing["risk_level"] == "attention"
+    assert briefing["subject_type"] == "deal"
+    assert briefing["subject_id"] == "DEAL-2026-001"
+    assert briefing["source_systems"] == [
+        "accounting.export.mock",
+        "bank.statement.mock",
+        "crm.bitrix24.mock",
+    ]
+    assert "1 open exception" in briefing["summary"]
+    assert {item["type"] for item in briefing["highlights"]} >= {
+        "business_exception",
+        "state_observation",
+    }
+    assert {item.get("system") for item in briefing["highlights"] if item["type"] == "state_observation"} >= {
+        "crm.bitrix24.mock",
+        "bank.statement.mock",
+        "accounting.export.mock",
+    }
+    assert {item["action"] for item in briefing["recommended_actions"]} == {"execute_repair_dry_run"}
+    assert briefing["recommended_actions"][0]["status"] == "ready"
+    assert briefing["review_points"][1]["name"] == "external_mutation"
+    assert briefing["review_points"][1]["status"] == "review_required"
+    assert {item["type"] for item in briefing["evidence"]} >= {
+        "observation",
+        "exception",
+        "repair_action",
+    }
+    assert briefing["api"]["preview"] == "POST /tenants/{tenant_id}/business-briefings/preview"
+
     executed_response = client.post(
         f"/tenants/{tenant_id}/repair-actions/{repair_action['id']}/execute",
         json={"mode": "dry_run", "note": "public-safe repair drill"},

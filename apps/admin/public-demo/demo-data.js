@@ -35,7 +35,7 @@ window.DRIVEDESK_DEMO_DATA = {
     },
     {
       "label": "OpenAPI paths",
-      "value": "41",
+      "value": "42",
       "detail": "generated contract",
       "tone": "violet"
     },
@@ -770,6 +770,65 @@ window.DRIVEDESK_DEMO_DATA = {
         "tone": "violet"
       }
     ],
+    "briefing": {
+      "role": "accountant",
+      "riskLevel": "attention",
+      "summary": "Payment is visible in bank evidence, but CRM still shows invoice_sent and accounting export is waiting.",
+      "sourceSystems": [
+        "crm.bitrix24.mock",
+        "bank.statement.mock",
+        "accounting.export.mock"
+      ],
+      "highlights": [
+        {
+          "type": "business_exception",
+          "title": "Payment received but CRM and accounting lag behind",
+          "detail": "One open crm_payment_mismatch affects deal:DEAL-2026-001.",
+          "evidence": "business_exception.created"
+        },
+        {
+          "type": "state_observation",
+          "title": "Bank state",
+          "detail": "bank.statement.mock reports paid with matched payment reference.",
+          "evidence": "business_state.observation.recorded"
+        },
+        {
+          "type": "repair_context",
+          "title": "Approved dry-run repair",
+          "detail": "sync_status can queue a dry-run repair event without external mutation.",
+          "evidence": "repair_action.approved"
+        }
+      ],
+      "recommendedActions": [
+        {
+          "action": "execute_repair_dry_run",
+          "status": "ready",
+          "endpoint": "POST /tenants/{tenant_id}/repair-actions/{repair_action_id}/execute",
+          "evidence": "repair_action.approved"
+        },
+        {
+          "action": "review_accounting_export",
+          "status": "available",
+          "endpoint": "GET /tenants/{tenant_id}/business-exceptions",
+          "evidence": "accounting.export.mock:not_exported"
+        }
+      ],
+      "reviewPoints": [
+        {
+          "name": "source_evidence",
+          "status": "ready",
+          "detail": "CRM, bank, and accounting states are visible in one briefing."
+        },
+        {
+          "name": "external_mutation",
+          "status": "review_required",
+          "detail": "External writes stay behind approval and outbox evidence."
+        }
+      ],
+      "api": {
+        "preview": "POST /tenants/{tenant_id}/business-briefings/preview"
+      }
+    },
     "observations": [
       {
         "id": "obs-crm-deal",

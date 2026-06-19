@@ -238,6 +238,25 @@ assert {item["label"] for item in control_tower["summary"]} >= {
     "Repair actions",
     "External writes",
 }, demo
+assert control_tower["briefing"]["role"] == "accountant", demo
+assert control_tower["briefing"]["riskLevel"] == "attention", demo
+assert set(control_tower["briefing"]["sourceSystems"]) >= {
+    "crm.bitrix24.mock",
+    "bank.statement.mock",
+    "accounting.export.mock",
+}, demo
+assert {item["type"] for item in control_tower["briefing"]["highlights"]} >= {
+    "business_exception",
+    "state_observation",
+    "repair_context",
+}, demo
+assert {item["action"] for item in control_tower["briefing"]["recommendedActions"]} >= {
+    "execute_repair_dry_run",
+    "review_accounting_export",
+}, demo
+assert control_tower["briefing"]["api"]["preview"] == (
+    "POST /tenants/{tenant_id}/business-briefings/preview"
+), demo
 assert {observation["system"] for observation in control_tower["observations"]} >= {
     "crm.bitrix24.mock",
     "bank.statement.mock",

@@ -291,6 +291,29 @@ assert {item["status"] for item in control_tower["actionPlan"]["approvalGates"]}
 assert control_tower["actionPlan"]["api"]["preview"] == (
     "POST /tenants/{tenant_id}/business-action-plans/preview"
 ), demo
+assert control_tower["notifications"]["notificationKind"] == "action_plan_updates", demo
+assert control_tower["notifications"]["role"] == "accountant", demo
+assert control_tower["notifications"]["riskLevel"] == "attention", demo
+assert {item["channel"] for item in control_tower["notifications"]["channels"]} == {
+    "in_app",
+    "telegram",
+}, demo
+assert {item["externalDelivery"] for item in control_tower["notifications"]["channels"]} == {False}, demo
+assert {item["piiIncluded"] for item in control_tower["notifications"]["drafts"]} == {False}, demo
+assert {item["externalDelivery"] for item in control_tower["notifications"]["drafts"]} == {False}, demo
+assert {item["sendMode"] for item in control_tower["notifications"]["deliveryPlan"]} == {
+    "preview_only"
+}, demo
+assert {item["wouldEnqueueEvent"] for item in control_tower["notifications"]["deliveryPlan"]} == {
+    "notification.delivery.requested"
+}, demo
+assert {item["name"] for item in control_tower["notifications"]["approvalGates"]} >= {
+    "notification_content_review",
+    "repair_action_approval",
+}, demo
+assert control_tower["notifications"]["api"]["preview"] == (
+    "POST /tenants/{tenant_id}/business-notifications/preview"
+), demo
 assert control_tower["briefing"]["role"] == "accountant", demo
 assert control_tower["briefing"]["riskLevel"] == "attention", demo
 assert set(control_tower["briefing"]["sourceSystems"]) >= {
@@ -326,6 +349,7 @@ assert {step["step"] for step in control_tower["flow"]} >= {
     "propose",
     "approve",
     "plan",
+    "notify",
     "execute",
 }, demo
 assert set(control_tower["metrics"]) >= {
@@ -530,6 +554,7 @@ assert "/business-record-lifecycle-policies" in openapi["paths"], openapi["paths
 assert "/tenants/{tenant_id}/business-records/lifecycle-preview" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/business-records/{record_id}/transition" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/business-action-plans/preview" in openapi["paths"], openapi["paths"].keys()
+assert "/tenants/{tenant_id}/business-notifications/preview" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/workflow-rules" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/workflow-action-runs" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/outbox-events/{event_id}/retry" in openapi["paths"], openapi["paths"].keys()
@@ -551,6 +576,7 @@ if openapi_file.exists():
     generated = json.loads(openapi_file.read_text(encoding="utf-8"))
     assert "/demo/public" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-action-plans/preview" in generated["paths"], generated["paths"].keys()
+    assert "/tenants/{tenant_id}/business-notifications/preview" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/workflow-action-runs" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/outbox-events/{event_id}/retry" in generated["paths"], generated["paths"].keys()
     assert "/business-record-lifecycle-policies" in generated["paths"], generated["paths"].keys()

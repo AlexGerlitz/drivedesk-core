@@ -131,13 +131,16 @@ The public repository export also generates:
   payload and Incidents tab.
 - `businessControlTower` - public-safe control tower contract for CRM, bank,
   accounting, detection preview, escalation preview, business exception,
-  action plan preview, repair-action flow, and role briefing preview.
+  action plan preview, notification preview, repair-action flow, and role
+  briefing preview.
 - `POST /tenants/{tenant_id}/business-detections/preview` - read-only
   exception candidate detection from normalized business observations.
 - `POST /tenants/{tenant_id}/business-escalations/preview` - read-only
   owner, queue, SLA, and next-action routing for open business exceptions.
 - `POST /tenants/{tenant_id}/business-action-plans/preview` - read-only
   ordered operator work, automation candidates, approval gates, and evidence.
+- `POST /tenants/{tenant_id}/business-notifications/preview` - read-only
+  notification channel readiness, drafts, delivery plan, and evidence.
 - `POST /tenants/{tenant_id}/business-briefings/preview` - read-only
   role-context briefing over observations, exceptions, and repair actions.
 - `GET /business-record-lifecycle-policies` - public-safe lifecycle policy catalog.

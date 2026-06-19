@@ -12,8 +12,9 @@ The first public-safe slice models a common cross-system failure:
 5. DriveDesk opens a business exception.
 6. DriveDesk previews escalation routing: owner, queue, SLA, and next action.
 7. DriveDesk previews an ordered action plan for the responsible operator.
-8. A repair action is proposed, approved, and executed in dry-run mode.
-9. A role briefing turns the raw evidence into the next useful operator view.
+8. DriveDesk previews notification drafts without sending anything externally.
+9. A repair action is proposed, approved, and executed in dry-run mode.
+10. A role briefing turns the raw evidence into the next useful operator view.
 
 This is intentionally not another workflow automation demo. The control tower
 tracks business state across systems, detects an exception, records impact, and
@@ -26,6 +27,7 @@ keeps the repair path auditable.
 | Preview detections | `POST /tenants/{tenant_id}/business-detections/preview` | Detect exception candidates and suggested repair actions from observations without mutating data. |
 | Preview escalations | `POST /tenants/{tenant_id}/business-escalations/preview` | Route open business exceptions to owner roles, queues, SLA targets, and next actions without mutating data. |
 | Preview action plan | `POST /tenants/{tenant_id}/business-action-plans/preview` | Build ordered operator work, automation candidates, approval gates, and evidence links without mutating data. |
+| Preview notifications | `POST /tenants/{tenant_id}/business-notifications/preview` | Build notification channel readiness, drafts, delivery plan, approval gates, and evidence without sending messages. |
 | Preview briefing | `POST /tenants/{tenant_id}/business-briefings/preview` | Build a role-specific work briefing from observations, exceptions, and repair actions without mutating data. |
 | Observe state | `POST /tenants/{tenant_id}/business-state/observations` | Record a normalized state sample from CRM, bank, accounting, support, or another connected system. |
 | List observations | `GET /tenants/{tenant_id}/business-state/observations` | Review the tenant-scoped state timeline for a subject. |
@@ -42,6 +44,7 @@ keeps the repair path auditable.
 | `BusinessDetectionPreview` | A read-only detector result with matched rules, exception candidates, repair suggestions, and evidence. |
 | `BusinessEscalationPreview` | A read-only triage result with queue, owner role, SLA, next action, and evidence. |
 | `BusinessActionPlanPreview` | A read-only work plan with lanes, ordered steps, automation candidates, approval gates, and evidence. |
+| `BusinessNotificationPreview` | A read-only communication plan with channels, drafts, delivery plan, approval gates, and evidence. |
 | `BusinessBriefing` | A read-model for the current operator role, subject, evidence, risks, and next actions. |
 | `BusinessStateObservation` | One normalized fact from an external system. |
 | `BusinessException` | A business problem derived from observations. |
@@ -121,6 +124,26 @@ It returns:
 The preview is read-only. It does not create tasks, notify users, enqueue
 outbox events, approve repairs, execute repairs, or mutate external systems.
 
+## Notification Preview
+
+The notification preview is the communication step after the action plan is
+ready. It turns ordered work into public-safe drafts for channels such as
+`in_app` and `telegram`.
+
+It returns:
+
+- channel readiness;
+- recipient role;
+- draft title and body;
+- action endpoint;
+- delivery mode;
+- approval gates;
+- evidence labels.
+
+The preview is read-only. It does not enqueue notification events, send
+messages, call Telegram, call email providers, call CRM systems, or include raw
+personal data in the public payload.
+
 ## Safety Boundary
 
 The public demo does not write to real external systems. Repair execution stores
@@ -152,6 +175,8 @@ The public demo includes a `businessControlTower` payload with:
   action;
 - one `exception_resolution` action plan with ordered steps, automation
   candidates, and approval gates;
+- one `action_plan_updates` notification preview with in-app and Telegram draft
+  boundaries;
 - one approval-gated `sync_status` repair action;
 - one accountant briefing with source systems, highlights, recommended actions,
   and review points;

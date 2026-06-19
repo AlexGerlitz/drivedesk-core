@@ -53,6 +53,7 @@ briefing_adr_path = root / "docs/adr/0065-business-role-briefings.md"
 detection_adr_path = root / "docs/adr/0066-business-detection-preview.md"
 escalation_adr_path = root / "docs/adr/0067-business-escalation-preview.md"
 action_plan_adr_path = root / "docs/adr/0068-business-action-plan-preview.md"
+notification_adr_path = root / "docs/adr/0069-business-notification-preview.md"
 demo_data_path = root / "apps/admin/public-demo/demo-data.js"
 demo_html_path = root / "apps/admin/public-demo/index.html"
 demo_app_path = root / "apps/admin/public-demo/app.js"
@@ -68,6 +69,7 @@ for path in [
     detection_adr_path,
     escalation_adr_path,
     action_plan_adr_path,
+    notification_adr_path,
     demo_data_path,
     demo_html_path,
     demo_app_path,
@@ -163,6 +165,44 @@ require(
     action_plan.get("api", {}).get("preview") == "POST /tenants/{tenant_id}/business-action-plans/preview",
     "businessControlTower action plan preview endpoint missing",
 )
+notifications = control.get("notifications", {})
+require(notifications.get("notificationKind") == "action_plan_updates", "businessControlTower notification kind mismatch")
+require(notifications.get("role") == "accountant", "businessControlTower notification role mismatch")
+require(notifications.get("riskLevel") == "attention", "businessControlTower notification risk mismatch")
+require(
+    {item.get("channel") for item in notifications.get("channels", [])} == {"in_app", "telegram"},
+    "businessControlTower notification channels mismatch",
+)
+require(
+    {item.get("externalDelivery") for item in notifications.get("channels", [])} == {False},
+    "businessControlTower notification channels must be public-safe",
+)
+require(
+    {item.get("piiIncluded") for item in notifications.get("drafts", [])} == {False},
+    "businessControlTower notification drafts must avoid PII",
+)
+require(
+    {item.get("externalDelivery") for item in notifications.get("drafts", [])} == {False},
+    "businessControlTower notification drafts must not send externally",
+)
+require(
+    {item.get("sendMode") for item in notifications.get("deliveryPlan", [])} == {"preview_only"},
+    "businessControlTower notification delivery must be preview only",
+)
+require(
+    {item.get("wouldEnqueueEvent") for item in notifications.get("deliveryPlan", [])}
+    == {"notification.delivery.requested"},
+    "businessControlTower notification delivery event mismatch",
+)
+require(
+    {item.get("name") for item in notifications.get("approvalGates", [])}
+    >= {"notification_content_review", "repair_action_approval"},
+    "businessControlTower notification approval gates missing",
+)
+require(
+    notifications.get("api", {}).get("preview") == "POST /tenants/{tenant_id}/business-notifications/preview",
+    "businessControlTower notification preview endpoint missing",
+)
 briefing = control.get("briefing", {})
 require(briefing.get("role") == "accountant", "businessControlTower briefing role mismatch")
 require(briefing.get("riskLevel") == "attention", "businessControlTower briefing risk mismatch")
@@ -223,6 +263,7 @@ required_paths = {
     "/tenants/{tenant_id}/business-detections/preview",
     "/tenants/{tenant_id}/business-escalations/preview",
     "/tenants/{tenant_id}/business-action-plans/preview",
+    "/tenants/{tenant_id}/business-notifications/preview",
     "/tenants/{tenant_id}/business-briefings/preview",
     "/tenants/{tenant_id}/business-state/observations",
     "/tenants/{tenant_id}/business-exceptions",
@@ -240,9 +281,11 @@ for needle in [
     "POST /tenants/{tenant_id}/business-detections/preview",
     "POST /tenants/{tenant_id}/business-escalations/preview",
     "POST /tenants/{tenant_id}/business-action-plans/preview",
+    "POST /tenants/{tenant_id}/business-notifications/preview",
     "POST /tenants/{tenant_id}/business-briefings/preview",
     "BusinessEscalationPreview",
     "BusinessActionPlanPreview",
+    "BusinessNotificationPreview",
     "POST /tenants/{tenant_id}/business-state/observations",
     "BusinessBriefing",
     "BusinessStateObservation",
@@ -262,6 +305,8 @@ for needle in [
     'id="controlTowerEscalationActionRows"',
     'id="controlTowerActionPlanRows"',
     'id="controlTowerActionPlanAutomationRows"',
+    'id="controlTowerNotificationRows"',
+    'id="controlTowerNotificationDraftRows"',
     'id="controlTowerBriefingRows"',
     'id="controlTowerBriefingActionRows"',
     'id="controlTowerObservationRows"',
@@ -279,6 +324,8 @@ for needle in [
     "business-escalations/preview",
     "controlTowerActionPlanRows",
     "business-action-plans/preview",
+    "controlTowerNotificationRows",
+    "business-notifications/preview",
     "controlTowerBriefingRows",
     "fillBusinessControlTower",
     "controlTowerSummaryRows",
@@ -310,6 +357,10 @@ else:
     require(
         'copy_path "docs/adr/0068-business-action-plan-preview.md"' in read(export_script_path),
         "export script missing ADR 0068",
+    )
+    require(
+        'copy_path "docs/adr/0069-business-notification-preview.md"' in read(export_script_path),
+        "export script missing ADR 0069",
     )
     require(
         'copy_path "scripts/check_public_business_control_tower.sh"' in read(export_script_path),

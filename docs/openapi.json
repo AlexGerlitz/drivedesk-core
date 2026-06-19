@@ -1283,6 +1283,212 @@
         "title": "BusinessExceptionStatusChange",
         "type": "object"
       },
+      "BusinessNotificationPreviewCreate": {
+        "properties": {
+          "channels": {
+            "items": {
+              "enum": [
+                "in_app",
+                "telegram",
+                "email"
+              ],
+              "type": "string"
+            },
+            "maxItems": 3,
+            "minItems": 1,
+            "title": "Channels",
+            "type": "array"
+          },
+          "include_resolved": {
+            "default": false,
+            "title": "Include Resolved",
+            "type": "boolean"
+          },
+          "limit": {
+            "default": 20,
+            "maximum": 50.0,
+            "minimum": 1.0,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "notification_kind": {
+            "const": "action_plan_updates",
+            "default": "action_plan_updates",
+            "title": "Notification Kind",
+            "type": "string"
+          },
+          "role": {
+            "default": "operator",
+            "enum": [
+              "operator",
+              "accountant",
+              "manager",
+              "owner",
+              "support"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "subject_id": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Id"
+          },
+          "subject_type": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 2,
+                "pattern": "^[a-z0-9][a-z0-9_-]*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Type"
+          }
+        },
+        "title": "BusinessNotificationPreviewCreate",
+        "type": "object"
+      },
+      "BusinessNotificationPreviewRead": {
+        "properties": {
+          "api": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Api",
+            "type": "object"
+          },
+          "approval_gates": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Approval Gates",
+            "type": "array"
+          },
+          "channels": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Channels",
+            "type": "array"
+          },
+          "delivery_plan": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Delivery Plan",
+            "type": "array"
+          },
+          "drafts": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Drafts",
+            "type": "array"
+          },
+          "evidence": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "notification_kind": {
+            "const": "action_plan_updates",
+            "title": "Notification Kind",
+            "type": "string"
+          },
+          "review_points": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Review Points",
+            "type": "array"
+          },
+          "risk_level": {
+            "enum": [
+              "normal",
+              "attention",
+              "critical"
+            ],
+            "title": "Risk Level",
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "operator",
+              "accountant",
+              "manager",
+              "owner",
+              "support"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "subject_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Id"
+          },
+          "subject_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Type"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tenant_id",
+          "notification_kind",
+          "role",
+          "generated_at",
+          "risk_level",
+          "summary"
+        ],
+        "title": "BusinessNotificationPreviewRead",
+        "type": "object"
+      },
       "BusinessRecordCreate": {
         "properties": {
           "external_ref": {
@@ -5736,6 +5942,94 @@
           }
         },
         "summary": "Change Business Exception Status Endpoint",
+        "tags": [
+          "business-control"
+        ]
+      }
+    },
+    "/tenants/{tenant_id}/business-notifications/preview": {
+      "post": {
+        "operationId": "preview_business_notifications_endpoint_tenants__tenant_id__business_notifications_preview_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tenant_id",
+            "required": true,
+            "schema": {
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "X-Actor-Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Role",
+            "required": false,
+            "schema": {
+              "default": "viewer",
+              "title": "X-Actor-Role",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessNotificationPreviewCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessNotificationPreviewRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Preview Business Notifications Endpoint",
         "tags": [
           "business-control"
         ]

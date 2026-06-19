@@ -35,7 +35,7 @@ window.DRIVEDESK_DEMO_DATA = {
     },
     {
       "label": "OpenAPI paths",
-      "value": "45",
+      "value": "46",
       "detail": "generated contract",
       "tone": "violet"
     },
@@ -1003,6 +1003,109 @@ window.DRIVEDESK_DEMO_DATA = {
         "preview": "POST /tenants/{tenant_id}/business-action-plans/preview"
       }
     },
+    "notifications": {
+      "notificationKind": "action_plan_updates",
+      "role": "accountant",
+      "riskLevel": "attention",
+      "summary": "DriveDesk prepares safe in-app and Telegram notification drafts from the current action plan.",
+      "channels": [
+        {
+          "channel": "in_app",
+          "status": "ready",
+          "configured": true,
+          "externalDelivery": false,
+          "requiresSecret": false,
+          "evidence": "business_notification.previewed"
+        },
+        {
+          "channel": "telegram",
+          "status": "requires_channel_config",
+          "configured": false,
+          "externalDelivery": false,
+          "requiresSecret": true,
+          "evidence": "business_notification.previewed"
+        }
+      ],
+      "drafts": [
+        {
+          "draftId": "action_plan_updates.in_app.accountant",
+          "channel": "in_app",
+          "recipientRole": "accountant",
+          "title": "Payment mismatch action plan is ready",
+          "body": "deal:DEAL-2026-001 has a ready action plan step: execute_repair_dry_run.",
+          "actionEndpoint": "POST /tenants/{tenant_id}/repair-actions/{repair_action_id}/execute",
+          "piiIncluded": false,
+          "externalDelivery": false,
+          "status": "ready",
+          "evidence": "business_notification.previewed"
+        },
+        {
+          "draftId": "action_plan_updates.telegram.accountant",
+          "channel": "telegram",
+          "recipientRole": "accountant",
+          "title": "Payment mismatch action plan is ready",
+          "body": "deal:DEAL-2026-001 has a ready action plan step: execute_repair_dry_run.",
+          "actionEndpoint": "POST /tenants/{tenant_id}/repair-actions/{repair_action_id}/execute",
+          "piiIncluded": false,
+          "externalDelivery": false,
+          "status": "preview_only",
+          "evidence": "business_notification.previewed"
+        }
+      ],
+      "deliveryPlan": [
+        {
+          "channel": "in_app",
+          "status": "ready",
+          "recipientRole": "accountant",
+          "sendMode": "preview_only",
+          "externalDelivery": false,
+          "requiresSecret": false,
+          "wouldEnqueueEvent": "notification.delivery.requested",
+          "evidence": "business_notification.previewed"
+        },
+        {
+          "channel": "telegram",
+          "status": "requires_channel_config",
+          "recipientRole": "accountant",
+          "sendMode": "preview_only",
+          "externalDelivery": false,
+          "requiresSecret": true,
+          "wouldEnqueueEvent": "notification.delivery.requested",
+          "evidence": "business_notification.previewed"
+        }
+      ],
+      "approvalGates": [
+        {
+          "name": "notification_content_review",
+          "status": "ready",
+          "requiresApproval": false,
+          "externalDelivery": false,
+          "evidence": "business_notification.previewed"
+        },
+        {
+          "name": "repair_action_approval",
+          "status": "satisfied",
+          "requiresApproval": true,
+          "externalDelivery": false,
+          "evidence": "repair_action.approved"
+        }
+      ],
+      "reviewPoints": [
+        {
+          "name": "no_external_send",
+          "status": "preview_only",
+          "detail": "Notification preview does not call Telegram, email, CRM, or any other provider."
+        },
+        {
+          "name": "pii_boundary",
+          "status": "clean",
+          "detail": "Drafts avoid raw personal data and use role, subject key, endpoint, and evidence labels."
+        }
+      ],
+      "api": {
+        "preview": "POST /tenants/{tenant_id}/business-notifications/preview"
+      }
+    },
     "briefing": {
       "role": "accountant",
       "riskLevel": "attention",
@@ -1146,6 +1249,13 @@ window.DRIVEDESK_DEMO_DATA = {
         "state": "ready",
         "detail": "The operator receives an ordered action plan with approval and automation boundaries.",
         "evidence": "business_action_plan.previewed"
+      },
+      {
+        "step": "notify",
+        "owner": "workbench",
+        "state": "preview_only",
+        "detail": "DriveDesk prepares notification drafts without external delivery.",
+        "evidence": "business_notification.previewed"
       },
       {
         "step": "execute",

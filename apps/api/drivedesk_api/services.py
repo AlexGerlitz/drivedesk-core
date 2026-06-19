@@ -36,6 +36,7 @@ from drivedesk_api.schemas import (
     BusinessBriefingPreviewCreate,
     BusinessDetectionPreviewCreate,
     BusinessEscalationPreviewCreate,
+    BusinessNotificationPreviewCreate,
     BusinessExceptionCreate,
     BusinessExceptionStatusChange,
     BusinessRecordCreate,
@@ -1807,6 +1808,155 @@ async def preview_business_action_plan(
             "escalations": "POST /tenants/{tenant_id}/business-escalations/preview",
             "briefings": "POST /tenants/{tenant_id}/business-briefings/preview",
             "execute_repair": "POST /tenants/{tenant_id}/repair-actions/{repair_action_id}/execute",
+        },
+    }
+
+
+def _notification_channel_state(channel: str) -> dict[str, object]:
+    if channel == "in_app":
+        return {
+            "channel": channel,
+            "status": "ready",
+            "configured": True,
+            "external_delivery": False,
+            "requires_secret": False,
+            "evidence": "business_notification.previewed",
+        }
+    return {
+        "channel": channel,
+        "status": "requires_channel_config",
+        "configured": False,
+        "external_delivery": False,
+        "requires_secret": True,
+        "evidence": "business_notification.previewed",
+    }
+
+
+async def preview_business_notifications(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    payload: BusinessNotificationPreviewCreate,
+) -> dict[str, object]:
+    await ensure_tenant_exists(session, tenant_id)
+    action_plan = await preview_business_action_plan(
+        session,
+        tenant_id=tenant_id,
+        payload=BusinessActionPlanPreviewCreate(
+            plan_kind="exception_resolution",
+            role=payload.role,
+            subject_type=payload.subject_type,
+            subject_id=payload.subject_id,
+            include_resolved=payload.include_resolved,
+            limit=payload.limit,
+        ),
+    )
+    channels = [_notification_channel_state(channel) for channel in payload.channels]
+    steps = list(action_plan.get("steps", []))
+    lanes = list(action_plan.get("lanes", []))
+    approval_gates = list(action_plan.get("approval_gates", []))
+    primary_step = steps[1] if len(steps) > 1 else (steps[0] if steps else {})
+    subject = _subject_label(payload.subject_type, payload.subject_id)
+    recipient_role = str(primary_step.get("owner_role") or payload.role)
+    action_status = str(primary_step.get("status") or "not_ready")
+    source_systems = sorted(
+        {
+            system
+            for step in steps
+            for system in step.get("source_systems", [])
+            if isinstance(system, str)
+        }
+    )
+    drafts: list[dict[str, object]] = []
+    delivery_plan: list[dict[str, object]] = []
+    for channel in channels:
+        channel_name = str(channel["channel"])
+        draft = {
+            "draft_id": f"{payload.notification_kind}.{channel_name}.{recipient_role}",
+            "channel": channel_name,
+            "recipient_role": recipient_role,
+            "title": "Payment mismatch action plan is ready",
+            "body": (
+                f"{subject} has a {action_status} action plan step: "
+                f"{primary_step.get('step', 'review_action_plan')}."
+            ),
+            "action_endpoint": str(primary_step.get("endpoint") or action_plan.get("api", {}).get("preview")),
+            "source_systems": source_systems,
+            "pii_included": False,
+            "external_delivery": False,
+            "status": "ready" if channel_name == "in_app" else "preview_only",
+            "evidence": "business_notification.previewed",
+        }
+        drafts.append(draft)
+        delivery_plan.append(
+            {
+                "channel": channel_name,
+                "status": channel["status"],
+                "recipient_role": recipient_role,
+                "send_mode": "preview_only",
+                "external_delivery": False,
+                "requires_secret": channel["requires_secret"],
+                "would_enqueue_event": "notification.delivery.requested",
+                "evidence": "business_notification.previewed",
+            }
+        )
+
+    summary = (
+        f"{payload.notification_kind} preview prepared {len(drafts)} draft(s) "
+        f"for {recipient_role} across {len(channels)} channel(s)."
+    )
+    return {
+        "tenant_id": tenant_id,
+        "notification_kind": payload.notification_kind,
+        "role": payload.role,
+        "subject_type": payload.subject_type,
+        "subject_id": payload.subject_id,
+        "generated_at": datetime.now(UTC),
+        "risk_level": str(action_plan.get("risk_level", "normal")),
+        "summary": summary,
+        "channels": channels,
+        "drafts": drafts,
+        "delivery_plan": delivery_plan,
+        "approval_gates": [
+            {
+                "name": "notification_content_review",
+                "status": "ready" if drafts else "empty",
+                "requires_approval": False,
+                "external_delivery": False,
+                "evidence": "business_notification.previewed",
+            },
+            *approval_gates,
+        ],
+        "review_points": [
+            {
+                "name": "no_external_send",
+                "status": "preview_only",
+                "detail": "Notification preview does not enqueue outbox events or call Telegram, email, or CRM providers.",
+            },
+            {
+                "name": "pii_boundary",
+                "status": "clean" if all(item["pii_included"] is False for item in drafts) else "review_required",
+                "detail": "Drafts include role, subject key, action endpoint, and evidence labels, not raw personal data.",
+            },
+            {
+                "name": "action_plan_link",
+                "status": "ready" if steps else "empty",
+                "detail": "Notification drafts are generated from the current action plan preview.",
+            },
+        ],
+        "evidence": [
+            {
+                "type": "action_plan",
+                "event": "business_action_plan.previewed",
+                "step_count": len(steps),
+                "lane_count": len(lanes),
+            },
+            *list(action_plan.get("evidence", []))[:5],
+        ],
+        "api": {
+            "preview": "POST /tenants/{tenant_id}/business-notifications/preview",
+            "action_plan": "POST /tenants/{tenant_id}/business-action-plans/preview",
+            "briefing": "POST /tenants/{tenant_id}/business-briefings/preview",
         },
     }
 

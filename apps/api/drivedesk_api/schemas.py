@@ -21,6 +21,7 @@ BusinessBriefingRiskLevel = Literal["normal", "attention", "critical"]
 BusinessDetectionRuleSet = Literal["payment_reconciliation"]
 BusinessEscalationPolicy = Literal["exception_triage"]
 BusinessActionPlanKind = Literal["exception_resolution"]
+BusinessNotificationKind = Literal["action_plan_updates"]
 
 
 class AdapterContractRead(BaseModel):
@@ -564,6 +565,38 @@ class BusinessActionPlanPreviewRead(BaseModel):
     lanes: list[dict[str, Any]] = Field(default_factory=list)
     steps: list[dict[str, Any]] = Field(default_factory=list)
     automation_candidates: list[dict[str, Any]] = Field(default_factory=list)
+    approval_gates: list[dict[str, Any]] = Field(default_factory=list)
+    review_points: list[dict[str, Any]] = Field(default_factory=list)
+    evidence: list[dict[str, Any]] = Field(default_factory=list)
+    api: dict[str, str] = Field(default_factory=dict)
+
+
+class BusinessNotificationPreviewCreate(BaseModel):
+    notification_kind: BusinessNotificationKind = "action_plan_updates"
+    role: BusinessBriefingRole = "operator"
+    subject_type: str | None = Field(default=None, min_length=2, max_length=64, pattern=r"^[a-z0-9][a-z0-9_-]*$")
+    subject_id: str | None = Field(default=None, min_length=1, max_length=128)
+    channels: list[Literal["in_app", "telegram", "email"]] = Field(
+        default_factory=lambda: ["in_app"],
+        min_length=1,
+        max_length=3,
+    )
+    include_resolved: bool = False
+    limit: int = Field(default=20, ge=1, le=50)
+
+
+class BusinessNotificationPreviewRead(BaseModel):
+    tenant_id: str
+    notification_kind: BusinessNotificationKind
+    role: BusinessBriefingRole
+    subject_type: str | None = None
+    subject_id: str | None = None
+    generated_at: datetime
+    risk_level: BusinessBriefingRiskLevel
+    summary: str
+    channels: list[dict[str, Any]] = Field(default_factory=list)
+    drafts: list[dict[str, Any]] = Field(default_factory=list)
+    delivery_plan: list[dict[str, Any]] = Field(default_factory=list)
     approval_gates: list[dict[str, Any]] = Field(default_factory=list)
     review_points: list[dict[str, Any]] = Field(default_factory=list)
     evidence: list[dict[str, Any]] = Field(default_factory=list)

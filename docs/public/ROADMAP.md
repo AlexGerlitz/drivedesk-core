@@ -94,6 +94,8 @@ Fast external verification path: `docs/public/REVIEWER_QUICKSTART.md`.
   queues, SLA targets, and approval-gated next actions.
 - Business action-plan preview for turning routed exceptions into ordered
   operator work, automation candidates, approval gates, and evidence handoff.
+- Business notification preview for turning action plans into safe channel
+  readiness, drafts, delivery plan, approval gates, and evidence.
 
 ## Next
 
@@ -101,8 +103,8 @@ Fast external verification path: `docs/public/REVIEWER_QUICKSTART.md`.
   event, and outbox shape.
 - More public-safe evidence around local run, CI, OpenAPI, and demo health.
 - More adapter recovery examples with payload mapping and follow-up actions.
-- More operator workbench scenarios that connect action plans to task creation
-  and notification previews without public external writes.
+- More operator workbench scenarios that connect action plans and notification
+  previews to task creation without public external writes.
 - More evidence around external notification adapters once destinations and
   secrets are intentionally configured outside the public surface.
 - Broader generated client SDK examples from the OpenAPI schema.

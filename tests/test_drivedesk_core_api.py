@@ -867,6 +867,52 @@ def test_business_control_tower_exception_and_repair_flow(
     }
     assert action_plan["api"]["preview"] == "POST /tenants/{tenant_id}/business-action-plans/preview"
 
+    notification_response = client.post(
+        f"/tenants/{tenant_id}/business-notifications/preview",
+        json={
+            "notification_kind": "action_plan_updates",
+            "role": "accountant",
+            "subject_type": "deal",
+            "subject_id": "DEAL-2026-001",
+            "channels": ["in_app", "telegram"],
+        },
+        headers=owner_headers,
+    )
+    assert notification_response.status_code == 200
+    notification = notification_response.json()
+    assert notification["notification_kind"] == "action_plan_updates"
+    assert notification["role"] == "accountant"
+    assert notification["risk_level"] == "attention"
+    assert "prepared 2 draft" in notification["summary"]
+    assert {item["channel"] for item in notification["channels"]} == {"in_app", "telegram"}
+    assert {item["external_delivery"] for item in notification["channels"]} == {False}
+    assert {item["requires_secret"] for item in notification["channels"]} == {False, True}
+    assert {item["recipient_role"] for item in notification["drafts"]} == {"accountant"}
+    assert {item["pii_included"] for item in notification["drafts"]} == {False}
+    assert {item["external_delivery"] for item in notification["drafts"]} == {False}
+    assert {item["status"] for item in notification["drafts"]} == {"ready", "preview_only"}
+    assert {item["send_mode"] for item in notification["delivery_plan"]} == {"preview_only"}
+    assert {item["would_enqueue_event"] for item in notification["delivery_plan"]} == {
+        "notification.delivery.requested"
+    }
+    assert {item["name"] for item in notification["approval_gates"]} >= {
+        "notification_content_review",
+        "repair_action_approval",
+    }
+    assert {item["name"] for item in notification["review_points"]} == {
+        "no_external_send",
+        "pii_boundary",
+        "action_plan_link",
+    }
+    assert {item["type"] for item in notification["evidence"]} >= {
+        "action_plan",
+        "observation",
+        "business_exception",
+        "repair_action",
+    }
+    assert notification["api"]["preview"] == "POST /tenants/{tenant_id}/business-notifications/preview"
+    assert notification["api"]["action_plan"] == "POST /tenants/{tenant_id}/business-action-plans/preview"
+
     briefing_response = client.post(
         f"/tenants/{tenant_id}/business-briefings/preview",
         json={

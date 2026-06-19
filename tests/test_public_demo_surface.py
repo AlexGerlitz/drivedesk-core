@@ -204,6 +204,28 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
     assert control_tower["actionPlan"]["api"]["preview"] == (
         "POST /tenants/{tenant_id}/business-action-plans/preview"
     )
+    assert control_tower["notifications"]["notificationKind"] == "action_plan_updates"
+    assert control_tower["notifications"]["role"] == "accountant"
+    assert control_tower["notifications"]["riskLevel"] == "attention"
+    assert {item["channel"] for item in control_tower["notifications"]["channels"]} == {
+        "in_app",
+        "telegram",
+    }
+    assert {item["externalDelivery"] for item in control_tower["notifications"]["channels"]} == {False}
+    assert {item["requiresSecret"] for item in control_tower["notifications"]["channels"]} == {False, True}
+    assert {item["piiIncluded"] for item in control_tower["notifications"]["drafts"]} == {False}
+    assert {item["externalDelivery"] for item in control_tower["notifications"]["drafts"]} == {False}
+    assert {item["sendMode"] for item in control_tower["notifications"]["deliveryPlan"]} == {"preview_only"}
+    assert {item["wouldEnqueueEvent"] for item in control_tower["notifications"]["deliveryPlan"]} == {
+        "notification.delivery.requested"
+    }
+    assert {item["name"] for item in control_tower["notifications"]["approvalGates"]} >= {
+        "notification_content_review",
+        "repair_action_approval",
+    }
+    assert control_tower["notifications"]["api"]["preview"] == (
+        "POST /tenants/{tenant_id}/business-notifications/preview"
+    )
     assert control_tower["briefing"]["role"] == "accountant"
     assert control_tower["briefing"]["riskLevel"] == "attention"
     assert set(control_tower["briefing"]["sourceSystems"]) >= {
@@ -238,6 +260,8 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
         "detect",
         "propose",
         "approve",
+        "plan",
+        "notify",
         "execute",
     }
     assert set(control_tower["metrics"]) >= {

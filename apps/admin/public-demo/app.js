@@ -49,6 +49,10 @@
     return "POST /tenants/{tenant_id}/business-action-plans/preview";
   }
 
+  function businessNotificationPreviewEndpoint() {
+    return "POST /tenants/{tenant_id}/business-notifications/preview";
+  }
+
   function isValidDemoPayload(payload) {
     return Boolean(
       payload &&
@@ -94,6 +98,11 @@
         Array.isArray(payload.businessControlTower.actionPlan.steps) &&
         Array.isArray(payload.businessControlTower.actionPlan.automationCandidates) &&
         Array.isArray(payload.businessControlTower.actionPlan.approvalGates) &&
+        payload.businessControlTower.notifications &&
+        Array.isArray(payload.businessControlTower.notifications.channels) &&
+        Array.isArray(payload.businessControlTower.notifications.drafts) &&
+        Array.isArray(payload.businessControlTower.notifications.deliveryPlan) &&
+        Array.isArray(payload.businessControlTower.notifications.approvalGates) &&
         payload.businessControlTower.briefing &&
         Array.isArray(payload.businessControlTower.briefing.highlights) &&
         Array.isArray(payload.businessControlTower.briefing.recommendedActions) &&
@@ -1207,6 +1216,121 @@
       actionPlanAutomationRows.appendChild(row);
     });
 
+    var notifications = controlTower.notifications;
+    var notificationRows = document.getElementById("controlTowerNotificationRows");
+    clear(notificationRows);
+
+    var notificationSummary = document.createElement("article");
+    notificationSummary.className = "event-row";
+    var notificationTop = document.createElement("div");
+    notificationTop.className = "event-top";
+    var notificationTitle = document.createElement("strong");
+    notificationTitle.appendChild(text(notifications.notificationKind + " notifications"));
+    notificationTop.append(notificationTitle, chip(notifications.riskLevel, statusTone(notifications.riskLevel)));
+
+    var notificationDetail = document.createElement("span");
+    notificationDetail.className = "muted";
+    notificationDetail.appendChild(text(notifications.summary));
+
+    var notificationApi = document.createElement("code");
+    notificationApi.appendChild(
+      text((notifications.api && notifications.api.preview) || businessNotificationPreviewEndpoint())
+    );
+
+    notificationSummary.append(notificationTop, notificationDetail, notificationApi);
+    notificationRows.appendChild(notificationSummary);
+
+    notifications.channels.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var channel = document.createElement("strong");
+      channel.appendChild(text(item.channel));
+      top.append(channel, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          "configured " +
+            String(item.configured) +
+            " - external delivery " +
+            String(item.externalDelivery) +
+            " - secret " +
+            String(item.requiresSecret)
+        )
+      );
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(item.evidence));
+
+      row.append(top, detail, evidence);
+      notificationRows.appendChild(row);
+    });
+
+    var notificationDraftRows = document.getElementById("controlTowerNotificationDraftRows");
+    clear(notificationDraftRows);
+    notifications.drafts.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(item.title));
+      top.append(title, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          item.channel +
+            " -> " +
+            item.recipientRole +
+            " - PII " +
+            String(item.piiIncluded) +
+            " - external delivery " +
+            String(item.externalDelivery)
+        )
+      );
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(item.evidence));
+
+      row.append(top, detail, evidence);
+      notificationDraftRows.appendChild(row);
+    });
+    notifications.deliveryPlan.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(item.channel + " delivery"));
+      top.append(title, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          item.sendMode +
+            " - would enqueue " +
+            item.wouldEnqueueEvent +
+            " - external delivery " +
+            String(item.externalDelivery)
+        )
+      );
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(item.evidence));
+
+      row.append(top, detail, evidence);
+      notificationDraftRows.appendChild(row);
+    });
+
     var briefing = controlTower.briefing;
     var briefingRows = document.getElementById("controlTowerBriefingRows");
     clear(briefingRows);
@@ -1376,11 +1500,11 @@
 
   function statusTone(status) {
     if (
-      ["done", "ready", "online", "validated", "processed", "green", "active", "success", "observed", "matched", "resolved", "passed", "routed", "approved", "executed", "paid", "available", "detected", "satisfied"].indexOf(status) >= 0
+      ["done", "ready", "online", "validated", "processed", "green", "active", "success", "observed", "matched", "resolved", "passed", "routed", "approved", "executed", "paid", "available", "detected", "satisfied", "clean"].indexOf(status) >= 0
     ) {
       return "green";
     }
-    if (["blocked", "waiting", "pending", "retry", "partial_success", "current", "open", "acknowledged", "warning", "attention", "review_required", "mitigating", "fired", "proposed", "suggested", "invoice_sent", "not_exported", "waiting_for_repair"].indexOf(status) >= 0) {
+    if (["blocked", "waiting", "pending", "retry", "partial_success", "current", "open", "acknowledged", "warning", "attention", "review_required", "mitigating", "fired", "proposed", "suggested", "invoice_sent", "not_exported", "waiting_for_repair", "requires_channel_config", "preview_only"].indexOf(status) >= 0) {
       return "amber";
     }
     if (["high", "dead_letter", "critical"].indexOf(status) >= 0) {

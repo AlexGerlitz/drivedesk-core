@@ -743,6 +743,17 @@ class AccountingExportCreate(BaseModel):
     simulate_failure: Literal["retryable", "permanent"] | None = None
 
 
+class ConnectorFixtureReplayRead(BaseModel):
+    status: Literal["validated"]
+    command: str
+    fixtureFile: str
+    evidenceFile: str
+    summary: list[dict[str, Any]]
+    outcomes: list[dict[str, Any]]
+    boundaries: list[dict[str, Any]]
+    docs: list[dict[str, str]]
+
+
 class PublicDemoRead(BaseModel):
     schemaVersion: int
     generatedAt: str

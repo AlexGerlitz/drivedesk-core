@@ -8,7 +8,9 @@ from typing import Any
 
 
 PUBLIC_DEMO_PATH = "/demo/public"
+CONNECTOR_REPLAY_PATH = "/demo/connector-fixture-replay"
 OPERATION_ID = "public_demo_demo_public_get"
+CONNECTOR_REPLAY_OPERATION_ID = "connector_fixture_replay_demo_demo_connector_fixture_replay_get"
 REQUIRED_FIELDS = [
   "schemaVersion",
   "generatedAt",
@@ -39,6 +41,16 @@ REQUIRED_FIELDS = [
   "timeline",
   "domainEvents"
 ]
+CONNECTOR_REPLAY_REQUIRED_FIELDS = [
+  "status",
+  "command",
+  "fixtureFile",
+  "evidenceFile",
+  "summary",
+  "outcomes",
+  "boundaries",
+  "docs"
+]
 
 
 class DriveDeskPublicDemoClient:
@@ -51,6 +63,11 @@ class DriveDeskPublicDemoClient:
     def get_public_demo(self) -> dict[str, Any]:
         payload = self._get_json(PUBLIC_DEMO_PATH)
         validate_public_demo_payload(payload)
+        return payload
+
+    def get_connector_fixture_replay(self) -> dict[str, Any]:
+        payload = self._get_json(CONNECTOR_REPLAY_PATH)
+        validate_connector_fixture_replay_payload(payload)
         return payload
 
     def get_adapter_operation_plan(
@@ -228,6 +245,52 @@ def _adapter_side_effects(scenario: dict[str, Any]) -> list[str]:
     return side_effects
 
 
+def validate_connector_fixture_replay_payload(payload: dict[str, Any]) -> None:
+    missing = [field for field in CONNECTOR_REPLAY_REQUIRED_FIELDS if field not in payload]
+    if missing:
+        raise ValueError(f"missing connector fixture replay fields: {', '.join(missing)}")
+
+    if payload.get("status") != "validated":
+        raise ValueError(f"unexpected connector replay status: {payload.get('status')}")
+
+    if payload.get("command") != "bash scripts/check_public_connector_fixture_replay.sh":
+        raise ValueError(f"unexpected connector replay command: {payload.get('command')}")
+
+    if payload.get("fixtureFile") != "examples/connector-fixtures/replay-fixtures.sanitized.json":
+        raise ValueError(f"unexpected connector replay fixtureFile: {payload.get('fixtureFile')}")
+
+    outcomes = payload.get("outcomes")
+    if not isinstance(outcomes, list) or len(outcomes) < 6:
+        raise ValueError("connector replay outcomes are missing or too short")
+
+    groups = {item.get("group") for item in outcomes if isinstance(item, dict)}
+    required_groups = {
+        "happy_path_preview",
+        "sensitive_payload_redaction",
+        "invalid_payload",
+        "retryable_provider_failure",
+        "dead_letter_provider_failure",
+        "reconciliation_mismatch",
+    }
+    if groups != required_groups:
+        raise ValueError(f"connector replay groups mismatch: {sorted(groups)}")
+
+    boundaries = payload.get("boundaries")
+    if not isinstance(boundaries, list) or len(boundaries) < 4:
+        raise ValueError("connector replay boundaries are missing or too short")
+
+    boundary_names = {item.get("name") for item in boundaries if isinstance(item, dict)}
+    required_boundaries = {"raw payload", "credentials", "external calls", "persistence"}
+    if not required_boundaries.issubset(boundary_names):
+        raise ValueError(
+            f"connector replay boundaries missing: {sorted(required_boundaries - boundary_names)}"
+        )
+
+    docs = payload.get("docs")
+    if not isinstance(docs, list) or len(docs) < 3:
+        raise ValueError("connector replay docs are missing or too short")
+
+
 def validate_public_demo_payload(payload: dict[str, Any]) -> None:
     missing = [field for field in REQUIRED_FIELDS if field not in payload]
     if missing:
@@ -368,6 +431,11 @@ def validate_public_demo_payload(payload: dict[str, Any]) -> None:
             f"{sorted(required_boundary_evidence - adapter_studio_boundary_evidence)}"
         )
 
+    connector_replay = payload.get("connectorFixtureReplay")
+    if not isinstance(connector_replay, dict):
+        raise ValueError("connectorFixtureReplay is missing")
+    validate_connector_fixture_replay_payload(connector_replay)
+
     proof = payload.get("engineeringProof") or {}
     if proof.get("milestone") != "engineering_70":
         raise ValueError(f"unexpected engineeringProof.milestone: {proof.get('milestone')}")
@@ -421,6 +489,7 @@ def main() -> None:
 
     client = DriveDeskPublicDemoClient(args.base_url)
     payload = client.get_public_demo()
+    connector_replay = client.get_connector_fixture_replay()
     adapter_plan = build_adapter_operation_plan(payload, "adapter-file-import-preview")
     print(
         "generated python SDK ok:",
@@ -428,7 +497,9 @@ def main() -> None:
         payload["dataSource"],
         f"workflow={payload['workflow']['currentStage']}",
         f"adapterPlan={adapter_plan['phase']}",
+        f"connectorReplay={connector_replay['status']}",
         f"operation={OPERATION_ID}",
+        f"connectorOperation={CONNECTOR_REPLAY_OPERATION_ID}",
     )
 
 

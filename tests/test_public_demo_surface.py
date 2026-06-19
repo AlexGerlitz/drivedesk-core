@@ -755,7 +755,14 @@ def test_public_demo_api_scripts_and_examples_exist() -> None:
 def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
     scripts = {
         "scripts/run_public_demo_local.sh": ["uvicorn", "/demo/public"],
-        "scripts/check_public_demo_api.sh": ["/health", "/ready", "/demo/public", "/openapi.json", "student_sync"],
+        "scripts/check_public_demo_api.sh": [
+            "/health",
+            "/ready",
+            "/demo/public",
+            "/demo/connector-fixture-replay",
+            "/openapi.json",
+            "student_sync",
+        ],
         "scripts/check_public_demo_sdk.sh": [
             "generate_public_demo_sdk.py",
             "sdk/generated/public-demo",
@@ -866,7 +873,9 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
         ],
         "scripts/generate_public_demo_sdk.py": [
             "/demo/public",
+            "/demo/connector-fixture-replay",
             "operationId",
+            "ConnectorFixtureReplayRead",
             "drivedesk_public_demo_client.py",
             "drivedesk-public-demo-client.mjs",
         ],
@@ -885,21 +894,29 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
         ],
         "sdk/generated/public-demo/python/drivedesk_public_demo_client.py": [
             "/demo/public",
+            "/demo/connector-fixture-replay",
             "public_demo_demo_public_get",
+            "connector_fixture_replay_demo_demo_connector_fixture_replay_get",
             "student_sync",
+            "get_connector_fixture_replay",
             "build_adapter_operation_plan",
             "contract_only",
         ],
         "sdk/generated/public-demo/javascript/drivedesk-public-demo-client.mjs": [
             "/demo/public",
+            "/demo/connector-fixture-replay",
             "public_demo_demo_public_get",
+            "connector_fixture_replay_demo_demo_connector_fixture_replay_get",
             "student_sync",
+            "getConnectorFixtureReplay",
             "buildAdapterOperationPlan",
             "contract_only",
         ],
         "sdk/generated/public-demo/typescript/drivedesk-public-demo-client.d.ts": [
             "PublicDemoPayload",
+            "ConnectorFixtureReplayPayload",
             "student_sync",
+            "getConnectorFixtureReplay",
             "AdapterOperationPlan",
         ],
     }

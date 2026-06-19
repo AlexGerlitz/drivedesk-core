@@ -47,10 +47,16 @@ platform_tour_path = root / "docs/public/PLATFORM_TOUR.md"
 api_demo_path = root / "docs/public/API_BACKED_DEMO.md"
 api_demo_payload_path = root / "apps/api/drivedesk_api/demo.py"
 api_schema_path = root / "apps/api/drivedesk_api/schemas.py"
+api_main_path = root / "apps/api/drivedesk_api/main.py"
 public_demo_html_path = root / "apps/admin/public-demo/index.html"
 public_demo_js_path = root / "apps/admin/public-demo/app.js"
 public_demo_data_path = root / "apps/admin/public-demo/demo-data.js"
 public_demo_api_check_path = root / "scripts/check_public_demo_api.sh"
+sdk_generator_path = root / "scripts/generate_public_demo_sdk.py"
+sdk_manifest_path = root / "sdk/generated/public-demo/openapi-client-manifest.json"
+sdk_python_path = root / "sdk/generated/public-demo/python/drivedesk_public_demo_client.py"
+sdk_js_path = root / "sdk/generated/public-demo/javascript/drivedesk-public-demo-client.mjs"
+sdk_types_path = root / "sdk/generated/public-demo/typescript/drivedesk-public-demo-client.d.ts"
 root_readme_path = root / "README.md"
 index_html_path = root / "index.html"
 private_smoke_path = root / "scripts/ci_smoke.sh"
@@ -296,7 +302,16 @@ for path, label, tokens in [
             "reconciliation_mismatch",
         ],
     ),
-    (api_schema_path, "public demo API schema", ["connectorFixtureReplay"]),
+    (
+        api_schema_path,
+        "public demo API schema",
+        ["ConnectorFixtureReplayRead", "connectorFixtureReplay"],
+    ),
+    (
+        api_main_path,
+        "public demo API routes",
+        ["/demo/connector-fixture-replay", "connector_fixture_replay_demo"],
+    ),
     (
         public_demo_data_path,
         "public demo static payload",
@@ -330,11 +345,45 @@ for path, label, tokens in [
         public_demo_api_check_path,
         "public demo API checker",
         [
+            "/demo/connector-fixture-replay",
             "connectorFixtureReplay",
             "happy_path_preview",
             "safe_payload_present=true",
             "drivedesk_integration_reconciliations",
         ],
+    ),
+    (
+        sdk_generator_path,
+        "SDK generator",
+        [
+            "/demo/connector-fixture-replay",
+            "ConnectorFixtureReplayRead",
+            "get_connector_fixture_replay",
+            "getConnectorFixtureReplay",
+        ],
+    ),
+    (
+        sdk_manifest_path,
+        "SDK manifest",
+        [
+            "/demo/connector-fixture-replay",
+            "connector_fixture_replay_demo_demo_connector_fixture_replay_get",
+        ],
+    ),
+    (
+        sdk_python_path,
+        "Python SDK",
+        ["get_connector_fixture_replay", "validate_connector_fixture_replay_payload"],
+    ),
+    (
+        sdk_js_path,
+        "JavaScript SDK",
+        ["getConnectorFixtureReplay", "validateConnectorFixtureReplayPayload"],
+    ),
+    (
+        sdk_types_path,
+        "TypeScript SDK",
+        ["ConnectorFixtureReplayPayload", "getConnectorFixtureReplay"],
     ),
 ]:
     text = read(path)

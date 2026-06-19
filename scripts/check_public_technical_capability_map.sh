@@ -89,6 +89,7 @@ for token in [
     "Engineering proof contract",
     "docs/openapi.json",
     "GET /demo/public",
+    "GET /demo/connector-fixture-replay",
     "docs/public/PROJECT_STATUS.md",
     "docs/public/ROADMAP.md",
     "docs/public/WORKFLOW_DEMO.md",

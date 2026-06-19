@@ -110,7 +110,8 @@ bash scripts/check_public_connector_fixture_replay.sh
 ## Public Demo Contract
 
 The replay is also exposed in the public-safe demo payload as
-`connectorFixtureReplay`.
+`connectorFixtureReplay`, and as a standalone read-only endpoint for SDK and
+reviewer checks.
 
 ```text
 GET /demo/public
@@ -118,6 +119,12 @@ GET /demo/public
   -> connectorFixtureReplay.outcomes
   -> connectorFixtureReplay.boundaries
   -> connectorFixtureReplay.docs
+
+GET /demo/connector-fixture-replay
+  -> summary
+  -> outcomes
+  -> boundaries
+  -> docs
 ```
 
 The GitHub Pages shell renders the same data in the Integrations tab through

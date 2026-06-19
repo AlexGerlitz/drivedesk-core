@@ -96,6 +96,7 @@ from drivedesk_api.schemas import (
     BusinessStateObservationRead,
     BusinessWorkbenchContextPreviewCreate,
     BusinessWorkbenchContextPreviewRead,
+    ConnectorFixtureReplayRead,
     FileImportCreate,
     IntegrationConnectionCheckCreate,
     IntegrationConnectionCheckRead,
@@ -253,6 +254,20 @@ def build_app(settings: Settings | None = None) -> FastAPI:
     async def public_demo() -> JSONResponse:
         return JSONResponse(
             build_public_demo_payload(),
+            headers={
+                "Access-Control-Allow-Origin": "*",
+                "Cache-Control": "public, max-age=60",
+            },
+        )
+
+    @api.get(
+        "/demo/connector-fixture-replay",
+        response_model=ConnectorFixtureReplayRead,
+        tags=["demo"],
+    )
+    async def connector_fixture_replay_demo() -> JSONResponse:
+        return JSONResponse(
+            build_public_demo_payload()["connectorFixtureReplay"],
             headers={
                 "Access-Control-Allow-Origin": "*",
                 "Cache-Control": "public, max-age=60",

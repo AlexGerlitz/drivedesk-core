@@ -1,7 +1,10 @@
 // Generated from DriveDesk Core OpenAPI. Do not edit by hand.
 export const PUBLIC_DEMO_PATH: "/demo/public";
+export const CONNECTOR_REPLAY_PATH: "/demo/connector-fixture-replay";
 export const OPERATION_ID: "public_demo_demo_public_get";
+export const CONNECTOR_REPLAY_OPERATION_ID: "connector_fixture_replay_demo_demo_connector_fixture_replay_get";
 export const REQUIRED_FIELDS: Array<"schemaVersion" | "generatedAt" | "dataSource" | "apiContract" | "tenant" | "health" | "metrics" | "workQueue" | "members" | "auditEvents" | "outbox" | "adapters" | "adapterScenarios" | "adapterStudio" | "connectorFixtureReplay" | "integrationJobs" | "integrationHealth" | "integrationReadiness" | "recoveryEvidence" | "alertRouting" | "incidentResponse" | "businessControlTower" | "engineeringProof" | "workflow" | "workflowScenarios" | "endToEndScenario" | "timeline" | "domainEvents">;
+export const CONNECTOR_REPLAY_REQUIRED_FIELDS: Array<"status" | "command" | "fixtureFile" | "evidenceFile" | "summary" | "outcomes" | "boundaries" | "docs">;
 
 export type AdapterScenarioPhase = "preview" | "execute" | "retry" | "operator_review";
 
@@ -41,6 +44,23 @@ export interface AdapterOperationPlan {
   };
 }
 
+export interface ConnectorFixtureReplayPayload {
+  status: "validated";
+  command: string;
+  fixtureFile: string;
+  evidenceFile: string;
+  summary: Array<Record<string, unknown>>;
+  outcomes: Array<{
+    group: string;
+    stage: string;
+    status: string;
+    detail: string;
+    evidence: string;
+  }>;
+  boundaries: Array<Record<string, unknown>>;
+  docs: Array<Record<string, string>>;
+}
+
 export interface PublicDemoPayload {
   schemaVersion: 1;
   generatedAt: string;
@@ -56,6 +76,7 @@ export interface PublicDemoPayload {
   adapters: Array<Record<string, string>>;
   adapterScenarios: AdapterScenario[];
   adapterStudio: Record<string, unknown>;
+  connectorFixtureReplay: ConnectorFixtureReplayPayload;
   integrationJobs: Array<Record<string, unknown>>;
   integrationHealth: Array<Record<string, string>>;
   integrationReadiness: Array<Record<string, unknown>>;
@@ -105,6 +126,7 @@ export interface PublicDemoPayload {
 export class DriveDeskPublicDemoClient {
   constructor(baseUrl?: string, options?: { fetchImpl?: typeof fetch });
   getPublicDemo(): Promise<PublicDemoPayload>;
+  getConnectorFixtureReplay(): Promise<ConnectorFixtureReplayPayload>;
   getAdapterOperationPlan(
     scenarioId: string,
     options?: { requestId?: string },
@@ -118,3 +140,4 @@ export function buildAdapterOperationPlan(
   options?: { requestId?: string },
 ): AdapterOperationPlan;
 export function validatePublicDemoPayload(payload: PublicDemoPayload): void;
+export function validateConnectorFixtureReplayPayload(payload: ConnectorFixtureReplayPayload): void;

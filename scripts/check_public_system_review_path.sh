@@ -88,6 +88,7 @@ for token in [
     "docs/public/OPENTOFU_PLAN_EVIDENCE.md",
     "docs/openapi.json",
     "GET /demo/public",
+    "GET /demo/connector-fixture-replay",
     "sdk/generated/public-demo/",
     "endToEndScenario",
     "approval -> notification -> adapter -> incident -> recovery -> proof",

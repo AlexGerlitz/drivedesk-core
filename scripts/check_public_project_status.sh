@@ -95,6 +95,7 @@ for token in [
     "sanitized evidence",
     "docs/openapi.json",
     "GET /demo/public",
+    "GET /demo/connector-fixture-replay",
     "PUBLIC_EXPORT_MANIFEST.md",
     "docs/public/SANITIZED_EVIDENCE.md",
     "docs/public/TECHNICAL_CAPABILITY_MAP.md",

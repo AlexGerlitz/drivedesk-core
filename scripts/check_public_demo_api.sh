@@ -107,6 +107,7 @@ else:
 health, _ = get_json("/health")
 ready, _ = get_json("/ready")
 demo, demo_headers = get_json("/demo/public")
+connector_replay_endpoint, connector_replay_headers = get_json("/demo/connector-fixture-replay")
 adapters, _ = get_json("/integration-adapters")
 runbooks, _ = get_json("/integration-runbooks")
 lifecycle_policies, _ = get_json("/business-record-lifecycle-policies")
@@ -594,6 +595,9 @@ assert {item["path"] for item in adapter_studio["docs"]} >= {
     "docs/public/PROVIDER_CONNECTOR_GUIDE.md",
 }, demo
 connector_replay = demo["connectorFixtureReplay"]
+assert connector_replay_endpoint == connector_replay, connector_replay_endpoint
+assert connector_replay_headers["access-control-allow-origin"] == "*", connector_replay_headers
+assert connector_replay_headers["cache-control"] == "public, max-age=60", connector_replay_headers
 assert connector_replay["status"] == "validated", demo
 assert connector_replay["command"] == "bash scripts/check_public_connector_fixture_replay.sh", demo
 assert connector_replay["fixtureFile"] == "examples/connector-fixtures/replay-fixtures.sanitized.json", demo
@@ -761,11 +765,13 @@ assert "/tenants/{tenant_id}/integration-exports/accounting" in openapi["paths"]
 assert "/integration-adapters" in openapi["paths"], openapi["paths"].keys()
 assert "/integration-runbooks" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/public" in openapi["paths"], openapi["paths"].keys()
+assert "/demo/connector-fixture-replay" in openapi["paths"], openapi["paths"].keys()
 assert "/health" in openapi["paths"], openapi["paths"].keys()
 
 if openapi_file.exists():
     generated = json.loads(openapi_file.read_text(encoding="utf-8"))
     assert "/demo/public" in generated["paths"], generated["paths"].keys()
+    assert "/demo/connector-fixture-replay" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-action-plans/preview" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-notifications/preview" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/workflow-action-runs" in generated["paths"], generated["paths"].keys()

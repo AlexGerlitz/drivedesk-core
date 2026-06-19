@@ -210,6 +210,8 @@ incident queue, mitigation, recovery, and resolution evidence path.
 - `apps/admin/public-demo/index.html` - static synthetic product demo shell.
 - `docs/openapi.json` - generated FastAPI OpenAPI schema.
 - `GET /demo/public` - read-only synthetic demo payload in the exported API.
+- `GET /demo/connector-fixture-replay` - standalone public-safe replay contract
+  for connector fixture groups, redaction outcomes, and boundaries.
 - `GET /integration-adapters` - runtime adapter catalog endpoint.
 - `POST /tenants/{tenant_id}/integration-mapping-preview` - read-only mapping transform preview.
 - `file_import:preview` and `file_import:execute` - public-safe connection scope examples.
@@ -291,6 +293,7 @@ Health:
 ```bash
 curl http://localhost:8080/health
 curl http://localhost:8080/demo/public
+curl http://localhost:8080/demo/connector-fixture-replay
 ```
 
 API contract and client examples:

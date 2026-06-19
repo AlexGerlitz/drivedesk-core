@@ -14,6 +14,21 @@
     "adapter-accounting-export-retry",
     "adapter-dead-letter-review"
   ],
+  "connector_replay": {
+    "method": "GET",
+    "operation_id": "connector_fixture_replay_demo_demo_connector_fixture_replay_get",
+    "path": "/demo/connector-fixture-replay",
+    "required_fields": [
+      "status",
+      "command",
+      "fixtureFile",
+      "evidenceFile",
+      "summary",
+      "outcomes",
+      "boundaries",
+      "docs"
+    ]
+  },
   "data_profile": "synthetic_demo_data",
   "generated_files": [
     "README.md",

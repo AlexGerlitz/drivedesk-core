@@ -2,7 +2,9 @@
 import { pathToFileURL } from "node:url";
 
 export const PUBLIC_DEMO_PATH = "/demo/public";
+export const CONNECTOR_REPLAY_PATH = "/demo/connector-fixture-replay";
 export const OPERATION_ID = "public_demo_demo_public_get";
+export const CONNECTOR_REPLAY_OPERATION_ID = "connector_fixture_replay_demo_demo_connector_fixture_replay_get";
 export const REQUIRED_FIELDS = [
   "schemaVersion",
   "generatedAt",
@@ -33,6 +35,16 @@ export const REQUIRED_FIELDS = [
   "timeline",
   "domainEvents"
 ];
+export const CONNECTOR_REPLAY_REQUIRED_FIELDS = [
+  "status",
+  "command",
+  "fixtureFile",
+  "evidenceFile",
+  "summary",
+  "outcomes",
+  "boundaries",
+  "docs"
+];
 
 export class DriveDeskPublicDemoClient {
   constructor(baseUrl = "http://localhost:8080", options = {}) {
@@ -56,6 +68,22 @@ export class DriveDeskPublicDemoClient {
 
     const payload = await response.json();
     validatePublicDemoPayload(payload);
+    return payload;
+  }
+
+  async getConnectorFixtureReplay() {
+    const response = await this.fetchImpl(`${this.baseUrl}${CONNECTOR_REPLAY_PATH}`, {
+      headers: {
+        Accept: "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`GET ${CONNECTOR_REPLAY_PATH} failed: ${response.status}`);
+    }
+
+    const payload = await response.json();
+    validateConnectorFixtureReplayPayload(payload);
     return payload;
   }
 
@@ -234,6 +262,59 @@ function adapterSideEffects(scenario) {
   return sideEffects;
 }
 
+export function validateConnectorFixtureReplayPayload(payload) {
+  const missing = CONNECTOR_REPLAY_REQUIRED_FIELDS.filter((field) => !(field in payload));
+  if (missing.length > 0) {
+    throw new Error(`missing connector fixture replay fields: ${missing.join(", ")}`);
+  }
+
+  if (payload.status !== "validated") {
+    throw new Error(`unexpected connector replay status: ${payload.status}`);
+  }
+
+  if (payload.command !== "bash scripts/check_public_connector_fixture_replay.sh") {
+    throw new Error(`unexpected connector replay command: ${payload.command}`);
+  }
+
+  if (payload.fixtureFile !== "examples/connector-fixtures/replay-fixtures.sanitized.json") {
+    throw new Error(`unexpected connector replay fixtureFile: ${payload.fixtureFile}`);
+  }
+
+  if (!Array.isArray(payload.outcomes) || payload.outcomes.length < 6) {
+    throw new Error("connector replay outcomes are missing or too short");
+  }
+
+  const groups = new Set(payload.outcomes.map((item) => item?.group));
+  const requiredGroups = [
+    "happy_path_preview",
+    "sensitive_payload_redaction",
+    "invalid_payload",
+    "retryable_provider_failure",
+    "dead_letter_provider_failure",
+    "reconciliation_mismatch",
+  ];
+  for (const group of requiredGroups) {
+    if (!groups.has(group)) {
+      throw new Error(`connector replay group is missing: ${group}`);
+    }
+  }
+
+  if (!Array.isArray(payload.boundaries) || payload.boundaries.length < 4) {
+    throw new Error("connector replay boundaries are missing or too short");
+  }
+
+  const boundaryNames = new Set(payload.boundaries.map((item) => item?.name));
+  for (const boundary of ["raw payload", "credentials", "external calls", "persistence"]) {
+    if (!boundaryNames.has(boundary)) {
+      throw new Error(`connector replay boundary is missing: ${boundary}`);
+    }
+  }
+
+  if (!Array.isArray(payload.docs) || payload.docs.length < 3) {
+    throw new Error("connector replay docs are missing or too short");
+  }
+}
+
 export function validatePublicDemoPayload(payload) {
   const missing = REQUIRED_FIELDS.filter((field) => !(field in payload));
   if (missing.length > 0) {
@@ -368,6 +449,11 @@ export function validatePublicDemoPayload(payload) {
     }
   }
 
+  if (!payload.connectorFixtureReplay || typeof payload.connectorFixtureReplay !== "object") {
+    throw new Error("connectorFixtureReplay is missing");
+  }
+  validateConnectorFixtureReplayPayload(payload.connectorFixtureReplay);
+
   if (payload.engineeringProof?.milestone !== "engineering_70") {
     throw new Error(`unexpected engineeringProof.milestone: ${payload.engineeringProof?.milestone}`);
   }
@@ -426,6 +512,7 @@ async function main() {
       : process.env.BASE_URL || "http://localhost:8080";
   const client = new DriveDeskPublicDemoClient(baseUrl);
   const payload = await client.getPublicDemo();
+  const connectorReplay = await client.getConnectorFixtureReplay();
   const adapterPlan = buildAdapterOperationPlan(payload, "adapter-file-import-preview");
   console.log(
     "generated js SDK ok:",
@@ -433,7 +520,9 @@ async function main() {
     payload.dataSource,
     `workflow=${payload.workflow.currentStage}`,
     `adapterPlan=${adapterPlan.phase}`,
+    `connectorReplay=${connectorReplay.status}`,
     `operation=${OPERATION_ID}`,
+    `connectorOperation=${CONNECTOR_REPLAY_OPERATION_ID}`,
   );
 }
 

@@ -42,10 +42,10 @@ Primary artifacts:
 | --- | --- |
 | Platform tour | `docs/public/PLATFORM_TOUR.md` |
 | Architecture | `docs/public/SYSTEM_DESIGN.md` |
-| Demo API | `docs/public/API_BACKED_DEMO.md`, `docs/openapi.json`, `GET /demo/public` |
+| Demo API | `docs/public/API_BACKED_DEMO.md`, `docs/openapi.json`, `GET /demo/public`, `GET /demo/connector-fixture-replay` |
 | SDK | `docs/public/CLIENT_SDK.md`, `sdk/generated/public-demo/` |
 | Workflow | `docs/public/WORKFLOW_DEMO.md`, `endToEndScenario` |
-| Connector replay | `docs/public/CONNECTOR_FIXTURE_REPLAY.md`, `examples/connector-fixtures/replay-fixtures.sanitized.json` |
+| Connector replay | `docs/public/CONNECTOR_FIXTURE_REPLAY.md`, `GET /demo/connector-fixture-replay`, `examples/connector-fixtures/replay-fixtures.sanitized.json` |
 | Observability | `docs/public/OBSERVABILITY_PROOF.md` |
 | Alert routing | `docs/public/ALERT_ROUTING_EVIDENCE.md` |
 | Incident response | `docs/public/INCIDENT_RESPONSE_DEMO.md` |

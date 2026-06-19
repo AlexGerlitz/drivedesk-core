@@ -1924,6 +1924,41 @@ def test_public_demo_endpoint_is_read_only_synthetic_contract(
     assert "password" not in serialized
 
 
+def test_connector_fixture_replay_demo_endpoint_exposes_same_public_contract(
+    api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, _ = api_client
+
+    public_response = client.get("/demo/public")
+    replay_response = client.get("/demo/connector-fixture-replay")
+
+    assert replay_response.status_code == 200
+    assert replay_response.headers["access-control-allow-origin"] == "*"
+    assert replay_response.headers["cache-control"] == "public, max-age=60"
+    replay_payload = replay_response.json()
+    assert replay_payload == public_response.json()["connectorFixtureReplay"]
+    assert replay_payload["status"] == "validated"
+    assert replay_payload["command"] == "bash scripts/check_public_connector_fixture_replay.sh"
+    assert replay_payload["fixtureFile"] == "examples/connector-fixtures/replay-fixtures.sanitized.json"
+    assert replay_payload["evidenceFile"] == (
+        "docs/public/evidence/connector-fixture-replay.sanitized.json"
+    )
+    assert {item["group"] for item in replay_payload["outcomes"]} == {
+        "happy_path_preview",
+        "sensitive_payload_redaction",
+        "invalid_payload",
+        "retryable_provider_failure",
+        "dead_letter_provider_failure",
+        "reconciliation_mismatch",
+    }
+    assert {item["name"] for item in replay_payload["boundaries"]} >= {
+        "raw payload",
+        "credentials",
+        "external calls",
+        "persistence",
+    }
+
+
 def test_file_import_adapter_success_flow(api_client: tuple[TestClient, async_sessionmaker[AsyncSession]]) -> None:
     client, session_factory = api_client
     owner_headers = {"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"}

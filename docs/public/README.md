@@ -146,6 +146,8 @@ The public repository export also generates:
 - `docs/openapi.json` - FastAPI OpenAPI schema from the exported API.
 - `apps/admin/public-demo/index.html` - static synthetic product demo shell.
 - `GET /demo/public` - read-only synthetic demo payload in the exported API.
+- `GET /demo/connector-fixture-replay` - standalone public-safe replay contract
+  for connector fixture groups, redaction outcomes, and boundaries.
 - `incidentResponse` - public-safe incident response contract in the demo
   payload and Incidents tab.
 - `businessControlTower` - public-safe control tower contract for CRM, bank,

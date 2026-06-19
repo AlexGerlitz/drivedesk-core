@@ -13,6 +13,7 @@ It targets the read-only synthetic public demo endpoint:
 
 ```text
 GET /demo/public
+GET /demo/connector-fixture-replay
 ```
 
 ## Generated Files
@@ -47,8 +48,9 @@ The generator is:
 scripts/generate_public_demo_sdk.py
 ```
 
-It reads the OpenAPI schema, finds `GET /demo/public`, extracts the operation
-id and required response fields, and writes small public-safe clients.
+It reads the OpenAPI schema, finds `GET /demo/public` and
+`GET /demo/connector-fixture-replay`, extracts operation ids and required
+response fields, and writes small public-safe clients.
 
 The SDK smoke is:
 
@@ -71,6 +73,8 @@ The SDK includes typed helpers around `adapterScenarios`:
 - `build_adapter_operation_plan` / `buildAdapterOperationPlan`;
 - `DriveDeskPublicDemoClient.get_adapter_operation_plan`;
 - `DriveDeskPublicDemoClient.getAdapterOperationPlan`.
+- `DriveDeskPublicDemoClient.get_connector_fixture_replay`;
+- `DriveDeskPublicDemoClient.getConnectorFixtureReplay`.
 
 These helpers convert public synthetic adapter scenarios into a
 contract-only request/response plan:
@@ -108,6 +112,11 @@ worker-backed outbox ingest, diagnostics, reconciliation, incident cards, and
 operator review evidence. The generated clients validate that this workbench
 contract is present.
 
+The generated clients also validate the standalone connector replay endpoint:
+fixture groups, redaction outcomes, read-only boundaries, and docs. That gives
+external engineers a small integration-proof API surface without loading the
+full public demo payload.
+
 ## Why This Matters
 
 The SDK is not meant to be a full production client yet. It proves a foundation:
@@ -117,6 +126,8 @@ The SDK is not meant to be a full production client yet. It proves a foundation:
 - The generated client validates the product-shaped demo payload.
 - The generated client can build typed adapter operation plans.
 - The generated client validates the Adapter Studio workbench contract.
+- The generated client validates connector fixture replay as a standalone API
+  contract.
 - The generated client can show the Bitrix-style CRM provider-intake body and
   worker-backed ingest operation without exposing real credentials.
 - The generated client validates the `engineeringProof` gate shape.

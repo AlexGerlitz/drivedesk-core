@@ -2288,6 +2288,73 @@
         "title": "BusinessWorkbenchContextPreviewRead",
         "type": "object"
       },
+      "ConnectorFixtureReplayRead": {
+        "properties": {
+          "boundaries": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Boundaries",
+            "type": "array"
+          },
+          "command": {
+            "title": "Command",
+            "type": "string"
+          },
+          "docs": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "title": "Docs",
+            "type": "array"
+          },
+          "evidenceFile": {
+            "title": "Evidencefile",
+            "type": "string"
+          },
+          "fixtureFile": {
+            "title": "Fixturefile",
+            "type": "string"
+          },
+          "outcomes": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Outcomes",
+            "type": "array"
+          },
+          "status": {
+            "const": "validated",
+            "title": "Status",
+            "type": "string"
+          },
+          "summary": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Summary",
+            "type": "array"
+          }
+        },
+        "required": [
+          "status",
+          "command",
+          "fixtureFile",
+          "evidenceFile",
+          "summary",
+          "outcomes",
+          "boundaries",
+          "docs"
+        ],
+        "title": "ConnectorFixtureReplayRead",
+        "type": "object"
+      },
       "FileImportCreate": {
         "properties": {
           "integration_connection_id": {
@@ -4990,6 +5057,27 @@
         "summary": "List Business Record Lifecycle Policies Endpoint",
         "tags": [
           "business-records"
+        ]
+      }
+    },
+    "/demo/connector-fixture-replay": {
+      "get": {
+        "operationId": "connector_fixture_replay_demo_demo_connector_fixture_replay_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectorFixtureReplayRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Connector Fixture Replay Demo",
+        "tags": [
+          "demo"
         ]
       }
     },

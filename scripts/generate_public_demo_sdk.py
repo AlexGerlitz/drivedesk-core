@@ -9,18 +9,28 @@ from typing import Any
 
 PUBLIC_DEMO_PATH = "/demo/public"
 PUBLIC_DEMO_METHOD = "get"
+CONNECTOR_REPLAY_PATH = "/demo/connector-fixture-replay"
+CONNECTOR_REPLAY_METHOD = "get"
 
 
 def load_schema(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def public_demo_operation(schema: dict[str, Any]) -> dict[str, Any]:
+def required_operation(schema: dict[str, Any], path: str, method: str) -> dict[str, Any]:
     paths = schema.get("paths", {})
-    operation = paths.get(PUBLIC_DEMO_PATH, {}).get(PUBLIC_DEMO_METHOD)
+    operation = paths.get(path, {}).get(method)
     if not isinstance(operation, dict):
-        raise SystemExit(f"OpenAPI schema does not contain GET {PUBLIC_DEMO_PATH}")
+        raise SystemExit(f"OpenAPI schema does not contain {method.upper()} {path}")
     return operation
+
+
+def public_demo_operation(schema: dict[str, Any]) -> dict[str, Any]:
+    return required_operation(schema, PUBLIC_DEMO_PATH, PUBLIC_DEMO_METHOD)
+
+
+def connector_replay_operation(schema: dict[str, Any]) -> dict[str, Any]:
+    return required_operation(schema, CONNECTOR_REPLAY_PATH, CONNECTOR_REPLAY_METHOD)
 
 
 def public_demo_required_fields(schema: dict[str, Any]) -> list[str]:
@@ -33,13 +43,29 @@ def public_demo_required_fields(schema: dict[str, Any]) -> list[str]:
     return [str(item) for item in required]
 
 
+def connector_replay_required_fields(schema: dict[str, Any]) -> list[str]:
+    components = schema.get("components", {})
+    schemas = components.get("schemas", {})
+    connector_replay = schemas.get("ConnectorFixtureReplayRead", {})
+    required = connector_replay.get("required", [])
+    if not isinstance(required, list) or not required:
+        raise SystemExit("OpenAPI schema does not contain ConnectorFixtureReplayRead.required")
+    return [str(item) for item in required]
+
+
 def write(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
 
 
-def render_python_client(operation_id: str, required_fields: list[str]) -> str:
+def render_python_client(
+    operation_id: str,
+    required_fields: list[str],
+    connector_operation_id: str,
+    connector_required_fields: list[str],
+) -> str:
     required_json = json.dumps(required_fields, indent=2)
+    connector_required_json = json.dumps(connector_required_fields, indent=2)
     return f'''#!/usr/bin/env python3
 from __future__ import annotations
 
@@ -50,8 +76,11 @@ from typing import Any
 
 
 PUBLIC_DEMO_PATH = "{PUBLIC_DEMO_PATH}"
+CONNECTOR_REPLAY_PATH = "{CONNECTOR_REPLAY_PATH}"
 OPERATION_ID = "{operation_id}"
+CONNECTOR_REPLAY_OPERATION_ID = "{connector_operation_id}"
 REQUIRED_FIELDS = {required_json}
+CONNECTOR_REPLAY_REQUIRED_FIELDS = {connector_required_json}
 
 
 class DriveDeskPublicDemoClient:
@@ -64,6 +93,11 @@ class DriveDeskPublicDemoClient:
     def get_public_demo(self) -> dict[str, Any]:
         payload = self._get_json(PUBLIC_DEMO_PATH)
         validate_public_demo_payload(payload)
+        return payload
+
+    def get_connector_fixture_replay(self) -> dict[str, Any]:
+        payload = self._get_json(CONNECTOR_REPLAY_PATH)
+        validate_connector_fixture_replay_payload(payload)
         return payload
 
     def get_adapter_operation_plan(
@@ -241,6 +275,52 @@ def _adapter_side_effects(scenario: dict[str, Any]) -> list[str]:
     return side_effects
 
 
+def validate_connector_fixture_replay_payload(payload: dict[str, Any]) -> None:
+    missing = [field for field in CONNECTOR_REPLAY_REQUIRED_FIELDS if field not in payload]
+    if missing:
+        raise ValueError(f"missing connector fixture replay fields: {{', '.join(missing)}}")
+
+    if payload.get("status") != "validated":
+        raise ValueError(f"unexpected connector replay status: {{payload.get('status')}}")
+
+    if payload.get("command") != "bash scripts/check_public_connector_fixture_replay.sh":
+        raise ValueError(f"unexpected connector replay command: {{payload.get('command')}}")
+
+    if payload.get("fixtureFile") != "examples/connector-fixtures/replay-fixtures.sanitized.json":
+        raise ValueError(f"unexpected connector replay fixtureFile: {{payload.get('fixtureFile')}}")
+
+    outcomes = payload.get("outcomes")
+    if not isinstance(outcomes, list) or len(outcomes) < 6:
+        raise ValueError("connector replay outcomes are missing or too short")
+
+    groups = {{item.get("group") for item in outcomes if isinstance(item, dict)}}
+    required_groups = {{
+        "happy_path_preview",
+        "sensitive_payload_redaction",
+        "invalid_payload",
+        "retryable_provider_failure",
+        "dead_letter_provider_failure",
+        "reconciliation_mismatch",
+    }}
+    if groups != required_groups:
+        raise ValueError(f"connector replay groups mismatch: {{sorted(groups)}}")
+
+    boundaries = payload.get("boundaries")
+    if not isinstance(boundaries, list) or len(boundaries) < 4:
+        raise ValueError("connector replay boundaries are missing or too short")
+
+    boundary_names = {{item.get("name") for item in boundaries if isinstance(item, dict)}}
+    required_boundaries = {{"raw payload", "credentials", "external calls", "persistence"}}
+    if not required_boundaries.issubset(boundary_names):
+        raise ValueError(
+            f"connector replay boundaries missing: {{sorted(required_boundaries - boundary_names)}}"
+        )
+
+    docs = payload.get("docs")
+    if not isinstance(docs, list) or len(docs) < 3:
+        raise ValueError("connector replay docs are missing or too short")
+
+
 def validate_public_demo_payload(payload: dict[str, Any]) -> None:
     missing = [field for field in REQUIRED_FIELDS if field not in payload]
     if missing:
@@ -381,6 +461,11 @@ def validate_public_demo_payload(payload: dict[str, Any]) -> None:
             f"{{sorted(required_boundary_evidence - adapter_studio_boundary_evidence)}}"
         )
 
+    connector_replay = payload.get("connectorFixtureReplay")
+    if not isinstance(connector_replay, dict):
+        raise ValueError("connectorFixtureReplay is missing")
+    validate_connector_fixture_replay_payload(connector_replay)
+
     proof = payload.get("engineeringProof") or {{}}
     if proof.get("milestone") != "engineering_70":
         raise ValueError(f"unexpected engineeringProof.milestone: {{proof.get('milestone')}}")
@@ -434,6 +519,7 @@ def main() -> None:
 
     client = DriveDeskPublicDemoClient(args.base_url)
     payload = client.get_public_demo()
+    connector_replay = client.get_connector_fixture_replay()
     adapter_plan = build_adapter_operation_plan(payload, "adapter-file-import-preview")
     print(
         "generated python SDK ok:",
@@ -441,7 +527,9 @@ def main() -> None:
         payload["dataSource"],
         f"workflow={{payload['workflow']['currentStage']}}",
         f"adapterPlan={{adapter_plan['phase']}}",
+        f"connectorReplay={{connector_replay['status']}}",
         f"operation={{OPERATION_ID}}",
+        f"connectorOperation={{CONNECTOR_REPLAY_OPERATION_ID}}",
     )
 
 
@@ -450,14 +538,23 @@ if __name__ == "__main__":
 '''
 
 
-def render_javascript_client(operation_id: str, required_fields: list[str]) -> str:
+def render_javascript_client(
+    operation_id: str,
+    required_fields: list[str],
+    connector_operation_id: str,
+    connector_required_fields: list[str],
+) -> str:
     required_json = json.dumps(required_fields, indent=2)
+    connector_required_json = json.dumps(connector_required_fields, indent=2)
     return f'''#!/usr/bin/env node
 import {{ pathToFileURL }} from "node:url";
 
 export const PUBLIC_DEMO_PATH = "{PUBLIC_DEMO_PATH}";
+export const CONNECTOR_REPLAY_PATH = "{CONNECTOR_REPLAY_PATH}";
 export const OPERATION_ID = "{operation_id}";
+export const CONNECTOR_REPLAY_OPERATION_ID = "{connector_operation_id}";
 export const REQUIRED_FIELDS = {required_json};
+export const CONNECTOR_REPLAY_REQUIRED_FIELDS = {connector_required_json};
 
 export class DriveDeskPublicDemoClient {{
   constructor(baseUrl = "http://localhost:8080", options = {{}}) {{
@@ -481,6 +578,22 @@ export class DriveDeskPublicDemoClient {{
 
     const payload = await response.json();
     validatePublicDemoPayload(payload);
+    return payload;
+  }}
+
+  async getConnectorFixtureReplay() {{
+    const response = await this.fetchImpl(`${{this.baseUrl}}${{CONNECTOR_REPLAY_PATH}}`, {{
+      headers: {{
+        Accept: "application/json",
+      }},
+    }});
+
+    if (!response.ok) {{
+      throw new Error(`GET ${{CONNECTOR_REPLAY_PATH}} failed: ${{response.status}}`);
+    }}
+
+    const payload = await response.json();
+    validateConnectorFixtureReplayPayload(payload);
     return payload;
   }}
 
@@ -659,6 +772,59 @@ function adapterSideEffects(scenario) {{
   return sideEffects;
 }}
 
+export function validateConnectorFixtureReplayPayload(payload) {{
+  const missing = CONNECTOR_REPLAY_REQUIRED_FIELDS.filter((field) => !(field in payload));
+  if (missing.length > 0) {{
+    throw new Error(`missing connector fixture replay fields: ${{missing.join(", ")}}`);
+  }}
+
+  if (payload.status !== "validated") {{
+    throw new Error(`unexpected connector replay status: ${{payload.status}}`);
+  }}
+
+  if (payload.command !== "bash scripts/check_public_connector_fixture_replay.sh") {{
+    throw new Error(`unexpected connector replay command: ${{payload.command}}`);
+  }}
+
+  if (payload.fixtureFile !== "examples/connector-fixtures/replay-fixtures.sanitized.json") {{
+    throw new Error(`unexpected connector replay fixtureFile: ${{payload.fixtureFile}}`);
+  }}
+
+  if (!Array.isArray(payload.outcomes) || payload.outcomes.length < 6) {{
+    throw new Error("connector replay outcomes are missing or too short");
+  }}
+
+  const groups = new Set(payload.outcomes.map((item) => item?.group));
+  const requiredGroups = [
+    "happy_path_preview",
+    "sensitive_payload_redaction",
+    "invalid_payload",
+    "retryable_provider_failure",
+    "dead_letter_provider_failure",
+    "reconciliation_mismatch",
+  ];
+  for (const group of requiredGroups) {{
+    if (!groups.has(group)) {{
+      throw new Error(`connector replay group is missing: ${{group}}`);
+    }}
+  }}
+
+  if (!Array.isArray(payload.boundaries) || payload.boundaries.length < 4) {{
+    throw new Error("connector replay boundaries are missing or too short");
+  }}
+
+  const boundaryNames = new Set(payload.boundaries.map((item) => item?.name));
+  for (const boundary of ["raw payload", "credentials", "external calls", "persistence"]) {{
+    if (!boundaryNames.has(boundary)) {{
+      throw new Error(`connector replay boundary is missing: ${{boundary}}`);
+    }}
+  }}
+
+  if (!Array.isArray(payload.docs) || payload.docs.length < 3) {{
+    throw new Error("connector replay docs are missing or too short");
+  }}
+}}
+
 export function validatePublicDemoPayload(payload) {{
   const missing = REQUIRED_FIELDS.filter((field) => !(field in payload));
   if (missing.length > 0) {{
@@ -793,6 +959,11 @@ export function validatePublicDemoPayload(payload) {{
     }}
   }}
 
+  if (!payload.connectorFixtureReplay || typeof payload.connectorFixtureReplay !== "object") {{
+    throw new Error("connectorFixtureReplay is missing");
+  }}
+  validateConnectorFixtureReplayPayload(payload.connectorFixtureReplay);
+
   if (payload.engineeringProof?.milestone !== "engineering_70") {{
     throw new Error(`unexpected engineeringProof.milestone: ${{payload.engineeringProof?.milestone}}`);
   }}
@@ -851,6 +1022,7 @@ async function main() {{
       : process.env.BASE_URL || "http://localhost:8080";
   const client = new DriveDeskPublicDemoClient(baseUrl);
   const payload = await client.getPublicDemo();
+  const connectorReplay = await client.getConnectorFixtureReplay();
   const adapterPlan = buildAdapterOperationPlan(payload, "adapter-file-import-preview");
   console.log(
     "generated js SDK ok:",
@@ -858,7 +1030,9 @@ async function main() {{
     payload.dataSource,
     `workflow=${{payload.workflow.currentStage}}`,
     `adapterPlan=${{adapterPlan.phase}}`,
+    `connectorReplay=${{connectorReplay.status}}`,
     `operation=${{OPERATION_ID}}`,
+    `connectorOperation=${{CONNECTOR_REPLAY_OPERATION_ID}}`,
   );
 }}
 
@@ -871,12 +1045,21 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
 '''
 
 
-def render_typescript_defs(operation_id: str, required_fields: list[str]) -> str:
+def render_typescript_defs(
+    operation_id: str,
+    required_fields: list[str],
+    connector_operation_id: str,
+    connector_required_fields: list[str],
+) -> str:
     required_union = " | ".join(f'"{field}"' for field in required_fields)
+    connector_required_union = " | ".join(f'"{field}"' for field in connector_required_fields)
     return f'''// Generated from DriveDesk Core OpenAPI. Do not edit by hand.
 export const PUBLIC_DEMO_PATH: "{PUBLIC_DEMO_PATH}";
+export const CONNECTOR_REPLAY_PATH: "{CONNECTOR_REPLAY_PATH}";
 export const OPERATION_ID: "{operation_id}";
+export const CONNECTOR_REPLAY_OPERATION_ID: "{connector_operation_id}";
 export const REQUIRED_FIELDS: Array<{required_union}>;
+export const CONNECTOR_REPLAY_REQUIRED_FIELDS: Array<{connector_required_union}>;
 
 export type AdapterScenarioPhase = "preview" | "execute" | "retry" | "operator_review";
 
@@ -916,6 +1099,23 @@ export interface AdapterOperationPlan {{
   }};
 }}
 
+export interface ConnectorFixtureReplayPayload {{
+  status: "validated";
+  command: string;
+  fixtureFile: string;
+  evidenceFile: string;
+  summary: Array<Record<string, unknown>>;
+  outcomes: Array<{{
+    group: string;
+    stage: string;
+    status: string;
+    detail: string;
+    evidence: string;
+  }}>;
+  boundaries: Array<Record<string, unknown>>;
+  docs: Array<Record<string, string>>;
+}}
+
 export interface PublicDemoPayload {{
   schemaVersion: 1;
   generatedAt: string;
@@ -931,6 +1131,7 @@ export interface PublicDemoPayload {{
   adapters: Array<Record<string, string>>;
   adapterScenarios: AdapterScenario[];
   adapterStudio: Record<string, unknown>;
+  connectorFixtureReplay: ConnectorFixtureReplayPayload;
   integrationJobs: Array<Record<string, unknown>>;
   integrationHealth: Array<Record<string, string>>;
   integrationReadiness: Array<Record<string, unknown>>;
@@ -980,6 +1181,7 @@ export interface PublicDemoPayload {{
 export class DriveDeskPublicDemoClient {{
   constructor(baseUrl?: string, options?: {{ fetchImpl?: typeof fetch }});
   getPublicDemo(): Promise<PublicDemoPayload>;
+  getConnectorFixtureReplay(): Promise<ConnectorFixtureReplayPayload>;
   getAdapterOperationPlan(
     scenarioId: string,
     options?: {{ requestId?: string }},
@@ -993,10 +1195,11 @@ export function buildAdapterOperationPlan(
   options?: {{ requestId?: string }},
 ): AdapterOperationPlan;
 export function validatePublicDemoPayload(payload: PublicDemoPayload): void;
+export function validateConnectorFixtureReplayPayload(payload: ConnectorFixtureReplayPayload): void;
 '''
 
 
-def render_readme(operation_id: str) -> str:
+def render_readme(operation_id: str, connector_operation_id: str) -> str:
     return f'''# Generated Public Demo SDK
 
 This folder is generated from `docs/openapi.json` by:
@@ -1016,6 +1219,9 @@ The clients target:
 ```text
 GET {PUBLIC_DEMO_PATH}
 operationId: {operation_id}
+
+GET {CONNECTOR_REPLAY_PATH}
+operationId: {connector_operation_id}
 ```
 
 Run the SDK smoke:
@@ -1030,10 +1236,16 @@ Adapter operation helpers:
 - `buildAdapterOperationPlan` / `build_adapter_operation_plan`
 - `DriveDeskPublicDemoClient.getAdapterOperationPlan`
 - `DriveDeskPublicDemoClient.get_adapter_operation_plan`
+- `DriveDeskPublicDemoClient.getConnectorFixtureReplay`
+- `DriveDeskPublicDemoClient.get_connector_fixture_replay`
 
 These helpers turn the public `adapterScenarios` payload into a typed
 contract-only request/response plan for mapping preview, execution, retry, and
 operator-review flows. They do not mutate the public demo.
+
+Connector fixture replay helpers validate the public-safe replay evidence as a
+standalone API contract: fixture groups, redaction outcomes, boundaries, and
+review docs.
 
 Engineering summary: this is the public-safe integration proof. DriveDesk
 publishes an OpenAPI contract and generates a small SDK from it instead of
@@ -1041,13 +1253,24 @@ relying on hand-written request examples only.
 '''
 
 
-def render_manifest(operation_id: str, required_fields: list[str]) -> str:
+def render_manifest(
+    operation_id: str,
+    required_fields: list[str],
+    connector_operation_id: str,
+    connector_required_fields: list[str],
+) -> str:
     payload = {
         "schema_version": 1,
         "source": "docs/openapi.json",
         "path": PUBLIC_DEMO_PATH,
         "method": PUBLIC_DEMO_METHOD.upper(),
         "operation_id": operation_id,
+        "connector_replay": {
+            "path": CONNECTOR_REPLAY_PATH,
+            "method": CONNECTOR_REPLAY_METHOD.upper(),
+            "operation_id": connector_operation_id,
+            "required_fields": connector_required_fields,
+        },
         "data_profile": "synthetic_demo_data",
         "generated_files": [
             "README.md",
@@ -1076,12 +1299,49 @@ def generate(openapi_path: Path, out_dir: Path) -> None:
     operation = public_demo_operation(schema)
     operation_id = str(operation.get("operationId") or "get_public_demo")
     required_fields = public_demo_required_fields(schema)
+    connector_operation = connector_replay_operation(schema)
+    connector_operation_id = str(
+        connector_operation.get("operationId") or "get_connector_fixture_replay"
+    )
+    connector_required_fields = connector_replay_required_fields(schema)
 
-    write(out_dir / "README.md", render_readme(operation_id))
-    write(out_dir / "openapi-client-manifest.json", render_manifest(operation_id, required_fields))
-    write(out_dir / "python/drivedesk_public_demo_client.py", render_python_client(operation_id, required_fields))
-    write(out_dir / "javascript/drivedesk-public-demo-client.mjs", render_javascript_client(operation_id, required_fields))
-    write(out_dir / "typescript/drivedesk-public-demo-client.d.ts", render_typescript_defs(operation_id, required_fields))
+    write(out_dir / "README.md", render_readme(operation_id, connector_operation_id))
+    write(
+        out_dir / "openapi-client-manifest.json",
+        render_manifest(
+            operation_id,
+            required_fields,
+            connector_operation_id,
+            connector_required_fields,
+        ),
+    )
+    write(
+        out_dir / "python/drivedesk_public_demo_client.py",
+        render_python_client(
+            operation_id,
+            required_fields,
+            connector_operation_id,
+            connector_required_fields,
+        ),
+    )
+    write(
+        out_dir / "javascript/drivedesk-public-demo-client.mjs",
+        render_javascript_client(
+            operation_id,
+            required_fields,
+            connector_operation_id,
+            connector_required_fields,
+        ),
+    )
+    write(
+        out_dir / "typescript/drivedesk-public-demo-client.d.ts",
+        render_typescript_defs(
+            operation_id,
+            required_fields,
+            connector_operation_id,
+            connector_required_fields,
+        ),
+    )
 
 
 def main() -> None:

@@ -12,15 +12,22 @@ DriveDesk now exposes:
 
 ```text
 GET /demo/public
+GET /demo/connector-fixture-replay
 ```
 
-The endpoint returns the same product-shaped synthetic demo data used by the public demo
-shell: tenant, health, metrics, work queue, workflow stages, timeline entries,
-workflow scenarios, domain events, members, audit events, outbox events, adapter
-contracts, adapter operation scenarios, Adapter Studio, sync jobs, Integration
-Health, alert routing, incident response, `businessControlTower` data, recovery
-evidence, `connectorFixtureReplay`, and the `engineeringProof` contract rendered
-by the Integrations, Operations, Incidents, and Proof tabs.
+`GET /demo/public` returns the same product-shaped synthetic demo data used by
+the public demo shell: tenant, health, metrics, work queue, workflow stages,
+timeline entries, workflow scenarios, domain events, members, audit events,
+outbox events, adapter contracts, adapter operation scenarios, Adapter Studio,
+sync jobs, Integration Health, alert routing, incident response,
+`businessControlTower` data, recovery evidence, `connectorFixtureReplay`, and
+the `engineeringProof` contract rendered by the Integrations, Operations,
+Incidents, and Proof tabs.
+
+`GET /demo/connector-fixture-replay` returns the same `connectorFixtureReplay`
+contract as a standalone endpoint. It is useful when a reviewer wants to inspect
+only the integration replay proof: fixture groups, redaction outcomes,
+read-only boundaries, evidence paths, and docs.
 
 ## Runtime Modes
 
@@ -28,6 +35,7 @@ by the Integrations, Operations, Incidents, and Proof tabs.
 | --- | --- |
 | Static fallback | GitHub Pages loads `demo-data.js` and works without a backend. |
 | API-backed | The demo shell loads JSON from `GET /demo/public` when `?demoApi=...` is provided. |
+| Replay API | The generated SDK and smoke checks can load `GET /demo/connector-fixture-replay` directly. |
 
 Example local API-backed run:
 
@@ -66,16 +74,17 @@ bash scripts/check_public_demo_sdk.sh
 
 `check_public_demo_api.sh` starts a temporary local API when no
 `DRIVEDESK_DEMO_BASE_URL` is provided. It checks `/health`, `/ready`,
-`/demo/public`, `/openapi.json`, the generated `docs/openapi.json` when
-present, alert routes, alert-to-runbook bindings, connector certification
-references in `CONNECTOR_CERTIFICATION.md`, connector fixture replay references
-in `CONNECTOR_FIXTURE_REPLAY.md`, and then runs the curl, Python, and JavaScript
-examples against the same API.
+`/demo/public`, `/demo/connector-fixture-replay`, `/openapi.json`, the generated
+`docs/openapi.json` when present, alert routes, alert-to-runbook bindings,
+connector certification references in `CONNECTOR_CERTIFICATION.md`, connector
+fixture replay references in `CONNECTOR_FIXTURE_REPLAY.md`, and then runs the
+curl, Python, and JavaScript examples against the same API.
 
 The `connectorFixtureReplay` payload is the API-backed form of
 `CONNECTOR_FIXTURE_REPLAY.md`: it exposes the synthetic fixture groups, replay
 outcomes, read-only boundaries, and evidence links rendered in the Integrations
-tab.
+tab. The standalone replay endpoint exposes the same contract without requiring
+the full public demo payload.
 
 The business control tower payload is documented in
 `BUSINESS_CONTROL_TOWER.md`. It shows the synthetic path:

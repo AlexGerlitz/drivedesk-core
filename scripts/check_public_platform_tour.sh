@@ -68,6 +68,7 @@ for token in [
     "businessControlTower.workbenchContext",
     "workflowScenarios",
     "adapterStudio",
+    "GET /demo/connector-fixture-replay",
     "sdk/generated/public-demo/",
     "worker:drivedesk_worker.main.process_pending_outbox",
     "alertRouting",
@@ -95,8 +96,8 @@ for token in [
 for path, tokens in {
     demo_data_path: ["adapterStudio", "businessControlTower", "incidentResponse", "engineeringProof"],
     demo_index_path: ["Adapter Studio", "Control Tower", "Operations", "Incidents", "Proof"],
-    api_doc_path: ["adapterStudio", "businessControlTower", "engineeringProof"],
-    sdk_doc_path: ["adapterStudio", "contract_only", "safeToRunAgainstPublicDemo"],
+    api_doc_path: ["adapterStudio", "businessControlTower", "engineeringProof", "GET /demo/connector-fixture-replay"],
+    sdk_doc_path: ["adapterStudio", "contract_only", "safeToRunAgainstPublicDemo", "getConnectorFixtureReplay"],
     status_path: ["PLATFORM_TOUR.md", "Adapter Studio", "Business control tower"],
     capability_map_path: ["PLATFORM_TOUR.md", "Integration adapter model", "Business operations control tower"],
     docs_readme_path: ["PLATFORM_TOUR.md", "DriveDesk Platform Tour"],

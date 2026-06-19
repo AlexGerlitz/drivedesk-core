@@ -50,6 +50,16 @@ It includes:
 
 ![DriveDesk Core demo overview](docs/public/assets/drivedesk-core-demo-overview.png)
 
+## Reviewer Snapshot
+
+| Signal | Public proof |
+| --- | --- |
+| Backend/platform foundation | FastAPI API, PostgreSQL-shaped persistence, Alembic migrations, RBAC, audit log, outbox, background worker, and metrics. |
+| Integration system design | Adapter catalog, connector certification, fixture replay, operation contracts, diagnostics, reconciliation, operator review, and integration runtime evidence. |
+| Business operations product thinking | Public Business OS tour, Control Tower, workflow automation, incidents, proof tabs, and synthetic end-to-end scenarios. |
+| Production-style delivery | Docker Compose, Helm, GitOps, OpenTofu plan evidence, CI, public demo health checks, and release safety drills. |
+| Reviewable evidence | `docs/public/SYSTEM_REVIEW_PATH.md`, `docs/public/TECHNICAL_CAPABILITY_MAP.md`, `docs/public/EVIDENCE_INDEX.md`, and `bash scripts/ci_smoke_public.sh`. |
+
 ## Start Here
 
 | Need | Open | What it proves |

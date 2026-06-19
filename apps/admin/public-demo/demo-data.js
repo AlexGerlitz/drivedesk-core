@@ -3618,6 +3618,310 @@ window.DRIVEDESK_DEMO_DATA = {
       }
     ]
   },
+  "integrationExecution": {
+    "adapterKey": "accounting.export.mock",
+    "api": {
+      "incidents": "GET /tenants/{tenant_id}/integration-incidents",
+      "outbox": "GET /tenants/{tenant_id}/outbox-events",
+      "preview": "POST /tenants/{tenant_id}/integration-executions/preview",
+      "reconciliations": "GET /tenants/{tenant_id}/integration-reconciliations",
+      "runtimePreview": "POST /tenants/{tenant_id}/integration-runtime/preview",
+      "standalone": "GET /demo/integration-execution",
+      "workflowActionRuns": "GET /tenants/{tenant_id}/workflow-action-runs"
+    },
+    "command": "POST /tenants/{tenant_id}/integration-executions/preview",
+    "dataBoundaries": [
+      {
+        "containsPii": false,
+        "detail": "Execution timeline is computed without creating run rows or queueing provider work.",
+        "externalMutation": false,
+        "idempotencyKeys": [],
+        "name": "preview_only_execution",
+        "rawPayloadIncluded": false,
+        "status": "clean"
+      },
+      {
+        "containsPii": false,
+        "detail": "Only idempotency key names and a synthetic fingerprint are shown.",
+        "externalMutation": false,
+        "idempotencyKeys": [
+          "tenant_id",
+          "export_batch_id",
+          "documents_hash"
+        ],
+        "name": "idempotency_without_payload",
+        "rawPayloadIncluded": false,
+        "status": "clean"
+      },
+      {
+        "containsPii": false,
+        "detail": "Provider result payloads are represented by status and evidence references only.",
+        "externalMutation": false,
+        "idempotencyKeys": [],
+        "name": "provider_result_redaction",
+        "rawPayloadIncluded": false,
+        "status": "clean"
+      },
+      {
+        "containsPii": false,
+        "detail": "Provider-changing work stays behind approval, outbox, and audit boundaries.",
+        "externalMutation": false,
+        "idempotencyKeys": [],
+        "name": "operator_review_before_mutation",
+        "rawPayloadIncluded": false,
+        "status": "closed"
+      }
+    ],
+    "docs": [
+      {
+        "check": "bash scripts/check_public_integration_execution.sh",
+        "label": "Integration execution",
+        "path": "docs/public/INTEGRATION_EXECUTION.md"
+      },
+      {
+        "check": "bash scripts/check_public_integration_runtime.sh",
+        "label": "Integration runtime",
+        "path": "docs/public/INTEGRATION_RUNTIME.md"
+      },
+      {
+        "check": "bash scripts/check_public_demo_api.sh",
+        "label": "Outbox recovery",
+        "path": "docs/public/OUTBOX_RECOVERY.md"
+      }
+    ],
+    "executionMode": "contract_only",
+    "observability": [
+      {
+        "evidence": "integration_execution.metric_attached",
+        "labels": [
+          "action_type",
+          "status"
+        ],
+        "metric": "drivedesk_workflow_action_runs",
+        "status": "planned"
+      },
+      {
+        "evidence": "integration_execution.metric_attached",
+        "labels": [
+          "adapter_key",
+          "status"
+        ],
+        "metric": "drivedesk_outbox_events",
+        "status": "planned"
+      },
+      {
+        "evidence": "integration_execution.metric_attached",
+        "labels": [
+          "adapter_key",
+          "status"
+        ],
+        "metric": "drivedesk_integration_reconciliations",
+        "status": "planned"
+      },
+      {
+        "evidence": "integration_execution.metric_attached",
+        "labels": [
+          "adapter_key",
+          "severity",
+          "status"
+        ],
+        "metric": "drivedesk_integration_incidents",
+        "status": "planned"
+      }
+    ],
+    "operationKey": "accounting_export_execute",
+    "reconciliationLinks": [
+      {
+        "evidence": "integration_execution.reconciliation_planned",
+        "name": "expected_result",
+        "source": "operation_contract",
+        "status": "prepared",
+        "wouldRecord": "IntegrationReconciliation.expected_json"
+      },
+      {
+        "evidence": "integration_execution.reconciliation_planned",
+        "name": "provider_evidence",
+        "source": "worker_result",
+        "status": "redacted",
+        "wouldRecord": "IntegrationReconciliation.actual_json"
+      },
+      {
+        "evidence": "integration_execution.incident_route_armed",
+        "name": "mismatch_route",
+        "source": "integration.reconciliation",
+        "status": "armed",
+        "wouldRecord": "IntegrationIncident"
+      }
+    ],
+    "retryPolicy": [
+      {
+        "evidence": "integration_execution.retry_policy_attached",
+        "externalMutation": false,
+        "maxAttempts": 3,
+        "name": "retry_queue",
+        "status": "armed",
+        "trigger": "outbox_event.retry_requested"
+      },
+      {
+        "evidence": "integration_execution.dead_letter_policy_attached",
+        "externalMutation": false,
+        "maxAttempts": 3,
+        "name": "dead_letter_review",
+        "status": "armed",
+        "trigger": "outbox.dead_letter"
+      }
+    ],
+    "runLedger": {
+      "adapterKey": "accounting.export.mock",
+      "containsPii": false,
+      "eventType": "accounting.export.requested",
+      "evidence": "integration_execution.run_ledger_prepared",
+      "executionMode": "contract_only",
+      "externalMutation": false,
+      "idempotencyFingerprint": "accounting.export.mock:accounting_export_execute:public-demo-accounting-export-001",
+      "operationKey": "accounting_export_execute",
+      "rawPayloadIncluded": false,
+      "requestId": "public-demo-accounting-export-001",
+      "runId": "run_accounting_export_mock_accounting_export_execute",
+      "status": "previewed",
+      "wouldCallProvider": false,
+      "wouldCreateOutboxEvent": true,
+      "wouldCreateWorkflowActionRun": true
+    },
+    "stateTransitions": [
+      {
+        "evidence": "integration_execution.requested",
+        "from": "none",
+        "to": "requested",
+        "trigger": "POST /tenants/{tenant_id}/integration-executions/preview"
+      },
+      {
+        "evidence": "integration_execution.preflight_passed",
+        "from": "requested",
+        "to": "preflight_passed",
+        "trigger": "adapter_runtime.previewed"
+      },
+      {
+        "evidence": "integration_execution.outbox_planned",
+        "from": "preflight_passed",
+        "to": "queued",
+        "trigger": "accounting.export.requested"
+      },
+      {
+        "evidence": "integration_execution.worker_dispatch_planned",
+        "from": "queued",
+        "to": "awaiting_reconciliation",
+        "trigger": "worker.outbox.pending"
+      },
+      {
+        "evidence": "integration_execution.operator_closure_ready",
+        "from": "awaiting_reconciliation",
+        "to": "operator_review_ready",
+        "trigger": "integration.reconciliation.recorded"
+      }
+    ],
+    "status": "previewed",
+    "summary": [
+      {
+        "detail": "request to closure",
+        "label": "Timeline",
+        "tone": "blue",
+        "value": "8"
+      },
+      {
+        "detail": "run_accounting_export_mock_accounting_export_execute",
+        "label": "Run ledger",
+        "tone": "green",
+        "value": "planned"
+      },
+      {
+        "detail": "blocked in public preview",
+        "label": "Provider calls",
+        "tone": "amber",
+        "value": "0"
+      },
+      {
+        "detail": "retry, dead-letter, reconciliation",
+        "label": "Recovery",
+        "tone": "violet",
+        "value": "armed"
+      }
+    ],
+    "timeline": [
+      {
+        "detail": "accounting.export.mock.accounting_export_execute execution request accepted.",
+        "evidence": "integration_execution.requested",
+        "externalMutation": false,
+        "providerCallEnabled": false,
+        "stage": "request_accepted",
+        "status": "ready",
+        "wouldRecord": "WorkflowActionRun"
+      },
+      {
+        "detail": "6 runtime preflight checks evaluated.",
+        "evidence": "integration_execution.preflight_passed",
+        "externalMutation": false,
+        "providerCallEnabled": false,
+        "stage": "runtime_preflight",
+        "status": "passed",
+        "wouldRecord": "adapter_runtime.previewed"
+      },
+      {
+        "detail": "Provider mutation remains locked until approval and idempotent outbox commit.",
+        "evidence": "integration_execution.approval_gate_evaluated",
+        "externalMutation": false,
+        "providerCallEnabled": false,
+        "stage": "approval_gate",
+        "status": "locked",
+        "wouldRecord": "business_approval.requested"
+      },
+      {
+        "detail": "accounting.export.requested",
+        "evidence": "integration_execution.outbox_planned",
+        "externalMutation": false,
+        "providerCallEnabled": false,
+        "stage": "outbox_enqueue",
+        "status": "ready",
+        "wouldRecord": "OutboxEvent"
+      },
+      {
+        "detail": "drivedesk_worker.main.process_pending_outbox",
+        "evidence": "integration_execution.worker_dispatch_planned",
+        "externalMutation": false,
+        "providerCallEnabled": false,
+        "stage": "worker_dispatch",
+        "status": "ready",
+        "wouldRecord": "worker.outbox.pending"
+      },
+      {
+        "detail": "External provider calls are represented as contract evidence only.",
+        "evidence": "integration_execution.provider_call_blocked",
+        "externalMutation": false,
+        "providerCallEnabled": false,
+        "stage": "provider_call",
+        "status": "blocked_in_public_preview",
+        "wouldRecord": null
+      },
+      {
+        "detail": "Expected internal result is compared with provider evidence after worker completion.",
+        "evidence": "integration_execution.reconciliation_planned",
+        "externalMutation": false,
+        "providerCallEnabled": false,
+        "stage": "reconciliation",
+        "status": "planned",
+        "wouldRecord": "IntegrationReconciliation"
+      },
+      {
+        "detail": "Operator receives retry, dead-letter, or reconciliation evidence before closure.",
+        "evidence": "integration_execution.operator_closure_ready",
+        "externalMutation": false,
+        "providerCallEnabled": false,
+        "stage": "operator_closure",
+        "status": "ready",
+        "wouldRecord": "IntegrationIncident"
+      }
+    ]
+  },
   "integrationHealth": [
     {
       "detail": "file.import.fake",

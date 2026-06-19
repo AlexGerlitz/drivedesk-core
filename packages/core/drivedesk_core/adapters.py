@@ -1134,6 +1134,279 @@ def build_adapter_runtime_plan(
     }
 
 
+def build_adapter_execution_timeline(
+    adapter_key: str,
+    *,
+    operation_key: str | None = None,
+    scopes: list[str] | None = None,
+    execution_mode: str = "contract_only",
+    request_id: str = "demo-request-001",
+    include_failure_path: bool = True,
+) -> dict[str, object]:
+    runtime = build_adapter_runtime_plan(
+        adapter_key,
+        operation_key=operation_key,
+        scopes=scopes,
+        execution_mode=execution_mode,
+    )
+    operation = runtime["operation_contract"]
+    if not isinstance(operation, dict):
+        raise AdapterValidationError(
+            f"Adapter operation contract is invalid for {adapter_key}",
+            adapter_key=adapter_key,
+        )
+
+    selected_operation_key = str(operation.get("key") or operation_key or "unknown")
+    event_type = str(operation.get("event_type") or "integration.operation.requested")
+    outbox_handoff = runtime.get("outbox_handoff", {})
+    worker_boundary = runtime.get("worker_boundary", {})
+    retryable = bool(operation.get("retryable"))
+    dead_letter = bool(operation.get("dead_letter"))
+    operator_review = bool(operation.get("operator_review"))
+    provider_write_candidate = (
+        str(runtime.get("adapter_direction") or "") == "outbound"
+        or str(operation.get("trigger") or "") == "api.outbox.enqueue"
+    )
+
+    run_id = f"run_{str(runtime['adapter_key']).replace('.', '_')}_{selected_operation_key}"
+    idempotency_keys = [str(item) for item in operation.get("idempotency_keys", [])]
+    idempotency_fingerprint = ":".join(
+        [str(runtime["adapter_key"]), selected_operation_key, request_id]
+    )
+
+    timeline = [
+        {
+            "stage": "request_accepted",
+            "status": "ready",
+            "detail": f"{runtime['adapter_key']}.{selected_operation_key} execution request accepted.",
+            "would_record": "WorkflowActionRun",
+            "external_mutation": False,
+            "evidence": "integration_execution.requested",
+        },
+        {
+            "stage": "runtime_preflight",
+            "status": "passed",
+            "detail": f"{len(runtime.get('preflight_checks', []))} runtime preflight checks evaluated.",
+            "would_record": "adapter_runtime.previewed",
+            "external_mutation": False,
+            "evidence": "integration_execution.preflight_passed",
+        },
+        {
+            "stage": "approval_gate",
+            "status": "locked" if provider_write_candidate or operator_review else "not_required",
+            "detail": "Provider mutation remains locked until approval and idempotent outbox commit.",
+            "would_record": "business_approval.requested" if provider_write_candidate or operator_review else None,
+            "external_mutation": False,
+            "evidence": "integration_execution.approval_gate_evaluated",
+        },
+        {
+            "stage": "outbox_enqueue",
+            "status": str(outbox_handoff.get("status") or "not_required"),
+            "detail": event_type,
+            "would_record": "OutboxEvent" if outbox_handoff.get("status") == "ready" else None,
+            "external_mutation": False,
+            "evidence": "integration_execution.outbox_planned",
+        },
+        {
+            "stage": "worker_dispatch",
+            "status": str(worker_boundary.get("status") or "not_required"),
+            "detail": str(worker_boundary.get("worker_function") or worker_boundary.get("endpoint") or "worker not required"),
+            "would_record": "worker.outbox.pending" if worker_boundary.get("status") == "ready" else None,
+            "external_mutation": False,
+            "evidence": "integration_execution.worker_dispatch_planned",
+        },
+        {
+            "stage": "provider_call",
+            "status": "blocked_in_public_preview",
+            "detail": "External provider calls are represented as contract evidence only.",
+            "would_record": None,
+            "external_mutation": False,
+            "provider_call_enabled": False,
+            "evidence": "integration_execution.provider_call_blocked",
+        },
+        {
+            "stage": "reconciliation",
+            "status": "planned" if provider_write_candidate else "not_required",
+            "detail": "Expected internal result is compared with provider evidence after worker completion.",
+            "would_record": "IntegrationReconciliation" if provider_write_candidate else None,
+            "external_mutation": False,
+            "evidence": "integration_execution.reconciliation_planned",
+        },
+        {
+            "stage": "operator_closure",
+            "status": "ready",
+            "detail": "Operator receives retry, dead-letter, or reconciliation evidence before closure.",
+            "would_record": "IntegrationIncident" if include_failure_path else None,
+            "external_mutation": False,
+            "evidence": "integration_execution.operator_closure_ready",
+        },
+    ]
+
+    run_ledger = {
+        "run_id": run_id,
+        "request_id": request_id,
+        "adapter_key": runtime["adapter_key"],
+        "operation_key": selected_operation_key,
+        "event_type": event_type,
+        "status": "previewed",
+        "execution_mode": execution_mode,
+        "idempotency_fingerprint": idempotency_fingerprint,
+        "would_create_workflow_action_run": True,
+        "would_create_outbox_event": outbox_handoff.get("status") == "ready",
+        "would_call_provider": False,
+        "external_mutation": False,
+        "raw_payload_included": False,
+        "contains_pii": False,
+        "evidence": "integration_execution.run_ledger_prepared",
+    }
+
+    state_transitions = [
+        {
+            "from": "none",
+            "to": "requested",
+            "trigger": "POST /tenants/{tenant_id}/integration-executions/preview",
+            "evidence": "integration_execution.requested",
+        },
+        {
+            "from": "requested",
+            "to": "preflight_passed",
+            "trigger": "adapter_runtime.previewed",
+            "evidence": "integration_execution.preflight_passed",
+        },
+        {
+            "from": "preflight_passed",
+            "to": "queued",
+            "trigger": event_type,
+            "evidence": "integration_execution.outbox_planned",
+        },
+        {
+            "from": "queued",
+            "to": "awaiting_reconciliation",
+            "trigger": "worker.outbox.pending",
+            "evidence": "integration_execution.worker_dispatch_planned",
+        },
+        {
+            "from": "awaiting_reconciliation",
+            "to": "operator_review_ready",
+            "trigger": "integration.reconciliation.recorded",
+            "evidence": "integration_execution.operator_closure_ready",
+        },
+    ]
+
+    retry_policy = [
+        {
+            "name": "retry_queue",
+            "status": "armed" if retryable else "not_required",
+            "trigger": "outbox_event.retry_requested",
+            "max_attempts": 3,
+            "external_mutation": False,
+            "evidence": "integration_execution.retry_policy_attached",
+        },
+        {
+            "name": "dead_letter_review",
+            "status": "armed" if dead_letter else "not_required",
+            "trigger": "outbox.dead_letter",
+            "max_attempts": 3,
+            "external_mutation": False,
+            "evidence": "integration_execution.dead_letter_policy_attached",
+        },
+    ]
+
+    reconciliation_links = [
+        {
+            "name": "expected_result",
+            "status": "prepared",
+            "source": "operation_contract",
+            "would_record": "IntegrationReconciliation.expected_json",
+            "evidence": "integration_execution.reconciliation_planned",
+        },
+        {
+            "name": "provider_evidence",
+            "status": "redacted",
+            "source": "worker_result",
+            "would_record": "IntegrationReconciliation.actual_json",
+            "evidence": "integration_execution.reconciliation_planned",
+        },
+        {
+            "name": "mismatch_route",
+            "status": "armed" if include_failure_path else "disabled",
+            "source": "integration.reconciliation",
+            "would_record": "IntegrationIncident",
+            "evidence": "integration_execution.incident_route_armed",
+        },
+    ]
+
+    observability = [
+        {
+            "metric": "drivedesk_workflow_action_runs",
+            "status": "planned",
+            "labels": ["action_type", "status"],
+            "evidence": "integration_execution.metric_attached",
+        },
+        {
+            "metric": "drivedesk_outbox_events",
+            "status": "planned",
+            "labels": ["adapter_key", "status"],
+            "evidence": "integration_execution.metric_attached",
+        },
+        {
+            "metric": "drivedesk_integration_reconciliations",
+            "status": "planned",
+            "labels": ["adapter_key", "status"],
+            "evidence": "integration_execution.metric_attached",
+        },
+        {
+            "metric": "drivedesk_integration_incidents",
+            "status": "planned",
+            "labels": ["adapter_key", "severity", "status"],
+            "evidence": "integration_execution.metric_attached",
+        },
+    ]
+
+    data_boundaries = [
+        {
+            "name": "preview_only_execution",
+            "status": "clean",
+            "external_mutation": False,
+            "detail": "Execution timeline is computed without creating run rows or queueing provider work.",
+        },
+        {
+            "name": "idempotency_without_payload",
+            "status": "clean",
+            "external_mutation": False,
+            "idempotency_keys": idempotency_keys,
+            "detail": "Only idempotency key names and a synthetic fingerprint are shown.",
+        },
+        {
+            "name": "provider_result_redaction",
+            "status": "clean",
+            "contains_pii": False,
+            "raw_payload_included": False,
+            "detail": "Provider result payloads are represented by status and evidence references only.",
+        },
+        {
+            "name": "operator_review_before_mutation",
+            "status": "closed",
+            "external_mutation": False,
+            "detail": "Provider-changing work stays behind approval, outbox, and audit boundaries.",
+        },
+    ]
+
+    return {
+        "adapter_key": runtime["adapter_key"],
+        "operation_key": selected_operation_key,
+        "execution_mode": execution_mode,
+        "runtime_plan": runtime,
+        "run_ledger": run_ledger,
+        "timeline": timeline,
+        "state_transitions": state_transitions,
+        "retry_policy": retry_policy,
+        "reconciliation_links": reconciliation_links,
+        "observability": observability,
+        "data_boundaries": data_boundaries,
+    }
+
+
 def execute_adapter(adapter_key: str | None, payload: dict[str, object]) -> AdapterResult:
     adapter = resolve_adapter(adapter_key)
     return adapter.execute(payload)

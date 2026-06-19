@@ -31,6 +31,7 @@ BusinessActionExecutionKind = Literal["action_plan_execution_preview"]
 BusinessApprovalGatewayKind = Literal["execution_approval_gateway"]
 IntegrationRuntimeKind = Literal["adapter_operation_runtime"]
 IntegrationRuntimeExecutionMode = Literal["contract_only", "dry_run", "commit_request"]
+IntegrationExecutionKind = Literal["adapter_execution_timeline"]
 
 
 class AdapterContractRead(BaseModel):
@@ -388,6 +389,36 @@ class IntegrationRuntimePreviewRead(BaseModel):
     worker_boundary: dict[str, Any] = Field(default_factory=dict)
     reconciliation_plan: list[dict[str, Any]] = Field(default_factory=list)
     incident_routes: list[dict[str, Any]] = Field(default_factory=list)
+    data_boundaries: list[dict[str, Any]] = Field(default_factory=list)
+    evidence: list[dict[str, Any]] = Field(default_factory=list)
+    api: dict[str, str] = Field(default_factory=dict)
+
+
+class IntegrationExecutionPreviewCreate(BaseModel):
+    execution_kind: IntegrationExecutionKind = "adapter_execution_timeline"
+    adapter_key: str = Field(default="accounting.export.mock", min_length=2, max_length=128, pattern=r"^[a-z0-9][a-z0-9_.-]*$")
+    operation_key: str | None = Field(default="accounting_export_execute", min_length=2, max_length=128, pattern=r"^[a-z0-9][a-z0-9_.-]*$")
+    connection_scopes: list[str] = Field(default_factory=list, max_length=8)
+    execution_mode: IntegrationRuntimeExecutionMode = "contract_only"
+    request_id: str = Field(default="demo-request-001", min_length=2, max_length=120, pattern=r"^[a-zA-Z0-9][a-zA-Z0-9_.:-]*$")
+    include_failure_path: bool = True
+
+
+class IntegrationExecutionPreviewRead(BaseModel):
+    tenant_id: str
+    execution_kind: IntegrationExecutionKind
+    adapter_key: str
+    operation_key: str
+    execution_mode: IntegrationRuntimeExecutionMode
+    generated_at: datetime
+    status: Literal["previewed"]
+    summary: str
+    run_ledger: dict[str, Any] = Field(default_factory=dict)
+    timeline: list[dict[str, Any]] = Field(default_factory=list)
+    state_transitions: list[dict[str, Any]] = Field(default_factory=list)
+    retry_policy: list[dict[str, Any]] = Field(default_factory=list)
+    reconciliation_links: list[dict[str, Any]] = Field(default_factory=list)
+    observability: list[dict[str, Any]] = Field(default_factory=list)
     data_boundaries: list[dict[str, Any]] = Field(default_factory=list)
     evidence: list[dict[str, Any]] = Field(default_factory=list)
     api: dict[str, str] = Field(default_factory=dict)
@@ -1054,6 +1085,24 @@ class IntegrationRuntimeDemoRead(BaseModel):
     docs: list[dict[str, str]]
 
 
+class IntegrationExecutionDemoRead(BaseModel):
+    status: Literal["previewed"]
+    command: str
+    summary: list[dict[str, Any]]
+    adapterKey: str
+    operationKey: str
+    executionMode: str
+    runLedger: dict[str, Any]
+    timeline: list[dict[str, Any]]
+    stateTransitions: list[dict[str, Any]]
+    retryPolicy: list[dict[str, Any]]
+    reconciliationLinks: list[dict[str, Any]]
+    observability: list[dict[str, Any]]
+    dataBoundaries: list[dict[str, Any]]
+    api: dict[str, str]
+    docs: list[dict[str, str]]
+
+
 class PublicDemoRead(BaseModel):
     schemaVersion: int
     generatedAt: str
@@ -1070,6 +1119,7 @@ class PublicDemoRead(BaseModel):
     adapterScenarios: list[dict[str, Any]]
     adapterStudio: dict[str, Any]
     integrationRuntime: dict[str, Any]
+    integrationExecution: dict[str, Any]
     connectorFixtureReplay: dict[str, Any]
     businessIntakePipeline: dict[str, Any]
     businessTaskHandoff: dict[str, Any]

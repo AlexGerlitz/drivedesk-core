@@ -17,6 +17,7 @@ GET /demo/connector-fixture-replay
 GET /demo/business-action-execution
 GET /demo/business-approval-gateway
 GET /demo/integration-runtime
+GET /demo/integration-execution
 GET /demo/business-scenario-replay
 ```
 
@@ -31,6 +32,10 @@ The approval gateway payload appears in the public contract as
 The Integration Runtime payload appears in the public contract as
 `integrationRuntime` and is documented in
 `docs/public/INTEGRATION_RUNTIME.md`.
+
+The Integration Execution payload appears in the public contract as
+`integrationExecution` and is documented in
+`docs/public/INTEGRATION_EXECUTION.md`.
 
 ## Generated Files
 
@@ -69,6 +74,7 @@ It reads the OpenAPI schema, finds `GET /demo/public`,
 `GET /demo/business-action-execution`, and
 `GET /demo/business-approval-gateway`, and
 `GET /demo/integration-runtime`, and
+`GET /demo/integration-execution`, and
 `GET /demo/business-scenario-replay`, extracts operation ids and required
 response fields, and writes small public-safe clients.
 
@@ -97,6 +103,7 @@ The SDK includes typed helpers around `adapterScenarios`:
 - `DriveDeskPublicDemoClient.getConnectorFixtureReplay`.
 - `business_action_execution` in `openapi-client-manifest.json`.
 - `integration_runtime` in `openapi-client-manifest.json`.
+- `integration_execution` in `openapi-client-manifest.json`.
 - `DriveDeskPublicDemoClient.get_business_scenario_replay`;
 - `DriveDeskPublicDemoClient.getBusinessScenarioReplay`.
 
@@ -151,6 +158,10 @@ metadata: adapter operation contract, runtime steps, preflight checks, outbox
 handoff, worker boundary, reconciliation plan, incident routes, and no-provider
 call boundaries.
 
+The generated manifest also validates the standalone integration execution
+metadata: run ledger, timeline, state transitions, retry policy,
+reconciliation links, observability metrics, and data-boundary evidence.
+
 ## Why This Matters
 
 The SDK is not meant to be a full production client yet. It proves a foundation:
@@ -164,6 +175,8 @@ The SDK is not meant to be a full production client yet. It proves a foundation:
   contract.
 - The generated manifest validates integration runtime metadata as a standalone
   API contract.
+- The generated manifest validates integration execution metadata as a
+  standalone API contract.
 - The generated client validates business scenario replay as a standalone API
   contract.
 - The generated client can show the Bitrix-style CRM provider-intake body and

@@ -26,6 +26,10 @@ Fast external verification path: `docs/public/REVIEWER_QUICKSTART.md`.
 - Integration Runtime preview from adapter runtime contract to scope preflight,
   idempotency, approval dependency, outbox handoff, worker boundary,
   reconciliation, incident route, and `adapter_runtime.previewed` evidence.
+- Integration Execution preview from runtime intent to run ledger, outbox
+  enqueue, worker dispatch, blocked provider call, retry, dead-letter,
+  reconciliation, observability, and `integration_execution.run_ledger_prepared`
+  evidence.
 - Tenant-scoped operator review queue for retry and dead-letter integration jobs.
 - Mapping validation against runtime adapter requirements.
 - Runtime mapping transform and read-only mapping preview.

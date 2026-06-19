@@ -56,6 +56,7 @@ from drivedesk_api.schemas import (
     IntegrationIncidentCreate,
     IntegrationIncidentStatusChange,
     IntegrationMappingPreviewCreate,
+    IntegrationExecutionPreviewCreate,
     IntegrationReconciliationCreate,
     IntegrationRuntimePreviewCreate,
     MembershipCreate,
@@ -72,6 +73,7 @@ from drivedesk_core import (
     AdapterExecutionError,
     AdapterValidationError,
     build_adapter_connection_diagnostics,
+    build_adapter_execution_timeline,
     build_adapter_mapping_preview,
     build_adapter_runtime_plan,
     list_adapter_descriptors,
@@ -625,6 +627,74 @@ async def preview_integration_runtime(
             "runbooks": "GET /integration-runbooks",
             "operator_review": "GET /tenants/{tenant_id}/integration-operator-review",
             "outbox": "GET /tenants/{tenant_id}/outbox",
+        },
+    }
+
+
+async def preview_integration_execution(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    payload: IntegrationExecutionPreviewCreate,
+) -> dict[str, object]:
+    await ensure_tenant_exists(session, tenant_id)
+    try:
+        execution = build_adapter_execution_timeline(
+            payload.adapter_key,
+            operation_key=payload.operation_key,
+            scopes=payload.connection_scopes or None,
+            execution_mode=payload.execution_mode,
+            request_id=payload.request_id,
+            include_failure_path=payload.include_failure_path,
+        )
+    except (AdapterExecutionError, AdapterValidationError) as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=exc.message) from exc
+
+    timeline = execution.get("timeline", [])
+    run_ledger = execution.get("run_ledger", {})
+    retry_policy = execution.get("retry_policy", [])
+    reconciliation_links = execution.get("reconciliation_links", [])
+    observability = execution.get("observability", [])
+
+    return {
+        "tenant_id": tenant_id,
+        "execution_kind": payload.execution_kind,
+        "adapter_key": str(execution["adapter_key"]),
+        "operation_key": str(execution["operation_key"]),
+        "execution_mode": payload.execution_mode,
+        "generated_at": datetime.now(UTC),
+        "status": "previewed",
+        "summary": (
+            f"Integration execution preview prepared {len(timeline)} timeline stage(s), "
+            f"{len(retry_policy)} retry policy item(s), "
+            f"{len(reconciliation_links)} reconciliation link(s), and "
+            f"{len(observability)} observability signal(s)."
+        ),
+        "run_ledger": run_ledger,
+        "timeline": timeline,
+        "state_transitions": execution.get("state_transitions", []),
+        "retry_policy": retry_policy,
+        "reconciliation_links": reconciliation_links,
+        "observability": observability,
+        "data_boundaries": execution.get("data_boundaries", []),
+        "evidence": [
+            {
+                "type": "integration_execution",
+                "event": "integration_execution.timeline_previewed",
+                "adapter_key": str(execution["adapter_key"]),
+                "operation_key": str(execution["operation_key"]),
+                "execution_mode": payload.execution_mode,
+                "external_mutation": False,
+                "provider_call_enabled": False,
+            }
+        ],
+        "api": {
+            "preview": "POST /tenants/{tenant_id}/integration-executions/preview",
+            "runtime_preview": "POST /tenants/{tenant_id}/integration-runtime/preview",
+            "workflow_action_runs": "GET /tenants/{tenant_id}/workflow-action-runs",
+            "outbox": "GET /tenants/{tenant_id}/outbox-events",
+            "reconciliations": "GET /tenants/{tenant_id}/integration-reconciliations",
+            "incidents": "GET /tenants/{tenant_id}/integration-incidents",
         },
     }
 

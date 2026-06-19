@@ -50,16 +50,6 @@ It includes:
 
 ![DriveDesk Core demo overview](docs/public/assets/drivedesk-core-demo-overview.png)
 
-## Reviewer Snapshot
-
-| Signal | Public proof |
-| --- | --- |
-| Backend/platform foundation | FastAPI API, PostgreSQL-shaped persistence, Alembic migrations, RBAC, audit log, outbox, background worker, and metrics. |
-| Integration system design | Adapter catalog, connector certification, fixture replay, operation contracts, diagnostics, reconciliation, operator review, and integration runtime evidence. |
-| Business operations product thinking | Public Business OS tour, Control Tower, workflow automation, incidents, proof tabs, and synthetic end-to-end scenarios. |
-| Production-style delivery | Docker Compose, Helm, GitOps, OpenTofu plan evidence, CI, public demo health checks, and release safety drills. |
-| Reviewable evidence | `docs/public/SYSTEM_REVIEW_PATH.md`, `docs/public/TECHNICAL_CAPABILITY_MAP.md`, `docs/public/EVIDENCE_INDEX.md`, and `bash scripts/ci_smoke_public.sh`. |
-
 ## Start Here
 
 | Need | Open | What it proves |
@@ -320,6 +310,7 @@ curl http://localhost:8080/demo/business-context-assistant
 curl http://localhost:8080/demo/business-action-execution
 curl http://localhost:8080/demo/business-approval-gateway
 curl http://localhost:8080/demo/integration-runtime
+curl http://localhost:8080/demo/integration-execution
 curl http://localhost:8080/demo/business-scenario-replay
 ```
 
@@ -334,6 +325,7 @@ bash scripts/check_public_business_context_assistant.sh
 bash scripts/check_public_business_action_execution.sh
 bash scripts/check_public_business_approval_gateway.sh
 bash scripts/check_public_integration_runtime.sh
+bash scripts/check_public_integration_execution.sh
 bash scripts/check_public_backup_restore.sh
 bash scripts/check_public_release_rollback.sh
 bash scripts/check_public_slo_canary_gate.sh

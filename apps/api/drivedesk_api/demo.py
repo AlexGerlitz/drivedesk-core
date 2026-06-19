@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from drivedesk_core import build_adapter_runtime_plan, list_adapter_descriptors
+from drivedesk_core import build_adapter_execution_timeline, build_adapter_runtime_plan, list_adapter_descriptors
 
 
 def _public_operation_contracts(descriptor: dict[str, Any]) -> list[dict[str, Any]]:
@@ -228,6 +228,164 @@ def _public_integration_runtime() -> dict[str, Any]:
                 "label": "Adapter developer guide",
                 "path": "docs/public/ADAPTER_DEVELOPER_GUIDE.md",
                 "check": "bash scripts/check_public_adapter_developer_guide.sh",
+            },
+        ],
+    }
+
+
+def _public_integration_execution() -> dict[str, Any]:
+    execution = build_adapter_execution_timeline(
+        "accounting.export.mock",
+        operation_key="accounting_export_execute",
+        scopes=["accounting:export"],
+        execution_mode="contract_only",
+        request_id="public-demo-accounting-export-001",
+        include_failure_path=True,
+    )
+    run_ledger = execution["run_ledger"]
+    timeline = [
+        {
+            "stage": item["stage"],
+            "status": item["status"],
+            "detail": item["detail"],
+            "wouldRecord": item.get("would_record"),
+            "externalMutation": item["external_mutation"],
+            "providerCallEnabled": item.get("provider_call_enabled", False),
+            "evidence": item["evidence"],
+        }
+        for item in execution["timeline"]
+    ]
+    state_transitions = [
+        {
+            "from": item["from"],
+            "to": item["to"],
+            "trigger": item["trigger"],
+            "evidence": item["evidence"],
+        }
+        for item in execution["state_transitions"]
+    ]
+    retry_policy = [
+        {
+            "name": item["name"],
+            "status": item["status"],
+            "trigger": item["trigger"],
+            "maxAttempts": item["max_attempts"],
+            "externalMutation": item["external_mutation"],
+            "evidence": item["evidence"],
+        }
+        for item in execution["retry_policy"]
+    ]
+    reconciliation_links = [
+        {
+            "name": item["name"],
+            "status": item["status"],
+            "source": item["source"],
+            "wouldRecord": item["would_record"],
+            "evidence": item["evidence"],
+        }
+        for item in execution["reconciliation_links"]
+    ]
+    observability = [
+        {
+            "metric": item["metric"],
+            "status": item["status"],
+            "labels": item["labels"],
+            "evidence": item["evidence"],
+        }
+        for item in execution["observability"]
+    ]
+    data_boundaries = [
+        {
+            "name": item["name"],
+            "status": item["status"],
+            "externalMutation": item.get("external_mutation", False),
+            "containsPii": item.get("contains_pii", False),
+            "rawPayloadIncluded": item.get("raw_payload_included", False),
+            "idempotencyKeys": item.get("idempotency_keys", []),
+            "detail": item["detail"],
+        }
+        for item in execution["data_boundaries"]
+    ]
+
+    return {
+        "status": "previewed",
+        "command": "POST /tenants/{tenant_id}/integration-executions/preview",
+        "summary": [
+            {
+                "label": "Timeline",
+                "value": str(len(timeline)),
+                "detail": "request to closure",
+                "tone": "blue",
+            },
+            {
+                "label": "Run ledger",
+                "value": "planned",
+                "detail": str(run_ledger["run_id"]),
+                "tone": "green",
+            },
+            {
+                "label": "Provider calls",
+                "value": "0",
+                "detail": "blocked in public preview",
+                "tone": "amber",
+            },
+            {
+                "label": "Recovery",
+                "value": "armed",
+                "detail": "retry, dead-letter, reconciliation",
+                "tone": "violet",
+            },
+        ],
+        "adapterKey": execution["adapter_key"],
+        "operationKey": execution["operation_key"],
+        "executionMode": execution["execution_mode"],
+        "runLedger": {
+            "runId": run_ledger["run_id"],
+            "requestId": run_ledger["request_id"],
+            "adapterKey": run_ledger["adapter_key"],
+            "operationKey": run_ledger["operation_key"],
+            "eventType": run_ledger["event_type"],
+            "status": run_ledger["status"],
+            "executionMode": run_ledger["execution_mode"],
+            "idempotencyFingerprint": run_ledger["idempotency_fingerprint"],
+            "wouldCreateWorkflowActionRun": run_ledger["would_create_workflow_action_run"],
+            "wouldCreateOutboxEvent": run_ledger["would_create_outbox_event"],
+            "wouldCallProvider": run_ledger["would_call_provider"],
+            "externalMutation": run_ledger["external_mutation"],
+            "rawPayloadIncluded": run_ledger["raw_payload_included"],
+            "containsPii": run_ledger["contains_pii"],
+            "evidence": run_ledger["evidence"],
+        },
+        "timeline": timeline,
+        "stateTransitions": state_transitions,
+        "retryPolicy": retry_policy,
+        "reconciliationLinks": reconciliation_links,
+        "observability": observability,
+        "dataBoundaries": data_boundaries,
+        "api": {
+            "standalone": "GET /demo/integration-execution",
+            "preview": "POST /tenants/{tenant_id}/integration-executions/preview",
+            "runtimePreview": "POST /tenants/{tenant_id}/integration-runtime/preview",
+            "workflowActionRuns": "GET /tenants/{tenant_id}/workflow-action-runs",
+            "outbox": "GET /tenants/{tenant_id}/outbox-events",
+            "reconciliations": "GET /tenants/{tenant_id}/integration-reconciliations",
+            "incidents": "GET /tenants/{tenant_id}/integration-incidents",
+        },
+        "docs": [
+            {
+                "label": "Integration execution",
+                "path": "docs/public/INTEGRATION_EXECUTION.md",
+                "check": "bash scripts/check_public_integration_execution.sh",
+            },
+            {
+                "label": "Integration runtime",
+                "path": "docs/public/INTEGRATION_RUNTIME.md",
+                "check": "bash scripts/check_public_integration_runtime.sh",
+            },
+            {
+                "label": "Outbox recovery",
+                "path": "docs/public/OUTBOX_RECOVERY.md",
+                "check": "bash scripts/check_public_demo_api.sh",
             },
         ],
     }
@@ -679,6 +837,7 @@ def build_public_demo_payload() -> dict[str, Any]:
             ],
         },
         "integrationRuntime": _public_integration_runtime(),
+        "integrationExecution": _public_integration_execution(),
         "connectorFixtureReplay": {
             "status": "validated",
             "command": "bash scripts/check_public_connector_fixture_replay.sh",

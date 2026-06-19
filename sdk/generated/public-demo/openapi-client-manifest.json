@@ -166,6 +166,28 @@
     "javascript/drivedesk-public-demo-client.mjs",
     "typescript/drivedesk-public-demo-client.d.ts"
   ],
+  "integration_execution": {
+    "method": "GET",
+    "operation_id": "integration_execution_demo_demo_integration_execution_get",
+    "path": "/demo/integration-execution",
+    "required_fields": [
+      "status",
+      "command",
+      "summary",
+      "adapterKey",
+      "operationKey",
+      "executionMode",
+      "runLedger",
+      "timeline",
+      "stateTransitions",
+      "retryPolicy",
+      "reconciliationLinks",
+      "observability",
+      "dataBoundaries",
+      "api",
+      "docs"
+    ]
+  },
   "integration_runtime": {
     "method": "GET",
     "operation_id": "integration_runtime_demo_demo_integration_runtime_get",
@@ -208,6 +230,7 @@
     "adapterScenarios",
     "adapterStudio",
     "integrationRuntime",
+    "integrationExecution",
     "connectorFixtureReplay",
     "businessIntakePipeline",
     "businessTaskHandoff",

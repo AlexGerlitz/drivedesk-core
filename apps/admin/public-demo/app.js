@@ -94,6 +94,14 @@
         Array.isArray(payload.integrationRuntime.reconciliationPlan) &&
         Array.isArray(payload.integrationRuntime.incidentRoutes) &&
         Array.isArray(payload.integrationRuntime.dataBoundaries) &&
+        payload.integrationExecution &&
+        Array.isArray(payload.integrationExecution.summary) &&
+        Array.isArray(payload.integrationExecution.timeline) &&
+        Array.isArray(payload.integrationExecution.stateTransitions) &&
+        Array.isArray(payload.integrationExecution.retryPolicy) &&
+        Array.isArray(payload.integrationExecution.reconciliationLinks) &&
+        Array.isArray(payload.integrationExecution.observability) &&
+        Array.isArray(payload.integrationExecution.dataBoundaries) &&
         payload.connectorFixtureReplay &&
         Array.isArray(payload.connectorFixtureReplay.summary) &&
         Array.isArray(payload.connectorFixtureReplay.outcomes) &&
@@ -745,6 +753,166 @@
         row.append(top, detail, evidence);
         boundaryRows.appendChild(row);
       });
+  }
+
+  function fillIntegrationExecution() {
+    var execution = data.integrationExecution;
+
+    var summaryRows = document.getElementById("integrationExecutionSummaryRows");
+    clear(summaryRows);
+    execution.summary.forEach(function (item) {
+      var card = document.createElement("article");
+      card.className = "metric-card";
+      card.dataset.tone = item.tone || "blue";
+
+      var label = document.createElement("span");
+      label.className = "muted";
+      label.appendChild(text(item.label));
+
+      var value = document.createElement("strong");
+      value.appendChild(text(item.value));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      card.append(label, value, detail);
+      summaryRows.appendChild(card);
+    });
+
+    var ledgerRows = document.getElementById("integrationExecutionLedgerRows");
+    clear(ledgerRows);
+    var ledger = execution.runLedger;
+    [
+      ["run", ledger.runId],
+      ["request", ledger.requestId],
+      ["event", ledger.eventType],
+      ["idempotency", ledger.idempotencyFingerprint],
+      ["provider call", String(Boolean(ledger.wouldCallProvider))],
+      ["evidence", ledger.evidence],
+    ].forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(item[0]));
+      top.append(title, chip(ledger.status, statusTone(ledger.status)));
+      var detail = document.createElement("code");
+      detail.appendChild(text(item[1]));
+      row.append(top, detail);
+      ledgerRows.appendChild(row);
+    });
+
+    var timelineRows = document.getElementById("integrationExecutionTimelineRows");
+    clear(timelineRows);
+    execution.timeline.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var stage = document.createElement("strong");
+      stage.appendChild(text(item.stage));
+      top.append(stage, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          item.detail +
+            " - would record " +
+            (item.wouldRecord || "none") +
+            " - provider call " +
+            String(Boolean(item.providerCallEnabled))
+        )
+      );
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(item.evidence));
+
+      row.append(top, detail, evidence);
+      timelineRows.appendChild(row);
+    });
+
+    var stateRows = document.getElementById("integrationExecutionStateRows");
+    clear(stateRows);
+    execution.stateTransitions.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(item.from + " -> " + item.to));
+      top.append(title, chip("transition", "blue"));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.trigger));
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(item.evidence));
+
+      row.append(top, detail, evidence);
+      stateRows.appendChild(row);
+    });
+
+    var recoveryRows = document.getElementById("integrationExecutionRecoveryRows");
+    clear(recoveryRows);
+    execution.retryPolicy
+      .concat(execution.reconciliationLinks)
+      .concat(execution.observability)
+      .forEach(function (item) {
+        var row = document.createElement("article");
+        row.className = "event-row";
+
+        var top = document.createElement("div");
+        top.className = "event-top";
+        var name = document.createElement("strong");
+        name.appendChild(text(item.name || item.metric));
+        top.append(name, chip(item.status, statusTone(item.status)));
+
+        var detail = document.createElement("span");
+        detail.className = "muted";
+        detail.appendChild(
+          text(item.trigger || item.source || (item.labels || []).join(", ") || "")
+        );
+
+        var evidence = document.createElement("code");
+        evidence.appendChild(text(item.evidence));
+
+        row.append(top, detail, evidence);
+        recoveryRows.appendChild(row);
+      });
+
+    var boundaryRows = document.getElementById("integrationExecutionBoundaryRows");
+    clear(boundaryRows);
+    execution.dataBoundaries.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var name = document.createElement("strong");
+      name.appendChild(text(item.name));
+      top.append(name, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          item.detail +
+            " - external mutation " +
+            String(Boolean(item.externalMutation)) +
+            " - raw payload " +
+            String(Boolean(item.rawPayloadIncluded))
+        )
+      );
+
+      row.append(top, detail);
+      boundaryRows.appendChild(row);
+    });
   }
 
   function fillConnectorFixtureReplay() {
@@ -3357,6 +3525,7 @@
     fillAdapterScenarios();
     fillAdapterStudio();
     fillIntegrationRuntime();
+    fillIntegrationExecution();
     fillConnectorFixtureReplay();
     fillSyncJobs();
     fillIntegrationHealth();

@@ -31,6 +31,8 @@ Demo endpoints:
   as a standalone synthetic contract.
 - `GET /demo/integration-runtime` returns the same Integration Runtime proof
   as a standalone synthetic contract.
+- `GET /demo/integration-execution` returns the same Integration Execution
+  timeline proof as a standalone synthetic contract.
 - `GET /demo/business-scenario-replay` returns reusable Business OS scenario
   replay data as a standalone synthetic contract.
 

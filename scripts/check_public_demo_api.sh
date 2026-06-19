@@ -123,6 +123,7 @@ business_approval_gateway_endpoint, business_approval_gateway_headers = get_json
     "/demo/business-approval-gateway"
 )
 integration_runtime_endpoint, integration_runtime_headers = get_json("/demo/integration-runtime")
+integration_execution_endpoint, integration_execution_headers = get_json("/demo/integration-execution")
 business_scenario_endpoint, business_scenario_headers = get_json("/demo/business-scenario-replay")
 adapters, _ = get_json("/integration-adapters")
 runbooks, _ = get_json("/integration-runbooks")
@@ -1182,6 +1183,87 @@ assert {item["path"] for item in integration_runtime["docs"]} >= {
     "docs/public/ADAPTER_DEVELOPER_GUIDE.md",
 }, demo
 
+integration_execution = demo["integrationExecution"]
+assert integration_execution_endpoint == integration_execution, integration_execution_endpoint
+assert integration_execution_headers["access-control-allow-origin"] == "*", integration_execution_headers
+assert integration_execution_headers["cache-control"] == "public, max-age=60", integration_execution_headers
+assert integration_execution["status"] == "previewed", demo
+assert (
+    integration_execution["command"]
+    == "POST /tenants/{tenant_id}/integration-executions/preview"
+), demo
+assert integration_execution["adapterKey"] == "accounting.export.mock", demo
+assert integration_execution["operationKey"] == "accounting_export_execute", demo
+assert integration_execution["executionMode"] == "contract_only", demo
+assert {item["label"] for item in integration_execution["summary"]} >= {
+    "Timeline",
+    "Run ledger",
+    "Provider calls",
+    "Recovery",
+}, demo
+run_ledger = integration_execution["runLedger"]
+assert run_ledger["wouldCreateWorkflowActionRun"] is True, demo
+assert run_ledger["wouldCreateOutboxEvent"] is True, demo
+assert run_ledger["wouldCallProvider"] is False, demo
+assert run_ledger["rawPayloadIncluded"] is False, demo
+assert run_ledger["containsPii"] is False, demo
+assert run_ledger["evidence"] == "integration_execution.run_ledger_prepared", demo
+assert [item["stage"] for item in integration_execution["timeline"]] == [
+    "request_accepted",
+    "runtime_preflight",
+    "approval_gate",
+    "outbox_enqueue",
+    "worker_dispatch",
+    "provider_call",
+    "reconciliation",
+    "operator_closure",
+], demo
+assert {item["externalMutation"] for item in integration_execution["timeline"]} == {False}, demo
+assert {item.get("providerCallEnabled", False) for item in integration_execution["timeline"]} == {
+    False
+}, demo
+assert {item["stage"] for item in integration_execution["timeline"] if item["status"] == "blocked_in_public_preview"} == {
+    "provider_call"
+}, demo
+assert {(item["from"], item["to"]) for item in integration_execution["stateTransitions"]} >= {
+    ("none", "requested"),
+    ("requested", "preflight_passed"),
+    ("preflight_passed", "queued"),
+    ("queued", "awaiting_reconciliation"),
+    ("awaiting_reconciliation", "operator_review_ready"),
+}, demo
+assert {item["name"] for item in integration_execution["retryPolicy"]} == {
+    "retry_queue",
+    "dead_letter_review",
+}, demo
+assert {item["name"] for item in integration_execution["reconciliationLinks"]} == {
+    "expected_result",
+    "provider_evidence",
+    "mismatch_route",
+}, demo
+assert {item["metric"] for item in integration_execution["observability"]} >= {
+    "drivedesk_workflow_action_runs",
+    "drivedesk_outbox_events",
+    "drivedesk_integration_reconciliations",
+    "drivedesk_integration_incidents",
+}, demo
+assert {item["name"] for item in integration_execution["dataBoundaries"]} == {
+    "preview_only_execution",
+    "idempotency_without_payload",
+    "provider_result_redaction",
+    "operator_review_before_mutation",
+}, demo
+assert integration_execution["api"]["standalone"] == "GET /demo/integration-execution", demo
+assert (
+    integration_execution["api"]["preview"]
+    == "POST /tenants/{tenant_id}/integration-executions/preview"
+), demo
+assert {item["path"] for item in integration_execution["docs"]} >= {
+    "docs/public/INTEGRATION_EXECUTION.md",
+    "docs/public/INTEGRATION_RUNTIME.md",
+    "docs/public/OUTBOX_RECOVERY.md",
+}, demo
+
 business_scenario_replay = demo["businessScenarioReplay"]
 assert business_scenario_endpoint == business_scenario_replay, business_scenario_endpoint
 assert business_scenario_headers["access-control-allow-origin"] == "*", business_scenario_headers
@@ -1359,6 +1441,7 @@ assert "/demo/business-context-assistant" in openapi["paths"], openapi["paths"].
 assert "/demo/business-action-execution" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/business-approval-gateway" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/integration-runtime" in openapi["paths"], openapi["paths"].keys()
+assert "/demo/integration-execution" in openapi["paths"], openapi["paths"].keys()
 assert "/demo/business-scenario-replay" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/business-intake-pipeline/preview" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/business-task-handoffs/preview" in openapi["paths"], openapi["paths"].keys()
@@ -1372,6 +1455,7 @@ assert (
     "/tenants/{tenant_id}/business-approval-gateway/preview" in openapi["paths"]
 ), openapi["paths"].keys()
 assert "/tenants/{tenant_id}/integration-runtime/preview" in openapi["paths"], openapi["paths"].keys()
+assert "/tenants/{tenant_id}/integration-executions/preview" in openapi["paths"], openapi["paths"].keys()
 assert "/health" in openapi["paths"], openapi["paths"].keys()
 
 if openapi_file.exists():
@@ -1385,6 +1469,7 @@ if openapi_file.exists():
     assert "/demo/business-action-execution" in generated["paths"], generated["paths"].keys()
     assert "/demo/business-approval-gateway" in generated["paths"], generated["paths"].keys()
     assert "/demo/integration-runtime" in generated["paths"], generated["paths"].keys()
+    assert "/demo/integration-execution" in generated["paths"], generated["paths"].keys()
     assert "/demo/business-scenario-replay" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-intake-pipeline/preview" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-task-handoffs/preview" in generated["paths"], generated["paths"].keys()
@@ -1398,6 +1483,9 @@ if openapi_file.exists():
         "/tenants/{tenant_id}/business-approval-gateway/preview" in generated["paths"]
     ), generated["paths"].keys()
     assert "/tenants/{tenant_id}/integration-runtime/preview" in generated["paths"], generated["paths"].keys()
+    assert (
+        "/tenants/{tenant_id}/integration-executions/preview" in generated["paths"]
+    ), generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-action-plans/preview" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-notifications/preview" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/workflow-action-runs" in generated["paths"], generated["paths"].keys()

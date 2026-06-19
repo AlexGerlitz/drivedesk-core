@@ -55,6 +55,9 @@ infrastructure, production history, customer data, or operational credentials.
 - `INTEGRATION_RUNTIME.md` - Integration runtime preview from adapter operation
   contract to scope preflight, outbox handoff, worker boundary, reconciliation,
   and incident routes via the `integrationRuntime` contract.
+- `INTEGRATION_EXECUTION.md` - Integration execution timeline from run ledger
+  to outbox, worker dispatch, blocked provider call, retry, reconciliation, and
+  operator closure via the `integrationExecution` contract.
 - `BUSINESS_SCENARIO_REPLAY.md` - reusable Business OS replay paths for
   CRM/bank/accounting mismatch, support SLA risk, and procurement delay risk via
   the `businessScenarioReplay` contract.
@@ -191,6 +194,9 @@ The public repository export also generates:
 - `GET /demo/integration-runtime` - standalone public-safe Integration Runtime
   contract for `integrationRuntime`, backed by
   `POST /tenants/{tenant_id}/integration-runtime/preview`.
+- `GET /demo/integration-execution` - standalone public-safe Integration
+  Execution timeline contract for `integrationExecution`, backed by
+  `POST /tenants/{tenant_id}/integration-executions/preview`.
 - `incidentResponse` - public-safe incident response contract in the demo
   payload and Incidents tab.
 - `businessControlTower` - public-safe control tower contract for CRM, bank,
@@ -218,6 +224,9 @@ The public repository export also generates:
 - `POST /tenants/{tenant_id}/integration-runtime/preview` - read-only adapter
   runtime planning over operation contracts, scope preflight, outbox handoff,
   worker boundary, reconciliation, and incident routing.
+- `POST /tenants/{tenant_id}/integration-executions/preview` - read-only
+  execution timeline over run ledger, outbox enqueue, worker dispatch, retry,
+  dead-letter, reconciliation, observability, and operator closure.
 - `POST /tenants/{tenant_id}/business-notifications/preview` - read-only
   notification channel readiness, drafts, delivery plan, and evidence.
 - `POST /tenants/{tenant_id}/business-briefings/preview` - read-only

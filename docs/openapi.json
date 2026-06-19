@@ -4388,6 +4388,318 @@
         "title": "IntegrationConnectionRead",
         "type": "object"
       },
+      "IntegrationExecutionDemoRead": {
+        "properties": {
+          "adapterKey": {
+            "title": "Adapterkey",
+            "type": "string"
+          },
+          "api": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Api",
+            "type": "object"
+          },
+          "command": {
+            "title": "Command",
+            "type": "string"
+          },
+          "dataBoundaries": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Databoundaries",
+            "type": "array"
+          },
+          "docs": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "title": "Docs",
+            "type": "array"
+          },
+          "executionMode": {
+            "title": "Executionmode",
+            "type": "string"
+          },
+          "observability": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Observability",
+            "type": "array"
+          },
+          "operationKey": {
+            "title": "Operationkey",
+            "type": "string"
+          },
+          "reconciliationLinks": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Reconciliationlinks",
+            "type": "array"
+          },
+          "retryPolicy": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Retrypolicy",
+            "type": "array"
+          },
+          "runLedger": {
+            "additionalProperties": true,
+            "title": "Runledger",
+            "type": "object"
+          },
+          "stateTransitions": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Statetransitions",
+            "type": "array"
+          },
+          "status": {
+            "const": "previewed",
+            "title": "Status",
+            "type": "string"
+          },
+          "summary": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Summary",
+            "type": "array"
+          },
+          "timeline": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Timeline",
+            "type": "array"
+          }
+        },
+        "required": [
+          "status",
+          "command",
+          "summary",
+          "adapterKey",
+          "operationKey",
+          "executionMode",
+          "runLedger",
+          "timeline",
+          "stateTransitions",
+          "retryPolicy",
+          "reconciliationLinks",
+          "observability",
+          "dataBoundaries",
+          "api",
+          "docs"
+        ],
+        "title": "IntegrationExecutionDemoRead",
+        "type": "object"
+      },
+      "IntegrationExecutionPreviewCreate": {
+        "properties": {
+          "adapter_key": {
+            "default": "accounting.export.mock",
+            "maxLength": 128,
+            "minLength": 2,
+            "pattern": "^[a-z0-9][a-z0-9_.-]*$",
+            "title": "Adapter Key",
+            "type": "string"
+          },
+          "connection_scopes": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 8,
+            "title": "Connection Scopes",
+            "type": "array"
+          },
+          "execution_kind": {
+            "const": "adapter_execution_timeline",
+            "default": "adapter_execution_timeline",
+            "title": "Execution Kind",
+            "type": "string"
+          },
+          "execution_mode": {
+            "default": "contract_only",
+            "enum": [
+              "contract_only",
+              "dry_run",
+              "commit_request"
+            ],
+            "title": "Execution Mode",
+            "type": "string"
+          },
+          "include_failure_path": {
+            "default": true,
+            "title": "Include Failure Path",
+            "type": "boolean"
+          },
+          "operation_key": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 2,
+                "pattern": "^[a-z0-9][a-z0-9_.-]*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "accounting_export_execute",
+            "title": "Operation Key"
+          },
+          "request_id": {
+            "default": "demo-request-001",
+            "maxLength": 120,
+            "minLength": 2,
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]*$",
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "title": "IntegrationExecutionPreviewCreate",
+        "type": "object"
+      },
+      "IntegrationExecutionPreviewRead": {
+        "properties": {
+          "adapter_key": {
+            "title": "Adapter Key",
+            "type": "string"
+          },
+          "api": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Api",
+            "type": "object"
+          },
+          "data_boundaries": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Data Boundaries",
+            "type": "array"
+          },
+          "evidence": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "execution_kind": {
+            "const": "adapter_execution_timeline",
+            "title": "Execution Kind",
+            "type": "string"
+          },
+          "execution_mode": {
+            "enum": [
+              "contract_only",
+              "dry_run",
+              "commit_request"
+            ],
+            "title": "Execution Mode",
+            "type": "string"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "observability": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Observability",
+            "type": "array"
+          },
+          "operation_key": {
+            "title": "Operation Key",
+            "type": "string"
+          },
+          "reconciliation_links": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Reconciliation Links",
+            "type": "array"
+          },
+          "retry_policy": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Retry Policy",
+            "type": "array"
+          },
+          "run_ledger": {
+            "additionalProperties": true,
+            "title": "Run Ledger",
+            "type": "object"
+          },
+          "state_transitions": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "State Transitions",
+            "type": "array"
+          },
+          "status": {
+            "const": "previewed",
+            "title": "Status",
+            "type": "string"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "timeline": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Timeline",
+            "type": "array"
+          }
+        },
+        "required": [
+          "tenant_id",
+          "execution_kind",
+          "adapter_key",
+          "operation_key",
+          "execution_mode",
+          "generated_at",
+          "status",
+          "summary"
+        ],
+        "title": "IntegrationExecutionPreviewRead",
+        "type": "object"
+      },
       "IntegrationIncidentCreate": {
         "properties": {
           "note": {
@@ -5864,6 +6176,11 @@
             "title": "Incidentresponse",
             "type": "object"
           },
+          "integrationExecution": {
+            "additionalProperties": true,
+            "title": "Integrationexecution",
+            "type": "object"
+          },
           "integrationHealth": {
             "items": {
               "additionalProperties": {
@@ -5990,6 +6307,7 @@
           "adapterScenarios",
           "adapterStudio",
           "integrationRuntime",
+          "integrationExecution",
           "connectorFixtureReplay",
           "businessIntakePipeline",
           "businessTaskHandoff",
@@ -7227,6 +7545,27 @@
           }
         },
         "summary": "Connector Fixture Replay Demo",
+        "tags": [
+          "demo"
+        ]
+      }
+    },
+    "/demo/integration-execution": {
+      "get": {
+        "operationId": "integration_execution_demo_demo_integration_execution_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationExecutionDemoRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Integration Execution Demo",
         "tags": [
           "demo"
         ]
@@ -10329,6 +10668,94 @@
           }
         },
         "summary": "Run Integration Connection Check Endpoint",
+        "tags": [
+          "integrations"
+        ]
+      }
+    },
+    "/tenants/{tenant_id}/integration-executions/preview": {
+      "post": {
+        "operationId": "preview_integration_execution_endpoint_tenants__tenant_id__integration_executions_preview_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tenant_id",
+            "required": true,
+            "schema": {
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "X-Actor-Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Role",
+            "required": false,
+            "schema": {
+              "default": "viewer",
+              "title": "X-Actor-Role",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntegrationExecutionPreviewCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationExecutionPreviewRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Preview Integration Execution Endpoint",
         "tags": [
           "integrations"
         ]

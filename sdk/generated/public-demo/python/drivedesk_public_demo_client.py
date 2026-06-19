@@ -29,6 +29,7 @@ REQUIRED_FIELDS = [
   "adapterScenarios",
   "adapterStudio",
   "integrationRuntime",
+  "integrationExecution",
   "connectorFixtureReplay",
   "businessIntakePipeline",
   "businessTaskHandoff",

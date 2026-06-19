@@ -2724,6 +2724,83 @@ def test_integration_runtime_demo_endpoint_exposes_same_public_contract(
     )
 
 
+def test_integration_execution_demo_endpoint_exposes_same_public_contract(
+    api_client: tuple[TestClient, async_sessionmaker[AsyncSession]],
+) -> None:
+    client, _ = api_client
+
+    public_response = client.get("/demo/public")
+    execution_response = client.get("/demo/integration-execution")
+
+    assert execution_response.status_code == 200
+    assert execution_response.headers["access-control-allow-origin"] == "*"
+    assert execution_response.headers["cache-control"] == "public, max-age=60"
+    execution_payload = execution_response.json()
+    assert execution_payload == public_response.json()["integrationExecution"]
+    assert execution_payload["status"] == "previewed"
+    assert (
+        execution_payload["command"]
+        == "POST /tenants/{tenant_id}/integration-executions/preview"
+    )
+    assert execution_payload["adapterKey"] == "accounting.export.mock"
+    assert execution_payload["operationKey"] == "accounting_export_execute"
+    assert execution_payload["executionMode"] == "contract_only"
+    assert execution_payload["runLedger"]["evidence"] == "integration_execution.run_ledger_prepared"
+    assert execution_payload["runLedger"]["wouldCreateWorkflowActionRun"] is True
+    assert execution_payload["runLedger"]["wouldCreateOutboxEvent"] is True
+    assert execution_payload["runLedger"]["wouldCallProvider"] is False
+    assert [item["stage"] for item in execution_payload["timeline"]] == [
+        "request_accepted",
+        "runtime_preflight",
+        "approval_gate",
+        "outbox_enqueue",
+        "worker_dispatch",
+        "provider_call",
+        "reconciliation",
+        "operator_closure",
+    ]
+    assert {item["stage"] for item in execution_payload["timeline"] if item["status"] == "blocked_in_public_preview"} == {
+        "provider_call"
+    }
+    assert {(item["from"], item["to"]) for item in execution_payload["stateTransitions"]} >= {
+        ("none", "requested"),
+        ("requested", "preflight_passed"),
+        ("preflight_passed", "queued"),
+        ("queued", "awaiting_reconciliation"),
+        ("awaiting_reconciliation", "operator_review_ready"),
+    }
+    assert {item["name"] for item in execution_payload["retryPolicy"]} == {
+        "retry_queue",
+        "dead_letter_review",
+    }
+    assert {item["name"] for item in execution_payload["reconciliationLinks"]} == {
+        "expected_result",
+        "provider_evidence",
+        "mismatch_route",
+    }
+    assert {item["metric"] for item in execution_payload["observability"]} >= {
+        "drivedesk_workflow_action_runs",
+        "drivedesk_outbox_events",
+        "drivedesk_integration_reconciliations",
+        "drivedesk_integration_incidents",
+    }
+    assert {item["name"] for item in execution_payload["dataBoundaries"]} == {
+        "preview_only_execution",
+        "idempotency_without_payload",
+        "provider_result_redaction",
+        "operator_review_before_mutation",
+    }
+    assert execution_payload["api"]["standalone"] == "GET /demo/integration-execution"
+    assert (
+        execution_payload["api"]["preview"]
+        == "POST /tenants/{tenant_id}/integration-executions/preview"
+    )
+    assert any(
+        item["path"] == "docs/public/INTEGRATION_EXECUTION.md"
+        for item in execution_payload["docs"]
+    )
+
+
 def test_file_import_adapter_success_flow(api_client: tuple[TestClient, async_sessionmaker[AsyncSession]]) -> None:
     client, session_factory = api_client
     owner_headers = {"X-Actor-Id": "owner_1", "X-Actor-Role": "owner"}

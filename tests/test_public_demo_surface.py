@@ -93,6 +93,12 @@ def test_public_demo_html_links_static_assets() -> None:
     assert 'id="integrationRuntimePreflightRows"' in html
     assert 'id="integrationRuntimeOutboxRows"' in html
     assert 'id="integrationRuntimeBoundaryRows"' in html
+    assert 'id="integrationExecutionSummaryRows"' in html
+    assert 'id="integrationExecutionLedgerRows"' in html
+    assert 'id="integrationExecutionTimelineRows"' in html
+    assert 'id="integrationExecutionStateRows"' in html
+    assert 'id="integrationExecutionRecoveryRows"' in html
+    assert 'id="integrationExecutionBoundaryRows"' in html
     assert 'id="controlTowerObservationRows"' in html
     assert 'id="controlTowerExceptionRows"' in html
     assert 'id="controlTowerRepairRows"' in html
@@ -996,6 +1002,54 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
         "docs/public/INTEGRATION_OPERATION_CONTRACTS.md",
         "docs/public/ADAPTER_DEVELOPER_GUIDE.md",
     }
+    integration_execution = payload["integrationExecution"]
+    assert integration_execution["status"] == "previewed"
+    assert (
+        integration_execution["command"]
+        == "POST /tenants/{tenant_id}/integration-executions/preview"
+    )
+    assert integration_execution["adapterKey"] == "accounting.export.mock"
+    assert integration_execution["operationKey"] == "accounting_export_execute"
+    assert integration_execution["executionMode"] == "contract_only"
+    assert {item["label"] for item in integration_execution["summary"]} >= {
+        "Timeline",
+        "Run ledger",
+        "Provider calls",
+        "Recovery",
+    }
+    assert integration_execution["runLedger"]["wouldCreateWorkflowActionRun"] is True
+    assert integration_execution["runLedger"]["wouldCreateOutboxEvent"] is True
+    assert integration_execution["runLedger"]["wouldCallProvider"] is False
+    assert integration_execution["runLedger"]["evidence"] == "integration_execution.run_ledger_prepared"
+    assert [item["stage"] for item in integration_execution["timeline"]] == [
+        "request_accepted",
+        "runtime_preflight",
+        "approval_gate",
+        "outbox_enqueue",
+        "worker_dispatch",
+        "provider_call",
+        "reconciliation",
+        "operator_closure",
+    ]
+    assert {item["name"] for item in integration_execution["retryPolicy"]} == {
+        "retry_queue",
+        "dead_letter_review",
+    }
+    assert {item["name"] for item in integration_execution["dataBoundaries"]} == {
+        "preview_only_execution",
+        "idempotency_without_payload",
+        "provider_result_redaction",
+        "operator_review_before_mutation",
+    }
+    assert integration_execution["api"]["standalone"] == "GET /demo/integration-execution"
+    assert integration_execution["api"]["preview"] == (
+        "POST /tenants/{tenant_id}/integration-executions/preview"
+    )
+    assert {item["path"] for item in integration_execution["docs"]} >= {
+        "docs/public/INTEGRATION_EXECUTION.md",
+        "docs/public/INTEGRATION_RUNTIME.md",
+        "docs/public/OUTBOX_RECOVERY.md",
+    }
     business_scenario_replay = payload["businessScenarioReplay"]
     assert business_scenario_replay["status"] == "validated"
     assert business_scenario_replay["command"] == "bash scripts/check_public_business_scenario_replay.sh"
@@ -1166,6 +1220,7 @@ def test_public_demo_can_load_api_backed_data_with_static_fallback() -> None:
     assert "fillBusinessActionExecution" in script
     assert "fillBusinessApprovalGateway" in script
     assert "fillIntegrationRuntime" in script
+    assert "fillIntegrationExecution" in script
     assert "alertRouting" in script
     assert "incidentResponse" in script
     assert "engineeringProof" in script
@@ -1173,6 +1228,7 @@ def test_public_demo_can_load_api_backed_data_with_static_fallback() -> None:
     assert "businessActionExecution" in script
     assert "businessApprovalGateway" in script
     assert "integrationRuntime" in script
+    assert "integrationExecution" in script
     assert "workflowScenarios" in script
     assert "endToEndScenario" in script
     assert "adapterScenarios" in script
@@ -1396,6 +1452,13 @@ def test_public_demo_api_scripts_and_examples_target_demo_contract() -> None:
             "accounting_export_execute",
             "providerCallEnabled",
             "INTEGRATION_RUNTIME.md",
+        ],
+        "scripts/check_public_integration_execution.sh": [
+            "/demo/integration-execution",
+            "integrationExecution",
+            "integration_execution.run_ledger_prepared",
+            "IntegrationReconciliation",
+            "INTEGRATION_EXECUTION.md",
         ],
         "examples/curl/demo-public.sh": ["/demo/public", "api.synthetic", "student_sync"],
         "examples/python/demo_public_client.py": ["/demo/public", "api.synthetic", "student_sync"],

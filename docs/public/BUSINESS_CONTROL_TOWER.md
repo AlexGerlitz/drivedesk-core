@@ -8,13 +8,15 @@ The first public-safe slice models a common cross-system failure:
 1. CRM still says a deal is waiting for payment.
 2. Bank evidence says payment was received.
 3. Accounting export has not been sent.
-4. DriveDesk previews the detected mismatch before mutating data.
-5. DriveDesk opens a business exception.
-6. DriveDesk previews escalation routing: owner, queue, SLA, and next action.
-7. DriveDesk previews an ordered action plan for the responsible operator.
-8. DriveDesk previews notification drafts without sending anything externally.
-9. A repair action is proposed, approved, and executed in dry-run mode.
-10. A role briefing turns the raw evidence into the next useful operator view.
+4. DriveDesk previews role-specific workbench context without raw provider
+   payloads.
+5. DriveDesk previews the detected mismatch before mutating data.
+6. DriveDesk opens a business exception.
+7. DriveDesk previews escalation routing: owner, queue, SLA, and next action.
+8. DriveDesk previews an ordered action plan for the responsible operator.
+9. DriveDesk previews notification drafts without sending anything externally.
+10. A repair action is proposed, approved, and executed in dry-run mode.
+11. A role briefing turns the raw evidence into the next useful operator view.
 
 This is intentionally not another workflow automation demo. The control tower
 tracks business state across systems, detects an exception, records impact, and
@@ -24,6 +26,7 @@ keeps the repair path auditable.
 
 | Step | Endpoint | Purpose |
 | --- | --- | --- |
+| Preview workbench context | `POST /tenants/{tenant_id}/business-workbench-context/preview` | Build role-specific context cards from normalized external observations without provider calls, secrets, raw payloads, or writes. |
 | Preview detections | `POST /tenants/{tenant_id}/business-detections/preview` | Detect exception candidates and suggested repair actions from observations without mutating data. |
 | Preview escalations | `POST /tenants/{tenant_id}/business-escalations/preview` | Route open business exceptions to owner roles, queues, SLA targets, and next actions without mutating data. |
 | Preview action plan | `POST /tenants/{tenant_id}/business-action-plans/preview` | Build ordered operator work, automation candidates, approval gates, and evidence links without mutating data. |
@@ -42,6 +45,7 @@ keeps the repair path auditable.
 | Model | Meaning |
 | --- | --- |
 | `BusinessDetectionPreview` | A read-only detector result with matched rules, exception candidates, repair suggestions, and evidence. |
+| `BusinessWorkbenchContextPreview` | A read-only workbench context with role cards, safe facts, suggested actions, data boundaries, and evidence. |
 | `BusinessEscalationPreview` | A read-only triage result with queue, owner role, SLA, next action, and evidence. |
 | `BusinessActionPlanPreview` | A read-only work plan with lanes, ordered steps, automation candidates, approval gates, and evidence. |
 | `BusinessNotificationPreview` | A read-only communication plan with channels, drafts, delivery plan, approval gates, and evidence. |
@@ -52,6 +56,27 @@ keeps the repair path auditable.
 
 The models are tenant-scoped and use the same audit/outbox foundation as the
 rest of the API.
+
+## Workbench Context Preview
+
+The workbench context preview is the bridge between external observations and
+daily employee work. A future Bitrix24, 1C, bank, KKT, website, or support
+adapter can feed normalized observations into DriveDesk; the workbench then
+renders safe role-specific cards.
+
+It returns:
+
+- context cards for systems such as CRM, bank, and accounting;
+- safe facts, for example amount bucket, owner role, match reason, or export
+  batch key;
+- suggested next actions inside DriveDesk;
+- data-boundary checks for read-only source context, PII redaction, and secret
+  isolation;
+- evidence labels that connect the cards to observations and action-plan
+  previews.
+
+The preview is read-only. It does not call provider APIs, read provider secrets,
+include raw payloads, enqueue outbox events, or mutate external systems.
 
 ## Role Briefing
 
@@ -170,6 +195,8 @@ The public demo includes a `businessControlTower` payload with:
 - synthetic observations from `crm.bitrix24.mock`, `bank.statement.mock`, and
   `accounting.export.mock`;
 - one `payment_reconciliation` detection preview;
+- one `role_assist` workbench context preview with three context cards and data
+  boundaries;
 - one `crm_payment_mismatch` exception;
 - one `exception_triage` escalation preview with owner, queue, SLA, and next
   action;
@@ -180,7 +207,8 @@ The public demo includes a `businessControlTower` payload with:
 - one approval-gated `sync_status` repair action;
 - one accountant briefing with source systems, highlights, recommended actions,
   and review points;
-- a five-step flow from observation to dry-run repair evidence.
+- a flow from observation to context, detection, action planning, notification,
+  and dry-run repair evidence.
 
 Verification:
 

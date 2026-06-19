@@ -1919,6 +1919,205 @@
         "title": "BusinessStateObservationRead",
         "type": "object"
       },
+      "BusinessWorkbenchContextPreviewCreate": {
+        "properties": {
+          "context_kind": {
+            "const": "role_assist",
+            "default": "role_assist",
+            "title": "Context Kind",
+            "type": "string"
+          },
+          "include_resolved": {
+            "default": false,
+            "title": "Include Resolved",
+            "type": "boolean"
+          },
+          "limit": {
+            "default": 20,
+            "maximum": 50.0,
+            "minimum": 1.0,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "role": {
+            "default": "operator",
+            "enum": [
+              "operator",
+              "accountant",
+              "manager",
+              "owner",
+              "support"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "source_systems": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 8,
+            "title": "Source Systems",
+            "type": "array"
+          },
+          "subject_id": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Id"
+          },
+          "subject_type": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 2,
+                "pattern": "^[a-z0-9][a-z0-9_-]*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Type"
+          }
+        },
+        "title": "BusinessWorkbenchContextPreviewCreate",
+        "type": "object"
+      },
+      "BusinessWorkbenchContextPreviewRead": {
+        "properties": {
+          "api": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Api",
+            "type": "object"
+          },
+          "context_cards": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Context Cards",
+            "type": "array"
+          },
+          "context_kind": {
+            "const": "role_assist",
+            "title": "Context Kind",
+            "type": "string"
+          },
+          "data_boundaries": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Data Boundaries",
+            "type": "array"
+          },
+          "evidence": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "review_points": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Review Points",
+            "type": "array"
+          },
+          "risk_level": {
+            "enum": [
+              "normal",
+              "attention",
+              "critical"
+            ],
+            "title": "Risk Level",
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "operator",
+              "accountant",
+              "manager",
+              "owner",
+              "support"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "source_systems": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Source Systems",
+            "type": "array"
+          },
+          "subject_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Id"
+          },
+          "subject_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Type"
+          },
+          "suggested_actions": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Suggested Actions",
+            "type": "array"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tenant_id",
+          "context_kind",
+          "role",
+          "generated_at",
+          "risk_level",
+          "summary"
+        ],
+        "title": "BusinessWorkbenchContextPreviewRead",
+        "type": "object"
+      },
       "FileImportCreate": {
         "properties": {
           "integration_connection_id": {
@@ -6625,6 +6824,94 @@
           }
         },
         "summary": "Create Business State Observation Endpoint",
+        "tags": [
+          "business-control"
+        ]
+      }
+    },
+    "/tenants/{tenant_id}/business-workbench-context/preview": {
+      "post": {
+        "operationId": "preview_business_workbench_context_endpoint_tenants__tenant_id__business_workbench_context_preview_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tenant_id",
+            "required": true,
+            "schema": {
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Id",
+            "required": false,
+            "schema": {
+              "default": "system",
+              "title": "X-Actor-Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-Role",
+            "required": false,
+            "schema": {
+              "default": "viewer",
+              "title": "X-Actor-Role",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessWorkbenchContextPreviewCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessWorkbenchContextPreviewRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Preview Business Workbench Context Endpoint",
         "tags": [
           "business-control"
         ]

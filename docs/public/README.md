@@ -130,9 +130,12 @@ The public repository export also generates:
 - `incidentResponse` - public-safe incident response contract in the demo
   payload and Incidents tab.
 - `businessControlTower` - public-safe control tower contract for CRM, bank,
-  accounting, detection preview, escalation preview, business exception,
-  action plan preview, notification preview, repair-action flow, and role
-  briefing preview.
+  accounting, workbench context preview, detection preview, escalation preview,
+  business exception, action plan preview, notification preview, repair-action
+  flow, and role briefing preview.
+- `POST /tenants/{tenant_id}/business-workbench-context/preview` - read-only
+  role-specific context cards from normalized external observations without
+  provider calls, raw payloads, secrets, or writes.
 - `POST /tenants/{tenant_id}/business-detections/preview` - read-only
   exception candidate detection from normalized business observations.
 - `POST /tenants/{tenant_id}/business-escalations/preview` - read-only

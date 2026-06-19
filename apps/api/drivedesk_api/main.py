@@ -92,6 +92,8 @@ from drivedesk_api.schemas import (
     BusinessRecordType,
     BusinessStateObservationCreate,
     BusinessStateObservationRead,
+    BusinessWorkbenchContextPreviewCreate,
+    BusinessWorkbenchContextPreviewRead,
     FileImportCreate,
     IntegrationConnectionCheckCreate,
     IntegrationConnectionCheckRead,
@@ -175,6 +177,7 @@ from drivedesk_api.services import (
     preview_business_detections,
     preview_business_escalations,
     preview_business_notifications,
+    preview_business_workbench_context,
     preview_integration_mapping,
     propose_repair_action,
     retry_outbox_event,
@@ -963,6 +966,21 @@ def build_app(settings: Settings | None = None) -> FastAPI:
             payload=payload,
             actor=actor,
         )
+
+    @api.post(
+        "/tenants/{tenant_id}/business-workbench-context/preview",
+        response_model=BusinessWorkbenchContextPreviewRead,
+        tags=["business-control"],
+    )
+    async def preview_business_workbench_context_endpoint(
+        tenant_id: str,
+        payload: BusinessWorkbenchContextPreviewCreate,
+        session: AsyncSession = Depends(get_session),
+        actor: ActorContext = Depends(actor_context),
+    ) -> dict[str, object]:
+        await ensure_tenant_exists(session, tenant_id)
+        require_tenant_permission(actor, tenant_id, Permission.BUSINESS_RECORD_READ)
+        return await preview_business_workbench_context(session, tenant_id=tenant_id, payload=payload)
 
     @api.post(
         "/tenants/{tenant_id}/business-detections/preview",

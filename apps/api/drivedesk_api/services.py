@@ -37,6 +37,7 @@ from drivedesk_api.schemas import (
     BusinessDetectionPreviewCreate,
     BusinessEscalationPreviewCreate,
     BusinessNotificationPreviewCreate,
+    BusinessWorkbenchContextPreviewCreate,
     BusinessExceptionCreate,
     BusinessExceptionStatusChange,
     BusinessRecordCreate,
@@ -1955,6 +1956,247 @@ async def preview_business_notifications(
         ],
         "api": {
             "preview": "POST /tenants/{tenant_id}/business-notifications/preview",
+            "action_plan": "POST /tenants/{tenant_id}/business-action-plans/preview",
+            "briefing": "POST /tenants/{tenant_id}/business-briefings/preview",
+        },
+    }
+
+
+SAFE_CONTEXT_FACT_KEYS = {
+    "amount_bucket",
+    "export_batch_id",
+    "matched_by",
+    "owner_role",
+    "reason",
+}
+
+
+def _workbench_context_card(observation: BusinessStateObservation) -> dict[str, object]:
+    family = _observation_family(observation.system_key)
+    payload = _json_dict(observation.payload_json)
+    safe_facts = [
+        {"key": key, "value": str(payload[key])}
+        for key in sorted(SAFE_CONTEXT_FACT_KEYS)
+        if key in payload
+    ]
+    title_by_family = {
+        "crm": "CRM deal context",
+        "bank": "Payment evidence",
+        "accounting": "Accounting export context",
+    }
+    state_status = "available"
+    if family == "bank" and observation.state in BANK_PAID_STATES:
+        state_status = "confirmed"
+    elif family == "accounting" and observation.state in ACCOUNTING_NOT_EXPORTED_STATES:
+        state_status = "action_required"
+    elif family == "crm" and observation.state in CRM_WAITING_PAYMENT_STATES:
+        state_status = "needs_cross_check"
+
+    return {
+        "card_id": f"{family}.{observation.subject_type}.{observation.subject_id}.{observation.state}",
+        "title": title_by_family.get(family, "External system context"),
+        "system_key": observation.system_key,
+        "system_family": family,
+        "subject": _subject_label(observation.subject_type, observation.subject_id),
+        "state": observation.state,
+        "status": state_status,
+        "safe_facts": safe_facts,
+        "payload_keys": sorted(payload.keys()),
+        "raw_payload_included": False,
+        "pii_included": False,
+        "external_fetch": False,
+        "external_mutation": False,
+        "observed_at": observation.observed_at.isoformat(),
+        "evidence": "business_workbench_context.previewed",
+    }
+
+
+def _workbench_context_suggested_actions(
+    *,
+    tenant_id: str,
+    cards: list[dict[str, object]],
+    exceptions: list[BusinessException],
+    repairs: list[RepairAction],
+) -> list[dict[str, object]]:
+    statuses_by_family = {
+        str(card["system_family"]): str(card["status"])
+        for card in cards
+    }
+    actions: list[dict[str, object]] = []
+    if statuses_by_family.get("bank") == "confirmed" and statuses_by_family.get("crm") == "needs_cross_check":
+        actions.append(
+            {
+                "action": "reconcile_crm_payment_status",
+                "status": "available",
+                "summary": "Compare the paid bank state with the CRM deal state before any external write.",
+                "endpoint": "POST /tenants/{tenant_id}/business-detections/preview",
+                "external_mutation": False,
+                "requires_approval": False,
+                "evidence": "business_workbench_context.previewed",
+            }
+        )
+    if statuses_by_family.get("accounting") == "action_required":
+        actions.append(
+            {
+                "action": "review_accounting_export",
+                "status": "available",
+                "summary": "Open the accounting export evidence and decide whether a dry-run repair is needed.",
+                "endpoint": "GET /tenants/{tenant_id}/business-state/observations",
+                "external_mutation": False,
+                "requires_approval": False,
+                "evidence": "business_workbench_context.previewed",
+            }
+        )
+    if exceptions or repairs:
+        actions.append(
+            {
+                "action": "open_action_plan_preview",
+                "status": "ready" if repairs else "available",
+                "summary": "Turn the current context into ordered operator work inside DriveDesk.",
+                "endpoint": "POST /tenants/{tenant_id}/business-action-plans/preview",
+                "external_mutation": False,
+                "requires_approval": False,
+                "evidence": "business_action_plan.previewed",
+            }
+        )
+    return actions
+
+
+async def preview_business_workbench_context(
+    session: AsyncSession,
+    *,
+    tenant_id: str,
+    payload: BusinessWorkbenchContextPreviewCreate,
+) -> dict[str, object]:
+    await ensure_tenant_exists(session, tenant_id)
+    observations_query = (
+        select(BusinessStateObservation)
+        .where(BusinessStateObservation.tenant_id == tenant_id)
+        .order_by(BusinessStateObservation.observed_at.desc(), BusinessStateObservation.created_at.desc())
+        .limit(payload.limit)
+    )
+    exceptions_query = (
+        select(BusinessException)
+        .where(BusinessException.tenant_id == tenant_id)
+        .order_by(BusinessException.detected_at.desc(), BusinessException.created_at.desc())
+        .limit(payload.limit)
+    )
+    if payload.subject_type:
+        observations_query = observations_query.where(BusinessStateObservation.subject_type == payload.subject_type)
+        exceptions_query = exceptions_query.where(BusinessException.subject_type == payload.subject_type)
+    if payload.subject_id:
+        observations_query = observations_query.where(BusinessStateObservation.subject_id == payload.subject_id)
+        exceptions_query = exceptions_query.where(BusinessException.subject_id == payload.subject_id)
+    if payload.source_systems:
+        observations_query = observations_query.where(BusinessStateObservation.system_key.in_(payload.source_systems))
+    if not payload.include_resolved:
+        exceptions_query = exceptions_query.where(BusinessException.status != "resolved")
+
+    observations_result = await session.execute(observations_query)
+    exceptions_result = await session.execute(exceptions_query)
+    observations = list(observations_result.scalars().all())
+    exceptions = list(exceptions_result.scalars().all())
+    exception_ids = [item.id for item in exceptions]
+    repairs: list[RepairAction] = []
+    if exception_ids:
+        repairs_result = await session.execute(
+            select(RepairAction)
+            .where(
+                RepairAction.tenant_id == tenant_id,
+                RepairAction.business_exception_id.in_(exception_ids),
+            )
+            .order_by(RepairAction.created_at.desc())
+            .limit(payload.limit)
+        )
+        repairs = list(repairs_result.scalars().all())
+
+    cards = [_workbench_context_card(observation) for observation in observations]
+    source_systems = sorted({str(card["system_key"]) for card in cards})
+    suggested_actions = _workbench_context_suggested_actions(
+        tenant_id=tenant_id,
+        cards=cards,
+        exceptions=exceptions,
+        repairs=repairs,
+    )
+    subject = _subject_label(payload.subject_type, payload.subject_id)
+    summary = (
+        f"{payload.context_kind} context for {payload.role}: {len(cards)} card(s), "
+        f"{len(source_systems)} source system(s), {len(suggested_actions)} suggested action(s) for {subject}."
+    )
+    return {
+        "tenant_id": tenant_id,
+        "context_kind": payload.context_kind,
+        "role": payload.role,
+        "subject_type": payload.subject_type,
+        "subject_id": payload.subject_id,
+        "generated_at": datetime.now(UTC),
+        "risk_level": _briefing_risk_level(exceptions, repairs),
+        "summary": summary,
+        "source_systems": source_systems,
+        "context_cards": cards,
+        "suggested_actions": suggested_actions,
+        "data_boundaries": [
+            {
+                "name": "read_only_source_context",
+                "status": "preview_only",
+                "external_fetch": False,
+                "external_mutation": False,
+                "detail": "The preview uses already-normalized DriveDesk observations and does not call provider APIs.",
+            },
+            {
+                "name": "pii_redaction",
+                "status": "clean" if all(card["pii_included"] is False for card in cards) else "review_required",
+                "raw_payload_included": False,
+                "detail": "Cards expose system, state, subject key, safe facts, and payload keys, not raw provider payloads.",
+            },
+            {
+                "name": "secret_boundary",
+                "status": "clean",
+                "requires_secret": False,
+                "detail": "No Bitrix, bank, accounting, Telegram, or email credentials are required for preview.",
+            },
+        ],
+        "review_points": [
+            {
+                "name": "single_work_surface",
+                "status": "ready" if cards else "empty",
+                "detail": "External facts are rendered next to the operator workflow inside DriveDesk.",
+            },
+            {
+                "name": "source_coverage",
+                "status": "ready" if len(source_systems) >= 2 else "partial",
+                "detail": "Context quality improves as CRM, bank, accounting, and support observations converge.",
+            },
+            {
+                "name": "next_action_boundary",
+                "status": "preview_only",
+                "detail": "Suggested actions link to DriveDesk previews and approval-gated flows only.",
+            },
+        ],
+        "evidence": [
+            {
+                "type": "observation",
+                "id": observation.id,
+                "system": observation.system_key,
+                "state": observation.state,
+                "event": "business_state.observation.recorded",
+            }
+            for observation in observations[:5]
+        ]
+        + [
+            {
+                "type": "business_exception",
+                "id": business_exception.id,
+                "severity": business_exception.severity,
+                "status": business_exception.status,
+                "event": "business_exception.created",
+            }
+            for business_exception in exceptions[:5]
+        ],
+        "api": {
+            "preview": "POST /tenants/{tenant_id}/business-workbench-context/preview",
+            "observations": "GET /tenants/{tenant_id}/business-state/observations",
+            "detections": "POST /tenants/{tenant_id}/business-detections/preview",
             "action_plan": "POST /tenants/{tenant_id}/business-action-plans/preview",
             "briefing": "POST /tenants/{tenant_id}/business-briefings/preview",
         },

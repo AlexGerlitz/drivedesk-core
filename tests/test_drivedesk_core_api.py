@@ -913,6 +913,56 @@ def test_business_control_tower_exception_and_repair_flow(
     assert notification["api"]["preview"] == "POST /tenants/{tenant_id}/business-notifications/preview"
     assert notification["api"]["action_plan"] == "POST /tenants/{tenant_id}/business-action-plans/preview"
 
+    context_response = client.post(
+        f"/tenants/{tenant_id}/business-workbench-context/preview",
+        json={
+            "context_kind": "role_assist",
+            "role": "accountant",
+            "subject_type": "deal",
+            "subject_id": "DEAL-2026-001",
+        },
+        headers=owner_headers,
+    )
+    assert context_response.status_code == 200
+    context = context_response.json()
+    assert context["context_kind"] == "role_assist"
+    assert context["role"] == "accountant"
+    assert context["risk_level"] == "attention"
+    assert context["source_systems"] == [
+        "accounting.export.mock",
+        "bank.statement.mock",
+        "crm.bitrix24.mock",
+    ]
+    assert {item["system_family"] for item in context["context_cards"]} == {
+        "accounting",
+        "bank",
+        "crm",
+    }
+    assert {item["status"] for item in context["context_cards"]} == {
+        "action_required",
+        "confirmed",
+        "needs_cross_check",
+    }
+    assert {item["pii_included"] for item in context["context_cards"]} == {False}
+    assert {item["raw_payload_included"] for item in context["context_cards"]} == {False}
+    assert {item["external_fetch"] for item in context["context_cards"]} == {False}
+    assert {item["external_mutation"] for item in context["context_cards"]} == {False}
+    assert {item["action"] for item in context["suggested_actions"]} >= {
+        "reconcile_crm_payment_status",
+        "review_accounting_export",
+        "open_action_plan_preview",
+    }
+    assert {item["external_mutation"] for item in context["suggested_actions"]} == {False}
+    assert {item["name"] for item in context["data_boundaries"]} == {
+        "read_only_source_context",
+        "pii_redaction",
+        "secret_boundary",
+    }
+    assert {item["status"] for item in context["data_boundaries"]} >= {"clean", "preview_only"}
+    assert {item["type"] for item in context["evidence"]} >= {"observation", "business_exception"}
+    assert context["api"]["preview"] == "POST /tenants/{tenant_id}/business-workbench-context/preview"
+    assert context["api"]["action_plan"] == "POST /tenants/{tenant_id}/business-action-plans/preview"
+
     briefing_response = client.post(
         f"/tenants/{tenant_id}/business-briefings/preview",
         json={

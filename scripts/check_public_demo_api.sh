@@ -252,6 +252,39 @@ assert {item["externalMutation"] for item in control_tower["detection"]["suggest
 assert control_tower["detection"]["api"]["preview"] == (
     "POST /tenants/{tenant_id}/business-detections/preview"
 ), demo
+assert control_tower["workbenchContext"]["contextKind"] == "role_assist", demo
+assert control_tower["workbenchContext"]["role"] == "accountant", demo
+assert control_tower["workbenchContext"]["riskLevel"] == "attention", demo
+assert set(control_tower["workbenchContext"]["sourceSystems"]) >= {
+    "crm.bitrix24.mock",
+    "bank.statement.mock",
+    "accounting.export.mock",
+}, demo
+assert {item["systemFamily"] for item in control_tower["workbenchContext"]["contextCards"]} == {
+    "accounting",
+    "bank",
+    "crm",
+}, demo
+assert {item["piiIncluded"] for item in control_tower["workbenchContext"]["contextCards"]} == {False}, demo
+assert {item["rawPayloadIncluded"] for item in control_tower["workbenchContext"]["contextCards"]} == {False}, demo
+assert {item["externalFetch"] for item in control_tower["workbenchContext"]["contextCards"]} == {False}, demo
+assert {item["externalMutation"] for item in control_tower["workbenchContext"]["contextCards"]} == {False}, demo
+assert {item["action"] for item in control_tower["workbenchContext"]["suggestedActions"]} >= {
+    "reconcile_crm_payment_status",
+    "review_accounting_export",
+    "open_action_plan_preview",
+}, demo
+assert {item["externalMutation"] for item in control_tower["workbenchContext"]["suggestedActions"]} == {
+    False
+}, demo
+assert {item["name"] for item in control_tower["workbenchContext"]["dataBoundaries"]} == {
+    "read_only_source_context",
+    "pii_redaction",
+    "secret_boundary",
+}, demo
+assert control_tower["workbenchContext"]["api"]["preview"] == (
+    "POST /tenants/{tenant_id}/business-workbench-context/preview"
+), demo
 assert control_tower["escalation"]["policy"] == "exception_triage", demo
 assert control_tower["escalation"]["riskLevel"] == "attention", demo
 assert {item["queue"] for item in control_tower["escalation"]["queues"]} == {
@@ -345,6 +378,7 @@ assert {repair_action["action"] for repair_action in control_tower["repairAction
 assert {repair_action["externalMutation"] for repair_action in control_tower["repairActions"]} == {False}, demo
 assert {step["step"] for step in control_tower["flow"]} >= {
     "observe",
+    "context",
     "detect",
     "propose",
     "approve",
@@ -553,6 +587,7 @@ assert "/tenants/{tenant_id}/business-records" in openapi["paths"], openapi["pat
 assert "/business-record-lifecycle-policies" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/business-records/lifecycle-preview" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/business-records/{record_id}/transition" in openapi["paths"], openapi["paths"].keys()
+assert "/tenants/{tenant_id}/business-workbench-context/preview" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/business-action-plans/preview" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/business-notifications/preview" in openapi["paths"], openapi["paths"].keys()
 assert "/tenants/{tenant_id}/workflow-rules" in openapi["paths"], openapi["paths"].keys()
@@ -581,6 +616,7 @@ if openapi_file.exists():
     assert "/tenants/{tenant_id}/outbox-events/{event_id}/retry" in generated["paths"], generated["paths"].keys()
     assert "/business-record-lifecycle-policies" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/business-records/lifecycle-preview" in generated["paths"], generated["paths"].keys()
+    assert "/tenants/{tenant_id}/business-workbench-context/preview" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/integration-connections" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/integration-connections/{connection_id}/health" in generated["paths"], generated["paths"].keys()
     assert "/tenants/{tenant_id}/integration-connections/{connection_id}/health-checks" in generated["paths"], generated["paths"].keys()

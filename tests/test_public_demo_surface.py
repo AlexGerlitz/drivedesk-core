@@ -167,6 +167,39 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
     assert control_tower["detection"]["api"]["preview"] == (
         "POST /tenants/{tenant_id}/business-detections/preview"
     )
+    assert control_tower["workbenchContext"]["contextKind"] == "role_assist"
+    assert control_tower["workbenchContext"]["role"] == "accountant"
+    assert control_tower["workbenchContext"]["riskLevel"] == "attention"
+    assert set(control_tower["workbenchContext"]["sourceSystems"]) >= {
+        "crm.bitrix24.mock",
+        "bank.statement.mock",
+        "accounting.export.mock",
+    }
+    assert {item["systemFamily"] for item in control_tower["workbenchContext"]["contextCards"]} == {
+        "accounting",
+        "bank",
+        "crm",
+    }
+    assert {item["piiIncluded"] for item in control_tower["workbenchContext"]["contextCards"]} == {False}
+    assert {item["rawPayloadIncluded"] for item in control_tower["workbenchContext"]["contextCards"]} == {False}
+    assert {item["externalFetch"] for item in control_tower["workbenchContext"]["contextCards"]} == {False}
+    assert {item["externalMutation"] for item in control_tower["workbenchContext"]["contextCards"]} == {False}
+    assert {item["action"] for item in control_tower["workbenchContext"]["suggestedActions"]} >= {
+        "reconcile_crm_payment_status",
+        "review_accounting_export",
+        "open_action_plan_preview",
+    }
+    assert {item["externalMutation"] for item in control_tower["workbenchContext"]["suggestedActions"]} == {
+        False
+    }
+    assert {item["name"] for item in control_tower["workbenchContext"]["dataBoundaries"]} == {
+        "read_only_source_context",
+        "pii_redaction",
+        "secret_boundary",
+    }
+    assert control_tower["workbenchContext"]["api"]["preview"] == (
+        "POST /tenants/{tenant_id}/business-workbench-context/preview"
+    )
     assert control_tower["escalation"]["policy"] == "exception_triage"
     assert control_tower["escalation"]["riskLevel"] == "attention"
     assert {item["queue"] for item in control_tower["escalation"]["queues"]} == {
@@ -260,6 +293,7 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
         "detect",
         "propose",
         "approve",
+        "context",
         "plan",
         "notify",
         "execute",

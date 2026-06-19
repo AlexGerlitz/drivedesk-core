@@ -54,6 +54,7 @@ detection_adr_path = root / "docs/adr/0066-business-detection-preview.md"
 escalation_adr_path = root / "docs/adr/0067-business-escalation-preview.md"
 action_plan_adr_path = root / "docs/adr/0068-business-action-plan-preview.md"
 notification_adr_path = root / "docs/adr/0069-business-notification-preview.md"
+workbench_context_adr_path = root / "docs/adr/0070-business-workbench-context-preview.md"
 demo_data_path = root / "apps/admin/public-demo/demo-data.js"
 demo_html_path = root / "apps/admin/public-demo/index.html"
 demo_app_path = root / "apps/admin/public-demo/app.js"
@@ -70,6 +71,7 @@ for path in [
     escalation_adr_path,
     action_plan_adr_path,
     notification_adr_path,
+    workbench_context_adr_path,
     demo_data_path,
     demo_html_path,
     demo_app_path,
@@ -103,6 +105,55 @@ require(
 require(
     detection.get("api", {}).get("preview") == "POST /tenants/{tenant_id}/business-detections/preview",
     "businessControlTower detection preview endpoint missing",
+)
+workbench_context = control.get("workbenchContext", {})
+require(workbench_context.get("contextKind") == "role_assist", "businessControlTower context kind mismatch")
+require(workbench_context.get("role") == "accountant", "businessControlTower context role mismatch")
+require(workbench_context.get("riskLevel") == "attention", "businessControlTower context risk mismatch")
+require(
+    set(workbench_context.get("sourceSystems", []))
+    >= {"crm.bitrix24.mock", "bank.statement.mock", "accounting.export.mock"},
+    "businessControlTower context source systems missing",
+)
+require(
+    {item.get("systemFamily") for item in workbench_context.get("contextCards", [])}
+    == {"accounting", "bank", "crm"},
+    "businessControlTower context cards mismatch",
+)
+require(
+    {item.get("piiIncluded") for item in workbench_context.get("contextCards", [])} == {False},
+    "businessControlTower context cards must avoid PII",
+)
+require(
+    {item.get("rawPayloadIncluded") for item in workbench_context.get("contextCards", [])} == {False},
+    "businessControlTower context cards must avoid raw payloads",
+)
+require(
+    {item.get("externalFetch") for item in workbench_context.get("contextCards", [])} == {False},
+    "businessControlTower context cards must not fetch externally",
+)
+require(
+    {item.get("externalMutation") for item in workbench_context.get("contextCards", [])} == {False},
+    "businessControlTower context cards must be public-safe",
+)
+require(
+    {item.get("action") for item in workbench_context.get("suggestedActions", [])}
+    >= {"reconcile_crm_payment_status", "review_accounting_export", "open_action_plan_preview"},
+    "businessControlTower context suggested actions missing",
+)
+require(
+    {item.get("externalMutation") for item in workbench_context.get("suggestedActions", [])} == {False},
+    "businessControlTower context suggested actions must be public-safe",
+)
+require(
+    {item.get("name") for item in workbench_context.get("dataBoundaries", [])}
+    == {"read_only_source_context", "pii_redaction", "secret_boundary"},
+    "businessControlTower context data boundaries mismatch",
+)
+require(
+    workbench_context.get("api", {}).get("preview")
+    == "POST /tenants/{tenant_id}/business-workbench-context/preview",
+    "businessControlTower context preview endpoint missing",
 )
 escalation = control.get("escalation", {})
 require(escalation.get("policy") == "exception_triage", "businessControlTower escalation policy mismatch")
@@ -260,6 +311,7 @@ require(
 openapi = build_app().openapi()
 paths = set(openapi.get("paths", {}))
 required_paths = {
+    "/tenants/{tenant_id}/business-workbench-context/preview",
     "/tenants/{tenant_id}/business-detections/preview",
     "/tenants/{tenant_id}/business-escalations/preview",
     "/tenants/{tenant_id}/business-action-plans/preview",
@@ -278,6 +330,7 @@ require(required_paths.issubset(paths), "OpenAPI missing business control paths"
 doc_text = read(doc_path)
 for needle in [
     "Business Operations Control Tower",
+    "POST /tenants/{tenant_id}/business-workbench-context/preview",
     "POST /tenants/{tenant_id}/business-detections/preview",
     "POST /tenants/{tenant_id}/business-escalations/preview",
     "POST /tenants/{tenant_id}/business-action-plans/preview",
@@ -286,6 +339,7 @@ for needle in [
     "BusinessEscalationPreview",
     "BusinessActionPlanPreview",
     "BusinessNotificationPreview",
+    "BusinessWorkbenchContextPreview",
     "POST /tenants/{tenant_id}/business-state/observations",
     "BusinessBriefing",
     "BusinessStateObservation",
@@ -299,6 +353,8 @@ html = read(demo_html_path)
 for needle in [
     'data-view="control"',
     'id="controlTowerSummaryRows"',
+    'id="controlTowerContextRows"',
+    'id="controlTowerContextActionRows"',
     'id="controlTowerDetectionRows"',
     'id="controlTowerDetectionRepairRows"',
     'id="controlTowerEscalationRows"',
@@ -318,6 +374,8 @@ for needle in [
 app_js = read(demo_app_path)
 for needle in [
     "businessControlTower",
+    "controlTowerContextRows",
+    "business-workbench-context/preview",
     "controlTowerDetectionRows",
     "business-detections/preview",
     "controlTowerEscalationRows",

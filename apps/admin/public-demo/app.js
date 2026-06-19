@@ -53,6 +53,10 @@
     return "POST /tenants/{tenant_id}/business-notifications/preview";
   }
 
+  function businessWorkbenchContextPreviewEndpoint() {
+    return "POST /tenants/{tenant_id}/business-workbench-context/preview";
+  }
+
   function isValidDemoPayload(payload) {
     return Boolean(
       payload &&
@@ -93,6 +97,10 @@
         Array.isArray(payload.businessControlTower.escalation.queues) &&
         Array.isArray(payload.businessControlTower.escalation.items) &&
         Array.isArray(payload.businessControlTower.escalation.suggestedActions) &&
+        payload.businessControlTower.workbenchContext &&
+        Array.isArray(payload.businessControlTower.workbenchContext.contextCards) &&
+        Array.isArray(payload.businessControlTower.workbenchContext.suggestedActions) &&
+        Array.isArray(payload.businessControlTower.workbenchContext.dataBoundaries) &&
         payload.businessControlTower.actionPlan &&
         Array.isArray(payload.businessControlTower.actionPlan.lanes) &&
         Array.isArray(payload.businessControlTower.actionPlan.steps) &&
@@ -934,6 +942,108 @@
       summaryRows.appendChild(card);
     });
 
+    var workbenchContext = controlTower.workbenchContext;
+    var contextRows = document.getElementById("controlTowerContextRows");
+    clear(contextRows);
+
+    var contextSummary = document.createElement("article");
+    contextSummary.className = "event-row";
+    var contextTop = document.createElement("div");
+    contextTop.className = "event-top";
+    var contextTitle = document.createElement("strong");
+    contextTitle.appendChild(text(workbenchContext.contextKind + " context"));
+    contextTop.append(contextTitle, chip(workbenchContext.riskLevel, statusTone(workbenchContext.riskLevel)));
+
+    var contextDetail = document.createElement("span");
+    contextDetail.className = "muted";
+    contextDetail.appendChild(text(workbenchContext.summary));
+
+    var contextApi = document.createElement("code");
+    contextApi.appendChild(
+      text((workbenchContext.api && workbenchContext.api.preview) || businessWorkbenchContextPreviewEndpoint())
+    );
+
+    contextSummary.append(contextTop, contextDetail, contextApi);
+    contextRows.appendChild(contextSummary);
+
+    workbenchContext.contextCards.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(item.title));
+      top.append(title, chip(item.status, statusTone(item.status)));
+
+      var factText = (item.safeFacts || [])
+        .map(function (fact) {
+          return fact.key + "=" + fact.value;
+        })
+        .join(", ");
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          item.systemKey +
+            " - " +
+            item.subject +
+            " - " +
+            item.state +
+            " - " +
+            (factText || "safe facts unavailable")
+        )
+      );
+
+      var boundary = document.createElement("code");
+      boundary.appendChild(
+        text("PII " + String(item.piiIncluded) + " - external mutation " + String(item.externalMutation))
+      );
+
+      row.append(top, detail, boundary);
+      contextRows.appendChild(row);
+    });
+
+    var contextActionRows = document.getElementById("controlTowerContextActionRows");
+    clear(contextActionRows);
+    workbenchContext.suggestedActions.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var action = document.createElement("strong");
+      action.appendChild(text(item.action));
+      top.append(action, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.summary));
+
+      var endpoint = document.createElement("code");
+      endpoint.appendChild(text(item.endpoint));
+
+      row.append(top, detail, endpoint);
+      contextActionRows.appendChild(row);
+    });
+    workbenchContext.dataBoundaries.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var name = document.createElement("strong");
+      name.appendChild(text(item.name));
+      top.append(name, chip(item.status, statusTone(item.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      row.append(top, detail);
+      contextActionRows.appendChild(row);
+    });
+
     var detection = controlTower.detection;
     var detectionRows = document.getElementById("controlTowerDetectionRows");
     clear(detectionRows);
@@ -1500,11 +1610,11 @@
 
   function statusTone(status) {
     if (
-      ["done", "ready", "online", "validated", "processed", "green", "active", "success", "observed", "matched", "resolved", "passed", "routed", "approved", "executed", "paid", "available", "detected", "satisfied", "clean"].indexOf(status) >= 0
+      ["done", "ready", "online", "validated", "processed", "green", "active", "success", "observed", "matched", "resolved", "passed", "routed", "approved", "executed", "paid", "available", "detected", "satisfied", "clean", "confirmed"].indexOf(status) >= 0
     ) {
       return "green";
     }
-    if (["blocked", "waiting", "pending", "retry", "partial_success", "current", "open", "acknowledged", "warning", "attention", "review_required", "mitigating", "fired", "proposed", "suggested", "invoice_sent", "not_exported", "waiting_for_repair", "requires_channel_config", "preview_only"].indexOf(status) >= 0) {
+    if (["blocked", "waiting", "pending", "retry", "partial_success", "current", "open", "acknowledged", "warning", "attention", "review_required", "mitigating", "fired", "proposed", "suggested", "invoice_sent", "not_exported", "waiting_for_repair", "requires_channel_config", "preview_only", "needs_cross_check", "action_required"].indexOf(status) >= 0) {
       return "amber";
     }
     if (["high", "dead_letter", "critical"].indexOf(status) >= 0) {

@@ -22,6 +22,7 @@ BusinessDetectionRuleSet = Literal["payment_reconciliation"]
 BusinessEscalationPolicy = Literal["exception_triage"]
 BusinessActionPlanKind = Literal["exception_resolution"]
 BusinessNotificationKind = Literal["action_plan_updates"]
+BusinessWorkbenchContextKind = Literal["role_assist"]
 
 
 class AdapterContractRead(BaseModel):
@@ -598,6 +599,34 @@ class BusinessNotificationPreviewRead(BaseModel):
     drafts: list[dict[str, Any]] = Field(default_factory=list)
     delivery_plan: list[dict[str, Any]] = Field(default_factory=list)
     approval_gates: list[dict[str, Any]] = Field(default_factory=list)
+    review_points: list[dict[str, Any]] = Field(default_factory=list)
+    evidence: list[dict[str, Any]] = Field(default_factory=list)
+    api: dict[str, str] = Field(default_factory=dict)
+
+
+class BusinessWorkbenchContextPreviewCreate(BaseModel):
+    context_kind: BusinessWorkbenchContextKind = "role_assist"
+    role: BusinessBriefingRole = "operator"
+    subject_type: str | None = Field(default=None, min_length=2, max_length=64, pattern=r"^[a-z0-9][a-z0-9_-]*$")
+    subject_id: str | None = Field(default=None, min_length=1, max_length=128)
+    source_systems: list[str] = Field(default_factory=list, max_length=8)
+    include_resolved: bool = False
+    limit: int = Field(default=20, ge=1, le=50)
+
+
+class BusinessWorkbenchContextPreviewRead(BaseModel):
+    tenant_id: str
+    context_kind: BusinessWorkbenchContextKind
+    role: BusinessBriefingRole
+    subject_type: str | None = None
+    subject_id: str | None = None
+    generated_at: datetime
+    risk_level: BusinessBriefingRiskLevel
+    summary: str
+    source_systems: list[str] = Field(default_factory=list)
+    context_cards: list[dict[str, Any]] = Field(default_factory=list)
+    suggested_actions: list[dict[str, Any]] = Field(default_factory=list)
+    data_boundaries: list[dict[str, Any]] = Field(default_factory=list)
     review_points: list[dict[str, Any]] = Field(default_factory=list)
     evidence: list[dict[str, Any]] = Field(default_factory=list)
     api: dict[str, str] = Field(default_factory=dict)

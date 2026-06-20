@@ -139,6 +139,9 @@ def test_public_demo_html_links_static_assets() -> None:
     assert 'id="providerOnboardingSummaryRows"' in html
     assert 'id="providerOnboardingProfileRows"' in html
     assert 'id="providerOnboardingStageRows"' in html
+    assert 'id="providerOnboardingReadinessRows"' in html
+    assert 'id="providerOnboardingBlockerRows"' in html
+    assert 'id="providerOnboardingHandoffRows"' in html
     assert 'id="providerOnboardingPreflightRows"' in html
     assert 'id="providerOnboardingRolloutRows"' in html
     assert 'id="providerOnboardingBoundaryRows"' in html
@@ -666,11 +669,14 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
     assert provider_onboarding["onboardingLevel"] == "sandbox_onboarding_ready"
     assert provider_onboarding["providerKey"] == "crm.bitrix24.mock"
     assert provider_onboarding["providerCategory"] == "crm"
+    assert provider_onboarding["readinessScore"] == 72
+    assert provider_onboarding["readinessStatus"] == "sandbox_ready_private_blocked"
     assert {item["label"] for item in provider_onboarding["summary"]} >= {
         "Provider",
         "Records",
         "External calls",
         "Rollout",
+        "Readiness",
     }
     assert set(provider_onboarding["providerProfile"]["operationKeys"]) >= {
         "crm_deal_intake_preview",
@@ -684,6 +690,36 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
         "approval_review",
         "private_rollout",
     }
+    readiness_gates = {
+        item["gate"]: item for item in provider_onboarding["readinessGates"]
+    }
+    assert set(readiness_gates) == {
+        "catalog_contract",
+        "tenant_connection_profile",
+        "mapping_preview",
+        "fixture_replay",
+        "private_secret_binding",
+        "provider_sandbox_dry_run",
+        "write_unlock_approval",
+        "post_rollout_monitoring",
+    }
+    assert readiness_gates["catalog_contract"]["blocksPrivateRollout"] is False
+    assert readiness_gates["private_secret_binding"]["blocksPrivateRollout"] is True
+    assert readiness_gates["provider_sandbox_dry_run"]["status"] == "pending_private"
+    assert readiness_gates["write_unlock_approval"]["status"] == "approval_required"
+    assert {item["gate"] for item in provider_onboarding["readinessBlockers"]} == {
+        "private_secret_binding",
+        "provider_sandbox_dry_run",
+        "write_unlock_approval",
+    }
+    handoff = provider_onboarding["privateConnectorHandoff"]
+    assert handoff["targetRuntime"] == "private_connector_only"
+    assert handoff["adapterKey"] == "crm.bitrix24.mock"
+    assert handoff["nextMilestone"] == "real_provider_sandbox_dry_run"
+    assert handoff["externalMutation"] is False
+    assert handoff["safeToShowPublicly"] is True
+    assert "server-side secret binding" in handoff["requiredArtifacts"]
+    assert "no provider token in browser storage" in handoff["acceptanceChecks"]
     assert provider_onboarding["mappingPreview"]["recordsAccepted"] == 2
     assert provider_onboarding["mappingPreview"]["recordsRejected"] == 0
     assert provider_onboarding["mappingPreview"]["rawPayloadIncluded"] is False
@@ -1504,8 +1540,12 @@ def test_public_demo_can_load_api_backed_data_with_static_fallback() -> None:
     assert "connectorCertificationGateRows" in script
     assert "Array.isArray(payload.providerOnboarding.summary)" in script
     assert "Array.isArray(payload.providerOnboarding.onboardingStages)" in script
+    assert "Array.isArray(payload.providerOnboarding.readinessGates)" in script
+    assert "payload.providerOnboarding.privateConnectorHandoff" in script
     assert "fillProviderOnboarding" in script
     assert "providerOnboardingStageRows" in script
+    assert "providerOnboardingReadinessRows" in script
+    assert "providerOnboardingHandoffRows" in script
     assert "providerOnboardingRolloutRows" in script
     assert "Array.isArray(payload.connectorFixtureReplay.summary)" in script
     assert "fillConnectorFixtureReplay" in script

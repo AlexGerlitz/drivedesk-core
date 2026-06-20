@@ -76,6 +76,11 @@ for token in [
     "GET /demo/provider-onboarding",
     "providerProfile",
     "onboardingStages",
+    "readinessGates",
+    "readinessBlockers",
+    "privateConnectorHandoff",
+    "readinessScore=72",
+    "sandbox_ready_private_blocked",
     "mappingPreview",
     "preflightChecks",
     "sandboxContract",
@@ -102,6 +107,11 @@ require(evidence.get("artifact_id") == "drivedesk-core-provider-onboarding", "un
 require(evidence.get("status") == "previewed", "unexpected provider onboarding evidence status")
 require(evidence.get("provider_key") == "crm.bitrix24.mock", "unexpected provider onboarding evidence provider")
 require(evidence.get("onboarding_level") == "sandbox_onboarding_ready", "unexpected provider onboarding evidence level")
+require(evidence.get("readiness_score") == 72, "unexpected provider onboarding evidence readiness score")
+require(
+    evidence.get("readiness_status") == "sandbox_ready_private_blocked",
+    "unexpected provider onboarding evidence readiness status",
+)
 require(evidence.get("verifier") == "bash scripts/check_public_provider_onboarding.sh", "provider onboarding evidence verifier mismatch")
 for stage in [
     "select_provider_profile",
@@ -112,6 +122,35 @@ for stage in [
     "private_rollout",
 ]:
     require(stage in evidence.get("onboarding_stages", []), f"provider onboarding evidence missing stage: {stage}")
+for gate in [
+    "catalog_contract",
+    "tenant_connection_profile",
+    "mapping_preview",
+    "fixture_replay",
+    "private_secret_binding",
+    "provider_sandbox_dry_run",
+    "write_unlock_approval",
+    "post_rollout_monitoring",
+]:
+    require(gate in evidence.get("readiness_gates", []), f"provider onboarding evidence missing readiness gate: {gate}")
+require(
+    set(evidence.get("readiness_blockers", []))
+    == {"private_secret_binding", "provider_sandbox_dry_run", "write_unlock_approval"},
+    "provider onboarding evidence blockers mismatch",
+)
+handoff_evidence = evidence.get("private_connector_handoff", {})
+require(
+    handoff_evidence.get("target_runtime") == "private_connector_only",
+    "provider onboarding evidence handoff runtime mismatch",
+)
+require(
+    handoff_evidence.get("next_milestone") == "real_provider_sandbox_dry_run",
+    "provider onboarding evidence handoff milestone mismatch",
+)
+require(
+    handoff_evidence.get("external_mutation") is False,
+    "provider onboarding evidence handoff must not mutate providers",
+)
 for key in [
     "provider_call_enabled",
     "external_mutation",
@@ -158,6 +197,8 @@ require(onboarding.get("status") == "previewed", "providerOnboarding status mism
 require(onboarding.get("command") == "GET /demo/provider-onboarding", "providerOnboarding command mismatch")
 require(onboarding.get("onboardingLevel") == "sandbox_onboarding_ready", "providerOnboarding level mismatch")
 require(onboarding.get("providerKey") == "crm.bitrix24.mock", "providerOnboarding provider mismatch")
+require(onboarding.get("readinessScore") == 72, "providerOnboarding readiness score mismatch")
+require(onboarding.get("readinessStatus") == "sandbox_ready_private_blocked", "providerOnboarding readiness status mismatch")
 require(onboarding.get("providerProfile", {}).get("adapterKey") == "crm.bitrix24.mock", "providerOnboarding profile key mismatch")
 require(onboarding.get("providerProfile", {}).get("publicDemoRequiresSecret") is False, "providerOnboarding public secret flag mismatch")
 require(onboarding.get("providerProfile", {}).get("realProviderRequiresSecret") is True, "providerOnboarding real secret flag mismatch")
@@ -178,6 +219,59 @@ require(
         "private_rollout",
     },
     "providerOnboarding stage set incomplete",
+)
+readiness_gates = {
+    item.get("gate"): item
+    for item in onboarding.get("readinessGates", [])
+    if isinstance(item, dict)
+}
+require(
+    set(readiness_gates) >= {
+        "catalog_contract",
+        "tenant_connection_profile",
+        "mapping_preview",
+        "fixture_replay",
+        "private_secret_binding",
+        "provider_sandbox_dry_run",
+        "write_unlock_approval",
+        "post_rollout_monitoring",
+    },
+    "providerOnboarding readiness gate set incomplete",
+)
+require(
+    readiness_gates.get("catalog_contract", {}).get("blocksPrivateRollout") is False,
+    "providerOnboarding catalog gate should not block rollout",
+)
+require(
+    readiness_gates.get("private_secret_binding", {}).get("blocksPrivateRollout") is True,
+    "providerOnboarding secret binding gate should block rollout",
+)
+require(
+    readiness_gates.get("provider_sandbox_dry_run", {}).get("status") == "pending_private",
+    "providerOnboarding sandbox dry-run status mismatch",
+)
+require(
+    readiness_gates.get("write_unlock_approval", {}).get("status") == "approval_required",
+    "providerOnboarding write unlock status mismatch",
+)
+require(
+    {item.get("gate") for item in onboarding.get("readinessBlockers", []) if isinstance(item, dict)}
+    == {"private_secret_binding", "provider_sandbox_dry_run", "write_unlock_approval"},
+    "providerOnboarding readiness blockers mismatch",
+)
+handoff = onboarding.get("privateConnectorHandoff", {})
+require(handoff.get("targetRuntime") == "private_connector_only", "providerOnboarding handoff runtime mismatch")
+require(handoff.get("adapterKey") == "crm.bitrix24.mock", "providerOnboarding handoff adapter mismatch")
+require(handoff.get("nextMilestone") == "real_provider_sandbox_dry_run", "providerOnboarding handoff milestone mismatch")
+require(handoff.get("externalMutation") is False, "providerOnboarding handoff must not mutate provider")
+require(handoff.get("safeToShowPublicly") is True, "providerOnboarding handoff must be public safe")
+require(
+    "server-side secret binding" in handoff.get("requiredArtifacts", []),
+    "providerOnboarding handoff missing secret binding artifact",
+)
+require(
+    "no provider token in browser storage" in handoff.get("acceptanceChecks", []),
+    "providerOnboarding handoff missing browser token acceptance check",
 )
 mapping_preview = onboarding.get("mappingPreview", {})
 require(mapping_preview.get("recordsAccepted") == 2, "providerOnboarding mapping accepted count mismatch")
@@ -270,12 +364,12 @@ for path, label, tokens in [
     (
         demo_app_path,
         "public demo app",
-        ["providerOnboarding", "fillProviderOnboarding", "providerOnboardingStageRows"],
+        ["providerOnboarding", "fillProviderOnboarding", "providerOnboardingReadinessRows"],
     ),
     (
         demo_html_path,
         "public demo HTML",
-        ["Provider Onboarding", "providerOnboardingSummaryRows", "providerOnboardingRolloutRows"],
+        ["Provider Onboarding", "providerOnboardingSummaryRows", "providerOnboardingHandoffRows"],
     ),
     (
         openapi_path,

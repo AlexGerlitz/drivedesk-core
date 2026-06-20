@@ -1716,6 +1716,69 @@ def build_provider_onboarding_workbench(adapter_key: str = "crm.bitrix24.mock") 
         }
     )
     auth_profile = descriptor.auth_profile
+    readiness_gates = [
+        {
+            "gate": "catalog_contract",
+            "status": "passed",
+            "detail": "Adapter descriptor, auth profile, scopes, and operation contracts are registered.",
+            "evidence": "GET /integration-adapters",
+            "blocks_private_rollout": False,
+        },
+        {
+            "gate": "tenant_connection_profile",
+            "status": "ready",
+            "detail": "Tenant-scoped mapping and scopes can be stored before provider credentials are attached.",
+            "evidence": "IntegrationConnection",
+            "blocks_private_rollout": False,
+        },
+        {
+            "gate": "mapping_preview",
+            "status": "passed",
+            "detail": f"{mapping_preview['records_accepted']} synthetic records map into DriveDesk fields.",
+            "evidence": "adapter_mapping.previewed",
+            "blocks_private_rollout": False,
+        },
+        {
+            "gate": "fixture_replay",
+            "status": "ready",
+            "detail": "Synthetic fixtures cover success, redaction, invalid payload, retry, dead-letter, and reconciliation.",
+            "evidence": "connector_fixture_replay",
+            "blocks_private_rollout": False,
+        },
+        {
+            "gate": "private_secret_binding",
+            "status": "pending_private",
+            "detail": "Real webhook URL, OAuth secret, tenant domain, and refresh flow must be bound in private secret storage.",
+            "evidence": "server_secret_store",
+            "blocks_private_rollout": True,
+        },
+        {
+            "gate": "provider_sandbox_dry_run",
+            "status": "pending_private",
+            "detail": "Real provider sandbox read/dry-run must prove rate limits, auth, pagination, and error mapping.",
+            "evidence": "private_connector_only",
+            "blocks_private_rollout": True,
+        },
+        {
+            "gate": "write_unlock_approval",
+            "status": "approval_required",
+            "detail": "Write mode stays locked until approval, idempotency, rollback, and observability evidence are attached.",
+            "evidence": "business_approval_gateway.previewed",
+            "blocks_private_rollout": True,
+        },
+        {
+            "gate": "post_rollout_monitoring",
+            "status": "scheduled",
+            "detail": "After rollout, scheduled validation watches connection checks, reconciliation, incidents, and outbox lag.",
+            "evidence": "private-infra-scheduled-validation",
+            "blocks_private_rollout": False,
+        },
+    ]
+    readiness_blockers = [
+        gate
+        for gate in readiness_gates
+        if bool(gate["blocks_private_rollout"])
+    ]
 
     return {
         "status": "previewed",
@@ -1723,6 +1786,8 @@ def build_provider_onboarding_workbench(adapter_key: str = "crm.bitrix24.mock") 
         "provider_key": descriptor.key,
         "provider_name": descriptor.name,
         "provider_category": descriptor.category,
+        "readiness_score": 72,
+        "readiness_status": "sandbox_ready_private_blocked",
         "summary": [
             {
                 "label": "Provider",
@@ -1747,6 +1812,12 @@ def build_provider_onboarding_workbench(adapter_key: str = "crm.bitrix24.mock") 
                 "value": "gated",
                 "detail": "private connector requires approval evidence",
                 "tone": "violet",
+            },
+            {
+                "label": "Readiness",
+                "value": "72%",
+                "detail": "sandbox-ready; private secrets and dry-run pending",
+                "tone": "green",
             },
         ],
         "provider_profile": {
@@ -1805,6 +1876,41 @@ def build_provider_onboarding_workbench(adapter_key: str = "crm.bitrix24.mock") 
                 "evidence": "private_connector_only",
             },
         ],
+        "readiness_gates": readiness_gates,
+        "readiness_blockers": [
+            {
+                "gate": str(item["gate"]),
+                "status": str(item["status"]),
+                "detail": str(item["detail"]),
+                "evidence": str(item["evidence"]),
+            }
+            for item in readiness_blockers
+        ],
+        "private_connector_handoff": {
+            "target_runtime": "private_connector_only",
+            "adapter_key": descriptor.key,
+            "next_milestone": "real_provider_sandbox_dry_run",
+            "secret_refs": sorted(str(item) for item in auth_profile.get("secret_refs", [])),
+            "required_artifacts": [
+                "private provider client",
+                "tenant connection profile",
+                "server-side secret binding",
+                "sandbox fixture replay evidence",
+                "dry-run connection check",
+                "approval-gated write unlock",
+                "reconciliation and incident evidence",
+            ],
+            "acceptance_checks": [
+                "no provider token in browser storage",
+                "no raw provider payload in public or client responses",
+                "idempotency keys recorded before enqueue",
+                "retry/dead-letter route visible to operator",
+                "reconciliation result attached before closure",
+            ],
+            "safe_to_show_publicly": True,
+            "external_mutation": False,
+            "evidence": "provider_onboarding.private_connector_handoff_ready",
+        },
         "mapping_preview": {
             "adapter_key": mapping_preview["adapter_key"],
             "records_received": mapping_preview["records_received"],
@@ -1941,7 +2047,7 @@ def build_provider_onboarding_workbench(adapter_key: str = "crm.bitrix24.mock") 
             "standalone": "GET /demo/provider-onboarding",
             "publicDemo": "GET /demo/public",
             "catalog": "GET /integration-adapters",
-            "mappingPreview": "POST /tenants/{tenant_id}/integration-mapping/preview",
+            "mappingPreview": "POST /tenants/{tenant_id}/integration-mapping-preview",
             "runtimePreview": "POST /tenants/{tenant_id}/integration-runtime/preview",
             "approvalGateway": "POST /tenants/{tenant_id}/business-approval-gateway/preview",
         },

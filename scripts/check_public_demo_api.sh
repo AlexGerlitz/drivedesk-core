@@ -726,11 +726,14 @@ assert provider_onboarding["onboardingLevel"] == "sandbox_onboarding_ready", dem
 assert provider_onboarding["providerKey"] == "crm.bitrix24.mock", demo
 assert provider_onboarding["providerName"] == "Mock Bitrix24 CRM Intake", demo
 assert provider_onboarding["providerCategory"] == "crm", demo
+assert provider_onboarding["readinessScore"] == 72, demo
+assert provider_onboarding["readinessStatus"] == "sandbox_ready_private_blocked", demo
 assert {item["label"] for item in provider_onboarding["summary"]} >= {
     "Provider",
     "Records",
     "External calls",
     "Rollout",
+    "Readiness",
 }, demo
 profile = provider_onboarding["providerProfile"]
 assert profile["adapterKey"] == "crm.bitrix24.mock", demo
@@ -748,6 +751,34 @@ assert {item["stage"] for item in provider_onboarding["onboardingStages"]} == {
     "approval_review",
     "private_rollout",
 }, demo
+readiness_gates = {item["gate"]: item for item in provider_onboarding["readinessGates"]}
+assert set(readiness_gates) == {
+    "catalog_contract",
+    "tenant_connection_profile",
+    "mapping_preview",
+    "fixture_replay",
+    "private_secret_binding",
+    "provider_sandbox_dry_run",
+    "write_unlock_approval",
+    "post_rollout_monitoring",
+}, demo
+assert readiness_gates["catalog_contract"]["blocksPrivateRollout"] is False, demo
+assert readiness_gates["private_secret_binding"]["blocksPrivateRollout"] is True, demo
+assert readiness_gates["provider_sandbox_dry_run"]["status"] == "pending_private", demo
+assert readiness_gates["write_unlock_approval"]["status"] == "approval_required", demo
+assert {item["gate"] for item in provider_onboarding["readinessBlockers"]} == {
+    "private_secret_binding",
+    "provider_sandbox_dry_run",
+    "write_unlock_approval",
+}, demo
+handoff = provider_onboarding["privateConnectorHandoff"]
+assert handoff["targetRuntime"] == "private_connector_only", demo
+assert handoff["adapterKey"] == "crm.bitrix24.mock", demo
+assert handoff["nextMilestone"] == "real_provider_sandbox_dry_run", demo
+assert handoff["externalMutation"] is False, demo
+assert handoff["safeToShowPublicly"] is True, demo
+assert "server-side secret binding" in handoff["requiredArtifacts"], demo
+assert "no provider token in browser storage" in handoff["acceptanceChecks"], demo
 mapping_preview = provider_onboarding["mappingPreview"]
 assert mapping_preview["recordsAccepted"] == 2, demo
 assert mapping_preview["recordsRejected"] == 0, demo

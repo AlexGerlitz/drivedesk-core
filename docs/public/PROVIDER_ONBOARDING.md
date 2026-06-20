@@ -20,6 +20,12 @@ Public payload:
 - `providerProfile` describes adapter identity, auth mode, scopes, operation
   keys, and server-side secret references.
 - `onboardingStages` shows the path from provider selection to private rollout.
+- `readinessGates` shows what is already ready and what still blocks a real
+  private connector rollout.
+- `readinessBlockers` lists only the blocking gates that must be cleared before
+  write-mode provider execution.
+- `privateConnectorHandoff` turns the public-safe sandbox proof into the next
+  private implementation checklist.
 - `mappingPreview` proves that provider fields can be normalized without raw
   provider payloads.
 - `preflightChecks` proves scope, mapping, secret reference, and provider-call
@@ -46,7 +52,7 @@ select_provider_profile
 The workbench links existing DriveDesk surfaces:
 
 - `GET /integration-adapters`
-- `POST /tenants/{tenant_id}/integration-mapping/preview`
+- `POST /tenants/{tenant_id}/integration-mapping-preview`
 - `POST /tenants/{tenant_id}/integration-runtime/preview`
 - `POST /tenants/{tenant_id}/business-approval-gateway/preview`
 - `GET /demo/connector-certification`
@@ -88,6 +94,35 @@ crm.bitrix24.mock
 
 The public demo exposes the secret reference names only. Secret values belong in
 the private server-side secret store.
+
+## Readiness Gates
+
+The onboarding workbench gives the current provider a bounded readiness score:
+
+```text
+readinessScore=72
+readinessStatus=sandbox_ready_private_blocked
+```
+
+This does not mean the real provider is fully live. It means the public-safe
+sandbox contract is ready and the private rollout is blocked only by things
+that must stay outside the public repository:
+
+- `private_secret_binding` - real webhook URL, OAuth secret, tenant domain, and
+  refresh flow must be bound in private secret storage.
+- `provider_sandbox_dry_run` - real provider sandbox read/dry-run must prove
+  auth, rate limits, pagination, and error mapping.
+- `write_unlock_approval` - write mode stays locked until approval,
+  idempotency, rollback, and observability evidence are attached.
+
+The handoff contract records the next private milestone:
+
+```text
+privateConnectorHandoff.nextMilestone=real_provider_sandbox_dry_run
+```
+
+That is the bridge from public portfolio proof to real commercial connector
+work.
 
 ## Public Safety
 

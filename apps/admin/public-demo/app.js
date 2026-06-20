@@ -100,6 +100,9 @@
         Array.isArray(payload.providerOnboarding.summary) &&
         payload.providerOnboarding.providerProfile &&
         Array.isArray(payload.providerOnboarding.onboardingStages) &&
+        Array.isArray(payload.providerOnboarding.readinessGates) &&
+        Array.isArray(payload.providerOnboarding.readinessBlockers) &&
+        payload.providerOnboarding.privateConnectorHandoff &&
         payload.providerOnboarding.mappingPreview &&
         Array.isArray(payload.providerOnboarding.preflightChecks) &&
         payload.providerOnboarding.sandboxContract &&
@@ -971,6 +974,95 @@
 
     profileRow.append(profileTop, profileKey, profileDetail, profileSecret);
     profileRows.appendChild(profileRow);
+
+    var readinessRows = document.getElementById("providerOnboardingReadinessRows");
+    clear(readinessRows);
+    onboarding.readinessGates.forEach(function (gate) {
+      var row = document.createElement("article");
+      row.className = "event-row provider-onboarding-readiness-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var name = document.createElement("strong");
+      name.appendChild(text(gate.gate));
+      top.append(name, chip(gate.status, statusTone(gate.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(
+        text(
+          gate.detail +
+            " - blocks rollout " +
+            String(Boolean(gate.blocksPrivateRollout))
+        )
+      );
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(gate.evidence));
+
+      row.append(top, detail, evidence);
+      readinessRows.appendChild(row);
+    });
+
+    var blockerRows = document.getElementById("providerOnboardingBlockerRows");
+    clear(blockerRows);
+    onboarding.readinessBlockers.forEach(function (blocker) {
+      var row = document.createElement("article");
+      row.className = "event-row provider-onboarding-blocker-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var gate = document.createElement("strong");
+      gate.appendChild(text(blocker.gate));
+      top.append(gate, chip(blocker.status, statusTone(blocker.status)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(blocker.detail));
+
+      var evidence = document.createElement("code");
+      evidence.appendChild(text(blocker.evidence));
+
+      row.append(top, detail, evidence);
+      blockerRows.appendChild(row);
+    });
+
+    var handoffRows = document.getElementById("providerOnboardingHandoffRows");
+    clear(handoffRows);
+    var handoff = onboarding.privateConnectorHandoff;
+    [
+      {
+        label: "Target runtime",
+        value: handoff.targetRuntime,
+        detail: handoff.nextMilestone,
+      },
+      {
+        label: "Required artifacts",
+        value: String((handoff.requiredArtifacts || []).length),
+        detail: (handoff.requiredArtifacts || []).join(", "),
+      },
+      {
+        label: "Acceptance checks",
+        value: String((handoff.acceptanceChecks || []).length),
+        detail: (handoff.acceptanceChecks || []).join(", "),
+      },
+    ].forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row provider-onboarding-handoff-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var label = document.createElement("strong");
+      label.appendChild(text(item.label));
+      top.append(label, chip(item.value, "blue"));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      row.append(top, detail);
+      handoffRows.appendChild(row);
+    });
 
     var stageRows = document.getElementById("providerOnboardingStageRows");
     clear(stageRows);

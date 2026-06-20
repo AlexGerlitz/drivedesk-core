@@ -5601,7 +5601,7 @@ window.DRIVEDESK_DEMO_DATA = {
     "api": {
       "approvalGateway": "POST /tenants/{tenant_id}/business-approval-gateway/preview",
       "catalog": "GET /integration-adapters",
-      "mappingPreview": "POST /tenants/{tenant_id}/integration-mapping/preview",
+      "mappingPreview": "POST /tenants/{tenant_id}/integration-mapping-preview",
       "publicDemo": "GET /demo/public",
       "runtimePreview": "POST /tenants/{tenant_id}/integration-runtime/preview",
       "standalone": "GET /demo/provider-onboarding"
@@ -5770,6 +5770,34 @@ window.DRIVEDESK_DEMO_DATA = {
         "status": "closed"
       }
     ],
+    "privateConnectorHandoff": {
+      "acceptanceChecks": [
+        "no provider token in browser storage",
+        "no raw provider payload in public or client responses",
+        "idempotency keys recorded before enqueue",
+        "retry/dead-letter route visible to operator",
+        "reconciliation result attached before closure"
+      ],
+      "adapterKey": "crm.bitrix24.mock",
+      "evidence": "provider_onboarding.private_connector_handoff_ready",
+      "externalMutation": false,
+      "nextMilestone": "real_provider_sandbox_dry_run",
+      "requiredArtifacts": [
+        "private provider client",
+        "tenant connection profile",
+        "server-side secret binding",
+        "sandbox fixture replay evidence",
+        "dry-run connection check",
+        "approval-gated write unlock",
+        "reconciliation and incident evidence"
+      ],
+      "safeToShowPublicly": true,
+      "secretRefs": [
+        "BITRIX24_CLIENT_SECRET",
+        "BITRIX24_WEBHOOK_URL"
+      ],
+      "targetRuntime": "private_connector_only"
+    },
     "providerCategory": "crm",
     "providerKey": "crm.bitrix24.mock",
     "providerName": "Mock Bitrix24 CRM Intake",
@@ -5800,6 +5828,86 @@ window.DRIVEDESK_DEMO_DATA = {
         "crm:deal.preview"
       ]
     },
+    "readinessBlockers": [
+      {
+        "detail": "Real webhook URL, OAuth secret, tenant domain, and refresh flow must be bound in private secret storage.",
+        "evidence": "server_secret_store",
+        "gate": "private_secret_binding",
+        "status": "pending_private"
+      },
+      {
+        "detail": "Real provider sandbox read/dry-run must prove rate limits, auth, pagination, and error mapping.",
+        "evidence": "private_connector_only",
+        "gate": "provider_sandbox_dry_run",
+        "status": "pending_private"
+      },
+      {
+        "detail": "Write mode stays locked until approval, idempotency, rollback, and observability evidence are attached.",
+        "evidence": "business_approval_gateway.previewed",
+        "gate": "write_unlock_approval",
+        "status": "approval_required"
+      }
+    ],
+    "readinessGates": [
+      {
+        "blocksPrivateRollout": false,
+        "detail": "Adapter descriptor, auth profile, scopes, and operation contracts are registered.",
+        "evidence": "GET /integration-adapters",
+        "gate": "catalog_contract",
+        "status": "passed"
+      },
+      {
+        "blocksPrivateRollout": false,
+        "detail": "Tenant-scoped mapping and scopes can be stored before provider credentials are attached.",
+        "evidence": "IntegrationConnection",
+        "gate": "tenant_connection_profile",
+        "status": "ready"
+      },
+      {
+        "blocksPrivateRollout": false,
+        "detail": "2 synthetic records map into DriveDesk fields.",
+        "evidence": "adapter_mapping.previewed",
+        "gate": "mapping_preview",
+        "status": "passed"
+      },
+      {
+        "blocksPrivateRollout": false,
+        "detail": "Synthetic fixtures cover success, redaction, invalid payload, retry, dead-letter, and reconciliation.",
+        "evidence": "connector_fixture_replay",
+        "gate": "fixture_replay",
+        "status": "ready"
+      },
+      {
+        "blocksPrivateRollout": true,
+        "detail": "Real webhook URL, OAuth secret, tenant domain, and refresh flow must be bound in private secret storage.",
+        "evidence": "server_secret_store",
+        "gate": "private_secret_binding",
+        "status": "pending_private"
+      },
+      {
+        "blocksPrivateRollout": true,
+        "detail": "Real provider sandbox read/dry-run must prove rate limits, auth, pagination, and error mapping.",
+        "evidence": "private_connector_only",
+        "gate": "provider_sandbox_dry_run",
+        "status": "pending_private"
+      },
+      {
+        "blocksPrivateRollout": true,
+        "detail": "Write mode stays locked until approval, idempotency, rollback, and observability evidence are attached.",
+        "evidence": "business_approval_gateway.previewed",
+        "gate": "write_unlock_approval",
+        "status": "approval_required"
+      },
+      {
+        "blocksPrivateRollout": false,
+        "detail": "After rollout, scheduled validation watches connection checks, reconciliation, incidents, and outbox lag.",
+        "evidence": "private-infra-scheduled-validation",
+        "gate": "post_rollout_monitoring",
+        "status": "scheduled"
+      }
+    ],
+    "readinessScore": 72,
+    "readinessStatus": "sandbox_ready_private_blocked",
     "rolloutPlan": [
       {
         "detail": "Create tenant-scoped connection metadata with mapping and scopes.",
@@ -5874,6 +5982,12 @@ window.DRIVEDESK_DEMO_DATA = {
         "label": "Rollout",
         "tone": "violet",
         "value": "gated"
+      },
+      {
+        "detail": "sandbox-ready; private secrets and dry-run pending",
+        "label": "Readiness",
+        "tone": "green",
+        "value": "72%"
       }
     ]
   },

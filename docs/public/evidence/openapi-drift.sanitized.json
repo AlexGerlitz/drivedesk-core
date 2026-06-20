@@ -39,7 +39,7 @@
       "/demo/business-scenario-replay"
     ],
     "schema_count": 99,
-    "sha256_prefix": "fd5f934ec15e80d6",
+    "sha256_prefix": "9bba37d2c43cbcfa",
     "title": "DriveDesk Core API"
   },
   "redaction": {
@@ -63,7 +63,7 @@
       "typescript/drivedesk-public-demo-client.d.ts"
     ],
     "schema_version": 1,
-    "sha256_prefix": "e5cf34c71eb651aa",
+    "sha256_prefix": "379f4e2198444d7e",
     "source": "docs/openapi.json"
   },
   "source": {

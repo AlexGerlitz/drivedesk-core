@@ -6711,6 +6711,11 @@
             "title": "Preflightchecks",
             "type": "array"
           },
+          "privateConnectorHandoff": {
+            "additionalProperties": true,
+            "title": "Privateconnectorhandoff",
+            "type": "object"
+          },
           "providerCategory": {
             "title": "Providercategory",
             "type": "string"
@@ -6727,6 +6732,30 @@
             "additionalProperties": true,
             "title": "Providerprofile",
             "type": "object"
+          },
+          "readinessBlockers": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Readinessblockers",
+            "type": "array"
+          },
+          "readinessGates": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Readinessgates",
+            "type": "array"
+          },
+          "readinessScore": {
+            "title": "Readinessscore",
+            "type": "integer"
+          },
+          "readinessStatus": {
+            "title": "Readinessstatus",
+            "type": "string"
           },
           "rolloutPlan": {
             "items": {
@@ -6762,9 +6791,14 @@
           "providerKey",
           "providerName",
           "providerCategory",
+          "readinessScore",
+          "readinessStatus",
           "summary",
           "providerProfile",
           "onboardingStages",
+          "readinessGates",
+          "readinessBlockers",
+          "privateConnectorHandoff",
           "mappingPreview",
           "preflightChecks",
           "sandboxContract",

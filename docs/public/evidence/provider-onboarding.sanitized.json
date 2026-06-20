@@ -6,6 +6,8 @@
   "schema_version": 1,
   "status": "previewed",
   "onboarding_level": "sandbox_onboarding_ready",
+  "readiness_score": 72,
+  "readiness_status": "sandbox_ready_private_blocked",
   "public_doc": "docs/public/PROVIDER_ONBOARDING.md",
   "verifier": "bash scripts/check_public_provider_onboarding.sh",
   "onboarding_stages": [
@@ -18,7 +20,7 @@
   ],
   "runtime_surfaces": [
     "GET /integration-adapters",
-    "POST /tenants/{tenant_id}/integration-mapping/preview",
+    "POST /tenants/{tenant_id}/integration-mapping-preview",
     "POST /tenants/{tenant_id}/integration-runtime/preview",
     "POST /tenants/{tenant_id}/business-approval-gateway/preview",
     "GET /demo/provider-onboarding",
@@ -26,6 +28,27 @@
     "GET /demo/connector-fixture-replay",
     "GET /demo/integration-execution"
   ],
+  "readiness_gates": [
+    "catalog_contract",
+    "tenant_connection_profile",
+    "mapping_preview",
+    "fixture_replay",
+    "private_secret_binding",
+    "provider_sandbox_dry_run",
+    "write_unlock_approval",
+    "post_rollout_monitoring"
+  ],
+  "readiness_blockers": [
+    "private_secret_binding",
+    "provider_sandbox_dry_run",
+    "write_unlock_approval"
+  ],
+  "private_connector_handoff": {
+    "target_runtime": "private_connector_only",
+    "next_milestone": "real_provider_sandbox_dry_run",
+    "safe_to_show_publicly": true,
+    "external_mutation": false
+  },
   "safety_assertions": {
     "provider_call_enabled": false,
     "external_mutation": false,

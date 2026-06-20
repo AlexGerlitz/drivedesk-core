@@ -990,9 +990,14 @@ class ProviderOnboardingRead(BaseModel):
     providerKey: str
     providerName: str
     providerCategory: str
+    readinessScore: int
+    readinessStatus: str
     summary: list[dict[str, Any]]
     providerProfile: dict[str, Any]
     onboardingStages: list[dict[str, Any]]
+    readinessGates: list[dict[str, Any]]
+    readinessBlockers: list[dict[str, Any]]
+    privateConnectorHandoff: dict[str, Any]
     mappingPreview: dict[str, Any]
     preflightChecks: list[dict[str, Any]]
     sandboxContract: dict[str, Any]

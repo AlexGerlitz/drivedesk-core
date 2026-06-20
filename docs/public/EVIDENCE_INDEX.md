@@ -34,6 +34,7 @@ parsing Markdown by hand.
 | --- | --- | --- |
 | Public review bundle | `docs/public/PUBLIC_REVIEW_BUNDLE.md` | `bash scripts/check_public_review_bundle.sh` |
 | Public engineering entrypoint | `docs/public/SYSTEM_REVIEW_PATH.md` | `bash scripts/check_public_system_review_path.sh` |
+| Interview stack brief | `docs/public/INTERVIEW_STACK_BRIEF.md` | `bash scripts/check_public_interview_stack_brief.sh` |
 | Public demo health | `docs/public/PUBLIC_DEMO_HEALTH.md` | `bash scripts/check_public_demo_health.sh` |
 | OpenAPI drift | `docs/public/OPENAPI_DRIFT.md` | `bash scripts/check_public_openapi_drift.sh` |
 | Business OS tour | `docs/public/PLATFORM_TOUR.md` | `bash scripts/check_public_platform_tour.sh` |
@@ -69,6 +70,7 @@ state.
 ```bash
 bash scripts/run_public_review_bundle.sh
 bash scripts/check_public_review_bundle.sh
+bash scripts/check_public_interview_stack_brief.sh
 bash scripts/check_public_evidence_index.sh
 bash scripts/check_public_connector_fixture_replay.sh
 bash scripts/check_public_business_control_tower.sh
@@ -98,6 +100,11 @@ The public review bundle is tracked through
 `docs/public/PUBLIC_REVIEW_BUNDLE.md`,
 `docs/public/evidence/public-review-bundle.sanitized.json`, and
 `bash scripts/run_public_review_bundle.sh`.
+
+The interview stack brief is tracked through
+`docs/public/INTERVIEW_STACK_BRIEF.md`,
+`docs/public/evidence/interview-stack-brief.sanitized.json`, and
+`bash scripts/check_public_interview_stack_brief.sh`.
 
 The check validates that:
 

@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "evidence_id": "interview_stack_brief",
+  "data_profile": "synthetic_demo_data",
+  "status": "validated",
+  "public_doc": "docs/public/INTERVIEW_STACK_BRIEF.md",
+  "contract_check": "bash scripts/check_public_interview_stack_brief.sh",
+  "related_docs": [
+    "docs/public/TECHNICAL_CAPABILITY_MAP.md",
+    "docs/public/PUBLIC_VERIFICATION_MATRIX.md",
+    "docs/public/EVIDENCE_INDEX.md",
+    "docs/public/PUBLIC_REVIEW_BUNDLE.md",
+    "docs/public/PROJECT_STATUS.md"
+  ],
+  "stack_groups": [
+    "Python / FastAPI",
+    "PostgreSQL / Alembic",
+    "Redis / Workers / Outbox",
+    "OpenAPI / SDK",
+    "Integration Hub / Adapters",
+    "Business Control Tower",
+    "Docker / Compose",
+    "Kubernetes / Helm",
+    "GitOps / Argo CD",
+    "OpenTofu / Terraform",
+    "CI/CD / GitHub Actions",
+    "Observability / Prometheus / Grafana / Loki",
+    "Reliability / Recovery",
+    "Security / Public-Private Boundary",
+    "Public Demo / Pages"
+  ],
+  "proof_command": "bash scripts/run_public_review_bundle.sh",
+  "redaction": {
+    "addresses_included": false,
+    "credentials_included": false,
+    "hostnames_included": false,
+    "paths_included": false,
+    "production_data_included": false,
+    "raw_logs_included": false,
+    "request_bodies_included": false
+  },
+  "boundary": "public-safe stack explanation with synthetic evidence references only"
+}

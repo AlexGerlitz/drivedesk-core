@@ -9,6 +9,7 @@ bash scripts/check_public_pages_entrypoint.sh
 bash scripts/check_public_system_review_path.sh
 bash scripts/check_public_platform_tour.sh
 bash scripts/check_public_reviewer_quickstart.sh
+bash scripts/check_public_interview_stack_brief.sh
 bash scripts/check_public_verification_matrix.sh
 bash scripts/check_public_project_status.sh
 bash scripts/check_public_technical_capability_map.sh

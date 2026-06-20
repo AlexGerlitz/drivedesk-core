@@ -78,6 +78,26 @@
       "boundary": "one-command public review route over synthetic data and sanitized evidence only"
     },
     {
+      "capability_id": "interview-stack-brief",
+      "title": "Interview stack brief",
+      "status": "validated",
+      "public_doc": "docs/public/INTERVIEW_STACK_BRIEF.md",
+      "evidence_files": [
+        "docs/public/evidence/interview-stack-brief.sanitized.json",
+        "docs/public/TECHNICAL_CAPABILITY_MAP.md",
+        "docs/public/PUBLIC_VERIFICATION_MATRIX.md",
+        "docs/public/PROJECT_STATUS.md"
+      ],
+      "verifiers": [
+        "bash scripts/check_public_interview_stack_brief.sh"
+      ],
+      "public_urls": [
+        "docs/public/INTERVIEW_STACK_BRIEF.md",
+        "docs/public/evidence/interview-stack-brief.sanitized.json"
+      ],
+      "boundary": "plain-language stack explanation with synthetic public-safe evidence references only"
+    },
+    {
       "capability_id": "public-demo-health",
       "title": "Public demo health",
       "status": "validated",

@@ -5,6 +5,7 @@ want to verify the project shape before reading the full documentation set.
 
 For the compact system map, start with `docs/public/SYSTEM_REVIEW_PATH.md`.
 For the product route, open `docs/public/PLATFORM_TOUR.md`.
+For the stack explanation, open `docs/public/INTERVIEW_STACK_BRIEF.md`.
 For a one-command check, open `docs/public/PUBLIC_REVIEW_BUNDLE.md` and run:
 
 ```bash
@@ -23,7 +24,8 @@ bash scripts/run_public_review_bundle.sh
 | 6 | `docs/public/PROJECT_STATUS.md` | Current capability state, limits, and next work are explicit. |
 | 7 | `docs/public/TECHNICAL_CAPABILITY_MAP.md` | Each visible capability maps to implementation surface, evidence, and verifier commands. |
 | 8 | `docs/public/PUBLIC_VERIFICATION_MATRIX.md` | Each engineering claim has an artifact, verifier command, and pass signal. |
-| 9 | `docs/public/ENGINEERING_PROOF.md` | The proof tab, API payload, OpenAPI schema, SDK artifacts, and CI gates share one contract. |
+| 9 | `docs/public/INTERVIEW_STACK_BRIEF.md` | The stack is explained with purpose, current state, remaining work, and proof commands. |
+| 10 | `docs/public/ENGINEERING_PROOF.md` | The proof tab, API payload, OpenAPI schema, SDK artifacts, and CI gates share one contract. |
 
 Pass criteria: a technical reader can identify the current architecture, public demo,
 API contract, SDK surface, observability evidence, incident response evidence,
@@ -40,6 +42,7 @@ bash scripts/check_public_pages_entrypoint.sh
 bash scripts/check_public_system_review_path.sh
 bash scripts/check_public_platform_tour.sh
 bash scripts/check_public_reviewer_quickstart.sh
+bash scripts/check_public_interview_stack_brief.sh
 bash scripts/check_public_verification_matrix.sh
 bash scripts/check_public_project_status.sh
 bash scripts/check_public_technical_capability_map.sh

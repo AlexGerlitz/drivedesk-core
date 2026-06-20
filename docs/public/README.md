@@ -14,6 +14,8 @@ infrastructure, production history, customer data, or operational credentials.
   evidence index.
 - `REVIEWER_QUICKSTART.md` - shortest external verification path with 5-minute,
   15-minute, and 45-minute verification tracks.
+- `INTERVIEW_STACK_BRIEF.md` - interview-oriented stack map explaining what each
+  technology does, what is validated, and what remains.
 - `PUBLIC_REVIEW_BUNDLE.md` - one-command public review route with a
   machine-readable evidence contract; run `bash scripts/run_public_review_bundle.sh`.
 - `ENGINEERING_REVIEW_GUIDE.md` - short verification path for demo, CI, API, recovery, GitOps, and IaC evidence.
@@ -23,6 +25,8 @@ infrastructure, production history, customer data, or operational credentials.
 - `PROJECT_STATUS.md` - current public-safe engineering status, limits, and next work.
 - `TECHNICAL_CAPABILITY_MAP.md` - capability-to-evidence map with verifier commands.
 - `EVIDENCE_INDEX.md` - human-readable public evidence index contract.
+- `evidence/interview-stack-brief.sanitized.json` - machine-readable stack brief
+  evidence.
 - `evidence/public-review-bundle.sanitized.json` - machine-readable public
   review bundle evidence.
 - `PUBLIC_DEMO_HEALTH.md` - public-safe Pages/demo health workflow,
@@ -319,6 +323,7 @@ The public repository export also generates:
 - `scripts/check_public_platform_maturity_70.sh` - public-safe 70 percent milestone validation.
 - `scripts/check_public_system_review_path.sh` - public-safe compact system review path validation.
 - `scripts/check_public_reviewer_quickstart.sh` - public-safe verification quickstart validation.
+- `scripts/check_public_interview_stack_brief.sh` - public-safe stack brief validation.
 - `scripts/check_public_demo_health.sh` - public-safe Pages/demo health
   workflow and evidence validation.
 - `scripts/check_public_project_status.sh` - public-safe project status validation.
@@ -365,15 +370,17 @@ https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 2. Run `bash scripts/run_public_review_bundle.sh`.
 3. Continue with `SYSTEM_REVIEW_PATH.md`.
 4. Continue with `REVIEWER_QUICKSTART.md`.
-5. Open the hosted demo and switch to the Workflow, Operations, Incidents, and Proof tabs.
-6. Inspect `docs/openapi.json`.
-7. Run `bash scripts/check_public_system_review_path.sh`.
-8. Run `bash scripts/ci_smoke_public.sh`.
-9. Run `bash scripts/check_public_engineering_proof.sh`.
-10. Run `bash scripts/check_public_demo_api.sh`.
-11. Run one generated client example from `examples/`.
-12. Review `PROJECT_STATUS.md`, `TECHNICAL_CAPABILITY_MAP.md`, `EVIDENCE_INDEX.md`, `BUSINESS_CONTROL_TOWER.md`, `OBSERVABILITY_PROOF.md`, `OBSERVABILITY_DASHBOARD.md`, `NOTIFICATION_DELIVERY.md`, `ALERT_ROUTING_EVIDENCE.md`, `INCIDENT_RESPONSE_DEMO.md`, `ENGINEERING_PROOF.md`, `PLATFORM_MATURITY_70.md`, and `SANITIZED_EVIDENCE.md`.
-13. Review `SYSTEM_DESIGN.md`, `CONNECTOR_CERTIFICATION.md`, `CONNECTOR_FIXTURE_REPLAY.md`, `GITOPS_DELIVERY.md`, and the recovery evidence docs.
+5. Review `INTERVIEW_STACK_BRIEF.md`.
+6. Open the hosted demo and switch to the Workflow, Operations, Incidents, and Proof tabs.
+7. Inspect `docs/openapi.json`.
+8. Run `bash scripts/check_public_system_review_path.sh`.
+9. Run `bash scripts/check_public_interview_stack_brief.sh`.
+10. Run `bash scripts/ci_smoke_public.sh`.
+11. Run `bash scripts/check_public_engineering_proof.sh`.
+12. Run `bash scripts/check_public_demo_api.sh`.
+13. Run one generated client example from `examples/`.
+14. Review `PROJECT_STATUS.md`, `TECHNICAL_CAPABILITY_MAP.md`, `EVIDENCE_INDEX.md`, `INTERVIEW_STACK_BRIEF.md`, `BUSINESS_CONTROL_TOWER.md`, `OBSERVABILITY_PROOF.md`, `OBSERVABILITY_DASHBOARD.md`, `NOTIFICATION_DELIVERY.md`, `ALERT_ROUTING_EVIDENCE.md`, `INCIDENT_RESPONSE_DEMO.md`, `ENGINEERING_PROOF.md`, `PLATFORM_MATURITY_70.md`, and `SANITIZED_EVIDENCE.md`.
+15. Review `SYSTEM_DESIGN.md`, `CONNECTOR_CERTIFICATION.md`, `CONNECTOR_FIXTURE_REPLAY.md`, `GITOPS_DELIVERY.md`, and the recovery evidence docs.
 
 ## Engineering Summary
 

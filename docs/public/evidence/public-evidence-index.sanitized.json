@@ -230,18 +230,23 @@
       "status": "validated",
       "public_doc": "docs/public/INTEGRATION_ADAPTER_CATALOG.md",
       "evidence_files": [
+        "scripts/run_provider_sandbox_dry_run.py",
+        "docs/public/PROVIDER_SANDBOX_DRY_RUN.md",
+        "docs/public/evidence/provider-sandbox-dry-run.sanitized.json",
         "docs/public/INTEGRATION_OPERATION_CONTRACTS.md",
         "docs/public/INTEGRATION_RECONCILIATION.md",
         "docs/public/INTEGRATION_OPERATOR_REVIEW.md"
       ],
       "verifiers": [
-        "bash scripts/check_public_demo_api.sh"
+        "bash scripts/check_public_demo_api.sh",
+        "bash scripts/check_public_provider_sandbox_dry_run.sh"
       ],
       "public_urls": [
+        "docs/public/PROVIDER_SANDBOX_DRY_RUN.md",
         "docs/public/INTEGRATION_CONNECTION_DIAGNOSTICS.md",
         "docs/public/INTEGRATION_INCIDENT_RUNBOOKS.md"
       ],
-      "boundary": "synthetic providers and sanitized adapter evidence only"
+      "boundary": "synthetic providers, sanitized adapter evidence, fake transport checks, and no provider secret values"
     },
     {
       "capability_id": "connector-certification",

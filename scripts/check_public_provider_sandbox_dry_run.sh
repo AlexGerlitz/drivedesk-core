@@ -171,3 +171,46 @@ print(
     f"runner={runner['status']} operation={ready['request_plan']['operation']}"
 )
 PY
+
+cli_plan="$(
+  BITRIX24_CLIENT_SECRET="client-secret-value" \
+  BITRIX24_WEBHOOK_URL="https://example.invalid/rest/1/secret-token" \
+  BITRIX24_TENANT_DOMAIN="tenant.bitrix24.invalid" \
+  PYTHONPATH="packages/core" "$PYTHON_BIN" scripts/run_provider_sandbox_dry_run.py --plan-only
+)"
+
+if [[ "$cli_plan" != *"ready_for_private_read_only_dry_run"* ]]; then
+  echo "provider sandbox dry-run CLI plan did not reach ready state" >&2
+  exit 1
+fi
+
+if [[ "$cli_plan" == *"client-secret-value"* || "$cli_plan" == *"secret-token"* || "$cli_plan" == *"tenant.bitrix24.invalid"* ]]; then
+  echo "provider sandbox dry-run CLI leaked secret/config values in plan-only mode" >&2
+  exit 1
+fi
+
+cli_fake="$(
+  BITRIX24_CLIENT_SECRET="client-secret-value" \
+  BITRIX24_WEBHOOK_URL="https://example.invalid/rest/1/secret-token" \
+  BITRIX24_TENANT_DOMAIN="tenant.bitrix24.invalid" \
+  PYTHONPATH="packages/core" "$PYTHON_BIN" scripts/run_provider_sandbox_dry_run.py --execute-read-only --transport fake
+)"
+
+if [[ "$cli_fake" != *"private_read_only_dry_run_completed"* ]]; then
+  echo "provider sandbox dry-run CLI fake transport did not complete" >&2
+  exit 1
+fi
+
+for leaked in \
+  "client-secret-value" \
+  "secret-token" \
+  "tenant.bitrix24.invalid" \
+  "+70000000000" \
+  "Hidden Person" \
+  "hidden@example.invalid" \
+  "DEAL-PRIVATE-DRY-RUN-001"; do
+  if [[ "$cli_fake" == *"$leaked"* ]]; then
+    echo "provider sandbox dry-run CLI leaked value: $leaked" >&2
+    exit 1
+  fi
+done

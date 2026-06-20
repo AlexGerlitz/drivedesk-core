@@ -20,6 +20,13 @@
   "status_with_private_refs": "ready_for_private_read_only_dry_run",
   "runner_status_with_fake_transport": "private_read_only_dry_run_completed",
   "runner_failure_status": "private_read_only_dry_run_retryable_failure",
+  "operator_cli": {
+    "script": "scripts/run_provider_sandbox_dry_run.py",
+    "plan_only_status": "ready_for_private_read_only_dry_run",
+    "fake_transport_status": "private_read_only_dry_run_completed",
+    "http_transport_available_for_private_runtime": true,
+    "external_call_in_public_ci": false
+  },
   "provider_call_enabled_by_default": false,
   "external_mutation": false,
   "runner_boundaries": {
@@ -27,6 +34,12 @@
     "exception_messages_included": false,
     "provider_endpoint_included": false,
     "raw_payload_included": false,
+    "request_body_included": false,
+    "secret_values_included": false
+  },
+  "operator_cli_boundaries": {
+    "provider_endpoint_included": false,
+    "raw_provider_payload_included": false,
     "request_body_included": false,
     "secret_values_included": false
   },

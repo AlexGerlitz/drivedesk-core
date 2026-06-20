@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import asyncio
+import importlib.util
+import io
 import json
 import logging
 import sys
@@ -610,6 +612,71 @@ def test_provider_sandbox_dry_run_runner_failure_is_redacted() -> None:
     assert rejected["failure"]["provider_error_code"] == "INVALID_TOKEN"
     assert rejected["failure"]["provider_error_description_included"] is False
     assert "secret-token" not in rejected_json
+
+
+def test_provider_sandbox_dry_run_operator_cli_is_sanitized() -> None:
+    spec = importlib.util.spec_from_file_location(
+        "run_provider_sandbox_dry_run",
+        ROOT / "scripts/run_provider_sandbox_dry_run.py",
+    )
+    assert spec is not None
+    assert spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    secret_env = {
+        "BITRIX24_CLIENT_SECRET": "client-secret-value",
+        "BITRIX24_WEBHOOK_URL": "https://example.invalid/rest/1/secret-token",
+        "BITRIX24_TENANT_DOMAIN": "tenant.bitrix24.invalid",
+    }
+
+    plan_output = io.StringIO()
+    plan_exit_code = module.run_provider_sandbox_dry_run(
+        ["--plan-only"],
+        env=secret_env,
+        stdout=plan_output,
+    )
+    plan_payload = json.loads(plan_output.getvalue())
+    plan_json = json.dumps(plan_payload, sort_keys=True)
+
+    assert plan_exit_code == 0
+    assert plan_payload["status"] == "ready_for_private_read_only_dry_run"
+    assert plan_payload["operator_cli"]["mode"] == "plan_only"
+    assert plan_payload["operator_cli"]["secret_values_included"] is False
+    assert "client-secret-value" not in plan_json
+    assert "secret-token" not in plan_json
+    assert "tenant.bitrix24.invalid" not in plan_json
+
+    fake_output = io.StringIO()
+    fake_exit_code = module.run_provider_sandbox_dry_run(
+        ["--execute-read-only", "--transport", "fake"],
+        env=secret_env,
+        stdout=fake_output,
+    )
+    fake_payload = json.loads(fake_output.getvalue())
+    fake_json = json.dumps(fake_payload, sort_keys=True)
+
+    assert fake_exit_code == 0
+    assert fake_payload["status"] == "private_read_only_dry_run_completed"
+    assert fake_payload["operator_cli"]["mode"] == "execute_read_only"
+    assert fake_payload["operator_cli"]["transport"] == "fake"
+    assert fake_payload["records_received"] == 2
+    assert fake_payload["records_accepted"] == 1
+    assert fake_payload["records_rejected"] == 1
+    assert fake_payload["request_body_included"] is False
+    assert fake_payload["provider_endpoint_included"] is False
+    assert fake_payload["secret_values_included"] is False
+    assert fake_payload["operator_cli"]["raw_provider_payload_included"] is False
+    for leaked in [
+        "client-secret-value",
+        "secret-token",
+        "tenant.bitrix24.invalid",
+        "+70000000000",
+        "Hidden Person",
+        "hidden@example.invalid",
+        "DEAL-PRIVATE-DRY-RUN-001",
+    ]:
+        assert leaked not in fake_json
 
 
 def test_integration_runbook_catalog_covers_operational_states() -> None:

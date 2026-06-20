@@ -43,7 +43,7 @@ parsing Markdown by hand.
 | API and SDK | `docs/public/API_BACKED_DEMO.md` | `bash scripts/check_public_demo_api.sh` |
 | Core domain | `docs/public/SYSTEM_DESIGN.md` | `bash scripts/ci_smoke_public.sh` |
 | Business control tower | `docs/public/BUSINESS_CONTROL_TOWER.md` | `bash scripts/check_public_business_control_tower.sh` |
-| Integration hub | `docs/public/INTEGRATION_ADAPTER_CATALOG.md` | `bash scripts/check_public_demo_api.sh` |
+| Integration hub | `docs/public/INTEGRATION_ADAPTER_CATALOG.md` | `bash scripts/check_public_demo_api.sh` and `bash scripts/check_public_provider_sandbox_dry_run.sh` |
 | Connector certification | `docs/public/CONNECTOR_CERTIFICATION.md` | `bash scripts/check_public_connector_certification.sh` |
 | Connector fixture replay | `docs/public/CONNECTOR_FIXTURE_REPLAY.md` | `bash scripts/check_public_connector_fixture_replay.sh` |
 | Integration repair | `docs/public/INTEGRATION_REPAIR.md` | `bash scripts/check_public_integration_repair.sh` |

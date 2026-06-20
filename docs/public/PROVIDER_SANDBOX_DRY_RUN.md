@@ -28,6 +28,19 @@ execute_provider_sandbox_dry_run
 Public CI uses a fake transport. Real Bitrix24 access belongs only in the
 private runtime with server-side secrets.
 
+The operator CLI wraps the same core contract:
+
+```bash
+python scripts/run_provider_sandbox_dry_run.py --plan-only
+python scripts/run_provider_sandbox_dry_run.py --execute-read-only --transport http
+```
+
+`--plan-only` checks that the private runtime has the required secret/config
+references without touching the provider. `--execute-read-only --transport http`
+performs one bounded read-only request and prints sanitized evidence only.
+Public validation uses `--transport fake` so CI can prove the CLI behavior
+without contacting a real provider.
+
 ## Why It Exists
 
 Provider onboarding proves the adapter shape with synthetic data.
@@ -41,6 +54,7 @@ provider:
 - page size and timeout are bounded;
 - provider calls are disabled by default;
 - runner calls require explicit opt-in and injected private transport;
+- operator CLI has plan-only and explicit read-only execution modes;
 - runner output contains counts, buckets, dropped-key evidence, and
   reconciliation markers only;
 - write mode remains locked;
@@ -101,6 +115,8 @@ The check validates:
 - fake secret values do not appear in JSON output;
 - provider call is disabled by default;
 - the fake transport is not called unless provider-call intent is enabled;
+- the operator CLI reaches ready state in plan-only mode without leaking refs;
+- the operator CLI completes fake read-only execution without leaking raw values;
 - read-only operation is `crm.deal.list`;
 - runner output excludes endpoint values, tokens, raw provider payloads,
   provider IDs, phone numbers, names, and email addresses;
@@ -133,5 +149,6 @@ Short answer:
 That shows integration discipline, not just an API call.
 
 For a real Bitrix24 sandbox, the only missing private step is binding real
-server-side secret values and passing a private HTTP transport into the runner.
-The public repository still proves the behavior without containing the secrets.
+server-side secret values and running the HTTP operator mode from the private
+runtime. The public repository still proves the behavior without containing the
+secrets.

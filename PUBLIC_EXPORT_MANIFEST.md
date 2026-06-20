@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-20T01:50:24Z
+Generated at: 2026-06-20T02:11:18Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -217,6 +217,10 @@ Copied public-safe areas:
 - public provider onboarding validation script: scripts/check_public_provider_onboarding.sh
 - public provider onboarding evidence snapshot: docs/public/evidence/provider-onboarding.sanitized.json
 - public provider onboarding links provider profile, mapping preview, preflight, sandbox contract, approval, and private rollout
+- public provider sandbox dry-run doc
+- public provider sandbox dry-run validation script: scripts/check_public_provider_sandbox_dry_run.sh
+- public provider sandbox dry-run evidence snapshot: docs/public/evidence/provider-sandbox-dry-run.sanitized.json
+- public provider sandbox dry-run links private secret refs, read-only request plan, provider call lock, and no-secret-value evidence
 - public integration repair doc: docs/public/INTEGRATION_REPAIR.md
 - public integration repair validation script: scripts/check_public_integration_repair.sh
 - public integration repair evidence snapshot: docs/public/evidence/integration-repair.sanitized.json

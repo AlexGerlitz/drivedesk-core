@@ -124,6 +124,12 @@ privateConnectorHandoff.nextMilestone=real_provider_sandbox_dry_run
 That is the bridge from public portfolio proof to real commercial connector
 work.
 
+The next executable contract is `docs/public/PROVIDER_SANDBOX_DRY_RUN.md`. It
+checks that private secret references and tenant/provider config references are
+bound, prepares a bounded read-only `crm.deal.list` request plan, keeps provider
+calls disabled by default, and proves that fake secret values do not leak into
+JSON output.
+
 ## Public Safety
 
 The public workbench is safe because:
@@ -150,5 +156,6 @@ Evidence:
 - `docs/public/PROVIDER_CONNECTOR_GUIDE.md`
 - `docs/public/CONNECTOR_CERTIFICATION.md`
 - `docs/public/CONNECTOR_FIXTURE_REPLAY.md`
+- `docs/public/PROVIDER_SANDBOX_DRY_RUN.md`
 - `docs/public/INTEGRATION_RUNTIME.md`
 - `docs/public/INTEGRATION_EXECUTION.md`

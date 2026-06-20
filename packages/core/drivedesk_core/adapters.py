@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
-from typing import Protocol
+from typing import Mapping, Protocol
 
 CRM_SENSITIVE_KEY_TOKENS = (
     "access_token",
@@ -15,6 +15,10 @@ CRM_SENSITIVE_KEY_TOKENS = (
     "phone",
     "secret",
     "token",
+)
+
+BITRIX24_SANDBOX_CONFIG_REFS = (
+    "BITRIX24_TENANT_DOMAIN",
 )
 
 
@@ -2078,6 +2082,219 @@ def build_provider_onboarding_workbench(adapter_key: str = "crm.bitrix24.mock") 
                 "check": "bash scripts/check_public_connector_certification.sh",
             },
         ],
+    }
+
+
+def build_provider_sandbox_dry_run_plan(
+    adapter_key: str = "crm.bitrix24.mock",
+    *,
+    env: Mapping[str, str] | None = None,
+    allow_provider_call: bool = False,
+) -> dict[str, object]:
+    descriptor = resolve_adapter(adapter_key).descriptor
+    auth_profile = descriptor.auth_profile
+    secret_refs = sorted(str(item) for item in auth_profile.get("secret_refs", []))
+    config_refs = list(BITRIX24_SANDBOX_CONFIG_REFS) if descriptor.key == "crm.bitrix24.mock" else []
+    env_values = env or {}
+
+    present_secret_refs = [
+        ref
+        for ref in secret_refs
+        if str(env_values.get(ref) or "").strip()
+    ]
+    missing_secret_refs = [
+        ref
+        for ref in secret_refs
+        if ref not in present_secret_refs
+    ]
+    present_config_refs = [
+        ref
+        for ref in config_refs
+        if str(env_values.get(ref) or "").strip()
+    ]
+    missing_config_refs = [
+        ref
+        for ref in config_refs
+        if ref not in present_config_refs
+    ]
+    required_refs_bound = not missing_secret_refs and not missing_config_refs
+    provider_call_enabled = bool(allow_provider_call and required_refs_bound)
+    status = (
+        "ready_for_private_read_only_dry_run"
+        if required_refs_bound and not provider_call_enabled
+        else "provider_call_prepared"
+        if provider_call_enabled
+        else "blocked_missing_secret_binding"
+    )
+
+    read_only_operation = "crm.deal.list"
+    endpoint_template = "{BITRIX24_WEBHOOK_URL}/crm.deal.list.json"
+    selected_fields = ["ID", "STAGE_ID", "ASSIGNED_BY_ID", "OPPORTUNITY", "DATE_CREATE"]
+    gates = [
+        {
+            "gate": "adapter_contract",
+            "status": "passed",
+            "detail": f"{descriptor.key} is registered with operation contracts and scopes.",
+            "blocks_dry_run": False,
+            "evidence": "GET /integration-adapters",
+        },
+        {
+            "gate": "secret_refs_bound",
+            "status": "passed" if not missing_secret_refs else "blocked",
+            "detail": "All provider secret reference names are present in private env.",
+            "missing_refs": missing_secret_refs,
+            "blocks_dry_run": bool(missing_secret_refs),
+            "evidence": "server_secret_store",
+        },
+        {
+            "gate": "tenant_domain_bound",
+            "status": "passed" if not missing_config_refs else "blocked",
+            "detail": "Tenant/provider domain reference is present without exposing the value.",
+            "missing_refs": missing_config_refs,
+            "blocks_dry_run": bool(missing_config_refs),
+            "evidence": "private_connector_config",
+        },
+        {
+            "gate": "read_only_scope",
+            "status": "passed",
+            "detail": "Dry-run reads a bounded deal list and does not update provider state.",
+            "blocks_dry_run": False,
+            "evidence": read_only_operation,
+        },
+        {
+            "gate": "rate_limit_policy",
+            "status": "armed",
+            "detail": "One request per dry-run, bounded page size, retry-after honored by worker policy.",
+            "blocks_dry_run": False,
+            "evidence": "provider_rate_limit_guard",
+        },
+        {
+            "gate": "provider_call_lock",
+            "status": "open" if provider_call_enabled else "closed",
+            "detail": "Code can prepare a request plan without making a provider call.",
+            "blocks_dry_run": not provider_call_enabled,
+            "evidence": "allow_provider_call",
+        },
+        {
+            "gate": "write_lock",
+            "status": "closed",
+            "detail": "Write mode remains unavailable until approval and idempotency evidence are attached.",
+            "blocks_dry_run": False,
+            "evidence": "business_approval_gateway.previewed",
+        },
+    ]
+
+    return {
+        "status": status,
+        "adapter_key": descriptor.key,
+        "provider_category": descriptor.category,
+        "dry_run_mode": "read_only",
+        "required_secret_refs": secret_refs,
+        "present_secret_refs": present_secret_refs,
+        "missing_secret_refs": missing_secret_refs,
+        "required_config_refs": config_refs,
+        "present_config_refs": present_config_refs,
+        "missing_config_refs": missing_config_refs,
+        "provider_call_enabled": provider_call_enabled,
+        "external_mutation": False,
+        "raw_payload_included": False,
+        "contains_pii": False,
+        "secret_values_included": False,
+        "request_plan": {
+            "method": "POST",
+            "endpoint_template": endpoint_template,
+            "operation": read_only_operation,
+            "max_page_size": 5,
+            "selected_fields": selected_fields,
+            "filter_policy": "recent_or_changed_since_last_cursor",
+            "pagination": "single_page_first_dry_run",
+            "timeout_seconds": 10,
+            "provider_call_enabled": provider_call_enabled,
+            "external_mutation": False,
+        },
+        "response_policy": {
+            "return_raw_payload": False,
+            "redact_keys": sorted(CRM_SENSITIVE_KEY_TOKENS),
+            "store_counts_only_in_public_evidence": True,
+            "attach_private_trace_id": True,
+        },
+        "gates": gates,
+        "dry_run_steps": [
+            {
+                "step": "resolve_tenant_connection",
+                "status": "prepared",
+                "detail": "Load tenant-scoped connection metadata, scopes, mapping, and secret reference names.",
+                "external_mutation": False,
+                "evidence": "IntegrationConnection",
+            },
+            {
+                "step": "validate_secret_binding",
+                "status": "passed" if required_refs_bound else "blocked",
+                "detail": "Check presence of secret/config refs without printing values.",
+                "external_mutation": False,
+                "evidence": "server_secret_store",
+            },
+            {
+                "step": "build_read_only_request",
+                "status": "prepared",
+                "detail": f"Prepare {read_only_operation} request with bounded fields and page size.",
+                "external_mutation": False,
+                "evidence": "provider_request_plan",
+            },
+            {
+                "step": "execute_provider_call",
+                "status": "enabled_private" if provider_call_enabled else "disabled_by_default",
+                "detail": "Provider call is opt-in and remains disabled in public/export checks.",
+                "external_mutation": False,
+                "evidence": "allow_provider_call",
+            },
+            {
+                "step": "normalize_and_redact",
+                "status": "prepared",
+                "detail": "Normalize deal fields and drop raw provider payload before returning any evidence.",
+                "external_mutation": False,
+                "evidence": "adapter_mapping.previewed",
+            },
+            {
+                "step": "attach_reconciliation_probe",
+                "status": "prepared",
+                "detail": "Attach counts, cursor state, and private trace id for later reconciliation.",
+                "external_mutation": False,
+                "evidence": "drivedesk_integration_reconciliations",
+            },
+        ],
+        "acceptance_checks": [
+            "no provider token in browser storage",
+            "no secret value in logs or JSON evidence",
+            "no raw provider payload returned to public/client response",
+            "read-only provider operation only",
+            "bounded page size and timeout recorded",
+            "rate-limit and retry-after behavior mapped",
+            "private trace id and reconciliation probe attached",
+        ],
+        "next_steps": [
+            {
+                "step": "bind_private_env",
+                "status": "required" if not required_refs_bound else "done",
+                "detail": "Bind webhook/OAuth secret refs and tenant domain inside private runtime.",
+            },
+            {
+                "step": "run_read_only_dry_run",
+                "status": "next_private_step",
+                "detail": "Execute one bounded read-only request and store sanitized counts/evidence.",
+            },
+            {
+                "step": "compare_with_fixture_replay",
+                "status": "required",
+                "detail": "Compare sandbox response shape with public fixture replay and mapping rules.",
+            },
+            {
+                "step": "request_write_unlock",
+                "status": "approval_required",
+                "detail": "Only then consider provider-changing operations behind approval gates.",
+            },
+        ],
+        "evidence": "provider_sandbox_dry_run.plan_prepared",
     }
 
 

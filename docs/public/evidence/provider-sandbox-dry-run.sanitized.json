@@ -1,0 +1,50 @@
+{
+  "adapter_key": "crm.bitrix24.mock",
+  "check": "public_provider_sandbox_dry_run",
+  "data_profile": "synthetic_demo_data",
+  "dry_run_mode": "read_only",
+  "operation": "crm.deal.list",
+  "redaction": {
+    "addresses_included": false,
+    "credentials_included": false,
+    "hostnames_included": false,
+    "paths_included": false,
+    "production_data_included": false,
+    "provider_tokens_included": false,
+    "raw_provider_payload_included": false,
+    "request_bodies_included": false,
+    "secret_values_included": false
+  },
+  "schema_version": 1,
+  "status_without_private_env": "blocked_missing_secret_binding",
+  "status_with_private_refs": "ready_for_private_read_only_dry_run",
+  "provider_call_enabled_by_default": false,
+  "external_mutation": false,
+  "request_plan": {
+    "endpoint_template": "{BITRIX24_WEBHOOK_URL}/crm.deal.list.json",
+    "filter_policy": "recent_or_changed_since_last_cursor",
+    "max_page_size": 5,
+    "method": "POST",
+    "pagination": "single_page_first_dry_run",
+    "timeout_seconds": 10
+  },
+  "required_refs": {
+    "config_refs": [
+      "BITRIX24_TENANT_DOMAIN"
+    ],
+    "secret_refs": [
+      "BITRIX24_CLIENT_SECRET",
+      "BITRIX24_WEBHOOK_URL"
+    ]
+  },
+  "verified_gates": [
+    "adapter_contract",
+    "secret_refs_bound",
+    "tenant_domain_bound",
+    "read_only_scope",
+    "rate_limit_policy",
+    "provider_call_lock",
+    "write_lock"
+  ],
+  "verifier": "bash scripts/check_public_provider_sandbox_dry_run.sh"
+}

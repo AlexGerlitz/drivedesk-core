@@ -29,7 +29,7 @@ export boundary through executable verifier scripts and GitHub Actions.
 | PostgreSQL / Alembic | Stores tenants, users, roles, audit events, outbox jobs, business records, and integration state. Alembic keeps schema changes reproducible. | Migrations and Postgres-shaped repository contracts are present and validated by tests. | Production sizing, backup retention, and migration rollout windows need live environment decisions. |
 | Redis / Workers / Outbox | Moves slow or risky work out of request handlers: retries, dead-letter handling, notifications, adapter jobs, and recovery actions. | Outbox/retry/dead-letter contracts are documented and covered by public-safe checks. | Real provider workers need secrets, queues, rate limits, and production runbooks. |
 | OpenAPI / SDK | Makes the API contract machine-readable and generates clients for Python, JavaScript, and TypeScript. | OpenAPI drift checks and generated SDK examples are validated. | A stable commercial SDK needs versioning, changelogs, and published packages. |
-| Integration Hub / Adapters | Normalizes outside systems such as CRM, bank, accounting, ERP, webhook, file import, email, and custom API providers. | Connector certification, fixture replay, provider onboarding, runtime, execution, and repair flows are public-safe and checked. | Real adapters need sandbox credentials, provider-specific auth, and private rollout evidence. |
+| Integration Hub / Adapters | Normalizes outside systems such as CRM, bank, accounting, ERP, webhook, file import, email, and custom API providers. | Connector certification, fixture replay, provider onboarding, provider sandbox dry-run planning, runtime, execution, and repair flows are public-safe and checked. | Real adapters need sandbox credentials, provider-specific auth, private read-only dry-run evidence, and private rollout evidence. |
 | Business Control Tower | Turns provider signals into safe facts, detections, action plans, tasks, approvals, notifications, and repair work. | Demo payload, docs, and checks show end-to-end preview flow. | Needs live frontend operator workflow and real provider data in private environments. |
 | Docker / Compose | Reproducible local runtime for app, database-shaped services, and developer verification. | Compose config is checked when Docker is available. | Full local one-command production parity still depends on final service split and runtime secrets. |
 | Kubernetes / Helm | Package and run the platform in cluster environments with predictable manifests. | Helm chart and render checks are present. | A live cluster rollout needs real ingress, secrets, autoscaling, storage, and environment policy. |
@@ -53,6 +53,9 @@ Use these phrases when explaining decisions:
 - Integration Hub: external systems are adapters, not the core. DriveDesk owns
   the business workflow, while providers supply or receive data through checked
   contracts.
+- Provider sandbox dry-run: before a real CRM connector writes anything, I
+  verify secret binding, read-only request shape, redaction, rate limits, and
+  reconciliation evidence without exposing provider tokens.
 - GitOps/IaC: infrastructure and deployment intent are described in Git, then
   verified with render, plan, drift, and release-gate checks.
 - Observability: metrics, logs, alerts, dashboards, and runbooks are part of the

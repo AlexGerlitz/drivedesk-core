@@ -343,6 +343,7 @@ incident queue, mitigation, recovery, and resolution evidence path.
 - `scripts/check_public_provider_connector_guide.sh` - public-safe provider connector guide validation.
 - `scripts/check_public_connector_certification.sh` - public-safe connector certification path validation.
 - `scripts/check_public_provider_onboarding.sh` - public-safe provider onboarding validation.
+- `scripts/check_public_provider_sandbox_dry_run.sh` - public-safe provider sandbox dry-run validation.
 - `scripts/check_public_integration_repair.sh` - public-safe integration repair validation.
 - `scripts/check_public_connector_fixture_replay.sh` - public-safe connector fixture replay validation.
 - `scripts/check_public_adapter_developer_guide.sh` - public-safe adapter developer guide and SDK operation-plan validation.
@@ -433,6 +434,7 @@ bash scripts/check_public_technical_capability_map.sh
 bash scripts/check_public_provider_connector_guide.sh
 bash scripts/check_public_connector_certification.sh
 bash scripts/check_public_provider_onboarding.sh
+bash scripts/check_public_provider_sandbox_dry_run.sh
 bash scripts/check_public_integration_repair.sh
 bash scripts/check_public_connector_fixture_replay.sh
 bash scripts/check_public_adapter_developer_guide.sh
@@ -494,6 +496,7 @@ bash scripts/check_public_technical_capability_map.sh
 bash scripts/check_public_provider_connector_guide.sh
 bash scripts/check_public_connector_certification.sh
 bash scripts/check_public_provider_onboarding.sh
+bash scripts/check_public_provider_sandbox_dry_run.sh
 bash scripts/check_public_connector_fixture_replay.sh
 bash scripts/check_public_adapter_developer_guide.sh
 bash scripts/check_public_evidence_index.sh

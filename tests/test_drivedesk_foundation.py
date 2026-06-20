@@ -28,6 +28,7 @@ from drivedesk_core import (
     TenantRef,
     build_adapter_connection_diagnostics,
     build_event,
+    build_provider_sandbox_dry_run_plan,
     list_integration_runbooks,
     list_lifecycle_policies,
     preview_lifecycle_transition,
@@ -424,6 +425,63 @@ def test_adapter_connection_diagnostics_are_safe_and_operation_aware() -> None:
     assert crm["real_provider_requires_secret"] is True
     assert crm["secret_refs"] == ["BITRIX24_CLIENT_SECRET", "BITRIX24_WEBHOOK_URL"]
     assert "STAGE_ID" not in json.dumps(crm)
+
+
+def test_provider_sandbox_dry_run_plan_is_secret_safe() -> None:
+    blocked = build_provider_sandbox_dry_run_plan("crm.bitrix24.mock", env={})
+
+    assert blocked["status"] == "blocked_missing_secret_binding"
+    assert blocked["adapter_key"] == "crm.bitrix24.mock"
+    assert blocked["provider_call_enabled"] is False
+    assert blocked["external_mutation"] is False
+    assert blocked["secret_values_included"] is False
+    assert blocked["missing_secret_refs"] == [
+        "BITRIX24_CLIENT_SECRET",
+        "BITRIX24_WEBHOOK_URL",
+    ]
+    assert blocked["missing_config_refs"] == ["BITRIX24_TENANT_DOMAIN"]
+    assert blocked["request_plan"]["operation"] == "crm.deal.list"
+    assert blocked["request_plan"]["max_page_size"] == 5
+    assert blocked["request_plan"]["external_mutation"] is False
+    assert {gate["gate"] for gate in blocked["gates"]} >= {
+        "adapter_contract",
+        "secret_refs_bound",
+        "tenant_domain_bound",
+        "provider_call_lock",
+        "write_lock",
+    }
+
+    secret_env = {
+        "BITRIX24_CLIENT_SECRET": "client-secret-value",
+        "BITRIX24_WEBHOOK_URL": "https://example.invalid/rest/1/secret-token",
+        "BITRIX24_TENANT_DOMAIN": "tenant.bitrix24.invalid",
+    }
+    ready = build_provider_sandbox_dry_run_plan("crm.bitrix24.mock", env=secret_env)
+    ready_json = json.dumps(ready)
+
+    assert ready["status"] == "ready_for_private_read_only_dry_run"
+    assert ready["present_secret_refs"] == [
+        "BITRIX24_CLIENT_SECRET",
+        "BITRIX24_WEBHOOK_URL",
+    ]
+    assert ready["present_config_refs"] == ["BITRIX24_TENANT_DOMAIN"]
+    assert ready["missing_secret_refs"] == []
+    assert ready["missing_config_refs"] == []
+    assert ready["provider_call_enabled"] is False
+    assert ready["request_plan"]["provider_call_enabled"] is False
+    assert "client-secret-value" not in ready_json
+    assert "secret-token" not in ready_json
+    assert "tenant.bitrix24.invalid" not in ready_json
+
+    call_prepared = build_provider_sandbox_dry_run_plan(
+        "crm.bitrix24.mock",
+        env=secret_env,
+        allow_provider_call=True,
+    )
+    assert call_prepared["status"] == "provider_call_prepared"
+    assert call_prepared["provider_call_enabled"] is True
+    assert call_prepared["external_mutation"] is False
+    assert call_prepared["request_plan"]["external_mutation"] is False
 
 
 def test_integration_runbook_catalog_covers_operational_states() -> None:

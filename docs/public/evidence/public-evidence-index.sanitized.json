@@ -231,6 +231,8 @@
       "public_doc": "docs/public/INTEGRATION_ADAPTER_CATALOG.md",
       "evidence_files": [
         "scripts/run_provider_sandbox_dry_run.py",
+        "scripts/record_provider_sandbox_dry_run_evidence.sh",
+        "scripts/check_provider_sandbox_dry_run_evidence.py",
         "docs/public/PROVIDER_SANDBOX_DRY_RUN.md",
         "docs/public/evidence/provider-sandbox-dry-run.sanitized.json",
         "docs/public/INTEGRATION_OPERATION_CONTRACTS.md",
@@ -246,7 +248,7 @@
         "docs/public/INTEGRATION_CONNECTION_DIAGNOSTICS.md",
         "docs/public/INTEGRATION_INCIDENT_RUNBOOKS.md"
       ],
-      "boundary": "synthetic providers, sanitized adapter evidence, fake transport checks, and no provider secret values"
+      "boundary": "synthetic providers, sanitized adapter evidence, fake transport checks, recorded-evidence verifier, and no provider secret values"
     },
     {
       "capability_id": "connector-certification",

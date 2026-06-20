@@ -33,6 +33,8 @@ The operator CLI wraps the same core contract:
 ```bash
 python scripts/run_provider_sandbox_dry_run.py --plan-only
 python scripts/run_provider_sandbox_dry_run.py --execute-read-only --transport http
+bash scripts/record_provider_sandbox_dry_run_evidence.sh
+python scripts/check_provider_sandbox_dry_run_evidence.py <evidence-file>
 ```
 
 `--plan-only` checks that the private runtime has the required secret/config
@@ -40,6 +42,11 @@ references without touching the provider. `--execute-read-only --transport http`
 performs one bounded read-only request and prints sanitized evidence only.
 Public validation uses `--transport fake` so CI can prove the CLI behavior
 without contacting a real provider.
+
+`record_provider_sandbox_dry_run_evidence.sh` is the private operator workflow:
+it runs the CLI, writes a sanitized evidence JSON file into runtime storage, and
+immediately validates that artifact with
+`check_provider_sandbox_dry_run_evidence.py`.
 
 ## Why It Exists
 
@@ -55,6 +62,7 @@ provider:
 - provider calls are disabled by default;
 - runner calls require explicit opt-in and injected private transport;
 - operator CLI has plan-only and explicit read-only execution modes;
+- recorded evidence is checked before it can be used as proof;
 - runner output contains counts, buckets, dropped-key evidence, and
   reconciliation markers only;
 - write mode remains locked;
@@ -117,6 +125,8 @@ The check validates:
 - the fake transport is not called unless provider-call intent is enabled;
 - the operator CLI reaches ready state in plan-only mode without leaking refs;
 - the operator CLI completes fake read-only execution without leaking raw values;
+- the recorder writes sanitized JSON and the verifier rejects raw URLs, tokens,
+  emails, phone numbers, provider IDs, request bodies, and raw payloads;
 - read-only operation is `crm.deal.list`;
 - runner output excludes endpoint values, tokens, raw provider payloads,
   provider IDs, phone numbers, names, and email addresses;
@@ -152,3 +162,10 @@ For a real Bitrix24 sandbox, the only missing private step is binding real
 server-side secret values and running the HTTP operator mode from the private
 runtime. The public repository still proves the behavior without containing the
 secrets.
+
+Human meaning: the workflow is now reproducible. A reviewer can see the same
+path a private operator would use:
+
+```text
+bind private env -> run read-only dry-run -> store sanitized evidence -> verify evidence -> review result
+```

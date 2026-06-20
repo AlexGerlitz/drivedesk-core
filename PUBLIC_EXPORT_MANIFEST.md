@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-20T07:57:15Z
+Generated at: 2026-06-20T08:13:29Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -220,8 +220,10 @@ Copied public-safe areas:
 - public provider sandbox dry-run doc
 - public provider sandbox dry-run validation script: scripts/check_public_provider_sandbox_dry_run.sh
 - public provider sandbox dry-run operator CLI: scripts/run_provider_sandbox_dry_run.py
+- public provider sandbox dry-run evidence recorder: scripts/record_provider_sandbox_dry_run_evidence.sh
+- public provider sandbox dry-run evidence verifier: scripts/check_provider_sandbox_dry_run_evidence.py
 - public provider sandbox dry-run evidence snapshot: docs/public/evidence/provider-sandbox-dry-run.sanitized.json
-- public provider sandbox dry-run links private secret refs, read-only request plan, provider call lock, operator CLI, and no-secret-value evidence
+- public provider sandbox dry-run links private secret refs, read-only request plan, provider call lock, operator CLI, recorded evidence verifier, and no-secret-value evidence
 - public integration repair doc: docs/public/INTEGRATION_REPAIR.md
 - public integration repair validation script: scripts/check_public_integration_repair.sh
 - public integration repair evidence snapshot: docs/public/evidence/integration-repair.sanitized.json

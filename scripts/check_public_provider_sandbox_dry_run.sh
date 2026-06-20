@@ -214,3 +214,38 @@ for leaked in \
     exit 1
   fi
 done
+
+tmp_dir="$(mktemp -d)"
+trap 'rm -rf "$tmp_dir"' EXIT
+evidence_file="$tmp_dir/provider-sandbox.sanitized.json"
+
+BITRIX24_CLIENT_SECRET="client-secret-value" \
+BITRIX24_WEBHOOK_URL="https://example.invalid/rest/1/secret-token" \
+BITRIX24_TENANT_DOMAIN="tenant.bitrix24.invalid" \
+MODE="execute-read-only" \
+TRANSPORT="fake" \
+OUTPUT="$evidence_file" \
+PYTHON_BIN="$PYTHON_BIN" \
+bash scripts/record_provider_sandbox_dry_run_evidence.sh >/dev/null
+
+"$PYTHON_BIN" scripts/check_provider_sandbox_dry_run_evidence.py "$evidence_file" --require-completed
+
+recorded="$(cat "$evidence_file")"
+if [[ "$recorded" != *"private_read_only_dry_run_completed"* ]]; then
+  echo "provider sandbox recorded evidence missing completed status" >&2
+  exit 1
+fi
+
+for leaked in \
+  "client-secret-value" \
+  "secret-token" \
+  "tenant.bitrix24.invalid" \
+  "+70000000000" \
+  "Hidden Person" \
+  "hidden@example.invalid" \
+  "DEAL-PRIVATE-DRY-RUN-001"; do
+  if [[ "$recorded" == *"$leaked"* ]]; then
+    echo "provider sandbox recorded evidence leaked value: $leaked" >&2
+    exit 1
+  fi
+done

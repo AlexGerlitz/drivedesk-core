@@ -679,6 +679,58 @@ def test_provider_sandbox_dry_run_operator_cli_is_sanitized() -> None:
         assert leaked not in fake_json
 
 
+def test_provider_sandbox_dry_run_evidence_verifier_rejects_leaks(tmp_path: Path) -> None:
+    runner_spec = importlib.util.spec_from_file_location(
+        "run_provider_sandbox_dry_run",
+        ROOT / "scripts/run_provider_sandbox_dry_run.py",
+    )
+    assert runner_spec is not None
+    assert runner_spec.loader is not None
+    runner_module = importlib.util.module_from_spec(runner_spec)
+    runner_spec.loader.exec_module(runner_module)
+
+    verifier_spec = importlib.util.spec_from_file_location(
+        "check_provider_sandbox_dry_run_evidence",
+        ROOT / "scripts/check_provider_sandbox_dry_run_evidence.py",
+    )
+    assert verifier_spec is not None
+    assert verifier_spec.loader is not None
+    verifier_module = importlib.util.module_from_spec(verifier_spec)
+    verifier_spec.loader.exec_module(verifier_module)
+
+    secret_env = {
+        "BITRIX24_CLIENT_SECRET": "client-secret-value",
+        "BITRIX24_WEBHOOK_URL": "https://example.invalid/rest/1/secret-token",
+        "BITRIX24_TENANT_DOMAIN": "tenant.bitrix24.invalid",
+    }
+    evidence_path = tmp_path / "provider-sandbox.sanitized.json"
+    exit_code = runner_module.run_provider_sandbox_dry_run(
+        [
+            "--execute-read-only",
+            "--transport",
+            "fake",
+            "--output",
+            str(evidence_path),
+        ],
+        env=secret_env,
+        stdout=io.StringIO(),
+    )
+    assert exit_code == 0
+
+    verified = verifier_module.validate_provider_sandbox_dry_run_evidence(
+        evidence_path,
+        require_completed=True,
+    )
+    assert verified["status"] == "private_read_only_dry_run_completed"
+
+    leaked = dict(verified)
+    leaked["provider_endpoint"] = "https://example.invalid/rest/1/secret-token"
+    leaked_path = tmp_path / "provider-sandbox.leaked.json"
+    leaked_path.write_text(json.dumps(leaked), encoding="utf-8")
+    with pytest.raises(SystemExit):
+        verifier_module.validate_provider_sandbox_dry_run_evidence(leaked_path)
+
+
 def test_integration_runbook_catalog_covers_operational_states() -> None:
     runbooks = {runbook["key"]: runbook for runbook in list_integration_runbooks()}
 

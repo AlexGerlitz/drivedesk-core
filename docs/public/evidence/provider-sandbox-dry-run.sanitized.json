@@ -27,6 +27,14 @@
     "http_transport_available_for_private_runtime": true,
     "external_call_in_public_ci": false
   },
+  "evidence_lifecycle": {
+    "recorder": "scripts/record_provider_sandbox_dry_run_evidence.sh",
+    "verifier": "scripts/check_provider_sandbox_dry_run_evidence.py",
+    "fake_transport_evidence_verified": true,
+    "http_transport_ready_for_private_runtime": true,
+    "private_runtime_storage_only": true,
+    "external_call_in_public_ci": false
+  },
   "provider_call_enabled_by_default": false,
   "external_mutation": false,
   "runner_boundaries": {
@@ -39,6 +47,16 @@
   },
   "operator_cli_boundaries": {
     "provider_endpoint_included": false,
+    "raw_provider_payload_included": false,
+    "request_body_included": false,
+    "secret_values_included": false
+  },
+  "recorded_evidence_boundaries": {
+    "email_included": false,
+    "phone_included": false,
+    "private_artifact_path_in_public_evidence": false,
+    "provider_endpoint_included": false,
+    "provider_ids_included": false,
     "raw_provider_payload_included": false,
     "request_body_included": false,
     "secret_values_included": false

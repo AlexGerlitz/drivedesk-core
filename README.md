@@ -345,6 +345,8 @@ incident queue, mitigation, recovery, and resolution evidence path.
 - `scripts/check_public_provider_onboarding.sh` - public-safe provider onboarding validation.
 - `scripts/check_public_provider_sandbox_dry_run.sh` - public-safe provider sandbox dry-run validation.
 - `scripts/run_provider_sandbox_dry_run.py` - sanitized plan-only/fake/http operator CLI for provider sandbox dry-run.
+- `scripts/record_provider_sandbox_dry_run_evidence.sh` - private-runtime evidence recorder for provider sandbox dry-run.
+- `scripts/check_provider_sandbox_dry_run_evidence.py` - sanitized evidence verifier for provider sandbox dry-run.
 - `scripts/check_public_integration_repair.sh` - public-safe integration repair validation.
 - `scripts/check_public_connector_fixture_replay.sh` - public-safe connector fixture replay validation.
 - `scripts/check_public_adapter_developer_guide.sh` - public-safe adapter developer guide and SDK operation-plan validation.

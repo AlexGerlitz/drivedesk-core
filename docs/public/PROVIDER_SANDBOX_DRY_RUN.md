@@ -15,6 +15,19 @@ It does not store or print real provider credentials. It checks that the
 private runtime has the required secret reference names and can prepare a
 bounded read-only provider request plan.
 
+The same contract also includes a private runner shape:
+
+```text
+execute_provider_sandbox_dry_run
+  -> build read-only request
+  -> call injected private transport only when enabled
+  -> normalize provider response
+  -> return sanitized counts and redaction evidence
+```
+
+Public CI uses a fake transport. Real Bitrix24 access belongs only in the
+private runtime with server-side secrets.
+
 ## Why It Exists
 
 Provider onboarding proves the adapter shape with synthetic data.
@@ -27,6 +40,9 @@ provider:
 - the request is read-only;
 - page size and timeout are bounded;
 - provider calls are disabled by default;
+- runner calls require explicit opt-in and injected private transport;
+- runner output contains counts, buckets, dropped-key evidence, and
+  reconciliation markers only;
 - write mode remains locked;
 - secret values, raw payloads, and provider tokens are not returned.
 
@@ -84,7 +100,11 @@ The check validates:
 - missing env blocks the dry-run;
 - fake secret values do not appear in JSON output;
 - provider call is disabled by default;
+- the fake transport is not called unless provider-call intent is enabled;
 - read-only operation is `crm.deal.list`;
+- runner output excludes endpoint values, tokens, raw provider payloads,
+  provider IDs, phone numbers, names, and email addresses;
+- retryable transport failures redact exception messages;
 - write mode stays locked;
 - the request plan stays bounded.
 
@@ -111,3 +131,7 @@ Short answer:
 > operation is allowed.
 
 That shows integration discipline, not just an API call.
+
+For a real Bitrix24 sandbox, the only missing private step is binding real
+server-side secret values and passing a private HTTP transport into the runner.
+The public repository still proves the behavior without containing the secrets.

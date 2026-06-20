@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
-from typing import Mapping, Protocol
+from typing import Callable, Mapping, Protocol
 
 CRM_SENSITIVE_KEY_TOKENS = (
     "access_token",
@@ -2295,6 +2295,240 @@ def build_provider_sandbox_dry_run_plan(
             },
         ],
         "evidence": "provider_sandbox_dry_run.plan_prepared",
+    }
+
+
+def _bitrix_sandbox_endpoint(env: Mapping[str, str]) -> str:
+    webhook_url = str(env.get("BITRIX24_WEBHOOK_URL") or "").strip().rstrip("/")
+    if webhook_url.endswith(".json"):
+        return webhook_url
+    return f"{webhook_url}/crm.deal.list.json"
+
+
+def _bitrix_response_records(response: Mapping[str, object]) -> list[object]:
+    result = response.get("result")
+    if isinstance(result, list):
+        return list(result)
+    if isinstance(result, dict):
+        items = result.get("items") or result.get("deals")
+        if isinstance(items, list):
+            return list(items)
+    return []
+
+
+def _safe_provider_total(response: Mapping[str, object]) -> int | None:
+    total = response.get("total")
+    if isinstance(total, bool):
+        return None
+    if isinstance(total, int):
+        return total
+    if isinstance(total, str) and total.isdigit():
+        return int(total)
+    return None
+
+
+def _safe_provider_error_code(response: Mapping[str, object]) -> str:
+    raw_code = str(response.get("error") or "provider_error").strip()
+    safe_chars = []
+    for char in raw_code[:64]:
+        if char.isalnum() or char in {"_", "-", "."}:
+            safe_chars.append(char)
+        else:
+            safe_chars.append("_")
+    return "".join(safe_chars) or "provider_error"
+
+
+def execute_provider_sandbox_dry_run(
+    adapter_key: str = "crm.bitrix24.mock",
+    *,
+    env: Mapping[str, str] | None = None,
+    allow_provider_call: bool = False,
+    provider_transport: Callable[[dict[str, object]], Mapping[str, object]] | None = None,
+) -> dict[str, object]:
+    plan = build_provider_sandbox_dry_run_plan(
+        adapter_key,
+        env=env,
+        allow_provider_call=allow_provider_call,
+    )
+    base_payload: dict[str, object] = {
+        "adapter_key": plan["adapter_key"],
+        "dry_run_mode": plan["dry_run_mode"],
+        "operation": plan["request_plan"]["operation"],
+        "provider_call_enabled": plan["provider_call_enabled"],
+        "external_mutation": False,
+        "raw_payload_included": False,
+        "request_body_included": False,
+        "provider_endpoint_included": False,
+        "contains_pii": False,
+        "secret_values_included": False,
+        "reconciliation_probe_attached": False,
+        "plan_status": plan["status"],
+        "request_plan": {
+            "method": plan["request_plan"]["method"],
+            "endpoint_template": plan["request_plan"]["endpoint_template"],
+            "operation": plan["request_plan"]["operation"],
+            "max_page_size": plan["request_plan"]["max_page_size"],
+            "timeout_seconds": plan["request_plan"]["timeout_seconds"],
+            "external_mutation": False,
+        },
+    }
+
+    if plan["status"] == "blocked_missing_secret_binding":
+        return {
+            **base_payload,
+            "status": "blocked_missing_secret_binding",
+            "records_received": 0,
+            "records_accepted": 0,
+            "records_rejected": 0,
+            "provider_reported_total": None,
+            "dropped_sensitive_keys": [],
+            "failure": {
+                "retryable": False,
+                "operator_review": True,
+                "reason": "missing_secret_or_config_refs",
+                "missing_secret_refs": plan["missing_secret_refs"],
+                "missing_config_refs": plan["missing_config_refs"],
+            },
+            "evidence": "provider_sandbox_dry_run.blocked",
+        }
+
+    if not allow_provider_call:
+        return {
+            **base_payload,
+            "status": "provider_call_disabled",
+            "records_received": 0,
+            "records_accepted": 0,
+            "records_rejected": 0,
+            "provider_reported_total": None,
+            "dropped_sensitive_keys": [],
+            "failure": {
+                "retryable": False,
+                "operator_review": False,
+                "reason": "provider_call_disabled_by_default",
+            },
+            "evidence": "provider_sandbox_dry_run.call_locked",
+        }
+
+    if provider_transport is None:
+        return {
+            **base_payload,
+            "status": "transport_missing",
+            "records_received": 0,
+            "records_accepted": 0,
+            "records_rejected": 0,
+            "provider_reported_total": None,
+            "dropped_sensitive_keys": [],
+            "failure": {
+                "retryable": False,
+                "operator_review": True,
+                "reason": "private_provider_transport_missing",
+            },
+            "evidence": "provider_sandbox_dry_run.transport_missing",
+        }
+
+    env_values = env or {}
+    request_body = {
+        "select": plan["request_plan"]["selected_fields"],
+        "order": {"DATE_CREATE": "DESC"},
+        "start": 0,
+    }
+    try:
+        response = provider_transport(
+            {
+                "method": "POST",
+                "url": _bitrix_sandbox_endpoint(env_values),
+                "json": request_body,
+                "timeout_seconds": plan["request_plan"]["timeout_seconds"],
+            }
+        )
+    except Exception as exc:  # pragma: no cover - error class is tested without relying on message text
+        return {
+            **base_payload,
+            "status": "private_read_only_dry_run_retryable_failure",
+            "records_received": 0,
+            "records_accepted": 0,
+            "records_rejected": 0,
+            "provider_reported_total": None,
+            "dropped_sensitive_keys": [],
+            "failure": {
+                "retryable": True,
+                "dead_letter": False,
+                "operator_review": True,
+                "reason": "provider_transport_exception",
+                "error_type": exc.__class__.__name__,
+                "error_message_included": False,
+            },
+            "evidence": "provider_sandbox_dry_run.retryable_failure",
+        }
+
+    if not isinstance(response, Mapping):
+        return {
+            **base_payload,
+            "status": "private_read_only_dry_run_rejected",
+            "records_received": 0,
+            "records_accepted": 0,
+            "records_rejected": 0,
+            "provider_reported_total": None,
+            "dropped_sensitive_keys": [],
+            "failure": {
+                "retryable": False,
+                "dead_letter": True,
+                "operator_review": True,
+                "reason": "provider_response_not_mapping",
+            },
+            "evidence": "provider_sandbox_dry_run.dead_letter_candidate",
+        }
+
+    if response.get("error"):
+        return {
+            **base_payload,
+            "status": "private_read_only_dry_run_rejected",
+            "records_received": 0,
+            "records_accepted": 0,
+            "records_rejected": 0,
+            "provider_reported_total": _safe_provider_total(response),
+            "dropped_sensitive_keys": [],
+            "failure": {
+                "retryable": False,
+                "dead_letter": True,
+                "operator_review": True,
+                "reason": "provider_returned_error",
+                "provider_error_code": _safe_provider_error_code(response),
+                "provider_error_description_included": False,
+            },
+            "evidence": "provider_sandbox_dry_run.dead_letter_candidate",
+        }
+
+    records = _bitrix_response_records(response)
+    adapter_result = execute_adapter(
+        adapter_key,
+        {
+            "batch_id": "provider-sandbox-dry-run",
+            "mapping": {
+                "deal_id": "ID",
+                "source_state": "STAGE_ID",
+                "owner_role": "ASSIGNED_BY_ID",
+                "amount": "OPPORTUNITY",
+            },
+            "deals": records,
+        },
+    )
+    details = adapter_result.details
+
+    return {
+        **base_payload,
+        "status": "private_read_only_dry_run_completed",
+        "records_received": adapter_result.records_received,
+        "records_accepted": adapter_result.records_accepted,
+        "records_rejected": adapter_result.records_rejected,
+        "provider_reported_total": _safe_provider_total(response),
+        "source_states": details.get("source_states", []),
+        "amount_buckets": details.get("amount_buckets", []),
+        "dropped_sensitive_keys": details.get("dropped_sensitive_keys", []),
+        "accepted_subject_ref_count": len(details.get("accepted_subject_refs", [])),
+        "reconciliation_probe_attached": True,
+        "failure": None,
+        "evidence": "provider_sandbox_dry_run.completed",
     }
 
 

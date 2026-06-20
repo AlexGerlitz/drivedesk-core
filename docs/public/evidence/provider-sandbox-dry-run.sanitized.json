@@ -18,8 +18,18 @@
   "schema_version": 1,
   "status_without_private_env": "blocked_missing_secret_binding",
   "status_with_private_refs": "ready_for_private_read_only_dry_run",
+  "runner_status_with_fake_transport": "private_read_only_dry_run_completed",
+  "runner_failure_status": "private_read_only_dry_run_retryable_failure",
   "provider_call_enabled_by_default": false,
   "external_mutation": false,
+  "runner_boundaries": {
+    "accepted_subject_refs_included": false,
+    "exception_messages_included": false,
+    "provider_endpoint_included": false,
+    "raw_payload_included": false,
+    "request_body_included": false,
+    "secret_values_included": false
+  },
   "request_plan": {
     "endpoint_template": "{BITRIX24_WEBHOOK_URL}/crm.deal.list.json",
     "filter_policy": "recent_or_changed_since_last_cursor",

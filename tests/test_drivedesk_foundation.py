@@ -29,6 +29,7 @@ from drivedesk_core import (
     build_adapter_connection_diagnostics,
     build_event,
     build_provider_sandbox_dry_run_plan,
+    execute_provider_sandbox_dry_run,
     list_integration_runbooks,
     list_lifecycle_policies,
     preview_lifecycle_transition,
@@ -482,6 +483,133 @@ def test_provider_sandbox_dry_run_plan_is_secret_safe() -> None:
     assert call_prepared["provider_call_enabled"] is True
     assert call_prepared["external_mutation"] is False
     assert call_prepared["request_plan"]["external_mutation"] is False
+
+
+def test_provider_sandbox_dry_run_runner_is_secret_safe() -> None:
+    secret_env = {
+        "BITRIX24_CLIENT_SECRET": "client-secret-value",
+        "BITRIX24_WEBHOOK_URL": "https://example.invalid/rest/1/secret-token",
+        "BITRIX24_TENANT_DOMAIN": "tenant.bitrix24.invalid",
+    }
+    transport_requests: list[dict[str, object]] = []
+
+    def fake_transport(request: dict[str, object]) -> dict[str, object]:
+        transport_requests.append(request)
+        return {
+            "result": [
+                {
+                    "ID": "DEAL-2026-100",
+                    "STAGE_ID": "NEW",
+                    "ASSIGNED_BY_ID": "7",
+                    "OPPORTUNITY": "1500",
+                    "PHONE": "+70000000000",
+                    "CLIENT_NAME": "Hidden Person",
+                    "access_token": "secret-token",
+                },
+                {
+                    "ID": "",
+                    "STAGE_ID": "BROKEN",
+                    "EMAIL": "hidden@example.invalid",
+                },
+            ],
+            "total": 2,
+        }
+
+    locked = execute_provider_sandbox_dry_run(
+        "crm.bitrix24.mock",
+        env=secret_env,
+        allow_provider_call=False,
+        provider_transport=fake_transport,
+    )
+    assert locked["status"] == "provider_call_disabled"
+    assert locked["provider_call_enabled"] is False
+    assert transport_requests == []
+
+    result = execute_provider_sandbox_dry_run(
+        "crm.bitrix24.mock",
+        env=secret_env,
+        allow_provider_call=True,
+        provider_transport=fake_transport,
+    )
+    result_json = json.dumps(result, sort_keys=True)
+
+    assert result["status"] == "private_read_only_dry_run_completed"
+    assert result["provider_call_enabled"] is True
+    assert result["operation"] == "crm.deal.list"
+    assert result["records_received"] == 2
+    assert result["records_accepted"] == 1
+    assert result["records_rejected"] == 1
+    assert result["provider_reported_total"] == 2
+    assert result["accepted_subject_ref_count"] == 1
+    assert result["source_states"] == ["NEW"]
+    assert result["amount_buckets"] == ["1000-2000"]
+    assert set(result["dropped_sensitive_keys"]) >= {
+        "CLIENT_NAME",
+        "EMAIL",
+        "PHONE",
+        "access_token",
+    }
+    assert result["external_mutation"] is False
+    assert result["raw_payload_included"] is False
+    assert result["request_body_included"] is False
+    assert result["provider_endpoint_included"] is False
+    assert result["secret_values_included"] is False
+    assert result["reconciliation_probe_attached"] is True
+    assert len(transport_requests) == 1
+    assert transport_requests[0]["method"] == "POST"
+    assert transport_requests[0]["json"] == {
+        "select": ["ID", "STAGE_ID", "ASSIGNED_BY_ID", "OPPORTUNITY", "DATE_CREATE"],
+        "order": {"DATE_CREATE": "DESC"},
+        "start": 0,
+    }
+    assert "client-secret-value" not in result_json
+    assert "secret-token" not in result_json
+    assert "tenant.bitrix24.invalid" not in result_json
+    assert "+70000000000" not in result_json
+    assert "Hidden Person" not in result_json
+    assert "hidden@example.invalid" not in result_json
+    assert "DEAL-2026-100" not in result_json
+
+
+def test_provider_sandbox_dry_run_runner_failure_is_redacted() -> None:
+    secret_env = {
+        "BITRIX24_CLIENT_SECRET": "client-secret-value",
+        "BITRIX24_WEBHOOK_URL": "https://example.invalid/rest/1/secret-token",
+        "BITRIX24_TENANT_DOMAIN": "tenant.bitrix24.invalid",
+    }
+
+    def failing_transport(request: dict[str, object]) -> dict[str, object]:
+        raise RuntimeError(f"leaked transport URL: {request['url']}")
+
+    retryable = execute_provider_sandbox_dry_run(
+        "crm.bitrix24.mock",
+        env=secret_env,
+        allow_provider_call=True,
+        provider_transport=failing_transport,
+    )
+    retryable_json = json.dumps(retryable, sort_keys=True)
+
+    assert retryable["status"] == "private_read_only_dry_run_retryable_failure"
+    assert retryable["failure"]["retryable"] is True
+    assert retryable["failure"]["operator_review"] is True
+    assert retryable["failure"]["error_type"] == "RuntimeError"
+    assert retryable["failure"]["error_message_included"] is False
+    assert "secret-token" not in retryable_json
+    assert "example.invalid" not in retryable_json
+
+    rejected = execute_provider_sandbox_dry_run(
+        "crm.bitrix24.mock",
+        env=secret_env,
+        allow_provider_call=True,
+        provider_transport=lambda request: {"error": "INVALID_TOKEN", "error_description": "secret-token"},
+    )
+    rejected_json = json.dumps(rejected, sort_keys=True)
+
+    assert rejected["status"] == "private_read_only_dry_run_rejected"
+    assert rejected["failure"]["dead_letter"] is True
+    assert rejected["failure"]["provider_error_code"] == "INVALID_TOKEN"
+    assert rejected["failure"]["provider_error_description_included"] is False
+    assert "secret-token" not in rejected_json
 
 
 def test_integration_runbook_catalog_covers_operational_states() -> None:

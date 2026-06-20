@@ -19,7 +19,7 @@ fi
 PYTHONPATH="packages/core" "$PYTHON_BIN" - <<'PY'
 import json
 
-from drivedesk_core import build_provider_sandbox_dry_run_plan
+from drivedesk_core import build_provider_sandbox_dry_run_plan, execute_provider_sandbox_dry_run
 
 
 def require(condition: bool, message: str) -> None:
@@ -79,8 +79,95 @@ require("client-secret-value" not in call_json, "client secret leaked in opt-in 
 require("secret-token" not in call_json, "webhook token leaked in opt-in plan")
 require("tenant.bitrix24.invalid" not in call_json, "tenant domain leaked in opt-in plan")
 
+transport_calls = []
+
+
+def fake_transport(request):
+    transport_calls.append(request)
+    return {
+        "result": [
+            {
+                "ID": "DEAL-2026-100",
+                "STAGE_ID": "NEW",
+                "ASSIGNED_BY_ID": "7",
+                "OPPORTUNITY": "1500",
+                "PHONE": "+70000000000",
+                "CLIENT_NAME": "Hidden Person",
+                "access_token": "secret-token",
+            },
+            {
+                "ID": "",
+                "STAGE_ID": "BROKEN",
+                "EMAIL": "hidden@example.invalid",
+            },
+        ],
+        "total": 2,
+    }
+
+
+locked_runner = execute_provider_sandbox_dry_run(
+    "crm.bitrix24.mock",
+    env=secret_env,
+    allow_provider_call=False,
+    provider_transport=fake_transport,
+)
+require(locked_runner["status"] == "provider_call_disabled", "runner must lock provider call by default")
+require(transport_calls == [], "runner called provider while disabled")
+
+runner = execute_provider_sandbox_dry_run(
+    "crm.bitrix24.mock",
+    env=secret_env,
+    allow_provider_call=True,
+    provider_transport=fake_transport,
+)
+runner_json = json.dumps(runner, sort_keys=True)
+require(runner["status"] == "private_read_only_dry_run_completed", "runner completion status mismatch")
+require(runner["records_received"] == 2, "runner received count mismatch")
+require(runner["records_accepted"] == 1, "runner accepted count mismatch")
+require(runner["records_rejected"] == 1, "runner rejected count mismatch")
+require(runner["provider_reported_total"] == 2, "runner total mismatch")
+require(runner["accepted_subject_ref_count"] == 1, "runner subject ref count mismatch")
+require(runner["reconciliation_probe_attached"] is True, "runner must attach reconciliation probe")
+require(runner["external_mutation"] is False, "runner must stay read-only")
+require(runner["raw_payload_included"] is False, "runner must not include raw payload")
+require(runner["provider_endpoint_included"] is False, "runner must not include provider endpoint")
+require(runner["secret_values_included"] is False, "runner must not include secret values")
+require(len(transport_calls) == 1, "runner transport call count mismatch")
+require(transport_calls[0]["method"] == "POST", "runner method mismatch")
+require(transport_calls[0]["json"]["start"] == 0, "runner pagination start mismatch")
+for leaked in [
+    "client-secret-value",
+    "secret-token",
+    "tenant.bitrix24.invalid",
+    "+70000000000",
+    "Hidden Person",
+    "hidden@example.invalid",
+    "DEAL-2026-100",
+]:
+    require(leaked not in runner_json, f"runner leaked value: {leaked}")
+
+
+def failing_transport(request):
+    raise RuntimeError(f"provider URL leaked in exception: {request['url']}")
+
+
+retryable = execute_provider_sandbox_dry_run(
+    "crm.bitrix24.mock",
+    env=secret_env,
+    allow_provider_call=True,
+    provider_transport=failing_transport,
+)
+retryable_json = json.dumps(retryable, sort_keys=True)
+require(
+    retryable["status"] == "private_read_only_dry_run_retryable_failure",
+    "runner retryable failure status mismatch",
+)
+require(retryable["failure"]["error_message_included"] is False, "runner must redact exception message")
+require("secret-token" not in retryable_json, "runner leaked webhook token in retryable failure")
+
 print(
     "public provider sandbox dry-run check ok: "
-    f"adapter={ready['adapter_key']} status={ready['status']} operation={ready['request_plan']['operation']}"
+    f"adapter={ready['adapter_key']} status={ready['status']} "
+    f"runner={runner['status']} operation={ready['request_plan']['operation']}"
 )
 PY

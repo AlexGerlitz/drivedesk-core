@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "evidence_id": "public_review_bundle",
+  "data_profile": "synthetic_demo_data",
+  "status": "validated",
+  "review_command": "bash scripts/run_public_review_bundle.sh",
+  "contract_check": "bash scripts/check_public_review_bundle.sh",
+  "review_docs": [
+    "docs/public/PUBLIC_REVIEW_BUNDLE.md",
+    "docs/public/SYSTEM_REVIEW_PATH.md",
+    "docs/public/REVIEWER_QUICKSTART.md",
+    "docs/public/ENGINEERING_REVIEW_GUIDE.md",
+    "docs/public/PUBLIC_VERIFICATION_MATRIX.md",
+    "docs/public/TECHNICAL_CAPABILITY_MAP.md",
+    "docs/public/EVIDENCE_INDEX.md"
+  ],
+  "included_checks": [
+    "bash scripts/check_public_pages_entrypoint.sh",
+    "bash scripts/check_public_system_review_path.sh",
+    "bash scripts/check_public_platform_tour.sh",
+    "bash scripts/check_public_reviewer_quickstart.sh",
+    "bash scripts/check_public_verification_matrix.sh",
+    "bash scripts/check_public_project_status.sh",
+    "bash scripts/check_public_technical_capability_map.sh",
+    "bash scripts/check_public_evidence_index.sh",
+    "bash scripts/check_public_demo_health.sh",
+    "bash scripts/check_public_openapi_drift.sh",
+    "bash scripts/check_public_demo_api.sh",
+    "bash scripts/check_public_demo_sdk.sh",
+    "bash scripts/check_public_observability_proof.sh",
+    "bash scripts/check_public_alert_routing.sh",
+    "bash scripts/check_public_engineering_proof.sh",
+    "bash scripts/check_public_review_bundle.sh"
+  ],
+  "pass_signals": [
+    "public Pages root links the main review artifacts",
+    "review documents point to executable verifier commands",
+    "claim-to-evidence matrix and evidence index validate",
+    "demo health, OpenAPI drift, SDK, observability, alert routing, and proof checks pass",
+    "public/private boundary remains synthetic and sanitized"
+  ],
+  "redaction": {
+    "addresses_included": false,
+    "credentials_included": false,
+    "hostnames_included": false,
+    "paths_included": false,
+    "production_data_included": false,
+    "raw_logs_included": false,
+    "request_bodies_included": false
+  },
+  "public_urls": [
+    "docs/public/PUBLIC_REVIEW_BUNDLE.md",
+    "docs/public/evidence/public-review-bundle.sanitized.json"
+  ],
+  "boundary": "one-command public review route over synthetic data and sanitized evidence only"
+}

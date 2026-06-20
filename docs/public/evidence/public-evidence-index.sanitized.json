@@ -59,6 +59,25 @@
       "boundary": "public-safe claim-to-evidence checklist over synthetic data, sanitized evidence, and verifier commands only"
     },
     {
+      "capability_id": "public-review-bundle",
+      "title": "Public review bundle",
+      "status": "validated",
+      "public_doc": "docs/public/PUBLIC_REVIEW_BUNDLE.md",
+      "evidence_files": [
+        "docs/public/evidence/public-review-bundle.sanitized.json",
+        "docs/public/REVIEWER_QUICKSTART.md",
+        "docs/public/ENGINEERING_REVIEW_GUIDE.md"
+      ],
+      "verifiers": [
+        "bash scripts/check_public_review_bundle.sh"
+      ],
+      "public_urls": [
+        "docs/public/PUBLIC_REVIEW_BUNDLE.md",
+        "docs/public/evidence/public-review-bundle.sanitized.json"
+      ],
+      "boundary": "one-command public review route over synthetic data and sanitized evidence only"
+    },
+    {
       "capability_id": "public-demo-health",
       "title": "Public demo health",
       "status": "validated",

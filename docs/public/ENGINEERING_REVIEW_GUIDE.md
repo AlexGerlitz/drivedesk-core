@@ -8,6 +8,7 @@ prove the current engineering surface.
 
 | Step | What to inspect | Proof |
 | --- | --- | --- |
+| 0 | Public review bundle | `docs/public/PUBLIC_REVIEW_BUNDLE.md`, `bash scripts/run_public_review_bundle.sh` |
 | 1 | System review path | `docs/public/SYSTEM_REVIEW_PATH.md` |
 | 2 | Platform Tour | `docs/public/PLATFORM_TOUR.md` |
 | 3 | Verification quickstart | `docs/public/REVIEWER_QUICKSTART.md` |
@@ -30,6 +31,8 @@ prove the current engineering surface.
 ## Review Commands
 
 ```bash
+bash scripts/run_public_review_bundle.sh
+bash scripts/check_public_review_bundle.sh
 bash scripts/ci_smoke_public.sh
 bash scripts/check_public_system_review_path.sh
 bash scripts/check_public_platform_tour.sh
@@ -59,6 +62,7 @@ bash scripts/check_public_opentofu_plan.sh
 
 | Area | Evidence |
 | --- | --- |
+| Public review bundle | `docs/public/PUBLIC_REVIEW_BUNDLE.md`, `docs/public/evidence/public-review-bundle.sanitized.json` |
 | System review path | `docs/public/SYSTEM_REVIEW_PATH.md` |
 | Business OS tour | `docs/public/PLATFORM_TOUR.md` |
 | Verification quickstart | `docs/public/REVIEWER_QUICKSTART.md` |

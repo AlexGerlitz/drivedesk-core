@@ -8,6 +8,7 @@ the current state.
 
 | Claim | Evidence | Verifier | Pass signal |
 | --- | --- | --- | --- |
+| One-command public review path is connected | `docs/public/PUBLIC_REVIEW_BUNDLE.md`, `docs/public/evidence/public-review-bundle.sanitized.json`, `scripts/run_public_review_bundle.sh` | `bash scripts/check_public_review_bundle.sh` | The bundle command, included checks, review docs, evidence index entry, public smoke, export, README, and Pages links stay wired together. |
 | Public entrypoint is navigable | `index.html`, `docs/public/SYSTEM_REVIEW_PATH.md`, `docs/public/REVIEWER_QUICKSTART.md` | `bash scripts/check_public_pages_entrypoint.sh && bash scripts/check_public_system_review_path.sh && bash scripts/check_public_reviewer_quickstart.sh` | Pages root links demo, system path, quickstart, status, capability map, evidence index, and OpenAPI. |
 | Demo health is live-verifiable | `docs/public/PUBLIC_DEMO_HEALTH.md`, `docs/public/evidence/public-demo-health.sanitized.json`, `.github/workflows/public-demo-health.yml` | `bash scripts/check_public_demo_health.sh` | Demo shell, static data, OpenAPI, generated SDK manifest, and workflow contract are connected. |
 | OpenAPI contract is not stale | `docs/public/OPENAPI_DRIFT.md`, `docs/public/evidence/openapi-drift.sanitized.json`, `docs/openapi.json` | `bash scripts/check_public_openapi_drift.sh` | Committed schema matches generated FastAPI schema, SDK manifest, and demo operation markers. |

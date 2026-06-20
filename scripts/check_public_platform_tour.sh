@@ -64,6 +64,7 @@ for token in [
     "Architecture Trace",
     "Verification",
     "Boundary",
+    "stack readiness",
     "businessControlTower.providerIntake",
     "businessControlTower.workbenchContext",
     "businessIntakePipeline",
@@ -114,9 +115,9 @@ for token in [
     require(token in text, f"platform tour missing {token}")
 
 for path, tokens in {
-    demo_data_path: ["adapterStudio", "businessControlTower", "businessIntakePipeline", "businessTaskHandoff", "businessNotificationChannels", "integrationRepair", "businessScenarioReplay", "incidentResponse", "engineeringProof"],
+    demo_data_path: ["stackReadiness", "Python / FastAPI", "OpenTofu / Terraform", "adapterStudio", "businessControlTower", "businessIntakePipeline", "businessTaskHandoff", "businessNotificationChannels", "integrationRepair", "businessScenarioReplay", "incidentResponse", "engineeringProof"],
     demo_index_path: ["Adapter Studio", "Control Tower", "Operations", "Incidents", "Proof"],
-    api_doc_path: ["adapterStudio", "businessControlTower", "businessIntakePipeline", "businessTaskHandoff", "businessNotificationChannels", "integrationRepair", "businessScenarioReplay", "engineeringProof", "GET /demo/connector-fixture-replay", "GET /demo/business-intake-pipeline", "GET /demo/business-task-handoff", "GET /demo/business-notification-channels", "GET /demo/integration-repair", "GET /demo/business-scenario-replay"],
+    api_doc_path: ["stack readiness", "adapterStudio", "businessControlTower", "businessIntakePipeline", "businessTaskHandoff", "businessNotificationChannels", "integrationRepair", "businessScenarioReplay", "engineeringProof", "GET /demo/connector-fixture-replay", "GET /demo/business-intake-pipeline", "GET /demo/business-task-handoff", "GET /demo/business-notification-channels", "GET /demo/integration-repair", "GET /demo/business-scenario-replay"],
     sdk_doc_path: ["adapterStudio", "contract_only", "safeToRunAgainstPublicDemo", "getConnectorFixtureReplay", "getIntegrationRepair", "getBusinessScenarioReplay"],
     status_path: ["PLATFORM_TOUR.md", "Adapter Studio", "Business control tower", "Business intake pipeline", "Business task handoff", "Business notification channels", "Integration repair", "Business scenario replay"],
     capability_map_path: ["PLATFORM_TOUR.md", "Integration adapter model", "Business operations control tower", "Business intake pipeline", "Business task handoff", "Business notification channels", "Integration repair", "Business scenario replay"],

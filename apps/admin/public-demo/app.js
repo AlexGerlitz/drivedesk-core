@@ -66,6 +66,10 @@
       payload &&
         payload.schemaVersion === 1 &&
         payload.tenant &&
+        payload.stackReadiness &&
+        Array.isArray(payload.stackReadiness.summary) &&
+        Array.isArray(payload.stackReadiness.groups) &&
+        Array.isArray(payload.stackReadiness.nextActions) &&
         Array.isArray(payload.metrics) &&
         Array.isArray(payload.workQueue) &&
         payload.workflow &&
@@ -352,6 +356,85 @@
 
       row.append(top, bar);
       rows.appendChild(row);
+    });
+  }
+
+  function fillStackReadiness() {
+    var readiness = data.stackReadiness;
+
+    var summaryRows = document.getElementById("stackReadinessSummaryRows");
+    clear(summaryRows);
+    readiness.summary.forEach(function (item) {
+      var card = document.createElement("article");
+      card.className = "metric-card";
+      card.dataset.tone = item.tone || "blue";
+
+      var label = document.createElement("span");
+      label.className = "muted";
+      label.appendChild(text(item.label));
+
+      var value = document.createElement("strong");
+      value.appendChild(text(item.value));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      card.append(label, value, detail);
+      summaryRows.appendChild(card);
+    });
+
+    var groupRows = document.getElementById("stackReadinessRows");
+    clear(groupRows);
+    readiness.groups.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row stack-readiness-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(item.name));
+      top.append(title, chip(item.state, statusTone(item.state)));
+
+      var stack = document.createElement("code");
+      stack.appendChild(text(item.stack));
+
+      var current = document.createElement("span");
+      current.className = "muted";
+      current.appendChild(text("Ready: " + item.current));
+
+      var next = document.createElement("span");
+      next.className = "muted";
+      next.appendChild(text("Next: " + item.next));
+
+      var proof = document.createElement("code");
+      proof.appendChild(text(item.proof));
+
+      row.append(top, stack, current, next, proof);
+      groupRows.appendChild(row);
+    });
+
+    var nextRows = document.getElementById("stackReadinessNextRows");
+    clear(nextRows);
+    readiness.nextActions.forEach(function (item) {
+      var row = document.createElement("article");
+      row.className = "event-row stack-readiness-next-row";
+
+      var top = document.createElement("div");
+      top.className = "event-top";
+      var title = document.createElement("strong");
+      title.appendChild(text(item.name));
+      top.append(title, chip(item.state, statusTone(item.state)));
+
+      var detail = document.createElement("span");
+      detail.className = "muted";
+      detail.appendChild(text(item.detail));
+
+      var proof = document.createElement("code");
+      proof.appendChild(text(item.proof));
+
+      row.append(top, detail, proof);
+      nextRows.appendChild(row);
     });
   }
 
@@ -4378,6 +4461,7 @@
     document.getElementById("apiStatus").textContent = "API " + data.health.api;
     document.getElementById("workerStatus").textContent = "Worker " + data.health.worker;
     fillMetricGrid();
+    fillStackReadiness();
     fillWorkQueue();
     fillWorkflow();
     fillWorkflowScenarios();

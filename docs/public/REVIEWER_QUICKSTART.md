@@ -20,7 +20,7 @@ bash scripts/run_public_review_bundle.sh
 | 2 | `docs/public/SYSTEM_REVIEW_PATH.md` | The compact system path ties the public root, demo, API, SDK, operations evidence, release safety, GitOps, OpenTofu, and evidence index together. |
 | 3 | `docs/public/PLATFORM_TOUR.md` | Business OS tour through business event -> workflow -> adapter -> incident -> proof. |
 | 4 | GitHub Pages engineering reference | The public entrypoint is published and wired to demo, CI, OpenAPI, docs, and evidence. |
-| 5 | Public demo Workflow, Control Tower, Integrations, Operations, Incidents, and Proof tabs | The demo is not a static screenshot; it exposes an end-to-end workflow-to-proof path, operational contracts, incidents, and proof payloads. |
+| 5 | Public demo Overview, Workflow, Control Tower, Integrations, Operations, Incidents, and Proof tabs | The demo is not a static screenshot; it exposes stack readiness, an end-to-end workflow-to-proof path, operational contracts, incidents, and proof payloads. |
 | 6 | `docs/public/PROJECT_STATUS.md` | Current capability state, limits, and next work are explicit. |
 | 7 | `docs/public/TECHNICAL_CAPABILITY_MAP.md` | Each visible capability maps to implementation surface, evidence, and verifier commands. |
 | 8 | `docs/public/PUBLIC_VERIFICATION_MATRIX.md` | Each engineering claim has an artifact, verifier command, and pass signal. |

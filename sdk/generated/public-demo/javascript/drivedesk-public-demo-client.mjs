@@ -52,6 +52,7 @@ export const REQUIRED_FIELDS = [
   "incidentResponse",
   "businessControlTower",
   "businessScenarioReplay",
+  "stackReadiness",
   "engineeringProof",
   "workflow",
   "workflowScenarios",

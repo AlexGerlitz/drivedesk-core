@@ -7008,6 +7008,11 @@
             "title": "Schemaversion",
             "type": "integer"
           },
+          "stackReadiness": {
+            "additionalProperties": true,
+            "title": "Stackreadiness",
+            "type": "object"
+          },
           "tenant": {
             "additionalProperties": {
               "type": "string"
@@ -7084,6 +7089,7 @@
           "incidentResponse",
           "businessControlTower",
           "businessScenarioReplay",
+          "stackReadiness",
           "engineeringProof",
           "workflow",
           "workflowScenarios",

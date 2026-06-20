@@ -1,22 +1,25 @@
 {
-  "schema_version": 1,
   "check": "public_openapi_drift",
-  "status": "validated",
+  "checks": {
+    "ci_smoke_includes_check": true,
+    "committed_openapi_present": true,
+    "generated_openapi_matches_committed": true,
+    "production_data_touched": false,
+    "public_demo_health_links_openapi": true,
+    "public_demo_paths_present": true,
+    "public_export_includes_check": true,
+    "release_gate_includes_check": true,
+    "sdk_manifest_operations_match": true,
+    "sdk_manifest_present": true,
+    "sdk_manifest_source_matches": true,
+    "static_demo_payload_markers_present": true
+  },
   "data_profile": "synthetic_demo_data",
   "drift_model": "fastapi_generated_openapi_to_committed_public_contract",
-  "source": {
-    "committed_openapi": "docs/openapi.json",
-    "generated_from": "drivedesk_api.main:app.openapi",
-    "sdk_manifest": "sdk/generated/public-demo/openapi-client-manifest.json",
-    "static_demo_payload": "apps/admin/public-demo/demo-data.js"
-  },
   "openapi": {
-    "openapi_version": "3.1.0",
-    "title": "DriveDesk Core API",
     "api_version": "0.1.0",
+    "openapi_version": "3.1.0",
     "path_count": 71,
-    "schema_count": 99,
-    "sha256_prefix": "a61568f61a68be61",
     "public_demo_paths": [
       "/demo/public",
       "/demo/connector-certification",
@@ -34,34 +37,10 @@
       "/demo/integration-repair",
       "/demo/observability-dashboard",
       "/demo/business-scenario-replay"
-    ]
-  },
-  "sdk": {
-    "source": "docs/openapi.json",
-    "schema_version": 1,
-    "data_profile": "synthetic_demo_data",
-    "sha256_prefix": "f82b9908b3009611",
-    "generated_files": [
-      "README.md",
-      "openapi-client-manifest.json",
-      "python/drivedesk_public_demo_client.py",
-      "javascript/drivedesk-public-demo-client.mjs",
-      "typescript/drivedesk-public-demo-client.d.ts"
-    ]
-  },
-  "checks": {
-    "committed_openapi_present": true,
-    "generated_openapi_matches_committed": true,
-    "public_demo_paths_present": true,
-    "sdk_manifest_present": true,
-    "sdk_manifest_source_matches": true,
-    "sdk_manifest_operations_match": true,
-    "static_demo_payload_markers_present": true,
-    "public_demo_health_links_openapi": true,
-    "ci_smoke_includes_check": true,
-    "public_export_includes_check": true,
-    "release_gate_includes_check": true,
-    "production_data_touched": false
+    ],
+    "schema_count": 99,
+    "sha256_prefix": "fd5f934ec15e80d6",
+    "title": "DriveDesk Core API"
   },
   "redaction": {
     "addresses_included": false,
@@ -72,5 +51,26 @@
     "raw_logs_included": false,
     "request_bodies_included": false,
     "secrets_included": false
-  }
+  },
+  "schema_version": 1,
+  "sdk": {
+    "data_profile": "synthetic_demo_data",
+    "generated_files": [
+      "README.md",
+      "openapi-client-manifest.json",
+      "python/drivedesk_public_demo_client.py",
+      "javascript/drivedesk-public-demo-client.mjs",
+      "typescript/drivedesk-public-demo-client.d.ts"
+    ],
+    "schema_version": 1,
+    "sha256_prefix": "e5cf34c71eb651aa",
+    "source": "docs/openapi.json"
+  },
+  "source": {
+    "committed_openapi": "docs/openapi.json",
+    "generated_from": "drivedesk_api.main:app.openapi",
+    "sdk_manifest": "sdk/generated/public-demo/openapi-client-manifest.json",
+    "static_demo_payload": "apps/admin/public-demo/demo-data.js"
+  },
+  "status": "validated"
 }

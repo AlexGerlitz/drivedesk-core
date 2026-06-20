@@ -149,6 +149,34 @@ assert demo["dataSource"] == "api.synthetic", demo
 assert demo["apiContract"]["path"] == "/demo/public", demo
 assert demo["apiContract"]["data_profile"] == "synthetic_demo_data", demo
 assert demo["tenant"]["slug"] == "demo-academy", demo
+stack_readiness = demo["stackReadiness"]
+assert len(stack_readiness["summary"]) >= 4, demo
+assert len(stack_readiness["groups"]) >= 8, demo
+assert len(stack_readiness["nextActions"]) >= 3, demo
+assert {item["name"] for item in stack_readiness["groups"]} >= {
+    "Backend API",
+    "Integration platform",
+    "Operations",
+    "Delivery",
+    "Infrastructure",
+    "Public boundary",
+}, demo
+assert {item["stack"] for item in stack_readiness["groups"]} >= {
+    "Python / FastAPI",
+    "Integration Hub / Adapters",
+    "Prometheus / Grafana / Loki",
+    "Docker / Kubernetes / Helm / GitOps",
+    "OpenTofu / Terraform",
+    "Export gate / Secret checks",
+}, demo
+assert {item["proof"] for item in stack_readiness["groups"]} >= {
+    "bash scripts/check_public_demo_api.sh",
+    "bash scripts/check_public_connector_certification.sh",
+    "bash scripts/check_public_observability_proof.sh",
+    "bash scripts/check_public_gitops_layout.sh",
+    "bash scripts/check_public_opentofu_plan.sh",
+    "bash scripts/public_repo_release_gate.sh",
+}, demo
 assert demo["workflow"]["id"] == "wf-demo-lead-to-student", demo
 assert demo["workflow"]["currentStage"] == "student_sync", demo
 assert len(demo["workflow"]["stages"]) >= 5, demo

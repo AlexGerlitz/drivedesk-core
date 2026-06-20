@@ -359,6 +359,7 @@
     "incidentResponse",
     "businessControlTower",
     "businessScenarioReplay",
+    "stackReadiness",
     "engineeringProof",
     "workflow",
     "workflowScenarios",

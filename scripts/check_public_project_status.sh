@@ -63,7 +63,7 @@ for token in [
     "Verification",
     "Public entrypoint",
     "Platform tour",
-    "Business event, Control Tower, workflow, Adapter Studio, outbox, incidents, and proof",
+    "Business event, stack readiness, Control Tower, workflow, Adapter Studio, outbox, incidents, and proof",
     "PLATFORM_TOUR.md",
     "bash scripts/check_public_platform_tour.sh",
     "SYSTEM_REVIEW_PATH.md",

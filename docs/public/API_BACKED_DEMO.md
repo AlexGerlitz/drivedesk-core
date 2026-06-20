@@ -30,7 +30,7 @@ GET /demo/business-scenario-replay
 ```
 
 `GET /demo/public` returns the same product-shaped synthetic demo data used by
-the public demo shell: tenant, health, metrics, work queue, workflow stages,
+the public demo shell: tenant, health, stack readiness, metrics, work queue, workflow stages,
 timeline entries, workflow scenarios, domain events, members, audit events,
 outbox events, adapter contracts, adapter operation scenarios, Adapter Studio,
 connector certification, sync jobs, Integration Health, alert routing, incident response,

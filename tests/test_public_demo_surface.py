@@ -37,6 +37,9 @@ def test_public_demo_html_links_static_assets() -> None:
     assert "./app.js" in html
     assert 'data-demo-api-path="/demo/public"' in html
     assert 'id="metricGrid"' in html
+    assert 'id="stackReadinessSummaryRows"' in html
+    assert 'id="stackReadinessRows"' in html
+    assert 'id="stackReadinessNextRows"' in html
     assert 'id="workQueueRows"' in html
     assert 'data-view="workflow"' in html
     assert 'data-view="control"' in html
@@ -171,6 +174,33 @@ def test_public_demo_data_is_synthetic_and_product_shaped() -> None:
     assert payload["apiContract"]["data_profile"] == "synthetic_demo_data"
     assert payload["tenant"]["slug"] == "demo-academy"
     assert payload["tenant"]["status"] == "active"
+    assert payload["stackReadiness"]["summary"]
+    assert len(payload["stackReadiness"]["groups"]) >= 8
+    assert len(payload["stackReadiness"]["nextActions"]) >= 3
+    assert {item["name"] for item in payload["stackReadiness"]["groups"]} >= {
+        "Backend API",
+        "Integration platform",
+        "Operations",
+        "Delivery",
+        "Infrastructure",
+        "Public boundary",
+    }
+    assert {item["stack"] for item in payload["stackReadiness"]["groups"]} >= {
+        "Python / FastAPI",
+        "Integration Hub / Adapters",
+        "Prometheus / Grafana / Loki",
+        "Docker / Kubernetes / Helm / GitOps",
+        "OpenTofu / Terraform",
+        "Export gate / Secret checks",
+    }
+    assert {item["proof"] for item in payload["stackReadiness"]["groups"]} >= {
+        "bash scripts/check_public_demo_api.sh",
+        "bash scripts/check_public_connector_certification.sh",
+        "bash scripts/check_public_observability_proof.sh",
+        "bash scripts/check_public_gitops_layout.sh",
+        "bash scripts/check_public_opentofu_plan.sh",
+        "bash scripts/public_repo_release_gate.sh",
+    }
     assert payload["workflow"]["id"] == "wf-demo-lead-to-student"
     assert payload["workflow"]["currentStage"] == "student_sync"
     assert len(payload["workflow"]["stages"]) >= 5

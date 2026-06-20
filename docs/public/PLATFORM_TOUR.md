@@ -25,7 +25,8 @@ The tour is public-safe: it uses synthetic data and sanitized evidence only.
 
 Use the public demo in this order:
 
-1. `Overview` - system status, queue, timeline, and product-shaped metrics.
+1. `Overview` - system status, stack readiness, queue, timeline, and
+   product-shaped metrics.
 2. `Workflow` - automation scenarios and end-to-end chain.
 3. `Control Tower` - provider intake, workbench context, detection, escalation,
    action plan, notification preview, role briefing, Business Intake Pipeline,

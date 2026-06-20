@@ -6036,6 +6036,120 @@ window.DRIVEDESK_DEMO_DATA = {
     }
   ],
   "schemaVersion": 1,
+  "stackReadiness": {
+    "groups": [
+      {
+        "current": "Public demo endpoints, OpenAPI schema, RBAC, tenant boundaries, and smoke tests.",
+        "name": "Backend API",
+        "next": "Harden production auth policy and add real customer workflows.",
+        "proof": "bash scripts/check_public_demo_api.sh",
+        "stack": "Python / FastAPI",
+        "state": "validated"
+      },
+      {
+        "current": "Migration-shaped storage contracts for tenants, RBAC, audit, outbox, business records, and integrations.",
+        "name": "Data layer",
+        "next": "Production sizing, migration windows, backup retention, and restore schedule.",
+        "proof": "bash scripts/ci_smoke_public.sh",
+        "stack": "PostgreSQL / Alembic",
+        "state": "validated"
+      },
+      {
+        "current": "Retry, dead-letter, notification, adapter, and repair paths are represented in public-safe contracts.",
+        "name": "Async jobs",
+        "next": "Private worker queues, provider rate limits, and operational runbooks for live adapters.",
+        "proof": "bash scripts/check_public_integration_execution.sh",
+        "stack": "Workers / Outbox / Retry",
+        "state": "validated"
+      },
+      {
+        "current": "Connector certification, fixture replay, provider onboarding, runtime, execution, and repair flows.",
+        "name": "Integration platform",
+        "next": "Sandbox credentials, provider-specific OAuth/webhook handling, and private certification evidence.",
+        "proof": "bash scripts/check_public_connector_certification.sh",
+        "stack": "Integration Hub / Adapters",
+        "state": "contract_ready"
+      },
+      {
+        "current": "Metrics, dashboards, alert routing, incident response, and runbook evidence are public-safe.",
+        "name": "Operations",
+        "next": "Live retention, alert receivers, escalation policy, and on-call operating rhythm.",
+        "proof": "bash scripts/check_public_observability_proof.sh",
+        "stack": "Prometheus / Grafana / Loki",
+        "state": "proved"
+      },
+      {
+        "current": "Public-safe compose, Helm, Argo CD layout, image promotion, drift, and remediation evidence.",
+        "name": "Delivery",
+        "next": "Private cluster deployment, ingress, secrets, autoscaling, storage, and environment approvals.",
+        "proof": "bash scripts/check_public_gitops_layout.sh",
+        "stack": "Docker / Kubernetes / Helm / GitOps",
+        "state": "proved"
+      },
+      {
+        "current": "Plan-only infrastructure, drift, scheduled validation, and remediation evidence are validated.",
+        "name": "Infrastructure",
+        "next": "Private remote state, locking, provider credentials, and live environment ownership.",
+        "proof": "bash scripts/check_public_opentofu_plan.sh",
+        "stack": "OpenTofu / Terraform",
+        "state": "proved"
+      },
+      {
+        "current": "Public repo export, sanitized evidence, secret scans, and Pages validation are gated.",
+        "name": "Public boundary",
+        "next": "Keep commercial source, production state, raw logs, and provider secrets private.",
+        "proof": "bash scripts/public_repo_release_gate.sh",
+        "stack": "Export gate / Secret checks",
+        "state": "enforced"
+      }
+    ],
+    "nextActions": [
+      {
+        "detail": "Move from public demo shell to real role-based operator screens.",
+        "name": "Authenticated admin workflows",
+        "proof": "docs/public/PROJECT_STATUS.md",
+        "state": "planned"
+      },
+      {
+        "detail": "Promote connector contracts into private sandbox integrations with credentials.",
+        "name": "Live provider adapters",
+        "proof": "docs/public/PROVIDER_ONBOARDING.md",
+        "state": "planned"
+      },
+      {
+        "detail": "Add tenant onboarding, billing, support process, release approvals, and runbooks.",
+        "name": "Commercial rollout path",
+        "proof": "docs/public/ROADMAP.md",
+        "state": "planned"
+      }
+    ],
+    "summary": [
+      {
+        "detail": "Pages, demo, OpenAPI, SDK, evidence, and CI are linked",
+        "label": "Public stand",
+        "tone": "green",
+        "value": "reviewable"
+      },
+      {
+        "detail": "FastAPI, RBAC, outbox, adapters, and tests are covered",
+        "label": "Core backend",
+        "tone": "green",
+        "value": "validated"
+      },
+      {
+        "detail": "GitOps, OpenTofu, observability, recovery, and release gates",
+        "label": "DevOps surface",
+        "tone": "blue",
+        "value": "proved"
+      },
+      {
+        "detail": "Live auth, real adapters, billing, onboarding, and UI workflows",
+        "label": "Commercial product",
+        "tone": "amber",
+        "value": "next"
+      }
+    ]
+  },
   "tenant": {
     "name": "DriveDesk Demo Academy",
     "plan": "Core Preview",

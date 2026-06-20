@@ -78,6 +78,26 @@
       "boundary": "one-command public review route over synthetic data and sanitized evidence only"
     },
     {
+      "capability_id": "review-console",
+      "title": "Review Console",
+      "status": "validated",
+      "public_doc": "docs/public/REVIEW_CONSOLE.md",
+      "evidence_files": [
+        "docs/public/evidence/review-console.sanitized.json",
+        "apps/admin/public-demo/demo-data.js",
+        "apps/admin/public-demo/index.html"
+      ],
+      "verifiers": [
+        "bash scripts/check_public_review_console.sh"
+      ],
+      "public_urls": [
+        "apps/admin/public-demo/",
+        "docs/public/REVIEW_CONSOLE.md",
+        "docs/public/evidence/review-console.sanitized.json"
+      ],
+      "boundary": "browser-visible readiness console over synthetic demo data and sanitized evidence only"
+    },
+    {
       "capability_id": "interview-stack-brief",
       "title": "Interview stack brief",
       "status": "validated",

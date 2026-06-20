@@ -1262,6 +1262,7 @@ class PublicDemoRead(BaseModel):
     businessControlTower: dict[str, Any]
     businessScenarioReplay: dict[str, Any]
     stackReadiness: dict[str, Any]
+    reviewConsole: dict[str, Any]
     engineeringProof: dict[str, Any]
     workflow: dict[str, Any]
     workflowScenarios: list[dict[str, Any]]

@@ -14,6 +14,7 @@ bash scripts/check_public_verification_matrix.sh
 bash scripts/check_public_project_status.sh
 bash scripts/check_public_technical_capability_map.sh
 bash scripts/check_public_evidence_index.sh
+bash scripts/check_public_review_console.sh
 bash scripts/check_public_demo_health.sh
 bash scripts/check_public_openapi_drift.sh
 bash scripts/check_public_demo_api.sh

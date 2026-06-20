@@ -4767,6 +4767,160 @@ def build_public_demo_payload() -> dict[str, Any]:
                 },
             ],
         },
+        "reviewConsole": {
+            "status": "reviewable",
+            "updatedAt": "2026-06-20T10:20:00Z",
+            "summary": [
+                {
+                    "label": "Public stand",
+                    "value": "live",
+                    "detail": "Pages demo, API contract, SDK, evidence index, and review bundle are connected",
+                    "tone": "green",
+                },
+                {
+                    "label": "DevOps proof",
+                    "value": "validated",
+                    "detail": "CI, GitOps, OpenTofu, observability, alerting, rollback, and recovery gates",
+                    "tone": "blue",
+                },
+                {
+                    "label": "Integration hub",
+                    "value": "dry-run",
+                    "detail": "adapter catalog, provider onboarding, fixture replay, sandbox runner, and repair workbench",
+                    "tone": "violet",
+                },
+                {
+                    "label": "Commercial rollout",
+                    "value": "planned",
+                    "detail": "real provider credentials, billing, customer onboarding, and production customers remain private work",
+                    "tone": "amber",
+                },
+            ],
+            "gates": [
+                {
+                    "name": "Public review bundle",
+                    "status": "passed",
+                    "command": "bash scripts/run_public_review_bundle.sh",
+                    "evidence": "one-command route through entrypoint, docs, demo health, OpenAPI, SDK, evidence, and proof",
+                },
+                {
+                    "name": "Review console contract",
+                    "status": "passed",
+                    "command": "bash scripts/check_public_review_console.sh",
+                    "evidence": "static demo, API payload, OpenAPI field, docs, evidence, and export wiring match",
+                },
+                {
+                    "name": "Public export boundary",
+                    "status": "passed",
+                    "command": "bash scripts/public_repo_release_gate.sh",
+                    "evidence": "public repository receives only synthetic data, sanitized evidence, and public-safe scripts",
+                },
+                {
+                    "name": "Provider sandbox dry-run",
+                    "status": "passed",
+                    "command": "bash scripts/check_public_provider_sandbox_dry_run.sh",
+                    "evidence": "fake transport, read-only runner, evidence recorder, and private-provider boundary",
+                },
+            ],
+            "evidence": [
+                {
+                    "title": "Review console contract",
+                    "kind": "doc",
+                    "path": "docs/public/REVIEW_CONSOLE.md",
+                    "summary": "Reviewer-facing product shell for readiness, gates, evidence, handoff, and remaining work",
+                },
+                {
+                    "title": "Review bundle",
+                    "kind": "doc",
+                    "path": "docs/public/PUBLIC_REVIEW_BUNDLE.md",
+                    "summary": "One-command public verification route",
+                },
+                {
+                    "title": "Evidence index",
+                    "kind": "evidence",
+                    "path": "docs/public/evidence/public-evidence-index.sanitized.json",
+                    "summary": "Machine-readable capability-to-evidence map",
+                },
+                {
+                    "title": "Review console evidence",
+                    "kind": "evidence",
+                    "path": "docs/public/evidence/review-console.sanitized.json",
+                    "summary": "Machine-readable review console contract and boundary flags",
+                },
+                {
+                    "title": "Provider sandbox dry-run",
+                    "kind": "doc",
+                    "path": "docs/public/PROVIDER_SANDBOX_DRY_RUN.md",
+                    "summary": "Provider onboarding runner, fake transport, recorder, and verification lifecycle",
+                },
+            ],
+            "handoff": [
+                {
+                    "name": "Public reviewer path",
+                    "status": "validated",
+                    "owner": "platform",
+                    "detail": "A reviewer can start from the Pages entrypoint, run the bundle, inspect demo tabs, and map claims to evidence.",
+                    "next": "Keep public docs and demo in sync with every new capability.",
+                },
+                {
+                    "name": "Provider onboarding path",
+                    "status": "safe_dry_run",
+                    "owner": "integrations",
+                    "detail": "Provider connectors can be modelled with synthetic fixtures, sandbox dry-run, and approval gates before private credentials.",
+                    "next": "Move one real provider through private credentials only after the provider and legal boundary are approved.",
+                },
+                {
+                    "name": "Operations handoff",
+                    "status": "validated",
+                    "owner": "operations",
+                    "detail": "Alerts, incidents, recovery, rollback, backup, and drift evidence are linked from the UI and docs.",
+                    "next": "Attach live production SLOs only when a real tenant and production runtime exist.",
+                },
+            ],
+            "remainingWork": [
+                {
+                    "name": "Commercial auth and onboarding",
+                    "status": "planned",
+                    "detail": "Tenant signup, paid plan management, customer admin onboarding, and support flows are not production-ready yet.",
+                    "proof": "docs/public/ROADMAP.md",
+                },
+                {
+                    "name": "Real provider credentials",
+                    "status": "requires_private_secret",
+                    "detail": "The public repository intentionally stops before real Bitrix24, bank, accounting, email, SMS, or webhook credentials.",
+                    "proof": "docs/public/PROVIDER_ONBOARDING.md",
+                },
+                {
+                    "name": "Production data and legal boundary",
+                    "status": "separate",
+                    "detail": "Public proof uses synthetic data; real customer data, private hostnames, raw logs, and provider secrets stay outside the public export.",
+                    "proof": "docs/public/SANITIZED_EVIDENCE.md",
+                },
+                {
+                    "name": "Mobile and native clients",
+                    "status": "planned",
+                    "detail": "The public proof currently focuses on backend, admin shell, integration hub, operations, and evidence gates.",
+                    "proof": "docs/public/PROJECT_STATUS.md",
+                },
+            ],
+            "boundary": [
+                {
+                    "name": "Synthetic public data",
+                    "status": "enforced",
+                    "detail": "The review console uses synthetic records and sanitized evidence only.",
+                },
+                {
+                    "name": "No private runtime markers",
+                    "status": "enforced",
+                    "detail": "The public export excludes private addresses, hostnames, provider secrets, raw logs, request bodies, and customer data.",
+                },
+                {
+                    "name": "No provider mutation",
+                    "status": "enforced",
+                    "detail": "Provider-changing work remains dry-run, approval-gated, and private-provider-only until real rollout.",
+                },
+            ],
+        },
         "workflow": {
             "id": "wf-demo-lead-to-student",
             "title": "Lead to enrolled student",

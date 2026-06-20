@@ -69,6 +69,7 @@ bash scripts/check_public_provider_sandbox_dry_run.sh
 bash scripts/check_public_connector_fixture_replay.sh
 bash scripts/check_public_adapter_developer_guide.sh
 bash scripts/check_public_evidence_index.sh
+bash scripts/check_public_review_console.sh
 bash scripts/check_public_observability_proof.sh
 bash scripts/check_public_observability_dashboard.sh
 bash scripts/check_public_notification_delivery.sh

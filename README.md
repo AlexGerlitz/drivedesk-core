@@ -30,6 +30,7 @@ It includes:
 - runtime adapter catalog for executable adapter metadata;
 - synthetic lead-to-student workflow in the public demo payload;
 - public Business OS tour connecting business event -> workflow -> adapter -> incident -> proof;
+- public Review Console for readiness, gates, evidence, handoff, remaining work, and boundary;
 - public connector certification path and workbench for provider profiles, capability manifests, contract fixtures, runtime readiness, gates, implementation path, and release proof;
 - public provider onboarding workbench for provider profile selection, mapping preview, preflight checks, sandbox dry-run, approval, private rollout, and reconciliation;
 - public Integration Repair workbench and action preview for runbook-backed retry, dead-letter, reconciliation mismatch, impact, safe actions, approval, dry-run, and postcheck evidence;
@@ -59,6 +60,7 @@ It includes:
 | Need | Open | What it proves |
 | --- | --- | --- |
 | One-command review | `docs/public/PUBLIC_REVIEW_BUNDLE.md` | The shortest checked route through the public entrypoint, docs, demo health, OpenAPI, SDK, evidence, observability, alert routing, and proof contract. |
+| Review Console | `docs/public/REVIEW_CONSOLE.md` | Browser-visible readiness, gates, evidence, handoff, remaining work, and public/private boundary. |
 | Fast system route | `docs/public/SYSTEM_REVIEW_PATH.md` | How the public root, demo, API, SDK, operations evidence, release safety, GitOps, OpenTofu, and evidence index fit together. |
 | Business OS tour | `docs/public/PLATFORM_TOUR.md` | How business events, Control Tower, Adapter Studio, incidents, and proof connect. |
 | Stack brief | `docs/public/INTERVIEW_STACK_BRIEF.md` | What each major technology does, what is validated, what remains, and how to explain the stack. |
@@ -128,6 +130,11 @@ capability-to-evidence index, verifier list, public URLs, and boundary notes.
 
 Use `docs/public/PUBLIC_REVIEW_BUNDLE.md` when you need the fastest
 one-command public review route.
+
+Use `docs/public/REVIEW_CONSOLE.md` when you need the browser-visible readiness
+console for current gates, evidence, handoff, remaining work, and public/private
+boundary. Its machine-readable evidence is
+`docs/public/evidence/review-console.sanitized.json`.
 
 Use `docs/public/CONNECTOR_CERTIFICATION.md` when you need the provider-neutral
 path for turning CRM, bank, accounting, ERP, KKT, webhook, file, email,
@@ -442,6 +449,7 @@ bash scripts/check_public_integration_repair.sh
 bash scripts/check_public_connector_fixture_replay.sh
 bash scripts/check_public_adapter_developer_guide.sh
 bash scripts/check_public_evidence_index.sh
+bash scripts/check_public_review_console.sh
 bash scripts/check_public_observability_proof.sh
 bash scripts/check_public_observability_dashboard.sh
 bash scripts/check_public_notification_delivery.sh

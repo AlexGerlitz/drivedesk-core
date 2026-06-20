@@ -53,6 +53,7 @@ export const REQUIRED_FIELDS = [
   "businessControlTower",
   "businessScenarioReplay",
   "stackReadiness",
+  "reviewConsole",
   "engineeringProof",
   "workflow",
   "workflowScenarios",

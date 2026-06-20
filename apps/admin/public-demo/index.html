@@ -26,6 +26,7 @@
           <button class="nav-tab" type="button" data-view="system">System</button>
           <button class="nav-tab" type="button" data-view="operations">Operations</button>
           <button class="nav-tab" type="button" data-view="incidents">Incidents</button>
+          <button class="nav-tab" type="button" data-view="review">Review</button>
           <button class="nav-tab" type="button" data-view="proof">Proof</button>
         </nav>
       </aside>
@@ -645,6 +646,58 @@
               <div class="event-list" id="incidentEvidenceRows"></div>
             </section>
           </div>
+        </section>
+
+        <section class="view" id="view-review" aria-labelledby="reviewTitle">
+          <div class="section-heading">
+            <h2 id="reviewTitle">Review Console</h2>
+            <span class="muted" id="reviewMeta"></span>
+          </div>
+          <div class="proof-summary-grid" id="reviewSummaryRows"></div>
+
+          <div class="dashboard-grid">
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Review Gates</h3>
+                <span class="muted">Executable checks</span>
+              </div>
+              <div class="proof-gate-list" id="reviewGateRows"></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Evidence</h3>
+                <span class="muted">Public-safe artifacts</span>
+              </div>
+              <div class="event-list" id="reviewEvidenceRows"></div>
+            </section>
+          </div>
+
+          <div class="dashboard-grid">
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Handoff</h3>
+                <span class="muted">What can be reviewed now</span>
+              </div>
+              <div class="event-list" id="reviewHandoffRows"></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Remaining Work</h3>
+                <span class="muted">Commercial rollout gaps</span>
+              </div>
+              <div class="event-list" id="reviewRemainingRows"></div>
+            </section>
+          </div>
+
+          <section class="panel review-boundary-panel">
+            <div class="panel-header">
+              <h3>Boundary</h3>
+              <span class="muted">Public/private split</span>
+            </div>
+            <div class="event-list" id="reviewBoundaryRows"></div>
+          </section>
         </section>
 
         <section class="view" id="view-proof" aria-labelledby="proofTitle">

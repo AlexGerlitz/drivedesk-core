@@ -18,6 +18,9 @@ infrastructure, production history, customer data, or operational credentials.
   technology does, what is validated, and what remains.
 - `PUBLIC_REVIEW_BUNDLE.md` - one-command public review route with a
   machine-readable evidence contract; run `bash scripts/run_public_review_bundle.sh`.
+- `REVIEW_CONSOLE.md` - browser-visible review console contract for readiness,
+  gates, evidence, handoff, remaining work, and public/private boundary; checked
+  by `bash scripts/check_public_review_console.sh`.
 - `ENGINEERING_REVIEW_GUIDE.md` - short verification path for demo, CI, API, recovery, GitOps, and IaC evidence.
 - `PUBLIC_VERIFICATION_MATRIX.md` - compact claim-to-evidence verification
   matrix with pass signals and verifier commands; checked by
@@ -29,6 +32,8 @@ infrastructure, production history, customer data, or operational credentials.
   evidence.
 - `evidence/public-review-bundle.sanitized.json` - machine-readable public
   review bundle evidence.
+- `evidence/review-console.sanitized.json` - machine-readable Review Console
+  evidence.
 - `PUBLIC_DEMO_HEALTH.md` - public-safe Pages/demo health workflow,
   static fallback, OpenAPI, SDK, and evidence health contract.
 - `evidence/public-demo-health.sanitized.json` - machine-readable public demo

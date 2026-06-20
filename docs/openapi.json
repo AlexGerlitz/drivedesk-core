@@ -7038,6 +7038,11 @@
             "title": "Recoveryevidence",
             "type": "array"
           },
+          "reviewConsole": {
+            "additionalProperties": true,
+            "title": "Reviewconsole",
+            "type": "object"
+          },
           "schemaVersion": {
             "title": "Schemaversion",
             "type": "integer"
@@ -7124,6 +7129,7 @@
           "businessControlTower",
           "businessScenarioReplay",
           "stackReadiness",
+          "reviewConsole",
           "engineeringProof",
           "workflow",
           "workflowScenarios",

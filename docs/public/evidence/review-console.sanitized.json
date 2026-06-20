@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "evidence_id": "review_console",
+  "data_profile": "synthetic_demo_data",
+  "status": "validated",
+  "demo_payload_key": "reviewConsole",
+  "demo_tab": "Review",
+  "contract_check": "bash scripts/check_public_review_console.sh",
+  "review_surfaces": [
+    "apps/admin/public-demo/index.html",
+    "apps/admin/public-demo/app.js",
+    "apps/admin/public-demo/demo-data.js",
+    "docs/public/REVIEW_CONSOLE.md",
+    "GET /demo/public"
+  ],
+  "included_gates": [
+    "bash scripts/run_public_review_bundle.sh",
+    "bash scripts/check_public_review_console.sh",
+    "bash scripts/public_repo_release_gate.sh",
+    "bash scripts/check_public_provider_sandbox_dry_run.sh"
+  ],
+  "pass_signals": [
+    "static demo and FastAPI payload expose the same reviewConsole contract",
+    "OpenAPI PublicDemoRead requires reviewConsole",
+    "public demo Review tab renders readiness, gates, evidence, handoff, remaining work, and boundary rows",
+    "review console is referenced from project status, capability map, evidence index, review bundle, and public smoke path",
+    "public/private boundary remains synthetic and sanitized"
+  ],
+  "redaction": {
+    "addresses_included": false,
+    "credentials_included": false,
+    "hostnames_included": false,
+    "paths_included": false,
+    "production_data_included": false,
+    "raw_logs_included": false,
+    "request_bodies_included": false
+  },
+  "public_urls": [
+    "apps/admin/public-demo/",
+    "docs/public/REVIEW_CONSOLE.md",
+    "docs/public/evidence/review-console.sanitized.json"
+  ],
+  "boundary": "browser-visible readiness console over synthetic demo data and sanitized evidence only"
+}

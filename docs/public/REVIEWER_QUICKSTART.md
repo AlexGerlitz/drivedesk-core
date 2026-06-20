@@ -6,6 +6,8 @@ want to verify the project shape before reading the full documentation set.
 For the compact system map, start with `docs/public/SYSTEM_REVIEW_PATH.md`.
 For the product route, open `docs/public/PLATFORM_TOUR.md`.
 For the stack explanation, open `docs/public/INTERVIEW_STACK_BRIEF.md`.
+For the browser-visible readiness console, open `docs/public/REVIEW_CONSOLE.md`
+or the public demo `Review` tab.
 For a one-command check, open `docs/public/PUBLIC_REVIEW_BUNDLE.md` and run:
 
 ```bash
@@ -20,16 +22,18 @@ bash scripts/run_public_review_bundle.sh
 | 2 | `docs/public/SYSTEM_REVIEW_PATH.md` | The compact system path ties the public root, demo, API, SDK, operations evidence, release safety, GitOps, OpenTofu, and evidence index together. |
 | 3 | `docs/public/PLATFORM_TOUR.md` | Business OS tour through business event -> workflow -> adapter -> incident -> proof. |
 | 4 | GitHub Pages engineering reference | The public entrypoint is published and wired to demo, CI, OpenAPI, docs, and evidence. |
-| 5 | Public demo Overview, Workflow, Control Tower, Integrations, Operations, Incidents, and Proof tabs | The demo is not a static screenshot; it exposes stack readiness, an end-to-end workflow-to-proof path, operational contracts, incidents, and proof payloads. |
+| 5 | Public demo Overview, Workflow, Control Tower, Integrations, Operations, Incidents, Review, and Proof tabs | The demo is not a static screenshot; it exposes stack readiness, an end-to-end workflow-to-proof path, operational contracts, incidents, review readiness, and proof payloads. |
 | 6 | `docs/public/PROJECT_STATUS.md` | Current capability state, limits, and next work are explicit. |
 | 7 | `docs/public/TECHNICAL_CAPABILITY_MAP.md` | Each visible capability maps to implementation surface, evidence, and verifier commands. |
 | 8 | `docs/public/PUBLIC_VERIFICATION_MATRIX.md` | Each engineering claim has an artifact, verifier command, and pass signal. |
 | 9 | `docs/public/INTERVIEW_STACK_BRIEF.md` | The stack is explained with purpose, current state, remaining work, and proof commands. |
 | 10 | `docs/public/ENGINEERING_PROOF.md` | The proof tab, API payload, OpenAPI schema, SDK artifacts, and CI gates share one contract. |
+| 11 | `docs/public/REVIEW_CONSOLE.md` | The Review tab, `reviewConsole` payload, evidence JSON, and verifier share one public-safe contract. |
 
 Pass criteria: a technical reader can identify the current architecture, public demo,
 API contract, SDK surface, observability evidence, incident response evidence,
-end-to-end scenario, and release safety gates without private access.
+Review Console, end-to-end scenario, and release safety gates without private
+access.
 
 ## 15-Minute Verification
 
@@ -47,6 +51,7 @@ bash scripts/check_public_verification_matrix.sh
 bash scripts/check_public_project_status.sh
 bash scripts/check_public_technical_capability_map.sh
 bash scripts/check_public_evidence_index.sh
+bash scripts/check_public_review_console.sh
 bash scripts/check_public_engineering_proof.sh
 bash scripts/check_public_demo_api.sh
 bash scripts/check_public_demo_sdk.sh

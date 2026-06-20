@@ -365,6 +365,7 @@
     "businessControlTower",
     "businessScenarioReplay",
     "stackReadiness",
+    "reviewConsole",
     "engineeringProof",
     "workflow",
     "workflowScenarios",

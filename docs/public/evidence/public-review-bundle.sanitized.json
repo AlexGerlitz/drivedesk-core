@@ -7,6 +7,7 @@
   "contract_check": "bash scripts/check_public_review_bundle.sh",
   "review_docs": [
     "docs/public/PUBLIC_REVIEW_BUNDLE.md",
+    "docs/public/REVIEW_CONSOLE.md",
     "docs/public/SYSTEM_REVIEW_PATH.md",
     "docs/public/REVIEWER_QUICKSTART.md",
     "docs/public/INTERVIEW_STACK_BRIEF.md",
@@ -25,6 +26,7 @@
     "bash scripts/check_public_project_status.sh",
     "bash scripts/check_public_technical_capability_map.sh",
     "bash scripts/check_public_evidence_index.sh",
+    "bash scripts/check_public_review_console.sh",
     "bash scripts/check_public_demo_health.sh",
     "bash scripts/check_public_openapi_drift.sh",
     "bash scripts/check_public_demo_api.sh",
@@ -39,7 +41,8 @@
     "review documents point to executable verifier commands",
     "claim-to-evidence matrix and evidence index validate",
     "demo health, OpenAPI drift, SDK, observability, alert routing, and proof checks pass",
-    "public/private boundary remains synthetic and sanitized"
+    "public/private boundary remains synthetic and sanitized",
+    "Review Console links readiness, gates, evidence, handoff, remaining work, and boundary in the public demo"
   ],
   "redaction": {
     "addresses_included": false,

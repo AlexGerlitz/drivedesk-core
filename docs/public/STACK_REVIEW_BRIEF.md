@@ -41,7 +41,7 @@ export boundary through executable verifier scripts and GitHub Actions.
 | Security / Public-Private Boundary | Keeps secrets, raw logs, production data, provider credentials, and private runtime state out of the public repo. | Export gate, secret checks, sanitized evidence, and public evidence index are wired. | Commercial security needs production secret management, audit review, threat model updates, and access reviews. |
 | Public Demo / Pages | Gives a browser-visible entrypoint for inspecting system shape, demo flow, evidence, and verification commands. | GitHub Pages, static demo data, public review bundle, and evidence index are connected. | A live SaaS UI still needs authenticated workflows, real tenant data, and role-specific frontend screens. |
 
-## Reviewer Talking Points
+## Review Notes
 
 Use these phrases when explaining decisions:
 

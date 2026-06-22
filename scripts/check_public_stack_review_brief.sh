@@ -67,7 +67,7 @@ required_doc_tokens = [
     "Stack Review Brief",
     "How To Describe The Project",
     "Stack Map",
-    "Reviewer Talking Points",
+    "Review Notes",
     "What Is Ready Versus Not Ready",
     "Fast Proof Path",
     "bash scripts/check_public_stack_review_brief.sh",

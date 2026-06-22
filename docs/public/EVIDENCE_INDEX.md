@@ -35,7 +35,7 @@ parsing Markdown by hand.
 | Public review bundle | `docs/public/PUBLIC_REVIEW_BUNDLE.md` | `bash scripts/check_public_review_bundle.sh` |
 | Review Console | `docs/public/REVIEW_CONSOLE.md` | `bash scripts/check_public_review_console.sh` |
 | Public engineering entrypoint | `docs/public/SYSTEM_REVIEW_PATH.md` | `bash scripts/check_public_system_review_path.sh` |
-| Interview stack brief | `docs/public/INTERVIEW_STACK_BRIEF.md` | `bash scripts/check_public_interview_stack_brief.sh` |
+| Stack review brief | `docs/public/STACK_REVIEW_BRIEF.md` | `bash scripts/check_public_stack_review_brief.sh` |
 | Public demo health | `docs/public/PUBLIC_DEMO_HEALTH.md` | `bash scripts/check_public_demo_health.sh` |
 | OpenAPI drift | `docs/public/OPENAPI_DRIFT.md` | `bash scripts/check_public_openapi_drift.sh` |
 | Business OS tour | `docs/public/PLATFORM_TOUR.md` | `bash scripts/check_public_platform_tour.sh` |
@@ -72,7 +72,7 @@ state.
 bash scripts/run_public_review_bundle.sh
 bash scripts/check_public_review_bundle.sh
 bash scripts/check_public_review_console.sh
-bash scripts/check_public_interview_stack_brief.sh
+bash scripts/check_public_stack_review_brief.sh
 bash scripts/check_public_evidence_index.sh
 bash scripts/check_public_connector_fixture_replay.sh
 bash scripts/check_public_business_control_tower.sh
@@ -108,10 +108,10 @@ The Review Console is tracked through `docs/public/REVIEW_CONSOLE.md`,
 `Review` tab, the `reviewConsole` payload key, and
 `bash scripts/check_public_review_console.sh`.
 
-The interview stack brief is tracked through
-`docs/public/INTERVIEW_STACK_BRIEF.md`,
-`docs/public/evidence/interview-stack-brief.sanitized.json`, and
-`bash scripts/check_public_interview_stack_brief.sh`.
+The stack review brief is tracked through
+`docs/public/STACK_REVIEW_BRIEF.md`,
+`docs/public/evidence/stack-review-brief.sanitized.json`, and
+`bash scripts/check_public_stack_review_brief.sh`.
 
 The check validates that:
 

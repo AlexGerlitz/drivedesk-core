@@ -9,7 +9,7 @@ work so the repository can be verified without private operational context.
 | Area | Current state | Evidence | Verification |
 | --- | --- | --- | --- |
 | Public entrypoint | GitHub Pages engineering reference, compact system review path, and quickstart are generated from the private export pipeline. | `index.html`, `docs/public/SYSTEM_REVIEW_PATH.md`, `docs/public/REVIEWER_QUICKSTART.md`, `docs/public/ENGINEERING_REVIEW_GUIDE.md` | `bash scripts/check_public_pages_entrypoint.sh && bash scripts/check_public_system_review_path.sh && bash scripts/check_public_reviewer_quickstart.sh` |
-| Interview stack brief | Plain-language stack map explains what each technology does, what is currently validated, and what remains for commercial rollout. | `docs/public/INTERVIEW_STACK_BRIEF.md`, `docs/public/evidence/interview-stack-brief.sanitized.json` | `bash scripts/check_public_interview_stack_brief.sh` |
+| Stack review brief | Plain-language stack map explains what each technology does, what is currently validated, and what remains for commercial rollout. | `docs/public/STACK_REVIEW_BRIEF.md`, `docs/public/evidence/stack-review-brief.sanitized.json` | `bash scripts/check_public_stack_review_brief.sh` |
 | Review Console | Public demo Review tab turns readiness, gates, evidence, handoff, remaining work, and public/private boundary into one browser-visible contract. | `docs/public/REVIEW_CONSOLE.md`, `docs/public/evidence/review-console.sanitized.json`, `GET /demo/public` `reviewConsole`, `apps/admin/public-demo/index.html` | `bash scripts/check_public_review_console.sh && bash scripts/check_public_demo_api.sh` |
 | Public demo health | Public Demo Health records the Pages demo workflow, static fallback, OpenAPI, SDK manifest, and public evidence health loop. | `docs/public/PUBLIC_DEMO_HEALTH.md`, `docs/public/evidence/public-demo-health.sanitized.json`, `.github/workflows/public-demo-health.yml`, `apps/admin/public-demo/demo-data.js` | `bash scripts/check_public_demo_health.sh && bash scripts/check_public_pages_entrypoint.sh` |
 | OpenAPI drift | Public OpenAPI drift evidence compares committed `docs/openapi.json` with the schema generated from the current FastAPI app, generated SDK manifest, and static demo markers. | `docs/public/OPENAPI_DRIFT.md`, `docs/public/evidence/openapi-drift.sanitized.json`, `docs/openapi.json`, `sdk/generated/public-demo/openapi-client-manifest.json` | `bash scripts/check_public_openapi_drift.sh && bash scripts/check_public_demo_api.sh && bash scripts/check_public_demo_sdk.sh` |
@@ -69,7 +69,7 @@ bash scripts/ci_smoke_public.sh
 bash scripts/check_public_system_review_path.sh
 bash scripts/check_public_platform_tour.sh
 bash scripts/check_public_reviewer_quickstart.sh
-bash scripts/check_public_interview_stack_brief.sh
+bash scripts/check_public_stack_review_brief.sh
 bash scripts/check_public_demo_health.sh
 bash scripts/check_public_openapi_drift.sh
 bash scripts/check_public_project_status.sh

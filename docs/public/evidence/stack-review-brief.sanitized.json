@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "evidence_id": "interview_stack_brief",
+  "evidence_id": "stack_review_brief",
   "data_profile": "synthetic_demo_data",
   "status": "validated",
-  "public_doc": "docs/public/INTERVIEW_STACK_BRIEF.md",
-  "contract_check": "bash scripts/check_public_interview_stack_brief.sh",
+  "public_doc": "docs/public/STACK_REVIEW_BRIEF.md",
+  "contract_check": "bash scripts/check_public_stack_review_brief.sh",
   "related_docs": [
     "docs/public/TECHNICAL_CAPABILITY_MAP.md",
     "docs/public/PUBLIC_VERIFICATION_MATRIX.md",

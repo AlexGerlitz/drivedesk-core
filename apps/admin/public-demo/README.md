@@ -43,5 +43,5 @@ surface for the Core concepts that already exist in the backend:
 - engineering proof gates and public-safe evidence chain;
 - API-backed synthetic demo contract;
 - API readiness;
-- stack readiness summary for interview and review discussions;
+- stack readiness summary for technical review discussions;
 - synthetic operational workflow state.

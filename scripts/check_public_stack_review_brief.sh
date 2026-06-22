@@ -29,8 +29,8 @@ import sys
 from pathlib import Path
 
 root = Path(sys.argv[1])
-doc_path = root / "docs/public/INTERVIEW_STACK_BRIEF.md"
-evidence_path = root / "docs/public/evidence/interview-stack-brief.sanitized.json"
+doc_path = root / "docs/public/STACK_REVIEW_BRIEF.md"
+evidence_path = root / "docs/public/evidence/stack-review-brief.sanitized.json"
 docs_readme_path = root / "docs/public/README.md"
 quickstart_path = root / "docs/public/REVIEWER_QUICKSTART.md"
 review_guide_path = root / "docs/public/ENGINEERING_REVIEW_GUIDE.md"
@@ -59,27 +59,27 @@ def read(path: Path) -> str:
     return path.read_text(encoding="utf-8") if path.is_file() else ""
 
 
-require(doc_path.is_file(), "missing docs/public/INTERVIEW_STACK_BRIEF.md")
-require(evidence_path.is_file(), "missing interview stack brief evidence JSON")
+require(doc_path.is_file(), "missing docs/public/STACK_REVIEW_BRIEF.md")
+require(evidence_path.is_file(), "missing stack review brief evidence JSON")
 
 doc = read(doc_path)
 required_doc_tokens = [
-    "Interview Stack Brief",
+    "Stack Review Brief",
     "How To Describe The Project",
     "Stack Map",
-    "Interview Talking Points",
+    "Reviewer Talking Points",
     "What Is Ready Versus Not Ready",
     "Fast Proof Path",
-    "bash scripts/check_public_interview_stack_brief.sh",
+    "bash scripts/check_public_stack_review_brief.sh",
     "bash scripts/run_public_review_bundle.sh",
     "docs/public/TECHNICAL_CAPABILITY_MAP.md",
     "docs/public/PUBLIC_VERIFICATION_MATRIX.md",
     "docs/public/EVIDENCE_INDEX.md",
-    "docs/public/evidence/interview-stack-brief.sanitized.json",
+    "docs/public/evidence/stack-review-brief.sanitized.json",
     "Boundary",
 ]
 for token in required_doc_tokens:
-    require(token in doc, f"interview stack brief missing {token}")
+    require(token in doc, f"stack review brief missing {token}")
 
 stack_rows = [
     "Python / FastAPI",
@@ -99,7 +99,7 @@ stack_rows = [
     "Public Demo / Pages",
 ]
 for stack in stack_rows:
-    require(stack in doc, f"interview stack brief missing stack row: {stack}")
+    require(stack in doc, f"stack review brief missing stack row: {stack}")
 
 for phrase in [
     "What It Does",
@@ -112,20 +112,20 @@ for phrase in [
     "Observability",
     "Public/private split",
 ]:
-    require(phrase in doc, f"interview stack brief missing phrase: {phrase}")
+    require(phrase in doc, f"stack review brief missing phrase: {phrase}")
 
 payload = json.loads(read(evidence_path))
-require(payload.get("schema_version") == 1, "unexpected interview stack brief schema version")
-require(payload.get("evidence_id") == "interview_stack_brief", "unexpected interview stack brief evidence id")
-require(payload.get("data_profile") == "synthetic_demo_data", "unexpected interview stack brief data profile")
-require(payload.get("status") == "validated", "unexpected interview stack brief status")
-require(payload.get("public_doc") == "docs/public/INTERVIEW_STACK_BRIEF.md", "unexpected interview stack brief public_doc")
+require(payload.get("schema_version") == 1, "unexpected stack review brief schema version")
+require(payload.get("evidence_id") == "stack_review_brief", "unexpected stack review brief evidence id")
+require(payload.get("data_profile") == "synthetic_demo_data", "unexpected stack review brief data profile")
+require(payload.get("status") == "validated", "unexpected stack review brief status")
+require(payload.get("public_doc") == "docs/public/STACK_REVIEW_BRIEF.md", "unexpected stack review brief public_doc")
 require(
-    payload.get("contract_check") == "bash scripts/check_public_interview_stack_brief.sh",
-    "unexpected interview stack brief contract check",
+    payload.get("contract_check") == "bash scripts/check_public_stack_review_brief.sh",
+    "unexpected stack review brief contract check",
 )
-require(payload.get("proof_command") == "bash scripts/run_public_review_bundle.sh", "unexpected interview stack proof command")
-require(payload.get("boundary"), "interview stack brief missing boundary")
+require(payload.get("proof_command") == "bash scripts/run_public_review_bundle.sh", "unexpected stack review proof command")
+require(payload.get("boundary"), "stack review brief missing boundary")
 
 payload_stacks = payload.get("stack_groups")
 require(isinstance(payload_stacks, list), "stack_groups must be a list")
@@ -149,7 +149,7 @@ for key in [
     "raw_logs_included",
     "request_bodies_included",
 ]:
-    require(redaction.get(key) is False, f"interview stack redaction flag must be false: {key}")
+    require(redaction.get(key) is False, f"stack review redaction flag must be false: {key}")
 
 serialized = json.dumps(payload, ensure_ascii=False, sort_keys=True)
 private_patterns = [
@@ -162,22 +162,22 @@ private_patterns = [
     re.compile(r"\b\d{1,3}(?:\.\d{1,3}){3}\b"),
 ]
 for pattern in private_patterns:
-    require(not pattern.search(serialized), f"interview stack evidence contains private marker: {pattern.pattern}")
+    require(not pattern.search(serialized), f"stack review evidence contains private marker: {pattern.pattern}")
 
 index_payload = json.loads(read(evidence_index_json_path))
 entries = index_payload.get("entries", [])
-brief_entries = [entry for entry in entries if entry.get("capability_id") == "interview-stack-brief"]
-require(len(brief_entries) == 1, "evidence index must contain one interview-stack-brief entry")
+brief_entries = [entry for entry in entries if entry.get("capability_id") == "stack-review-brief"]
+require(len(brief_entries) == 1, "evidence index must contain one stack-review-brief entry")
 if brief_entries:
     entry = brief_entries[0]
-    require(entry.get("public_doc") == "docs/public/INTERVIEW_STACK_BRIEF.md", "interview stack index public_doc mismatch")
+    require(entry.get("public_doc") == "docs/public/STACK_REVIEW_BRIEF.md", "stack review index public_doc mismatch")
     require(
-        "docs/public/evidence/interview-stack-brief.sanitized.json" in entry.get("evidence_files", []),
-        "interview stack evidence JSON missing from evidence index entry",
+        "docs/public/evidence/stack-review-brief.sanitized.json" in entry.get("evidence_files", []),
+        "stack review evidence JSON missing from evidence index entry",
     )
     require(
-        "bash scripts/check_public_interview_stack_brief.sh" in entry.get("verifiers", []),
-        "interview stack verifier missing from evidence index entry",
+        "bash scripts/check_public_stack_review_brief.sh" in entry.get("verifiers", []),
+        "stack review verifier missing from evidence index entry",
     )
 
 for path in [
@@ -190,40 +190,40 @@ for path in [
     evidence_index_path,
 ]:
     text = read(path)
-    require("INTERVIEW_STACK_BRIEF.md" in text, f"{path.relative_to(root)} missing INTERVIEW_STACK_BRIEF.md")
-    require("check_public_interview_stack_brief.sh" in text, f"{path.relative_to(root)} missing interview stack checker")
+    require("STACK_REVIEW_BRIEF.md" in text, f"{path.relative_to(root)} missing STACK_REVIEW_BRIEF.md")
+    require("check_public_stack_review_brief.sh" in text, f"{path.relative_to(root)} missing stack review checker")
 
 public_smoke = read(public_smoke_path)
 if is_public_export or public_smoke_path.is_file():
-    require("check_public_interview_stack_brief.sh" in public_smoke, "public smoke missing interview stack check")
+    require("check_public_stack_review_brief.sh" in public_smoke, "public smoke missing stack review check")
 
 if is_public_export:
     root_readme = read(root_readme_path)
     index_html = read(index_html_path)
-    require("INTERVIEW_STACK_BRIEF.md" in root_readme, "public README missing interview stack brief")
-    require("docs/public/INTERVIEW_STACK_BRIEF.md" in index_html, "public Pages root missing interview stack brief link")
+    require("STACK_REVIEW_BRIEF.md" in root_readme, "public README missing stack review brief")
+    require("docs/public/STACK_REVIEW_BRIEF.md" in index_html, "public Pages root missing stack review brief link")
 else:
     private_smoke = read(private_smoke_path)
     export_script = read(export_script_path)
     release_gate = read(release_gate_path)
-    require("check_public_interview_stack_brief.sh" in private_smoke, "private smoke missing interview stack check")
-    require('copy_path "scripts/check_public_interview_stack_brief.sh"' in export_script, "export script missing interview stack checker copy")
-    require("INTERVIEW_STACK_BRIEF.md" in export_script, "export script missing interview stack brief doc reference")
-    require("interview-stack-brief.sanitized.json" in export_script, "export script missing interview stack evidence reference")
-    require("check_public_interview_stack_brief.sh" in export_script, "export script missing generated public smoke interview stack check")
-    require("docs/public/INTERVIEW_STACK_BRIEF.md" in release_gate, "release gate missing interview stack brief required file")
+    require("check_public_stack_review_brief.sh" in private_smoke, "private smoke missing stack review check")
+    require('copy_path "scripts/check_public_stack_review_brief.sh"' in export_script, "export script missing stack review checker copy")
+    require("STACK_REVIEW_BRIEF.md" in export_script, "export script missing stack review brief doc reference")
+    require("stack-review-brief.sanitized.json" in export_script, "export script missing stack review evidence reference")
+    require("check_public_stack_review_brief.sh" in export_script, "export script missing generated public smoke stack review check")
+    require("docs/public/STACK_REVIEW_BRIEF.md" in release_gate, "release gate missing stack review brief required file")
     require(
-        "docs/public/evidence/interview-stack-brief.sanitized.json" in release_gate,
-        "release gate missing interview stack evidence required file",
+        "docs/public/evidence/stack-review-brief.sanitized.json" in release_gate,
+        "release gate missing stack review evidence required file",
     )
-    require("scripts/check_public_interview_stack_brief.sh" in release_gate, "release gate missing interview stack checker required file")
-    require("check_public_interview_stack_brief.sh" in release_gate, "release gate missing interview stack check")
+    require("scripts/check_public_stack_review_brief.sh" in release_gate, "release gate missing stack review checker required file")
+    require("check_public_stack_review_brief.sh" in release_gate, "release gate missing stack review check")
 
 if errors:
-    print("public interview stack brief check failed:", file=sys.stderr)
+    print("public stack review brief check failed:", file=sys.stderr)
     for error in errors:
         print(f"- {error}", file=sys.stderr)
     raise SystemExit(1)
 
-print(f"public interview stack brief check ok: stack_groups={len(stack_rows)}")
+print(f"public stack review brief check ok: stack_groups={len(stack_rows)}")
 PY

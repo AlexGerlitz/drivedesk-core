@@ -1,6 +1,6 @@
-# Interview Stack Brief
+# Stack Review Brief
 
-This brief explains the DriveDesk Core stack in interview-friendly language.
+This brief explains the DriveDesk Core stack in review-friendly language.
 It is intentionally tied to public evidence, verifier commands, and current
 limits so a technical reviewer can move from explanation to proof.
 
@@ -41,7 +41,7 @@ export boundary through executable verifier scripts and GitHub Actions.
 | Security / Public-Private Boundary | Keeps secrets, raw logs, production data, provider credentials, and private runtime state out of the public repo. | Export gate, secret checks, sanitized evidence, and public evidence index are wired. | Commercial security needs production secret management, audit review, threat model updates, and access reviews. |
 | Public Demo / Pages | Gives a browser-visible entrypoint for inspecting system shape, demo flow, evidence, and verification commands. | GitHub Pages, static demo data, public review bundle, and evidence index are connected. | A live SaaS UI still needs authenticated workflows, real tenant data, and role-specific frontend screens. |
 
-## Interview Talking Points
+## Reviewer Talking Points
 
 Use these phrases when explaining decisions:
 
@@ -93,7 +93,7 @@ bash scripts/run_public_review_bundle.sh
 Use this command to validate this brief:
 
 ```bash
-bash scripts/check_public_interview_stack_brief.sh
+bash scripts/check_public_stack_review_brief.sh
 ```
 
 Related evidence:
@@ -101,7 +101,7 @@ Related evidence:
 - `docs/public/TECHNICAL_CAPABILITY_MAP.md`;
 - `docs/public/PUBLIC_VERIFICATION_MATRIX.md`;
 - `docs/public/EVIDENCE_INDEX.md`;
-- `docs/public/evidence/interview-stack-brief.sanitized.json`.
+- `docs/public/evidence/stack-review-brief.sanitized.json`.
 
 ## Boundary
 

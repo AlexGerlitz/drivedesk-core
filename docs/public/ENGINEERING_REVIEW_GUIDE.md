@@ -12,7 +12,7 @@ prove the current engineering surface.
 | 1 | System review path | `docs/public/SYSTEM_REVIEW_PATH.md` |
 | 2 | Platform Tour | `docs/public/PLATFORM_TOUR.md` |
 | 3 | Verification quickstart | `docs/public/REVIEWER_QUICKSTART.md` |
-| 4 | Interview stack brief | `docs/public/INTERVIEW_STACK_BRIEF.md`, `bash scripts/check_public_interview_stack_brief.sh` |
+| 4 | Stack review brief | `docs/public/STACK_REVIEW_BRIEF.md`, `bash scripts/check_public_stack_review_brief.sh` |
 | 5 | Verification matrix | `docs/public/PUBLIC_VERIFICATION_MATRIX.md` |
 | 6 | Live demo Workflow, Control Tower, Integrations, Operations, Incidents, Review, and Proof tabs | `businessControlTower`, `adapterStudio`, `endToEndScenario`, `alertRouting`, `incidentResponse`, `reviewConsole`, and `engineeringProof` payloads |
 | 7 | Root CI badge | `bash scripts/ci_smoke_public.sh` |
@@ -39,7 +39,7 @@ bash scripts/ci_smoke_public.sh
 bash scripts/check_public_system_review_path.sh
 bash scripts/check_public_platform_tour.sh
 bash scripts/check_public_reviewer_quickstart.sh
-bash scripts/check_public_interview_stack_brief.sh
+bash scripts/check_public_stack_review_brief.sh
 bash scripts/check_public_verification_matrix.sh
 bash scripts/check_public_review_guide.sh
 bash scripts/check_public_project_status.sh
@@ -70,7 +70,7 @@ bash scripts/check_public_opentofu_plan.sh
 | System review path | `docs/public/SYSTEM_REVIEW_PATH.md` |
 | Business OS tour | `docs/public/PLATFORM_TOUR.md` |
 | Verification quickstart | `docs/public/REVIEWER_QUICKSTART.md` |
-| Interview stack brief | `docs/public/INTERVIEW_STACK_BRIEF.md`, `docs/public/evidence/interview-stack-brief.sanitized.json` |
+| Stack review brief | `docs/public/STACK_REVIEW_BRIEF.md`, `docs/public/evidence/stack-review-brief.sanitized.json` |
 | Verification matrix | `docs/public/PUBLIC_VERIFICATION_MATRIX.md` |
 | System design | `docs/public/SYSTEM_DESIGN.md` |
 | Project status | `docs/public/PROJECT_STATUS.md` |

@@ -2,48 +2,30 @@
 
 [![CI](https://github.com/AlexGerlitz/drivedesk-core/actions/workflows/ci.yml/badge.svg)](https://github.com/AlexGerlitz/drivedesk-core/actions/workflows/ci.yml)
 
-DriveDesk Core is a modular monolith backend foundation for a business
-operations platform.
+DriveDesk Core is the public backend/platform foundation behind the DriveDesk AI
+Operator direction: business operations, integrations, workflows, audit/outbox,
+adapter boundaries, recovery paths, and public proof owned by backend code.
 
-It includes:
+This repository is meant to be reviewed as an engineering proof surface, not as
+a narrow demo. The API, data model, public demo, CI gates, OpenAPI, SDK drift
+checks, operations docs, and sanitized evidence all point to the same system
+shape.
 
-- FastAPI API;
-- PostgreSQL migrations with Alembic;
-- background worker;
-- tenant, user, membership, RBAC, audit, and outbox foundation;
-- credential auth foundation with bearer access tokens, current-user lookup,
-  token revocation, redacted session listing, admin-triggered session revocation,
-  failed-attempt guard, and auth audit events;
-- dedicated platform-admin grants for platform-scoped bearer-token operations;
-- aggregate auth metrics for session lifecycle and login-attempt outcomes;
-- auth security alert names and public-safe runbook shape;
-- bearer-token tenant isolation for tenant/user listing and bootstrap endpoints;
-- reusable tenant-scope helper module for Core list queries;
-- reusable tenant-owned repository helper module for models with `tenant_id`;
-- tenant-owned business record foundation for contracts, payments, lessons,
-  tasks, and documents;
-- business record lifecycle transition endpoint with audit, outbox, and aggregate metrics;
-- tenant-owned workflow rules for business record status automation;
-- workflow rule audit, configured outbox handoff, and aggregate workflow metrics;
-- workflow actions for task record creation and adapter sync requests;
-- synthetic file import adapter with retry and dead-letter state;
-- runtime adapter catalog for executable adapter metadata;
-- synthetic lead-to-student workflow in the public demo payload;
-- public Business OS tour connecting business event -> workflow -> adapter -> incident -> proof;
-- public Review Console for readiness, gates, evidence, handoff, remaining work, and boundary;
-- public connector certification path and workbench for provider profiles, capability manifests, contract fixtures, runtime readiness, gates, implementation path, and release proof;
-- public provider onboarding workbench for provider profile selection, mapping preview, preflight checks, sandbox dry-run, approval, private rollout, and reconciliation;
-- public Integration Repair workbench and action preview for runbook-backed retry, dead-letter, reconciliation mismatch, impact, safe actions, approval, dry-run, and postcheck evidence;
-- public connector fixture replay for synthetic happy-path, redaction, invalid-payload, retry, dead-letter, and reconciliation cases;
-- generated OpenAPI client SDK example for the public demo API;
-- OpenAPI drift check comparing the committed schema, generated FastAPI schema,
-  generated SDK manifest, and static demo markers;
-- public-safe synthetic backup/restore drill with sanitized evidence;
-- public-safe synthetic release rollback drill with sanitized evidence;
-- public-safe 70 percent DevOps/platform milestone evidence;
-- Docker Compose local runtime;
-- pytest coverage for the Core API;
-- architecture docs and ADRs.
+## 60-Second Review
+
+| Signal | What to inspect |
+| --- | --- |
+| Backend/platform foundation | FastAPI, PostgreSQL/Alembic, tenant model, RBAC, audit log, outbox, workflow rules, workers, and metrics. |
+| Integration discipline | Adapter catalog, connector certification, provider onboarding, fixture replay, idempotent handoff boundaries, and repair workbench. |
+| Production proof | Docker Compose, OpenAPI/SDK drift checks, CI, public demo health, backup/restore, rollback, SLO canary, GitOps, and OpenTofu evidence. |
+| Fast proof route | `docs/public/PUBLIC_REVIEW_BUNDLE.md`, `docs/public/SYSTEM_REVIEW_PATH.md`, `docs/public/STACK_REVIEW_BRIEF.md`, and `docs/public/PUBLIC_VERIFICATION_MATRIX.md`. |
+
+Best-fit signal:
+
+- operations platform backend, not a prompt-only or no-code-only workflow;
+- backend-owned state, audit, retries, quality gates, and integration contracts;
+- public-safe evidence that lets a reviewer verify claims from code, docs, demo,
+  checks, and GitHub Actions.
 
 [![Public Demo Health](https://github.com/AlexGerlitz/drivedesk-core/actions/workflows/public-demo-health.yml/badge.svg)](https://github.com/AlexGerlitz/drivedesk-core/actions/workflows/public-demo-health.yml)
 
@@ -54,6 +36,25 @@ It includes:
 [Open the public DriveDesk Core demo](https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/)
 
 ![DriveDesk Core demo overview](docs/public/assets/drivedesk-core-demo-overview.png)
+
+## Implemented Surface
+
+- API/runtime: FastAPI API, PostgreSQL migrations with Alembic, background
+  worker, Docker Compose local runtime, `GET /metrics`, pytest coverage, and
+  architecture docs/ADRs.
+- SaaS core: tenants, users, memberships, RBAC, bearer-token auth, current-user
+  lookup, token revocation, redacted session listing, tenant isolation, and
+  platform-admin grants.
+- Business operations: tenant-owned contracts, payments, lessons, tasks,
+  documents, lifecycle transitions, workflow rules, workflow actions, task
+  creation, adapter-sync requests, and aggregate metrics.
+- Integration layer: synthetic file import adapter, retry/dead-letter state,
+  runtime adapter catalog, connector certification, provider onboarding,
+  Integration Repair, action preview, fixture replay, and sandbox dry-run
+  evidence.
+- Public proof: Business OS tour, Review Console, generated OpenAPI client SDK
+  example, OpenAPI drift check, public-safe backup/restore drill, release
+  rollback drill, DevOps/platform milestone evidence, and public demo payloads.
 
 ## Start Here
 

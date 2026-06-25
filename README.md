@@ -11,6 +11,10 @@ a narrow demo. The API, data model, public demo, CI gates, OpenAPI, SDK drift
 checks, operations docs, and sanitized evidence all point to the same system
 shape.
 
+Profile / contact route: [DriveDesk AI Operator proof route](https://alexgerlitz.github.io/AlexGerlitz/drivedesk-proof-route.html),
+[portfolio](https://alexgerlitz.github.io/AlexGerlitz/), and
+[inbound brief](https://alexgerlitz.github.io/AlexGerlitz/INTAKE_BRIEF.md).
+
 ## 60-Second Review
 
 | Signal | What to inspect |

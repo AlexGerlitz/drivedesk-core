@@ -24,6 +24,7 @@ Best-fit signal:
 
 - operations platform backend, not a prompt-only or no-code-only workflow;
 - backend-owned state, audit, retries, quality gates, and integration contracts;
+- Business OS route from business event -> workflow -> adapter -> incident -> proof;
 - public-safe evidence that lets a reviewer verify claims from code, docs, demo,
   checks, and GitHub Actions.
 

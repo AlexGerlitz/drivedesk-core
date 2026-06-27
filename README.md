@@ -20,6 +20,11 @@ Profile / contact route: [DriveDesk AI Operator proof route](https://alexgerlitz
 
 ## 60-Second Review
 
+Hiring relevance: I can turn business operations, CRM/ERP adapters, audit/outbox
+state, tenant boundaries, RBAC, workflow rules, integration recovery, metrics,
+Docker, CI, OpenAPI, and public-safe evidence into a backend/platform system a
+team can review, run, extend, and hand off.
+
 | Signal | What to inspect |
 | --- | --- |
 | Backend/platform foundation | FastAPI, PostgreSQL/Alembic, tenant model, RBAC, audit log, outbox, workflow rules, workers, and metrics. |

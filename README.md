@@ -12,8 +12,10 @@ checks, operations docs, and sanitized evidence all point to the same system
 shape.
 
 Profile / contact route: [DriveDesk AI Operator proof route](https://alexgerlitz.github.io/AlexGerlitz/drivedesk-proof-route.html),
+[LinkedIn message route](https://www.linkedin.com/in/alex-gerlitz-a659ab3bb/),
+[PDF resume](https://alexgerlitz.github.io/AlexGerlitz/output/pdf/alex-gerlitz-remote-ai-automation-resume.pdf),
 [portfolio](https://alexgerlitz.github.io/AlexGerlitz/), and
-[inbound brief](https://alexgerlitz.github.io/AlexGerlitz/INTAKE_BRIEF.md).
+[inbound brief](https://alexgerlitz.github.io/AlexGerlitz/intake-brief.html).
 
 ## 60-Second Review
 

@@ -18,6 +18,18 @@ Profile / contact route: [DriveDesk AI Operator proof route](https://alexgerlitz
 [enterprise readiness](https://alexgerlitz.github.io/AlexGerlitz/enterprise-readiness.html), and
 [inbound brief](https://alexgerlitz.github.io/AlexGerlitz/intake-brief.html).
 
+Message me first when there is one messy business workflow, one risky integration
+boundary, or one backend/platform/DevOps slice that should become testable, logged,
+documented, and handed off.
+
+Shortest proof path: [LinkedIn Recruiter Packet](https://alexgerlitz.github.io/AlexGerlitz/linkedin-recruiter-packet.html) ->
+[Hiring Decision](https://alexgerlitz.github.io/AlexGerlitz/hiring-decision.html) ->
+[DriveDesk Proof Route](https://alexgerlitz.github.io/AlexGerlitz/drivedesk-proof-route.html) ->
+[PDF resume](https://alexgerlitz.github.io/AlexGerlitz/output/pdf/alex-gerlitz-remote-ai-automation-resume.pdf).
+
+First useful result: a verified operations/integration platform slice with backend-owned
+state, tests, logs, docs, and a handoff route.
+
 ## 60-Second Review
 
 Hiring relevance: I can turn business operations, CRM/ERP adapters, audit/outbox

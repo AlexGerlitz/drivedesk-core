@@ -12,6 +12,7 @@ checks, operations docs, and sanitized evidence all point to the same system
 shape.
 
 Profile / contact route: [DriveDesk AI Operator proof route](https://alexgerlitz.github.io/AlexGerlitz/drivedesk-proof-route.html),
+[Decision-Ready Contact](https://alexgerlitz.github.io/AlexGerlitz/decision-ready-contact.html),
 [LinkedIn message route](https://www.linkedin.com/in/alex-gerlitz-a659ab3bb/),
 [PDF resume](https://alexgerlitz.github.io/AlexGerlitz/output/pdf/alex-gerlitz-remote-ai-automation-resume.pdf),
 [portfolio](https://alexgerlitz.github.io/AlexGerlitz/),
@@ -25,6 +26,7 @@ documented, and handed off.
 Shortest proof path: [LinkedIn Recruiter Packet](https://alexgerlitz.github.io/AlexGerlitz/linkedin-recruiter-packet.html) ->
 [Hiring Decision](https://alexgerlitz.github.io/AlexGerlitz/hiring-decision.html) ->
 [DriveDesk Proof Route](https://alexgerlitz.github.io/AlexGerlitz/drivedesk-proof-route.html) ->
+[Decision-Ready Contact](https://alexgerlitz.github.io/AlexGerlitz/decision-ready-contact.html) ->
 [PDF resume](https://alexgerlitz.github.io/AlexGerlitz/output/pdf/alex-gerlitz-remote-ai-automation-resume.pdf).
 
 First useful result: a verified operations/integration platform slice with backend-owned

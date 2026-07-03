@@ -2,9 +2,10 @@
 
 [![CI](https://github.com/AlexGerlitz/drivedesk-core/actions/workflows/ci.yml/badge.svg)](https://github.com/AlexGerlitz/drivedesk-core/actions/workflows/ci.yml)
 
-DriveDesk Core is the public backend/platform foundation behind the DriveDesk AI
-Operator direction: business operations, integrations, workflows, audit/outbox,
-adapter boundaries, recovery paths, and public proof owned by backend code.
+DriveDesk Core is the public backend/API and integration foundation behind the
+DriveDesk AI Operator direction: business operations, integrations, workflows,
+audit/outbox, adapter boundaries, recovery paths, and public proof owned by
+backend code.
 
 This repository is meant to be reviewed as an engineering proof surface, not as
 a narrow demo. The API, data model, public demo, CI gates, OpenAPI, SDK drift
@@ -19,36 +20,36 @@ Profile / contact route: [DriveDesk AI Operator proof route](https://alexgerlitz
 [enterprise readiness](https://alexgerlitz.github.io/AlexGerlitz/enterprise-readiness.html), and
 [inbound brief](https://alexgerlitz.github.io/AlexGerlitz/intake-brief.html).
 
-Message me first when there is one messy business workflow, one risky integration
-boundary, or one backend/platform/DevOps slice that should become testable, logged,
-documented, and handed off.
+Message me first when there is one messy business workflow, one risky
+integration boundary, or one backend/API reliability slice that should become
+testable, logged, documented, and handed off.
 
 Shortest proof path: [LinkedIn Recruiter Packet](https://alexgerlitz.github.io/AlexGerlitz/linkedin-recruiter-packet.html) ->
 [Hiring Decision](https://alexgerlitz.github.io/AlexGerlitz/hiring-decision.html) ->
 [DriveDesk Proof Route](https://alexgerlitz.github.io/AlexGerlitz/drivedesk-proof-route.html) ->
 [Decision-Ready Contact](https://alexgerlitz.github.io/AlexGerlitz/decision-ready-contact.html) ->
-[PDF resume](https://alexgerlitz.github.io/AlexGerlitz/output/pdf/alex-gerlitz-remote-ai-automation-resume.pdf).
+[PDF resume](https://alexgerlitz.github.io/AlexGerlitz/output/pdf/alex-gerlitz-python-backend-automation-resume.pdf).
 
-First useful result: a verified operations/integration platform slice with backend-owned
-state, tests, logs, docs, and a handoff route.
+First useful result: a verified operations/integration API slice with
+backend-owned state, tests, logs, docs, and a handoff route.
 
 ## 60-Second Review
 
 Hiring relevance: I can turn business operations, CRM/ERP adapters, audit/outbox
 state, tenant boundaries, RBAC, workflow rules, integration recovery, metrics,
-Docker, CI, OpenAPI, and public-safe evidence into a backend/platform system a
-team can review, run, extend, and hand off.
+Docker, CI, OpenAPI, and public-safe evidence into a backend/API system a team
+can review, run, extend, and hand off.
 
 | Signal | What to inspect |
 | --- | --- |
-| Backend/platform foundation | FastAPI, PostgreSQL/Alembic, tenant model, RBAC, audit log, outbox, workflow rules, workers, and metrics. |
+| Backend/API foundation | FastAPI, PostgreSQL/Alembic, tenant model, RBAC, audit log, outbox, workflow rules, workers, and metrics. |
 | Integration discipline | Adapter catalog, connector certification, provider onboarding, fixture replay, idempotent handoff boundaries, and repair workbench. |
-| Production proof | Docker Compose, OpenAPI/SDK drift checks, CI, public demo health, backup/restore, rollback, SLO canary, GitOps, and OpenTofu evidence. |
+| Production proof | Docker Compose, OpenAPI/SDK drift checks, CI, public demo health, backup/restore, rollback, SLO canary, and release-handoff evidence. |
 | Fast proof route | `docs/public/PUBLIC_REVIEW_BUNDLE.md`, `docs/public/SYSTEM_REVIEW_PATH.md`, `docs/public/STACK_REVIEW_BRIEF.md`, and `docs/public/PUBLIC_VERIFICATION_MATRIX.md`. |
 
 Best-fit signal:
 
-- operations platform backend, not a prompt-only or no-code-only workflow;
+- operations/internal-tools backend, not a prompt-only or no-code-only workflow;
 - backend-owned state, audit, retries, quality gates, and integration contracts;
 - Business OS route from business event -> workflow -> adapter -> incident -> proof;
 - public-safe evidence that lets a reviewer verify claims from code, docs, demo,
@@ -81,7 +82,8 @@ Best-fit signal:
   evidence.
 - Public proof: Business OS tour, Review Console, generated OpenAPI client SDK
   example, OpenAPI drift check, public-safe backup/restore drill, release
-  rollback drill, DevOps/platform milestone evidence, and public demo payloads.
+  rollback drill, reliability/handoff milestone evidence, and public demo
+  payloads.
 
 ## Start Here
 
@@ -297,7 +299,7 @@ incident queue, mitigation, recovery, and resolution evidence path.
 - `docs/public/PRIVATE_INFRA_POST_REMEDIATION_DRIFT_REFRESH.md` - public-safe post-remediation drift refresh evidence.
 - `docs/public/PRIVATE_INFRA_SCHEDULED_VALIDATION.md` - public-safe recurring scheduled validation evidence.
 - `docs/public/PRIVATE_INFRA_SCHEDULED_ALERTING.md` - public-safe scheduled validation alerting evidence.
-- `docs/public/PLATFORM_MATURITY_70.md` - public-safe 70 percent DevOps/platform milestone.
+- `docs/public/PLATFORM_MATURITY_70.md` - public-safe reliability maturity milestone.
 - `docs/public/OBSERVABILITY_PROOF.md` - public-safe observability proof.
 - `docs/public/OBSERVABILITY_DASHBOARD.md` - public-safe observability dashboard contract.
 - `docs/public/NOTIFICATION_DELIVERY.md` - public-safe notification delivery contract.

@@ -1,6 +1,6 @@
 # Public Export Manifest
 
-Generated at: 2026-06-20T10:03:49Z
+Generated at: 2026-07-03T19:23:31Z
 Source snapshot: private repository clean export
 
 Copied public-safe areas:
@@ -199,6 +199,11 @@ Copied public-safe areas:
 - public platform maturity 70 milestone evidence snapshot: docs/public/evidence/platform-maturity-70.sanitized.json
 - public platform maturity 70 milestone event: platform.maturity_70.reached
 - public platform maturity 70 milestone ADR: 0061-public-safe-platform-maturity-70
+- public commercial readiness 80 milestone doc
+- public commercial readiness 80 milestone script: scripts/check_public_commercial_readiness_80.sh
+- public commercial readiness 80 milestone evidence snapshot: docs/public/evidence/commercial-readiness-80.sanitized.json
+- public commercial readiness 80 milestone event: commercial_readiness_80.reached
+- public commercial readiness 80 milestone ADR: 0079-public-safe-commercial-readiness-80
 - public project status doc
 - public project status validation script: scripts/check_public_project_status.sh
 - public project status links current state, limits, next work, and verification

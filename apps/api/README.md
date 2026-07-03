@@ -154,6 +154,16 @@ bash scripts/check_public_platform_maturity_70.sh
 The check validates the 70-point milestone, public-safe evidence groups,
 engineering surface, gates, remaining product work, and redaction boundary.
 
+Public-safe 80 percent commercial readiness milestone:
+
+```bash
+bash scripts/check_public_commercial_readiness_80.sh
+```
+
+The check validates the productized Business OS foundation, provider sandbox
+path, approval gateway, API/SDK contract, operations proof, public/private
+boundary, remaining 100 percent gaps, and redaction boundary.
+
 Core endpoints:
 
 - `POST /auth/login`;

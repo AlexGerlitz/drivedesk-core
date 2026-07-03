@@ -4748,6 +4748,12 @@ def build_public_demo_payload() -> dict[str, Any]:
                     "summary": "Seven evidence groups with executable validation gates",
                 },
                 {
+                    "title": "Commercial readiness",
+                    "kind": "doc",
+                    "path": "docs/public/COMMERCIAL_READINESS_80.md",
+                    "summary": "Eight evidence groups from platform proof toward commercial Business OS readiness",
+                },
+                {
                     "title": "Sanitized evidence index",
                     "kind": "doc",
                     "path": "docs/public/SANITIZED_EVIDENCE.md",
@@ -4810,6 +4816,12 @@ def build_public_demo_payload() -> dict[str, Any]:
                     "evidence": "static demo, API payload, OpenAPI field, docs, evidence, and export wiring match",
                 },
                 {
+                    "name": "Commercial readiness 80",
+                    "status": "passed",
+                    "command": "bash scripts/check_public_commercial_readiness_80.sh",
+                    "evidence": "product workbench, provider sandbox path, approval gateway, API/SDK, operations proof, and 100 percent gaps",
+                },
+                {
                     "name": "Public export boundary",
                     "status": "passed",
                     "command": "bash scripts/public_repo_release_gate.sh",
@@ -4827,7 +4839,13 @@ def build_public_demo_payload() -> dict[str, Any]:
                     "title": "Review console contract",
                     "kind": "doc",
                     "path": "docs/public/REVIEW_CONSOLE.md",
-                    "summary": "Reviewer-facing product shell for readiness, gates, evidence, handoff, and remaining work",
+                    "summary": "Public-safe product shell for readiness, gates, evidence, handoff, and remaining work",
+                },
+                {
+                    "title": "Commercial readiness 80",
+                    "kind": "doc",
+                    "path": "docs/public/COMMERCIAL_READINESS_80.md",
+                    "summary": "Checked path from platform proof toward live SaaS readiness without claiming finished SaaS",
                 },
                 {
                     "title": "Review bundle",

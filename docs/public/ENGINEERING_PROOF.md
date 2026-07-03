@@ -52,6 +52,7 @@ step at `docs/public/ENGINEERING_PROOF.md`.
 | `docs/public/SYSTEM_REVIEW_PATH.md` | Compact system route through public root, demo, API, SDK, operations evidence, release safety, GitOps, OpenTofu, and evidence index |
 | `docs/public/REVIEWER_QUICKSTART.md` | Short 5-minute, 15-minute, and 45-minute external verification path |
 | `docs/public/PLATFORM_MATURITY_70.md` | Milestone contract and evidence groups |
+| `docs/public/COMMERCIAL_READINESS_80.md` | Productized Business OS readiness milestone and remaining 100 percent gaps |
 | `docs/public/SANITIZED_EVIDENCE.md` | Sanitized runtime, recovery, release, GitOps, and boundary evidence |
 | `docs/public/EVIDENCE_INDEX.md` | Public capability-to-evidence index contract |
 | `docs/public/evidence/public-evidence-index.sanitized.json` | Machine-readable index of docs, evidence, verifiers, URLs, and boundaries |

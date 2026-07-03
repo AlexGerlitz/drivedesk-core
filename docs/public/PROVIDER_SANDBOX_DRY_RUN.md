@@ -144,7 +144,7 @@ bash scripts/public_repo_release_gate.sh
 
 ## What This Gives The Project
 
-In a technical review, this answers:
+On an interview, this is the answer to:
 
 > How would you connect a real CRM without leaking tokens or breaking customer
 > data?

@@ -11,9 +11,9 @@ bash scripts/run_public_review_bundle.sh
 ```
 
 The command checks the public entrypoint, system review path, Business OS tour,
-quickstart, Review Console, verification matrix, project status, capability map,
-evidence index, demo health, OpenAPI drift, demo API, SDK, observability, alert
-routing, and proof contract.
+quickstart, Review Console, commercial readiness milestone, verification
+matrix, project status, capability map, evidence index, demo health, OpenAPI
+drift, demo API, SDK, observability, alert routing, and proof contract.
 
 ## What This Proves
 
@@ -22,6 +22,7 @@ routing, and proof contract.
 | Public entrypoint | `index.html`, `docs/public/SYSTEM_REVIEW_PATH.md` | `bash scripts/check_public_pages_entrypoint.sh` |
 | Review route | `docs/public/REVIEWER_QUICKSTART.md`, `docs/public/ENGINEERING_REVIEW_GUIDE.md` | `bash scripts/check_public_reviewer_quickstart.sh` |
 | Review Console | `docs/public/REVIEW_CONSOLE.md`, `docs/public/evidence/review-console.sanitized.json` | `bash scripts/check_public_review_console.sh` |
+| Commercial readiness | `docs/public/COMMERCIAL_READINESS_80.md`, `docs/public/evidence/commercial-readiness-80.sanitized.json` | `bash scripts/check_public_commercial_readiness_80.sh` |
 | Claim-to-evidence map | `docs/public/PUBLIC_VERIFICATION_MATRIX.md`, `docs/public/TECHNICAL_CAPABILITY_MAP.md` | `bash scripts/check_public_verification_matrix.sh` |
 | Evidence contract | `docs/public/EVIDENCE_INDEX.md`, `docs/public/evidence/public-evidence-index.sanitized.json` | `bash scripts/check_public_evidence_index.sh` |
 | Demo and API | `docs/public/PUBLIC_DEMO_HEALTH.md`, `docs/openapi.json`, `sdk/generated/public-demo/` | `bash scripts/check_public_demo_health.sh` |

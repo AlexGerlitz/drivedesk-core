@@ -16,6 +16,7 @@
   "included_gates": [
     "bash scripts/run_public_review_bundle.sh",
     "bash scripts/check_public_review_console.sh",
+    "bash scripts/check_public_commercial_readiness_80.sh",
     "bash scripts/public_repo_release_gate.sh",
     "bash scripts/check_public_provider_sandbox_dry_run.sh"
   ],
@@ -24,6 +25,7 @@
     "OpenAPI PublicDemoRead requires reviewConsole",
     "public demo Review tab renders readiness, gates, evidence, handoff, remaining work, and boundary rows",
     "review console is referenced from project status, capability map, evidence index, review bundle, and public smoke path",
+    "commercial readiness 80 milestone is linked as a checked path toward live SaaS readiness",
     "public/private boundary remains synthetic and sanitized"
   ],
   "redaction": {

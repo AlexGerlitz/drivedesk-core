@@ -2,58 +2,51 @@
 
 [![CI](https://github.com/AlexGerlitz/drivedesk-core/actions/workflows/ci.yml/badge.svg)](https://github.com/AlexGerlitz/drivedesk-core/actions/workflows/ci.yml)
 
-DriveDesk Core is the public backend/API and integration foundation behind the
-DriveDesk AI Operator direction: business operations, integrations, workflows,
-audit/outbox, adapter boundaries, recovery paths, and public proof owned by
-backend code.
+DriveDesk Core is a modular monolith backend foundation for a business
+operations platform.
 
-This repository is meant to be reviewed as an engineering proof surface, not as
-a narrow demo. The API, data model, public demo, CI gates, OpenAPI, SDK drift
-checks, operations docs, and sanitized evidence all point to the same system
-shape.
+It includes:
 
-Profile / contact route: [DriveDesk AI Operator proof route](https://alexgerlitz.github.io/AlexGerlitz/drivedesk-proof-route.html),
-[Decision-Ready Contact](https://alexgerlitz.github.io/AlexGerlitz/decision-ready-contact.html),
-[LinkedIn message route](https://www.linkedin.com/in/alex-gerlitz-a659ab3bb/),
-[PDF resume](https://alexgerlitz.github.io/AlexGerlitz/output/pdf/alex-gerlitz-python-backend-automation-resume.pdf),
-[portfolio](https://alexgerlitz.github.io/AlexGerlitz/),
-[enterprise readiness](https://alexgerlitz.github.io/AlexGerlitz/enterprise-readiness.html), and
-[inbound brief](https://alexgerlitz.github.io/AlexGerlitz/intake-brief.html).
-
-Message me first when there is one messy business workflow, one risky
-integration boundary, or one backend/API reliability slice that should become
-testable, logged, documented, and handed off.
-
-Shortest proof path: [LinkedIn Recruiter Packet](https://alexgerlitz.github.io/AlexGerlitz/linkedin-recruiter-packet.html) ->
-[Hiring Decision](https://alexgerlitz.github.io/AlexGerlitz/hiring-decision.html) ->
-[DriveDesk Proof Route](https://alexgerlitz.github.io/AlexGerlitz/drivedesk-proof-route.html) ->
-[Decision-Ready Contact](https://alexgerlitz.github.io/AlexGerlitz/decision-ready-contact.html) ->
-[PDF resume](https://alexgerlitz.github.io/AlexGerlitz/output/pdf/alex-gerlitz-python-backend-automation-resume.pdf).
-
-First useful result: a verified operations/integration API slice with
-backend-owned state, tests, logs, docs, and a handoff route.
-
-## 60-Second Review
-
-Hiring relevance: I can turn business operations, CRM/ERP adapters, audit/outbox
-state, tenant boundaries, RBAC, workflow rules, integration recovery, metrics,
-Docker, CI, OpenAPI, and public-safe evidence into a backend/API system a team
-can review, run, extend, and hand off.
-
-| Signal | What to inspect |
-| --- | --- |
-| Backend/API foundation | FastAPI, PostgreSQL/Alembic, tenant model, RBAC, audit log, outbox, workflow rules, workers, and metrics. |
-| Integration discipline | Adapter catalog, connector certification, provider onboarding, fixture replay, idempotent handoff boundaries, and repair workbench. |
-| Production proof | Docker Compose, OpenAPI/SDK drift checks, CI, public demo health, backup/restore, rollback, SLO canary, and release-handoff evidence. |
-| Fast proof route | `docs/public/PUBLIC_REVIEW_BUNDLE.md`, `docs/public/SYSTEM_REVIEW_PATH.md`, `docs/public/STACK_REVIEW_BRIEF.md`, and `docs/public/PUBLIC_VERIFICATION_MATRIX.md`. |
-
-Best-fit signal:
-
-- operations/internal-tools backend, not a prompt-only or no-code-only workflow;
-- backend-owned state, audit, retries, quality gates, and integration contracts;
-- Business OS route from business event -> workflow -> adapter -> incident -> proof;
-- public-safe evidence that lets a reviewer verify claims from code, docs, demo,
-  checks, and GitHub Actions.
+- FastAPI API;
+- PostgreSQL migrations with Alembic;
+- background worker;
+- tenant, user, membership, RBAC, audit, and outbox foundation;
+- credential auth foundation with bearer access tokens, current-user lookup,
+  token revocation, redacted session listing, admin-triggered session revocation,
+  failed-attempt guard, and auth audit events;
+- dedicated platform-admin grants for platform-scoped bearer-token operations;
+- aggregate auth metrics for session lifecycle and login-attempt outcomes;
+- auth security alert names and public-safe runbook shape;
+- bearer-token tenant isolation for tenant/user listing and bootstrap endpoints;
+- reusable tenant-scope helper module for Core list queries;
+- reusable tenant-owned repository helper module for models with `tenant_id`;
+- tenant-owned business record foundation for contracts, payments, lessons,
+  tasks, and documents;
+- business record lifecycle transition endpoint with audit, outbox, and aggregate metrics;
+- tenant-owned workflow rules for business record status automation;
+- workflow rule audit, configured outbox handoff, and aggregate workflow metrics;
+- workflow actions for task record creation and adapter sync requests;
+- synthetic file import adapter with retry and dead-letter state;
+- runtime adapter catalog for executable adapter metadata;
+- synthetic lead-to-student workflow in the public demo payload;
+- recruiter-fast Business Intake API Handoff route from intake facts to FastAPI
+  preview, admin workbench, task/outbox handoff, OpenAPI/SDK, pytest, and CI;
+- public Business OS tour connecting business event -> workflow -> adapter -> incident -> proof;
+- public Review Console for readiness, gates, evidence, handoff, remaining work, and boundary;
+- public connector certification path and workbench for provider profiles, capability manifests, contract fixtures, runtime readiness, gates, implementation path, and release proof;
+- public provider onboarding workbench for provider profile selection, mapping preview, preflight checks, sandbox dry-run, approval, private rollout, and reconciliation;
+- public Integration Repair workbench and action preview for runbook-backed retry, dead-letter, reconciliation mismatch, impact, safe actions, approval, dry-run, and postcheck evidence;
+- public connector fixture replay for synthetic happy-path, redaction, invalid-payload, retry, dead-letter, and reconciliation cases;
+- generated OpenAPI client SDK example for the public demo API;
+- OpenAPI drift check comparing the committed schema, generated FastAPI schema,
+  generated SDK manifest, and static demo markers;
+- public-safe synthetic backup/restore drill with sanitized evidence;
+- public-safe synthetic release rollback drill with sanitized evidence;
+- public-safe 70 percent DevOps/platform milestone evidence;
+- public-safe 80 percent commercial readiness milestone evidence;
+- Docker Compose local runtime;
+- pytest coverage for the Core API;
+- architecture docs and ADRs.
 
 [![Public Demo Health](https://github.com/AlexGerlitz/drivedesk-core/actions/workflows/public-demo-health.yml/badge.svg)](https://github.com/AlexGerlitz/drivedesk-core/actions/workflows/public-demo-health.yml)
 
@@ -65,26 +58,6 @@ Best-fit signal:
 
 ![DriveDesk Core demo overview](docs/public/assets/drivedesk-core-demo-overview.png)
 
-## Implemented Surface
-
-- API/runtime: FastAPI API, PostgreSQL migrations with Alembic, background
-  worker, Docker Compose local runtime, `GET /metrics`, pytest coverage, and
-  architecture docs/ADRs.
-- SaaS core: tenants, users, memberships, RBAC, bearer-token auth, current-user
-  lookup, token revocation, redacted session listing, tenant isolation, and
-  platform-admin grants.
-- Business operations: tenant-owned contracts, payments, lessons, tasks,
-  documents, lifecycle transitions, workflow rules, workflow actions, task
-  creation, adapter-sync requests, and aggregate metrics.
-- Integration layer: synthetic file import adapter, retry/dead-letter state,
-  runtime adapter catalog, connector certification, provider onboarding,
-  Integration Repair, action preview, fixture replay, and sandbox dry-run
-  evidence.
-- Public proof: Business OS tour, Review Console, generated OpenAPI client SDK
-  example, OpenAPI drift check, public-safe backup/restore drill, release
-  rollback drill, reliability/handoff milestone evidence, and public demo
-  payloads.
-
 ## Start Here
 
 | Need | Open | What it proves |
@@ -92,11 +65,13 @@ Best-fit signal:
 | One-command review | `docs/public/PUBLIC_REVIEW_BUNDLE.md` | The shortest checked route through the public entrypoint, docs, demo health, OpenAPI, SDK, evidence, observability, alert routing, and proof contract. |
 | Review Console | `docs/public/REVIEW_CONSOLE.md` | Browser-visible readiness, gates, evidence, handoff, remaining work, and public/private boundary. |
 | Fast system route | `docs/public/SYSTEM_REVIEW_PATH.md` | How the public root, demo, API, SDK, operations evidence, release safety, GitOps, OpenTofu, and evidence index fit together. |
+| Business intake API handoff | `docs/public/BUSINESS_INTAKE_API_HANDOFF.md` | 60-second backend/API slice from intake facts to FastAPI preview, admin workbench, task/outbox handoff, OpenAPI/SDK, pytest, and CI. |
 | Business OS tour | `docs/public/PLATFORM_TOUR.md` | How business events, Control Tower, Adapter Studio, incidents, and proof connect. |
-| Stack brief | `docs/public/STACK_REVIEW_BRIEF.md` | What each major technology does, what is validated, what remains, and how to explain the stack. |
+| Stack brief | `docs/public/INTERVIEW_STACK_BRIEF.md` | What each major technology does, what is validated, what remains, and how to explain the stack. |
 | Verification matrix | `docs/public/PUBLIC_VERIFICATION_MATRIX.md` | Which artifact and command proves each engineering claim. |
 | Live product surface | [public engineering reference](https://alexgerlitz.github.io/drivedesk-core/) and [public demo](https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/) | Browser-visible workflow, operations, incidents, and proof tabs on synthetic demo data. |
 | Current project state | `docs/public/PROJECT_STATUS.md` | What is implemented, what is intentionally public-safe, and what remains private. |
+| Commercial readiness | `docs/public/COMMERCIAL_READINESS_80.md` | Checked 80 percent milestone from platform proof toward commercial Business OS readiness without claiming finished SaaS. |
 | Verification commands | `bash scripts/ci_smoke_public.sh` | Public smoke path covering docs, demo contract, OpenAPI, SDK examples, and release evidence. |
 
 ## System Snapshot
@@ -133,11 +108,11 @@ Then continue with `docs/public/REVIEWER_QUICKSTART.md`.
 It gives a 5-minute pass, 15-minute verification path, and 45-minute deep
 check for the public verification surface.
 
-Use `docs/public/STACK_REVIEW_BRIEF.md` when you need the stack map in
+Use `docs/public/INTERVIEW_STACK_BRIEF.md` when you need the stack map in
 plain engineering language: backend, data, workers, OpenAPI, adapters, Docker,
 Kubernetes, GitOps, OpenTofu, CI/CD, observability, reliability, and
 public/private boundaries. Validate it with
-`bash scripts/check_public_stack_review_brief.sh`.
+`bash scripts/check_public_interview_stack_brief.sh`.
 
 Use `docs/public/ENGINEERING_REVIEW_GUIDE.md` when you need the expanded
 verification path.
@@ -157,6 +132,10 @@ capability-to-evidence matrix with verifier commands.
 
 Use `docs/public/EVIDENCE_INDEX.md` when you need the machine-readable
 capability-to-evidence index, verifier list, public URLs, and boundary notes.
+
+Use `docs/public/BUSINESS_INTAKE_API_HANDOFF.md` when you need the fastest
+backend/API hiring proof: intake facts -> FastAPI preview -> admin workbench ->
+task/outbox handoff -> OpenAPI/SDK -> pytest/API smoke/CI.
 
 Use `docs/public/PUBLIC_REVIEW_BUNDLE.md` when you need the fastest
 one-command public review route.
@@ -203,18 +182,18 @@ incident queue, mitigation, recovery, and resolution evidence path.
 3. Open `docs/public/SYSTEM_REVIEW_PATH.md`.
 4. Open `docs/public/PLATFORM_TOUR.md`.
 5. Continue with `docs/public/REVIEWER_QUICKSTART.md`.
-6. Review `docs/public/STACK_REVIEW_BRIEF.md`.
+6. Review `docs/public/INTERVIEW_STACK_BRIEF.md`.
 7. Open the live demo and switch to the Workflow, Control Tower, Integrations, Operations, Incidents, and Proof tabs.
 8. Inspect `docs/openapi.json`.
 9. Run `bash scripts/check_public_system_review_path.sh`.
 10. Run `bash scripts/check_public_platform_tour.sh`.
-11. Run `bash scripts/check_public_stack_review_brief.sh`.
+11. Run `bash scripts/check_public_interview_stack_brief.sh`.
 12. Run `bash scripts/ci_smoke_public.sh`.
 13. Run `bash scripts/check_public_engineering_proof.sh`.
 14. Run `bash scripts/check_public_demo_api.sh`.
 15. Run one generated client example from `examples/`.
 16. Run `bash scripts/check_public_verification_matrix.sh`.
-17. Review `docs/public/PROJECT_STATUS.md`, `docs/public/TECHNICAL_CAPABILITY_MAP.md`, `docs/public/PUBLIC_VERIFICATION_MATRIX.md`, `docs/public/EVIDENCE_INDEX.md`, `docs/public/STACK_REVIEW_BRIEF.md`, `docs/public/PUBLIC_REVIEW_BUNDLE.md`, `docs/public/PUBLIC_DEMO_HEALTH.md`, `docs/public/OPENAPI_DRIFT.md`, `docs/public/OBSERVABILITY_PROOF.md`, `docs/public/OBSERVABILITY_DASHBOARD.md`, `docs/public/NOTIFICATION_DELIVERY.md`, `docs/public/ALERT_ROUTING_EVIDENCE.md`, `docs/public/INCIDENT_RESPONSE_DEMO.md`, `docs/public/ENGINEERING_PROOF.md`, `docs/public/PLATFORM_MATURITY_70.md`, and `docs/public/SANITIZED_EVIDENCE.md`.
+17. Review `docs/public/PROJECT_STATUS.md`, `docs/public/TECHNICAL_CAPABILITY_MAP.md`, `docs/public/PUBLIC_VERIFICATION_MATRIX.md`, `docs/public/EVIDENCE_INDEX.md`, `docs/public/BUSINESS_INTAKE_API_HANDOFF.md`, `docs/public/INTERVIEW_STACK_BRIEF.md`, `docs/public/PUBLIC_REVIEW_BUNDLE.md`, `docs/public/PUBLIC_DEMO_HEALTH.md`, `docs/public/OPENAPI_DRIFT.md`, `docs/public/OBSERVABILITY_PROOF.md`, `docs/public/OBSERVABILITY_DASHBOARD.md`, `docs/public/NOTIFICATION_DELIVERY.md`, `docs/public/ALERT_ROUTING_EVIDENCE.md`, `docs/public/INCIDENT_RESPONSE_DEMO.md`, `docs/public/ENGINEERING_PROOF.md`, `docs/public/PLATFORM_MATURITY_70.md`, `docs/public/COMMERCIAL_READINESS_80.md`, and `docs/public/SANITIZED_EVIDENCE.md`.
 18. Review `docs/public/SYSTEM_DESIGN.md`, `docs/public/PROVIDER_CONNECTOR_GUIDE.md`, `docs/public/CONNECTOR_CERTIFICATION.md`, `docs/public/PROVIDER_ONBOARDING.md`, `docs/public/INTEGRATION_REPAIR.md`, `docs/public/CONNECTOR_FIXTURE_REPLAY.md`, `docs/public/ADAPTER_DEVELOPER_GUIDE.md`, `docs/public/GITOPS_DELIVERY.md`, and the recovery evidence docs.
 
 ## Full Artifact Reference
@@ -223,10 +202,10 @@ incident queue, mitigation, recovery, and resolution evidence path.
 - `docs/public/SYSTEM_REVIEW_PATH.md` - compact engineering route through the public root, demo, API, SDK, operations evidence, release safety, GitOps, OpenTofu, and evidence index.
 - `docs/public/PLATFORM_TOUR.md` - Business OS tour across business events, Control Tower, Adapter Studio, incidents, proof, and verification gates.
 - `docs/public/REVIEWER_QUICKSTART.md` - shortest external verification path with 5-minute, 15-minute, and 45-minute verification tracks.
-- `docs/public/STACK_REVIEW_BRIEF.md` - stack map explaining what each
+- `docs/public/INTERVIEW_STACK_BRIEF.md` - stack map explaining what each
   technology does, what is validated, and what remains.
 - `docs/public/PUBLIC_REVIEW_BUNDLE.md` - one-command public review route with a machine-readable evidence contract.
-- `docs/public/evidence/stack-review-brief.sanitized.json` - machine-readable
+- `docs/public/evidence/interview-stack-brief.sanitized.json` - machine-readable
   stack brief evidence.
 - `docs/public/evidence/public-review-bundle.sanitized.json` - machine-readable public review bundle evidence.
 - `docs/public/ENGINEERING_REVIEW_GUIDE.md` - short verification path for demo, CI, API, recovery, GitOps, and IaC evidence.
@@ -250,6 +229,9 @@ incident queue, mitigation, recovery, and resolution evidence path.
 - `docs/public/ENGINEERING_PROOF.md` - proof tab payload, gates, evidence, and verifier contract.
 - `docs/public/SYSTEM_DESIGN.md` - system design overview.
 - `docs/public/API_BACKED_DEMO.md` - read-only synthetic demo API contract.
+- `docs/public/BUSINESS_INTAKE_API_HANDOFF.md` - 60-second backend/API route
+  from intake facts to FastAPI preview, admin workbench, task/outbox handoff,
+  OpenAPI/SDK, pytest, and CI.
 - `docs/public/WORKFLOW_DEMO.md` - synthetic business workflow contract.
 - `docs/public/WORKFLOW_RULES.md` - tenant-owned workflow rules contract.
 - `docs/public/WORKFLOW_ACTION_RUNS.md` - workflow action execution history.
@@ -299,7 +281,8 @@ incident queue, mitigation, recovery, and resolution evidence path.
 - `docs/public/PRIVATE_INFRA_POST_REMEDIATION_DRIFT_REFRESH.md` - public-safe post-remediation drift refresh evidence.
 - `docs/public/PRIVATE_INFRA_SCHEDULED_VALIDATION.md` - public-safe recurring scheduled validation evidence.
 - `docs/public/PRIVATE_INFRA_SCHEDULED_ALERTING.md` - public-safe scheduled validation alerting evidence.
-- `docs/public/PLATFORM_MATURITY_70.md` - public-safe reliability maturity milestone.
+- `docs/public/PLATFORM_MATURITY_70.md` - public-safe 70 percent DevOps/platform milestone.
+- `docs/public/COMMERCIAL_READINESS_80.md` - public-safe 80 percent commercial readiness milestone.
 - `docs/public/OBSERVABILITY_PROOF.md` - public-safe observability proof.
 - `docs/public/OBSERVABILITY_DASHBOARD.md` - public-safe observability dashboard contract.
 - `docs/public/NOTIFICATION_DELIVERY.md` - public-safe notification delivery contract.
@@ -374,6 +357,7 @@ incident queue, mitigation, recovery, and resolution evidence path.
 - `scripts/check_public_private_infra_scheduled_validation.sh` - public-safe recurring scheduled validation.
 - `scripts/check_public_private_infra_scheduled_alerting.sh` - public-safe scheduled validation alerting.
 - `scripts/check_public_platform_maturity_70.sh` - public-safe 70 percent milestone validation.
+- `scripts/check_public_commercial_readiness_80.sh` - public-safe 80 percent commercial readiness validation.
 - `scripts/check_public_system_review_path.sh` - public-safe compact system review path validation.
 - `scripts/check_public_reviewer_quickstart.sh` - public-safe verification quickstart validation.
 - `scripts/check_public_review_guide.sh` - public-safe short verification path validation.
@@ -463,7 +447,7 @@ bash scripts/check_public_system_review_path.sh
 bash scripts/check_public_platform_tour.sh
 bash scripts/check_public_review_bundle.sh
 bash scripts/check_public_reviewer_quickstart.sh
-bash scripts/check_public_stack_review_brief.sh
+bash scripts/check_public_interview_stack_brief.sh
 bash scripts/check_public_verification_matrix.sh
 bash scripts/check_public_review_guide.sh
 bash scripts/check_public_pages_entrypoint.sh
@@ -526,7 +510,7 @@ bash scripts/check_public_system_review_path.sh
 bash scripts/check_public_platform_tour.sh
 bash scripts/check_public_review_bundle.sh
 bash scripts/check_public_reviewer_quickstart.sh
-bash scripts/check_public_stack_review_brief.sh
+bash scripts/check_public_interview_stack_brief.sh
 bash scripts/check_public_verification_matrix.sh
 bash scripts/check_public_review_guide.sh
 bash scripts/check_public_pages_entrypoint.sh

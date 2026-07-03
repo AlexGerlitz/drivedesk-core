@@ -3647,6 +3647,12 @@ window.DRIVEDESK_DEMO_DATA = {
       },
       {
         "kind": "doc",
+        "path": "docs/public/COMMERCIAL_READINESS_80.md",
+        "summary": "Eight evidence groups from platform proof toward commercial Business OS readiness",
+        "title": "Commercial readiness"
+      },
+      {
+        "kind": "doc",
         "path": "docs/public/SANITIZED_EVIDENCE.md",
         "summary": "Runtime, recovery, release, GitOps, and boundary evidence",
         "title": "Sanitized evidence index"
@@ -6171,8 +6177,14 @@ window.DRIVEDESK_DEMO_DATA = {
       {
         "kind": "doc",
         "path": "docs/public/REVIEW_CONSOLE.md",
-        "summary": "Reviewer-facing product shell for readiness, gates, evidence, handoff, and remaining work",
+        "summary": "Public-safe product shell for readiness, gates, evidence, handoff, and remaining work",
         "title": "Review console contract"
+      },
+      {
+        "kind": "doc",
+        "path": "docs/public/COMMERCIAL_READINESS_80.md",
+        "summary": "Checked path from platform proof toward live SaaS readiness without claiming finished SaaS",
+        "title": "Commercial readiness 80"
       },
       {
         "kind": "doc",
@@ -6210,6 +6222,12 @@ window.DRIVEDESK_DEMO_DATA = {
         "command": "bash scripts/check_public_review_console.sh",
         "evidence": "static demo, API payload, OpenAPI field, docs, evidence, and export wiring match",
         "name": "Review console contract",
+        "status": "passed"
+      },
+      {
+        "command": "bash scripts/check_public_commercial_readiness_80.sh",
+        "evidence": "product workbench, provider sandbox path, approval gateway, API/SDK, operations proof, and 100 percent gaps",
+        "name": "Commercial readiness 80",
         "status": "passed"
       },
       {

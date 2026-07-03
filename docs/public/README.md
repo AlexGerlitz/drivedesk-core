@@ -14,7 +14,7 @@ infrastructure, production history, customer data, or operational credentials.
   evidence index.
 - `REVIEWER_QUICKSTART.md` - shortest external verification path with 5-minute,
   15-minute, and 45-minute verification tracks.
-- `STACK_REVIEW_BRIEF.md` - review-oriented stack map explaining what each
+- `INTERVIEW_STACK_BRIEF.md` - interview-oriented stack map explaining what each
   technology does, what is validated, and what remains.
 - `PUBLIC_REVIEW_BUNDLE.md` - one-command public review route with a
   machine-readable evidence contract; run `bash scripts/run_public_review_bundle.sh`.
@@ -28,7 +28,7 @@ infrastructure, production history, customer data, or operational credentials.
 - `PROJECT_STATUS.md` - current public-safe engineering status, limits, and next work.
 - `TECHNICAL_CAPABILITY_MAP.md` - capability-to-evidence map with verifier commands.
 - `EVIDENCE_INDEX.md` - human-readable public evidence index contract.
-- `evidence/stack-review-brief.sanitized.json` - machine-readable stack brief
+- `evidence/interview-stack-brief.sanitized.json` - machine-readable stack brief
   evidence.
 - `evidence/public-review-bundle.sanitized.json` - machine-readable public
   review bundle evidence.
@@ -58,6 +58,10 @@ infrastructure, production history, customer data, or operational credentials.
 - `BUSINESS_CONTROL_TOWER.md` - provider intake preview, cross-system
   observations, business exceptions, approval-gated repair actions, and control
   tower metrics.
+- `BUSINESS_INTAKE_API_HANDOFF.md` - 60-second recruiter-facing route from
+  intake facts to FastAPI preview, admin workbench, task handoff, OpenAPI/SDK,
+  pytest, and CI; checked by
+  `bash scripts/check_public_business_intake_api_handoff.sh`.
 - `BUSINESS_INTAKE_PIPELINE.md` - preview-only provider signal pipeline from
   CRM/bank/accounting events to safe facts, role workbench, detection,
   approval-gated action plan, and draft notifications via the
@@ -143,6 +147,7 @@ infrastructure, production history, customer data, or operational credentials.
 - `PRIVATE_INFRA_SCHEDULED_VALIDATION.md` - public-safe recurring scheduled validation evidence.
 - `PRIVATE_INFRA_SCHEDULED_ALERTING.md` - public-safe scheduled validation alerting evidence.
 - `PLATFORM_MATURITY_70.md` - public-safe 70 percent DevOps/platform milestone.
+- `COMMERCIAL_READINESS_80.md` - public-safe 80 percent commercial readiness milestone.
 - `GITOPS_DELIVERY.md` - public-safe GitOps delivery foundation.
 - `GITOPS_PROMOTION_DRIFT.md` - public-safe GitOps image promotion and drift evidence.
 - `GITOPS_DRIFT_REMEDIATION.md` - public-safe GitOps drift remediation evidence.
@@ -183,6 +188,8 @@ infrastructure, production history, customer data, or operational credentials.
   machine-readable scheduled validation alerting evidence snapshot.
 - `evidence/platform-maturity-70.sanitized.json` - machine-readable 70
   percent DevOps/platform milestone evidence snapshot.
+- `evidence/commercial-readiness-80.sanitized.json` - machine-readable 80
+  percent commercial readiness evidence snapshot.
 - `evidence/gitops-layout.sanitized.json` - machine-readable GitOps layout
   evidence snapshot.
 - `evidence/gitops-promotion-drift.sanitized.json` - machine-readable GitOps
@@ -326,9 +333,10 @@ The public repository export also generates:
 - `scripts/check_public_private_infra_scheduled_validation.sh` - public-safe recurring scheduled validation.
 - `scripts/check_public_private_infra_scheduled_alerting.sh` - public-safe scheduled validation alerting.
 - `scripts/check_public_platform_maturity_70.sh` - public-safe 70 percent milestone validation.
+- `scripts/check_public_commercial_readiness_80.sh` - public-safe 80 percent commercial readiness validation.
 - `scripts/check_public_system_review_path.sh` - public-safe compact system review path validation.
 - `scripts/check_public_reviewer_quickstart.sh` - public-safe verification quickstart validation.
-- `scripts/check_public_stack_review_brief.sh` - public-safe stack brief validation.
+- `scripts/check_public_interview_stack_brief.sh` - public-safe stack brief validation.
 - `scripts/check_public_demo_health.sh` - public-safe Pages/demo health
   workflow and evidence validation.
 - `scripts/check_public_project_status.sh` - public-safe project status validation.
@@ -375,16 +383,16 @@ https://alexgerlitz.github.io/drivedesk-core/apps/admin/public-demo/
 2. Run `bash scripts/run_public_review_bundle.sh`.
 3. Continue with `SYSTEM_REVIEW_PATH.md`.
 4. Continue with `REVIEWER_QUICKSTART.md`.
-5. Review `STACK_REVIEW_BRIEF.md`.
+5. Review `INTERVIEW_STACK_BRIEF.md`.
 6. Open the hosted demo and switch to the Workflow, Operations, Incidents, and Proof tabs.
 7. Inspect `docs/openapi.json`.
 8. Run `bash scripts/check_public_system_review_path.sh`.
-9. Run `bash scripts/check_public_stack_review_brief.sh`.
+9. Run `bash scripts/check_public_interview_stack_brief.sh`.
 10. Run `bash scripts/ci_smoke_public.sh`.
 11. Run `bash scripts/check_public_engineering_proof.sh`.
 12. Run `bash scripts/check_public_demo_api.sh`.
 13. Run one generated client example from `examples/`.
-14. Review `PROJECT_STATUS.md`, `TECHNICAL_CAPABILITY_MAP.md`, `EVIDENCE_INDEX.md`, `STACK_REVIEW_BRIEF.md`, `BUSINESS_CONTROL_TOWER.md`, `OBSERVABILITY_PROOF.md`, `OBSERVABILITY_DASHBOARD.md`, `NOTIFICATION_DELIVERY.md`, `ALERT_ROUTING_EVIDENCE.md`, `INCIDENT_RESPONSE_DEMO.md`, `ENGINEERING_PROOF.md`, `PLATFORM_MATURITY_70.md`, and `SANITIZED_EVIDENCE.md`.
+14. Review `PROJECT_STATUS.md`, `TECHNICAL_CAPABILITY_MAP.md`, `EVIDENCE_INDEX.md`, `INTERVIEW_STACK_BRIEF.md`, `BUSINESS_INTAKE_API_HANDOFF.md`, `BUSINESS_CONTROL_TOWER.md`, `OBSERVABILITY_PROOF.md`, `OBSERVABILITY_DASHBOARD.md`, `NOTIFICATION_DELIVERY.md`, `ALERT_ROUTING_EVIDENCE.md`, `INCIDENT_RESPONSE_DEMO.md`, `ENGINEERING_PROOF.md`, `PLATFORM_MATURITY_70.md`, `COMMERCIAL_READINESS_80.md`, and `SANITIZED_EVIDENCE.md`.
 15. Review `SYSTEM_DESIGN.md`, `CONNECTOR_CERTIFICATION.md`, `CONNECTOR_FIXTURE_REPLAY.md`, `GITOPS_DELIVERY.md`, and the recovery evidence docs.
 
 ## Engineering Summary

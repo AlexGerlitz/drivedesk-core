@@ -8,9 +8,10 @@
   "review_docs": [
     "docs/public/PUBLIC_REVIEW_BUNDLE.md",
     "docs/public/REVIEW_CONSOLE.md",
+    "docs/public/COMMERCIAL_READINESS_80.md",
     "docs/public/SYSTEM_REVIEW_PATH.md",
     "docs/public/REVIEWER_QUICKSTART.md",
-    "docs/public/STACK_REVIEW_BRIEF.md",
+    "docs/public/INTERVIEW_STACK_BRIEF.md",
     "docs/public/ENGINEERING_REVIEW_GUIDE.md",
     "docs/public/PUBLIC_VERIFICATION_MATRIX.md",
     "docs/public/TECHNICAL_CAPABILITY_MAP.md",
@@ -21,12 +22,13 @@
     "bash scripts/check_public_system_review_path.sh",
     "bash scripts/check_public_platform_tour.sh",
     "bash scripts/check_public_reviewer_quickstart.sh",
-    "bash scripts/check_public_stack_review_brief.sh",
+    "bash scripts/check_public_interview_stack_brief.sh",
     "bash scripts/check_public_verification_matrix.sh",
     "bash scripts/check_public_project_status.sh",
     "bash scripts/check_public_technical_capability_map.sh",
     "bash scripts/check_public_evidence_index.sh",
     "bash scripts/check_public_review_console.sh",
+    "bash scripts/check_public_commercial_readiness_80.sh",
     "bash scripts/check_public_demo_health.sh",
     "bash scripts/check_public_openapi_drift.sh",
     "bash scripts/check_public_demo_api.sh",
@@ -42,7 +44,8 @@
     "claim-to-evidence matrix and evidence index validate",
     "demo health, OpenAPI drift, SDK, observability, alert routing, and proof checks pass",
     "public/private boundary remains synthetic and sanitized",
-    "Review Console links readiness, gates, evidence, handoff, remaining work, and boundary in the public demo"
+    "Review Console links readiness, gates, evidence, handoff, remaining work, and boundary in the public demo",
+    "Commercial readiness milestone records the checked path from platform proof toward live SaaS readiness"
   ],
   "redaction": {
     "addresses_included": false,

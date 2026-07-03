@@ -14,10 +14,6 @@ report() {
 while IFS= read -r -d '' file; do
   [[ -f "$file" ]] || continue
   [[ "$file" == ./.git/* ]] && continue
-  [[ "$file" == ./.venv/* ]] && continue
-  [[ "$file" == ./node_modules/* ]] && continue
-  [[ "$file" == ./dist/* ]] && continue
-  [[ "$file" == ./build/* ]] && continue
   [[ "$file" == ./scripts/check_public_export_secrets.sh ]] && continue
 
   if ! grep -Iq . "$file"; then

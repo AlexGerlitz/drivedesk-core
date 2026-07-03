@@ -24,6 +24,7 @@ find "$ROOT" -type d -name __pycache__ -prune -exec rm -rf {} +
 bash scripts/check_public_export_secrets.sh
 bash scripts/check_public_demo_api.sh
 bash scripts/check_public_business_control_tower.sh
+bash scripts/check_public_business_intake_api_handoff.sh
 bash scripts/check_public_business_intake_pipeline.sh
 bash scripts/check_public_business_task_handoff.sh
 bash scripts/check_public_business_notification_channels.sh
@@ -50,11 +51,12 @@ bash scripts/check_public_private_infra_post_remediation_drift_refresh.sh
 bash scripts/check_public_private_infra_scheduled_validation.sh
 bash scripts/check_public_private_infra_scheduled_alerting.sh
 bash scripts/check_public_platform_maturity_70.sh
+bash scripts/check_public_commercial_readiness_80.sh
 bash scripts/check_public_system_review_path.sh
 bash scripts/check_public_platform_tour.sh
 bash scripts/check_public_review_bundle.sh
 bash scripts/check_public_reviewer_quickstart.sh
-bash scripts/check_public_stack_review_brief.sh
+bash scripts/check_public_interview_stack_brief.sh
 bash scripts/check_public_verification_matrix.sh
 bash scripts/check_public_review_guide.sh
 bash scripts/check_public_pages_entrypoint.sh

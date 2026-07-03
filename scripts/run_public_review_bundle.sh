@@ -9,12 +9,13 @@ bash scripts/check_public_pages_entrypoint.sh
 bash scripts/check_public_system_review_path.sh
 bash scripts/check_public_platform_tour.sh
 bash scripts/check_public_reviewer_quickstart.sh
-bash scripts/check_public_stack_review_brief.sh
+bash scripts/check_public_interview_stack_brief.sh
 bash scripts/check_public_verification_matrix.sh
 bash scripts/check_public_project_status.sh
 bash scripts/check_public_technical_capability_map.sh
 bash scripts/check_public_evidence_index.sh
 bash scripts/check_public_review_console.sh
+bash scripts/check_public_commercial_readiness_80.sh
 bash scripts/check_public_demo_health.sh
 bash scripts/check_public_openapi_drift.sh
 bash scripts/check_public_demo_api.sh

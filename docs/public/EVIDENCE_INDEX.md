@@ -35,7 +35,7 @@ parsing Markdown by hand.
 | Public review bundle | `docs/public/PUBLIC_REVIEW_BUNDLE.md` | `bash scripts/check_public_review_bundle.sh` |
 | Review Console | `docs/public/REVIEW_CONSOLE.md` | `bash scripts/check_public_review_console.sh` |
 | Public engineering entrypoint | `docs/public/SYSTEM_REVIEW_PATH.md` | `bash scripts/check_public_system_review_path.sh` |
-| Stack review brief | `docs/public/STACK_REVIEW_BRIEF.md` | `bash scripts/check_public_stack_review_brief.sh` |
+| Interview stack brief | `docs/public/INTERVIEW_STACK_BRIEF.md` | `bash scripts/check_public_interview_stack_brief.sh` |
 | Public demo health | `docs/public/PUBLIC_DEMO_HEALTH.md` | `bash scripts/check_public_demo_health.sh` |
 | OpenAPI drift | `docs/public/OPENAPI_DRIFT.md` | `bash scripts/check_public_openapi_drift.sh` |
 | Business OS tour | `docs/public/PLATFORM_TOUR.md` | `bash scripts/check_public_platform_tour.sh` |
@@ -44,6 +44,7 @@ parsing Markdown by hand.
 | API and SDK | `docs/public/API_BACKED_DEMO.md` | `bash scripts/check_public_demo_api.sh` |
 | Core domain | `docs/public/SYSTEM_DESIGN.md` | `bash scripts/ci_smoke_public.sh` |
 | Business control tower | `docs/public/BUSINESS_CONTROL_TOWER.md` | `bash scripts/check_public_business_control_tower.sh` |
+| Business intake API handoff | `docs/public/BUSINESS_INTAKE_API_HANDOFF.md` | `bash scripts/check_public_business_intake_api_handoff.sh` |
 | Integration hub | `docs/public/INTEGRATION_ADAPTER_CATALOG.md` | `bash scripts/check_public_demo_api.sh` and `bash scripts/check_public_provider_sandbox_dry_run.sh` |
 | Connector certification | `docs/public/CONNECTOR_CERTIFICATION.md` | `bash scripts/check_public_connector_certification.sh` |
 | Connector fixture replay | `docs/public/CONNECTOR_FIXTURE_REPLAY.md` | `bash scripts/check_public_connector_fixture_replay.sh` |
@@ -58,6 +59,7 @@ parsing Markdown by hand.
 | Private staging validation | `docs/public/PRIVATE_INFRA_VALIDATION.md` | `bash scripts/check_public_private_infra_validation.sh` |
 | Scheduled validation | `docs/public/PRIVATE_INFRA_SCHEDULED_VALIDATION.md` | `bash scripts/check_public_private_infra_scheduled_validation.sh` |
 | Platform maturity | `docs/public/PLATFORM_MATURITY_70.md` | `bash scripts/check_public_platform_maturity_70.sh` |
+| Commercial readiness | `docs/public/COMMERCIAL_READINESS_80.md` | `bash scripts/check_public_commercial_readiness_80.sh` |
 
 ## Boundary
 
@@ -72,10 +74,11 @@ state.
 bash scripts/run_public_review_bundle.sh
 bash scripts/check_public_review_bundle.sh
 bash scripts/check_public_review_console.sh
-bash scripts/check_public_stack_review_brief.sh
+bash scripts/check_public_interview_stack_brief.sh
 bash scripts/check_public_evidence_index.sh
 bash scripts/check_public_connector_fixture_replay.sh
 bash scripts/check_public_business_control_tower.sh
+bash scripts/check_public_business_intake_api_handoff.sh
 bash scripts/check_public_observability_dashboard.sh
 bash scripts/check_public_notification_delivery.sh
 bash scripts/check_public_demo_health.sh
@@ -108,10 +111,22 @@ The Review Console is tracked through `docs/public/REVIEW_CONSOLE.md`,
 `Review` tab, the `reviewConsole` payload key, and
 `bash scripts/check_public_review_console.sh`.
 
-The stack review brief is tracked through
-`docs/public/STACK_REVIEW_BRIEF.md`,
-`docs/public/evidence/stack-review-brief.sanitized.json`, and
-`bash scripts/check_public_stack_review_brief.sh`.
+The interview stack brief is tracked through
+`docs/public/INTERVIEW_STACK_BRIEF.md`,
+`docs/public/evidence/interview-stack-brief.sanitized.json`, and
+`bash scripts/check_public_interview_stack_brief.sh`.
+
+The commercial readiness milestone is tracked through
+`docs/public/COMMERCIAL_READINESS_80.md`,
+`docs/public/evidence/commercial-readiness-80.sanitized.json`, and
+`bash scripts/check_public_commercial_readiness_80.sh`.
+
+The Business Intake API Handoff route is tracked through
+`docs/public/BUSINESS_INTAKE_API_HANDOFF.md`,
+`docs/public/BUSINESS_INTAKE_PIPELINE.md`,
+`docs/public/BUSINESS_TASK_HANDOFF.md`, `docs/openapi.json`,
+`sdk/generated/public-demo/`, and
+`bash scripts/check_public_business_intake_api_handoff.sh`.
 
 The check validates that:
 

@@ -1,0 +1,215 @@
+{
+  "schema_version": 1,
+  "check": "public_commercial_readiness_80",
+  "milestone": "commercial_readiness_80",
+  "snapshot_date": "2026-06-20",
+  "target": {
+    "objective": "DriveDesk commercial readiness milestone",
+    "current_milestone_percent": 80,
+    "engineering_scope": "productized_business_os_foundation",
+    "commercial_saas_ready": false,
+    "public_claim": "80 percent commercial readiness foundation reached"
+  },
+  "completion_model": {
+    "total_points_required": 80,
+    "points_recorded": 80,
+    "minimum_groups_required": 8,
+    "all_required_groups_complete": true,
+    "verification_mode": "public_safe_evidence_plus_executable_gates"
+  },
+  "evidence_groups": [
+    {
+      "id": "platform_maturity_foundation",
+      "points": 10,
+      "status": "complete",
+      "engineering_value": "Carries forward the validated 70 percent DevOps/platform foundation as the base for product maturity.",
+      "evidence": [
+        "docs/public/PLATFORM_MATURITY_70.md",
+        "docs/public/evidence/platform-maturity-70.sanitized.json",
+        "infra/platform-maturity/platform-maturity-70.sanitized.json"
+      ],
+      "checks": [
+        "bash scripts/check_public_platform_maturity_70.sh"
+      ]
+    },
+    {
+      "id": "product_workbench_previews",
+      "points": 10,
+      "status": "complete",
+      "engineering_value": "Shows the product direction: external facts become role-specific context, actions, tasks, notifications, and replayable business scenarios.",
+      "evidence": [
+        "docs/public/BUSINESS_CONTEXT_ASSISTANT.md",
+        "docs/public/BUSINESS_ACTION_EXECUTION.md",
+        "docs/public/BUSINESS_SCENARIO_REPLAY.md",
+        "docs/public/PLATFORM_TOUR.md"
+      ],
+      "checks": [
+        "bash scripts/check_public_business_context_assistant.sh",
+        "bash scripts/check_public_business_action_execution.sh",
+        "bash scripts/check_public_business_scenario_replay.sh",
+        "bash scripts/check_public_platform_tour.sh"
+      ]
+    },
+    {
+      "id": "provider_sandbox_path",
+      "points": 10,
+      "status": "complete",
+      "engineering_value": "Shows how a real provider can move from catalog profile to fixtures, sandbox dry-run, evidence, and private rollout without public secrets.",
+      "evidence": [
+        "docs/public/PROVIDER_CONNECTOR_GUIDE.md",
+        "docs/public/CONNECTOR_CERTIFICATION.md",
+        "docs/public/PROVIDER_ONBOARDING.md",
+        "docs/public/PROVIDER_SANDBOX_DRY_RUN.md",
+        "docs/public/CONNECTOR_FIXTURE_REPLAY.md"
+      ],
+      "checks": [
+        "bash scripts/check_public_provider_connector_guide.sh",
+        "bash scripts/check_public_connector_certification.sh",
+        "bash scripts/check_public_provider_onboarding.sh",
+        "bash scripts/check_public_provider_sandbox_dry_run.sh",
+        "bash scripts/check_public_connector_fixture_replay.sh"
+      ]
+    },
+    {
+      "id": "action_approval_safety",
+      "points": 10,
+      "status": "complete",
+      "engineering_value": "Shows that provider-changing work is routed through dry-run candidates, preflight checks, approval gateway, rollback notes, and audit evidence.",
+      "evidence": [
+        "docs/public/BUSINESS_APPROVAL_GATEWAY.md",
+        "docs/public/BUSINESS_ACTION_EXECUTION.md",
+        "docs/public/INTEGRATION_EXECUTION.md",
+        "docs/public/INTEGRATION_REPAIR.md"
+      ],
+      "checks": [
+        "bash scripts/check_public_business_approval_gateway.sh",
+        "bash scripts/check_public_business_action_execution.sh",
+        "bash scripts/check_public_integration_execution.sh",
+        "bash scripts/check_public_integration_repair.sh"
+      ]
+    },
+    {
+      "id": "api_sdk_contract",
+      "points": 10,
+      "status": "complete",
+      "engineering_value": "Shows that the public API, OpenAPI schema, generated SDK, and drift guard are treated as a product contract.",
+      "evidence": [
+        "docs/public/API_BACKED_DEMO.md",
+        "docs/public/CLIENT_SDK.md",
+        "docs/public/OPENAPI_DRIFT.md",
+        "docs/openapi.json",
+        "sdk/generated/public-demo/openapi-client-manifest.json"
+      ],
+      "checks": [
+        "bash scripts/check_public_demo_api.sh",
+        "bash scripts/check_public_demo_sdk.sh",
+        "bash scripts/check_public_openapi_drift.sh"
+      ]
+    },
+    {
+      "id": "operations_release_evidence",
+      "points": 10,
+      "status": "complete",
+      "engineering_value": "Shows operations maturity through observability, alert routing, notification delivery, recovery drills, rollback, canary, staged promotion, GitOps, and IaC evidence.",
+      "evidence": [
+        "docs/public/OBSERVABILITY_PROOF.md",
+        "docs/public/OBSERVABILITY_DASHBOARD.md",
+        "docs/public/ALERT_ROUTING_EVIDENCE.md",
+        "docs/public/NOTIFICATION_DELIVERY.md",
+        "docs/public/RELEASE_ROLLBACK_EVIDENCE.md",
+        "docs/public/STAGED_PROMOTION_EVIDENCE.md",
+        "docs/public/GITOPS_DELIVERY.md",
+        "docs/public/OPENTOFU_PLAN_EVIDENCE.md"
+      ],
+      "checks": [
+        "bash scripts/check_public_observability_proof.sh",
+        "bash scripts/check_public_observability_dashboard.sh",
+        "bash scripts/check_public_alert_routing.sh",
+        "bash scripts/check_public_notification_delivery.sh",
+        "bash scripts/check_public_release_rollback.sh",
+        "bash scripts/check_public_staged_promotion.sh",
+        "bash scripts/check_public_gitops_layout.sh",
+        "bash scripts/check_public_opentofu_plan.sh"
+      ]
+    },
+    {
+      "id": "public_private_boundary",
+      "points": 10,
+      "status": "complete",
+      "engineering_value": "Shows that public proof, private source, provider secrets, runtime state, and production data are separated by export gates and redaction checks.",
+      "evidence": [
+        "docs/public/SANITIZED_EVIDENCE.md",
+        "docs/public/PUBLIC_REVIEW_BUNDLE.md",
+        "docs/public/REVIEW_CONSOLE.md",
+        "docs/public/EVIDENCE_INDEX.md",
+        "docs/public/evidence/public-evidence-index.sanitized.json"
+      ],
+      "checks": [
+        "bash scripts/check_public_review_bundle.sh",
+        "bash scripts/check_public_review_console.sh",
+        "bash scripts/check_public_evidence_index.sh",
+        "bash scripts/public_repo_release_gate.sh"
+      ]
+    },
+    {
+      "id": "commercial_gap_control",
+      "points": 10,
+      "status": "complete",
+      "engineering_value": "Shows that the project does not overclaim: live billing, real tenants, production provider credentials, support process, mobile apps, and long incident history remain tracked work.",
+      "evidence": [
+        "docs/public/PROJECT_STATUS.md",
+        "docs/public/ROADMAP.md",
+        "docs/public/INTERVIEW_STACK_BRIEF.md",
+        "docs/public/COMMERCIAL_READINESS_80.md"
+      ],
+      "checks": [
+        "bash scripts/check_public_project_status.sh",
+        "bash scripts/check_public_interview_stack_brief.sh",
+        "bash scripts/check_public_commercial_readiness_80.sh"
+      ]
+    }
+  ],
+  "verification_chain": {
+    "private_smoke": "bash scripts/ci_smoke.sh",
+    "public_release_gate": "bash scripts/public_repo_release_gate.sh",
+    "milestone_check": "bash scripts/check_public_commercial_readiness_80.sh",
+    "public_export_boundary": "scripts/export_public_repo.sh",
+    "public_repo": "AlexGerlitz/drivedesk-core"
+  },
+  "public_boundary": {
+    "public_safe": true,
+    "sanitized_evidence_only": true,
+    "synthetic_demo_data_only": true,
+    "no_customer_data": true,
+    "no_private_hosts": true,
+    "no_raw_logs": true,
+    "no_runtime_secret_material": true,
+    "no_provider_credentials": true,
+    "no_external_mutation": true
+  },
+  "remaining_to_100": [
+    "authenticated commercial tenant onboarding",
+    "billing and paid plan lifecycle",
+    "one private real-provider sandbox using approved credentials",
+    "live production environment with managed secrets and remote state",
+    "production SLOs, alert receivers, retention, and on-call policy",
+    "support process and customer-facing runbooks",
+    "mobile or role-specific production clients",
+    "longer production incident and recovery history"
+  ],
+  "decision": {
+    "event_type": "commercial_readiness_80.reached",
+    "milestone_reached": true,
+    "claim": "80 percent commercial readiness foundation reached",
+    "production_commercial_saas_ready": false,
+    "next_goal": "move from commercial readiness milestone to live commercial SaaS readiness"
+  },
+  "redaction": {
+    "hostnames_included": false,
+    "addresses_included": false,
+    "credentials_included": false,
+    "raw_logs_included": false,
+    "request_bodies_included": false,
+    "production_data_included": false
+  }
+}

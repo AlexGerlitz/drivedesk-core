@@ -2,10 +2,56 @@
 
 [![CI](https://github.com/AlexGerlitz/drivedesk-core/actions/workflows/ci.yml/badge.svg)](https://github.com/AlexGerlitz/drivedesk-core/actions/workflows/ci.yml)
 
-DriveDesk Core is a modular monolith backend foundation for a business
-operations platform.
+DriveDesk Core is the public backend/API and integration foundation behind the
+DriveDesk AI Operator direction: business operations, integrations, workflows, audit/outbox,
+adapter boundaries, recovery paths, and public proof owned by backend code.
 
-It includes:
+It is a modular monolith backend foundation for a business operations platform.
+
+Profile / contact route: [DriveDesk AI Operator proof route](https://alexgerlitz.github.io/AlexGerlitz/drivedesk-proof-route.html),
+[Decision-Ready Contact](https://alexgerlitz.github.io/AlexGerlitz/decision-ready-contact.html),
+[LinkedIn message route](https://www.linkedin.com/in/alex-gerlitz-a659ab3bb/),
+[PDF resume](https://alexgerlitz.github.io/AlexGerlitz/output/pdf/alex-gerlitz-python-backend-automation-resume.pdf),
+[portfolio](https://alexgerlitz.github.io/AlexGerlitz/),
+[enterprise readiness](https://alexgerlitz.github.io/AlexGerlitz/enterprise-readiness.html), and
+[inbound brief](https://alexgerlitz.github.io/AlexGerlitz/intake-brief.html).
+
+Message me first when there is one messy business workflow, one risky integration
+boundary, or one backend/API or integration slice that should become testable, logged,
+documented, and handed off.
+
+Shortest proof path: [LinkedIn Recruiter Packet](https://alexgerlitz.github.io/AlexGerlitz/linkedin-recruiter-packet.html) ->
+[Hiring Decision](https://alexgerlitz.github.io/AlexGerlitz/hiring-decision.html) ->
+[DriveDesk Proof Route](https://alexgerlitz.github.io/AlexGerlitz/drivedesk-proof-route.html) ->
+[Decision-Ready Contact](https://alexgerlitz.github.io/AlexGerlitz/decision-ready-contact.html) ->
+[PDF resume](https://alexgerlitz.github.io/AlexGerlitz/output/pdf/alex-gerlitz-python-backend-automation-resume.pdf).
+
+First useful result: a verified operations/integration platform slice with backend-owned
+state, tests, logs, docs, and a handoff route.
+
+## 60-Second Review
+
+Hiring relevance: I can turn business operations, CRM/ERP adapters, audit/outbox
+state, tenant boundaries, RBAC, workflow rules, integration recovery, metrics,
+Docker, CI, OpenAPI, and public-safe evidence into a backend/platform system a
+team can review, run, extend, and hand off.
+
+| Signal | What to inspect |
+| --- | --- |
+| Backend/platform foundation | FastAPI, PostgreSQL/Alembic, tenant model, RBAC, audit log, outbox, workflow rules, workers, and metrics. |
+| Integration discipline | Adapter catalog, connector certification, provider onboarding, fixture replay, idempotent handoff boundaries, and repair workbench. |
+| Production proof | Docker Compose, OpenAPI/SDK drift checks, CI, public demo health, backup/restore, rollback, SLO canary, GitOps, and OpenTofu evidence. |
+| Fast proof route | `docs/public/PUBLIC_REVIEW_BUNDLE.md`, `docs/public/SYSTEM_REVIEW_PATH.md`, `docs/public/STACK_REVIEW_BRIEF.md`, and `docs/public/PUBLIC_VERIFICATION_MATRIX.md`. |
+
+Best-fit signal:
+
+- operations platform backend, not a prompt-only or no-code-only workflow;
+- backend-owned state, audit, retries, quality gates, and integration contracts;
+- Business OS route from business event -> workflow -> adapter -> incident -> proof;
+- public-safe evidence that lets a reviewer verify claims from code, docs, demo,
+  checks, and GitHub Actions.
+
+## Implemented Surface
 
 - FastAPI API;
 - PostgreSQL migrations with Alembic;

@@ -92,7 +92,7 @@ workflow = evidence.get("workflow", {}) if isinstance(evidence.get("workflow"), 
 require(workflow.get("name") == "Public Demo Health", "workflow name mismatch")
 require(workflow.get("path") == ".github/workflows/public-demo-health.yml", "workflow path mismatch")
 require(set(workflow.get("trigger_modes", [])) == {"workflow_dispatch", "schedule"}, "workflow trigger modes mismatch")
-require(workflow.get("cron_utc") == "17 */6 * * *", "workflow cron mismatch")
+require(workflow.get("cron_utc") == "31 */6 * * *", "workflow cron mismatch")
 require(workflow.get("timeout_minutes") == 6, "workflow timeout mismatch")
 
 checks = evidence.get("checks", {}) if isinstance(evidence.get("checks"), dict) else {}
@@ -194,7 +194,7 @@ if is_public_export:
         "name: Public Demo Health",
         "workflow_dispatch:",
         "schedule:",
-        'cron: "17 */6 * * *"',
+        'cron: "31 */6 * * *"',
         "timeout-minutes: 6",
         "curl -fsSL --retry 3 --retry-delay 5",
         "DriveDesk Core Demo",
@@ -215,7 +215,7 @@ else:
         "name: Public Demo Health",
         "workflow_dispatch:",
         "schedule:",
-        'cron: "17 */6 * * *"',
+        'cron: "31 */6 * * *"',
         "timeout-minutes: 6",
         "notificationDelivery",
         "businessScenarioReplay",

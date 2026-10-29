@@ -3,7 +3,7 @@ name: Public Scheduled Validation
 on:
   workflow_dispatch:
   schedule:
-    - cron: "23 4 * * *"
+    - cron: "29 4 * * *"
 
 permissions:
   contents: read

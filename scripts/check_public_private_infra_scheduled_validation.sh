@@ -147,7 +147,7 @@ result_checks = {
         "name: Public Scheduled Validation" in workflow_text
         and "workflow_dispatch:" in workflow_text
         and "schedule:" in workflow_text
-        and 'cron: "23 4 * * *"' in workflow_text
+        and 'cron: "29 4 * * *"' in workflow_text
         and "permissions:" in workflow_text
         and "contents: read" in workflow_text
         and source.get("workflow") == ".github/workflows/scheduled-validation.yml"
@@ -204,14 +204,14 @@ result_checks = {
     "read_only_schedule_recorded": (
         scheduler.get("schedule_id") == "private-infra-scheduled-validation-2026-06-18"
         and scheduler.get("workflow_name") == "Public Scheduled Validation"
-        and scheduler.get("cron_utc") == "23 4 * * *"
+        and scheduler.get("cron_utc") == "29 4 * * *"
         and scheduler.get("cadence") == "daily"
         and scheduler.get("read_only") is True
         and scheduler.get("automatic_apply") is False
         and scheduler.get("public_apply") is False
         and scheduler.get("production_apply") is False
         and evidence_scheduler.get("read_only") is True
-        and evidence_scheduler.get("cron_utc") == "23 4 * * *"
+        and evidence_scheduler.get("cron_utc") == "29 4 * * *"
         and checks.get("read_only_schedule_recorded") is True
     ),
     "source_contracts_referenced": (
@@ -287,7 +287,7 @@ payload = {
         "schedule_id": "private-infra-scheduled-validation-2026-06-18",
         "workflow_name": "Public Scheduled Validation",
         "workflow_path": ".github/workflows/scheduled-validation.yml",
-        "cron_utc": "23 4 * * *",
+        "cron_utc": "29 4 * * *",
         "cadence": "daily",
         "trigger_modes": ["schedule", "workflow_dispatch"],
         "read_only": True,

@@ -3,7 +3,7 @@ name: Public Demo Health
 on:
   workflow_dispatch:
   schedule:
-    - cron: "17 */6 * * *"
+    - cron: "31 */6 * * *"
 
 permissions:
   contents: read

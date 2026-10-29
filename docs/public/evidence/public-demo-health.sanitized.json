@@ -13,7 +13,7 @@
       "workflow_dispatch",
       "schedule"
     ],
-    "cron_utc": "17 */6 * * *",
+    "cron_utc": "31 */6 * * *",
     "timeout_minutes": 6
   },
   "checks": {
